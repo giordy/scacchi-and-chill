@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1f3a34">
+<title>Round pairings</title>
+<style>
+  :root {
+    --bg: #e8ece9;
+    --panel: #f7f9f7;
+    --ink: #17231f;
+    --muted: #5a6b64;
+    --line: #c5d0ca;
+    --accent: #1f3a34;
+    --accent-ink: #f2f6f3;
+    --danger: #a3302a;
+    --ok: #2c6a4a;
+    --square-a: #dfe6e1;
+    --square-b: #bccbc2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121a17;
+      --panel: #1b2622;
+      --ink: #e6eee9;
+      --muted: #93a59c;
+      --line: #32423b;
+      --accent: #8fc4ae;
+      --accent-ink: #10201a;
+      --danger: #ee8a82;
+      --ok: #8fc4ae;
+      --square-a: #223029;
+      --square-b: #2c3d34;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+  }
+  main { max-width: 560px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font: 600 28px/1.15 Georgia, "Iowan Old Style", "Times New Roman", serif; margin: 4px 0; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .strip { height: 10px; border-radius: 3px; margin: 0 0 18px;
+    background: repeating-linear-gradient(90deg, var(--square-a) 0 20px, var(--square-b) 20px 40px); }
+
+  label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+  input[type=text], input[type=password], input[type=number], select, textarea {
+    width: 100%; min-height: 48px; font: inherit; font-size: 16px; /* 16px prevents iOS zoom */
+    color: var(--ink); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+  }
+  select:disabled { opacity: 0.75; }
+  textarea { min-height: 220px; font-size: 15px; line-height: 1.4; resize: vertical; }
+  textarea.small { min-height: 84px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .game { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+  .game h2 { font-size: 16px; font-weight: 600; margin: 0 0 10px; display: flex; justify-content: space-between; }
+  .game .state { font-size: 14px; font-weight: 500; color: var(--ok); }
+  .pair { display: grid; grid-template-columns: 1fr 48px; gap: 8px; align-items: end; }
+  .selects { display: grid; gap: 8px; }
+  .side { display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 8px; }
+  .dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--ink); justify-self: center; }
+  .dot.w { background: #fff; }
+  .dot.b { background: #111; }
+  .swap { min-height: 48px; height: 100%; border: 1px solid var(--line); background: transparent;
+    color: var(--ink); border-radius: 8px; font-size: 20px; cursor: pointer; }
+  .swap:disabled { opacity: 0.4; cursor: default; }
+  .progress { color: var(--muted); margin: 4px 0 14px; }
+
+  button.primary, a.primary { display: block; width: 100%; min-height: 52px; text-align: center; text-decoration: none;
+    font: inherit; font-weight: 600; background: var(--accent); color: var(--accent-ink);
+    border: 0; border-radius: 10px; padding: 14px 16px; cursor: pointer; }
+  button.primary:disabled { opacity: 0.45; cursor: default; }
+  button.secondary { min-height: 48px; font: inherit; font-weight: 500; background: transparent; color: var(--ink);
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+  .actions { display: grid; gap: 10px; margin-top: 10px; }
+  .actions.two { grid-template-columns: 1fr 1fr; }
+
+  details { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 4px 12px; margin: 18px 0; }
+  summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 500; }
+  details .body { padding: 4px 0 14px; display: grid; gap: 12px; }
+  .inline { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+  .inline input { width: 22px; height: 22px; }
+  .inline label { margin: 0; color: var(--ink); font-size: 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .note { font-size: 14px; color: var(--muted); margin: 0; }
+  .note code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+
+  .notice { margin: 14px 0 0; padding: 12px; border-radius: 8px; font-size: 15px; }
+  .notice.err { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); border: 1px solid var(--danger); }
+  .notice.ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); border: 1px solid var(--ok); }
+  .notice ul { margin: 6px 0 0 18px; padding: 0; }
+
+  .result { margin-top: 24px; }
+  .result h2 { font: 600 20px/1.2 Georgia, "Iowan Old Style", serif; margin: 0 0 10px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React + in-browser JSX (no build step). Versions are pinned. -->
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ====================================================================
+   CONFIG – the parts you will most likely edit
+==================================================================== */
+
+// One entry per player. handle = exact Lichess username, name = shown in the WhatsApp message.
+const PLAYERS = [
+  { handle: "player1", name: "Player 1" },
+  { handle: "player2", name: "Player 2" },
+  { handle: "player3", name: "Player 3" },
+  { handle: "player4", name: "Player 4" },
+  { handle: "player5", name: "Player 5" },
+  { handle: "player6", name: "Player 6" },
+  { handle: "player7", name: "Player 7" },
+  { handle: "player8", name: "Player 8" },
+];
+
+// Default WhatsApp message, in three parts. They can also be edited in the app (Settings → Message text).
+// Placeholders:
+//   header + footer: {round} {days} {expiry} {type}
+//   game (repeated once per game): {n} {white} {black} {url}  (plus the ones above)
+// Parts are separated by a blank line in the final message.
+const DEFAULT_TEMPLATES = {
+  header: "♟️ Turno {round} – {days} giorni a mossa, partite {type}",
+  game: "{n} {white} ⚪ vs {black} ⚫\n{url}",
+  footer: "Cliccate sul vostro link e accettate la sfida. I link restano validi {expiry} giorni.",
+};
+
+// Text used for the {type} placeholder
+const TYPE_LABELS = { rated: "classificate", casual: "amichevoli" };
+
+// Name Lichess shows on the challenge page
+const CHALLENGE_NAME = "Turno {round}";
+
+const KEYCAPS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
+const DEFAULT_SETTINGS = { token: "", days: 2, expiry: 4, rated: true };
+const GAME_COUNT = Math.floor(PLAYERS.length / 2);
+
+/* ====================================================================
+   HELPERS
+==================================================================== */
+
+const nameOf = (handle) => PLAYERS.find((p) => p.handle === handle)?.name ?? handle;
+
+// "Turno {round}" + {round: 3}  ->  "Turno 3". Unknown placeholders are left untouched.
+const fill = (template, vars) =>
+  template.replace(/\{(\w+)\}/g, (match, key) => (key in vars ? vars[key] : match));
+
+const emptyPairs = () => Array.from({ length: GAME_COUNT }, () => ({ white: "", black: "", url: "" }));
+
+const clampDays = (value, fallback) => {
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) ? Math.min(14, Math.max(1, n)) : fallback;
+};
+
+// useState that survives page reloads (localStorage). Safe if storage is unavailable.
+function usePersistentState(key, initial, isValid = () => true) {
+  const [value, setValue] = useState(() => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (isValid(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return typeof initial === "function" ? initial() : initial;
+  });
+  useEffect(() => {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+  }, [key, value]);
+  return [value, setValue];
+}
+
+function buildMessage({ pairs, round, settings, templates }) {
+  const created = pairs.filter((p) => p.url);
+  if (created.length === 0) return "";
+  const common = {
+    round,
+    days: settings.days,
+    expiry: settings.expiry,
+    type: settings.rated ? TYPE_LABELS.rated : TYPE_LABELS.casual,
+  };
+  const games = created.map((p, i) =>
+    fill(templates.game, {
+      ...common,
+      n: KEYCAPS[i] ?? `${i + 1}.`,
+      white: nameOf(p.white),
+      black: nameOf(p.black),
+      url: p.url,
+    })
+  );
+  return [fill(templates.header, common), ...games, fill(templates.footer, common)]
+    .filter((part) => part.trim() !== "")
+    .join("\n\n");
+}
+
+// Lichess call: one open challenge restricted to two players (first one gets white).
+async function createChallenge(pair, { round, settings }) {
+  const body = new URLSearchParams({
+    users: `${pair.white},${pair.black}`,
+    rated: String(settings.rated),
+    days: String(settings.days),
+    name: fill(CHALLENGE_NAME, { round }),
+    expiresAt: String(Date.now() + settings.expiry * 86400000),
+  });
+  const res = await fetch("https://lichess.org/api/challenge/open", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + settings.token,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
+  if (!res.ok) {
+    const detail = (await res.text().catch(() => "")).slice(0, 200);
+    const hint =
+      res.status === 401 ? "Token missing, wrong or expired." :
+      res.status === 429 ? "Lichess rate limit: wait a minute and retry." : "";
+    throw new Error(`HTTP ${res.status}. ${hint} ${detail}`.trim());
+  }
+  const data = await res.json();
+  const url = (data.challenge ?? data).url;
+  if (!url) throw new Error("Lichess answered without a link.");
+  return url;
+}
+
+/* ====================================================================
+   COMPONENTS
+==================================================================== */
+
+function PlayerSelect({ color, label, value, players, disabled, onChange }) {
+  return (
+    <div className="side">
+      <span className={"dot " + (color === "white" ? "w" : "b")} title={color} />
+      <select aria-label={label} value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)}>
+        <option value="">{color === "white" ? "White…" : "Black…"}</option>
+        {players.map((p) => (
+          <option key={p.handle} value={p.handle}>{p.name}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function GameCard({ index, pair, available, onChange, onSwap }) {
+  const locked = !!pair.url;
+  return (
+    <div className="game">
+      <h2>
+        <span>Game {index + 1}</span>
+        <span className="state">{locked ? "Created" : ""}</span>
+      </h2>
+      <div className="pair">
+        <div className="selects">
+          <PlayerSelect color="white" label={`Game ${index + 1} white`} value={pair.white}
+            players={available(pair.white)} disabled={locked} onChange={(v) => onChange({ white: v })} />
+          <PlayerSelect color="black" label={`Game ${index + 1} black`} value={pair.black}
+            players={available(pair.black)} disabled={locked} onChange={(v) => onChange({ black: v })} />
+        </div>
+        <button className="swap" type="button" disabled={locked} onClick={onSwap}
+          aria-label={`Swap colors in game ${index + 1}`}>⇅</button>
+      </div>
+    </div>
+  );
+}
+
+function Notice({ notice }) {
+  if (!notice) return null;
+  return (
+    <div className={"notice " + notice.kind} role="status" aria-live="polite">
+      {notice.text}
+      {notice.items && <ul>{notice.items.map((t, i) => <li key={i}>{t}</li>)}</ul>}
+    </div>
+  );
+}
+
+function SettingsPanel({ settings, setSettings, templates, setTemplates, flash, panelRef }) {
+  const [tokenDraft, setTokenDraft] = useState(settings.token);
+  const set = (patch) => setSettings((s) => ({ ...s, ...patch }));
+  const setTemplate = (key, text) => setTemplates((t) => ({ ...t, [key]: text }));
+
+  return (
+    <details ref={panelRef}>
+      <summary>Settings</summary>
+      <div className="body">
+        <div>
+          <label htmlFor="token">Lichess API token</label>
+          <input id="token" type="password" autoComplete="off" placeholder="lip_…"
+            value={tokenDraft} onChange={(e) => setTokenDraft(e.target.value)} />
+          <p className="note">Create one at lichess.org/account/oauth/token with the challenge scope. It is stored only in this browser.</p>
+        </div>
+        <div className="actions two" style={{ marginTop: 0 }}>
+          <button className="secondary" type="button"
+            onClick={() => { set({ token: tokenDraft.trim() }); flash("ok", "Token saved in this browser."); }}>
+            Save token
+          </button>
+          <button className="secondary" type="button"
+            onClick={() => { setTokenDraft(""); set({ token: "" }); flash("ok", "Token removed from this browser."); }}>
+            Forget token
+          </button>
+        </div>
+        <div className="grid2">
+          <div>
+            <label htmlFor="days">Days per move</label>
+            <input id="days" type="number" min="1" max="14" inputMode="numeric" value={settings.days}
+              onChange={(e) => set({ days: clampDays(e.target.value, 2) })} />
+          </div>
+          <div>
+            <label htmlFor="expiry">Link valid for (days)</label>
+            <input id="expiry" type="number" min="1" max="14" inputMode="numeric" value={settings.expiry}
+              onChange={(e) => set({ expiry: clampDays(e.target.value, 4) })} />
+          </div>
+        </div>
+        <div className="inline">
+          <input id="rated" type="checkbox" checked={settings.rated} onChange={(e) => set({ rated: e.target.checked })} />
+          <label htmlFor="rated">Rated games</label>
+        </div>
+
+        <hr style={{ border: 0, borderTop: "1px solid var(--line)", width: "100%" }} />
+
+        <p className="note">
+          <strong>Message text.</strong> Use <code>{"{round}"}</code> <code>{"{days}"}</code> <code>{"{expiry}"}</code>{" "}
+          <code>{"{type}"}</code> anywhere. In the game line you can also use <code>{"{n}"}</code> <code>{"{white}"}</code>{" "}
+          <code>{"{black}"}</code> <code>{"{url}"}</code>. Parts are separated by a blank line.
+        </p>
+        <div>
+          <label htmlFor="tpl-header">Opening</label>
+          <textarea id="tpl-header" className="small" value={templates.header}
+            onChange={(e) => setTemplate("header", e.target.value)} />
+        </div>
+        <div>
+          <label htmlFor="tpl-game">Each game</label>
+          <textarea id="tpl-game" className="small" value={templates.game}
+            onChange={(e) => setTemplate("game", e.target.value)} />
+        </div>
+        <div>
+          <label htmlFor="tpl-footer">Closing</label>
+          <textarea id="tpl-footer" className="small" value={templates.footer}
+            onChange={(e) => setTemplate("footer", e.target.value)} />
+        </div>
+        <button className="secondary" type="button"
+          onClick={() => { setTemplates(DEFAULT_TEMPLATES); flash("ok", "Message text reset to the defaults."); }}>
+          Reset message text
+        </button>
+      </div>
+    </details>
+  );
+}
+
+/* ====================================================================
+   APP
+==================================================================== */
+
+function App() {
+  const [round, setRound] = usePersistentState("pairings.round", "1");
+  const [pairs, setPairs] = usePersistentState("pairings.pairs.v2", emptyPairs,
+    (v) => Array.isArray(v) && v.length === GAME_COUNT);
+  const [settings, setSettings] = usePersistentState("pairings.settings", DEFAULT_SETTINGS);
+  const [templates, setTemplates] = usePersistentState("pairings.templates", DEFAULT_TEMPLATES);
+
+  const [notice, setNotice] = useState(null);
+  const [busy, setBusy] = useState("");      // e.g. "Creating game 2…"
+  const [editedText, setEditedText] = useState(null); // manual edits to the message, until it changes
+  const settingsRef = useRef(null);
+  const resultRef = useRef(null);
+
+  const flash = (kind, text, items) => setNotice({ kind, text, items });
+
+  /* ----- pairings ----- */
+  const updatePair = (i, patch) => {
+    setNotice(null);
+    setPairs((prev) => prev.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
+  };
+  const swapPair = (i) => updatePair(i, { white: pairs[i].black, black: pairs[i].white });
+
+  const used = new Set(pairs.flatMap((p) => [p.white, p.black]).filter(Boolean));
+  // players still free, plus the one currently chosen in this particular dropdown
+  const availableFor = (current) => PLAYERS.filter((p) => !used.has(p.handle) || p.handle === current);
+
+  /* ----- message ----- */
+  const generated = buildMessage({ pairs, round, settings, templates });
+  useEffect(() => setEditedText(null), [generated]);
+  const text = editedText ?? generated;
+  const hasCreated = pairs.some((p) => p.url);
+
+  const copyText = async () => {
+    try { await navigator.clipboard.writeText(text); flash("ok", "Copied."); }
+    catch (e) { flash("err", "Could not copy. Select the text and copy it manually."); }
+  };
+
+  /* ----- actions ----- */
+  const createGames = async () => {
+    setNotice(null);
+    if (!settings.token) {
+      settingsRef.current.open = true;
+      return flash("err", "Add your Lichess API token in Settings first.");
+    }
+    const todo = pairs.map((p, i) => ({ p, i })).filter(({ p }) => !p.url);
+    const ready = todo.filter(({ p }) => p.white && p.black);
+    const half = todo.filter(({ p }) => (p.white || p.black) && !(p.white && p.black));
+    if (ready.length === 0) return flash("err", "Choose a white and a black player for at least one game.");
+    if (half.length && !confirm(`Game ${half.map(({ i }) => i + 1).join(", ")} is incomplete and will be skipped. Continue?`)) return;
+
+    const errors = [];
+    for (const { p, i } of ready) {
+      setBusy(`Creating game ${i + 1}…`);
+      try {
+        const url = await createChallenge(p, { round, settings });
+        setPairs((prev) => prev.map((x, idx) => (idx === i ? { ...x, url } : x)));
+      } catch (e) {
+        errors.push(`Game ${i + 1}: ` + (e instanceof TypeError
+          ? "network error. If your connection is fine, the browser may be blocking the request (CORS)."
+          : e.message));
+      }
+    }
+    setBusy("");
+    if (errors.length) {
+      flash("err", "Some games were not created. Fix the issue and press Create again; finished games are kept.", errors);
+    } else {
+      flash("ok", "Games created. Share the message below.");
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    }
+  };
+
+  const clearPairs = () => {
+    if (hasCreated && !confirm("This removes the created links from this page. The games on Lichess stay open. Clear anyway?")) return;
+    setPairs(emptyPairs());
+    setNotice(null);
+  };
+
+  const nextRound = () => {
+    const n = parseInt(round, 10);
+    setPairs(emptyPairs());
+    if (Number.isFinite(n)) setRound(String(n + 1));
+    setNotice(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <main>
+      <h1>Round pairings</h1>
+      <p className="sub">Pick the pairings, create the games, share the links.</p>
+      <div className="strip" aria-hidden="true" />
+
+      <div style={{ marginBottom: 16 }}>
+        <label htmlFor="round">Round</label>
+        <input id="round" type="text" inputMode="numeric" autoComplete="off" value={round}
+          onChange={(e) => setRound(e.target.value)} />
+      </div>
+
+      {pairs.map((pair, i) => (
+        <GameCard key={i} index={i} pair={pair} available={availableFor}
+          onChange={(patch) => updatePair(i, patch)} onSwap={() => swapPair(i)} />
+      ))}
+      <p className="progress">{used.size} of {PLAYERS.length} players placed</p>
+
+      <button className="primary" type="button" disabled={!!busy} onClick={createGames}>
+        {busy || "Create games"}
+      </button>
+      <div className="actions">
+        <button className="secondary" type="button" onClick={clearPairs}>Clear pairings</button>
+      </div>
+      <Notice notice={notice} />
+
+      {hasCreated && (
+        <section className="result" ref={resultRef}>
+          <h2>Message for the group</h2>
+          <textarea aria-label="Message for the group" value={text} onChange={(e) => setEditedText(e.target.value)} />
+          <div className="actions two">
+            <a className="primary" target="_blank" rel="noopener"
+              href={"https://wa.me/?text=" + encodeURIComponent(text)}>Share on WhatsApp</a>
+            <button className="secondary" type="button" onClick={copyText}>Copy text</button>
+          </div>
+          <div className="actions">
+            <button className="secondary" type="button" onClick={nextRound}>Start next round</button>
+          </div>
+        </section>
+      )}
+
+      <SettingsPanel settings={settings} setSettings={setSettings} templates={templates}
+        setTemplates={setTemplates} flash={flash} panelRef={settingsRef} />
+    </main>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
