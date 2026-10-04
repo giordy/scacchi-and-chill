@@ -120,14 +120,14 @@ const { useState, useEffect, useRef } = React;
 
 // One entry per player. handle = exact Lichess username, name = shown in the WhatsApp message.
 const PLAYERS = [
-  { handle: "giords", name: "Giordano" },
-  { handle: "battimat", name: "Matteo B." },
-  // { handle: "player3", name: "Player 3" },
-  // { handle: "player4", name: "Player 4" },
-  // { handle: "player5", name: "Player 5" },
-  // { handle: "player6", name: "Player 6" },
-  // { handle: "player7", name: "Player 7" },
-  // { handle: "player8", name: "Player 8" },
+  { handle: "player1", name: "Player 1" },
+  { handle: "player2", name: "Player 2" },
+  { handle: "player3", name: "Player 3" },
+  { handle: "player4", name: "Player 4" },
+  { handle: "player5", name: "Player 5" },
+  { handle: "player6", name: "Player 6" },
+  { handle: "player7", name: "Player 7" },
+  { handle: "player8", name: "Player 8" },
 ];
 
 // Default WhatsApp message, in three parts. They can also be edited in the app (Settings → Message text).
@@ -135,9 +135,12 @@ const PLAYERS = [
 //   header + footer: {round} {days} {expiry} {type}
 //   game (repeated once per game): {n} {white} {black} {url}  (plus the ones above)
 // Parts are separated by a blank line in the final message.
+// "bye" is shown after the games, only when someone is not playing this round (odd number of players).
+// It can use {bye} (the name, or names separated by commas), which also works in the other parts.
 const DEFAULT_TEMPLATES = {
   header: "♟️ Turno {round} – {days} giorni a mossa, partite {type}",
   game: "{n} {white} ⚪ vs {black} ⚫\n{url}",
+  bye: "😴 Riposa in questo turno: {bye}",
   footer: "Cliccate sul vostro link e accettate la sfida. I link restano validi {expiry} giorni.",
 };
 
@@ -186,7 +189,8 @@ function usePersistentState(key, initial, isValid = () => true) {
   return [value, setValue];
 }
 
-function buildMessage({ pairs, round, settings, templates }) {
+// byes = names of the players not placed in any game this round
+function buildMessage({ pairs, round, settings, templates, byes }) {
   const created = pairs.filter((p) => p.url);
   if (created.length === 0) return "";
   const common = {
@@ -194,6 +198,7 @@ function buildMessage({ pairs, round, settings, templates }) {
     days: settings.days,
     expiry: settings.expiry,
     type: settings.rated ? TYPE_LABELS.rated : TYPE_LABELS.casual,
+    bye: byes.join(", "),
   };
   const games = created.map((p, i) =>
     fill(templates.game, {
@@ -204,7 +209,8 @@ function buildMessage({ pairs, round, settings, templates }) {
       url: p.url,
     })
   );
-  return [fill(templates.header, common), ...games, fill(templates.footer, common)]
+  const byeLine = byes.length > 0 ? fill(templates.bye, common) : "";
+  return [fill(templates.header, common), ...games, byeLine, fill(templates.footer, common)]
     .filter((part) => part.trim() !== "")
     .join("\n\n");
 }
@@ -349,6 +355,11 @@ function SettingsPanel({ settings, setSettings, templates, setTemplates, flash, 
             onChange={(e) => setTemplate("game", e.target.value)} />
         </div>
         <div>
+          <label htmlFor="tpl-bye">Bye (only shown when someone sits out; use {"{bye}"} for the name)</label>
+          <textarea id="tpl-bye" className="small" value={templates.bye}
+            onChange={(e) => setTemplate("bye", e.target.value)} />
+        </div>
+        <div>
           <label htmlFor="tpl-footer">Closing</label>
           <textarea id="tpl-footer" className="small" value={templates.footer}
             onChange={(e) => setTemplate("footer", e.target.value)} />
@@ -393,7 +404,10 @@ function App() {
   const availableFor = (current) => PLAYERS.filter((p) => !used.has(p.handle) || p.handle === current);
 
   /* ----- message ----- */
-  const generated = buildMessage({ pairs, round, settings, templates });
+  // saved templates from older versions may lack newer parts, so fill gaps from the defaults
+  const tpl = { ...DEFAULT_TEMPLATES, ...templates };
+  const byes = PLAYERS.filter((p) => !used.has(p.handle)).map((p) => p.name);
+  const generated = buildMessage({ pairs, round, settings, templates: tpl, byes });
   useEffect(() => setEditedText(null), [generated]);
   const text = editedText ?? generated;
   const hasCreated = pairs.some((p) => p.url);
@@ -492,7 +506,7 @@ function App() {
         </section>
       )}
 
-      <SettingsPanel settings={settings} setSettings={setSettings} templates={templates}
+      <SettingsPanel settings={settings} setSettings={setSettings} templates={tpl}
         setTemplates={setTemplates} flash={flash} panelRef={settingsRef} />
     </main>
   );
