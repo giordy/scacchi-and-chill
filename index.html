@@ -151,7 +151,32 @@ const TYPE_LABELS = { rated: "classificate", casual: "amichevoli" };
 const CHALLENGE_NAME = "Turno {round}";
 
 const KEYCAPS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
-const DEFAULT_SETTINGS = { token: "", days: 2, expiry: 4, rated: true };
+
+// Extra Lichess game rules (sent as the "rules" parameter). Labels are shown in Settings.
+const RULES = [
+  { key: "noRematch", label: "No rematch offers" },
+  { key: "noGiveTime", label: "No giving time to the opponent" },
+  { key: "noClaimWin", label: "No claiming victory if the opponent leaves" },
+  { key: "noEarlyDraw", label: "No early draws (draw offers blocked early in the game)" },
+];
+
+const DEFAULT_SETTINGS = {
+  token: "",
+  days: 2,      // days per move
+  expiry: 2,    // days the link stays valid
+  rated: true,
+  rules: { noRematch: true, noGiveTime: true, noClaimWin: false, noEarlyDraw: true },
+};
+
+// Settings were stored under an older key before rules existed: keep token, days and rated, reset the rest.
+function initialSettings() {
+  try {
+    const old = JSON.parse(localStorage.getItem("pairings.settings"));
+    if (old) return { ...DEFAULT_SETTINGS, token: old.token ?? "", days: old.days ?? 2, rated: old.rated ?? true };
+  } catch (e) {}
+  return DEFAULT_SETTINGS;
+}
+
 const GAME_COUNT = Math.floor(PLAYERS.length / 2);
 
 /* ====================================================================
@@ -224,6 +249,8 @@ async function createChallenge(pair, { round, settings }) {
     name: fill(CHALLENGE_NAME, { round }),
     expiresAt: String(Date.now() + settings.expiry * 86400000),
   });
+  const rules = RULES.map((r) => r.key).filter((key) => settings.rules?.[key]);
+  if (rules.length > 0) body.set("rules", rules.join(","));
   const res = await fetch("https://lichess.org/api/challenge/open", {
     method: "POST",
     headers: {
@@ -295,6 +322,33 @@ function Notice({ notice }) {
   );
 }
 
+// Number field for 1-14 days. Keeps what you type as text, so it can be emptied and retyped on a phone;
+// the value is saved as soon as it is valid, and corrected when you leave the field.
+function DaysField({ id, label, value, fallback, onCommit }) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => setText(String(value)), [value]);
+
+  const handleChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setText(raw);
+    const n = parseInt(raw, 10);
+    if (n >= 1 && n <= 14) onCommit(n);
+  };
+  const handleBlur = () => {
+    const n = clampDays(text, fallback);
+    onCommit(n);
+    setText(String(n));
+  };
+
+  return (
+    <div>
+      <label htmlFor={id}>{label}</label>
+      <input id={id} type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off"
+        value={text} onChange={handleChange} onBlur={handleBlur} onFocus={(e) => e.target.select()} />
+    </div>
+  );
+}
+
 function SettingsPanel({ settings, setSettings, templates, setTemplates, flash, panelRef }) {
   const [tokenDraft, setTokenDraft] = useState(settings.token);
   const set = (patch) => setSettings((s) => ({ ...s, ...patch }));
@@ -321,20 +375,25 @@ function SettingsPanel({ settings, setSettings, templates, setTemplates, flash, 
           </button>
         </div>
         <div className="grid2">
-          <div>
-            <label htmlFor="days">Days per move</label>
-            <input id="days" type="number" min="1" max="14" inputMode="numeric" value={settings.days}
-              onChange={(e) => set({ days: clampDays(e.target.value, 2) })} />
-          </div>
-          <div>
-            <label htmlFor="expiry">Link valid for (days)</label>
-            <input id="expiry" type="number" min="1" max="14" inputMode="numeric" value={settings.expiry}
-              onChange={(e) => set({ expiry: clampDays(e.target.value, 4) })} />
-          </div>
+          <DaysField id="days" label="Days per move" value={settings.days}
+            fallback={2} onCommit={(n) => set({ days: n })} />
+          <DaysField id="expiry" label="Link valid for (days)" value={settings.expiry}
+            fallback={2} onCommit={(n) => set({ expiry: n })} />
         </div>
         <div className="inline">
           <input id="rated" type="checkbox" checked={settings.rated} onChange={(e) => set({ rated: e.target.checked })} />
           <label htmlFor="rated">Rated games</label>
+        </div>
+
+        <div>
+          <label>Game rules</label>
+          {RULES.map(({ key, label }) => (
+            <div className="inline" key={key}>
+              <input id={"rule-" + key} type="checkbox" checked={!!settings.rules?.[key]}
+                onChange={(e) => set({ rules: { ...settings.rules, [key]: e.target.checked } })} />
+              <label htmlFor={"rule-" + key}>{label}</label>
+            </div>
+          ))}
         </div>
 
         <hr style={{ border: 0, borderTop: "1px solid var(--line)", width: "100%" }} />
@@ -381,7 +440,7 @@ function App() {
   const [round, setRound] = usePersistentState("pairings.round", "1");
   const [pairs, setPairs] = usePersistentState("pairings.pairs.v2", emptyPairs,
     (v) => Array.isArray(v) && v.length === GAME_COUNT);
-  const [settings, setSettings] = usePersistentState("pairings.settings", DEFAULT_SETTINGS);
+  const [settings, setSettings] = usePersistentState("pairings.settings.v2", initialSettings);
   const [templates, setTemplates] = usePersistentState("pairings.templates", DEFAULT_TEMPLATES);
 
   const [notice, setNotice] = useState(null);
