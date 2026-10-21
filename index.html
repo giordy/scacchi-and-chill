@@ -154,6 +154,7 @@ function applyConfig(cfg) {
   const spKeys = ["header", "ongoing", "win", "draw", "aborted", "pending", "footer", "closing"];
   const badKey = sp && spKeys.find((k) => !isTextList(sp[k]));
   if (!sp || badKey) fail(`"statusPhrases.${badKey ?? "…"}" must be a non-empty list of texts.`);
+  if (sp.highlight !== undefined && !isTextList(sp.highlight)) fail('"statusPhrases.highlight" must be a non-empty list of texts (or left out).');
 
   const d = cfg.defaults ?? {};
   const days = Number(d.days ?? 2);
@@ -467,7 +468,7 @@ function formatDeadline(ms) {
 // Asks Lichess for the current state of the games (public data, no token needed).
 // Games that are not on Lichess yet (link not accepted) are simply missing from the answer.
 async function fetchGameStates(ids) {
-  const res = await fetch("https://lichess.org/api/games/export/_ids?pgnInJson=false&lastFen=true", {
+  const res = await fetch("https://lichess.org/api/games/export/_ids?pgnInJson=false&lastFen=true&opening=true", {
     method: "POST",
     headers: { "Content-Type": "text/plain", Accept: "application/x-ndjson" },
     body: ids.join(","),
@@ -480,6 +481,13 @@ async function fetchGameStates(ids) {
   return states;
 }
 
+// How a game ended, in Italian, as a fragment that follows "ha vinto X ..."
+const HOW_WIN = { mate: "con il matto", resign: "per abbandono", outoftime: "per tempo scaduto", timeout: "per abbandono" };
+const HOW_DRAW = { stalemate: "per stallo" };
+
+// cleans up after empty placeholders: "()" removed, repeated spaces and blank lines collapsed
+const tidy = (t) => t.replace(/\(\s*\)/g, "").replace(/[ \t]+/g, " ").replace(/ ?\n ?/g, "\n").replace(/\n+/g, "\n").trim();
+
 // Lichess user id (lowercase) -> our handle from config.json
 const idToHandle = (id) => PLAYERS.find((p) => p.handle.toLowerCase() === String(id ?? "").toLowerCase())?.handle;
 
@@ -487,6 +495,7 @@ const idToHandle = (id) => PLAYERS.find((p) => p.handle.toLowerCase() === String
 function buildStatusMessage({ games, states, round, defaultDays }) {
   const count = { finished: 0, ongoing: 0, pending: 0 };
   const details = [];
+  const finishedInfo = []; // for the highlights
 
   // random phrase from a list; inside one message the same phrase is not used twice until the list runs out
   const used = {};
@@ -542,28 +551,57 @@ function buildStatusMessage({ games, states, round, defaultDays }) {
       details.push(`${i + 1}. ${id}: status ${s.status}`);
     } else {
       count.finished++;
-      if (s.winner === "white" || s.winner === "black") {
+      const plies = s.moves && s.moves.trim() ? s.moves.trim().split(/\s+/).length : 0;
+      const moves = Math.ceil(plies / 2);
+      const movesText = moves > 0 ? `in ${moves} ${moves === 1 ? "mossa" : "mosse"}` : "";
+      const opening = s.opening?.name ?? "";
+      const common = { moves, opening, openingNote: opening ? `Apertura: ${opening}` : "" };
+      const won = s.winner === "white" || s.winner === "black";
+
+      if (won) {
         const winnerHandle = s.winner === "white" ? white : black;
         const loserHandle = s.winner === "white" ? black : white;
-        body = fill(pickFor("win"), {
+        const color = s.winner === "white" ? "col bianco" : "col nero";
+        const how = HOW_WIN[s.status] ?? "";
+        body = tidy(fill(pickFor("win"), {
+          ...common,
           winner: nameOf(winnerHandle),
           loser: nameOf(loserHandle),
           result: s.winner === "white" ? "1-0" : "0-1",
-        });
+          color,
+          how,
+          details: [color, how, movesText].filter(Boolean).join(" "),
+        }));
       } else {
-        body = fill(pickFor("draw"), { result: "½-½" });
+        const how = HOW_DRAW[s.status] ?? "";
+        body = tidy(fill(pickFor("draw"), {
+          ...common,
+          result: "½-½",
+          how,
+          details: [how, movesText].filter(Boolean).join(" "),
+        }));
       }
-      details.push(`${i + 1}. ${id}: status ${s.status}, winner ${s.winner ?? "none"}`);
+      finishedInfo.push({ names: `${nameOf(white)}–${nameOf(black)}`, moves });
+      details.push(`${i + 1}. ${id}: status ${s.status}, winner ${s.winner ?? "none"}, moves ${moves}, opening ${opening || "n/a"}`);
     }
     return `${head}\n${body}`;
   });
 
+  // longest and shortest finished game, only with at least two finished games of different length
+  let highlight = "";
+  const timed = finishedInfo.filter((x) => x.moves > 0).sort((a, b) => a.moves - b.moves);
+  if (STATUS_PHRASES.highlight && timed.length >= 2 && timed[0].moves !== timed[timed.length - 1].moves) {
+    const label = (x) => `${x.names} (${x.moves} mosse)`;
+    highlight = fill(pickFor("highlight"), { longest: label(timed[timed.length - 1]), shortest: label(timed[0]) });
+  }
+
   const text = [
     fill(pickFor("header"), { round }),
     ...blocks,
+    highlight,
     fill(pickFor("footer"), count),
     pickFor("closing"),
-  ].join("\n\n");
+  ].filter(Boolean).join("\n\n");
   return { text, details };
 }
 

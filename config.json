@@ -7,7 +7,7 @@
     "typeLabels: the words used for {type}.",
     "challengeName: the name Lichess shows on the challenge page.",
     "numberEmojis: used for {n}, one per game.",
-    "statusPhrases: the weekly status message. One phrase per list is picked at random for each game (the same phrase is not repeated inside one message until the list runs out). Placeholders: header {round}; win {winner} {loser} {result}; draw {result}; footer {finished} {ongoing} {pending}. ongoing also has {move} and {turn}, but they are NOT reliable: Lichess hides the latest moves of games in progress, so they can lag behind the real game. Avoid them.",
+    "statusPhrases: the weekly status message. One phrase per list is picked at random for each game (the same phrase is not repeated inside one message until the list runs out). Placeholders: header {round}; footer {finished} {ongoing} {pending}; win {winner} {loser} {result} {details} {moves} {how} {color} {opening} {openingNote}; draw {result} {details} {moves} {how} {opening} {openingNote}; highlight {longest} {shortest} (shown only when at least two games are finished and their lengths differ; this list is optional). {details} is ready-made, e.g. 'col nero per abbandono in 34 mosse'; {openingNote} is 'Apertura: ...' and disappears when Lichess does not know the opening (it is the English name from Lichess). ongoing also has {move} and {turn}, but they are NOT reliable: Lichess hides the latest moves of games in progress, so they can lag behind the real game. Avoid them.",
     "Keys starting with an underscore (like this one) are ignored. JSON does not allow comments or trailing commas."
   ],
   "players": [
@@ -103,28 +103,28 @@
       "Si va avanti, la partita non è finita 🔜"
     ],
     "win": [
-      "Finita! Ha vinto {winner} ({result}) 🎉",
-      "{winner} porta a casa il punto ({result}) 👏",
-      "Partita chiusa: vittoria di {winner} ({result}) ✅",
-      "Punto pieno per {winner} ({result}) 🏆",
-      "{winner} la spunta su {loser} ({result}) 🙌",
-      "Fine dei giochi: vince {winner} ({result}) 🔔",
-      "Si chiude con la vittoria di {winner} ({result}) 📌",
-      "{winner} incassa il punto ({result}) 💪",
-      "Verdetto: {winner} vince ({result}) ⚖️",
-      "Partita archiviata: vince {winner} ({result}) 🗂️"
+      "Finita! Ha vinto {winner} {details} ({result}) 🎉\n{openingNote}",
+      "{winner} porta a casa il punto {details} ({result}) 👏",
+      "Partita chiusa: vittoria di {winner} {details} ({result}) ✅\n{openingNote}",
+      "Punto pieno per {winner} {details} ({result}) 🏆",
+      "{winner} la spunta su {loser} {details} ({result}) 🙌\n{openingNote}",
+      "Fine dei giochi: vince {winner} {details} ({result}) 🔔",
+      "Si chiude con la vittoria di {winner} {details} ({result}) 📌\n{openingNote}",
+      "{winner} incassa il punto {details} ({result}) 💪",
+      "Verdetto: {winner} vince {details} ({result}) ⚖️\n{openingNote}",
+      "Partita archiviata: vince {winner} {details} ({result}) 🗂️"
     ],
     "draw": [
-      "Finita in patta ({result}) 🤝",
-      "Mezzo punto a testa ({result}) 🤝",
-      "Pace firmata: patta ({result}) 🕊️",
-      "Si divide la posta ({result}) ⚖️",
-      "Niente vincitori, niente vinti: patta ({result}) 🤝",
-      "Un pareggio ({result}) e ognuno si prende mezzo punto ➗",
-      "Patta! Il punto si divide ({result}) ✌️",
-      "Chiusa alla pari ({result}) 🟰",
-      "Partita finita in parità ({result}) ⚪⚫",
-      "Armistizio sulla scacchiera ({result}) 🕊️"
+      "Finita in patta {details} ({result}) 🤝\n{openingNote}",
+      "Mezzo punto a testa {details} ({result}) 🤝",
+      "Pace firmata: patta {details} ({result}) 🕊️\n{openingNote}",
+      "Si divide la posta {details} ({result}) ⚖️",
+      "Niente vincitori, niente vinti: patta {details} ({result}) 🤝\n{openingNote}",
+      "Un pareggio {details} ({result}) e ognuno si prende mezzo punto ➗",
+      "Patta! Il punto si divide {details} ({result}) ✌️\n{openingNote}",
+      "Chiusa alla pari {details} ({result}) 🟰",
+      "Partita finita in parità {details} ({result}) ⚪⚫\n{openingNote}",
+      "Armistizio sulla scacchiera {details} ({result}) 🕊️"
     ],
     "aborted": [
       "Partita annullata 🚫",
@@ -173,6 +173,18 @@
       "Muovete con calma e buon divertimento! 😄",
       "Buone partite a tutti, ci sentiamo lunedì! 👋",
       "Che sia una settimana di buone mosse! ♟️"
+    ],
+    "highlight": [
+      "🏁 La più lunga del turno: {longest}. La più rapida: {shortest}.",
+      "⏱️ Maratona del turno: {longest}. Sprint: {shortest}.",
+      "📏 Partita più lunga: {longest}. Più breve: {shortest}.",
+      "🏃 La più veloce a chiudersi: {shortest}. La più combattuta: {longest}.",
+      "🐢 Più lunga: {longest} · 🐇 Più rapida: {shortest}",
+      "📌 Da segnare: la più lunga è {longest}, la più rapida {shortest}.",
+      "🎖️ Resistenza: {longest}. Velocità: {shortest}.",
+      "🧮 Facendo i conti, la partita più lunga è {longest} e la più breve {shortest}.",
+      "📊 Più mosse: {longest}. Meno mosse: {shortest}.",
+      "🔎 Curiosità del turno: più lunga {longest}, più corta {shortest}."
     ]
   }
 }
