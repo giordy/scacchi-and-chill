@@ -7,7 +7,7 @@
     "typeLabels: the words used for {type}.",
     "challengeName: the name Lichess shows on the challenge page.",
     "numberEmojis: used for {n}, one per game.",
-    "statusPhrases: the weekly status message. One phrase per list is picked at random. Placeholders: header {round}; ongoing {move} {turn} {deadline}; win {winner} {loser} {result}; draw {result}; footer {finished} {ongoing} {pending}.",
+    "statusPhrases: the weekly status message. One phrase per list is picked at random for each game (the same phrase is not repeated inside one message until the list runs out). Placeholders: header {round}; win {winner} {loser} {result}; draw {result}; footer {finished} {ongoing} {pending}. ongoing also has {move} and {turn}, but they are NOT reliable: Lichess hides the latest moves of games in progress, so they can lag behind the real game. Avoid them.",
     "Keys starting with an underscore (like this one) are ignored. JSON does not allow comments or trailing commas."
   ],
   "players": [
@@ -91,16 +91,16 @@
       "♟️ Turno {round}: stato dei lavori"
     ],
     "ongoing": [
-      "In corso, mossa {move}. Tocca a {turn} 🤔",
-      "Mossa {move}: ora è il turno di {turn} ♟️",
-      "{turn} è alla mossa {move} 🧠",
-      "Si sta giocando: mossa {move}, turno di {turn} 🎯",
-      "Alla mossa {move} il turno è di {turn} 🔍",
-      "Partita aperta, siamo alla mossa {move} (turno di {turn}) ♟️",
-      "Mossa {move} sulla scacchiera, la parola passa a {turn} 🗣️",
-      "La partita prosegue: mossa {move}, a {turn} il turno 🔄",
-      "{turn} sta pensando alla mossa {move} 💭",
-      "Siamo alla mossa {move}, turno di {turn} 🙂"
+      "In corso ♟️",
+      "Partita in corso 🎯",
+      "Si sta giocando 🙂",
+      "La partita prosegue 🔄",
+      "Ancora in corso, si va avanti ♟️",
+      "Partita aperta, la sfida continua ⚔️",
+      "In pieno svolgimento 🧠",
+      "Sulla scacchiera si combatte ancora ♞",
+      "Partita ancora aperta 📂",
+      "Si va avanti, la partita non è finita 🔜"
     ],
     "win": [
       "Finita! Ha vinto {winner} ({result}) 🎉",
