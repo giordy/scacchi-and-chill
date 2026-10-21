@@ -91,16 +91,16 @@
       "♟️ Turno {round}: stato dei lavori"
     ],
     "ongoing": [
-      "In corso, mossa {move}. Tocca a {turn}, tempo fino a {deadline} 🤔",
-      "Mossa {move}: ora pensa {turn}, scadenza {deadline} ⏳",
-      "{turn} è al lavoro alla mossa {move}. Tempo fino a {deadline} 🧠",
-      "Alla mossa {move} la palla passa a {turn}: ha tempo fino a {deadline} ⏱️",
-      "{turn} deve muovere (mossa {move}), scadenza {deadline} ♟️",
-      "Siamo alla mossa {move}. Attesa per {turn}, che ha tempo fino a {deadline} 👀",
-      "Partita aperta, mossa {move}: tocca a {turn} entro {deadline} 🕰️",
-      "{turn} sta valutando la mossa {move}. Il tempo scade {deadline} 🔍",
-      "Mossa {move}: aspettiamo {turn}, tempo fino a {deadline} 📬",
-      "Si gioca! Mossa {move}, turno di {turn}, scadenza {deadline} 🎯"
+      "In corso, mossa {move}. Tocca a {turn} 🤔",
+      "Mossa {move}: ora è il turno di {turn} ♟️",
+      "{turn} è alla mossa {move} 🧠",
+      "Si sta giocando: mossa {move}, turno di {turn} 🎯",
+      "Alla mossa {move} il turno è di {turn} 🔍",
+      "Partita aperta, siamo alla mossa {move} (turno di {turn}) ♟️",
+      "Mossa {move} sulla scacchiera, la parola passa a {turn} 🗣️",
+      "La partita prosegue: mossa {move}, a {turn} il turno 🔄",
+      "{turn} sta pensando alla mossa {move} 💭",
+      "Siamo alla mossa {move}, turno di {turn} 🙂"
     ],
     "win": [
       "Finita! Ha vinto {winner} ({result}) 🎉",
@@ -168,7 +168,7 @@
       "Pensateci bene e buona settimana! ♟️",
       "Buon proseguimento a tutti, e buone mosse! 🙌",
       "Alla prossima settimana, che vinca il migliore!",
-      "Prendetevi il tempo che serve (ma non tutto)! ⏳",
+      "Prendetevi il tempo che serve e buon divertimento! 🙂",
       "Buona settimana, e ricordate: l'alfiere va in diagonale! ♝",
       "Muovete con calma e buon divertimento! 😄",
       "Buone partite a tutti, ci sentiamo lunedì! 👋",
