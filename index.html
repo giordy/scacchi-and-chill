@@ -115,44 +115,14 @@
 const { useState, useEffect, useRef } = React;
 
 /* ====================================================================
-   CONFIG – the parts you will most likely edit
+   CONFIG – loaded from config.json (same folder as this page)
+   Players, message texts, status phrases and defaults live there.
 ==================================================================== */
 
-// One entry per player. handle = exact Lichess username, name = shown in the WhatsApp message.
-const PLAYERS = [
-  { handle: "matepaco", name: "Francesco Spa" },
-  { handle: "frasal", name: "Francesco Sal" },
-  { handle: "scarsoforteh", name: "Stefano" },
-  { handle: "drake097", name: "Alessandro" },
-  { handle: "fsgach", name: "Fabio" },
-  { handle: "luca_sgarbossa", name: "Luca" },
-  { handle: "giords", name: "Giordano" },
-  { handle: "battimat", name: "Matteo" },
-];
+// Filled in by applyConfig() before the app is drawn.
+let PLAYERS, DEFAULT_TEMPLATES, TYPE_LABELS, CHALLENGE_NAME, KEYCAPS, STATUS_PHRASES, DEFAULT_SETTINGS, GAME_COUNT;
 
-// Default WhatsApp message, in three parts. They can also be edited in the app (Settings → Message text).
-// Placeholders:
-//   header + footer: {round} {days} {expiry} {type}
-//   game (repeated once per game): {n} {white} {black} {url}  (plus the ones above)
-// Parts are separated by a blank line in the final message.
-// "bye" is shown after the games, only when someone is not playing this round (odd number of players).
-// It can use {bye} (the name, or names separated by commas), which also works in the other parts.
-const DEFAULT_TEMPLATES = {
-  header: "♟️ Turno {round} – {days} giorni a mossa, partite {type}",
-  game: "{n} {white} ⚪ vs {black} ⚫\n{url}",
-  bye: "😴 Riposa in questo turno: {bye}",
-  footer: "Cliccate sul vostro link e accettate la sfida. I link restano validi {expiry} giorni.",
-};
-
-// Text used for the {type} placeholder
-const TYPE_LABELS = { rated: "classificate", casual: "amichevoli" };
-
-// Name Lichess shows on the challenge page
-const CHALLENGE_NAME = "Turno {round}";
-
-const KEYCAPS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
-
-// Extra Lichess game rules (sent as the "rules" parameter). Labels are shown in Settings.
+// Extra Lichess game rules (sent as the "rules" parameter). Which ones are on by default is set in config.json.
 const RULES = [
   { key: "noRematch", label: "No rematch offers" },
   { key: "noGiveTime", label: "No giving time to the opponent" },
@@ -160,24 +130,64 @@ const RULES = [
   { key: "noEarlyDraw", label: "No early draws (draw offers blocked early in the game)" },
 ];
 
-const DEFAULT_SETTINGS = {
-  token: "",
-  days: 2,      // days per move
-  expiry: 2,    // days the link stays valid
-  rated: true,
-  rules: { noRematch: true, noGiveTime: true, noClaimWin: false, noEarlyDraw: true },
-};
+function applyConfig(cfg) {
+  const fail = (msg) => { throw new Error("config.json: " + msg); };
+  const isText = (v) => typeof v === "string";
+  const isTextList = (v) => Array.isArray(v) && v.length > 0 && v.every(isText);
 
-// Settings were stored under an older key before rules existed: keep token, days and rated, reset the rest.
-function initialSettings() {
-  try {
-    const old = JSON.parse(localStorage.getItem("pairings.settings"));
-    if (old) return { ...DEFAULT_SETTINGS, token: old.token ?? "", days: old.days ?? 2, rated: old.rated ?? true };
-  } catch (e) {}
-  return DEFAULT_SETTINGS;
+  if (!Array.isArray(cfg.players) || cfg.players.length < 2 || cfg.players.some((p) => !p || !isText(p.handle) || !p.handle.trim())) {
+    fail('"players" must be a list of at least 2 entries like { "handle": "lichess_username", "name": "Name" }.');
+  }
+  const handles = cfg.players.map((p) => p.handle.trim().toLowerCase());
+  if (new Set(handles).size !== handles.length) fail('"players" contains the same handle twice.');
+
+  const t = cfg.messageTemplates;
+  if (!t || !["header", "game", "bye", "footer"].every((k) => isText(t[k]))) {
+    fail('"messageTemplates" needs the text fields "header", "game", "bye" and "footer".');
+  }
+  if (!cfg.typeLabels || !isText(cfg.typeLabels.rated) || !isText(cfg.typeLabels.casual)) {
+    fail('"typeLabels" needs "rated" and "casual".');
+  }
+  if (!isText(cfg.challengeName)) fail('"challengeName" must be text.');
+
+  const sp = cfg.statusPhrases;
+  const spKeys = ["header", "ongoing", "win", "draw", "aborted", "pending", "footer", "closing"];
+  const badKey = sp && spKeys.find((k) => !isTextList(sp[k]));
+  if (!sp || badKey) fail(`"statusPhrases.${badKey ?? "…"}" must be a non-empty list of texts.`);
+
+  const d = cfg.defaults ?? {};
+  const days = Number(d.days ?? 2);
+  const expiry = Number(d.expiry ?? 2);
+  if (!Number.isInteger(days) || days < 1 || days > 14) fail('"defaults.days" must be a whole number from 1 to 14.');
+  if (!Number.isInteger(expiry) || expiry < 1 || expiry > 14) fail('"defaults.expiry" must be a whole number from 1 to 14.');
+
+  PLAYERS = cfg.players.map((p) => ({ handle: p.handle.trim(), name: (isText(p.name) && p.name.trim()) || p.handle.trim() }));
+  DEFAULT_TEMPLATES = { header: t.header, game: t.game, bye: t.bye, footer: t.footer };
+  TYPE_LABELS = { rated: cfg.typeLabels.rated, casual: cfg.typeLabels.casual };
+  CHALLENGE_NAME = cfg.challengeName;
+  KEYCAPS = isTextList(cfg.numberEmojis) ? cfg.numberEmojis : [];
+  STATUS_PHRASES = sp;
+  DEFAULT_SETTINGS = {
+    token: "",
+    days,
+    expiry,
+    rated: d.rated !== false,
+    rules: Object.fromEntries(RULES.map(({ key }) => [key, !!d.rules?.[key]])),
+  };
+  GAME_COUNT = Math.floor(PLAYERS.length / 2);
 }
 
-const GAME_COUNT = Math.floor(PLAYERS.length / 2);
+// Settings saved in the browser only hold what you changed (plus the token); everything else follows config.json.
+// Older versions stored a full copy: keep just the token from it.
+function initialStoredSettings() {
+  for (const key of ["pairings.settings.v2", "pairings.settings"]) {
+    try {
+      const old = JSON.parse(localStorage.getItem(key));
+      if (old?.token) return { token: old.token };
+    } catch (e) {}
+  }
+  return {};
+}
 
 /* ====================================================================
    HELPERS
@@ -336,7 +346,7 @@ function DaysField({ id, label, value, fallback, onCommit }) {
   };
   const handleBlur = () => {
     const n = clampDays(text, fallback);
-    onCommit(n);
+    if (n !== value) onCommit(n);
     setText(String(n));
   };
 
@@ -352,7 +362,7 @@ function DaysField({ id, label, value, fallback, onCommit }) {
 function SettingsPanel({ settings, setSettings, templates, setTemplates, flash, panelRef }) {
   const [tokenDraft, setTokenDraft] = useState(settings.token);
   const set = (patch) => setSettings((s) => ({ ...s, ...patch }));
-  const setTemplate = (key, text) => setTemplates((t) => ({ ...t, [key]: text }));
+  const setTemplate = (key, text) => setTemplates((t) => ({ ...(t ?? {}), [key]: text }));
 
   return (
     <details ref={panelRef}>
@@ -424,7 +434,7 @@ function SettingsPanel({ settings, setSettings, templates, setTemplates, flash, 
             onChange={(e) => setTemplate("footer", e.target.value)} />
         </div>
         <button className="secondary" type="button"
-          onClick={() => { setTemplates(DEFAULT_TEMPLATES); flash("ok", "Message text reset to the defaults."); }}>
+          onClick={() => { setTemplates(null); flash("ok", "Message text reset to config.json."); }}>
           Reset message text
         </button>
       </div>
@@ -436,12 +446,253 @@ function SettingsPanel({ settings, setSettings, templates, setTemplates, flash, 
    APP
 ==================================================================== */
 
+/* ====================================================================
+   GAME STATUS (weekly update)
+==================================================================== */
+
+const pick = (list) => list[Math.floor(Math.random() * list.length)];
+
+// "https://lichess.org/AbCdEfGh" -> "AbCdEfGh" (the id stays the same after the challenge is accepted)
+const gameIdOf = (url) => url?.match(/lichess\.org\/([A-Za-z0-9]{8})/)?.[1];
+
+// Absolute deadline in Italian time, e.g. "mercoledì alle 21:40"
+function formatDeadline(ms) {
+  const parts = new Intl.DateTimeFormat("it-IT", {
+    timeZone: "Europe/Rome", weekday: "long", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  }).formatToParts(new Date(ms));
+  const get = (type) => parts.find((p) => p.type === type)?.value;
+  return `${get("weekday")} alle ${get("hour")}:${get("minute")}`;
+}
+
+// Asks Lichess for the current state of the games (public data, no token needed).
+// Games that are not on Lichess yet (link not accepted) are simply missing from the answer.
+async function fetchGameStates(ids) {
+  const res = await fetch("https://lichess.org/api/games/export/_ids?pgnInJson=false", {
+    method: "POST",
+    headers: { "Content-Type": "text/plain", Accept: "application/x-ndjson" },
+    body: ids.join(","),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const states = {};
+  (await res.text()).split("\n").filter((l) => l.trim()).forEach((line) => {
+    try { const g = JSON.parse(line); states[g.id] = g; } catch (e) {}
+  });
+  return states;
+}
+
+function buildStatusMessage({ games, states, round, defaultDays }) {
+  const count = { finished: 0, ongoing: 0, pending: 0 };
+
+  const blocks = games.map((g, i) => {
+    const head = `${KEYCAPS[i] ?? i + 1 + "."} ${nameOf(g.white)} ⚪ vs ${nameOf(g.black)} ⚫`;
+    const s = states[gameIdOf(g.url)];
+    let body;
+
+    if (!s) {
+      count.pending++;
+      body = pick(STATUS_PHRASES.pending);
+    } else if (s.status === "created" || s.status === "started") {
+      count.ongoing++;
+      const plies = s.moves && s.moves.trim() ? s.moves.trim().split(/\s+/).length : 0;
+      const turn = plies % 2 === 0 ? g.white : g.black;
+      const days = s.daysPerTurn ?? defaultDays;
+      const deadlineMs = (s.lastMoveAt ?? s.createdAt) + days * 86400000;
+      body = fill(pick(STATUS_PHRASES.ongoing), {
+        move: Math.floor(plies / 2) + 1,
+        turn: nameOf(turn),
+        deadline: deadlineMs < Date.now() ? "adesso (tempo scaduto)" : formatDeadline(deadlineMs),
+      });
+    } else if (s.status === "aborted" || s.status === "noStart") {
+      body = pick(STATUS_PHRASES.aborted);
+    } else {
+      count.finished++;
+      if (s.winner === "white" || s.winner === "black") {
+        const winnerHandle = s.winner === "white" ? g.white : g.black;
+        const loserHandle = s.winner === "white" ? g.black : g.white;
+        body = fill(pick(STATUS_PHRASES.win), {
+          winner: nameOf(winnerHandle),
+          loser: nameOf(loserHandle),
+          result: s.winner === "white" ? "1-0" : "0-1",
+        });
+      } else {
+        body = fill(pick(STATUS_PHRASES.draw), { result: "½-½" });
+      }
+    }
+    return `${head}\n${body}`;
+  });
+
+  return [
+    fill(pick(STATUS_PHRASES.header), { round }),
+    ...blocks,
+    fill(pick(STATUS_PHRASES.footer), count),
+    pick(STATUS_PHRASES.closing),
+  ].join("\n\n");
+}
+
+// Reads a round message (as posted in the group) and extracts the round number and the games.
+// For each Lichess link, the two players named in the text just before it are taken as white (first) and black (second).
+function parseRoundMessage(text) {
+  const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const round = text.match(/(?:turno|round)\s*(\d+)/i)?.[1] ?? "";
+  const linkRe = /https?:\/\/lichess\.org\/([A-Za-z0-9]{8})(?![A-Za-z0-9])/g;
+  const games = [];
+  const problems = [];
+  let previousEnd = 0;
+  let n = 0;
+  let match;
+
+  while ((match = linkRe.exec(text))) {
+    n++;
+    const segment = text.slice(previousEnd, match.index);
+    previousEnd = match.index + match[0].length;
+
+    // position of each known player in the text before this link (by display name or by Lichess handle)
+    const found = PLAYERS.map((p) => {
+      let best = -1;
+      [p.name, p.handle].forEach((label) => {
+        const re = new RegExp("(^|[^\\p{L}\\p{N}])" + escapeRe(label) + "(?![\\p{L}\\p{N}])", "iu");
+        const hit = re.exec(segment);
+        if (hit) {
+          const idx = hit.index + hit[1].length;
+          if (best === -1 || idx < best) best = idx;
+        }
+      });
+      return { player: p, idx: best };
+    }).filter((x) => x.idx >= 0).sort((a, b) => a.idx - b.idx);
+
+    if (found.length < 2) {
+      problems.push(`Link ${n} (${match[1]}): could not recognise the two players, skipped.`);
+      continue;
+    }
+    games.push({ white: found[0].player.handle, black: found[1].player.handle, url: `https://lichess.org/${match[1]}` });
+  }
+  return { round, games, problems };
+}
+
+function StatusPanel({ history, defaultDays, onRecover }) {
+  const rounds = [...new Set(history.map((g) => g.round))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  const [chosen, setChosen] = useState("");
+  const round = rounds.includes(chosen) ? chosen : rounds[rounds.length - 1] ?? "";
+  const [text, setText] = useState("");
+  const [status, setStatus] = useState({ busy: false, error: "", info: "" });
+
+  // recover games from an old round message
+  const [recText, setRecText] = useState("");
+  const [recRound, setRecRound] = useState("");
+  const [recResult, setRecResult] = useState(null);
+
+  const recover = () => {
+    const parsed = parseRoundMessage(recText);
+    if (parsed.games.length === 0) {
+      return setRecResult({ kind: "err", text: "No Lichess game links found in the text.", items: parsed.problems });
+    }
+    const roundValue = parsed.round || recRound.trim();
+    if (!roundValue) {
+      return setRecResult({ kind: "err", text: "I can't find the round number. Type it in the Round field and try again." });
+    }
+    const { added, skipped } = onRecover(roundValue, parsed.games);
+    setChosen(roundValue);
+    setRecResult({
+      kind: parsed.problems.length ? "err" : "ok",
+      text: `Recovered ${added} game${added === 1 ? "" : "s"} for round ${roundValue}` +
+        (skipped ? ` (${skipped} already known)` : "") + ".",
+      items: parsed.problems,
+    });
+  };
+
+  const load = async () => {
+    const games = history.filter((g) => g.round === round);
+    setStatus({ busy: true, error: "", info: "" });
+    try {
+      const states = await fetchGameStates(games.map((g) => gameIdOf(g.url)).filter(Boolean));
+      setText(buildStatusMessage({ games, states, round, defaultDays }));
+      setStatus({ busy: false, error: "", info: "" });
+    } catch (e) {
+      setStatus({
+        busy: false, info: "",
+        error: e instanceof TypeError
+          ? "Network error. If your connection is fine, the browser may be blocking the request (CORS)."
+          : e.message,
+      });
+    }
+  };
+
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text); setStatus((s) => ({ ...s, info: "Copied." })); }
+    catch (e) { setStatus((s) => ({ ...s, info: "Could not copy. Select the text and copy it manually." })); }
+  };
+
+  return (
+    <section className="result">
+      <h2>Game status</h2>
+      {rounds.length === 0 ? (
+        <p className="note">Create some games first: their ids are remembered here. If you lost the data, recover them from an old round message below.</p>
+      ) : (
+        <>
+          <div>
+            <label htmlFor="status-round">Round</label>
+            <select id="status-round" value={round} onChange={(e) => setChosen(e.target.value)}>
+              {rounds.map((r) => <option key={r} value={r}>Round {r}</option>)}
+            </select>
+          </div>
+          <div className="actions">
+            <button className="primary" type="button" disabled={status.busy} onClick={load}>
+              {status.busy ? "Checking…" : "Check games status"}
+            </button>
+          </div>
+          {status.error && <div className="notice err">{status.error}</div>}
+          {text && (
+            <>
+              <div style={{ marginTop: 14 }}>
+                <textarea aria-label="Status message" value={text} onChange={(e) => setText(e.target.value)} />
+              </div>
+              <div className="actions two">
+                <a className="primary" target="_blank" rel="noopener"
+                  href={"https://wa.me/?text=" + encodeURIComponent(text)}>Share on WhatsApp</a>
+                <button className="secondary" type="button" onClick={copy}>Copy text</button>
+              </div>
+              {status.info && <div className="notice ok">{status.info}</div>}
+            </>
+          )}
+        </>
+      )}
+
+      <details>
+        <summary>Recover games from a WhatsApp message</summary>
+        <div className="body">
+          <p className="note">
+            Paste the message you posted when you started a round. Each link is matched with the two players named just before it
+            (first = white). Games already known are not duplicated.
+          </p>
+          <textarea className="small" aria-label="Round message to recover from" value={recText}
+            placeholder="Paste the round message here" onChange={(e) => { setRecText(e.target.value); setRecResult(null); }} />
+          <div>
+            <label htmlFor="rec-round">Round (only needed if the message has no "Turno N")</label>
+            <input id="rec-round" type="text" inputMode="numeric" autoComplete="off" value={recRound}
+              onChange={(e) => setRecRound(e.target.value)} />
+          </div>
+          <button className="secondary" type="button" disabled={!recText.trim()} onClick={recover}>Recover games</button>
+          {recResult && (
+            <div className={"notice " + recResult.kind}>
+              {recResult.text}
+              {recResult.items?.length > 0 && <ul>{recResult.items.map((t, i) => <li key={i}>{t}</li>)}</ul>}
+            </div>
+          )}
+        </div>
+      </details>
+    </section>
+  );
+}
+
 function App() {
   const [round, setRound] = usePersistentState("pairings.round", "1");
+  // every game ever created from this page (kept after "Start next round"), used for the status check
+  const [history, setHistory] = usePersistentState("pairings.history", [], Array.isArray);
   const [pairs, setPairs] = usePersistentState("pairings.pairs.v2", emptyPairs,
     (v) => Array.isArray(v) && v.length === GAME_COUNT);
-  const [settings, setSettings] = usePersistentState("pairings.settings.v2", initialSettings);
-  const [templates, setTemplates] = usePersistentState("pairings.templates", DEFAULT_TEMPLATES);
+  const [storedSettings, setSettings] = usePersistentState("pairings.settings.v3", initialStoredSettings);
+  const settings = { ...DEFAULT_SETTINGS, ...storedSettings, rules: { ...DEFAULT_SETTINGS.rules, ...(storedSettings.rules ?? {}) } };
+  const [templates, setTemplates] = usePersistentState("pairings.templates.v2", null); // only texts edited in Settings; the rest follows config.json
 
   const [notice, setNotice] = useState(null);
   const [busy, setBusy] = useState("");      // e.g. "Creating game 2…"
@@ -450,6 +701,25 @@ function App() {
   const resultRef = useRef(null);
 
   const flash = (kind, text, items) => setNotice({ kind, text, items });
+
+  // add games recovered from an old round message (skips the ones whose id is already known)
+  const recoverGames = (roundValue, games) => {
+    const known = new Set(history.map((g) => gameIdOf(g.url)));
+    const fresh = games.filter((g) => !known.has(gameIdOf(g.url))).map((g) => ({ ...g, round: roundValue }));
+    if (fresh.length) setHistory((h) => [...h, ...fresh].slice(-80));
+    return { added: fresh.length, skipped: games.length - fresh.length };
+  };
+
+  // remember every created game (also the ones already on the page when this feature was added)
+  useEffect(() => {
+    setHistory((h) => {
+      const known = new Set(h.map((g) => g.url));
+      const added = pairs
+        .filter((p) => p.url && !known.has(p.url))
+        .map((p) => ({ round, white: p.white, black: p.black, url: p.url }));
+      return added.length ? [...h, ...added].slice(-80) : h;
+    });
+  }, [pairs]);
 
   /* ----- pairings ----- */
   const updatePair = (i, patch) => {
@@ -565,13 +835,39 @@ function App() {
         </section>
       )}
 
+      <StatusPanel history={history} defaultDays={settings.days} onRecover={recoverGames} />
+
       <SettingsPanel settings={settings} setSettings={setSettings} templates={tpl}
         setTemplates={setTemplates} flash={flash} panelRef={settingsRef} />
     </main>
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+function ConfigError({ message }) {
+  return (
+    <main>
+      <h1>Round pairings</h1>
+      <div className="notice err" role="alert">{message}</div>
+    </main>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<main><p className="sub">Loading…</p></main>);
+
+fetch("config.json", { cache: "no-cache" })
+  .then((res) => {
+    if (!res.ok) throw new Error(`config.json not found (HTTP ${res.status}). It must sit in the same folder as index.html.`);
+    return res.json();
+  })
+  .then((cfg) => { applyConfig(cfg); root.render(<App />); })
+  .catch((e) => {
+    const message =
+      e instanceof SyntaxError ? "config.json is not valid JSON (check commas and quotes): " + e.message :
+      e instanceof TypeError ? "Could not load config.json. Open the page from its web address, not as a local file." :
+      e.message;
+    root.render(<ConfigError message={message} />);
+  });
 </script>
 </body>
 </html>
