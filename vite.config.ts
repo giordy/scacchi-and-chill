@@ -9,8 +9,8 @@ function singleRootConfigPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const rawUrl = (req as any).url || '';
-        const pathname = rawUrl.split('?')[0];
-        if (pathname === '/config.json') {
+        // Only intercept direct fetch to /config.json, not Vite module imports like /config.json?import
+        if (rawUrl === '/config.json') {
           const configPath = path.resolve(process.cwd(), 'config.json');
           if (fs.existsSync(configPath)) {
             res.setHeader('Content-Type', 'application/json');
