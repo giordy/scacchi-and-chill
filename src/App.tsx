@@ -9,7 +9,7 @@ import {
   NoticeState,
   LichessExportGame,
 } from './types';
-import { defaultConfig } from './defaultConfig';
+import rawConfig from '../config.json';
 
 export const RULES = [
   { key: "noRematch", label: "No rematch offers" },
@@ -76,6 +76,8 @@ function validateAndNormalizeConfig(cfg: any): AppConfig {
     statusPhrases: sp,
   };
 }
+
+const defaultConfig: AppConfig = validateAndNormalizeConfig(rawConfig);
 
 function initialStoredSettings(): Partial<Settings> {
   for (const key of ["pairings.settings.v2", "pairings.settings"]) {

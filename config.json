@@ -91,16 +91,19 @@
       "♟️ Turno {round}: stato dei lavori"
     ],
     "ongoing": [
-      "In corso ♟️",
-      "Partita in corso 🎯",
-      "Si sta giocando 🙂",
-      "La partita prosegue 🔄",
-      "Ancora in corso, si va avanti ♟️",
-      "Partita aperta, la sfida continua ⚔️",
-      "In pieno svolgimento 🧠",
-      "Sulla scacchiera si combatte ancora ♞",
-      "Partita ancora aperta 📂",
-      "Si va avanti, la partita non è finita 🔜"
+      "In corso ♟️ ({approxMoves})",
+      "Partita in pieno svolgimento 🎯 ({approxMoves})",
+      "Si sta giocando 🙂 – {approxMoves}",
+      "La partita prosegue 🔄 ({approxMoves})",
+      "Ancora in corso, si va avanti ♟️ – {approxMoves}",
+      "Partita aperta, la sfida continua ⚔️ ({approxMoves})",
+      "In pieno svolgimento 🧠 ({approxMoves})",
+      "Sulla scacchiera si combatte ancora ♞ – {approxMoves}",
+      "Partita aperta e combattuta 📂 ({approxMoves})",
+      "Si va avanti, la partita non è finita 🔜 ({approxMoves})",
+      "Manovre sul centro scacchiera ♟️ ({approxMoves})",
+      "Lotta serrata, posizioni tese ⚔️ ({approxMoves})",
+      "Fase di riflessione profonda ⏳ ({approxMoves})"
     ],
     "win": [
       "Finita! Ha vinto {winner} {details} ({result}) 🎉\n{openingNote}",
