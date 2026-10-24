@@ -27,17 +27,11 @@ Applicazione web per organizzare i turni di un torneo di scacchi tra amici, gene
 
 L'app è pronta per essere ospitata gratuitamente su GitHub Pages con due modalità a scelta:
 
-### Metodo 1: Senza compilazione (Cartella `/docs`)
-1. Su GitHub vai su **Settings** > **Pages**.
-2. Sotto **Build and deployment** seleziona **Source**: `Deploy from a branch`.
-3. Seleziona il branch `main` e la cartella **/docs**, quindi clicca **Save**.
-4. Il sito sarà online al tuo indirizzo GitHub Pages senza necessità di eseguire build sul server!
-
-### Metodo 2: Compilazione Automatica (GitHub Actions)
-Nel repository è già configurato il workflow `.github/workflows/deploy.yml`.
+### Pubblicazione Automatica (GitHub Actions)
+Nel repository è configurato il workflow `.github/workflows/deploy.yml`.
 1. Su GitHub vai su **Settings** > **Pages**.
 2. Sotto **Build and deployment** seleziona **Source**: `GitHub Actions`.
-3. A ogni push su `main`, GitHub compilerà e pubblicherà automaticamente l'applicazione.
+3. A ogni push su `main`, GitHub compilerà l'app ed eseguirà il deploy in automatico!
 
 ---
 
