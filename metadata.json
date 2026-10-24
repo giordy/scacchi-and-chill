@@ -1,0 +1,6 @@
+{
+  "name": "Round pairings",
+  "description": "Lichess round pairings organizer and game status tracker for chess tournaments.",
+  "permissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
