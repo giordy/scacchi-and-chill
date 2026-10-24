@@ -229,16 +229,9 @@ const HOW_DRAW: Record<string, string> = {
 const tidy = (t: string) =>
   t.replace(/\(\s*\)/g, "").replace(/[ \t]+/g, " ").replace(/ ?\n ?/g, "\n").replace(/\n+/g, "\n").trim();
 
-// Estimates the moves band for ongoing games (since Lichess hides the latest moves in progress)
+// Estimates the moves threshold for ongoing games (single thresholds: meno di 10, più di 10/20/30/40)
 function getApproxMoves(plies: number): { approxMoves: string; movesBand: string; phase: string } {
   const estimatedMoves = Math.max(1, Math.floor(plies / 2) + 1);
-  if (estimatedMoves <= 3) {
-    return {
-      approxMoves: "prime mosse",
-      movesBand: "< 5 mosse",
-      phase: "in apertura",
-    };
-  }
   if (estimatedMoves < 10) {
     return {
       approxMoves: "meno di 10 mosse",
@@ -246,30 +239,30 @@ function getApproxMoves(plies: number): { approxMoves: string; movesBand: string
       phase: "in apertura",
     };
   }
-  if (estimatedMoves <= 20) {
+  if (estimatedMoves < 20) {
     return {
-      approxMoves: "tra 10 e 20 mosse",
-      movesBand: "10-20 mosse",
+      approxMoves: "più di 10 mosse",
+      movesBand: "> 10 mosse",
       phase: "nel mediogioco",
     };
   }
-  if (estimatedMoves <= 35) {
+  if (estimatedMoves < 30) {
     return {
       approxMoves: "più di 20 mosse",
-      movesBand: "20-35 mosse",
-      phase: "nel vivo del mediogioco",
+      movesBand: "> 20 mosse",
+      phase: "nel vivo del gioco",
     };
   }
-  if (estimatedMoves <= 50) {
+  if (estimatedMoves < 40) {
     return {
-      approxMoves: "oltre 35 mosse",
-      movesBand: "35-50 mosse",
+      approxMoves: "più di 30 mosse",
+      movesBand: "> 30 mosse",
       phase: "fase avanzata",
     };
   }
   return {
-    approxMoves: "oltre 50 mosse",
-    movesBand: "> 50 mosse",
+    approxMoves: "più di 40 mosse",
+    movesBand: "> 40 mosse",
     phase: "in pieno finale",
   };
 }
