@@ -10,6 +10,7 @@ import {
   LichessExportGame,
 } from './types';
 import rawConfig from '../config.json';
+import EventsTab from './EventsTab';
 
 export const RULES = [
   { key: "noRematch", label: "No rematch offers" },
@@ -74,6 +75,7 @@ function validateAndNormalizeConfig(cfg: any): AppConfig {
     challengeName: cfg.challengeName,
     numberEmojis: isTextList(cfg.numberEmojis) ? cfg.numberEmojis : [],
     statusPhrases: sp,
+    tournamentDescriptions: typeof cfg.tournamentDescriptions === 'object' && cfg.tournamentDescriptions !== null ? cfg.tournamentDescriptions : {},
   };
 }
 
@@ -1172,7 +1174,7 @@ function StatusTab({
 
 export function App() {
   const [config, setConfig] = useState<AppConfig>(defaultConfig);
-  const [activeTab, setActiveTab] = usePersistentState<'pairings' | 'status' | 'settings'>(
+  const [activeTab, setActiveTab] = usePersistentState<'pairings' | 'status' | 'events' | 'settings'>(
     'pairings.activeTab',
     'pairings'
   );
@@ -1450,6 +1452,14 @@ export function App() {
           📊 Stato
         </button>
         <button
+          className={`tab-btn ${activeTab === 'events' ? 'active' : ''}`}
+          role="tab"
+          aria-selected={activeTab === 'events'}
+          onClick={() => setActiveTab('events')}
+        >
+          🌍 Eventi
+        </button>
+        <button
           className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
           role="tab"
           aria-selected={activeTab === 'settings'}
@@ -1541,7 +1551,15 @@ export function App() {
         />
       )}
 
-      {/* Tab 3: Settings */}
+      {/* Tab 3: Grandi Eventi Lichess */}
+      {activeTab === 'events' && (
+        <EventsTab
+          config={config}
+          flash={flash}
+        />
+      )}
+
+      {/* Tab 4: Settings */}
       {activeTab === 'settings' && (
         <section>
           <h2>Impostazioni e Regole</h2>

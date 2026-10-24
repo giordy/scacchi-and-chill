@@ -72,6 +72,7 @@ export interface AppConfig {
   challengeName: string;
   numberEmojis: string[];
   statusPhrases: StatusPhrases;
+  tournamentDescriptions?: Record<string, string>;
 }
 
 export interface NoticeState {
@@ -103,4 +104,34 @@ export interface LichessExportGame {
   opening?: {
     name?: string;
   };
+}
+
+export interface LichessBroadcastTourInfo {
+  format?: string;
+  tc?: string;
+  fideTC?: string;
+  location?: string;
+  timeZone?: string;
+  website?: string;
+  standings?: string;
+  players?: string;
+  regulations?: string;
+}
+
+export interface LichessBroadcastTour {
+  id: string;
+  name: string;
+  slug: string;
+  url: string;
+  tier?: number;
+  dates?: number[];
+  image?: string;
+  info?: LichessBroadcastTourInfo;
+}
+
+export interface LichessBroadcastItem {
+  tour: LichessBroadcastTour;
+  rounds?: any[];
+  round?: any;
+  group?: string;
 }
