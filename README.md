@@ -18,13 +18,7 @@ Applicazione web per organizzare i turni di un torneo di scacchi tra amici, gene
 
 ### 4. Gestione Turni e Protezione Ripristino Messaggi
 - **Anteprima interattiva prima del ripristino**: incollando il messaggio WhatsApp, l'app analizza e mostra l'elenco delle partite e dei giocatori identificati prima di salvare.
-- **Protezione sovrascrittura**: se il turno esiste già, puoi scegliere esplicitamente se *Sostituire completamente il turno*, *Unire solo le partite mancanti* o *Annullare*.
-### 5. Grandi Eventi su Lichess (Messaggio WhatsApp Mensile)
-- **Filtro automatico per mese**: seleziona il mese desiderato (preimpostato su quello in corso) e scarica i broadcast ufficiali in corso o futuri da Lichess.
-- **Solo il meglio**: seleziona 1 o al massimo 2 tornei mondiali di prima fascia (es. Mondiali, Candidati, Olimpiadi, Tata Steel) e 1 eventuale torneo italiano di rilievo.
-- **Niente spam**: se non ci sono tornei di primo piano nel mese, l'app lo segnala e permette di omettere il messaggio.
-- **Schede complete con link ufficiali**: include nome, sede, date formattate in italiano, top player in gara, breve spiegazione in italiano, link al sito ufficiale del torneo (se disponibile) e link alla diretta su Lichess.
-- **Anteprima e condivisione 1-click**: area di testo modificabile con pulsanti *Condividi su WhatsApp* e *Copia testo*.
+- **Gestione turni salvati**: visualizza tutte le partite di ogni turno, elimina singoli turni errati o ricaricali direttamente nella schermata Partite.
 
 ---
 

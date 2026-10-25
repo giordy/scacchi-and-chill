@@ -191,21 +191,5 @@
       "📊 Più mosse: {longest}. Meno mosse: {shortest}.",
       "🔎 Curiosità del turno: più lunga {longest}, più corta {shortest}."
     ]
-  },
-  "tournamentDescriptions": {
-    "tata steel": "Il \"Wimbledon degli scacchi\": il super-torneo invernale più prestigioso al mondo con l'élite assoluta dei Grandi Maestri.",
-    "candidates": "Il torneo più atteso e drammatico dell'anno: 8 super-campioni si sfidano per decretare lo sfidante al Campione del Mondo.",
-    "world championship": "La sfida suprema per la corona di Campione del Mondo di scacchi.",
-    "olympiad": "Le Olimpiadi degli scacchi: la storica competizione a squadre per nazioni con maestri da oltre 180 paesi.",
-    "world cup": "La Coppa del Mondo FIDE: tabellone a eliminazione diretta senza appello tra i migliori scacchisti del pianeta.",
-    "norway chess": "Uno dei tornei classici più duri e innovativi al mondo, nella terra di Magnus Carlsen con spareggi Armageddon.",
-    "grand chess tour": "Il prestigioso circuito globale d'élite che raduna le stelle del ranking mondiale tra classiche, rapid e blitz.",
-    "sinquefield": "La classica americana per eccellenza del Saint Louis Chess Club.",
-    "campionato italiano": "La massima competizione nazionale: in palio il titolo di Campione e Campionessa d'Italia.",
-    "grand swiss": "Torneo svizzero ad altissimo livello che mette in palio i pass per il Torneo dei Candidati.",
-    "freestyle": "Scacchi 960 (Fischer Random) ai massimi livelli mondiali con posizioni iniziali dei pezzi sorteggiate.",
-    "speed chess": "Il campionato ad altissimo ritmo (Blitz e Bullet) tra i migliori scacchisti del globo.",
-    "spilimbergo": "Storico Open internazionale italiano tra i più frequentati e competitivi della penisola.",
-    "arco": "Tradizionale festival scacchistico internazionale sulle rive del Lago di Garda."
   }
 }

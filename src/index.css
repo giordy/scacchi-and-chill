@@ -73,7 +73,7 @@ h1 {
 /* Tabs navigation */
 .tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   background: var(--panel);
   border: 1px solid var(--line);
@@ -86,20 +86,19 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   min-height: 46px;
-  padding: 6px 3px;
+  padding: 8px 6px;
   border: 0;
   border-radius: 8px;
   background: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: center;
-  line-height: 1.15;
 }
 
 .tab-btn:hover {
@@ -110,26 +109,6 @@ h1 {
   background: var(--accent);
   color: var(--accent-ink);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
-
-.badge-gold {
-  background: color-mix(in srgb, #d4af37 20%, transparent);
-  color: #8c731f;
-  border: 1px solid #d4af37;
-}
-
-@media (prefers-color-scheme: dark) {
-  .badge-gold {
-    background: color-mix(in srgb, #f5d061 20%, transparent);
-    color: #f5d061;
-    border: 1px solid #f5d061;
-  }
-}
-
-.badge-green {
-  background: color-mix(in srgb, var(--ok) 20%, transparent);
-  color: var(--ok);
-  border: 1px solid var(--ok);
 }
 
 label {
