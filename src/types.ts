@@ -54,7 +54,7 @@ export interface StatusPhrases {
   aborted: string[];
   pending: string[];
   footer: string[];
-  closing: string[];
+  closing?: string[];
   highlight?: string[];
   [key: string]: string[] | undefined;
 }

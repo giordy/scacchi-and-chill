@@ -19,39 +19,87 @@ export const RULES = [
 ];
 
 function validateAndNormalizeConfig(cfg: any): AppConfig {
-  const fail = (msg: string) => { throw new Error("config.json: " + msg); };
+  const fail = (msg: string) => {
+    throw new Error("config.json: " + msg);
+  };
   const isText = (v: any): v is string => typeof v === "string";
-  const isTextList = (v: any): v is string[] => Array.isArray(v) && v.length > 0 && v.every(isText);
+  const isTextList = (v: any): v is string[] =>
+    Array.isArray(v) && v.length > 0 && v.every(isText);
 
-  if (!Array.isArray(cfg?.players) || cfg.players.length < 2 || cfg.players.some((p: any) => !p || !isText(p.handle) || !p.handle.trim())) {
-    fail('"players" must be a list of at least 2 entries like { "handle": "lichess_username", "name": "Name" }.');
+  // 1. Players
+  const players = cfg?.players || cfg?.giocatori;
+  if (
+    !Array.isArray(players) ||
+    players.length < 2 ||
+    players.some((p: any) => !p || !isText(p.handle) || !p.handle.trim())
+  ) {
+    fail('"players" must be a list of at least 2 entries with { "handle": "lichess_username", "name": "Name" }.');
   }
-  const handles = cfg.players.map((p: any) => p.handle.trim().toLowerCase());
-  if (new Set(handles).size !== handles.length) fail('"players" contains the same handle twice.');
-
-  const t = cfg.messageTemplates;
-  if (!t || !["header", "game", "bye", "footer"].every((k) => isText(t[k]))) {
-    fail('"messageTemplates" needs the text fields "header", "game", "bye" and "footer".');
+  const handles = players.map((p: any) => p.handle.trim().toLowerCase());
+  if (new Set(handles).size !== handles.length) {
+    fail('"players" contains the same handle twice.');
   }
-  if (!cfg.typeLabels || !isText(cfg.typeLabels.rated) || !isText(cfg.typeLabels.casual)) {
-    fail('"typeLabels" needs "rated" and "casual".');
-  }
-  if (!isText(cfg.challengeName)) fail('"challengeName" must be text.');
 
-  const sp = cfg.statusPhrases;
-  const spKeys = ["header", "ongoing", "win", "draw", "aborted", "pending", "footer", "closing"];
-  const badKey = sp && spKeys.find((k) => !isTextList(sp[k]));
-  if (!sp || badKey) fail(`"statusPhrases.${badKey ?? "…"}" must be a non-empty list of texts.`);
-  if (sp.highlight !== undefined && !isTextList(sp.highlight)) fail('"statusPhrases.highlight" must be a non-empty list of texts (or left out).');
-
-  const d = cfg.defaults ?? {};
+  // 2. Defaults
+  const d = cfg.defaults || cfg.impostazioniPredefinite || {};
   const days = Number(d.days ?? 2);
   const expiry = Number(d.expiry ?? 2);
-  if (!Number.isInteger(days) || days < 1 || days > 14) fail('"defaults.days" must be a whole number from 1 to 14.');
-  if (!Number.isInteger(expiry) || expiry < 1 || expiry > 14) fail('"defaults.expiry" must be a whole number from 1 to 14.');
+  if (!Number.isInteger(days) || days < 1 || days > 14) {
+    fail('"days" must be a whole number from 1 to 14.');
+  }
+  if (!Number.isInteger(expiry) || expiry < 1 || expiry > 14) {
+    fail('"expiry" must be a whole number from 1 to 14.');
+  }
+
+  // 3. Round message templates (supports roundMessage or messageTemplates)
+  const rm = cfg.roundMessage || cfg.messaggioNuovoTurno || cfg.messageTemplates;
+  if (!rm || !["header", "game", "bye", "footer"].every((k) => isText(rm[k]))) {
+    fail('"roundMessage" needs the text fields "header", "game", "bye" and "footer".');
+  }
+
+  const typeLabels = rm.typeLabels || rm.etichetteTipo || cfg.typeLabels || { rated: "classificate", casual: "amichevoli" };
+  if (!isText(typeLabels.rated) || !isText(typeLabels.casual)) {
+    fail('"typeLabels" needs "rated" and "casual".');
+  }
+
+  const challengeName = isText(rm.challengeName)
+    ? rm.challengeName
+    : isText(rm.nomeSfida)
+    ? rm.nomeSfida
+    : isText(cfg.challengeName)
+    ? cfg.challengeName
+    : "Turno {round}";
+
+  const numberEmojisRaw = rm.numberEmojis || rm.numeriEmoji || cfg.numberEmojis;
+  const numberEmojis = isTextList(numberEmojisRaw) ? numberEmojisRaw : [];
+
+  // 4. Status message phrases (supports statusMessage or statusPhrases)
+  const sm = cfg.statusMessage || cfg.messaggioStatoPartite || cfg.statusPhrases;
+  if (!sm) fail('"statusMessage" is missing in config.json.');
+
+  const smHeader = sm.header || sm.titoli;
+  const smOngoing = sm.ongoing || sm.inCorso;
+  const smWin = sm.win || sm.vittoria;
+  const smDraw = sm.draw || sm.patta;
+  const smAborted = sm.aborted || sm.annullata;
+  const smPending = sm.pending || sm.daIniziare;
+  const smFooter = sm.footer || sm.riepilogo;
+  const smClosingRaw = sm.closing !== undefined ? sm.closing : sm.chiusura;
+  const smClosing = Array.isArray(smClosingRaw) ? smClosingRaw.filter(isText) : [];
+
+  if (!isTextList(smHeader)) fail('"statusMessage.header" must be a non-empty list of texts.');
+  if (!isTextList(smOngoing)) fail('"statusMessage.ongoing" must be a non-empty list of texts.');
+  if (!isTextList(smWin)) fail('"statusMessage.win" must be a non-empty list of texts.');
+  if (!isTextList(smDraw)) fail('"statusMessage.draw" must be a non-empty list of texts.');
+  if (!isTextList(smAborted)) fail('"statusMessage.aborted" must be a non-empty list of texts.');
+  if (!isTextList(smPending)) fail('"statusMessage.pending" must be a non-empty list of texts.');
+  if (!isTextList(smFooter)) fail('"statusMessage.footer" must be a non-empty list of texts.');
+
+  const highlightRaw = sm.highlight || sm.inEvidenza;
+  const highlight = Array.isArray(highlightRaw) && isTextList(highlightRaw) ? highlightRaw : undefined;
 
   return {
-    players: cfg.players.map((p: any) => ({
+    players: players.map((p: any) => ({
       handle: p.handle.trim(),
       name: (isText(p.name) && p.name.trim()) || p.handle.trim(),
     })),
@@ -62,18 +110,25 @@ function validateAndNormalizeConfig(cfg: any): AppConfig {
       rules: Object.fromEntries(RULES.map(({ key }) => [key, !!d.rules?.[key]])) as any,
     },
     messageTemplates: {
-      header: t.header,
-      game: t.game,
-      bye: t.bye,
-      footer: t.footer,
+      header: rm.header,
+      game: rm.game,
+      bye: rm.bye,
+      footer: rm.footer,
     },
-    typeLabels: {
-      rated: cfg.typeLabels.rated,
-      casual: cfg.typeLabels.casual,
+    typeLabels,
+    challengeName,
+    numberEmojis,
+    statusPhrases: {
+      header: smHeader,
+      ongoing: smOngoing,
+      win: smWin,
+      draw: smDraw,
+      aborted: smAborted,
+      pending: smPending,
+      footer: smFooter,
+      closing: smClosing,
+      highlight,
     },
-    challengeName: cfg.challengeName,
-    numberEmojis: isTextList(cfg.numberEmojis) ? cfg.numberEmojis : [],
-    statusPhrases: sp,
   };
 }
 
@@ -877,7 +932,7 @@ function StatusTab({
       ...blocks,
       highlight,
       fill(pickFor("footer"), count),
-      pickFor("closing"),
+      config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
     ]
       .filter(Boolean)
       .join("\n\n");

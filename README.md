@@ -41,7 +41,7 @@ npm install
 npm run dev
 ```
 
-Per compilare la versione di produzione (aggiorna sia `dist/` che `docs/`):
+Per compilare la versione di produzione:
 ```bash
 npm run build
 ```

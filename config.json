@@ -1,15 +1,13 @@
 {
   "_readme": [
-    "Configuration for index.html. Edit this file freely: index.html itself never needs to change for these things.",
-    "players: one entry per player. handle = exact Lichess username, name = how the player appears in WhatsApp messages. The number of games per round is half the number of players.",
-    "defaults: starting values for days per move, days a link stays valid, rated or not, and extra Lichess rules. Values changed in the page's Settings are saved in the phone's browser and win over these.",
-    "messageTemplates: the message posted when a round is created, in four parts separated by a blank line. Placeholders for all parts: {round} {days} {expiry} {type} {bye}. In 'game' also {n} {white} {black} {url}. 'bye' is only shown when someone sits out. Text edited in the page's Settings wins over these; 'Reset message text' goes back to this file.",
-    "typeLabels: the words used for {type}.",
-    "challengeName: the name Lichess shows on the challenge page.",
-    "numberEmojis: used for {n}, one per game.",
-    "statusPhrases: the weekly status message. One phrase per list is picked at random for each game (the same phrase is not repeated inside one message until the list runs out). Placeholders: header {round}; footer {finished} {ongoing} {pending}; win {winner} {loser} {result} {details} {moves} {how} {color} {opening} {openingNote}; draw {result} {details} {moves} {how} {opening} {openingNote}; highlight {longest} {shortest} (shown only when at least two games are finished and their lengths differ; this list is optional). {details} is ready-made, e.g. 'col nero per abbandono in 34 mosse'; {openingNote} is 'Apertura: ...' and disappears when Lichess does not know the opening (it is the English name from Lichess). ongoing also has {move} and {turn}, but they are NOT reliable: Lichess hides the latest moves of games in progress, so they can lag behind the real game. Avoid them.",
-    "Keys starting with an underscore (like this one) are ignored. JSON does not allow comments or trailing commas."
+    "Scacchi & Chill tournament configuration.",
+    "1. players: list of participants with exact Lichess handle and WhatsApp display name.",
+    "2. defaults: default days per move, challenge link expiry days, and game rules.",
+    "3. roundMessage: message template used when creating a new round's pairings.",
+    "4. statusMessage: phrases used for the ongoing games status update.",
+    "   (Leave 'closing' empty [] to end the status message right after the summary statistics)."
   ],
+
   "players": [
     {
       "handle": "matepaco",
@@ -44,6 +42,7 @@
       "name": "Matteo"
     }
   ],
+
   "defaults": {
     "days": 2,
     "expiry": 2,
@@ -55,52 +54,47 @@
       "noEarlyDraw": true
     }
   },
-  "messageTemplates": {
+
+  "roundMessage": {
+    "challengeName": "Turno {round}",
+    "typeLabels": {
+      "rated": "classificate",
+      "casual": "amichevoli"
+    },
+    "numberEmojis": [
+      "1️⃣",
+      "2️⃣",
+      "3️⃣",
+      "4️⃣",
+      "5️⃣",
+      "6️⃣",
+      "7️⃣",
+      "8️⃣",
+      "9️⃣"
+    ],
     "header": "♟️ Turno {round} – {days} giorni a mossa, partite {type}",
     "game": "{n} {white} ⚪ vs {black} ⚫\n{url}",
-    "bye": "😴 Riposa in questo turno: {bye}",
-    "footer": "Cliccate sul vostro link e accettate la sfida. I link restano validi {expiry} giorni."
+    "bye": "Riposa in questo turno: {bye}",
+    "footer": "Accettate la sfida cliccando sul vostro link. I link restano validi {expiry} giorni."
   },
-  "typeLabels": {
-    "rated": "classificate",
-    "casual": "amichevoli"
-  },
-  "challengeName": "Turno {round}",
-  "numberEmojis": [
-    "1️⃣",
-    "2️⃣",
-    "3️⃣",
-    "4️⃣",
-    "5️⃣",
-    "6️⃣",
-    "7️⃣",
-    "8️⃣",
-    "9️⃣"
-  ],
-  "statusPhrases": {
+
+  "statusMessage": {
     "header": [
       "♟️ Aggiornamento Turno {round}",
       "♟️ Turno {round}: la situazione sulle scacchiere",
       "♟️ Turno {round}: come siamo messi?",
       "♟️ Turno {round}: il punto della settimana",
-      "♟️ Turno {round}: scacchiere sotto la lente",
       "♟️ Turno {round}: cosa si muove?",
-      "♟️ Il bollettino del Turno {round}",
-      "♟️ Turno {round}: un'occhiata alle partite",
-      "♟️ Turno {round}: facciamo il punto",
-      "♟️ Turno {round}: stato dei lavori"
+      "♟️ Il bollettino del Turno {round}"
     ],
     "ongoing": [
       "In corso ♟️ ({approxMoves})",
       "Partita in pieno svolgimento 🎯 ({approxMoves})",
       "Si sta giocando 🙂 – {approxMoves}",
       "La partita prosegue 🔄 ({approxMoves})",
-      "Ancora in corso, si va avanti ♟️ – {approxMoves}",
       "Partita aperta, la sfida continua ⚔️ ({approxMoves})",
-      "In pieno svolgimento 🧠 ({approxMoves})",
       "Sulla scacchiera si combatte ancora ♞ – {approxMoves}",
       "Partita aperta e combattuta 📂 ({approxMoves})",
-      "Si va avanti, la partita non è finita 🔜 ({approxMoves})",
       "Manovre sul centro scacchiera ♟️ ({approxMoves})",
       "Lotta serrata, posizioni tese ⚔️ ({approxMoves})",
       "Fase di riflessione profonda ⏳ ({approxMoves})"
@@ -120,26 +114,21 @@
     "draw": [
       "Finita in patta {details} ({result}) 🤝\n{openingNote}",
       "Mezzo punto a testa {details} ({result}) 🤝",
-      "Pace firmata: patta {details} ({result}) 🕊️\n{openingNote}",
+      "Pace firmata: patta {details} ({result})\n{openingNote}",
       "Si divide la posta {details} ({result}) ⚖️",
       "Niente vincitori, niente vinti: patta {details} ({result}) 🤝\n{openingNote}",
-      "Un pareggio {details} ({result}) e ognuno si prende mezzo punto ➗",
+      "Un pareggio {details} ({result}) e mezzo punto per uno ➗",
       "Patta! Il punto si divide {details} ({result}) ✌️\n{openingNote}",
       "Chiusa alla pari {details} ({result}) 🟰",
       "Partita finita in parità {details} ({result}) ⚪⚫\n{openingNote}",
-      "Armistizio sulla scacchiera {details} ({result}) 🕊️"
+      "Armistizio sulla scacchiera {details} ({result})"
     ],
     "aborted": [
       "Partita annullata 🚫",
       "Questa partita è stata annullata ❌",
       "Partita annullata su Lichess 🚫",
-      "Annullata: se serve ne parliamo nel gruppo 💬",
-      "Partita non disputata, risulta annullata 🚫",
-      "Qui la partita è stata annullata ❌",
-      "Stop: partita annullata 🛑",
-      "Partita annullata, da vedere come procedere 🤔",
-      "Risulta annullata 🚫",
-      "Partita interrotta e annullata ❌"
+      "Annullata: da concordare nel gruppo 💬",
+      "Partita non disputata, risulta annullata 🚫"
     ],
     "pending": [
       "Non ancora iniziata ⏳",
@@ -147,37 +136,16 @@
       "Scacchiera ancora chiusa 📦",
       "Il link aspetta ancora di essere aperto 🔗",
       "Ancora da avviare ⏳",
-      "Si parte appena la partita viene accettata 🚦",
-      "Non è ancora partita 🕐",
+      "Si parte appena la sfida viene accettata 🚦",
       "Pezzi ancora in scatola 🎲",
-      "In attesa del via 🏁",
-      "Partita ancora da cominciare ♟️"
+      "In attesa del via 🏁"
     ],
     "footer": [
       "📊 {finished} finite, {ongoing} in corso, {pending} da avviare.",
       "📊 Riepilogo: {finished} concluse, {ongoing} in corso, {pending} da iniziare.",
       "📊 In numeri: {finished} finite · {ongoing} in corso · {pending} da avviare.",
       "📈 Il quadro: {finished} chiuse, {ongoing} aperte, {pending} ferme al via.",
-      "📊 Conteggio: {ongoing} partite in corso, {finished} finite, {pending} non partite.",
-      "📊 Totale: {finished} concluse, {ongoing} ancora in gioco, {pending} da avviare.",
-      "🧮 Facendo i conti: {finished} finite, {ongoing} in corso, {pending} da far partire.",
-      "📊 Stato generale: {ongoing} in corso, {finished} chiuse, {pending} in attesa.",
-      "📋 Riassunto: {finished} finite, {ongoing} in corso, {pending} da avviare.",
-      "📊 {ongoing} partite aperte, {finished} concluse, {pending} da avviare."
-    ],
-    "closing": [
-      "Buona settimana e buone partite a tutti! ♟️",
-      "Ci aggiorniamo lunedì prossimo. Buon divertimento! ♞",
-      "Pensateci bene e buona settimana! ♟️",
-      "Buon proseguimento a tutti sul torneo! 🙌",
-      "Alla prossima settimana, che vinca il migliore! 🏆",
-      "Prendetevi il tempo che serve e buon divertimento! 🙂",
-      "Buona settimana, e ricordate: l'alfiere va in diagonale! ♝",
-      "Giocate con calma e buon divertimento! 😄",
-      "Buone partite a tutti, ci sentiamo al prossimo aggiornamento! 👋",
-      "Che vinca la tattica migliore e buon torneo a tutti! 👑",
-      "Meno fretta e più arrocco per tutti! 🏰",
-      "Occhio ai cavalli al centro! Buone partite! 🐴"
+      "📊 Totale: {finished} concluse, {ongoing} ancora in gioco, {pending} da avviare."
     ],
     "highlight": [
       "🏁 La più lunga del turno: {longest}. La più rapida: {shortest}.",
@@ -185,11 +153,8 @@
       "📏 Partita più lunga: {longest}. Più breve: {shortest}.",
       "🏃 La più veloce a chiudersi: {shortest}. La più combattuta: {longest}.",
       "🐢 Più lunga: {longest} · 🐇 Più rapida: {shortest}",
-      "📌 Da segnare: la più lunga è {longest}, la più rapida {shortest}.",
-      "🎖️ Resistenza: {longest}. Velocità: {shortest}.",
-      "🧮 Facendo i conti, la partita più lunga è {longest} e la più breve {shortest}.",
-      "📊 Più mosse: {longest}. Meno mosse: {shortest}.",
-      "🔎 Curiosità del turno: più lunga {longest}, più corta {shortest}."
-    ]
+      "📌 Da segnare: la più lunga è {longest}, la più rapida {shortest}."
+    ],
+    "closing": []
   }
 }
