@@ -877,7 +877,12 @@ function StatusTab({
         const moves = Math.ceil(plies / 2);
         const movesText = moves > 0 ? `in ${moves} ${moves === 1 ? "mossa" : "mosse"}` : "";
         const opening = s.opening?.name ?? "";
-        const common = { moves, opening, openingNote: opening ? `Apertura: ${opening}` : "" };
+        const mainOpening = opening.split(":")[0].trim();
+        const studyUrl = mainOpening
+          ? `https://lichess.org/study/search?q=${encodeURIComponent(mainOpening)}&order=relevant`
+          : "";
+        const openingNote = opening ? `Apertura: ${opening}\n📖 Studi: ${studyUrl}` : "";
+        const common = { moves, opening, mainOpening, studyUrl, openingNote };
         const won = s.winner === "white" || s.winner === "black";
 
         if (won) {
@@ -907,6 +912,12 @@ function StatusTab({
             })
           );
         }
+
+        // Guarantee opening and study link are included whenever Lichess detected it
+        if (opening && !body.includes(opening)) {
+          body = `${body}\n${openingNote}`;
+        }
+
         finishedInfo.push({ names: `${nameOf(white)}–${nameOf(black)}`, moves });
         detailsList.push(
           `${i + 1}. ${id}: stato ${s.status}, vincitore ${s.winner ?? "nessuno"}, mosse ${moves}, apertura ${

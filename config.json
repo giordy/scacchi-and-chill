@@ -101,27 +101,27 @@
     ],
     "win": [
       "Finita! Ha vinto {winner} {details} ({result}) 🎉\n{openingNote}",
-      "{winner} porta a casa il punto {details} ({result}) 👏",
+      "{winner} porta a casa il punto {details} ({result}) 👏\n{openingNote}",
       "Partita chiusa: vittoria di {winner} {details} ({result}) ✅\n{openingNote}",
-      "Punto pieno per {winner} {details} ({result}) 🏆",
+      "Punto pieno per {winner} {details} ({result}) 🏆\n{openingNote}",
       "{winner} la spunta su {loser} {details} ({result}) 🙌\n{openingNote}",
-      "Fine dei giochi: vince {winner} {details} ({result}) 🔔",
+      "Fine dei giochi: vince {winner} {details} ({result}) 🔔\n{openingNote}",
       "Si chiude con la vittoria di {winner} {details} ({result}) 📌\n{openingNote}",
-      "{winner} incassa il punto {details} ({result}) 💪",
+      "{winner} incassa il punto {details} ({result}) 💪\n{openingNote}",
       "Verdetto: {winner} vince {details} ({result}) ⚖️\n{openingNote}",
-      "Partita archiviata: vince {winner} {details} ({result}) 🗂️"
+      "Partita archiviata: vince {winner} {details} ({result}) 🗂️\n{openingNote}"
     ],
     "draw": [
       "Finita in patta {details} ({result}) 🤝\n{openingNote}",
-      "Mezzo punto a testa {details} ({result}) 🤝",
+      "Mezzo punto a testa {details} ({result}) 🤝\n{openingNote}",
       "Pace firmata: patta {details} ({result})\n{openingNote}",
-      "Si divide la posta {details} ({result}) ⚖️",
+      "Si divide la posta {details} ({result}) ⚖️\n{openingNote}",
       "Niente vincitori, niente vinti: patta {details} ({result}) 🤝\n{openingNote}",
-      "Un pareggio {details} ({result}) e mezzo punto per uno ➗",
+      "Un pareggio {details} ({result}) e mezzo punto per uno ➗\n{openingNote}",
       "Patta! Il punto si divide {details} ({result}) ✌️\n{openingNote}",
-      "Chiusa alla pari {details} ({result}) 🟰",
+      "Chiusa alla pari {details} ({result}) 🟰\n{openingNote}",
       "Partita finita in parità {details} ({result}) ⚪⚫\n{openingNote}",
-      "Armistizio sulla scacchiera {details} ({result})"
+      "Armistizio sulla scacchiera {details} ({result})\n{openingNote}"
     ],
     "aborted": [
       "Partita annullata 🚫",
