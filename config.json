@@ -155,6 +155,16 @@
       "🐢 Più lunga: {longest} · 🐇 Più rapida: {shortest}",
       "📌 Da segnare: la più lunga è {longest}, la più rapida {shortest}."
     ],
+    "roundEndHeader": [
+      "🏁 Turno {round} concluso! Ecco i risultati finali:",
+      "🏁 Si chiude il Turno {round}! I verdetti delle scacchiere:",
+      "🏁 Turno {round} completato – Tutti i risultati:"
+    ],
+    "roundEndFooter": [
+      "🏆 Tutte le {finished} partite del Turno {round} sono terminate!",
+      "🏆 Turno {round} ufficialmente concluso ({finished} su {finished} partite disputate).",
+      "🏁 Calato il sipario sul Turno {round}!"
+    ],
     "closing": []
   }
 }

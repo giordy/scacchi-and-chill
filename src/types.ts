@@ -56,6 +56,8 @@ export interface StatusPhrases {
   footer: string[];
   closing?: string[];
   highlight?: string[];
+  roundEndHeader?: string[];
+  roundEndFooter?: string[];
   [key: string]: string[] | undefined;
 }
 

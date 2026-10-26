@@ -98,6 +98,12 @@ function validateAndNormalizeConfig(cfg: any): AppConfig {
   const highlightRaw = sm.highlight || sm.inEvidenza;
   const highlight = Array.isArray(highlightRaw) && isTextList(highlightRaw) ? highlightRaw : undefined;
 
+  const roundEndHeaderRaw = sm.roundEndHeader || sm.fineTurnoTitoli;
+  const roundEndHeader = Array.isArray(roundEndHeaderRaw) && isTextList(roundEndHeaderRaw) ? roundEndHeaderRaw : undefined;
+
+  const roundEndFooterRaw = sm.roundEndFooter || sm.fineTurnoRiepilogo;
+  const roundEndFooter = Array.isArray(roundEndFooterRaw) && isTextList(roundEndFooterRaw) ? roundEndFooterRaw : undefined;
+
   return {
     players: players.map((p: any) => ({
       handle: p.handle.trim(),
@@ -128,6 +134,8 @@ function validateAndNormalizeConfig(cfg: any): AppConfig {
       footer: smFooter,
       closing: smClosing,
       highlight,
+      roundEndHeader,
+      roundEndFooter,
     },
   };
 }
@@ -708,6 +716,7 @@ function StatusTab({
   const round = rounds.includes(chosen) ? chosen : rounds[rounds.length - 1] ?? "";
   const [text, setText] = useState("");
   const [details, setDetails] = useState<string[]>([]);
+  const [isRoundComplete, setIsRoundComplete] = useState(false);
   const [status, setStatus] = useState({ busy: false, error: "", info: "" });
 
   // Recover games section
@@ -938,17 +947,29 @@ function StatusTab({
       });
     }
 
+    const isRoundComplete = games.length > 0 && count.finished === games.length;
+
+    const headerTemplate =
+      isRoundComplete && config.statusPhrases.roundEndHeader && config.statusPhrases.roundEndHeader.length > 0
+        ? pickFor("roundEndHeader")
+        : pickFor("header");
+
+    const footerTemplate =
+      isRoundComplete && config.statusPhrases.roundEndFooter && config.statusPhrases.roundEndFooter.length > 0
+        ? pickFor("roundEndFooter")
+        : pickFor("footer");
+
     const textResult = [
-      fill(pickFor("header"), { round }),
+      fill(headerTemplate, { round, ...count }),
       ...blocks,
       highlight,
-      fill(pickFor("footer"), count),
+      fill(footerTemplate, { round, ...count }),
       config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
     ]
       .filter(Boolean)
       .join("\n\n");
 
-    return { text: textResult, details: detailsList };
+    return { text: textResult, details: detailsList, isComplete: isRoundComplete };
   };
 
   const load = async () => {
@@ -960,6 +981,7 @@ function StatusTab({
       const built = buildStatusMessageInternal(games, states);
       setText(built.text);
       setDetails(built.details);
+      setIsRoundComplete(built.isComplete);
       setStatus({ busy: false, error: "", info: "" });
     } catch (e: any) {
       setStatus({
@@ -1015,6 +1037,11 @@ function StatusTab({
 
           {text && (
             <>
+              {isRoundComplete && (
+                <div className="notice ok" style={{ marginTop: 14, marginBottom: 0 }}>
+                  🏁 <strong>Turno {round} completato!</strong> Tutte le partite sono terminate. Il messaggio qui sotto contiene i risultati finali di fine turno.
+                </div>
+              )}
               <div style={{ marginTop: 14 }}>
                 <textarea
                   aria-label="Messaggio di aggiornamento"
