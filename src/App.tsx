@@ -952,17 +952,22 @@ function StatusTab({
       return `${head}\n${body}`;
     });
 
+    const isRoundComplete = games.length > 0 && count.finished === games.length;
+
     let highlight = "";
     const timed = finishedInfo.filter((x) => x.moves > 0).sort((a, b) => a.moves - b.moves);
-    if (config.statusPhrases.highlight && timed.length >= 2 && timed[0].moves !== timed[timed.length - 1].moves) {
+    if (
+      isRoundComplete &&
+      config.statusPhrases.highlight &&
+      timed.length >= 2 &&
+      timed[0].moves !== timed[timed.length - 1].moves
+    ) {
       const label = (x: { names: string; moves: number }) => `${x.names} (${x.moves} mosse)`;
       highlight = fill(pickFor("highlight"), {
         longest: label(timed[timed.length - 1]),
         shortest: label(timed[0]),
       });
     }
-
-    const isRoundComplete = games.length > 0 && count.finished === games.length;
 
     const headerTemplate =
       isRoundComplete && config.statusPhrases.roundEndHeader && config.statusPhrases.roundEndHeader.length > 0
@@ -985,8 +990,8 @@ function StatusTab({
     const textResult = [
       fill(headerTemplate, { round, ...count }),
       ...blocks,
-      highlight,
       fill(footerTemplate, { round, ...count }),
+      highlight,
       config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
       studiesAppendix,
       config.statusPhrases.infoLine ? config.statusPhrases.infoLine : "",
