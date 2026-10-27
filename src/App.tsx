@@ -253,15 +253,19 @@ async function createChallenge(
 }
 
 function formatDeadline(ms: number) {
+  // Round to nearest 10 minutes for natural readability (e.g. 15:40 instead of 15:37)
+  const roundedMs = Math.round(ms / (10 * 60 * 1000)) * (10 * 60 * 1000);
   const parts = new Intl.DateTimeFormat("it-IT", {
     timeZone: "Europe/Rome",
     weekday: "long",
+    day: "numeric",
+    month: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
-  }).formatToParts(new Date(ms));
+  }).formatToParts(new Date(roundedMs));
   const get = (type: string) => parts.find((p) => p.type === type)?.value;
-  return `${get("weekday")} alle ${get("hour")}:${get("minute")}`;
+  return `${get("weekday")} ${get("day")}/${get("month")} alle ${get("hour")}:${get("minute")}`;
 }
 
 async function fetchGameStates(ids: string[]): Promise<Record<string, LichessExportGame>> {
@@ -1403,10 +1407,13 @@ export function App() {
   }) => {
     const created = currentPairs.filter((p) => p.url);
     if (created.length === 0) return "";
+    const expiryMs = Date.now() + currentSettings.expiry * 86400000;
+    const expiryDeadline = formatDeadline(expiryMs);
     const common = {
       round: currentRound,
       days: currentSettings.days,
       expiry: currentSettings.expiry,
+      expiryDeadline,
       type: currentSettings.rated ? config.typeLabels.rated : config.typeLabels.casual,
       bye: currentByes.join(", "),
     };

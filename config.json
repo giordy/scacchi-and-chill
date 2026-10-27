@@ -75,7 +75,7 @@
     "header": "⚔️ *TURNO {round} – ACCOPPIAMENTI & LINK*\n⏱️ *{days} giorni a mossa · Partite {type}*",
     "game": "{n} *{white}* ⚪ vs *{black}* ⚫\n🔗 *Sfida:* {url}",
     "bye": "🏖️ *Riposa in questo turno:* {bye}",
-    "footer": "⏳ *Attenzione:* i link scadono tra {expiry} giorni! Cliccate sul vostro link e accettate la sfida per avviare la scacchiera."
+    "footer": "⏳ *Attenzione:* link validi fino a {expiryDeadline}! Cliccate sul vostro link e accettate la sfida per avviare la scacchiera."
   },
 
   "statusMessage": {
@@ -89,14 +89,12 @@
     "ongoing": [
       "In corso ♟️ ({approxMoves})",
       "Partita in pieno svolgimento 🎯 ({approxMoves})",
-      "Si sta giocando 🙂 – {approxMoves}",
-      "La partita prosegue 🔄 ({approxMoves})",
-      "Partita aperta, la sfida continua ⚔️ ({approxMoves})",
-      "Sulla scacchiera si combatte ancora ♞ – {approxMoves}",
-      "Partita aperta e combattuta 📂 ({approxMoves})",
+      "La sfida prosegue 🔄 ({approxMoves})",
+      "Partita aperta e combattuta ⚔️ ({approxMoves})",
+      "Sulla scacchiera si combatte ancora ♞ ({approxMoves})",
       "Manovre sul centro scacchiera ♟️ ({approxMoves})",
-      "Lotta serrata, posizioni tese ⚔️ ({approxMoves})",
-      "Fase di riflessione profonda ⏳ ({approxMoves})"
+      "Lotta serrata sulle caselle ⚔️ ({approxMoves})",
+      "Posizioni tese e sfida aperta ♟️ ({approxMoves})"
     ],
     "win": [
       "Finita! Ha vinto {winner} {details} *({result})* 🎉\n{openingNote}",
@@ -149,7 +147,7 @@
       "🏁 La più lunga del turno: {longest}. La più rapida: {shortest}.",
       "⏱️ Maratona del turno: {longest}. Sprint: {shortest}.",
       "📏 Partita più lunga: {longest}. Più breve: {shortest}.",
-      "🏃 La più veloce a chiudersi: {shortest}. La più combattuta: {longest}.",
+      "🏃 La più rapida a chiudersi: {shortest}. La maratona del turno: {longest}.",
       "🐢 Più lunga: {longest} · 🐇 Più rapida: {shortest}",
       "📌 Da segnare: la più lunga è {longest}, la più rapida {shortest}."
     ],
