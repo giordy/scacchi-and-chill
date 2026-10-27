@@ -58,7 +58,9 @@ export interface StatusPhrases {
   highlight?: string[];
   roundEndHeader?: string[];
   roundEndFooter?: string[];
-  [key: string]: string[] | undefined;
+  infoLine?: string;
+  infoLink?: string;
+  [key: string]: any;
 }
 
 export interface AppConfig {

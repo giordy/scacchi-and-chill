@@ -104,6 +104,13 @@ function validateAndNormalizeConfig(cfg: any): AppConfig {
   const roundEndFooterRaw = sm.roundEndFooter || sm.fineTurnoRiepilogo;
   const roundEndFooter = Array.isArray(roundEndFooterRaw) && isTextList(roundEndFooterRaw) ? roundEndFooterRaw : undefined;
 
+  const infoLink = isText(sm.infoLink) ? sm.infoLink.trim() : (isText(cfg.infoLink) ? cfg.infoLink.trim() : undefined);
+  const infoLine = isText(sm.infoLine)
+    ? sm.infoLine.trim()
+    : infoLink
+    ? `🌐 Classifica e regolamento: ${infoLink}`
+    : undefined;
+
   return {
     players: players.map((p: any) => ({
       handle: p.handle.trim(),
@@ -136,6 +143,8 @@ function validateAndNormalizeConfig(cfg: any): AppConfig {
       highlight,
       roundEndHeader,
       roundEndFooter,
+      infoLine,
+      infoLink,
     },
   };
 }
@@ -823,6 +832,7 @@ function StatusTab({
     const count = { finished: 0, ongoing: 0, pending: 0 };
     const detailsList: string[] = [];
     const finishedInfo: Array<{ names: string; moves: number }> = [];
+    const finishedOpenings = new Map<string, string>();
 
     const used: Record<string, Set<number>> = {};
     const pickFor = (key: string): string => {
@@ -843,7 +853,7 @@ function StatusTab({
       const s = id ? states[id] : undefined;
       const white = idToHandle(s?.players?.white?.user?.id) ?? g.white;
       const black = idToHandle(s?.players?.black?.user?.id) ?? g.black;
-      const head = `${config.numberEmojis[i] ?? i + 1 + "."} ${nameOf(white)} ⚪ vs ${nameOf(black)} ⚫`;
+      const head = `${config.numberEmojis[i] ?? i + 1 + "."} *${nameOf(white)}* ⚪ vs *${nameOf(black)}* ⚫`;
       let body: string;
 
       if (!s) {
@@ -887,11 +897,12 @@ function StatusTab({
         const movesText = moves > 0 ? `in ${moves} ${moves === 1 ? "mossa" : "mosse"}` : "";
         const opening = s.opening?.name ?? "";
         const mainOpening = opening.split(":")[0].trim();
-        const studyUrl = mainOpening
-          ? `https://lichess.org/study/search?q=${encodeURIComponent(mainOpening)}&order=popular`
-          : "";
-        const openingNote = opening ? `Apertura: ${opening}\n📖 Studi: ${studyUrl}` : "";
-        const common = { moves, opening, mainOpening, studyUrl, openingNote };
+        if (mainOpening) {
+          const studyUrl = `https://lichess.org/study/search?q=${encodeURIComponent(mainOpening)}&order=popular`;
+          finishedOpenings.set(mainOpening, studyUrl);
+        }
+        const openingNote = opening ? `♟️ Apertura: ${opening}` : "";
+        const common = { moves, opening, mainOpening, openingNote };
         const won = s.winner === "white" || s.winner === "black";
 
         if (won) {
@@ -922,7 +933,7 @@ function StatusTab({
           );
         }
 
-        // Guarantee opening and study link are included whenever Lichess detected it
+        // Guarantee opening is included whenever Lichess detected it
         if (opening && !body.includes(opening)) {
           body = `${body}\n${openingNote}`;
         }
@@ -959,12 +970,22 @@ function StatusTab({
         ? pickFor("roundEndFooter")
         : pickFor("footer");
 
+    let studiesAppendix = "";
+    if (isRoundComplete && finishedOpenings.size > 0) {
+      const items = Array.from(finishedOpenings.entries()).map(
+        ([name, url]) => `• ${name}: ${url}`
+      );
+      studiesAppendix = `📚 *Studi consigliati per le aperture del turno:*\n${items.join("\n")}`;
+    }
+
     const textResult = [
       fill(headerTemplate, { round, ...count }),
       ...blocks,
       highlight,
       fill(footerTemplate, { round, ...count }),
       config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
+      studiesAppendix,
+      config.statusPhrases.infoLine ? config.statusPhrases.infoLine : "",
     ]
       .filter(Boolean)
       .join("\n\n");
