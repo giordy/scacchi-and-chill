@@ -888,7 +888,7 @@ function StatusTab({
         const opening = s.opening?.name ?? "";
         const mainOpening = opening.split(":")[0].trim();
         const studyUrl = mainOpening
-          ? `https://lichess.org/study/search?q=${encodeURIComponent(mainOpening)}&order=relevant`
+          ? `https://lichess.org/study/search?q=${encodeURIComponent(mainOpening)}&order=popular`
           : "";
         const openingNote = opening ? `Apertura: ${opening}\n📖 Studi: ${studyUrl}` : "";
         const common = { moves, opening, mainOpening, studyUrl, openingNote };
