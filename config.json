@@ -72,20 +72,19 @@
       "8️⃣",
       "9️⃣"
     ],
-    "header": "♟️ Turno {round} – {days} giorni a mossa, partite {type}",
-    "game": "{n} {white} ⚪ vs {black} ⚫\n{url}",
-    "bye": "Riposa in questo turno: {bye}",
-    "footer": "Accettate la sfida cliccando sul vostro link. I link restano validi {expiry} giorni."
+    "header": "⚔️ *TURNO {round} – ACCOPPIAMENTI & LINK*\n⏱️ *{days} giorni a mossa · Partite {type}*",
+    "game": "{n} *{white}* ⚪ vs *{black}* ⚫\n🔗 *Sfida:* {url}",
+    "bye": "🏖️ *Riposa in questo turno:* {bye}",
+    "footer": "⏳ *Attenzione:* i link scadono tra {expiry} giorni! Cliccate sul vostro link e accettate la sfida per avviare la scacchiera."
   },
 
   "statusMessage": {
     "header": [
-      "♟️ *Aggiornamento Turno {round}*",
-      "♟️ *Turno {round}*: la situazione sulle scacchiere",
-      "♟️ *Turno {round}*: come siamo messi?",
-      "♟️ *Turno {round}*: il punto della settimana",
-      "♟️ *Turno {round}*: cosa si muove?",
-      "♟️ *Il bollettino del Turno {round}*"
+      "📊 *Aggiornamento Turno {round}*",
+      "📊 *Turno {round}*: la situazione sulle scacchiere",
+      "📊 *Turno {round}*: come siamo messi?",
+      "📊 *Turno {round}*: il punto della settimana",
+      "📊 *Il bollettino del Turno {round}*"
     ],
     "ongoing": [
       "In corso ♟️ ({approxMoves})",
