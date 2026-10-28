@@ -1,0 +1,6 @@
+{
+  "summary":  "Piano di sviluppo per la nuova scheda 'Recensione AI' (Gran Galà & Volata Finale) con generazione in-app tramite Gemini, copia prompt per chat esterne, note aneddotiche per giocatore e recupero automatico dell'Elo corrispondenza da Lichess.",
+  "updatedAt":  "2026-10-28T08:33:56.799247896Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

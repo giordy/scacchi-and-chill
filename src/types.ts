@@ -108,3 +108,15 @@ export interface LichessExportGame {
     name?: string;
   };
 }
+
+export interface PlayerStanding {
+  handle: string;
+  name: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  points: number;
+  rating?: number | null;
+  anecdote?: string;
+}

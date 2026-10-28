@@ -10,6 +10,7 @@ import {
   LichessExportGame,
 } from './types';
 import rawConfig from '../config.json';
+import { ReviewsTab } from './ReviewsTab';
 
 export const RULES = [
   { key: "noRematch", label: "No rematch offers" },
@@ -994,7 +995,7 @@ function StatusTab({
       highlight,
       config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
       studiesAppendix,
-      config.statusPhrases.infoLine ? config.statusPhrases.infoLine : "",
+      isRoundComplete && config.statusPhrases.infoLine ? config.statusPhrases.infoLine : "",
     ]
       .filter(Boolean)
       .join("\n\n");
@@ -1295,7 +1296,7 @@ function StatusTab({
 
 export function App() {
   const [config, setConfig] = useState<AppConfig>(defaultConfig);
-  const [activeTab, setActiveTab] = usePersistentState<'pairings' | 'status' | 'settings'>(
+  const [activeTab, setActiveTab] = usePersistentState<'pairings' | 'status' | 'reviews' | 'settings'>(
     'pairings.activeTab',
     'pairings'
   );
@@ -1576,12 +1577,20 @@ export function App() {
           📊 Stato
         </button>
         <button
+          className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
+          role="tab"
+          aria-selected={activeTab === 'reviews'}
+          onClick={() => setActiveTab('reviews')}
+        >
+          ✨ Recensione
+        </button>
+        <button
           className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
           role="tab"
           aria-selected={activeTab === 'settings'}
           onClick={() => setActiveTab('settings')}
         >
-          ⚙️ Impostazioni
+          ⚙️ Opzioni
         </button>
       </nav>
 
@@ -1667,7 +1676,16 @@ export function App() {
         />
       )}
 
-      {/* Tab 3: Settings */}
+      {/* Tab 3: AI Reviews & Highlights */}
+      {activeTab === 'reviews' && (
+        <ReviewsTab
+          history={history}
+          config={config}
+          nameOf={nameOf}
+        />
+      )}
+
+      {/* Tab 4: Settings */}
       {activeTab === 'settings' && (
         <section>
           <h2>Impostazioni e Regole</h2>
