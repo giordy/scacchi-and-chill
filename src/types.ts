@@ -120,3 +120,16 @@ export interface PlayerStanding {
   rating?: number | null;
   anecdote?: string;
 }
+
+export interface BackupData {
+  version: string;
+  exportedAt: string;
+  round?: string;
+  history?: HistoryGame[];
+  pairs?: GamePair[];
+  settings?: Partial<Settings>;
+  templates?: Partial<MessageTemplates> | null;
+  anecdotes?: Record<string, string>;
+  ratings?: Record<string, number | null>;
+}
+
