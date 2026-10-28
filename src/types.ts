@@ -117,7 +117,7 @@ export interface PlayerStanding {
   drawn: number;
   lost: number;
   points: number;
-  rating?: number | null;
+  rating?: string | number | null;
   anecdote?: string;
 }
 
@@ -130,6 +130,6 @@ export interface BackupData {
   settings?: Partial<Settings>;
   templates?: Partial<MessageTemplates> | null;
   anecdotes?: Record<string, string>;
-  ratings?: Record<string, number | null>;
+  ratings?: Record<string, string | number | null>;
 }
 

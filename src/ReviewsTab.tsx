@@ -23,7 +23,7 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
   });
 
   // Ratings per player: handle -> rating
-  const [ratings, setRatings] = useState<Record<string, number | null>>(() => {
+  const [ratings, setRatings] = useState<Record<string, string | number | null>>(() => {
     try {
       const saved = localStorage.getItem("scacchi.ratings");
       return saved ? JSON.parse(saved) : {};
@@ -118,30 +118,78 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
     }
   }, [history.length]);
 
-  // Fetch correspondence Elo for all players
+  // Fetch correspondence Elo for all players directly from Lichess API (CORS enabled for all origins)
   const fetchAllRatings = async () => {
     setIsFetchingElo(true);
     setNotice(null);
-    const updated: Record<string, number | null> = { ...ratings };
+    const updated: Record<string, string | number | null> = { ...ratings };
     let successCount = 0;
 
     for (const player of config.players) {
       try {
-        const res = await fetch(`/api/lichess-user/${encodeURIComponent(player.handle)}`);
-        if (res.ok) {
-          const data = await res.json();
-          updated[player.handle] = data.correspondence ?? data.classical ?? data.rapid ?? null;
-          successCount++;
+        let data: any = null;
+
+        // 1. Direct call to Lichess API (supported in browser on GitHub Pages, dev server, mobile)
+        try {
+          const directRes = await fetch(
+            `https://lichess.org/api/user/${encodeURIComponent(player.handle)}`,
+            { headers: { Accept: "application/json" } }
+          );
+          if (directRes.ok) {
+            data = await directRes.json();
+          }
+        } catch {}
+
+        // 2. Fallback to local Express proxy if direct call was blocked
+        if (!data) {
+          try {
+            const proxyRes = await fetch(`/api/lichess-user/${encodeURIComponent(player.handle)}`);
+            if (proxyRes.ok) {
+              data = await proxyRes.json();
+            }
+          } catch {}
         }
-      } catch {}
+
+        if (data) {
+          const perfs = data.perfs || {};
+          const corr = perfs.correspondence;
+          const rap = perfs.rapid;
+          const clas = perfs.classical;
+
+          if (corr && typeof corr.rating === "number") {
+            const provSuffix = corr.prov ? "?" : "";
+            updated[player.handle] = `${corr.rating}${provSuffix}`;
+            successCount++;
+          } else if (rap && typeof rap.rating === "number" && rap.games > 0) {
+            const provSuffix = rap.prov ? "?" : "";
+            updated[player.handle] = `${rap.rating}${provSuffix} [rapid]`;
+            successCount++;
+          } else if (clas && typeof clas.rating === "number" && clas.games > 0) {
+            const provSuffix = clas.prov ? "?" : "";
+            updated[player.handle] = `${clas.rating}${provSuffix} [classical]`;
+            successCount++;
+          } else {
+            updated[player.handle] = null;
+          }
+        }
+      } catch (err: any) {
+        console.warn(`Errore recupero Elo per ${player.handle}:`, err);
+      }
     }
 
     setRatings(updated);
     setIsFetchingElo(false);
-    setNotice({
-      kind: "ok",
-      text: `Elo Lichess aggiornato per ${successCount} su ${config.players.length} giocatori.`,
-    });
+    if (successCount > 0) {
+      setNotice({
+        kind: "ok",
+        text: `Elo Lichess aggiornato con successo per ${successCount} su ${config.players.length} giocatori.`,
+      });
+    } else {
+      setNotice({
+        kind: "warning",
+        text: "Impossibile contattare Lichess al momento. Verifica la connessione a internet o i nickname.",
+      });
+    }
   };
 
   // Calculate Standings & Game Summary
