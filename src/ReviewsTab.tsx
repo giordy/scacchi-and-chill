@@ -302,52 +302,74 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
     return "andata";
   };
 
-  // Build the sober, witty, non-sensationalist AI prompt
+  // Build the sober, witty, feel-good AI prompt
   const buildPrompt = () => {
-    let p = `Sei il cronista del torneo amatoriale di scacchi tra amici "${tournamentTitle}".\n`;
+    let p = `Sei il cronista amichevole del torneo di scacchi tra amici "${tournamentTitle}".\n`;
     p += `Devi scrivere un resoconto per il nostro gruppo WhatsApp.\n\n`;
 
-    p += `LINEE GUIDA GENERALI SU TONO E STILE:\n`;
-    p += `- Tono: Sobrio, pungente, autoironico e brillante tra amici. NIENTE sensazionalismo finto, niente enfasi da circo o trailer cinematografici ("epico torneo", "campionato che passerà alla storia", "tiranno crudele"). Mantieni i piedi per terra: siamo un gruppo di amici che giocano a scacchi online.\n`;
-    p += `- Umorismo: arguto, sottile, con battute su sviste scacchistiche reali, pezzi regalati, partite durate 50 mosse, orari notturni e aneddoti di vita quotidiana (es. notti insonni, paternità, impegni).\n`;
-    p += `- Formattazione: WhatsApp pulita (*grassetto*, _corsivo_ per i voti, emoji sobrie e mirate, elenchi ben spaziati).\n\n`;
+    p += `REGOLE FONDAMENTALI DI SPIRITO E TONO (CRITICHE):\n`;
+    p += `1. ATMOSFERA "FEEL-GOOD" E ZERO DERISIONE (NO SHAMING):\n`;
+    p += `   - Il torneo si chiama "${tournamentTitle}": è un gruppo di amici e colleghi che giocano per passione, divertimento e relax.\n`;
+    p += `   - NESSUN GIUDIZIO MORTIFICANTE, NESSUNA DERISIONE, NESSUNA UMILIAZIONE.\n`;
+    p += `   - Ogni singolo giocatore – dal primo all'ultimo in classifica – deve finire di leggere la sua pagella con un sorriso, sentendosi valorizzato e felice di partecipare.\n`;
+    p += `   - L'ironia deve essere affettuosa, complice e calorosa (come una battuta al bar tra amici che si vogliono bene), MAI tagliente, MAI sprezzante.\n`;
+    p += `   - VIETATE categoricamente espressioni condescendenti o offensive (ad es. NON usare: "non sa muovere i cavalli", "da arresto immediato", "sfida tra disperati", "il nickname dice tutto", "martire", "a secco").\n\n`;
+
+    p += `2. L'ELO COME METRO DI CORAGGIO E HANDICAP (NON COME PRETESTO DI CRITICA):\n`;
+    p += `   - Nel torneo convivono giocatori con Elo molto differenti (da circa 700 a oltre 1850).\n`;
+    p += `   - Chi ha un Elo più basso (ad es. Stefano ~779) e gioca contro avversari con 700-1000 punti in più di Elo è l'eroe coraggioso del torneo: durare 30 o più mosse contro chi è molto più esperto è una prova di grandissimo carattere e grinta! Celebrane l'audacia, lo spirito sportivo e la tenacia, senza mai rimarcarne la sconfitta in modo negativo.\n`;
+    p += `   - Chi ha impegni personali gravosi (es. paternità, notti insonni, biberon per Giordano) va elogiato per la passione e la dedizione con cui continua a giocare nonostante la stanchezza.\n`;
+    p += `   - Chi vince con Elo alto va riconosciuto con rispetto, ma senza sminuire chi ha lottato dall'altra parte della scacchiera.\n\n`;
+
+    p += `3. NIENTE VOTI NUMERICI – ASSEGNA IL "PEZZO GUIDA" E IL "PREMIO DEL GIRONE":\n`;
+    p += `   - NON usare MAI voti numerici (NON scrivere mai "Voto: 6", "Voto: 7.5", "Voto: 10", ecc.). I numeri scolastici sono freddi, sterili e creano gerarchie mortificanti.\n`;
+    p += `   - Al posto del voto, per OGNI giocatore assegna due elementi scacchistici divertenti, positivi e memorabili:\n`;
+    p += `     a) ♟️ *Pezzo Guida*: un parallelo con un pezzo degli scacchi che ne rispecchia lo stile di gioco o l'atteggiamento, con una breve motivazione ironica e affettuosa tra parentesi.\n`;
+    p += `        (Esempi: *Il Pedone Passato* che avanza a testa alta contro i giganti; *La Torre da Assedio* per chi costruisce difese eterne e maratone da 60 mosse; *Il Cavallo Imprevedibile* che muove a sorpresa e crea il caos creativo; *La Regina d'Assalto* per chi attacca sempre senza paura; *L'Alfiere Campestre* per chi scova diagonali invisibili da lontano; *Il Re Guerriero* che difende il castello senza dormire da mesi).\n`;
+    p += `     b) 🎖️ *Premio Speciale*: un riconoscimento personalizzato, brillante e caloroso (stile "Oscar del torneo").\n`;
+    p += `        (Esempi: *Premio "Davide contro Golia"* per chi affronta avversari con centinaia di punti Elo in più vendendo cara la pelle; *Premio "Catenaccio d'Oro"* per la difesa più ostinata; *Premio "Papà & Scacchiere"* per chi gioca con un biberon in mano; *Premio "Maratona dei Finali"* per la partita più lunga; *Premio "Fedeltà alla Bandiera"* per chi gioca sempre con coerenza la propria apertura preferita).\n\n`;
+
+    p += `4. FORMATTAZIONE WHATSAPP:\n`;
+    p += `   - Testo pulito, chiaro, con *grassetto*, _corsivo_ per i riconoscimenti, emoji gradevoli e sobrie, spaziature naturali tra i paragrafi.\n\n`;
 
     if (reviewType === "andata") {
       p += `CONTESTO SPECIFICO: GIRO DI BOA / FINE GIRONE D'ANDATA (7 partite disputate)\n`;
       p += `Istruzioni per il messaggio:\n`;
-      p += `1. Titolo sobrio ed efficace: 🔄 *Giro di boa: Il bilancio dell'andata di "${tournamentTitle}"*\n`;
-      p += `2. Breve premessa di 2-3 righe: si è chiusa l'andata, un primo sguardo a chi ha sorpreso e a chi deve ancora ingranare.\n`;
+      p += `1. Titolo accogliente: 🔄 *Giro di boa: Il bilancio dell'andata di "${tournamentTitle}"*\n`;
+      p += `2. Premessa breve e calorosa: si chiude il girone di andata tra grandi battaglie, belle giocate e tanto divertimento.\n`;
       p += `3. Per OGNI giocatore della classifica (dal primo all'ultimo):\n`;
-      p += `   * *#Posizione Nome (@handle) – Soprannome spiritoso e realistico*\n`;
-      p += `   * Breve paragrafo con commento pacato e ironico: punti fatti, solidità, aperture giocate, confronto con il suo Elo, e inserisci con naturalezza gli aneddoti personali forniti.\n`;
-      p += `   * _Voto: [da 5 a 9] (Giudizio sintetico in 1-2 parole)_\n`;
-      p += `4. Chiusura in 2 righe sul girone di ritorno che sta per iniziare.\n\n`;
+      p += `   * *#Posizione Nome (@handle) – Titolo simpatico e affettuoso*\n`;
+      p += `   * Paragrafo brillante che valorizza il suo percorso: i punti fatti, le difese ostinate, le partite lottate fino all'ultimo tratto, il confronto positivo con il proprio Elo e gli aneddoti di vita reale integrati con simpatia.\n`;
+      p += `   * ♟️ *Pezzo Guida:* [Pezzo degli scacchi con spiegazione tra parentesi]\n`;
+      p += `   * 🎖️ *Premio del Girone:* [Premio speciale personalizzato e caloroso]\n`;
+      p += `4. Chiusura stimolante e amichevole in vista del girone di ritorno.\n\n`;
     } else if (reviewType === "volata") {
       p += `CONTESTO SPECIFICO: VOLATA FINALE (mancano pochissime partite alla conclusione)\n`;
       p += `Istruzioni per il messaggio:\n`;
       p += `1. Titolo: ⏱️ *Volata Finale: Le ultime sfide decisive di "${tournamentTitle}"*\n`;
-      p += `2. Introduzione asciutta: mancano solo ${ongoingMatches.length || "2-3"} partite per chiudere i conti del torneo. Ecco cosa c'è ancora in gioco.\n`;
-      p += `3. Suddivisione lucida per zone della classifica:\n`;
-      p += `   * 🥇 *Primo posto*: chi guida la classifica e cosa gli serve per blindare il titolo (vittoria matematica, mezzo punto, ecc.).\n`;
-      p += `   * 🥈 *Lotta per il podio*: distacchi tra il 2° e il 3° posto e duelli a distanza.\n`;
-      p += `   * 📊 *Centro classifica*: sfide per stabilire le posizioni intermedie.\n`;
-      p += `   * 🛡️ *Finale d'orgoglio*: chi gioca per chiudere a testa alta o strappare punti prestigiosi.\n`;
-      p += `4. Cita con precisione le partite rimanenti con i nomi dei giocatori.\n`;
-      p += `5. Breve augurio di buona partita a chi deve ancora muovere.\n\n`;
+      p += `2. Introduzione appassionante e sportiva: mancano solo ${ongoingMatches.length || "2-3"} partite per completare il campionato.\n`;
+      p += `3. Panoramica positiva per zone della classifica:\n`;
+      p += `   * 🥇 *Corsa al vertice*: chi guida e quale traguardo può tagliare.\n`;
+      p += `   * 🥈 *Volata podio*: le belle sfide a distanza per le medaglie d'argento e bronzo.\n`;
+      p += `   * 📊 *Centro classifica*: i duelli tra chi ha dato vita a partite tiratissime.\n`;
+      p += `   * 🛡️ *Sfide d'orgoglio*: chi scende sulla scacchiera per regalare e regalarsi un'ultima bella prestazione.\n`;
+      p += `4. Cita con precisione le partite ancora da completare e i giocatori coinvolti con il loro spirito di gioco.\n`;
+      p += `5. Augurio caloroso di buon gioco a tutti per gli ultimi tratti.\n\n`;
     } else {
       p += `CONTESTO SPECIFICO: FINE TORNEO / PAGELLE CONCLUSIVE (tutte le partite concluse)\n`;
       p += `Istruzioni per il messaggio:\n`;
       p += `1. Titolo: 🏆 *Le Pagelle Finali di "${tournamentTitle}"*\n`;
-      p += `2. Breve introduzione amichevole: il torneo è ufficialmente terminato ed ecco il verdetto definitivo delle scacchiere.\n`;
+      p += `2. Introduzione calorosa: si chiude ufficialmente questa splendida edizione del torneo tra amici.\n`;
       p += `3. Per OGNI giocatore (in rigoroso ordine di classifica dal 1° all'ultimo):\n`;
-      p += `   * *#Posizione Nome (@handle) – Nomignolo azzeccato*\n`;
-      p += `   * Giudizio complessivo: vittorie chiave, momenti no, costanza, aperture predilette e integrazione sobria degli aneddoti personali.\n`;
-      p += `   * _Voto: [da 5 a 9.5, 10 solo al vincitore indiscusso] (Definizione)_\n`;
-      p += `4. Saluto finale affettuoso e ringraziamento a tutti i partecipanti per la bella sfida.\n\n`;
+      p += `   * *#Posizione Nome (@handle) – Soprannome d'onore affettuoso*\n`;
+      p += `   * Giudizio complessivo che esalta i momenti migliori, le partite più belle, la costanza, il coraggio rispetto all'Elo e gli aneddoti personali.\n`;
+      p += `   * ♟️ *Pezzo Guida:* [Pezzo degli scacchi con spiegazione celebrativa]\n`;
+      p += `   * 🎖️ *Premio Speciale del Campionato:* [Premio speciale personalizzato e celebrativo]\n`;
+      p += `4. Saluto finale e grande applauso corale a tutti per aver reso speciale il torneo.\n\n`;
     }
 
     if (generalNotes.trim()) {
-      p += `NOTE AGGIUNTIVE DELL'ORGANIZZATORE:\n${generalNotes.trim()}\n\n`;
+      p += `NOTE DELL'ORGANIZZATORE:\n${generalNotes.trim()}\n\n`;
     }
 
     p += `DATI CLASSIFICA GIOCATORI:\n`;
@@ -590,7 +612,7 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
             onClick={() => setReviewType("andata")}
           >
             <span className="review-moment-title">🔄 Fine Andata</span>
-            <span className="review-moment-sub">Giro di boa: bilancio delle prime 7 sfide e promossi/rimandati.</span>
+            <span className="review-moment-sub">Giro di boa: bilancio delle prime 7 sfide, Pezzi Guida e riconoscimenti.</span>
           </button>
 
           <button
@@ -608,7 +630,7 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
             onClick={() => setReviewType("finale")}
           >
             <span className="review-moment-title">🏆 Fine Torneo</span>
-            <span className="review-moment-sub">Chiusura definitiva con pagelle, voti dal 5 al 10 e nomignoli.</span>
+            <span className="review-moment-sub">Chiusura definitiva con verdetti, Pezzo Guida e premi speciali del torneo.</span>
           </button>
         </div>
       </div>
