@@ -446,12 +446,126 @@ details .body {
   margin-top: 10px;
 }
 
-/* AI Review & Anecdotes */
 .review-types {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-bottom: 14px;
+}
+
+.review-types-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 600px) {
+  .review-types-3 {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
+.review-moment-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.review-moment-btn:hover {
+  border-color: var(--muted);
+}
+
+.review-moment-btn.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+.review-moment-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+
+.review-moment-sub {
+  font-size: 11px;
+  opacity: 0.85;
+  line-height: 1.3;
+}
+
+/* Tournament Status Dashboard Card */
+.sync-dashboard {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.sync-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sync-badge.synced {
+  background: #d4ebd9;
+  color: #175227;
+}
+
+.sync-badge.pending {
+  background: #fff0d4;
+  color: #8c5300;
+}
+
+.stat-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.stat-pill {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.stat-pill-label {
+  font-size: 11px;
+  color: var(--muted);
+  display: block;
+}
+
+.stat-pill-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .review-type-btn {

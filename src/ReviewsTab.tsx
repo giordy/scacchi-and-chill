@@ -7,8 +7,10 @@ interface ReviewsTabProps {
   nameOf: (handle: string) => string;
 }
 
+export type ReviewMoment = "andata" | "volata" | "finale";
+
 export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
-  const [reviewType, setReviewType] = useState<"gala" | "volata">("gala");
+  const [reviewType, setReviewType] = useState<ReviewMoment>("finale");
   const [tournamentTitle, setTournamentTitle] = useState("Scacchi & Chill");
   const [generalNotes, setGeneralNotes] = useState("");
   
@@ -33,6 +35,7 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
   });
 
   const [gameStates, setGameStates] = useState<Record<string, LichessExportGame>>({});
+  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [generatedReview, setGeneratedReview] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
@@ -41,6 +44,7 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [copiedReview, setCopiedReview] = useState(false);
   const [showAnecdotes, setShowAnecdotes] = useState(false);
+  const [showStandingsTable, setShowStandingsTable] = useState(false);
 
   // Save anecdotes to localStorage
   useEffect(() => {
@@ -73,6 +77,10 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
 
       if (ids.length === 0) {
         setIsFetchingData(false);
+        setNotice({
+          kind: "warning",
+          text: "Nessuna partita salvata nello storico. Crea o carica prima dei turni nella scheda Partite o Stato.",
+        });
         return;
       }
 
@@ -100,11 +108,17 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
         });
 
       setGameStates(states);
-      setNotice({ kind: "ok", text: `Dati di ${Object.keys(states).length} partite aggiornati con successo da Lichess.` });
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      setLastSyncTime(timeStr);
+      setNotice({
+        kind: "ok",
+        text: `Dati di ${Object.keys(states).length} partite sincronizzati con successo da Lichess (ore ${timeStr}).`,
+      });
     } catch (e: any) {
       setNotice({
         kind: "warning",
-        text: "Impossibile scaricare gli stati da Lichess (verranno usati i dati locali salvati): " + e.message,
+        text: "Impossibile scaricare gli stati da Lichess: " + e.message,
       });
     } finally {
       setIsFetchingData(false);
@@ -118,7 +132,7 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
     }
   }, [history.length]);
 
-  // Fetch correspondence Elo for all players directly from Lichess API (CORS enabled for all origins)
+  // Fetch correspondence Elo for all players directly from Lichess API (CORS enabled)
   const fetchAllRatings = async () => {
     setIsFetchingElo(true);
     setNotice(null);
@@ -128,8 +142,6 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
     for (const player of config.players) {
       try {
         let data: any = null;
-
-        // 1. Direct call to Lichess API (supported in browser on GitHub Pages, dev server, mobile)
         try {
           const directRes = await fetch(
             `https://lichess.org/api/user/${encodeURIComponent(player.handle)}`,
@@ -140,7 +152,6 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
           }
         } catch {}
 
-        // 2. Fallback to local Express proxy if direct call was blocked
         if (!data) {
           try {
             const proxyRes = await fetch(`/api/lichess-user/${encodeURIComponent(player.handle)}`);
@@ -182,12 +193,12 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
     if (successCount > 0) {
       setNotice({
         kind: "ok",
-        text: `Elo Lichess aggiornato con successo per ${successCount} su ${config.players.length} giocatori.`,
+        text: `Elo Lichess aggiornato per ${successCount} su ${config.players.length} giocatori.`,
       });
     } else {
       setNotice({
         kind: "warning",
-        text: "Impossibile contattare Lichess al momento. Verifica la connessione a internet o i nickname.",
+        text: "Nessun dato Elo recuperato da Lichess. Verifica la connessione a internet.",
       });
     }
   };
@@ -281,49 +292,72 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
 
   const { standings, finishedMatches, ongoingMatches } = calculateStandings();
 
-  // Build the complete AI prompt
-  const buildPrompt = () => {
-    const isGala = reviewType === "gala";
+  // Count players with loaded rating
+  const ratedCount = standings.filter((s) => s.rating).length;
 
-    let p = `Sei il cronista ufficiale e comico del torneo amatoriale di scacchi tra amici "${tournamentTitle}".\n`;
-    
-    if (isGala) {
-      p += `Devi scrivere il "Gran Galà delle Pagelle": un resoconto finale o di metà campionato irriverente, goliardico, arguto ma sempre affettuoso e rispettoso verso tutti i partecipanti.\n\n`;
-      p += `REGOLE DI STILE E FORMATTAZIONE:\n`;
-      p += `- Usa la formattazione WhatsApp (*grassetto*, _corsivo_, emoji).\n`;
-      p += `- Titolo trionfale in apertura (es. 🏆 *Gran Galà di Chiusura: "${tournamentTitle}"* 🏆).\n`;
-      p += `- Breve introduzione teatrale sul torneo appena concluso.\n`;
-      p += `- Per OGNI giocatore della classifica, scrivi una pagella dedicata con:\n`;
-      p += `  1. *#Posizione Nome (nickname_lichess) – Titolo Onorifico Ironico* 🤖\n`;
-      p += `  2. Un paragrafo divertente che commenta i suoi punti, le sue vittorie, le sconfitte, le aperture giocate, il confronto con l'Elo Lichess e soprattutto INTEGRA con naturalezza le note personali e gli aneddoti forniti (es. nascite, notti insonni, ritiri, battaglie).\n`;
-      p += `  3. _Voto: [da 1 a 10 e lode o 11] (Definizione comica)_\n`;
-      p += `- Chiudi con un brindisi caloroso e arrivederci alla prossima edizione.\n\n`;
+  // Recommended moment based on match numbers
+  const getRecommendedMoment = (): ReviewMoment => {
+    if (ongoingMatches.length === 0 && finishedMatches.length > 0) return "finale";
+    if (ongoingMatches.length > 0 && ongoingMatches.length <= 3) return "volata";
+    return "andata";
+  };
+
+  // Build the sober, witty, non-sensationalist AI prompt
+  const buildPrompt = () => {
+    let p = `Sei il cronista del torneo amatoriale di scacchi tra amici "${tournamentTitle}".\n`;
+    p += `Devi scrivere un resoconto per il nostro gruppo WhatsApp.\n\n`;
+
+    p += `LINEE GUIDA GENERALI SU TONO E STILE:\n`;
+    p += `- Tono: Sobrio, pungente, autoironico e brillante tra amici. NIENTE sensazionalismo finto, niente enfasi da circo o trailer cinematografici ("epico torneo", "campionato che passerà alla storia", "tiranno crudele"). Mantieni i piedi per terra: siamo un gruppo di amici che giocano a scacchi online.\n`;
+    p += `- Umorismo: arguto, sottile, con battute su sviste scacchistiche reali, pezzi regalati, partite durate 50 mosse, orari notturni e aneddoti di vita quotidiana (es. notti insonni, paternità, impegni).\n`;
+    p += `- Formattazione: WhatsApp pulita (*grassetto*, _corsivo_ per i voti, emoji sobrie e mirate, elenchi ben spaziati).\n\n`;
+
+    if (reviewType === "andata") {
+      p += `CONTESTO SPECIFICO: GIRO DI BOA / FINE GIRONE D'ANDATA (7 partite disputate)\n`;
+      p += `Istruzioni per il messaggio:\n`;
+      p += `1. Titolo sobrio ed efficace: 🔄 *Giro di boa: Il bilancio dell'andata di "${tournamentTitle}"*\n`;
+      p += `2. Breve premessa di 2-3 righe: si è chiusa l'andata, un primo sguardo a chi ha sorpreso e a chi deve ancora ingranare.\n`;
+      p += `3. Per OGNI giocatore della classifica (dal primo all'ultimo):\n`;
+      p += `   * *#Posizione Nome (@handle) – Soprannome spiritoso e realistico*\n`;
+      p += `   * Breve paragrafo con commento pacato e ironico: punti fatti, solidità, aperture giocate, confronto con il suo Elo, e inserisci con naturalezza gli aneddoti personali forniti.\n`;
+      p += `   * _Voto: [da 5 a 9] (Giudizio sintetico in 1-2 parole)_\n`;
+      p += `4. Chiusura in 2 righe sul girone di ritorno che sta per iniziare.\n\n`;
+    } else if (reviewType === "volata") {
+      p += `CONTESTO SPECIFICO: VOLATA FINALE (mancano pochissime partite alla conclusione)\n`;
+      p += `Istruzioni per il messaggio:\n`;
+      p += `1. Titolo: ⏱️ *Volata Finale: Le ultime sfide decisive di "${tournamentTitle}"*\n`;
+      p += `2. Introduzione asciutta: mancano solo ${ongoingMatches.length || "2-3"} partite per chiudere i conti del torneo. Ecco cosa c'è ancora in gioco.\n`;
+      p += `3. Suddivisione lucida per zone della classifica:\n`;
+      p += `   * 🥇 *Primo posto*: chi guida la classifica e cosa gli serve per blindare il titolo (vittoria matematica, mezzo punto, ecc.).\n`;
+      p += `   * 🥈 *Lotta per il podio*: distacchi tra il 2° e il 3° posto e duelli a distanza.\n`;
+      p += `   * 📊 *Centro classifica*: sfide per stabilire le posizioni intermedie.\n`;
+      p += `   * 🛡️ *Finale d'orgoglio*: chi gioca per chiudere a testa alta o strappare punti prestigiosi.\n`;
+      p += `4. Cita con precisione le partite rimanenti con i nomi dei giocatori.\n`;
+      p += `5. Breve augurio di buona partita a chi deve ancora muovere.\n\n`;
     } else {
-      p += `Mancano pochissime partite alla conclusione e devi scrivere il messaggio della "Volata Finale" per presentare le sfide decisive e creare entusiasmo e sana rivalità nel gruppo WhatsApp!\n\n`;
-      p += `REGOLE DI STILE E FORMATTAZIONE:\n`;
-      p += `- Usa la formattazione WhatsApp (*grassetto*, emoji scacchistiche).\n`;
-      p += `- Introduzione carica di hype (es. "Mancano solo le ultime sfide per far calare il sipario: ecco cosa c'è ancora in ballo! 🔥").\n`;
-      p += `- Suddividi in sezioni strategiche per zone calde della classifica:\n`;
-      p += `  * 🏆 Primo Posto & Invincibilità: chi è in testa o campione matematico, e cosa deve difendere.\n`;
-      p += `  * 🥈 Volata Podio / Argento: chi si contende il secondo e terzo posto a distanza.\n`;
-      p += `  * 📊 Zona Media Classifica: duelli punto a punto per le posizioni centrali.\n`;
-      p += `  * 🛡️ Finale d'Orgoglio: le partite per evitare il fondo o per togliere punti ai primi.\n`;
-      p += `- Per ogni zona cita esplicitamente i giocatori coinvolti, i punti attuali e le partite rimanenti da giocare.\n`;
-      p += `- Concludi con un augurio di buona fortuna e buona battaglia sulle scacchiere.\n\n`;
+      p += `CONTESTO SPECIFICO: FINE TORNEO / PAGELLE CONCLUSIVE (tutte le partite concluse)\n`;
+      p += `Istruzioni per il messaggio:\n`;
+      p += `1. Titolo: 🏆 *Le Pagelle Finali di "${tournamentTitle}"*\n`;
+      p += `2. Breve introduzione amichevole: il torneo è ufficialmente terminato ed ecco il verdetto definitivo delle scacchiere.\n`;
+      p += `3. Per OGNI giocatore (in rigoroso ordine di classifica dal 1° all'ultimo):\n`;
+      p += `   * *#Posizione Nome (@handle) – Nomignolo azzeccato*\n`;
+      p += `   * Giudizio complessivo: vittorie chiave, momenti no, costanza, aperture predilette e integrazione sobria degli aneddoti personali.\n`;
+      p += `   * _Voto: [da 5 a 9.5, 10 solo al vincitore indiscusso] (Definizione)_\n`;
+      p += `4. Saluto finale affettuoso e ringraziamento a tutti i partecipanti per la bella sfida.\n\n`;
     }
 
     if (generalNotes.trim()) {
-      p += `NOTE GENERALI SUL TORNEO FORNITE DALL'ORGANIZZATORE:\n${generalNotes.trim()}\n\n`;
+      p += `NOTE AGGIUNTIVE DELL'ORGANIZZATORE:\n${generalNotes.trim()}\n\n`;
     }
 
-    p += `CLASSIFICA ATTUALE DEI GIOCATORI:\n`;
+    p += `DATI CLASSIFICA GIOCATORI:\n`;
     standings.forEach((s, idx) => {
-      const eloStr = s.rating ? `[Elo Corrispondenza: ~${s.rating}]` : `[Elo: n/d]`;
-      const anecStr = s.anecdote ? ` | Aneddoto/Nota personale: "${s.anecdote}"` : "";
-      p += `${idx + 1}. ${s.name} (@${s.handle}) – Punti: ${s.points} (Giocate: ${s.played}, Vinte: ${s.won}, Patte: ${s.drawn}, Perse: ${s.lost}) ${eloStr}${anecStr}\n`;
+      const eloStr = s.rating ? `[Elo: ~${s.rating}]` : `[Elo: n/d]`;
+      const anecStr = s.anecdote ? ` | Aneddoto/Nota: "${s.anecdote}"` : "";
+      p += `${idx + 1}. ${s.name} (@${s.handle}) – Punti: ${s.points} (Vinte: ${s.won}, Patte: ${s.drawn}, Perse: ${s.lost}, Giocate: ${s.played}) ${eloStr}${anecStr}\n`;
     });
 
-    p += `\nPARTITE CONCLUSE NEL TORNEO:\n`;
+    p += `\nPARTITE CONCLUSE:\n`;
     if (finishedMatches.length === 0) {
       p += `Nessuna partita ancora conclusa nello storico.\n`;
     } else {
@@ -335,7 +369,7 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
     }
 
     if (ongoingMatches.length > 0) {
-      p += `\nPARTITE ANCORA IN CORSO / DA COMPLETARE:\n`;
+      p += `\nPARTITE ANCORA APERTE / IN CORSO:\n`;
       ongoingMatches.forEach((m) => {
         p += `- Turno ${m.round}: ${nameOf(m.white)} (@${m.white}) vs ${nameOf(m.black)} (@${m.black})\n`;
       });
@@ -350,9 +384,13 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
       const prompt = buildPrompt();
       await navigator.clipboard.writeText(prompt);
       setCopiedPrompt(true);
+      setNotice({
+        kind: "ok",
+        text: "📋 Prompt completo copiato negli appunti! Ora puoi incollarlo direttamente nella tua chat con Claude o ChatGPT.",
+      });
       setTimeout(() => setCopiedPrompt(false), 3000);
     } catch {
-      setNotice({ kind: "err", text: "Impossibile copiare il prompt automaticamente." });
+      setNotice({ kind: "err", text: "Impossibile copiare automaticamente il prompt negli appunti." });
     }
   };
 
@@ -382,8 +420,9 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
   const handleGenerateWithAI = async () => {
     setIsGenerating(true);
     setNotice(null);
+    const prompt = buildPrompt();
+
     try {
-      const prompt = buildPrompt();
       const res = await fetch("/api/generate-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -391,6 +430,15 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
       });
 
       if (!res.ok) {
+        if (res.status === 405 || res.status === 404) {
+          // GitHub Pages static hosting cannot handle POST requests
+          await navigator.clipboard.writeText(prompt).catch(() => {});
+          setNotice({
+            kind: "warning",
+            text: "Su GitHub Pages (hosting statico) non è presente un backend server per la generazione in-app (HTTP 405). Il prompt con tutti i dati è stato COPIATO automaticamente nei tuoi appunti: incollalo su Claude o ChatGPT!",
+          });
+          return;
+        }
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || `Errore HTTP ${res.status}`);
       }
@@ -399,9 +447,11 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
       setGeneratedReview(data.text || "");
       setNotice({ kind: "ok", text: "✨ Recensione generata con successo da Gemini!" });
     } catch (e: any) {
+      // Auto-copy prompt as fallback
+      await navigator.clipboard.writeText(prompt).catch(() => {});
       setNotice({
-        kind: "err",
-        text: `Errore nella generazione diretta: ${e.message}. Puoi comunque usare il pulsante "Copia Prompt Completo" per incollarlo su Claude o ChatGPT.`,
+        kind: "warning",
+        text: `${e.message} Prompt copiato negli appunti: incollalo direttamente su Claude o ChatGPT!`,
       });
     } finally {
       setIsGenerating(false);
@@ -417,11 +467,13 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
     } catch {}
   };
 
+  const recommended = getRecommendedMoment();
+
   return (
     <section>
       <h2>✨ Recensioni & Pagelle del Torneo</h2>
-      <p className="note" style={{ marginBottom: 16 }}>
-        Genera pagelle comiche di fine andata/torneo o il bollettino di volata finale per le ultime sfide, integrando risultati, aperture, Elo Lichess e aneddoti personali.
+      <p className="note" style={{ marginBottom: 14 }}>
+        Genera il bilancio del girone d'andata, la volata delle ultime sfide o le pagelle finali, con tono sobrio e arguto tra amici.
       </p>
 
       {notice && (
@@ -430,23 +482,133 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
         </div>
       )}
 
-      {/* Select Review Type */}
-      <div style={{ marginBottom: 14 }}>
-        <label>Tipo di Messaggio Speciale</label>
-        <div className="review-types">
+      {/* QUADRO STATO DATI TORNEO */}
+      <div className="sync-dashboard">
+        <div className="sync-header">
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <strong style={{ fontSize: 14 }}>📊 Stato Dati Torneo</strong>
+            <span className={`sync-badge ${lastSyncTime ? "synced" : "pending"}`}>
+              {lastSyncTime ? `● Sincronizzato alle ${lastSyncTime}` : "⏳ Da sincronizzare"}
+            </span>
+          </div>
           <button
             type="button"
-            className={`review-type-btn ${reviewType === "gala" ? "active" : ""}`}
-            onClick={() => setReviewType("gala")}
+            className="secondary"
+            disabled={isFetchingData}
+            onClick={loadGameStates}
+            style={{ padding: "4px 10px", fontSize: 13, minHeight: 32 }}
           >
-            🏆 Gran Galà & Pagelle
+            {isFetchingData ? "Aggiornamento in corso…" : "🔄 Sincronizza Partite"}
+          </button>
+        </div>
+
+        <div className="stat-pills">
+          <div className="stat-pill">
+            <span className="stat-pill-label">Partite Totali</span>
+            <span className="stat-pill-val">
+              {history.length} <small style={{ fontWeight: "normal", color: "var(--muted)" }}>({finishedMatches.length} finite, {ongoingMatches.length} in corso)</small>
+            </span>
+          </div>
+          <div className="stat-pill">
+            <span className="stat-pill-label">Elo Lichess</span>
+            <span className="stat-pill-val">
+              {ratedCount} / {config.players.length} <small style={{ fontWeight: "normal", color: "var(--muted)" }}>giocatori</small>
+            </span>
+          </div>
+          <div className="stat-pill">
+            <span className="stat-pill-label">Fase Rilevata</span>
+            <span className="stat-pill-val" style={{ color: "var(--accent)" }}>
+              {recommended === "finale" ? "🏆 Concluso" : recommended === "volata" ? "⏱️ Volata" : "🔄 Andata"}
+            </span>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+          <button
+            type="button"
+            className="secondary"
+            disabled={isFetchingElo}
+            onClick={fetchAllRatings}
+            style={{ padding: "4px 8px", fontSize: 12, minHeight: 28 }}
+          >
+            {isFetchingElo ? "Recupero Elo in corso..." : "♟️ Scarica Elo da Lichess"}
           </button>
           <button
             type="button"
-            className={`review-type-btn ${reviewType === "volata" ? "active" : ""}`}
+            onClick={() => setShowStandingsTable(!showStandingsTable)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--muted)",
+              fontSize: 12,
+              cursor: "pointer",
+              textDecoration: "underline",
+              padding: 0,
+            }}
+          >
+            {showStandingsTable ? "Nascondi classifica rapida ▲" : "Vedi classifica calcolata ▼"}
+          </button>
+        </div>
+
+        {/* Quick Standings Table */}
+        {showStandingsTable && (
+          <div style={{ marginTop: 10, borderTop: "1px solid var(--line)", paddingTop: 8 }}>
+            <p className="note" style={{ margin: "0 0 6px", fontSize: 12 }}>
+              Classifica calcolata dalle partite salvate nello storico:
+            </p>
+            <div style={{ maxHeight: 200, overflowY: "auto", fontSize: 13 }}>
+              {standings.map((s, idx) => (
+                <div
+                  key={s.handle}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "3px 0",
+                    borderBottom: "1px dotted var(--line)",
+                  }}
+                >
+                  <span>
+                    <strong>{idx + 1}. {s.name}</strong> <small style={{ color: "var(--muted)" }}>({s.handle})</small>
+                  </span>
+                  <span>
+                    <strong>{s.points} pt</strong> ({s.won}V {s.drawn}N {s.lost}P) · {s.rating ? `~${s.rating}` : "no elo"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* MOMENTO DEL TORNEO (3 PULSANTI CHIAVE) */}
+      <div style={{ marginBottom: 14 }}>
+        <label>Momento del Torneo</label>
+        <div className="review-types-3">
+          <button
+            type="button"
+            className={`review-moment-btn ${reviewType === "andata" ? "active" : ""}`}
+            onClick={() => setReviewType("andata")}
+          >
+            <span className="review-moment-title">🔄 Fine Andata</span>
+            <span className="review-moment-sub">Giro di boa: bilancio delle prime 7 sfide e promossi/rimandati.</span>
+          </button>
+
+          <button
+            type="button"
+            className={`review-moment-btn ${reviewType === "volata" ? "active" : ""}`}
             onClick={() => setReviewType("volata")}
           >
-            🔥 Volata Finale (Ultime sfide)
+            <span className="review-moment-title">⏱️ Volata Finale</span>
+            <span className="review-moment-sub">Mancano 2-3 partite: calcoli per il podio e le sfide decisive.</span>
+          </button>
+
+          <button
+            type="button"
+            className={`review-moment-btn ${reviewType === "finale" ? "active" : ""}`}
+            onClick={() => setReviewType("finale")}
+          >
+            <span className="review-moment-title">🏆 Fine Torneo</span>
+            <span className="review-moment-sub">Chiusura definitiva con pagelle, voti dal 5 al 10 e nomignoli.</span>
           </button>
         </div>
       </div>
@@ -464,61 +626,35 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
           />
         </div>
         <div>
-          <label>Dati Lichess Partite</label>
-          <button
-            type="button"
-            className="secondary"
-            disabled={isFetchingData}
-            onClick={loadGameStates}
-            style={{ width: "100%", minHeight: 48 }}
-          >
-            {isFetchingData ? "Aggiornamento in corso…" : "🔄 Sincronizza Partite"}
-          </button>
+          <label htmlFor="rev-general-notes">Note extra dell'organizzatore (opzionale)</label>
+          <input
+            id="rev-general-notes"
+            type="text"
+            value={generalNotes}
+            onChange={(e) => setGeneralNotes(e.target.value)}
+            placeholder="es. Tante partite decise all'ultima mossa, ritmo rilassato..."
+          />
         </div>
-      </div>
-
-      {/* General notes */}
-      <div style={{ marginBottom: 14 }}>
-        <label htmlFor="rev-general-notes">Note generali sul torneo (facoltativo)</label>
-        <textarea
-          id="rev-general-notes"
-          value={generalNotes}
-          onChange={(e) => setGeneralNotes(e.target.value)}
-          placeholder="es. Prima edizione con 8 partecipanti, torneo combattuto con tante sorprese e un'atmosfera molto rilassata."
-          rows={2}
-          style={{ minHeight: 70 }}
-        />
       </div>
 
       {/* Accordion for Player Anecdotes & Elo */}
       <div style={{ marginBottom: 18 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-          <label style={{ margin: 0 }}>Aneddoti personali & Elo giocatori ({config.players.length})</label>
-          <div style={{ display: "flex", gap: 6 }}>
-            <button
-              type="button"
-              className="secondary"
-              style={{ padding: "4px 8px", fontSize: 12, minHeight: 30 }}
-              disabled={isFetchingElo}
-              onClick={fetchAllRatings}
-            >
-              {isFetchingElo ? "Recupero..." : "🔄 Scarica Elo da Lichess"}
-            </button>
-            <button
-              type="button"
-              className="secondary"
-              style={{ padding: "4px 8px", fontSize: 12, minHeight: 30 }}
-              onClick={() => setShowAnecdotes(!showAnecdotes)}
-            >
-              {showAnecdotes ? "Nascondi note ▲" : "Modifica note ▼"}
-            </button>
-          </div>
+          <label style={{ margin: 0 }}>Aneddoti personali dei giocatori ({config.players.length})</label>
+          <button
+            type="button"
+            className="secondary"
+            style={{ padding: "4px 8px", fontSize: 12, minHeight: 30 }}
+            onClick={() => setShowAnecdotes(!showAnecdotes)}
+          >
+            {showAnecdotes ? "Chiudi note ▲" : "Modifica note ▼"}
+          </button>
         </div>
 
         {showAnecdotes && (
           <div className="anecdote-grid">
             <p className="note" style={{ margin: "0 0 6px", fontSize: 13 }}>
-              Scrivi una breve nota o fatto curioso per ciascun giocatore (es. paternità, insonnia, ritiri, battute di gioco):
+              Inserisci piccoli fatti della vita reale o battute di gioco per ciascun giocatore (es. paternità, orari notturni, ritiri, cambi di apertura):
             </p>
             {standings.map((p) => (
               <div key={p.handle} className="anecdote-card">
@@ -548,28 +684,31 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
         )}
       </div>
 
-      {/* Action Buttons */}
-      <div className="actions" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+      {/* Action Buttons: Copia Prompt is the primary frictionless action */}
+      <div className="actions" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
         <button
           type="button"
           className="primary"
+          onClick={handleCopyPrompt}
+          style={{ minHeight: 48 }}
+        >
+          {copiedPrompt ? "✅ Prompt Copiato!" : "📋 Copia Prompt per Claude / ChatGPT"}
+        </button>
+        <button
+          type="button"
+          className="secondary"
           disabled={isGenerating}
           onClick={handleGenerateWithAI}
           style={{ minHeight: 48 }}
         >
           {isGenerating ? "Generazione in corso… 🧠" : "✨ Genera con AI"}
         </button>
-        <button
-          type="button"
-          className="secondary"
-          onClick={handleCopyPrompt}
-          style={{ minHeight: 48 }}
-        >
-          {copiedPrompt ? "✅ Prompt Copiato!" : "📋 Copia Prompt Completo"}
-        </button>
       </div>
 
-      <div style={{ textAlign: "right", marginBottom: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <p className="note" style={{ margin: 0, fontSize: 12 }}>
+          💡 Il pulsante <strong>Copia Prompt</strong> funziona al 100% ovunque, pronto da incollare nella tua chat AI abituale.
+        </p>
         <button
           type="button"
           onClick={handleDownloadJson}
@@ -577,20 +716,21 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
             background: "none",
             border: "none",
             color: "var(--muted)",
-            fontSize: 13,
+            fontSize: 12,
             cursor: "pointer",
             textDecoration: "underline",
             padding: 0,
+            whiteSpace: "nowrap",
           }}
         >
-          💾 Scarica dati e classifica in JSON
+          💾 Scarica JSON
         </button>
       </div>
 
-      {/* Generated Result Area */}
+      {/* Generated Result Area (when generated via AI) */}
       {generatedReview && (
         <div style={{ marginTop: 16 }}>
-          <label htmlFor="generated-review-text">Recensione Generata (pronta da inviare o modificare)</label>
+          <label htmlFor="generated-review-text">Testo Generato (pronto da inviare o ritoccare)</label>
           <textarea
             id="generated-review-text"
             value={generatedReview}
