@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding } from "./types";
+import { WhatsAppPreview } from "./WhatsAppPreview";
 
 interface ReviewsTabProps {
   history: HistoryGame[];
   config: AppConfig;
   nameOf: (handle: string) => string;
+  triggerToast?: (msg: string) => void;
 }
 
 export type ReviewMoment = "andata" | "volata" | "finale";
 
-export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
+export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTabProps) {
   const [reviewType, setReviewType] = useState<ReviewMoment>("finale");
   const [tournamentTitle, setTournamentTitle] = useState("Scacchi & Chill");
   const [generalNotes, setGeneralNotes] = useState("");
@@ -406,6 +408,9 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
       const prompt = buildPrompt();
       await navigator.clipboard.writeText(prompt);
       setCopiedPrompt(true);
+      if (triggerToast) {
+        triggerToast("Prompt copiato negli appunti! 📋 Pronto per Claude/ChatGPT");
+      }
       setNotice({
         kind: "ok",
         text: "📋 Prompt completo copiato negli appunti! Ora puoi incollarlo direttamente nella tua chat con Claude o ChatGPT.",
@@ -488,6 +493,9 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
     try {
       await navigator.clipboard.writeText(generatedReview);
       setCopiedReview(true);
+      if (triggerToast) {
+        triggerToast("Testo della recensione copiato negli appunti! 📋");
+      }
       setTimeout(() => setCopiedReview(false), 2500);
     } catch {}
   };
@@ -755,14 +763,24 @@ export function ReviewsTab({ history, config, nameOf }: ReviewsTabProps) {
       {/* Generated Result Area (when generated via AI) */}
       {generatedReview && (
         <div style={{ marginTop: 16 }}>
-          <label htmlFor="generated-review-text">Testo Generato (pronto da inviare o ritoccare)</label>
-          <textarea
-            id="generated-review-text"
-            value={generatedReview}
-            onChange={(e) => setGeneratedReview(e.target.value)}
-            rows={14}
-            style={{ minHeight: 280, fontFamily: "inherit" }}
-          />
+          {/* WhatsApp formatted live chat bubble */}
+          <WhatsAppPreview text={generatedReview} title="Anteprima WhatsApp (Recensione Generata)" />
+
+          <details style={{ marginTop: 8, marginBottom: 12 }}>
+            <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--muted)" }}>
+              Modifica testo grezzo prima dell'invio
+            </summary>
+            <div style={{ marginTop: 8 }}>
+              <textarea
+                id="generated-review-text"
+                value={generatedReview}
+                onChange={(e) => setGeneratedReview(e.target.value)}
+                rows={12}
+                style={{ minHeight: 220, fontFamily: "inherit" }}
+              />
+            </div>
+          </details>
+
           <div className="actions two" style={{ marginTop: 10 }}>
             <a
               className="primary"

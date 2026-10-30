@@ -12,6 +12,7 @@ import {
 } from './types';
 import rawConfig from '../config.json';
 import { ReviewsTab } from './ReviewsTab';
+import { WhatsAppPreview, Toast } from './WhatsAppPreview';
 
 export const RULES = [
   { key: "noRematch", label: "No rematch offers" },
@@ -410,17 +411,69 @@ function PlayerSelect({
   disabled: boolean;
   onChange: (v: string) => void;
 }) {
+  const [showPicker, setShowPicker] = useState(false);
+  const selectedPlayer = players.find((p) => p.handle === value);
+
   return (
-    <div className="side">
-      <span className={"dot " + (color === "white" ? "w" : "b")} title={color} />
-      <select aria-label={label} value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)}>
-        <option value="">{color === "white" ? "Bianco…" : "Nero…"}</option>
-        {players.map((p) => (
-          <option key={p.handle} value={p.handle}>
-            {p.name}
-          </option>
-        ))}
-      </select>
+    <div className="side-container">
+      <div className="side">
+        <span className={"dot " + (color === "white" ? "w" : "b")} title={color} />
+        
+        {/* Quick Chip Button that opens the visual player picker grid */}
+        <div style={{ display: "flex", gap: 6, width: "100%" }}>
+          <button
+            type="button"
+            className={`player-chip-btn ${value ? "filled" : "empty"}`}
+            disabled={disabled}
+            onClick={() => setShowPicker(!showPicker)}
+            aria-label={label}
+          >
+            <span style={{ fontWeight: value ? 600 : 400 }}>
+              {selectedPlayer ? selectedPlayer.name : (color === "white" ? "Seleziona Bianco…" : "Seleziona Nero…")}
+            </span>
+            <span style={{ fontSize: 11, opacity: 0.6 }}>▼</span>
+          </button>
+          {value && !disabled && (
+            <button
+              type="button"
+              className="chip-clear-btn"
+              title="Rimuovi giocatore"
+              onClick={() => onChange("")}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Visual Chip Grid Modal/Dropdown */}
+      {showPicker && !disabled && (
+        <div className="player-chips-popover">
+          <div className="player-chips-header">
+            <span>Scegli giocatore per il {color === "white" ? "⚪ Bianco" : "⚫ Nero"}:</span>
+            <button type="button" className="close-chips-btn" onClick={() => setShowPicker(false)}>✕</button>
+          </div>
+          <div className="player-chips-grid">
+            {players.map((p) => {
+              const isCurrent = p.handle === value;
+              return (
+                <button
+                  key={p.handle}
+                  type="button"
+                  className={`player-chip ${isCurrent ? "current" : ""}`}
+                  onClick={() => {
+                    onChange(p.handle);
+                    setShowPicker(false);
+                  }}
+                >
+                  <span className="chip-name">{p.name}</span>
+                  <span className="chip-handle">@{p.handle}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -892,12 +945,14 @@ function StatusTab({
   defaultDays,
   config,
   onLoadIntoActivePairs,
+  triggerToast,
 }: {
   history: HistoryGame[];
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
   defaultDays: number;
   config: AppConfig;
   onLoadIntoActivePairs: (round: string, games: HistoryGame[]) => void;
+  triggerToast?: (msg: string) => void;
 }) {
   const nameOf = (handle: string) => config.players.find((p) => p.handle === handle)?.name ?? handle;
   const idToHandle = (id?: string) =>
@@ -1211,6 +1266,9 @@ function StatusTab({
     try {
       await navigator.clipboard.writeText(text);
       setStatus((s) => ({ ...s, info: "Messaggio copiato negli appunti." }));
+      if (triggerToast) {
+        triggerToast("Messaggio di stato copiato negli appunti! 📋");
+      }
     } catch {
       setStatus((s) => ({ ...s, info: "Impossibile copiare automaticamente: seleziona il testo e copia a mano." }));
     }
@@ -1254,13 +1312,24 @@ function StatusTab({
                   🏁 <strong>Turno {round} completato!</strong> Tutte le partite sono terminate. Il messaggio qui sotto contiene i risultati finali di fine turno.
                 </div>
               )}
-              <div style={{ marginTop: 14 }}>
-                <textarea
-                  aria-label="Messaggio di aggiornamento"
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                />
-              </div>
+
+              {/* WhatsApp Live Bubble Preview */}
+              <WhatsAppPreview text={text} title={`Anteprima WhatsApp (Stato Turno ${round})`} />
+
+              <details style={{ marginTop: 8, marginBottom: 12 }}>
+                <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--muted)" }}>
+                  Modifica testo grezzo prima dell'invio
+                </summary>
+                <div style={{ marginTop: 8 }}>
+                  <textarea
+                    aria-label="Messaggio di aggiornamento"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    style={{ minHeight: 180 }}
+                  />
+                </div>
+              </details>
+
               <div className="actions two">
                 <a
                   className="primary"
@@ -1268,10 +1337,10 @@ function StatusTab({
                   rel="noopener noreferrer"
                   href={"https://wa.me/?text=" + encodeURIComponent(text)}
                 >
-                  Condividi su WhatsApp
+                  📲 Condividi su WhatsApp
                 </a>
                 <button className="secondary" type="button" onClick={copy}>
-                  Copia testo
+                  📋 Copia testo
                 </button>
               </div>
               {status.info && <div className="notice ok">{status.info}</div>}
@@ -1542,11 +1611,23 @@ export function App() {
   const [notice, setNotice] = useState<NoticeState | null>(null);
   const [busy, setBusy] = useState("");
   const [editedText, setEditedText] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const settingsTabRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLElement>(null);
 
-  const flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) =>
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((cur) => (cur === msg ? null : cur));
+    }, 2800);
+  };
+
+  const flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => {
     setNotice({ kind, text, items });
+    if (kind === 'ok') {
+      triggerToast(text);
+    }
+  };
 
   // Remember every created game in history without duplicating
   useEffect(() => {
@@ -1747,7 +1828,8 @@ export function App() {
           aria-selected={activeTab === 'pairings'}
           onClick={() => setActiveTab('pairings')}
         >
-          ♟️ Partite
+          <span className="tab-icon">♟️</span>
+          <span className="tab-label">Partite</span>
         </button>
         <button
           className={`tab-btn ${activeTab === 'status' ? 'active' : ''}`}
@@ -1755,7 +1837,8 @@ export function App() {
           aria-selected={activeTab === 'status'}
           onClick={() => setActiveTab('status')}
         >
-          📊 Stato
+          <span className="tab-icon">📊</span>
+          <span className="tab-label">Stato</span>
         </button>
         <button
           className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
@@ -1763,7 +1846,8 @@ export function App() {
           aria-selected={activeTab === 'reviews'}
           onClick={() => setActiveTab('reviews')}
         >
-          ✨ Recensione
+          <span className="tab-icon">✨</span>
+          <span className="tab-label">Recensione</span>
         </button>
         <button
           className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
@@ -1771,7 +1855,8 @@ export function App() {
           aria-selected={activeTab === 'settings'}
           onClick={() => setActiveTab('settings')}
         >
-          ⚙️ Opzioni
+          <span className="tab-icon">⚙️</span>
+          <span className="tab-label">Opzioni</span>
         </button>
       </nav>
 
@@ -1818,11 +1903,24 @@ export function App() {
           {hasCreated && (
             <section className="result" ref={resultRef}>
               <h2>Messaggio per il gruppo WhatsApp</h2>
-              <textarea
-                aria-label="Messaggio per il gruppo WhatsApp"
-                value={text}
-                onChange={(e) => setEditedText(e.target.value)}
-              />
+              
+              {/* WhatsApp styled live chat bubble preview */}
+              <WhatsAppPreview text={text} title="Anteprima WhatsApp (Lancio Turno)" />
+
+              <details style={{ marginTop: 8, marginBottom: 12 }}>
+                <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--muted)" }}>
+                  Modifica testo grezzo prima dell'invio
+                </summary>
+                <div style={{ marginTop: 8 }}>
+                  <textarea
+                    aria-label="Messaggio per il gruppo WhatsApp"
+                    value={text}
+                    onChange={(e) => setEditedText(e.target.value)}
+                    style={{ minHeight: 180 }}
+                  />
+                </div>
+              </details>
+
               <div className="actions two">
                 <a
                   className="primary"
@@ -1830,10 +1928,10 @@ export function App() {
                   rel="noopener noreferrer"
                   href={"https://wa.me/?text=" + encodeURIComponent(text)}
                 >
-                  Condividi su WhatsApp
+                  📲 Condividi su WhatsApp
                 </a>
                 <button className="secondary" type="button" onClick={copyText}>
-                  Copia testo
+                  📋 Copia testo
                 </button>
               </div>
               <div className="actions">
@@ -1854,6 +1952,7 @@ export function App() {
           defaultDays={settings.days}
           config={config}
           onLoadIntoActivePairs={handleLoadRoundIntoPairs}
+          triggerToast={triggerToast}
         />
       )}
 
@@ -1863,6 +1962,7 @@ export function App() {
           history={history}
           config={config}
           nameOf={nameOf}
+          triggerToast={triggerToast}
         />
       )}
 
@@ -1887,6 +1987,9 @@ export function App() {
           />
         </section>
       )}
+
+      {/* Floating Global Toast Notification */}
+      <Toast message={toastMessage || ""} isVisible={Boolean(toastMessage)} />
     </main>
   );
 }
