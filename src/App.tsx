@@ -600,7 +600,9 @@ function SettingsTab({
       ratings,
     };
 
-    const dateStr = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -610,7 +612,7 @@ function SettingsTab({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    flash("ok", `Backup esportato con successo (${history.length} partite storiche salvate).`);
+    flash("ok", `Backup esportato con successo (${history.length} partite storiche salvate in backup-scacchi-and-chill-${dateStr}.json).`);
   };
 
   const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
