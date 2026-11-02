@@ -40,12 +40,12 @@ export function TournamentInfoSection({
   const [tournRules, setTournRules] = useState(config.tournament?.rulesText || "");
 
   return (
-    <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
-      <p className="note" style={{ margin: "0 0 12px" }}>
+    <div>
+      <p className="note note-flush">
         Questi dettagli vengono mostrati nella scheda pubblica <strong>Torneo</strong> per tutti i partecipanti.
       </p>
 
-      <div className="grid2" style={{ marginBottom: 10 }}>
+      <div className="grid2 field">
         <div>
           <label htmlFor="cfg-tourn-title">Nome del Torneo</label>
           <input
@@ -68,7 +68,7 @@ export function TournamentInfoSection({
         </div>
       </div>
 
-      <div className="grid2" style={{ marginBottom: 10 }}>
+      <div className="grid2 field">
         <div>
           <label htmlFor="cfg-tourn-master">Nome del Maestro Scacchista</label>
           <input
@@ -91,7 +91,7 @@ export function TournamentInfoSection({
         </div>
       </div>
 
-      <div style={{ marginBottom: 10 }}>
+      <div className="field">
         <label htmlFor="cfg-tourn-img">URL Immagine / Foto Maestro</label>
         <input
           id="cfg-tourn-img"
@@ -102,7 +102,7 @@ export function TournamentInfoSection({
         />
       </div>
 
-      <div style={{ marginBottom: 10 }}>
+      <div className="field">
         <label htmlFor="cfg-tourn-desc">Presentazione / Dedica della Stagione</label>
         <textarea
           id="cfg-tourn-desc"
@@ -110,11 +110,11 @@ export function TournamentInfoSection({
           value={tournDesc}
           onChange={(e) => setTournDesc(e.target.value)}
           placeholder="Per rendere ogni appuntamento sempre vario e coinvolgente..."
-          style={{ minHeight: 70 }}
+          className="ta-sm"
         />
       </div>
 
-      <div style={{ marginBottom: 10 }}>
+      <div className="field">
         <label htmlFor="cfg-tourn-how">Svolgimento del Torneo ("Come funziona il torneo")</label>
         <textarea
           id="cfg-tourn-how"
@@ -122,11 +122,11 @@ export function TournamentInfoSection({
           value={tournHowItWorks}
           onChange={(e) => setTournHowItWorks(e.target.value)}
           placeholder="1. All'inizio di ogni giornata ricevi nel gruppo il link..."
-          style={{ minHeight: 70 }}
+          className="ta-sm"
         />
       </div>
 
-      <div style={{ marginBottom: 10 }}>
+      <div className="field">
         <label htmlFor="cfg-tourn-fairplay">Regole di Fair Play</label>
         <textarea
           id="cfg-tourn-fairplay"
@@ -134,39 +134,29 @@ export function TournamentInfoSection({
           value={tournFairPlay}
           onChange={(e) => setTournFairPlay(e.target.value)}
           placeholder="• Ti impegni a giocare ogni partita con le tue forze..."
-          style={{ minHeight: 90 }}
+          className="ta-md"
         />
       </div>
 
       {/* 🏆 Albo d'Oro - Vincitori per Edizione */}
-      <div style={{ background: "var(--panel)", border: "1px solid var(--line)", borderRadius: 8, padding: 12, marginBottom: 14 }}>
-        <h4 style={{ margin: "0 0 6px", fontSize: 14 }}>🏆 Albo d'Oro (Vincitori Edizioni)</h4>
-        <p className="note" style={{ margin: "0 0 10px", fontSize: 12 }}>
+      <div className="subcard">
+        <h4 className="subcard-title">🏆 Albo d'Oro (Vincitori Edizioni)</h4>
+        <p className="note note-sm">
           Aggiungi o rimuovi i campioni delle stagioni passate.
         </p>
 
-        <div style={{ display: "grid", gap: 6, marginBottom: 10 }}>
+        <div className="item-list tight">
           {tournWinners.map((w, idx) => (
             <div
               key={idx}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "6px 10px",
-                background: "var(--bg)",
-                border: "1px solid var(--line)",
-                borderRadius: 6,
-                fontSize: 13,
-              }}
+              className="list-row small"
             >
               <div>
-                <strong>{w.season}:</strong> {w.name} (@{w.handle}) {w.notes && <span style={{ opacity: 0.7 }}>– {w.notes}</span>}
+                <strong>{w.season}:</strong> {w.name} (@{w.handle}) {w.notes && <span className="muted-sm">– {w.notes}</span>}
               </div>
               <button
                 type="button"
-                className="secondary"
-                style={{ fontSize: 11, padding: "2px 6px", color: "var(--danger)" }}
+                className="secondary btn-mini"
                 onClick={() => {
                   const updated = tournWinners.filter((_, i) => i !== idx);
                   setTournWinners(updated);
@@ -178,9 +168,9 @@ export function TournamentInfoSection({
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr auto", gap: 6, alignItems: "flex-end" }}>
+        <div className="add-form add-form-winner">
           <div>
-            <label htmlFor="new-w-season" style={{ fontSize: 11 }}>Stagione</label>
+            <label htmlFor="new-w-season" className="label-sm">Stagione</label>
             <input
               id="new-w-season"
               type="text"
@@ -190,7 +180,7 @@ export function TournamentInfoSection({
             />
           </div>
           <div>
-            <label htmlFor="new-w-handle" style={{ fontSize: 11 }}>Vincitore</label>
+            <label htmlFor="new-w-handle" className="label-sm">Vincitore</label>
             <select
               id="new-w-handle"
               value={newWinnerHandle}
@@ -205,7 +195,7 @@ export function TournamentInfoSection({
             </select>
           </div>
           <div>
-            <label htmlFor="new-w-notes" style={{ fontSize: 11 }}>Note (opzionale)</label>
+            <label htmlFor="new-w-notes" className="label-sm">Note (opzionale)</label>
             <input
               id="new-w-notes"
               type="text"
@@ -216,8 +206,7 @@ export function TournamentInfoSection({
           </div>
           <button
             type="button"
-            className="secondary"
-            style={{ minHeight: 44, whiteSpace: "nowrap", fontSize: 12 }}
+            className="secondary btn-add compact"
             onClick={() => {
               const s = newWinnerSeason.trim();
               if (!s || !newWinnerHandle) {
@@ -245,7 +234,7 @@ export function TournamentInfoSection({
         </div>
       </div>
 
-      <div className="actions two" style={{ marginTop: 0 }}>
+      <div className="actions two flush">
         <button
           className="secondary"
           type="button"

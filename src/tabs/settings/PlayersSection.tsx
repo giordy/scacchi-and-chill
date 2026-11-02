@@ -15,32 +15,23 @@ export function PlayersSection({
   const [newPlayerHandle, setNewPlayerHandle] = useState("");
 
   return (
-    <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
-      <p className="note" style={{ margin: "0 0 12px" }}>
+    <div>
+      <p className="note note-flush">
         Modifica i partecipanti e i loro nickname Lichess. Le modifiche vengono salvate in tempo reale nel database cloud.
       </p>
 
-      <div style={{ display: "grid", gap: 6, marginBottom: 14, maxHeight: 220, overflowY: "auto" }}>
+      <div className="item-list">
         {playersList.map((p, idx) => (
           <div
             key={idx}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "6px 10px",
-              background: "var(--panel)",
-              border: "1px solid var(--line)",
-              borderRadius: 6,
-            }}
+            className="list-row"
           >
             <div>
-              <strong>{p.name}</strong> <span style={{ opacity: 0.7, fontSize: 13 }}>({p.handle})</span>
+              <strong>{p.name}</strong> <span className="muted-sm">({p.handle})</span>
             </div>
             <button
               type="button"
-              className="secondary"
-              style={{ fontSize: 11, padding: "3px 8px", color: "var(--danger)" }}
+              className="secondary btn-mini"
               onClick={() => {
                 const updated = playersList.filter((_, i) => i !== idx);
                 onUpdatePlayers(updated);
@@ -53,7 +44,7 @@ export function PlayersSection({
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "flex-end" }}>
+      <div className="add-form add-form-player">
         <div>
           <label htmlFor="new-p-name">Nome WhatsApp</label>
           <input
@@ -76,8 +67,7 @@ export function PlayersSection({
         </div>
         <button
           type="button"
-          className="secondary"
-          style={{ minHeight: 48, whiteSpace: "nowrap" }}
+          className="secondary btn-add"
           onClick={() => {
             const name = newPlayerName.trim();
             const handle = newPlayerHandle.trim().toLowerCase();

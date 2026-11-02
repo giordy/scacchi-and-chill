@@ -43,7 +43,7 @@ export function LichessSettingsSection({
         </p>
       </div>
 
-      <div className="actions two" style={{ marginTop: 0 }}>
+      <div className="actions two flush">
         <button
           className="secondary"
           type="button"
@@ -109,7 +109,7 @@ export function LichessSettingsSection({
         ))}
       </div>
 
-      <hr style={{ border: 0, borderTop: "1px solid var(--line)", width: "100%", margin: "10px 0" }} />
+      <hr className="divider" />
 
       <p className="note">
         <strong>Testo dei messaggi WhatsApp.</strong> Puoi usare <code>{"{round}"}</code> <code>{"{days}"}</code>{" "}

@@ -23,38 +23,28 @@ export function ScheduleSection({
   }, [schedule]);
 
   return (
-    <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
-      <p className="note" style={{ margin: "0 0 12px" }}>
+    <div>
+      <p className="note note-flush">
         Gli accoppiamenti preimpostati per ciascun turno. Selezionando il turno nella scheda <em>Partite</em>, questi incontri vengono caricati in automatico con 1 clic.
       </p>
 
       {scheduleList.length > 0 && (
-        <div style={{ display: "grid", gap: 6, marginBottom: 14, maxHeight: 220, overflowY: "auto" }}>
+        <div className="item-list">
           {scheduleList.map((m, idx) => {
             const wName = playersList.find((p) => p.handle === m.white)?.name || m.white;
             const bName = playersList.find((p) => p.handle === m.black)?.name || m.black;
             return (
               <div
                 key={idx}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "6px 10px",
-                  background: "var(--panel)",
-                  border: "1px solid var(--line)",
-                  borderRadius: 6,
-                  fontSize: 13,
-                }}
+                className="list-row small"
               >
                 <div>
-                  <span className="badge" style={{ marginRight: 6 }}>T.{m.round}</span>
+                  <span className="badge badge-gap">T.{m.round}</span>
                   <strong>{wName}</strong> ⚪ vs <strong>{bName}</strong> ⚫
                 </div>
                 <button
                   type="button"
-                  className="secondary"
-                  style={{ fontSize: 11, padding: "2px 6px", color: "var(--danger)" }}
+                  className="secondary btn-mini"
                   onClick={() => {
                     const updated = scheduleList.filter((_, i) => i !== idx);
                     setScheduleList(updated);
@@ -70,7 +60,7 @@ export function ScheduleSection({
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "70px 1fr 1fr auto", gap: 8, alignItems: "flex-end" }}>
+      <div className="add-form add-form-match">
         <div>
           <label htmlFor="new-m-round">Turno</label>
           <input
@@ -113,8 +103,7 @@ export function ScheduleSection({
         </div>
         <button
           type="button"
-          className="secondary"
-          style={{ minHeight: 48, whiteSpace: "nowrap" }}
+          className="secondary btn-add"
           onClick={() => {
             const r = newMatchRound.trim();
             if (!r || !newMatchWhite || !newMatchBlack) {

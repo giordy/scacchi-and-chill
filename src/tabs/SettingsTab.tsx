@@ -52,7 +52,7 @@ export function SettingsTab({
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
 }) {
   return (
-    <div ref={panelRef} style={{ display: 'grid', gap: '14px' }}>
+    <div ref={panelRef} className="settings-stack">
       <CollapsibleSection title="🏆 Informazioni Torneo & Nuova Stagione" defaultOpen>
         <TournamentInfoSection
           config={config}

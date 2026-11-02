@@ -1280,3 +1280,37 @@ button.sync-btn { min-height: 40px; font-weight: 600; }
 .sync-note { margin: 0; font-size: 12px; }
 .public-footer { margin-top: 24px; text-align: center; border-top: 1px solid var(--line); padding-top: 14px; }
 .admin-link { font-size: 12px; color: var(--muted); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; opacity: 0.85; }
+
+/* Settings sections */
+.settings-stack { display: grid; gap: 14px; }
+.note-flush { margin: 0 0 12px; }
+.note-sm { margin: 0 0 10px; font-size: 12px; }
+.field { margin-bottom: 10px; }
+.muted-sm { opacity: 0.7; font-size: 13px; }
+.badge-gap { margin-right: 6px; }
+.item-list { display: grid; gap: 6px; margin-bottom: 14px; max-height: 220px; overflow-y: auto; }
+.item-list.tight { margin-bottom: 10px; max-height: none; overflow: visible; }
+.list-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }
+.list-row.small { font-size: 13px; }
+.subcard .list-row { background: var(--panel); }
+.subcard { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+.subcard-title { margin: 0 0 6px; font-size: 14px; }
+.add-form { display: grid; gap: 8px; align-items: flex-end; }
+.add-form-player { grid-template-columns: 1fr 1fr auto; }
+.add-form-match { grid-template-columns: 70px 1fr 1fr auto; }
+.add-form-winner { grid-template-columns: 110px 1fr 1fr auto; gap: 6px; }
+button.btn-add { min-height: 48px; white-space: nowrap; }
+button.btn-add.compact { min-height: 44px; font-size: 12px; }
+button.btn-mini { min-height: 0; font-size: 11px; padding: 3px 8px; color: var(--danger); }
+textarea.ta-sm { min-height: 70px; }
+textarea.ta-md { min-height: 90px; }
+label.label-sm { font-size: 11px; }
+.actions.flush { margin-top: 0; }
+.divider { border: 0; border-top: 1px solid var(--line); width: 100%; margin: 10px 0; }
+label.file-btn { display: flex; align-items: center; justify-content: center; min-height: 48px; cursor: pointer; margin: 0; text-align: center; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); font-weight: 600; font-size: 14px; }
+.hidden-input { display: none; }
+.reset-row { margin-top: 14px; text-align: right; }
+button.link-danger { background: none; border: none; color: var(--danger); font-size: 13px; cursor: pointer; text-decoration: underline; padding: 0; }
+.player-select-row { display: flex; gap: 6px; width: 100%; }
+.fw-600 { font-weight: 600; }
+.chevron { font-size: 11px; opacity: 0.6; }

@@ -27,7 +27,7 @@ export function PlayerSelect({
         <span className={"dot " + (color === "white" ? "w" : "b")} title={color} />
         
         {/* Quick Chip Button that opens the visual player picker grid */}
-        <div style={{ display: "flex", gap: 6, width: "100%" }}>
+        <div className="player-select-row">
           <button
             type="button"
             className={`player-chip-btn ${value ? "filled" : "empty"}`}
@@ -35,10 +35,10 @@ export function PlayerSelect({
             onClick={() => setShowPicker(!showPicker)}
             aria-label={label}
           >
-            <span style={{ fontWeight: value ? 600 : 400 }}>
+            <span className={value ? "fw-600" : undefined}>
               {selectedPlayer ? selectedPlayer.name : (color === "white" ? "Seleziona Bianco…" : "Seleziona Nero…")}
             </span>
-            <span style={{ fontSize: 11, opacity: 0.6 }}>▼</span>
+            <span className="chevron">▼</span>
           </button>
           {value && !disabled && (
             <button

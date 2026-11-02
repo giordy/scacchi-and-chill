@@ -138,60 +138,37 @@ export function BackupSection({
 
   return (
     <div>
-      <p className="note" style={{ margin: "0 0 12px" }}>
+      <p className="note note-flush">
         Esporta tutti i dati del torneo (storico turni, partite, aneddoti dei giocatori e impostazioni) in un file JSON per sicurezza o per trasferirli su un altro dispositivo.
       </p>
 
-      <div className="actions two" style={{ marginTop: 0 }}>
+      <div className="actions two flush">
         <button
           className="secondary"
           type="button"
           onClick={handleExportBackup}
-          style={{ minHeight: 48 }}
         >
           📥 Scarica Backup (JSON)
         </button>
         <label
-          className="secondary"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: 48,
-            cursor: "pointer",
-            margin: 0,
-            textAlign: "center",
-            borderRadius: "8px",
-            border: "1px solid var(--line)",
-            background: "var(--panel)",
-            fontWeight: 600,
-            fontSize: "14px",
-          }}
+          className="secondary file-btn"
         >
           📂 Carica Backup (.json)
           <input
             ref={fileInputRef}
             type="file"
             accept=".json,application/json"
-            style={{ display: "none" }}
+            className="hidden-input"
             onChange={handleImportBackup}
           />
         </label>
       </div>
 
-      <div style={{ marginTop: 14, textAlign: "right" }}>
+      <div className="reset-row">
         <button
           type="button"
+          className="link-danger"
           onClick={handleResetAllData}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--danger)",
-            fontSize: "13px",
-            cursor: "pointer",
-            textDecoration: "underline",
-            padding: 0,
-          }}
         >
           ⚠️ Azzera tutti i dati locali del torneo
         </button>
