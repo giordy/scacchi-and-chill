@@ -63,8 +63,38 @@ export interface StatusPhrases {
   [key: string]: any;
 }
 
+export interface ScheduledMatch {
+  round: string;
+  white: string;
+  black: string;
+  url?: string;
+}
+
+export interface SeasonWinner {
+  season: string; // es. "Stagione 1"
+  name: string; // es. "Fabio"
+  handle: string; // es. "fsgach"
+  year?: string; // es. "2026"
+  notes?: string;
+}
+
+export interface TournamentMeta {
+  title: string;
+  season: string;
+  subtitle?: string;
+  imageUrl?: string;
+  masterName?: string;
+  description: string;
+  rulesText?: string;
+  howItWorks?: string;
+  fairPlayText?: string;
+  winners?: SeasonWinner[];
+}
+
 export interface AppConfig {
+  tournament?: TournamentMeta;
   players: Player[];
+  schedule?: ScheduledMatch[];
   defaults: {
     days: number;
     expiry: number;

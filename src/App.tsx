@@ -9,10 +9,27 @@ import {
   NoticeState,
   LichessExportGame,
   BackupData,
+  TournamentMeta,
+  ScheduledMatch,
+  SeasonWinner,
 } from './types';
 import rawConfig from '../config.json';
 import { ReviewsTab } from './ReviewsTab';
 import { WhatsAppPreview, Toast } from './WhatsAppPreview';
+import { PublicTournamentView } from './PublicTournamentView';
+import {
+  saveGameToFirebase,
+  saveGamesBatchToFirebase,
+  saveTournamentMetaToFirebase,
+  loadTournamentMetaFromFirebase,
+  saveTournamentFullToFirebase,
+  loadTournamentFullFromFirebase,
+  subscribeToTournamentDoc,
+  subscribeToGames,
+  testFirestoreConnection,
+  setAdminPassword,
+  verifyAdminPassword,
+} from './firebaseService';
 
 export const RULES = [
   { key: "noRematch", label: "No rematch offers" },
@@ -114,11 +131,37 @@ function validateAndNormalizeConfig(cfg: any): AppConfig {
     ? `🌐 Classifica e regolamento: ${infoLink}`
     : undefined;
 
+  const tournamentMeta = cfg.tournament ? {
+    title: isText(cfg.tournament.title) ? cfg.tournament.title : "Scacchi & Chill",
+    season: isText(cfg.tournament.season) ? cfg.tournament.season : "Edizione 2026",
+    description: isText(cfg.tournament.description) ? cfg.tournament.description : "Campionato amatoriale di scacchi per corrispondenza tra amici e colleghi.",
+    rulesText: isText(cfg.tournament.rulesText) ? cfg.tournament.rulesText : "2 giorni a mossa. Nessuna rivincita. Fair play assoluto.",
+  } : {
+    title: "Scacchi & Chill",
+    season: "Edizione 2026",
+    description: "Campionato amatoriale di scacchi per corrispondenza tra amici e colleghi.",
+    rulesText: "Partite per corrispondenza con cadenza a 2 giorni per mossa. No takeback, partite Rated, rispetto e fair play tra amici.",
+  };
+
+  const rawSchedule = cfg.schedule || cfg.calendario;
+  const schedule = Array.isArray(rawSchedule)
+    ? rawSchedule
+        .filter((m: any) => m && isText(m.round) && isText(m.white) && isText(m.black))
+        .map((m: any) => ({
+          round: String(m.round).trim(),
+          white: String(m.white).trim(),
+          black: String(m.black).trim(),
+          url: isText(m.url) ? m.url.trim() : undefined,
+        }))
+    : undefined;
+
   return {
+    tournament: tournamentMeta,
     players: players.map((p: any) => ({
       handle: p.handle.trim(),
       name: (isText(p.name) && p.name.trim()) || p.handle.trim(),
     })),
+    schedule,
     defaults: {
       days,
       expiry,
@@ -606,6 +649,10 @@ function SettingsTab({
   setPairs,
   flash,
   panelRef,
+  config,
+  onUpdateTournamentMeta,
+  onUpdatePlayers,
+  onUpdateSchedule,
 }: {
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Partial<Settings>>>;
@@ -619,9 +666,59 @@ function SettingsTab({
   setPairs: React.Dispatch<React.SetStateAction<GamePair[]>>;
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
   panelRef: React.RefObject<HTMLDivElement>;
+  config: AppConfig;
+  onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
+  onUpdatePlayers: (players: Player[]) => void;
+  onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
 }) {
   const [tokenDraft, setTokenDraft] = useState(settings.token);
+  const [tournTitle, setTournTitle] = useState(config.tournament?.title || "Scacchi & Chill");
+  const [tournSeason, setTournSeason] = useState(config.tournament?.season || "Stagione 2 - Capablanca");
+  const [tournSubtitle, setTournSubtitle] = useState(config.tournament?.subtitle || "La macchina degli scacchi");
+  const [tournMasterName, setTournMasterName] = useState(config.tournament?.masterName || "José Raúl Capablanca");
+  const [tournImageUrl, setTournImageUrl] = useState(config.tournament?.imageUrl || "assets/capablanca.jpg");
+  const [tournDesc, setTournDesc] = useState(
+    config.tournament?.description ||
+      "Per rendere ogni appuntamento sempre vario e coinvolgente, ogni stagione del nostro torneo è dedicata a un grande campione della storia degli scacchi, con aneddoti e curiosità legati alla sua carriera durante lo svolgimento delle partite."
+  );
+  const [tournHowItWorks, setTournHowItWorks] = useState(
+    config.tournament?.howItWorks ||
+      "1. All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida.\n2. Quando la partita finisce, scrivi nel gruppo WhatsApp così il risultato viene registrato."
+  );
+  const [tournFairPlay, setTournFairPlay] = useState(
+    config.tournament?.fairPlayText ||
+      "• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.\n• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.\n• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore."
+  );
+  const [tournWinners, setTournWinners] = useState<SeasonWinner[]>(
+    config.tournament?.winners || [
+      { season: "Stagione 1", name: "Fabio", handle: "fsgach", year: "2026", notes: "Campione 1ª Edizione" },
+    ]
+  );
+  const [newWinnerSeason, setNewWinnerSeason] = useState("");
+  const [newWinnerHandle, setNewWinnerHandle] = useState("");
+  const [newWinnerNotes, setNewWinnerNotes] = useState("");
+  const [tournRules, setTournRules] = useState(config.tournament?.rulesText || "");
+  
+  // Players state in admin
+  const [playersList, setPlayersList] = useState<Player[]>(config.players);
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerHandle, setNewPlayerHandle] = useState("");
+
+  // Schedule state in admin
+  const [scheduleList, setScheduleList] = useState<ScheduledMatch[]>(config.schedule || []);
+  const [newMatchRound, setNewMatchRound] = useState("1");
+  const [newMatchWhite, setNewMatchWhite] = useState("");
+  const [newMatchBlack, setNewMatchBlack] = useState("");
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPlayersList(config.players);
+  }, [config.players]);
+
+  useEffect(() => {
+    if (config.schedule) setScheduleList(config.schedule);
+  }, [config.schedule]);
 
   useEffect(() => {
     setTokenDraft(settings.token);
@@ -735,8 +832,526 @@ function SettingsTab({
 
   return (
     <div ref={panelRef} style={{ display: 'grid', gap: '14px' }}>
+      {/* 🏆 Gestione Stagione / Torneo Pubblico */}
+      <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
+        <h3 style={{ margin: "0 0 6px", fontSize: 16 }}>🏆 Informazioni Torneo & Nuova Stagione</h3>
+        <p className="note" style={{ margin: "0 0 12px" }}>
+          Questi dettagli vengono mostrati nella scheda pubblica <strong>Torneo</strong> per tutti i partecipanti.
+        </p>
+
+        <div className="grid2" style={{ marginBottom: 10 }}>
+          <div>
+            <label htmlFor="cfg-tourn-title">Nome del Torneo</label>
+            <input
+              id="cfg-tourn-title"
+              type="text"
+              value={tournTitle}
+              onChange={(e) => setTournTitle(e.target.value)}
+              placeholder="es. Scacchi & Chill"
+            />
+          </div>
+          <div>
+            <label htmlFor="cfg-tourn-season">Edizione / Stagione</label>
+            <input
+              id="cfg-tourn-season"
+              type="text"
+              value={tournSeason}
+              onChange={(e) => setTournSeason(e.target.value)}
+              placeholder="es. Stagione 2 - Capablanca"
+            />
+          </div>
+        </div>
+
+        <div className="grid2" style={{ marginBottom: 10 }}>
+          <div>
+            <label htmlFor="cfg-tourn-master">Nome del Maestro Scacchista</label>
+            <input
+              id="cfg-tourn-master"
+              type="text"
+              value={tournMasterName}
+              onChange={(e) => setTournMasterName(e.target.value)}
+              placeholder="es. José Raúl Capablanca"
+            />
+          </div>
+          <div>
+            <label htmlFor="cfg-tourn-sub">Motto / Soprannome Maestro</label>
+            <input
+              id="cfg-tourn-sub"
+              type="text"
+              value={tournSubtitle}
+              onChange={(e) => setTournSubtitle(e.target.value)}
+              placeholder="es. La macchina degli scacchi"
+            />
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label htmlFor="cfg-tourn-img">URL Immagine / Foto Maestro</label>
+          <input
+            id="cfg-tourn-img"
+            type="text"
+            value={tournImageUrl}
+            onChange={(e) => setTournImageUrl(e.target.value)}
+            placeholder="es. assets/capablanca.jpg"
+          />
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label htmlFor="cfg-tourn-desc">Presentazione / Dedica della Stagione</label>
+          <textarea
+            id="cfg-tourn-desc"
+            rows={3}
+            value={tournDesc}
+            onChange={(e) => setTournDesc(e.target.value)}
+            placeholder="Per rendere ogni appuntamento sempre vario e coinvolgente..."
+            style={{ minHeight: 70 }}
+          />
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label htmlFor="cfg-tourn-how">Svolgimento del Torneo ("Come funziona il torneo")</label>
+          <textarea
+            id="cfg-tourn-how"
+            rows={3}
+            value={tournHowItWorks}
+            onChange={(e) => setTournHowItWorks(e.target.value)}
+            placeholder="1. All'inizio di ogni giornata ricevi nel gruppo il link..."
+            style={{ minHeight: 70 }}
+          />
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label htmlFor="cfg-tourn-fairplay">Regole di Fair Play</label>
+          <textarea
+            id="cfg-tourn-fairplay"
+            rows={5}
+            value={tournFairPlay}
+            onChange={(e) => setTournFairPlay(e.target.value)}
+            placeholder="• Ti impegni a giocare ogni partita con le tue forze..."
+            style={{ minHeight: 90 }}
+          />
+        </div>
+
+        {/* 🏆 Albo d'Oro - Vincitori per Edizione */}
+        <div style={{ background: "var(--panel)", border: "1px solid var(--line)", borderRadius: 8, padding: 12, marginBottom: 14 }}>
+          <h4 style={{ margin: "0 0 6px", fontSize: 14 }}>🏆 Albo d'Oro (Vincitori Edizioni)</h4>
+          <p className="note" style={{ margin: "0 0 10px", fontSize: 12 }}>
+            Aggiungi o rimuovi i campioni delle stagioni passate.
+          </p>
+
+          <div style={{ display: "grid", gap: 6, marginBottom: 10 }}>
+            {tournWinners.map((w, idx) => (
+              <div
+                key={idx}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "6px 10px",
+                  background: "var(--bg)",
+                  border: "1px solid var(--line)",
+                  borderRadius: 6,
+                  fontSize: 13,
+                }}
+              >
+                <div>
+                  <strong>{w.season}:</strong> {w.name} (@{w.handle}) {w.notes && <span style={{ opacity: 0.7 }}>– {w.notes}</span>}
+                </div>
+                <button
+                  type="button"
+                  className="secondary"
+                  style={{ fontSize: 11, padding: "2px 6px", color: "var(--danger)" }}
+                  onClick={() => {
+                    const updated = tournWinners.filter((_, i) => i !== idx);
+                    setTournWinners(updated);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr auto", gap: 6, alignItems: "flex-end" }}>
+            <div>
+              <label htmlFor="new-w-season" style={{ fontSize: 11 }}>Stagione</label>
+              <input
+                id="new-w-season"
+                type="text"
+                placeholder="es. Stagione 1"
+                value={newWinnerSeason}
+                onChange={(e) => setNewWinnerSeason(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="new-w-handle" style={{ fontSize: 11 }}>Vincitore</label>
+              <select
+                id="new-w-handle"
+                value={newWinnerHandle}
+                onChange={(e) => setNewWinnerHandle(e.target.value)}
+              >
+                <option value="">Seleziona...</option>
+                {playersList.map((p) => (
+                  <option key={p.handle} value={p.handle}>
+                    {p.name} (@{p.handle})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="new-w-notes" style={{ fontSize: 11 }}>Note (opzionale)</label>
+              <input
+                id="new-w-notes"
+                type="text"
+                placeholder="es. 1ª Edizione"
+                value={newWinnerNotes}
+                onChange={(e) => setNewWinnerNotes(e.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              className="secondary"
+              style={{ minHeight: 44, whiteSpace: "nowrap", fontSize: 12 }}
+              onClick={() => {
+                const s = newWinnerSeason.trim();
+                if (!s || !newWinnerHandle) {
+                  flash("err", "Inserisci la stagione e seleziona il vincitore.");
+                  return;
+                }
+                const p = playersList.find((pl) => pl.handle === newWinnerHandle);
+                const updated = [
+                  ...tournWinners,
+                  {
+                    season: s,
+                    handle: newWinnerHandle,
+                    name: p?.name || newWinnerHandle,
+                    notes: newWinnerNotes.trim() || undefined,
+                  },
+                ];
+                setTournWinners(updated);
+                setNewWinnerSeason("");
+                setNewWinnerHandle("");
+                setNewWinnerNotes("");
+              }}
+            >
+              + Aggiungi
+            </button>
+          </div>
+        </div>
+
+        <div className="actions two" style={{ marginTop: 0 }}>
+          <button
+            className="secondary"
+            type="button"
+            onClick={() => {
+              onUpdateTournamentMeta({
+                title: tournTitle.trim(),
+                season: tournSeason.trim(),
+                subtitle: tournSubtitle.trim(),
+                masterName: tournMasterName.trim(),
+                imageUrl: tournImageUrl.trim(),
+                description: tournDesc.trim(),
+                howItWorks: tournHowItWorks.trim(),
+                fairPlayText: tournFairPlay.trim(),
+                winners: tournWinners,
+                rulesText: tournRules.trim(),
+              });
+              flash("ok", "Informazioni del torneo e Albo d'Oro aggiornati con successo!");
+            }}
+          >
+            Salva informazioni torneo
+          </button>
+          <button
+            className="secondary"
+            type="button"
+            title="Scarica config.json aggiornato con le impostazioni correnti e le partite salvate"
+            onClick={() => {
+              const fullExportConfig = {
+                ...config,
+                tournament: {
+                  title: tournTitle.trim(),
+                  season: tournSeason.trim(),
+                  description: tournDesc.trim(),
+                  rulesText: tournRules.trim(),
+                },
+                schedule: history.map((g) => ({
+                  round: g.round,
+                  white: g.white,
+                  black: g.black,
+                  url: g.url,
+                })),
+              };
+              const blob = new Blob([JSON.stringify(fullExportConfig, null, 2)], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "config.json";
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              flash("ok", "File config.json generato e scaricato!");
+            }}
+          >
+            📄 Esporta config.json per GitHub
+          </button>
+        </div>
+      </div>
+
+      {/* 👥 Gestione Partecipanti (Salvata su Firebase) */}
+      <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
+        <h3 style={{ margin: "0 0 6px", fontSize: 16 }}>👥 Giocatori del Torneo ({playersList.length})</h3>
+        <p className="note" style={{ margin: "0 0 12px" }}>
+          Modifica i partecipanti e i loro nickname Lichess. Le modifiche vengono salvate in tempo reale nel database cloud.
+        </p>
+
+        <div style={{ display: "grid", gap: 6, marginBottom: 14, maxHeight: 220, overflowY: "auto" }}>
+          {playersList.map((p, idx) => (
+            <div
+              key={idx}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "6px 10px",
+                background: "var(--panel)",
+                border: "1px solid var(--line)",
+                borderRadius: 6,
+              }}
+            >
+              <div>
+                <strong>{p.name}</strong> <span style={{ opacity: 0.7, fontSize: 13 }}>({p.handle})</span>
+              </div>
+              <button
+                type="button"
+                className="secondary"
+                style={{ fontSize: 11, padding: "3px 8px", color: "var(--danger)" }}
+                onClick={() => {
+                  const updated = playersList.filter((_, i) => i !== idx);
+                  setPlayersList(updated);
+                  onUpdatePlayers(updated);
+                  flash("ok", `Giocatore ${p.name} rimosso.`);
+                }}
+              >
+                Rimuovi
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "flex-end" }}>
+          <div>
+            <label htmlFor="new-p-name">Nome WhatsApp</label>
+            <input
+              id="new-p-name"
+              type="text"
+              placeholder="es. Marco"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="new-p-handle">Nickname Lichess</label>
+            <input
+              id="new-p-handle"
+              type="text"
+              placeholder="es. marco_chess"
+              value={newPlayerHandle}
+              onChange={(e) => setNewPlayerHandle(e.target.value)}
+            />
+          </div>
+          <button
+            type="button"
+            className="secondary"
+            style={{ minHeight: 48, whiteSpace: "nowrap" }}
+            onClick={() => {
+              const name = newPlayerName.trim();
+              const handle = newPlayerHandle.trim().toLowerCase();
+              if (!name || !handle) {
+                flash("err", "Inserisci sia il nome che il nickname Lichess.");
+                return;
+              }
+              if (playersList.some((p) => p.handle.toLowerCase() === handle)) {
+                flash("err", `Esiste già un giocatore con handle '${handle}'.`);
+                return;
+              }
+              const updated = [...playersList, { name, handle }];
+              setPlayersList(updated);
+              onUpdatePlayers(updated);
+              setNewPlayerName("");
+              setNewPlayerHandle("");
+              flash("ok", `Giocatore ${name} aggiunto con successo!`);
+            }}
+          >
+            + Aggiungi
+          </button>
+        </div>
+      </div>
+
+      {/* 📅 Calendario Ufficiale Accoppiamenti (Salvato su Firebase) */}
+      <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
+        <h3 style={{ margin: "0 0 6px", fontSize: 16 }}>📅 Calendario Ufficiale Accoppiamenti ({scheduleList.length} partite)</h3>
+        <p className="note" style={{ margin: "0 0 12px" }}>
+          Gli accoppiamenti preimpostati per ciascun turno. Selezionando il turno nella scheda <em>Partite</em>, questi incontri vengono caricati in automatico con 1 clic.
+        </p>
+
+        {scheduleList.length > 0 && (
+          <div style={{ display: "grid", gap: 6, marginBottom: 14, maxHeight: 220, overflowY: "auto" }}>
+            {scheduleList.map((m, idx) => {
+              const wName = playersList.find((p) => p.handle === m.white)?.name || m.white;
+              const bName = playersList.find((p) => p.handle === m.black)?.name || m.black;
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "6px 10px",
+                    background: "var(--panel)",
+                    border: "1px solid var(--line)",
+                    borderRadius: 6,
+                    fontSize: 13,
+                  }}
+                >
+                  <div>
+                    <span className="badge" style={{ marginRight: 6 }}>T.{m.round}</span>
+                    <strong>{wName}</strong> ⚪ vs <strong>{bName}</strong> ⚫
+                  </div>
+                  <button
+                    type="button"
+                    className="secondary"
+                    style={{ fontSize: 11, padding: "2px 6px", color: "var(--danger)" }}
+                    onClick={() => {
+                      const updated = scheduleList.filter((_, i) => i !== idx);
+                      setScheduleList(updated);
+                      onUpdateSchedule(updated);
+                      flash("ok", "Accoppiamento rimosso dal calendario.");
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div style={{ display: "grid", gridTemplateColumns: "70px 1fr 1fr auto", gap: 8, alignItems: "flex-end" }}>
+          <div>
+            <label htmlFor="new-m-round">Turno</label>
+            <input
+              id="new-m-round"
+              type="text"
+              inputMode="numeric"
+              value={newMatchRound}
+              onChange={(e) => setNewMatchRound(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="new-m-white">Bianco</label>
+            <select
+              id="new-m-white"
+              value={newMatchWhite}
+              onChange={(e) => setNewMatchWhite(e.target.value)}
+            >
+              <option value="">Seleziona...</option>
+              {playersList.map((p) => (
+                <option key={p.handle} value={p.handle}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="new-m-black">Nero</label>
+            <select
+              id="new-m-black"
+              value={newMatchBlack}
+              onChange={(e) => setNewMatchBlack(e.target.value)}
+            >
+              <option value="">Seleziona...</option>
+              {playersList.map((p) => (
+                <option key={p.handle} value={p.handle}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            className="secondary"
+            style={{ minHeight: 48, whiteSpace: "nowrap" }}
+            onClick={() => {
+              const r = newMatchRound.trim();
+              if (!r || !newMatchWhite || !newMatchBlack) {
+                flash("err", "Inserisci turno, giocatore bianco e giocatore nero.");
+                return;
+              }
+              if (newMatchWhite === newMatchBlack) {
+                flash("err", "Un giocatore non può sfidare se stesso.");
+                return;
+              }
+              const updated = [
+                ...scheduleList,
+                { round: r, white: newMatchWhite, black: newMatchBlack },
+              ];
+              setScheduleList(updated);
+              onUpdateSchedule(updated);
+              setNewMatchWhite("");
+              setNewMatchBlack("");
+              flash("ok", `Partita aggiunta al Turno ${r}!`);
+            }}
+          >
+            + Inserisci
+          </button>
+        </div>
+      </div>
+
+      {/* 🔐 Password Area Organizzatore */}
+      <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
+        <h3 style={{ margin: "0 0 6px", fontSize: 16 }}>🔐 Password Area Organizzatore</h3>
+        <p className="note" style={{ margin: "0 0 12px" }}>
+          La password è salvata in modo sicuro nel database Firebase (hash SHA-256) per proteggere la console amministrativa da accessi non autorizzati.
+        </p>
+
+        <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+          <div style={{ flex: 1 }}>
+            <label htmlFor="new-admin-pw">Nuova Password Organizzatore</label>
+            <input
+              id="new-admin-pw"
+              type="password"
+              placeholder="Inserisci nuova password…"
+              autoComplete="new-password"
+            />
+          </div>
+          <button
+            className="secondary"
+            type="button"
+            style={{ minHeight: 48, whiteSpace: "nowrap" }}
+            onClick={async () => {
+              const inp = document.getElementById("new-admin-pw") as HTMLInputElement;
+              const val = inp?.value?.trim();
+              if (!val || val.length < 4) {
+                flash("err", "La password deve contenere almeno 4 caratteri.");
+                return;
+              }
+              try {
+                await setAdminPassword(val);
+                inp.value = "";
+                flash("ok", "Password amministratore salvata con successo nel database Firebase!");
+              } catch (e: any) {
+                flash("err", "Errore nel salvataggio della password: " + e.message);
+              }
+            }}
+          >
+            Salva Password
+          </button>
+        </div>
+      </div>
+
       <div>
-        <label htmlFor="token">Token API Lichess</label>
+        <label htmlFor="token">Token API Lichess (Organizzatore)</label>
         <input
           id="token"
           type="password"
@@ -968,91 +1583,7 @@ function StatusTab({
   const [details, setDetails] = useState<string[]>([]);
   const [isRoundComplete, setIsRoundComplete] = useState(false);
   const [status, setStatus] = useState({ busy: false, error: "", info: "" });
-
-  // Recover games section
-  const [recText, setRecText] = useState("");
-  const [recRound, setRecRound] = useState("");
-  const [parsedPreview, setParsedPreview] = useState<{
-    round: string;
-    games: Array<{ white: string; black: string; url: string }>;
-    problems: string[];
-  } | null>(null);
-  const [recNotice, setRecNotice] = useState<NoticeState | null>(null);
-
-  // Manage saved rounds
   const [showManage, setShowManage] = useState(false);
-
-  const handleAnalyzeRecovery = () => {
-    setRecNotice(null);
-    if (!recText.trim()) {
-      return setRecNotice({ kind: "err", text: "Incolla prima il messaggio WhatsApp del turno." });
-    }
-    const parsed = parseRoundMessage(recText, config.players);
-    if (parsed.games.length === 0) {
-      return setRecNotice({
-        kind: "err",
-        text: "Nessun link Lichess trovato nel testo incollato. Controlla che contenga i link delle partite.",
-        items: parsed.problems,
-      });
-    }
-    const roundToUse = parsed.round || recRound.trim() || "1";
-    setRecRound(roundToUse);
-    setParsedPreview({
-      round: roundToUse,
-      games: parsed.games,
-      problems: parsed.problems,
-    });
-  };
-
-  const handleConfirmRecovery = (mode: 'replace' | 'merge') => {
-    if (!parsedPreview) return;
-    const targetRound = recRound.trim() || parsedPreview.round;
-    if (!targetRound) {
-      return setRecNotice({ kind: "err", text: "Inserisci il numero del turno." });
-    }
-
-    if (mode === 'replace') {
-      // Remove all existing games for this round and add recovered ones
-      setHistory((prev) => {
-        const otherRounds = prev.filter((g) => g.round !== targetRound);
-        const newGames: HistoryGame[] = parsedPreview.games.map((g) => ({
-          round: targetRound,
-          white: g.white,
-          black: g.black,
-          url: g.url,
-          createdAt: Date.now(),
-        }));
-        return [...otherRounds, ...newGames].slice(-100);
-      });
-      setRecNotice({
-        kind: "ok",
-        text: `Turno ${targetRound} sostituito con successo con ${parsedPreview.games.length} partite.`,
-      });
-    } else {
-      // Merge only missing games
-      setHistory((prev) => {
-        const existingUrls = new Set(prev.filter((g) => g.round === targetRound).map((g) => extractGameId(g.url)));
-        const fresh = parsedPreview.games
-          .filter((g) => !existingUrls.has(extractGameId(g.url)))
-          .map((g) => ({
-            round: targetRound,
-            white: g.white,
-            black: g.black,
-            url: g.url,
-            createdAt: Date.now(),
-          }));
-        return [...prev, ...fresh].slice(-100);
-      });
-      setRecNotice({
-        kind: "ok",
-        text: `Partite del Turno ${targetRound} integrate nello storico.`,
-      });
-    }
-
-    setChosen(targetRound);
-    setParsedPreview(null);
-    setRecText("");
-  };
 
   const handleDeleteRound = (roundToDelete: string) => {
     if (window.confirm(`Sei sicuro di voler eliminare tutte le partite del Turno ${roundToDelete}?`)) {
@@ -1239,8 +1770,29 @@ function StatusTab({
     return { text: textResult, details: detailsList, isComplete: isRoundComplete };
   };
 
-  const load = async () => {
-    const games = history.filter((g) => g.round === round);
+  const loadStatusForRound = async (targetRound: string) => {
+    let games = history.filter((g) => g.round === targetRound);
+    if (games.length === 0) {
+      setText("");
+      setIsRoundComplete(false);
+      return;
+    }
+
+    // Sort games in the exact order defined in the tournament schedule
+    if (config.schedule && config.schedule.length > 0) {
+      games = [...games].sort((a, b) => {
+        const idxA = config.schedule!.findIndex(
+          (m) => m.round === a.round && m.white === a.white && m.black === a.black
+        );
+        const idxB = config.schedule!.findIndex(
+          (m) => m.round === b.round && m.white === b.white && m.black === b.black
+        );
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return 0;
+      });
+    }
     setStatus({ busy: true, error: "", info: "" });
     try {
       const ids = games.map((g) => extractGameId(g.url)).filter((id): id is string => Boolean(id));
@@ -1262,6 +1814,13 @@ function StatusTab({
     }
   };
 
+  // Automatically update status whenever round is chosen or games change
+  useEffect(() => {
+    if (round) {
+      loadStatusForRound(round);
+    }
+  }, [round, history.length]);
+
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text);
@@ -1279,58 +1838,55 @@ function StatusTab({
       <h2>Stato e Risultati Partite</h2>
       {rounds.length === 0 ? (
         <p className="note">
-          Nessuna partita memorizzata. Crea un turno nella scheda <strong>Partite</strong> oppure recupera un turno precedente incollando il messaggio WhatsApp più in basso.
+          Nessuna partita memorizzata. Crea un turno nella scheda <strong>Partite</strong> per monitorarne lo stato in tempo reale.
         </p>
       ) : (
         <>
-          <div style={{ marginBottom: 12 }}>
-            <label htmlFor="status-round">Seleziona Turno</label>
-            <select id="status-round" value={round} onChange={(e) => setChosen(e.target.value)}>
-              {rounds.map((r) => {
-                const count = history.filter((g) => g.round === r).length;
-                return (
-                  <option key={r} value={r}>
-                    Turno {r} ({count} {count === 1 ? 'partita' : 'partite'})
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          <div className="actions">
-            <button className="primary" type="button" disabled={status.busy} onClick={load}>
-              {status.busy ? "Controllo in corso su Lichess…" : "Aggiorna stato da Lichess"}
+          <div style={{ display: "flex", gap: 10, alignItems: "flex-end", marginBottom: 16 }}>
+            <div style={{ flex: 1 }}>
+              <label htmlFor="status-round">Seleziona Turno</label>
+              <select id="status-round" value={round} onChange={(e) => setChosen(e.target.value)}>
+                {rounds.map((r) => {
+                  const count = history.filter((g) => g.round === r).length;
+                  return (
+                    <option key={r} value={r}>
+                      Turno {r} ({count} {count === 1 ? 'partita' : 'partite'})
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            <button
+              className="secondary"
+              type="button"
+              disabled={status.busy}
+              onClick={() => loadStatusForRound(round)}
+              style={{ minHeight: 48, whiteSpace: "nowrap" }}
+            >
+              {status.busy ? "Verifica in corso…" : "🔄 Aggiorna da Lichess"}
             </button>
           </div>
 
           {status.error && <div className="notice err">{status.error}</div>}
 
+          {status.busy && (
+            <div className="notice ok" style={{ marginBottom: 14 }}>
+              ⏳ Recupero stati, aperture e mosse delle partite da Lichess…
+            </div>
+          )}
+
           {text && (
             <>
               {isRoundComplete && (
-                <div className="notice ok" style={{ marginTop: 14, marginBottom: 0 }}>
-                  🏁 <strong>Turno {round} completato!</strong> Tutte le partite sono terminate. Il messaggio qui sotto contiene i risultati finali di fine turno.
+                <div className="notice ok" style={{ marginTop: 10, marginBottom: 12 }}>
+                  🏁 <strong>Turno {round} completato!</strong> Tutte le partite sono terminate. Il messaggio contiene i risultati finali.
                 </div>
               )}
 
               {/* WhatsApp Live Bubble Preview */}
               <WhatsAppPreview text={text} title={`Anteprima WhatsApp (Stato Turno ${round})`} />
 
-              <details style={{ marginTop: 8, marginBottom: 12 }}>
-                <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--muted)" }}>
-                  Modifica testo grezzo prima dell'invio
-                </summary>
-                <div style={{ marginTop: 8 }}>
-                  <textarea
-                    aria-label="Messaggio di aggiornamento"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    style={{ minHeight: 180 }}
-                  />
-                </div>
-              </details>
-
-              <div className="actions two">
+              <div className="actions two" style={{ marginTop: 12 }}>
                 <a
                   className="primary"
                   target="_blank"
@@ -1343,18 +1899,20 @@ function StatusTab({
                   📋 Copia testo
                 </button>
               </div>
-              {status.info && <div className="notice ok">{status.info}</div>}
-              <details>
-                <summary>Dettagli tecnici Lichess (verifica mosse)</summary>
-                <div className="body">
-                  <p className="note">
-                    Dati restituiti dalle API pubbliche di Lichess. Ricorda che per le partite in corso le ultimissime mosse non vengono mostrate in pubblico per evitare aiuti esterni.
-                  </p>
-                  <ul className="note" style={{ margin: 0, paddingLeft: 18 }}>
-                    {details.map((d, i) => (
-                      <li key={i}>{d}</li>
-                    ))}
-                  </ul>
+
+              {status.info && <div className="notice ok" style={{ marginTop: 8 }}>{status.info}</div>}
+
+              <details style={{ marginTop: 12 }}>
+                <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--muted)" }}>
+                  ✏️ Modifica testo prima dell'invio
+                </summary>
+                <div style={{ marginTop: 8 }}>
+                  <textarea
+                    aria-label="Messaggio di aggiornamento"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    style={{ minHeight: 180 }}
+                  />
                 </div>
               </details>
             </>
@@ -1362,40 +1920,24 @@ function StatusTab({
         </>
       )}
 
-      {/* Management of saved rounds */}
-      <details open={showManage} onToggle={(e) => setShowManage((e.target as HTMLDetailsElement).open)}>
-        <summary>Gestione turni salvati ({rounds.length} {rounds.length === 1 ? 'turno' : 'turni'})</summary>
-        <div className="body">
-          <p className="note">
-            Qui puoi vedere tutte le partite memorizzate per ciascun turno, eliminare turni caricati per errore o ricaricarli nella schermata principale.
-          </p>
-          {rounds.length === 0 ? (
-            <p className="note">Nessun turno presente nello storico.</p>
-          ) : (
-            <div>
-              {rounds.map((r) => {
-                const roundGames = history.filter((g) => g.round === r);
-                return (
-                  <div key={r} className="round-card">
-                    <div className="round-header">
-                      <strong>Turno {r}</strong>
-                      <span className="badge">{roundGames.length} {roundGames.length === 1 ? 'partita' : 'partite'}</span>
-                    </div>
-                    <ul className="match-list">
-                      {roundGames.map((g, idx) => (
-                        <li key={idx}>
-                          {nameOf(g.white)} ⚪ vs {nameOf(g.black)} ⚫ —{' '}
-                          <a href={g.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>
-                            {extractGameId(g.url)}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="actions two">
+      {/* Archivio Compatto turni salvati */}
+      {rounds.length > 0 && (
+        <details style={{ marginTop: 24 }} open={showManage} onToggle={(e) => setShowManage((e.target as HTMLDetailsElement).open)}>
+          <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--muted)" }}>
+            🗂️ Archivio e pulizia turni ({rounds.length} {rounds.length === 1 ? 'turno' : 'turni'})
+          </summary>
+          <div className="body" style={{ marginTop: 10 }}>
+            {rounds.map((r) => {
+              const roundGames = history.filter((g) => g.round === r);
+              return (
+                <div key={r} className="round-card" style={{ marginBottom: 10 }}>
+                  <div className="round-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <strong>Turno {r}</strong>
+                    <div style={{ display: "flex", gap: 6 }}>
                       <button
                         className="secondary"
                         type="button"
-                        style={{ minHeight: '38px', fontSize: '13px' }}
+                        style={{ fontSize: 12, padding: "3px 8px" }}
                         onClick={() => onLoadIntoActivePairs(r, roundGames)}
                       >
                         Carica in Partite
@@ -1403,141 +1945,28 @@ function StatusTab({
                       <button
                         className="danger"
                         type="button"
-                        style={{ minHeight: '38px', fontSize: '13px' }}
+                        style={{ fontSize: 12, padding: "3px 8px" }}
                         onClick={() => handleDeleteRound(r)}
                       >
-                        Elimina Turno {r}
+                        Elimina
                       </button>
                     </div>
                   </div>
-                );
-              })}
-              <div style={{ marginTop: 12 }}>
-                <button className="danger" type="button" style={{ width: '100%' }} onClick={handleClearAllHistory}>
-                  Cancella tutto lo storico
-                </button>
-              </div>
+                </div>
+              );
+            })}
+            <div style={{ marginTop: 12, textAlign: "right" }}>
+              <button
+                type="button"
+                style={{ background: "none", border: "none", color: "var(--danger)", fontSize: 12, textDecoration: "underline", cursor: "pointer" }}
+                onClick={handleClearAllHistory}
+              >
+                Cancella tutto lo storico salvato
+              </button>
             </div>
-          )}
-        </div>
-      </details>
-
-      {/* Protected Recovery from WhatsApp message */}
-      <details>
-        <summary>Recupera partite da messaggio WhatsApp</summary>
-        <div className="body">
-          <p className="note">
-            Incolla il testo del messaggio che avevi pubblicato all'avvio del turno. Supporta automaticamente sia i link Lichess tradizionali che i nuovi formati (<code>lichess.org/...</code> e <code>lichess.org/challenge/...</code>).
-          </p>
-          <textarea
-            className="small"
-            aria-label="Messaggio turno da recuperare"
-            value={recText}
-            placeholder="Incolla qui il messaggio del turno..."
-            onChange={(e) => {
-              setRecText(e.target.value);
-              setParsedPreview(null);
-              setRecNotice(null);
-            }}
-          />
-
-          <button className="secondary" type="button" disabled={!recText.trim()} onClick={handleAnalyzeRecovery}>
-            Analizza messaggio
-          </button>
-
-          <Notice notice={recNotice} />
-
-          {/* Safe Interactive Preview with overwrite protection */}
-          {parsedPreview && (
-            <div className="preview-box">
-              <h3 style={{ margin: '0 0 8px', fontSize: '16px' }}>Anteprima partite riconosciute</h3>
-
-              <div style={{ marginBottom: 12 }}>
-                <label htmlFor="edit-rec-round">Numero Turno da assegnare</label>
-                <input
-                  id="edit-rec-round"
-                  type="text"
-                  inputMode="numeric"
-                  value={recRound}
-                  onChange={(e) => setRecRound(e.target.value)}
-                />
-              </div>
-
-              <ul className="match-list" style={{ marginBottom: 12 }}>
-                {parsedPreview.games.map((g, idx) => (
-                  <li key={idx}>
-                    <strong>Partita {idx + 1}:</strong> {nameOf(g.white)} (bianco) vs {nameOf(g.black)} (nero)
-                    <br />
-                    <span style={{ fontSize: '12px', opacity: 0.85 }}>{g.url}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {parsedPreview.problems.length > 0 && (
-                <div className="notice warning" style={{ margin: '8px 0' }}>
-                  <strong>Attenzione:</strong>
-                  <ul>
-                    {parsedPreview.problems.map((p, i) => (
-                      <li key={i}>{p}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Check if targetRound already exists */}
-              {rounds.includes(recRound.trim()) ? (
-                <div>
-                  <div className="notice warning" style={{ margin: '8px 0 12px' }}>
-                    ⚠️ Il <strong>Turno {recRound.trim()}</strong> esiste già nello storico (
-                    {history.filter((g) => g.round === recRound.trim()).length} partite). Scegli come procedere per evitare sovrascritture accidentali:
-                  </div>
-                  <div className="actions">
-                    <button
-                      className="primary"
-                      type="button"
-                      style={{ background: 'var(--danger)' }}
-                      onClick={() => handleConfirmRecovery('replace')}
-                    >
-                      Sostituisci completamente il Turno {recRound.trim()}
-                    </button>
-                    <button
-                      className="secondary"
-                      type="button"
-                      onClick={() => handleConfirmRecovery('merge')}
-                    >
-                      Unisci solo le partite mancanti
-                    </button>
-                    <button
-                      className="secondary"
-                      type="button"
-                      onClick={() => setParsedPreview(null)}
-                    >
-                      Annulla
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="actions two">
-                  <button
-                    className="primary"
-                    type="button"
-                    onClick={() => handleConfirmRecovery('replace')}
-                  >
-                    Salva nel Turno {recRound.trim()}
-                  </button>
-                  <button
-                    className="secondary"
-                    type="button"
-                    onClick={() => setParsedPreview(null)}
-                  >
-                    Annulla
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </details>
+          </div>
+        </details>
+      )}
     </section>
   );
 }
@@ -1546,25 +1975,181 @@ function StatusTab({
 
 export function App() {
   const [config, setConfig] = useState<AppConfig>(defaultConfig);
+
+  // Check URL hash for admin mode: #admin or ?admin
+  const checkIsAdmin = () => {
+    return (
+      window.location.hash.toLowerCase().includes("admin") ||
+      window.location.search.toLowerCase().includes("admin")
+    );
+  };
+
+  const [isAdmin, setIsAdmin] = useState(checkIsAdmin);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    return sessionStorage.getItem("scacchi.admin.auth") === "true";
+  });
+  const [adminPasswordInput, setAdminPasswordInput] = useState("");
+  const [adminAuthError, setAdminAuthError] = useState("");
+  const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
+
+  useEffect(() => {
+    const handleHash = () => setIsAdmin(checkIsAdmin());
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
+
+  const handleAdminLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!adminPasswordInput.trim()) {
+      setAdminAuthError("Inserisci la password.");
+      return;
+    }
+    setAdminAuthError("");
+    setIsVerifyingPassword(true);
+    try {
+      const ok = await verifyAdminPassword(adminPasswordInput.trim());
+      if (ok) {
+        setIsAdminAuthenticated(true);
+        sessionStorage.setItem("scacchi.admin.auth", "true");
+        setAdminPasswordInput("");
+        setAdminAuthError("");
+      } else {
+        setAdminAuthError("Password non corretta. Riprova.");
+      }
+    } catch (err: any) {
+      setAdminAuthError("Errore durante la verifica: " + err.message);
+    } finally {
+      setIsVerifyingPassword(false);
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdminAuthenticated(false);
+    sessionStorage.removeItem("scacchi.admin.auth");
+    window.location.hash = "";
+  };
+
   const [activeTab, setActiveTab] = usePersistentState<'pairings' | 'status' | 'reviews' | 'settings'>(
-    'pairings.activeTab',
+    'pairings.adminActiveTab',
     'pairings'
   );
 
-  // Attempt to load live config.json if available
+  const [liveGameStates, setLiveGameStates] = useState<Record<string, LichessExportGame>>({});
+  const [isSyncingLive, setIsSyncingLive] = useState(false);
+  const [lastLiveSyncTime, setLastLiveSyncTime] = useState<string | null>(null);
+
+  // Attempt to load live config.json and Firestore state on boot
   useEffect(() => {
+    testFirestoreConnection();
+
     fetch("config.json", { cache: "no-cache" })
       .then((res) => {
         if (!res.ok) throw new Error(`config.json non trovato (HTTP ${res.status}).`);
         return res.json();
       })
-      .then((cfg) => {
+      .then(async (cfg) => {
         const validated = validateAndNormalizeConfig(cfg);
+        // Check if Firestore already has full tournament data (meta, players, schedule)
+        const remoteTournament = await loadTournamentFullFromFirebase();
+        if (remoteTournament) {
+          if (remoteTournament.title && remoteTournament.season) {
+            validated.tournament = {
+              title: remoteTournament.title,
+              season: remoteTournament.season,
+              subtitle: remoteTournament.subtitle || "La macchina degli scacchi",
+              masterName: remoteTournament.masterName || "José Raúl Capablanca",
+              imageUrl: remoteTournament.imageUrl || "assets/capablanca.jpg",
+              description:
+                remoteTournament.description ||
+                "Per rendere ogni appuntamento sempre vario e coinvolgente, ogni stagione del nostro torneo è dedicata a un grande campione della storia degli scacchi, con aneddoti e curiosità legati alla sua carriera durante lo svolgimento delle partite.",
+              rulesText: remoteTournament.rulesText || "",
+              howItWorks: remoteTournament.howItWorks || "",
+              fairPlayText: remoteTournament.fairPlayText || "",
+              winners: remoteTournament.winners || [],
+            };
+          }
+          if (Array.isArray(remoteTournament.players) && remoteTournament.players.length > 0) {
+            validated.players = remoteTournament.players;
+          }
+          if (Array.isArray(remoteTournament.schedule) && remoteTournament.schedule.length > 0) {
+            validated.schedule = remoteTournament.schedule;
+          }
+        } else {
+          // If Firestore is empty on first boot, initialize it with the default config!
+          saveTournamentFullToFirebase({
+            meta: {
+              title: "Scacchi & Chill",
+              season: "Stagione 2 - Capablanca",
+              subtitle: "La macchina degli scacchi",
+              masterName: "José Raúl Capablanca",
+              imageUrl: "assets/capablanca.jpg",
+              description:
+                "Per rendere ogni appuntamento sempre vario e coinvolgente, ogni stagione del nostro torneo è dedicata a un grande campione della storia degli scacchi, con aneddoti e curiosità legati alla sua carriera durante lo svolgimento delle partite.",
+              rulesText: "",
+              howItWorks:
+                "1. All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida.\n2. Quando la partita finisce, scrivi nel gruppo WhatsApp così il risultato viene registrato.",
+              fairPlayText:
+                "• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.\n• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.\n• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.",
+              winners: [
+                { season: "Stagione 1", name: "Fabio", handle: "fsgach", year: "2026", notes: "Campione 1ª Edizione" },
+              ],
+            },
+            players: validated.players,
+            schedule: validated.schedule,
+          }).catch((e) => console.warn("Inizializzazione Firestore saltata:", e));
+        }
         setConfig(validated);
       })
       .catch((err) => {
         console.warn("Utilizzo configurazione incorporata di default:", err.message);
       });
+
+    // Real-time listener for Tournament Doc changes (players, schedule, rules)
+    const unsubDoc = subscribeToTournamentDoc((doc) => {
+      setConfig((prev) => {
+        const next = { ...prev };
+        if (doc.title && doc.season) {
+          next.tournament = {
+            title: doc.title,
+            season: doc.season,
+            subtitle: doc.subtitle || "La macchina degli scacchi",
+            masterName: doc.masterName || "José Raúl Capablanca",
+            imageUrl: doc.imageUrl || "assets/capablanca.jpg",
+            description:
+              doc.description ||
+              "Per rendere ogni appuntamento sempre vario e coinvolgente, ogni stagione del nostro torneo è dedicata a un grande campione della storia degli scacchi, con aneddoti e curiosità legati alla sua carriera durante lo svolgimento delle partite.",
+            rulesText: doc.rulesText || "",
+            howItWorks: doc.howItWorks || "",
+            fairPlayText: doc.fairPlayText || "",
+            winners: doc.winners || [],
+          };
+        }
+        if (Array.isArray(doc.players) && doc.players.length > 0) {
+          next.players = doc.players;
+        }
+        if (Array.isArray(doc.schedule)) {
+          next.schedule = doc.schedule;
+        }
+        return next;
+      });
+    });
+
+    // Real-time listener for Firestore games: updates games across all devices instantly!
+    const unsubGames = subscribeToGames((remoteGames) => {
+      if (remoteGames.length > 0) {
+        setHistory((prevLocal) => {
+          const knownUrls = new Set(prevLocal.map((g) => g.url).filter(Boolean));
+          const toAdd = remoteGames.filter((rg) => rg.url && !knownUrls.has(rg.url));
+          if (toAdd.length === 0) return prevLocal;
+          return [...prevLocal, ...toAdd];
+        });
+      }
+    });
+
+    return () => {
+      unsubDoc();
+      unsubGames();
+    };
   }, []);
 
   const gameCount = Math.floor(config.players.length / 2);
@@ -1629,11 +2214,11 @@ export function App() {
     }
   };
 
-  // Remember every created game in history without duplicating
+  // Remember every created game in history without duplicating, and sync with config.schedule
   useEffect(() => {
     setHistory((h) => {
       const knownIds = new Set(h.map((g) => extractGameId(g.url)));
-      const added = pairs
+      const addedFromPairs = pairs
         .filter((p) => p.url && extractGameId(p.url) && !knownIds.has(extractGameId(p.url)))
         .map((p) => ({
           round,
@@ -1642,9 +2227,129 @@ export function App() {
           url: p.url,
           createdAt: Date.now(),
         }));
-      return added.length ? [...h, ...added].slice(-100) : h;
+
+      // Also merge any games present in config.schedule that have a URL
+      const addedFromSchedule: HistoryGame[] = [];
+      if (config.schedule && config.schedule.length > 0) {
+        config.schedule.forEach((m) => {
+          if (m.url) {
+            const id = extractGameId(m.url);
+            if (id && !knownIds.has(id)) {
+              knownIds.add(id);
+              addedFromSchedule.push({
+                round: m.round,
+                white: m.white,
+                black: m.black,
+                url: m.url,
+                createdAt: Date.now(),
+              });
+            }
+          }
+        });
+      }
+
+      const allAdded = [...addedFromPairs, ...addedFromSchedule];
+      return allAdded.length ? [...h, ...allAdded].slice(-200) : h;
     });
-  }, [pairs, round, setHistory]);
+  }, [pairs, round, config.schedule, setHistory]);
+
+  const refreshLiveGameStates = async (force: boolean = false) => {
+    const ids = history.map((g) => extractGameId(g.url)).filter((id): id is string => Boolean(id));
+    if (ids.length === 0) return;
+
+    // Smart Cache in localStorage:
+    // Finished games are final and immutable (status != started/created).
+    // We only fetch if the cache is older than 5 minutes (300,000 ms) or if forced.
+    const CACHE_KEY = "scacchi.lichess.cache.v1";
+    const CACHE_TIME_KEY = "scacchi.lichess.cache.time";
+    const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache to protect Lichess servers
+
+    let cachedMap: Record<string, LichessExportGame> = {};
+    let lastFetched = 0;
+    try {
+      const saved = localStorage.getItem(CACHE_KEY);
+      if (saved) cachedMap = JSON.parse(saved);
+      const savedTime = localStorage.getItem(CACHE_TIME_KEY);
+      if (savedTime) lastFetched = parseInt(savedTime, 10);
+    } catch {}
+
+    const now = Date.now();
+    const isFresh = now - lastFetched < CACHE_TTL_MS;
+
+    // Identify games that are already finished (winner exists or status is mate/draw/resign/outoftime)
+    const isFinished = (s?: LichessExportGame) =>
+      Boolean(s && s.status && s.status !== "created" && s.status !== "started");
+
+    // Games that we actually need to check: not in cache OR not yet finished
+    const idsToFetch = ids.filter((id) => !isFinished(cachedMap[id]));
+
+    // If cache is fresh and we already have data, reuse cache without touching network!
+    if (!force && isFresh && Object.keys(cachedMap).length > 0) {
+      setLiveGameStates(cachedMap);
+      const d = new Date(lastFetched);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      setLastLiveSyncTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
+      return;
+    }
+
+    // If all games in tournament are already finished, no network call is ever needed!
+    if (idsToFetch.length === 0 && Object.keys(cachedMap).length > 0) {
+      setLiveGameStates(cachedMap);
+      const d = new Date(lastFetched || now);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      setLastLiveSyncTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
+      return;
+    }
+
+    // Call Lichess ONLY for unfinished or new games in 1 single batch POST
+    setIsSyncingLive(true);
+    try {
+      const res = await fetch("https://lichess.org/api/games/export/_ids?pgnInJson=false&lastFen=true&opening=true", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain", Accept: "application/x-ndjson" },
+        body: idsToFetch.join(","),
+      });
+
+      if (res.ok) {
+        const text = await res.text();
+        const updatedMap: Record<string, LichessExportGame> = { ...cachedMap };
+        text
+          .split("\n")
+          .filter((l) => l.trim())
+          .forEach((line) => {
+            try {
+              const g = JSON.parse(line);
+              if (g.id) updatedMap[g.id] = g;
+            } catch {}
+          });
+
+        setLiveGameStates(updatedMap);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(updatedMap));
+          localStorage.setItem(CACHE_TIME_KEY, String(now));
+        } catch {}
+
+        const d = new Date(now);
+        const pad = (n: number) => String(n).padStart(2, "0");
+        setLastLiveSyncTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
+      }
+    } catch (e: any) {
+      console.warn("Auto-sync Lichess fallito:", e.message);
+      // Fallback to cached data if network failed
+      if (Object.keys(cachedMap).length > 0) {
+        setLiveGameStates(cachedMap);
+      }
+    } finally {
+      setIsSyncingLive(false);
+    }
+  };
+
+  // Auto-sync on first load if we have games
+  useEffect(() => {
+    if (history.length > 0) {
+      refreshLiveGameStates();
+    }
+  }, [history.length]);
 
   const updatePair = (i: number, patch: Partial<GamePair>) => {
     setNotice(null);
@@ -1774,7 +2479,24 @@ export function App() {
         errors
       );
     } else {
-      flash("ok", "Partite create con successo! Puoi condividere il messaggio qui sotto.");
+      // Sync created games to Firestore in background
+      try {
+        const gamesToSave: HistoryGame[] = ready.map(({ p, i }) => ({
+          round,
+          white: p.white,
+          black: p.black,
+          url: pairs[i]?.url || "",
+          createdAt: Date.now(),
+        })).filter((g) => Boolean(g.url));
+
+        if (gamesToSave.length > 0) {
+          saveGamesBatchToFirebase(gamesToSave);
+        }
+      } catch (err) {
+        console.warn("Salvataggio Firebase in background fallito:", err);
+      }
+
+      flash("ok", "Partite create con successo e sincronizzate sul database cloud!");
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     }
   };
@@ -1814,13 +2536,177 @@ export function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // If NOT in admin mode: show the Public Tournament Page (Clean, with discreet link to admin)
+  if (!isAdmin) {
+    return (
+      <main>
+        <PublicTournamentView
+          config={config}
+          tournamentMeta={
+            config.tournament || {
+              title: "Scacchi & Chill",
+              season: "Stagione 2 - Capablanca",
+              subtitle: "La macchina degli scacchi",
+              masterName: "José Raúl Capablanca",
+              imageUrl: "assets/capablanca.jpg",
+              description:
+                "Per rendere ogni appuntamento sempre vario e coinvolgente, ogni stagione del nostro torneo è dedicata a un grande campione della storia degli scacchi, con aneddoti e curiosità legati alla sua carriera durante lo svolgimento delle partite.",
+              rulesText: "2 giorni a mossa. Nessuna rivincita. Fair play assoluto.",
+            }
+          }
+          history={history}
+          gameStates={liveGameStates}
+          isSyncing={isSyncingLive}
+          onRefresh={refreshLiveGameStates}
+          lastSyncTime={lastLiveSyncTime}
+          nameOf={nameOf}
+        />
+
+        {/* Link per l'organizzatore nella parte pubblica */}
+        <div style={{ marginTop: 24, textAlign: "center", borderTop: "1px solid var(--line)", paddingTop: 14 }}>
+          <a
+            href="#admin"
+            style={{
+              fontSize: 12,
+              color: "var(--muted)",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              opacity: 0.85,
+            }}
+          >
+            🔒 Area Organizzatore
+          </a>
+        </div>
+      </main>
+    );
+  }
+
+  // If in admin mode but NOT authenticated: show Password Login Screen
+  if (!isAdminAuthenticated) {
+    return (
+      <main>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <div>
+            <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--accent)" }}>
+              Accesso Riservato
+            </span>
+            <h1 style={{ margin: "2px 0 0", fontSize: 22 }}>🔒 Area Organizzatore</h1>
+          </div>
+          <a
+            href="#"
+            className="secondary"
+            style={{
+              fontSize: 12,
+              padding: "6px 12px",
+              borderRadius: 8,
+              textDecoration: "none",
+              border: "1px solid var(--line)",
+              background: "var(--panel)",
+              color: "var(--ink)",
+              fontWeight: 600,
+            }}
+          >
+            ← Torna al Torneo
+          </a>
+        </div>
+
+        <div style={{ background: "var(--panel)", border: "1px solid var(--line)", borderRadius: 12, padding: 20, maxWidth: 440, margin: "20px auto" }}>
+          <h2 style={{ fontSize: 18, marginTop: 0 }}>Inserisci la Password</h2>
+          <p className="note" style={{ margin: "0 0 16px" }}>
+            L'accesso alla creazione partite e gestione turni è protetto da password salvata nel database Firebase.
+          </p>
+
+          <form onSubmit={handleAdminLogin}>
+            <div style={{ marginBottom: 14 }}>
+              <label htmlFor="admin-pw-gate">Password di Accesso</label>
+              <input
+                id="admin-pw-gate"
+                type="password"
+                autoFocus
+                placeholder="Password organizzatore…"
+                value={adminPasswordInput}
+                onChange={(e) => setAdminPasswordInput(e.target.value)}
+                autoComplete="current-password"
+              />
+            </div>
+
+            {adminAuthError && (
+              <div className="notice err" style={{ marginBottom: 14 }}>
+                {adminAuthError}
+              </div>
+            )}
+
+            <button
+              className="primary"
+              type="submit"
+              disabled={isVerifyingPassword}
+              style={{ width: "100%", minHeight: 48 }}
+            >
+              {isVerifyingPassword ? "Verifica in corso…" : "Accedi all'Area Gestione 🔓"}
+            </button>
+
+            <p className="note" style={{ marginTop: 12, textAlign: "center", fontSize: 12 }}>
+              💡 Nota iniziale: se è il primo accesso e non l'hai ancora cambiata, la password predefinita è <code>scacchi</code>.
+            </p>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+  // If in admin mode AND authenticated: show the Full Tournament Admin Console
   return (
     <main>
-      <h1>Round pairings</h1>
-      <p className="sub">Crea gli accoppiamenti, genera le sfide su Lichess e segui lo stato del torneo.</p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+        <div>
+          <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--accent)", letterSpacing: 0.5 }}>
+            🔒 Area Organizzatore (Autenticato)
+          </span>
+          <h1 style={{ margin: "2px 0 0", fontSize: 22 }}>Gestione Torneo</h1>
+        </div>
+        <div style={{ display: "flex", gap: 6 }}>
+          <a
+            href="#"
+            className="secondary"
+            style={{
+              fontSize: 12,
+              padding: "6px 10px",
+              borderRadius: 8,
+              textDecoration: "none",
+              border: "1px solid var(--line)",
+              background: "var(--panel)",
+              color: "var(--ink)",
+              fontWeight: 600,
+            }}
+          >
+            👁️ Vista Pubblica
+          </a>
+          <button
+            type="button"
+            className="secondary"
+            onClick={handleAdminLogout}
+            style={{
+              fontSize: 12,
+              padding: "6px 10px",
+              borderRadius: 8,
+              border: "1px solid var(--line)",
+              background: "var(--panel)",
+              color: "var(--danger)",
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+            title="Esci dalla sessione amministratore"
+          >
+            Esci 🚪
+          </button>
+        </div>
+      </div>
+      <p className="sub">Crea gli accoppiamenti, genera le sfide su Lichess e gestisci il torneo.</p>
       <div className="strip" aria-hidden="true" />
 
-      {/* Modern Phone-Friendly Tabs Navigation */}
+      {/* Modern Phone-Friendly Tabs Navigation (Admin Only) */}
       <nav className="tabs" role="tablist" aria-label="Navigazione sezioni">
         <button
           className={`tab-btn ${activeTab === 'pairings' ? 'active' : ''}`}
@@ -1864,15 +2750,52 @@ export function App() {
       {activeTab === 'pairings' && (
         <section>
           <div style={{ marginBottom: 16 }}>
-            <label htmlFor="round">Numero del Turno</label>
-            <input
-              id="round"
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              value={round}
-              onChange={(e) => setRound(e.target.value)}
-            />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+              <div style={{ flex: 1, marginRight: 8 }}>
+                <label htmlFor="round">Numero del Turno</label>
+                <input
+                  id="round"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={round}
+                  onChange={(e) => {
+                    const nextR = e.target.value;
+                    setRound(nextR);
+                    const scheduledForRound = (config.schedule || []).filter((m) => m.round === nextR.trim());
+                    if (scheduledForRound.length > 0) {
+                      const newPairs = emptyPairs();
+                      scheduledForRound.forEach((m, idx) => {
+                        if (idx < newPairs.length) {
+                          newPairs[idx] = { white: m.white, black: m.black, url: m.url || "" };
+                        }
+                      });
+                      setPairs(newPairs);
+                    }
+                  }}
+                />
+              </div>
+              {config.schedule && config.schedule.some((m) => m.round === round.trim()) && (
+                <button
+                  type="button"
+                  className="secondary"
+                  style={{ minHeight: 48, fontSize: 13, whiteSpace: "nowrap" }}
+                  onClick={() => {
+                    const scheduledForRound = (config.schedule || []).filter((m) => m.round === round.trim());
+                    const newPairs = emptyPairs();
+                    scheduledForRound.forEach((m, idx) => {
+                      if (idx < newPairs.length) {
+                        newPairs[idx] = { white: m.white, black: m.black, url: m.url || "" };
+                      }
+                    });
+                    setPairs(newPairs);
+                    flash("ok", `Accoppiamenti del Turno ${round} ricaricati dal calendario ufficiale!`);
+                  }}
+                >
+                  🔄 Ricarica Turno {round}
+                </button>
+              )}
+            </div>
           </div>
 
           {pairs.map((pair, i) => (
@@ -1984,6 +2907,53 @@ export function App() {
             setPairs={setPairs}
             flash={flash}
             panelRef={settingsTabRef}
+            config={config}
+            onUpdateTournamentMeta={(patch) => {
+              const updatedMeta: TournamentMeta = {
+                title: patch.title ?? config.tournament?.title ?? "Scacchi & Chill",
+                season: patch.season ?? config.tournament?.season ?? "Stagione 2 - Capablanca",
+                subtitle: patch.subtitle ?? config.tournament?.subtitle ?? "La macchina degli scacchi",
+                masterName: patch.masterName ?? config.tournament?.masterName ?? "José Raúl Capablanca",
+                imageUrl: patch.imageUrl ?? config.tournament?.imageUrl ?? "assets/capablanca.jpg",
+                description:
+                  patch.description ??
+                  config.tournament?.description ??
+                  "Per rendere ogni appuntamento sempre vario e coinvolgente, ogni stagione del nostro torneo è dedicata a un grande campione della storia degli scacchi, con aneddoti e curiosità legati alla sua carriera durante lo svolgimento delle partite.",
+                howItWorks:
+                  patch.howItWorks ??
+                  config.tournament?.howItWorks ??
+                  "1. All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida.\n2. Quando la partita finisce, scrivi nel gruppo WhatsApp così il risultato viene registrato.",
+                fairPlayText:
+                  patch.fairPlayText ??
+                  config.tournament?.fairPlayText ??
+                  "• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.\n• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.\n• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.",
+                winners:
+                  patch.winners ??
+                  config.tournament?.winners ?? [
+                    { season: "Stagione 1", name: "Fabio", handle: "fsgach", year: "2026", notes: "Campione 1ª Edizione" },
+                  ],
+                rulesText: patch.rulesText ?? config.tournament?.rulesText ?? "",
+              };
+              setConfig((prev) => ({
+                ...prev,
+                tournament: updatedMeta,
+              }));
+              saveTournamentMetaToFirebase(updatedMeta).catch((e) =>
+                console.warn("Salvataggio metadati su Firestore fallito:", e)
+              );
+            }}
+            onUpdatePlayers={(updatedPlayers) => {
+              setConfig((prev) => ({ ...prev, players: updatedPlayers }));
+              saveTournamentFullToFirebase({ players: updatedPlayers }).catch((e) =>
+                console.warn("Salvataggio giocatori su Firestore fallito:", e)
+              );
+            }}
+            onUpdateSchedule={(updatedSchedule) => {
+              setConfig((prev) => ({ ...prev, schedule: updatedSchedule }));
+              saveTournamentFullToFirebase({ schedule: updatedSchedule }).catch((e) =>
+                console.warn("Salvataggio calendario su Firestore fallito:", e)
+              );
+            }}
           />
         </section>
       )}

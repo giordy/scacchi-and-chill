@@ -777,13 +777,329 @@ details .body {
   font-size: 14px;
 }
 
-.rating-badge {
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 6px;
+/* Public Tournament Showcase (Score7 Replacement) */
+.public-tournament {
+  margin-top: 6px;
+}
+
+.tournament-hero {
   background: var(--panel);
   border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tournament-tag {
+  display: inline-block;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.tournament-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.tournament-desc {
+  margin: 0;
+  font-size: 14px;
   color: var(--muted);
+  line-height: 1.4;
+  max-width: 600px;
+}
+
+.sync-pill-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.refresh-btn {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+}
+
+.last-sync-text {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.public-subnav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 16px;
+  background: var(--panel);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+@media (max-width: 640px) {
+  .public-subnav {
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+}
+
+.pub-tab-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.pub-tab-btn.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Standings Table */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.standings-table th,
+.standings-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.standings-table th {
+  background: var(--bg);
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.row-leader {
+  background: rgba(234, 179, 8, 0.08);
+}
+
+.row-podium {
+  background: rgba(34, 197, 94, 0.04);
+}
+
+.player-link {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.player-link:hover {
+  color: var(--accent);
+}
+
+/* Crosstable Matrix */
+.crosstable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.crosstable th,
+.crosstable td {
+  padding: 8px 6px;
+  border: 1px solid var(--line);
+  text-align: center;
+}
+
+.crosstable th {
+  background: var(--bg);
+  font-weight: 600;
+}
+
+.cross-cell.self {
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.cross-cell.win {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.cross-cell.loss {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.cross-cell.draw {
+  background: rgba(234, 179, 8, 0.15);
+  color: #ca8a04;
+  font-weight: 600;
+}
+
+.cross-cell.empty {
+  color: var(--muted);
+}
+
+/* Matches Grid */
+.matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.match-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.match-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.match-round {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.status-badge.ongoing {
+  background: rgba(2, 126, 181, 0.15);
+  color: #027eb5;
+}
+
+.status-badge.win {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+}
+
+.status-badge.loss {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.status-badge.draw {
+  background: rgba(234, 179, 8, 0.15);
+  color: #ca8a04;
+}
+
+.status-badge.pending {
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.match-players {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.winner-crown {
+  font-size: 12px;
+}
+
+.match-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.opening-label {
+  font-size: 11px;
+  color: var(--muted);
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lichess-link-btn {
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lichess-link-btn:hover {
+  text-decoration: underline;
+}
+
+.rules-box {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
 }
 
 /* WhatsApp Message Preview Bubble */
