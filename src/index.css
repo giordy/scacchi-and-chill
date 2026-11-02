@@ -1345,3 +1345,26 @@ details.manage-rounds { margin-top: 24px; }
 summary.summary-muted, details.manage-rounds > summary { cursor: pointer; font-size: 13px; color: var(--muted); }
 button.btn-sm { font-size: 12px; padding: 3px 8px; }
 button.link-danger.sm { font-size: 12px; }
+
+/* Reviews tab */
+.mb-6 { margin-bottom: 6px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-18 { margin-bottom: 18px; }
+.mt-16 { margin-top: 16px; }
+.m-0 { margin: 0; }
+.fs-14 { font-size: 14px; }
+.inline-row { display: flex; align-items: center; gap: 8px; }
+.space-row { display: flex; justify-content: space-between; align-items: center; }
+.muted { color: var(--muted); }
+.muted-normal { color: var(--muted); font-weight: normal; }
+.stat-pill-val.accent { color: var(--accent); }
+.note-xs { margin: 0 0 6px; font-size: 12px; }
+.note-13 { margin: 0 0 6px; font-size: 13px; }
+button.btn-compact { padding: 4px 10px; font-size: 13px; min-height: 32px; }
+button.btn-compact.xs { padding: 4px 8px; font-size: 12px; min-height: 30px; }
+button.link-muted { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
+.quick-standings { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+.quick-standings-list { max-height: 200px; overflow-y: auto; font-size: 13px; }
+.quick-standings-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted var(--line); }
+textarea.ta-xl { min-height: 220px; font-family: inherit; }

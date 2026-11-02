@@ -501,12 +501,12 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
   return (
     <section>
       <h2>✨ Recensioni & Pagelle del Torneo</h2>
-      <p className="note" style={{ marginBottom: 14 }}>
+      <p className="note mb-14">
         Genera il bilancio del girone d'andata, la volata delle ultime sfide o le pagelle finali, con tono sobrio e arguto tra amici.
       </p>
 
       {notice && (
-        <div className={`notice ${notice.kind}`} style={{ marginBottom: 14 }}>
+        <div className={`notice ${notice.kind} mb-14`}>
           {notice.text}
         </div>
       )}
@@ -514,18 +514,17 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
       {/* QUADRO STATO DATI TORNEO */}
       <div className="sync-dashboard">
         <div className="sync-header">
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <strong style={{ fontSize: 14 }}>📊 Stato Dati Torneo</strong>
+          <div className="inline-row">
+            <strong className="fs-14">📊 Stato Dati Torneo</strong>
             <span className={`sync-badge ${lastSyncTime ? "synced" : "pending"}`}>
               {lastSyncTime ? `● Sincronizzato alle ${lastSyncTime}` : "⏳ Da sincronizzare"}
             </span>
           </div>
           <button
             type="button"
-            className="secondary"
+            className="secondary btn-compact"
             disabled={isFetchingData}
             onClick={loadGameStates}
-            style={{ padding: "4px 10px", fontSize: 13, minHeight: 32 }}
           >
             {isFetchingData ? "Aggiornamento in corso…" : "🔄 Sincronizza Partite"}
           </button>
@@ -535,45 +534,36 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
           <div className="stat-pill">
             <span className="stat-pill-label">Partite Totali</span>
             <span className="stat-pill-val">
-              {history.length} <small style={{ fontWeight: "normal", color: "var(--muted)" }}>({finishedMatches.length} finite, {ongoingMatches.length} in corso)</small>
+              {history.length} <small className="muted-normal">({finishedMatches.length} finite, {ongoingMatches.length} in corso)</small>
             </span>
           </div>
           <div className="stat-pill">
             <span className="stat-pill-label">Elo Lichess</span>
             <span className="stat-pill-val">
-              {ratedCount} / {config.players.length} <small style={{ fontWeight: "normal", color: "var(--muted)" }}>giocatori</small>
+              {ratedCount} / {config.players.length} <small className="muted-normal">giocatori</small>
             </span>
           </div>
           <div className="stat-pill">
             <span className="stat-pill-label">Fase Rilevata</span>
-            <span className="stat-pill-val" style={{ color: "var(--accent)" }}>
+            <span className="stat-pill-val accent">
               {recommended === "finale" ? "🏆 Concluso" : recommended === "volata" ? "⏱️ Volata" : "🔄 Andata"}
             </span>
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+        <div className="space-row mt-8">
           <button
             type="button"
-            className="secondary"
+            className="secondary btn-compact xs"
             disabled={isFetchingElo}
             onClick={fetchAllRatings}
-            style={{ padding: "4px 8px", fontSize: 12, minHeight: 28 }}
           >
             {isFetchingElo ? "Recupero Elo in corso..." : "♟️ Scarica Elo da Lichess"}
           </button>
           <button
             type="button"
+            className="link-muted"
             onClick={() => setShowStandingsTable(!showStandingsTable)}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--muted)",
-              fontSize: 12,
-              cursor: "pointer",
-              textDecoration: "underline",
-              padding: 0,
-            }}
           >
             {showStandingsTable ? "Nascondi classifica rapida ▲" : "Vedi classifica calcolata ▼"}
           </button>
@@ -581,23 +571,18 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
 
         {/* Quick Standings Table */}
         {showStandingsTable && (
-          <div style={{ marginTop: 10, borderTop: "1px solid var(--line)", paddingTop: 8 }}>
-            <p className="note" style={{ margin: "0 0 6px", fontSize: 12 }}>
+          <div className="quick-standings">
+            <p className="note note-xs">
               Classifica calcolata dalle partite salvate nello storico:
             </p>
-            <div style={{ maxHeight: 200, overflowY: "auto", fontSize: 13 }}>
+            <div className="quick-standings-list">
               {standings.map((s, idx) => (
                 <div
                   key={s.handle}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "3px 0",
-                    borderBottom: "1px dotted var(--line)",
-                  }}
+                  className="quick-standings-row"
                 >
                   <span>
-                    <strong>{idx + 1}. {s.name}</strong> <small style={{ color: "var(--muted)" }}>({s.handle})</small>
+                    <strong>{idx + 1}. {s.name}</strong> <small className="muted">({s.handle})</small>
                   </span>
                   <span>
                     <strong>{s.points} pt</strong> ({s.won}V {s.drawn}N {s.lost}P) · {s.rating ? `~${s.rating}` : "no elo"}
@@ -610,7 +595,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
       </div>
 
       {/* MOMENTO DEL TORNEO (3 PULSANTI CHIAVE) */}
-      <div style={{ marginBottom: 14 }}>
+      <div className="mb-14">
         <label>Momento del Torneo</label>
         <div className="review-types-3">
           <button
@@ -643,7 +628,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
       </div>
 
       {/* Tournament Settings */}
-      <div className="grid2" style={{ marginBottom: 12 }}>
+      <div className="grid2 mb-12">
         <div>
           <label htmlFor="rev-tournament-title">Nome del Torneo</label>
           <input
@@ -667,13 +652,12 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
       </div>
 
       {/* Accordion for Player Anecdotes & Elo */}
-      <div style={{ marginBottom: 18 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-          <label style={{ margin: 0 }}>Aneddoti personali dei giocatori ({config.players.length})</label>
+      <div className="mb-18">
+        <div className="space-row mb-6">
+          <label className="m-0">Aneddoti personali dei giocatori ({config.players.length})</label>
           <button
             type="button"
-            className="secondary"
-            style={{ padding: "4px 8px", fontSize: 12, minHeight: 30 }}
+            className="secondary btn-compact xs"
             onClick={() => setShowAnecdotes(!showAnecdotes)}
           >
             {showAnecdotes ? "Chiudi note ▲" : "Modifica note ▼"}
@@ -682,14 +666,14 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
 
         {showAnecdotes && (
           <div className="anecdote-grid">
-            <p className="note" style={{ margin: "0 0 6px", fontSize: 13 }}>
+            <p className="note note-13">
               Inserisci piccoli fatti della vita reale o battute di gioco per ciascun giocatore (es. paternità, orari notturni, ritiri, cambi di apertura):
             </p>
             {standings.map((p) => (
               <div key={p.handle} className="anecdote-card">
                 <div className="anecdote-card-header">
                   <strong>
-                    {p.name} <span style={{ color: "var(--muted)", fontWeight: "normal" }}>({p.handle})</span>
+                    {p.name} <span className="muted-normal">({p.handle})</span>
                   </strong>
                   <span className="rating-badge">
                     {p.rating ? `Elo ~${p.rating}` : "Elo n/d"} · {p.points} pt
@@ -714,12 +698,11 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
       </div>
 
       {/* Action Buttons: Copia Prompt is the primary frictionless action */}
-      <div className="actions" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+      <div className="actions two mb-12">
         <button
           type="button"
           className="primary"
           onClick={handleCopyPrompt}
-          style={{ minHeight: 48 }}
         >
           {copiedPrompt ? "✅ Prompt Copiato!" : "📋 Copia Prompt per Claude / ChatGPT"}
         </button>
@@ -728,29 +711,19 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
           className="secondary"
           disabled={isGenerating}
           onClick={handleGenerateWithAI}
-          style={{ minHeight: 48 }}
         >
           {isGenerating ? "Generazione in corso… 🧠" : "✨ Genera con AI"}
         </button>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <p className="note" style={{ margin: 0, fontSize: 12 }}>
+      <div className="space-row mb-16">
+        <p className="note sync-note">
           💡 Il pulsante <strong>Copia Prompt</strong> funziona al 100% ovunque, pronto da incollare nella tua chat AI abituale.
         </p>
         <button
           type="button"
+          className="link-muted nowrap"
           onClick={handleDownloadJson}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--muted)",
-            fontSize: 12,
-            cursor: "pointer",
-            textDecoration: "underline",
-            padding: 0,
-            whiteSpace: "nowrap",
-          }}
         >
           💾 Scarica JSON
         </button>
@@ -758,26 +731,26 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
 
       {/* Generated Result Area (when generated via AI) */}
       {generatedReview && (
-        <div style={{ marginTop: 16 }}>
+        <div className="mt-16">
           {/* WhatsApp formatted live chat bubble */}
           <WhatsAppPreview text={generatedReview} title="Anteprima WhatsApp (Recensione Generata)" />
 
-          <details style={{ marginTop: 8, marginBottom: 12 }}>
-            <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--muted)" }}>
+          <details className="raw-text">
+            <summary>
               Modifica testo grezzo prima dell'invio
             </summary>
-            <div style={{ marginTop: 8 }}>
+            <div className="raw-text-body">
               <textarea
                 id="generated-review-text"
                 value={generatedReview}
                 onChange={(e) => setGeneratedReview(e.target.value)}
                 rows={12}
-                style={{ minHeight: 220, fontFamily: "inherit" }}
+                className="ta-xl"
               />
             </div>
           </details>
 
-          <div className="actions two" style={{ marginTop: 10 }}>
+          <div className="actions two mt-10">
             <a
               className="primary"
               target="_blank"
