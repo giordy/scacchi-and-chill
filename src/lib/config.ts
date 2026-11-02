@@ -1,0 +1,183 @@
+import {
+  AppConfig,
+  Settings,
+} from '../types';
+import rawConfig from '../../config.json';
+
+export const RULES = [
+  { key: "noRematch", label: "No rematch offers" },
+  { key: "noGiveTime", label: "No giving time to the opponent" },
+  { key: "noClaimWin", label: "No claiming victory if the opponent leaves" },
+  { key: "noEarlyDraw", label: "No early draws (draw offers blocked early in the game)" },
+];
+
+export function validateAndNormalizeConfig(cfg: any): AppConfig {
+  const fail = (msg: string) => {
+    throw new Error("config.json: " + msg);
+  };
+  const isText = (v: any): v is string => typeof v === "string";
+  const isTextList = (v: any): v is string[] =>
+    Array.isArray(v) && v.length > 0 && v.every(isText);
+
+  // 1. Players
+  const players = cfg?.players || cfg?.giocatori;
+  if (
+    !Array.isArray(players) ||
+    players.length < 2 ||
+    players.some((p: any) => !p || !isText(p.handle) || !p.handle.trim())
+  ) {
+    fail('"players" must be a list of at least 2 entries with { "handle": "lichess_username", "name": "Name" }.');
+  }
+  const handles = players.map((p: any) => p.handle.trim().toLowerCase());
+  if (new Set(handles).size !== handles.length) {
+    fail('"players" contains the same handle twice.');
+  }
+
+  // 2. Defaults
+  const d = cfg.defaults || cfg.impostazioniPredefinite || {};
+  const days = Number(d.days ?? 2);
+  const expiry = Number(d.expiry ?? 2);
+  if (!Number.isInteger(days) || days < 1 || days > 14) {
+    fail('"days" must be a whole number from 1 to 14.');
+  }
+  if (!Number.isInteger(expiry) || expiry < 1 || expiry > 14) {
+    fail('"expiry" must be a whole number from 1 to 14.');
+  }
+
+  // 3. Round message templates (supports roundMessage or messageTemplates)
+  const rm = cfg.roundMessage || cfg.messaggioNuovoTurno || cfg.messageTemplates;
+  if (!rm || !["header", "game", "bye", "footer"].every((k) => isText(rm[k]))) {
+    fail('"roundMessage" needs the text fields "header", "game", "bye" and "footer".');
+  }
+
+  const typeLabels = rm.typeLabels || rm.etichetteTipo || cfg.typeLabels || { rated: "classificate", casual: "amichevoli" };
+  if (!isText(typeLabels.rated) || !isText(typeLabels.casual)) {
+    fail('"typeLabels" needs "rated" and "casual".');
+  }
+
+  const challengeName = isText(rm.challengeName)
+    ? rm.challengeName
+    : isText(rm.nomeSfida)
+    ? rm.nomeSfida
+    : isText(cfg.challengeName)
+    ? cfg.challengeName
+    : "Turno {round}";
+
+  const numberEmojisRaw = rm.numberEmojis || rm.numeriEmoji || cfg.numberEmojis;
+  const numberEmojis = isTextList(numberEmojisRaw) ? numberEmojisRaw : [];
+
+  // 4. Status message phrases (supports statusMessage or statusPhrases)
+  const sm = cfg.statusMessage || cfg.messaggioStatoPartite || cfg.statusPhrases;
+  if (!sm) fail('"statusMessage" is missing in config.json.');
+
+  const smHeader = sm.header || sm.titoli;
+  const smOngoing = sm.ongoing || sm.inCorso;
+  const smWin = sm.win || sm.vittoria;
+  const smDraw = sm.draw || sm.patta;
+  const smAborted = sm.aborted || sm.annullata;
+  const smPending = sm.pending || sm.daIniziare;
+  const smFooter = sm.footer || sm.riepilogo;
+  const smClosingRaw = sm.closing !== undefined ? sm.closing : sm.chiusura;
+  const smClosing = Array.isArray(smClosingRaw) ? smClosingRaw.filter(isText) : [];
+
+  if (!isTextList(smHeader)) fail('"statusMessage.header" must be a non-empty list of texts.');
+  if (!isTextList(smOngoing)) fail('"statusMessage.ongoing" must be a non-empty list of texts.');
+  if (!isTextList(smWin)) fail('"statusMessage.win" must be a non-empty list of texts.');
+  if (!isTextList(smDraw)) fail('"statusMessage.draw" must be a non-empty list of texts.');
+  if (!isTextList(smAborted)) fail('"statusMessage.aborted" must be a non-empty list of texts.');
+  if (!isTextList(smPending)) fail('"statusMessage.pending" must be a non-empty list of texts.');
+  if (!isTextList(smFooter)) fail('"statusMessage.footer" must be a non-empty list of texts.');
+
+  const highlightRaw = sm.highlight || sm.inEvidenza;
+  const highlight = Array.isArray(highlightRaw) && isTextList(highlightRaw) ? highlightRaw : undefined;
+
+  const roundEndHeaderRaw = sm.roundEndHeader || sm.fineTurnoTitoli;
+  const roundEndHeader = Array.isArray(roundEndHeaderRaw) && isTextList(roundEndHeaderRaw) ? roundEndHeaderRaw : undefined;
+
+  const roundEndFooterRaw = sm.roundEndFooter || sm.fineTurnoRiepilogo;
+  const roundEndFooter = Array.isArray(roundEndFooterRaw) && isTextList(roundEndFooterRaw) ? roundEndFooterRaw : undefined;
+
+  const infoLink = isText(sm.infoLink) ? sm.infoLink.trim() : (isText(cfg.infoLink) ? cfg.infoLink.trim() : undefined);
+  const infoLine = isText(sm.infoLine)
+    ? sm.infoLine.trim()
+    : infoLink
+    ? `🌐 Classifica e regolamento: ${infoLink}`
+    : undefined;
+
+  const tournamentMeta = cfg.tournament ? {
+    title: isText(cfg.tournament.title) ? cfg.tournament.title : "Scacchi & Chill",
+    season: isText(cfg.tournament.season) ? cfg.tournament.season : "Edizione 2026",
+    description: isText(cfg.tournament.description) ? cfg.tournament.description : "Campionato amatoriale di scacchi per corrispondenza tra amici e colleghi.",
+    rulesText: isText(cfg.tournament.rulesText) ? cfg.tournament.rulesText : "2 giorni a mossa. Nessuna rivincita. Fair play assoluto.",
+  } : {
+    title: "Scacchi & Chill",
+    season: "Edizione 2026",
+    description: "Campionato amatoriale di scacchi per corrispondenza tra amici e colleghi.",
+    rulesText: "Partite per corrispondenza con cadenza a 2 giorni per mossa. No takeback, partite Rated, rispetto e fair play tra amici.",
+  };
+
+  const rawSchedule = cfg.schedule || cfg.calendario;
+  const schedule = Array.isArray(rawSchedule)
+    ? rawSchedule
+        .filter((m: any) => m && isText(m.round) && isText(m.white) && isText(m.black))
+        .map((m: any) => ({
+          round: String(m.round).trim(),
+          white: String(m.white).trim(),
+          black: String(m.black).trim(),
+          url: isText(m.url) ? m.url.trim() : undefined,
+        }))
+    : undefined;
+
+  return {
+    tournament: tournamentMeta,
+    players: players.map((p: any) => ({
+      handle: p.handle.trim(),
+      name: (isText(p.name) && p.name.trim()) || p.handle.trim(),
+    })),
+    schedule,
+    defaults: {
+      days,
+      expiry,
+      rated: d.rated !== false,
+      rules: Object.fromEntries(RULES.map(({ key }) => [key, !!d.rules?.[key]])) as any,
+    },
+    messageTemplates: {
+      header: rm.header,
+      game: rm.game,
+      bye: rm.bye,
+      footer: rm.footer,
+    },
+    typeLabels,
+    challengeName,
+    numberEmojis,
+    statusPhrases: {
+      header: smHeader,
+      ongoing: smOngoing,
+      win: smWin,
+      draw: smDraw,
+      aborted: smAborted,
+      pending: smPending,
+      footer: smFooter,
+      closing: smClosing,
+      highlight,
+      roundEndHeader,
+      roundEndFooter,
+      infoLine,
+      infoLink,
+    },
+  };
+}
+
+export const defaultConfig: AppConfig = validateAndNormalizeConfig(rawConfig);
+
+export function initialStoredSettings(): Partial<Settings> {
+  for (const key of ["pairings.settings.v2", "pairings.settings"]) {
+    try {
+      const old = JSON.parse(localStorage.getItem(key) || "{}");
+      if (old?.token) return { token: old.token };
+    } catch {
+      // ignore
+    }
+  }
+  return {};
+}

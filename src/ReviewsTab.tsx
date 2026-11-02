@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding } from "./types";
 import { WhatsAppPreview } from "./WhatsAppPreview";
+import { extractGameId } from "./lib/utils";
 
 interface ReviewsTabProps {
   history: HistoryGame[];
@@ -62,11 +63,6 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
     } catch {}
   }, [ratings]);
 
-  // Extract game ID helper
-  const extractGameId = (url: string) => {
-    const m = url.match(/lichess\.org\/(?:(?:game|challenge|embed\/game|embed)\/)?([a-zA-Z0-9]{8})/);
-    return m ? m[1] : null;
-  };
 
   // Fetch Lichess game states for all saved games
   const loadGameStates = async () => {

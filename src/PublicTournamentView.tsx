@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, TournamentMeta } from "./types";
+import { extractGameId } from "./lib/utils";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -18,11 +19,6 @@ export function PublicTournamentView({
 }: PublicTournamentViewProps) {
   const [subTab, setSubTab] = useState<"standings" | "matches" | "crosstable" | "rules">("standings");
   const [filterRound, setFilterRound] = useState<string>("all");
-
-  const extractGameId = (url: string) => {
-    const m = url.match(/lichess\.org\/(?:(?:game|challenge|embed\/game|embed)\/)?([a-zA-Z0-9]{8})/);
-    return m ? m[1] : null;
-  };
 
   // Calculate Standings, Sonneborn-Berger and Crosstable Matrix
   const stats: Record<
