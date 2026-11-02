@@ -1314,3 +1314,19 @@ button.link-danger { background: none; border: none; color: var(--danger); font-
 .player-select-row { display: flex; gap: 6px; width: 100%; }
 .fw-600 { font-weight: 600; }
 .chevron { font-size: 11px; opacity: 0.6; }
+
+/* Pairings tab and WhatsApp preview */
+.round-picker { margin-bottom: 16px; }
+.round-picker-row { display: flex; justify-content: space-between; align-items: flex-end; }
+.round-picker-field { flex: 1; margin-right: 8px; }
+button.btn-add.compact-13 { font-size: 13px; }
+details.raw-text { margin-top: 8px; margin-bottom: 12px; }
+details.raw-text > summary { font-size: 13px; color: var(--muted); }
+.raw-text-body { margin-top: 8px; }
+textarea.ta-lg { min-height: 180px; }
+.wa-gap { height: 8px; }
+.wa-bold { font-weight: 700; color: var(--ink); }
+.wa-italic { font-style: italic; opacity: 0.9; }
+.wa-link { color: #027eb5; text-decoration: underline; word-break: break-all; }
+.wa-line { line-height: 1.45; min-height: 18px; }
+.wa-ticks { color: #53bdeb; font-size: 13px; margin-left: 3px; }

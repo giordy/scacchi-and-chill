@@ -15,7 +15,7 @@ export function formatWhatsAppMarkup(raw: string): React.ReactNode[] {
 
   return lines.map((line, lineIdx) => {
     if (!line.trim()) {
-      return <div key={lineIdx} style={{ height: "8px" }} />;
+      return <div key={lineIdx} className="wa-gap" />;
     }
 
     // Parse tokens inside the line
@@ -37,13 +37,13 @@ export function formatWhatsAppMarkup(raw: string): React.ReactNode[] {
       const token = match[0];
       if (token.startsWith("*") && token.endsWith("*") && token.length > 2) {
         parts.push(
-          <strong key={`${lineIdx}-${keyCounter++}`} style={{ fontWeight: 700, color: "var(--ink)" }}>
+          <strong key={`${lineIdx}-${keyCounter++}`} className="wa-bold">
             {token.slice(1, -1)}
           </strong>
         );
       } else if (token.startsWith("_") && token.endsWith("_") && token.length > 2) {
         parts.push(
-          <em key={`${lineIdx}-${keyCounter++}`} style={{ fontStyle: "italic", opacity: 0.9 }}>
+          <em key={`${lineIdx}-${keyCounter++}`} className="wa-italic">
             {token.slice(1, -1)}
           </em>
         );
@@ -51,7 +51,7 @@ export function formatWhatsAppMarkup(raw: string): React.ReactNode[] {
         parts.push(
           <span
             key={`${lineIdx}-${keyCounter++}`}
-            style={{ color: "#027eb5", textDecoration: "underline", wordBreak: "break-all" }}
+            className="wa-link"
           >
             {token}
           </span>
@@ -67,7 +67,7 @@ export function formatWhatsAppMarkup(raw: string): React.ReactNode[] {
     }
 
     return (
-      <div key={lineIdx} style={{ lineHeight: 1.45, minHeight: "18px" }}>
+      <div key={lineIdx} className="wa-line">
         {parts.length > 0 ? parts : "\u00A0"}
       </div>
     );
@@ -84,7 +84,7 @@ export function WhatsAppPreview({ text, title = "Anteprima messaggio WhatsApp" }
         <div className="wa-content">{formatWhatsAppMarkup(text)}</div>
         <div className="wa-timestamp">
           <span>Adesso</span>
-          <span style={{ color: "#53bdeb", fontSize: 13, marginLeft: 3 }}>✓✓</span>
+          <span className="wa-ticks">✓✓</span>
         </div>
       </div>
     </div>

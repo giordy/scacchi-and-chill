@@ -210,9 +210,9 @@ export function PairingsTab({
 
   return (
     <section>
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-          <div style={{ flex: 1, marginRight: 8 }}>
+      <div className="round-picker">
+        <div className="round-picker-row">
+          <div className="round-picker-field">
             <label htmlFor="round">Numero del Turno</label>
             <input
               id="round"
@@ -230,8 +230,7 @@ export function PairingsTab({
           {roundIsScheduled(round) && (
             <button
               type="button"
-              className="secondary"
-              style={{ minHeight: 48, fontSize: 13, whiteSpace: "nowrap" }}
+              className="secondary btn-add compact-13"
               onClick={() => {
                 loadScheduledRound(round);
                 flash("ok", `Accoppiamenti del Turno ${round} ricaricati dal calendario ufficiale!`);
@@ -275,16 +274,16 @@ export function PairingsTab({
           {/* WhatsApp styled live chat bubble preview */}
           <WhatsAppPreview text={text} title="Anteprima WhatsApp (Lancio Turno)" />
 
-          <details style={{ marginTop: 8, marginBottom: 12 }}>
-            <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--muted)" }}>
+          <details className="raw-text">
+            <summary>
               Modifica testo grezzo prima dell'invio
             </summary>
-            <div style={{ marginTop: 8 }}>
+            <div className="raw-text-body">
               <textarea
                 aria-label="Messaggio per il gruppo WhatsApp"
                 value={text}
                 onChange={(e) => setEditedText(e.target.value)}
-                style={{ minHeight: 180 }}
+                className="ta-lg"
               />
             </div>
           </details>
