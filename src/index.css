@@ -1257,3 +1257,26 @@ th.sticky-col { background: var(--bg); z-index: 2; }
 /* Collapsible settings sections */
 details.settings-section { margin: 0; }
 details.settings-section > summary { font-weight: 600; font-size: 16px; }
+
+/* App views */
+.view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.view-header.tight { margin-bottom: 6px; }
+.eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent); letter-spacing: 0.5px; }
+.view-title { margin: 2px 0 0; font-size: 22px; }
+.header-actions { display: flex; gap: 6px; }
+.chip-link {
+  font-size: 12px; padding: 6px 12px; border-radius: 8px; text-decoration: none;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  font-weight: 600; cursor: pointer; font-family: inherit;
+}
+.chip-link.is-danger { color: var(--danger); }
+button.btn-block { width: 100%; min-height: 48px; }
+.login-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; max-width: 440px; margin: 20px auto; }
+.login-title { font-size: 18px; margin-top: 0; }
+.login-note { margin: 0 0 16px; }
+.login-error { margin-bottom: 14px; }
+.sync-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; flex-wrap: wrap; }
+button.sync-btn { min-height: 40px; font-weight: 600; }
+.sync-note { margin: 0; font-size: 12px; }
+.public-footer { margin-top: 24px; text-align: center; border-top: 1px solid var(--line); padding-top: 14px; }
+.admin-link { font-size: 12px; color: var(--muted); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; opacity: 0.85; }

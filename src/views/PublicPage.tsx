@@ -31,19 +31,8 @@ export function PublicPage({ ready, config, history, gameStates, nameOf }: Publi
         nameOf={nameOf}
       />
 
-      <div style={{ marginTop: 24, textAlign: "center", borderTop: "1px solid var(--line)", paddingTop: 14 }}>
-        <a
-          href="#admin"
-          style={{
-            fontSize: 12,
-            color: "var(--muted)",
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 4,
-            opacity: 0.85,
-          }}
-        >
+      <div className="public-footer">
+        <a href="#admin" className="admin-link">
           🔒 Area Organizzatore
         </a>
       </div>

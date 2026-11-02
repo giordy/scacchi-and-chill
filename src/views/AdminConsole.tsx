@@ -36,44 +36,24 @@ export function AdminConsole({
 }: AdminConsoleProps) {
   return (
     <main>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+      <div className="view-header tight">
         <div>
-          <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--accent)", letterSpacing: 0.5 }}>
+          <span className="eyebrow">
             🔒 Area Organizzatore · {email}
           </span>
-          <h1 style={{ margin: "2px 0 0", fontSize: 22 }}>Gestione Torneo</h1>
+          <h1 className="view-title">Gestione Torneo</h1>
         </div>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div className="header-actions">
           <a
             href="#"
-            className="secondary"
-            style={{
-              fontSize: 12,
-              padding: "6px 10px",
-              borderRadius: 8,
-              textDecoration: "none",
-              border: "1px solid var(--line)",
-              background: "var(--panel)",
-              color: "var(--ink)",
-              fontWeight: 600,
-            }}
+            className="chip-link"
           >
             👁️ Vista Pubblica
           </a>
           <button
             type="button"
-            className="secondary"
+            className="chip-link is-danger"
             onClick={onLogout}
-            style={{
-              fontSize: 12,
-              padding: "6px 10px",
-              borderRadius: 8,
-              border: "1px solid var(--line)",
-              background: "var(--panel)",
-              color: "var(--danger)",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
             title="Esci dalla sessione amministratore"
           >
             Esci 🚪
@@ -84,17 +64,16 @@ export function AdminConsole({
       <div className="strip" aria-hidden="true" />
 
       {/* Results sync: Lichess → Firestore (the public view reads from there) */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 14px", flexWrap: "wrap" }}>
+      <div className="sync-bar">
         <button
           type="button"
-          className="secondary"
+          className="secondary sync-btn"
           onClick={onSync}
           disabled={isSyncing}
-          style={{ minHeight: 40, fontWeight: 600 }}
         >
           {isSyncing ? "Sincronizzazione…" : "🔄 Sincronizza risultati"}
         </button>
-        <span className="note" style={{ margin: 0, fontSize: 12 }}>
+        <span className="note sync-note">
           {lastSyncTime
             ? `Ultima sincronizzazione alle ${lastSyncTime}`
             : "Aggiorna i risultati visibili al pubblico"}
