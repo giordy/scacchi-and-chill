@@ -27,8 +27,10 @@ import {
   subscribeToTournamentDoc,
   subscribeToGames,
   testFirestoreConnection,
-  setAdminPassword,
-  verifyAdminPassword,
+  subscribeToAuth,
+  signInAdminWithGoogle,
+  signOutAdmin,
+  isAdminUser,
 } from './firebaseService';
 
 export const RULES = [
@@ -1308,48 +1310,6 @@ function SettingsTab({
         </div>
       </div>
 
-      {/* 🔐 Password Area Organizzatore */}
-      <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
-        <h3 style={{ margin: "0 0 6px", fontSize: 16 }}>🔐 Password Area Organizzatore</h3>
-        <p className="note" style={{ margin: "0 0 12px" }}>
-          La password è salvata in modo sicuro nel database Firebase (hash SHA-256) per proteggere la console amministrativa da accessi non autorizzati.
-        </p>
-
-        <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
-          <div style={{ flex: 1 }}>
-            <label htmlFor="new-admin-pw">Nuova Password Organizzatore</label>
-            <input
-              id="new-admin-pw"
-              type="password"
-              placeholder="Inserisci nuova password…"
-              autoComplete="new-password"
-            />
-          </div>
-          <button
-            className="secondary"
-            type="button"
-            style={{ minHeight: 48, whiteSpace: "nowrap" }}
-            onClick={async () => {
-              const inp = document.getElementById("new-admin-pw") as HTMLInputElement;
-              const val = inp?.value?.trim();
-              if (!val || val.length < 4) {
-                flash("err", "La password deve contenere almeno 4 caratteri.");
-                return;
-              }
-              try {
-                await setAdminPassword(val);
-                inp.value = "";
-                flash("ok", "Password amministratore salvata con successo nel database Firebase!");
-              } catch (e: any) {
-                flash("err", "Errore nel salvataggio della password: " + e.message);
-              }
-            }}
-          >
-            Salva Password
-          </button>
-        </div>
-      </div>
-
       <div>
         <label htmlFor="token">Token API Lichess (Organizzatore)</label>
         <input
@@ -1985,10 +1945,8 @@ export function App() {
   };
 
   const [isAdmin, setIsAdmin] = useState(checkIsAdmin);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
-    return sessionStorage.getItem("scacchi.admin.auth") === "true";
-  });
-  const [adminPasswordInput, setAdminPasswordInput] = useState("");
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("");
   const [adminAuthError, setAdminAuthError] = useState("");
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
 
@@ -1998,34 +1956,35 @@ export function App() {
     return () => window.removeEventListener("hashchange", handleHash);
   }, []);
 
-  const handleAdminLogin = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!adminPasswordInput.trim()) {
-      setAdminAuthError("Inserisci la password.");
-      return;
-    }
+  // Stato di login Firebase Authentication: l'accesso vale solo per gli account in ADMIN_EMAILS
+  useEffect(() => {
+    return subscribeToAuth((user) => {
+      const ok = isAdminUser(user);
+      setIsAdminAuthenticated(ok);
+      setAdminEmail(ok && user?.email ? user.email : "");
+      if (user && !ok) {
+        setAdminAuthError(`L'account ${user.email} non è autorizzato come organizzatore.`);
+        signOutAdmin().catch(() => {});
+      }
+    });
+  }, []);
+
+  const handleAdminLogin = async () => {
     setAdminAuthError("");
     setIsVerifyingPassword(true);
     try {
-      const ok = await verifyAdminPassword(adminPasswordInput.trim());
-      if (ok) {
-        setIsAdminAuthenticated(true);
-        sessionStorage.setItem("scacchi.admin.auth", "true");
-        setAdminPasswordInput("");
-        setAdminAuthError("");
-      } else {
-        setAdminAuthError("Password non corretta. Riprova.");
-      }
+      await signInAdminWithGoogle();
     } catch (err: any) {
-      setAdminAuthError("Errore durante la verifica: " + err.message);
+      if (err?.code !== "auth/popup-closed-by-user" && err?.code !== "auth/cancelled-popup-request") {
+        setAdminAuthError("Errore durante l'accesso: " + (err?.message || err));
+      }
     } finally {
       setIsVerifyingPassword(false);
     }
   };
 
   const handleAdminLogout = () => {
-    setIsAdminAuthenticated(false);
-    sessionStorage.removeItem("scacchi.admin.auth");
+    signOutAdmin().catch(() => {});
     window.location.hash = "";
   };
 
@@ -2613,44 +2572,26 @@ export function App() {
         </div>
 
         <div style={{ background: "var(--panel)", border: "1px solid var(--line)", borderRadius: 12, padding: 20, maxWidth: 440, margin: "20px auto" }}>
-          <h2 style={{ fontSize: 18, marginTop: 0 }}>Inserisci la Password</h2>
+          <h2 style={{ fontSize: 18, marginTop: 0 }}>Accedi con Google</h2>
           <p className="note" style={{ margin: "0 0 16px" }}>
-            L'accesso alla creazione partite e gestione turni è protetto da password salvata nel database Firebase.
+            La gestione del torneo è riservata all'organizzatore. Accedi con l'account Google autorizzato.
           </p>
 
-          <form onSubmit={handleAdminLogin}>
-            <div style={{ marginBottom: 14 }}>
-              <label htmlFor="admin-pw-gate">Password di Accesso</label>
-              <input
-                id="admin-pw-gate"
-                type="password"
-                autoFocus
-                placeholder="Password organizzatore…"
-                value={adminPasswordInput}
-                onChange={(e) => setAdminPasswordInput(e.target.value)}
-                autoComplete="current-password"
-              />
+          {adminAuthError && (
+            <div className="notice err" style={{ marginBottom: 14 }}>
+              {adminAuthError}
             </div>
+          )}
 
-            {adminAuthError && (
-              <div className="notice err" style={{ marginBottom: 14 }}>
-                {adminAuthError}
-              </div>
-            )}
-
-            <button
-              className="primary"
-              type="submit"
-              disabled={isVerifyingPassword}
-              style={{ width: "100%", minHeight: 48 }}
-            >
-              {isVerifyingPassword ? "Verifica in corso…" : "Accedi all'Area Gestione 🔓"}
-            </button>
-
-            <p className="note" style={{ marginTop: 12, textAlign: "center", fontSize: 12 }}>
-              💡 Nota iniziale: se è il primo accesso e non l'hai ancora cambiata, la password predefinita è <code>scacchi</code>.
-            </p>
-          </form>
+          <button
+            className="primary"
+            type="button"
+            onClick={handleAdminLogin}
+            disabled={isVerifyingPassword}
+            style={{ width: "100%", minHeight: 48 }}
+          >
+            {isVerifyingPassword ? "Accesso in corso…" : "Accedi con Google 🔓"}
+          </button>
         </div>
       </main>
     );
@@ -2662,7 +2603,7 @@ export function App() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
         <div>
           <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--accent)", letterSpacing: 0.5 }}>
-            🔒 Area Organizzatore (Autenticato)
+            🔒 Area Organizzatore · {adminEmail}
           </span>
           <h1 style={{ margin: "2px 0 0", fontSize: 22 }}>Gestione Torneo</h1>
         </div>

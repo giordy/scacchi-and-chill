@@ -69,16 +69,6 @@
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["round", "white", "black"]
-    },
-    "AdminConfig": {
-      "title": "AdminConfig",
-      "type": "object",
-      "description": "Stores administrator password hash for access protection",
-      "properties": {
-        "passwordHash": { "type": "string" },
-        "updatedAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["passwordHash"]
     }
   },
   "firestore": {
@@ -89,10 +79,6 @@
     "/tournaments/{tournamentId}/games/{gameId}": {
       "schema": "Game",
       "description": "Stores individual games and their Lichess challenge URLs"
-    },
-    "/tournaments/{tournamentId}/admin/config": {
-      "schema": "AdminConfig",
-      "description": "Stores tournament administrator password hash"
     }
   }
 }

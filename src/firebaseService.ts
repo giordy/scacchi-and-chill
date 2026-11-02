@@ -1,5 +1,13 @@
 import { initializeApp } from "firebase/app";
 import {
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  User,
+} from "firebase/auth";
+import {
   getFirestore,
   collection,
   doc,
@@ -250,57 +258,33 @@ export function subscribeToGames(
   );
 }
 
-// 7. Password hashing utility (SHA-256 via Web Crypto API)
-export async function hashPassword(plainText: string): Promise<string> {
-  const enc = new TextEncoder();
-  const data = enc.encode(plainText.trim());
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
+// 7. Admin authentication (Google sign-in via Firebase Authentication)
+// L'email autorizzata deve coincidere con quella scritta in firestore.rules.
+export const ADMIN_EMAILS = ["jordan83@gmail.com"];
 
-// 8. Admin Password Management in Firestore
-export async function getAdminPasswordHash(): Promise<string | null> {
-  try {
-    const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "admin", "config");
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      return snap.data().passwordHash || null;
-    }
-  } catch (err) {
-    console.warn("Impossibile leggere password admin da Firestore:", err);
-  }
-  return null;
-}
+const auth = getAuth(app);
 
-export async function setAdminPassword(newPasswordPlain: string): Promise<void> {
-  const hash = await hashPassword(newPasswordPlain);
-  const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "admin", "config");
-  await setDoc(
-    ref,
-    {
-      passwordHash: hash,
-      updatedAt: new Date().toISOString(),
-    },
-    { merge: true }
+export function isAdminUser(user: User | null): boolean {
+  return (
+    !!user &&
+    !!user.email &&
+    user.emailVerified &&
+    ADMIN_EMAILS.includes(user.email.toLowerCase())
   );
 }
 
-export async function verifyAdminPassword(inputPlain: string): Promise<boolean> {
-  const storedHash = await getAdminPasswordHash();
-  const inputHash = await hashPassword(inputPlain);
-  
-  // If no password was ever set in DB, allow initial setup with default 'scacchi' or accept input
-  if (!storedHash) {
-    // Default initial password is "scacchi"
-    const defaultHash = await hashPassword("scacchi");
-    if (inputHash === defaultHash) {
-      // Auto-initialize the default in DB
-      await setAdminPassword("scacchi");
-      return true;
-    }
-    return false;
-  }
-  return storedHash === inputHash;
+export function subscribeToAuth(onChange: (user: User | null) => void): () => void {
+  return onAuthStateChanged(auth, onChange);
+}
+
+export async function signInAdminWithGoogle(): Promise<User> {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  const result = await signInWithPopup(auth, provider);
+  return result.user;
+}
+
+export async function signOutAdmin(): Promise<void> {
+  await signOut(auth);
 }
 

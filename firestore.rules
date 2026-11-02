@@ -1,7 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function
+    // Solo l'organizzatore (account Google verificato) può scrivere.
+    // Se cambi l'email qui, aggiorna anche ADMIN_EMAILS in src/firebaseService.ts.
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email_verified == true
+          && request.auth.token.email == 'jordan83@gmail.com';
+    }
+
     function isValidUrl(url) {
       return url is string && (url.size() == 0 || url.matches('https://lichess\\.org/.*'));
     }
@@ -10,23 +17,19 @@ service cloud.firestore {
       // Tournament data (metadata, players, schedule) is publicly readable
       allow read: if true;
       // Writing tournament metadata requires valid title and season
-      allow write: if request.resource.data.title is string
+      allow write: if isAdmin()
+                   && request.resource.data.title is string
                    && request.resource.data.season is string;
 
       match /games/{gameId} {
         // Games are publicly readable so standings and matches can be displayed to all participants
         allow read: if true;
         // Game records can be written if they have valid round and player handles
-        allow write: if request.resource.data.round is string
+        allow write: if isAdmin()
+                     && request.resource.data.round is string
                      && request.resource.data.white is string
                      && request.resource.data.black is string
                      && (!('url' in request.resource.data) || isValidUrl(request.resource.data.url));
-      }
-
-      match /admin/{docId} {
-        // Admin configuration (password hash verification)
-        allow read: if true;
-        allow write: if request.resource.data.passwordHash is string;
       }
     }
   }
