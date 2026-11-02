@@ -14,6 +14,7 @@ import { TournamentInfoSection } from './settings/TournamentInfoSection';
 import { PlayersSection } from './settings/PlayersSection';
 import { ScheduleSection } from './settings/ScheduleSection';
 import { LichessSettingsSection } from './settings/LichessSettingsSection';
+import type { OrganizerStore } from '../hooks/useOrganizerData';
 import { BackupSection } from './settings/BackupSection';
 
 export function SettingsTab({
@@ -28,6 +29,7 @@ export function SettingsTab({
   pairs,
   setPairs,
   flash,
+  organizer,
   panelRef,
   config,
   onUpdateTournamentMeta,
@@ -45,6 +47,7 @@ export function SettingsTab({
   pairs: GamePair[];
   setPairs: React.Dispatch<React.SetStateAction<GamePair[]>>;
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
+  organizer: OrganizerStore;
   panelRef: React.RefObject<HTMLDivElement>;
   config: AppConfig;
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
@@ -94,6 +97,7 @@ export function SettingsTab({
           pairs={pairs}
           setPairs={setPairs}
           flash={flash}
+          organizer={organizer}
         />
       </CollapsibleSection>
     </div>

@@ -13,6 +13,7 @@ import { mergeTournamentMeta } from './lib/tournament';
 import { usePersistentState } from './hooks/usePersistentState';
 import { useAdminAuth } from './hooks/useAdminAuth';
 import { useTournamentSync } from './hooks/useTournamentSync';
+import { useOrganizerData } from './hooks/useOrganizerData';
 import { useLichessSync } from './hooks/useLichessSync';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Notice } from './components/Notice';
@@ -83,6 +84,7 @@ export function App() {
     if (kind === 'ok') triggerToast(text);
   };
 
+  const organizer = useOrganizerData(admin.isAdminRoute && admin.isAuthenticated, (msg) => flash('err', msg));
   const { ready } = useTournamentSync(setConfig, setHistory);
   const lichess = useLichessSync(history, setHistory, flash);
 
@@ -153,7 +155,7 @@ export function App() {
       )}
 
       {activeTab === 'reviews' && (
-        <ReviewsTab history={history} config={config} nameOf={nameOf} triggerToast={triggerToast} />
+        <ReviewsTab history={history} config={config} nameOf={nameOf} triggerToast={triggerToast} organizer={organizer} />
       )}
 
       {activeTab === 'settings' && (
@@ -172,6 +174,7 @@ export function App() {
             pairs={pairs}
             setPairs={setPairs}
             flash={flash}
+            organizer={organizer}
             panelRef={settingsTabRef}
             config={config}
             onUpdateTournamentMeta={(patch) => {

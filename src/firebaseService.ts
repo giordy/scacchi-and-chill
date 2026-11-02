@@ -141,6 +141,44 @@ export function subscribeToTournamentDoc(
   );
 }
 
+// Organizer-only notes (player anecdotes and cached Lichess ratings).
+// Stored in a private document: Firestore rules allow only the admin to read it,
+// because the anecdotes are personal and must not be exposed on the public page.
+export interface OrganizerData {
+  anecdotes: Record<string, string>;
+  ratings: Record<string, string | number | null>;
+}
+
+const organizerRef = () => doc(db, "tournaments", TOURNAMENT_DOC_ID, "private", "organizer");
+
+export async function saveOrganizerData(data: OrganizerData): Promise<void> {
+  await setDoc(organizerRef(), { ...data, updatedAt: new Date().toISOString() });
+}
+
+// Calls onUpdate with the stored data, or null when the document does not exist yet.
+// Snapshots caused by local writes are skipped so typing is never overwritten by its own echo.
+export function subscribeToOrganizerData(
+  onUpdate: (data: OrganizerData | null) => void,
+  onError?: (err: unknown) => void
+): () => void {
+  return onSnapshot(
+    organizerRef(),
+    (snap) => {
+      if (snap.metadata.hasPendingWrites) return;
+      if (!snap.exists()) {
+        onUpdate(null);
+        return;
+      }
+      const d = snap.data();
+      onUpdate({ anecdotes: d.anecdotes ?? {}, ratings: d.ratings ?? {} });
+    },
+    (err) => {
+      console.warn("Sottoscrizione note organizzatore fallita:", err);
+      onError?.(err);
+    }
+  );
+}
+
 // Backward-compat helpers
 export async function saveTournamentMetaToFirebase(
   meta: TournamentMeta

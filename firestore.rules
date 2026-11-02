@@ -21,6 +21,11 @@ service cloud.firestore {
                    && request.resource.data.title is string
                    && request.resource.data.season is string;
 
+      // Organizer-only notes (player anecdotes, cached ratings): never public
+      match /private/{docId} {
+        allow read, write: if isAdmin();
+      }
+
       match /games/{gameId} {
         // Games are publicly readable so standings and matches can be displayed to all participants
         allow read: if true;

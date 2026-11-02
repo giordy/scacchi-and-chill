@@ -3,40 +3,25 @@ import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding 
 import { WhatsAppPreview } from "./WhatsAppPreview";
 import { errorMessage, extractGameId } from "./lib/utils";
 import type { LichessUserProfile } from "./types";
+import type { OrganizerStore } from "./hooks/useOrganizerData";
 
 interface ReviewsTabProps {
   history: HistoryGame[];
   config: AppConfig;
   nameOf: (handle: string) => string;
   triggerToast?: (msg: string) => void;
+  organizer: OrganizerStore;
 }
 
 export type ReviewMoment = "andata" | "volata" | "finale";
 
-export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTabProps) {
+export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }: ReviewsTabProps) {
   const [reviewType, setReviewType] = useState<ReviewMoment>("finale");
   const [tournamentTitle, setTournamentTitle] = useState("Scacchi & Chill");
   const [generalNotes, setGeneralNotes] = useState("");
   
-  // Anecdotes per player: handle -> note
-  const [anecdotes, setAnecdotes] = useState<Record<string, string>>(() => {
-    try {
-      const saved = localStorage.getItem("scacchi.anecdotes");
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  // Ratings per player: handle -> rating
-  const [ratings, setRatings] = useState<Record<string, string | number | null>>(() => {
-    try {
-      const saved = localStorage.getItem("scacchi.ratings");
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
+  // Anecdotes and ratings live in the private Firestore document (see useOrganizerData)
+  const { anecdotes, ratings, setAnecdote, setRatings } = organizer;
 
   const [gameStates, setGameStates] = useState<Record<string, LichessExportGame>>({});
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
@@ -49,21 +34,6 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
   const [copiedReview, setCopiedReview] = useState(false);
   const [showAnecdotes, setShowAnecdotes] = useState(false);
   const [showStandingsTable, setShowStandingsTable] = useState(false);
-
-  // Save anecdotes to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem("scacchi.anecdotes", JSON.stringify(anecdotes));
-    } catch {}
-  }, [anecdotes]);
-
-  // Save ratings to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem("scacchi.ratings", JSON.stringify(ratings));
-    } catch {}
-  }, [ratings]);
-
 
   // Fetch Lichess game states for all saved games
   const loadGameStates = async () => {
@@ -684,12 +654,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
                   type="text"
                   className="anecdote-input"
                   value={anecdotes[p.handle] || ""}
-                  onChange={(e) =>
-                    setAnecdotes((prev) => ({
-                      ...prev,
-                      [p.handle]: e.target.value,
-                    }))
-                  }
+                  onChange={(e) => setAnecdote(p.handle, e.target.value)}
                   placeholder={`Aneddoto per ${p.name} (es. papà da poco, gioca solo di notte...)`}
                 />
               </div>

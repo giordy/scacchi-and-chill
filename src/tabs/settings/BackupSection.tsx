@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import type { OrganizerStore } from '../../hooks/useOrganizerData';
 import { errorMessage } from '../../lib/utils';
 import {
   GamePair,
@@ -20,6 +21,7 @@ export function BackupSection({
   pairs,
   setPairs,
   flash,
+  organizer,
 }: {
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Partial<Settings>>>;
@@ -32,19 +34,11 @@ export function BackupSection({
   pairs: GamePair[];
   setPairs: React.Dispatch<React.SetStateAction<GamePair[]>>;
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
+  organizer: OrganizerStore;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExportBackup = () => {
-    let anecdotes = {};
-    let ratings = {};
-    try {
-      const a = localStorage.getItem("scacchi.anecdotes");
-      if (a) anecdotes = JSON.parse(a);
-      const r = localStorage.getItem("scacchi.ratings");
-      if (r) ratings = JSON.parse(r);
-    } catch {}
-
     const backup: BackupData = {
       version: "1.0",
       exportedAt: new Date().toISOString(),
@@ -53,8 +47,8 @@ export function BackupSection({
       pairs,
       settings,
       templates,
-      anecdotes,
-      ratings,
+      anecdotes: organizer.anecdotes,
+      ratings: organizer.ratings,
     };
 
     const now = new Date();
@@ -101,12 +95,10 @@ export function BackupSection({
         if (data.templates !== undefined) {
           setTemplates(data.templates);
         }
-        if (data.anecdotes && typeof data.anecdotes === "object") {
-          localStorage.setItem("scacchi.anecdotes", JSON.stringify(data.anecdotes));
-        }
-        if (data.ratings && typeof data.ratings === "object") {
-          localStorage.setItem("scacchi.ratings", JSON.stringify(data.ratings));
-        }
+        organizer.replaceAll({
+          ...(data.anecdotes && typeof data.anecdotes === "object" ? { anecdotes: data.anecdotes } : {}),
+          ...(data.ratings && typeof data.ratings === "object" ? { ratings: data.ratings } : {}),
+        });
 
         const matchCount = data.history?.length ?? 0;
         flash("ok", `Backup ripristinato con successo! Caricate ${matchCount} partite storiche, aneddoti e impostazioni.`);
@@ -130,8 +122,7 @@ export function BackupSection({
       setHistory([]);
       setPairs([]);
       setRound("1");
-      localStorage.removeItem("scacchi.anecdotes");
-      localStorage.removeItem("scacchi.ratings");
+      organizer.clearAll();
       setTemplates(null);
       flash("ok", "Tutti i dati locali del torneo sono stati azzerati.");
     }
