@@ -1,47 +1,79 @@
-# Round Pairings (Scacchi & Chill)
+# Scacchi & Chill
 
-Applicazione web per organizzare i turni di un torneo di scacchi tra amici, generare le sfide su Lichess e condividere gli aggiornamenti su WhatsApp.
+Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli accoppiamenti si creano su Lichess, i risultati si sincronizzano su Firebase e tutti i partecipanti seguono classifica, calendario e storico delle stagioni da una pagina pubblica. Il sito è statico (React + Vite + Firebase) e viene servito da GitHub Pages.
 
-## Novità e Funzionalità Principali
+## Cosa c'è
 
-### 1. Interfaccia a Schede (Ottimizzata per Smartphone)
-- **♟️ Partite**: selezione rapida degli accoppiamenti bianco/nero, inversione colori con pulsante `⇅`, conteggio giocatori assegnati, creazione automatica sfide su Lichess, e messaggio WhatsApp con link di invito pronti per la condivisione.
-- **📊 Stato**: monitoraggio dell'andamento delle partite con Lichess, bollettino settimanale WhatsApp con stima mosse, dettagli tecnici, gestione dei turni salvati e recupero protetto.
-- **⚙️ Impostazioni**: gestione del token API Lichess, giorni per mossa, validità link, partite classificate/amichevoli, regole speciali e personalizzazione dei testi dei messaggi.
+### Parte pubblica
+- **📊 Classifica** con punti, V/N/P e spareggio Sonneborn-Berger. La colonna del giocatore resta fissa durante lo scroll orizzontale su mobile.
+- **🔲 Tabellone incrociato** con tutti i risultati.
+- **♟️ Calendario partite**, filtrabile per turno, con link a Lichess.
+- **📜 Regolamento** e Albo d'Oro dei vincitori.
+- **🏛️ Storico** delle stagioni passate con la classifica finale (compare dopo la prima stagione archiviata).
+- **Pagina giocatore** (`#/giocatore/<handle>`): posizione, partite giocate, avversari ancora da affrontare. Si apre cliccando un nome in classifica.
 
-### 2. Stima Mosse & Varietà Messaggi
-- Poiché Lichess omette le ultimissime mosse nelle partite in corso per prevenire aiuti esterni, l'app include una stima per fasce (*"meno di 10 mosse"*, *"tra 10 e 20 mosse"*, *"oltre 20 mosse"*, *"oltre 35 mosse"*, *"oltre 50 mosse"*).
-- Ampia varietà di frasi in italiano colloquiale e divertente per partite in corso, vittorie, patte, aperture e partite maratona/sprint.
+### Area organizzatore (`#admin`)
+Accesso con login Google, riservato a un solo account.
+- **♟️ Partite**: accoppiamenti bianco/nero, creazione delle sfide su Lichess, messaggio WhatsApp con i link.
+- **📊 Stato**: andamento delle partite, bollettino WhatsApp, gestione dei turni salvati.
+- **✨ Recensione**: statistiche, aneddoti ed Elo dei giocatori per costruire il prompt da incollare in Claude o ChatGPT; il testo ottenuto si incolla poi nella scheda per l'anteprima WhatsApp.
+- **⚙️ Opzioni** (sezioni richiudibili): informazioni del torneo e Albo d'Oro, archivio stagioni, giocatori, calendario ufficiale, token Lichess e testi dei messaggi, backup.
+- **🔄 Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. La vista pubblica legge da Firestore, quindi i nuovi risultati compaiono solo dopo la sincronizzazione.
 
-### 3. Supporto Completo URL Lichess (Vecchi e Nuovi)
-- Riconosce automaticamente sia il formato classico `lichess.org/AbCdEfGh` sia i formati recenti come `lichess.org/challenge/AbCdEfGh`, URL a 12 caratteri per giocatore, link abbreviati o link con prefissi `www.`/`https`.
+### Stagioni
+Da *Opzioni → Archivio stagioni*:
+- **Archivia stagione corrente** salva la classifica finale nello storico pubblico e aggiunge il campione all'Albo d'Oro.
+- **Archivia e inizia nuova stagione** archivia, poi **cancella tutte le partite** dalla stagione corrente, imposta il nuovo nome e maestro e, se vuoi, svuota il calendario. Prima della cancellazione chiede conferma e non cancella nulla se l'archiviazione fallisce.
 
-### 4. Gestione Turni e Protezione Ripristino Messaggi
-- **Anteprima interattiva prima del ripristino**: incollando il messaggio WhatsApp, l'app analizza e mostra l'elenco delle partite e dei giocatori identificati prima di salvare.
-- **Gestione turni salvati**: visualizza tutte le partite di ogni turno, elimina singoli turni errati o ricaricali direttamente nella schermata Partite.
+## Configurazione Firebase
 
----
+1. **Authentication → Sign-in method**: attiva Google.
+2. **Authentication → Settings → Authorized domains**: aggiungi il dominio di GitHub Pages (`<utente>.github.io`) e `localhost`.
+3. **Firestore → Rules**: pubblica il contenuto di [`firestore.rules`](firestore.rules). Ripubblicalo ogni volta che il file cambia.
+4. La chiave web in `firebase-applet-config.json` è pubblica per natura. Limitala in Google Cloud ai referrer `<utente>.github.io/*` e `localhost`.
 
-## Hosting Gratuito su GitHub Pages
+L'email dell'organizzatore compare in **due** posti, da tenere allineati:
+- `firestore.rules` (`isAdmin()`), che è la protezione vera;
+- `ADMIN_EMAILS` in `src/firebaseService.ts`, che regola solo l'interfaccia.
 
-L'app è pronta per essere ospitata gratuitamente su GitHub Pages con due modalità a scelta:
+### Dati su Firestore
+| Percorso | Lettura | Contenuto |
+|---|---|---|
+| `tournaments/<id>` | pubblica | titolo, stagione, giocatori, calendario, Albo d'Oro |
+| `tournaments/<id>/games/*` | pubblica | partite e stato Lichess |
+| `tournaments/<id>/seasons/*` | pubblica | classifiche finali delle stagioni archiviate |
+| `tournaments/<id>/private/organizer` | solo admin | aneddoti sui giocatori ed Elo |
 
-### Pubblicazione Automatica (GitHub Actions)
-Nel repository è configurato il workflow `.github/workflows/deploy.yml`.
-1. Su GitHub vai su **Settings** > **Pages**.
-2. Sotto **Build and deployment** seleziona **Source**: `GitHub Actions`.
-3. A ogni push su `main`, GitHub compilerà l'app ed eseguirà il deploy in automatico!
+Gli aneddoti sono privati di proposito: non vanno mai nella parte pubblica.
 
----
-
-## Sviluppo Locale
+## Sviluppo
 
 ```bash
 npm install
-npm run dev
+npm run dev      # server di sviluppo su http://localhost:3000
+npm test         # test con vitest
+npm run lint     # controllo dei tipi (tsc --noEmit)
+npm run build    # build di produzione in dist/
 ```
 
-Per compilare la versione di produzione:
-```bash
-npm run build
-```
+### Struttura di `src/`
+- `views/`: pagine (pubblica, giocatore, login, console admin).
+- `tabs/`: schede dell'area admin; `tabs/settings/` ha le sezioni delle impostazioni.
+- `hooks/`: login, sincronizzazione con Firestore e Lichess, dati dell'organizzatore, stagioni.
+- `lib/`: logica pura e testata (`standings`, `playerProfile`, `seasons`, `routes`, `parse`).
+- `components/`: elementi condivisi.
+
+Le funzioni di calcolo (classifica, spareggi, profilo giocatore, stagioni, lettura dei messaggi dei turni) stanno in `lib/` e hanno test in `lib/__tests__/`.
+
+## Pubblicazione su GitHub Pages
+
+Il workflow `.github/workflows/deploy.yml` esegue test e build a ogni push su `main` e pubblica `dist/`.
+1. Su GitHub vai in **Settings → Pages**.
+2. Sotto **Build and deployment** scegli **Source: GitHub Actions**.
+
+## Configurazione iniziale del torneo
+`config.json` contiene i valori predefiniti (giocatori, calendario, testi dei messaggi). Dopo il primo avvio i dati vivono su Firestore e si modificano dall'area organizzatore. *Opzioni → Informazioni torneo → Esporta config.json* scarica una copia aggiornata.
+
+## Limiti noti
+- Finché l'organizzatore non preme **Sincronizza**, il pubblico non vede i nuovi risultati.
+- Il login usa `signInWithPopup`: se un browser mobile blocca i popup, serve passare a `signInWithRedirect`.
