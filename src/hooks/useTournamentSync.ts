@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame } from '../types';
 import { validateAndNormalizeConfig } from '../lib/config';
 import { DEFAULT_TOURNAMENT, tournamentFromDoc } from '../lib/tournament';
@@ -15,6 +15,8 @@ export function useTournamentSync(
   setConfig: React.Dispatch<React.SetStateAction<AppConfig>>,
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>
 ) {
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
     testFirestoreConnection();
 
@@ -45,9 +47,11 @@ export function useTournamentSync(
           }).catch((e) => console.warn("Inizializzazione Firestore saltata:", e));
         }
         setConfig(validated);
+        setReady(true);
       })
       .catch((err) => {
         console.warn("Utilizzo configurazione incorporata di default:", err.message);
+        setReady(true);
       });
 
     // Real-time listener for tournament doc changes (meta, players, schedule)
@@ -88,4 +92,6 @@ export function useTournamentSync(
       unsubGames();
     };
   }, []);
+
+  return { ready };
 }

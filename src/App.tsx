@@ -14,6 +14,7 @@ import { usePersistentState } from './hooks/usePersistentState';
 import { useAdminAuth } from './hooks/useAdminAuth';
 import { useTournamentSync } from './hooks/useTournamentSync';
 import { useLichessSync } from './hooks/useLichessSync';
+import { LoadingScreen } from './components/LoadingScreen';
 import { Notice } from './components/Notice';
 import { PairingsTab } from './tabs/PairingsTab';
 import { SettingsTab } from './tabs/SettingsTab';
@@ -82,7 +83,7 @@ export function App() {
     if (kind === 'ok') triggerToast(text);
   };
 
-  useTournamentSync(setConfig, setHistory);
+  const { ready } = useTournamentSync(setConfig, setHistory);
   const lichess = useLichessSync(history, setHistory, flash);
 
   const handleLoadRoundIntoPairs = (loadedRound: string, loadedGames: HistoryGame[]) => {
@@ -100,7 +101,11 @@ export function App() {
   };
 
   if (!admin.isAdminRoute) {
-    return <PublicPage config={config} history={history} gameStates={lichess.gameStates} nameOf={nameOf} />;
+    return <PublicPage ready={ready} config={config} history={history} gameStates={lichess.gameStates} nameOf={nameOf} />;
+  }
+
+  if (!admin.authReady) {
+    return <LoadingScreen label="Verifica accesso…" />;
   }
 
   if (!admin.isAuthenticated) {

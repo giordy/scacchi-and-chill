@@ -17,6 +17,7 @@ export function useAdminAuth() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     const handleHash = () => setIsAdminRoute(checkIsAdminRoute());
@@ -27,6 +28,7 @@ export function useAdminAuth() {
   // Firebase Authentication state: access is granted only to the accounts in ADMIN_EMAILS
   useEffect(() => {
     return subscribeToAuth((user) => {
+      setAuthReady(true);
       const ok = isAdminUser(user);
       setIsAuthenticated(ok);
       setEmail(ok && user?.email ? user.email : "");
@@ -56,5 +58,5 @@ export function useAdminAuth() {
     window.location.hash = "";
   };
 
-  return { isAdminRoute, isAuthenticated, email, error, isSigningIn, login, logout };
+  return { isAdminRoute, authReady, isAuthenticated, email, error, isSigningIn, login, logout };
 }

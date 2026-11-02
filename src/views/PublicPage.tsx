@@ -1,9 +1,11 @@
 import React from 'react';
 import { AppConfig, HistoryGame, LichessExportGame } from '../types';
 import { DEFAULT_TOURNAMENT } from '../lib/tournament';
+import { LoadingScreen } from '../components/LoadingScreen';
 import { PublicTournamentView } from '../PublicTournamentView';
 
 interface PublicPageProps {
+  ready: boolean;
   config: AppConfig;
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
@@ -11,7 +13,9 @@ interface PublicPageProps {
 }
 
 // Public tournament page, with a discreet link to the organizer area
-export function PublicPage({ config, history, gameStates, nameOf }: PublicPageProps) {
+export function PublicPage({ ready, config, history, gameStates, nameOf }: PublicPageProps) {
+  if (!ready) return <LoadingScreen label="Caricamento torneo…" />;
+
   return (
     <main>
       <PublicTournamentView

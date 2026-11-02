@@ -107,7 +107,9 @@ export function AdminConsole({
             key={t.key}
             className={`tab-btn ${activeTab === t.key ? 'active' : ''}`}
             role="tab"
+            id={`admin-tab-${t.key}`}
             aria-selected={activeTab === t.key}
+            aria-controls="admin-panel"
             onClick={() => setActiveTab(t.key)}
           >
             <span className="tab-icon">{t.icon}</span>
@@ -116,7 +118,9 @@ export function AdminConsole({
         ))}
       </nav>
 
-      {children}
+      <div role="tabpanel" id="admin-panel" aria-labelledby={`admin-tab-${activeTab}`}>
+        {children}
+      </div>
 
       <Toast message={toastMessage || ""} isVisible={Boolean(toastMessage)} />
     </main>
