@@ -15,6 +15,8 @@ export interface HistoryGame {
   black: string;
   url: string;
   createdAt?: number;
+  // Stato della partita su Lichess, salvato in Firestore dal pulsante "Sincronizza"
+  lichess?: LichessExportGame;
 }
 
 export interface GameRules {

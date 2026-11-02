@@ -19,7 +19,14 @@ import {
   getDocFromServer,
 } from "firebase/firestore";
 import firebaseConfigRaw from "../firebase-applet-config.json";
-import { HistoryGame, TournamentMeta, Player, ScheduledMatch, SeasonWinner } from "./types";
+import {
+  HistoryGame,
+  TournamentMeta,
+  Player,
+  ScheduledMatch,
+  SeasonWinner,
+  LichessExportGame,
+} from "./types";
 
 const firebaseConfig = {
   apiKey: firebaseConfigRaw.apiKey,
@@ -204,6 +211,40 @@ export async function saveGamesBatchToFirebase(
   await batch.commit();
 }
 
+// 4b. Salva lo stato Lichess (esito, mosse, apertura) sulle partite corrispondenti
+export async function saveLichessStatesToFirebase(
+  games: HistoryGame[],
+  states: Record<string, LichessExportGame>,
+  extractId: (url?: string) => string | undefined
+): Promise<number> {
+  const batch = writeBatch(db);
+  let count = 0;
+  games.forEach((game) => {
+    const id = extractId(game.url);
+    const state = id ? states[id] : undefined;
+    if (!state) return;
+    const gameDocId = `r${game.round}_${game.white}_${game.black}`;
+    const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", gameDocId);
+    // Firestore non accetta valori undefined: passiamo per JSON per ripulire l'oggetto
+    const clean = JSON.parse(JSON.stringify(state));
+    batch.set(
+      ref,
+      {
+        round: game.round,
+        white: game.white,
+        black: game.black,
+        url: game.url || "",
+        lichess: clean,
+        syncedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+    count++;
+  });
+  if (count > 0) await batch.commit();
+  return count;
+}
+
 // 5. Load all games from Firestore
 export async function loadGamesFromFirebase(): Promise<HistoryGame[]> {
   try {
@@ -219,6 +260,7 @@ export async function loadGamesFromFirebase(): Promise<HistoryGame[]> {
           black: String(data.black),
           url: String(data.url || ""),
           createdAt: Number(data.createdAt) || undefined,
+          lichess: data.lichess || undefined,
         });
       }
     });
@@ -247,6 +289,7 @@ export function subscribeToGames(
             black: String(data.black),
             url: String(data.url || ""),
             createdAt: Number(data.createdAt) || undefined,
+            lichess: data.lichess || undefined,
           });
         }
       });

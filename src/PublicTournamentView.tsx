@@ -6,9 +6,6 @@ interface PublicTournamentViewProps {
   tournamentMeta: TournamentMeta;
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
-  isSyncing: boolean;
-  onRefresh: () => void;
-  lastSyncTime: string | null;
   nameOf: (handle: string) => string;
 }
 
@@ -17,9 +14,6 @@ export function PublicTournamentView({
   tournamentMeta,
   history,
   gameStates,
-  isSyncing,
-  onRefresh,
-  lastSyncTime,
   nameOf,
 }: PublicTournamentViewProps) {
   const [subTab, setSubTab] = useState<"standings" | "matches" | "crosstable" | "rules">("standings");

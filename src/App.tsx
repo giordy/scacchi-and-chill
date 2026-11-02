@@ -27,6 +27,7 @@ import {
   subscribeToTournamentDoc,
   subscribeToGames,
   testFirestoreConnection,
+  saveLichessStatesToFirebase,
   subscribeToAuth,
   signInAdminWithGoogle,
   signOutAdmin,
@@ -1993,7 +1994,6 @@ export function App() {
     'pairings'
   );
 
-  const [liveGameStates, setLiveGameStates] = useState<Record<string, LichessExportGame>>({});
   const [isSyncingLive, setIsSyncingLive] = useState(false);
   const [lastLiveSyncTime, setLastLiveSyncTime] = useState<string | null>(null);
 
@@ -2097,10 +2097,15 @@ export function App() {
     const unsubGames = subscribeToGames((remoteGames) => {
       if (remoteGames.length > 0) {
         setHistory((prevLocal) => {
+          const remoteByUrl = new Map(remoteGames.filter((rg) => rg.url).map((rg) => [rg.url, rg]));
           const knownUrls = new Set(prevLocal.map((g) => g.url).filter(Boolean));
+          // Aggiorna lo stato Lichess delle partite già note con quello salvato in Firestore
+          const merged = prevLocal.map((g) => {
+            const r = g.url ? remoteByUrl.get(g.url) : undefined;
+            return r?.lichess ? { ...g, lichess: r.lichess } : g;
+          });
           const toAdd = remoteGames.filter((rg) => rg.url && !knownUrls.has(rg.url));
-          if (toAdd.length === 0) return prevLocal;
-          return [...prevLocal, ...toAdd];
+          return [...merged, ...toAdd];
         });
       }
     });
@@ -2212,103 +2217,62 @@ export function App() {
     });
   }, [pairs, round, config.schedule, setHistory]);
 
-  const refreshLiveGameStates = async (force: boolean = false) => {
-    const ids = history.map((g) => extractGameId(g.url)).filter((id): id is string => Boolean(id));
-    if (ids.length === 0) return;
+  // Lo stato delle partite (esito, mosse, apertura) è salvato in Firestore nel campo `lichess`:
+  // la vista pubblica lo legge da lì, senza chiamare Lichess dal browser di ogni visitatore.
+  const liveGameStates = React.useMemo(() => {
+    const map: Record<string, LichessExportGame> = {};
+    history.forEach((g) => {
+      const id = extractGameId(g.url);
+      if (id && g.lichess) map[id] = g.lichess;
+    });
+    return map;
+  }, [history]);
 
-    // Smart Cache in localStorage:
-    // Finished games are final and immutable (status != started/created).
-    // We only fetch if the cache is older than 5 minutes (300,000 ms) or if forced.
-    const CACHE_KEY = "scacchi.lichess.cache.v1";
-    const CACHE_TIME_KEY = "scacchi.lichess.cache.time";
-    const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache to protect Lichess servers
-
-    let cachedMap: Record<string, LichessExportGame> = {};
-    let lastFetched = 0;
-    try {
-      const saved = localStorage.getItem(CACHE_KEY);
-      if (saved) cachedMap = JSON.parse(saved);
-      const savedTime = localStorage.getItem(CACHE_TIME_KEY);
-      if (savedTime) lastFetched = parseInt(savedTime, 10);
-    } catch {}
-
-    const now = Date.now();
-    const isFresh = now - lastFetched < CACHE_TTL_MS;
-
-    // Identify games that are already finished (winner exists or status is mate/draw/resign/outoftime)
+  // Pulsante "Sincronizza" (solo organizzatore): legge da Lichess e salva su Firestore.
+  const syncLichessToFirebase = async () => {
     const isFinished = (s?: LichessExportGame) =>
       Boolean(s && s.status && s.status !== "created" && s.status !== "started");
 
-    // Games that we actually need to check: not in cache OR not yet finished
-    const idsToFetch = ids.filter((id) => !isFinished(cachedMap[id]));
-
-    // If cache is fresh and we already have data, reuse cache without touching network!
-    if (!force && isFresh && Object.keys(cachedMap).length > 0) {
-      setLiveGameStates(cachedMap);
-      const d = new Date(lastFetched);
-      const pad = (n: number) => String(n).padStart(2, "0");
-      setLastLiveSyncTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
+    const targets = history.filter((g) => extractGameId(g.url) && !isFinished(g.lichess));
+    if (history.filter((g) => extractGameId(g.url)).length === 0) {
+      flash("warning", "Non ci sono ancora partite con un link Lichess da sincronizzare.");
+      return;
+    }
+    if (targets.length === 0) {
+      flash("ok", "Tutte le partite risultano già concluse e salvate: niente da aggiornare.");
       return;
     }
 
-    // If all games in tournament are already finished, no network call is ever needed!
-    if (idsToFetch.length === 0 && Object.keys(cachedMap).length > 0) {
-      setLiveGameStates(cachedMap);
-      const d = new Date(lastFetched || now);
-      const pad = (n: number) => String(n).padStart(2, "0");
-      setLastLiveSyncTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
-      return;
-    }
-
-    // Call Lichess ONLY for unfinished or new games in 1 single batch POST
     setIsSyncingLive(true);
     try {
-      const res = await fetch("https://lichess.org/api/games/export/_ids?pgnInJson=false&lastFen=true&opening=true", {
-        method: "POST",
-        headers: { "Content-Type": "text/plain", Accept: "application/x-ndjson" },
-        body: idsToFetch.join(","),
-      });
+      const ids = Array.from(new Set(targets.map((g) => extractGameId(g.url) as string)));
+      const states = await fetchGameStates(ids);
+      const saved = await saveLichessStatesToFirebase(targets, states, extractGameId);
 
-      if (res.ok) {
-        const text = await res.text();
-        const updatedMap: Record<string, LichessExportGame> = { ...cachedMap };
-        text
-          .split("\n")
-          .filter((l) => l.trim())
-          .forEach((line) => {
-            try {
-              const g = JSON.parse(line);
-              if (g.id) updatedMap[g.id] = g;
-            } catch {}
-          });
+      setHistory((prev) =>
+        prev.map((g) => {
+          const id = extractGameId(g.url);
+          const s = id ? states[id] : undefined;
+          return s ? { ...g, lichess: s } : g;
+        })
+      );
 
-        setLiveGameStates(updatedMap);
-        try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify(updatedMap));
-          localStorage.setItem(CACHE_TIME_KEY, String(now));
-        } catch {}
+      const d = new Date();
+      const pad = (n: number) => String(n).padStart(2, "0");
+      setLastLiveSyncTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
 
-        const d = new Date(now);
-        const pad = (n: number) => String(n).padStart(2, "0");
-        setLastLiveSyncTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
-      }
+      const missing = targets.length - saved;
+      flash(
+        missing > 0 ? "warning" : "ok",
+        `Sincronizzate ${saved} partite su Firestore.` +
+          (missing > 0 ? ` ${missing} non ancora trovate su Lichess (sfida non accettata).` : "")
+      );
     } catch (e: any) {
-      console.warn("Auto-sync Lichess fallito:", e.message);
-      // Fallback to cached data if network failed
-      if (Object.keys(cachedMap).length > 0) {
-        setLiveGameStates(cachedMap);
-      }
+      flash("err", "Sincronizzazione fallita: " + (e?.message || e));
     } finally {
       setIsSyncingLive(false);
     }
   };
-
-  // Auto-sync on first load if we have games
-  useEffect(() => {
-    if (history.length > 0) {
-      refreshLiveGameStates();
-    }
-  }, [history.length]);
 
   const updatePair = (i: number, patch: Partial<GamePair>) => {
     setNotice(null);
@@ -2515,9 +2479,6 @@ export function App() {
           }
           history={history}
           gameStates={liveGameStates}
-          isSyncing={isSyncingLive}
-          onRefresh={refreshLiveGameStates}
-          lastSyncTime={lastLiveSyncTime}
           nameOf={nameOf}
         />
 
@@ -2646,6 +2607,24 @@ export function App() {
       </div>
       <p className="sub">Crea gli accoppiamenti, genera le sfide su Lichess e gestisci il torneo.</p>
       <div className="strip" aria-hidden="true" />
+
+      {/* Sincronizzazione risultati: Lichess → Firestore (la vista pubblica legge da qui) */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 14px", flexWrap: "wrap" }}>
+        <button
+          type="button"
+          className="secondary"
+          onClick={syncLichessToFirebase}
+          disabled={isSyncingLive}
+          style={{ minHeight: 40, fontWeight: 600 }}
+        >
+          {isSyncingLive ? "Sincronizzazione…" : "🔄 Sincronizza risultati"}
+        </button>
+        <span className="note" style={{ margin: 0, fontSize: 12 }}>
+          {lastLiveSyncTime
+            ? `Ultima sincronizzazione alle ${lastLiveSyncTime}`
+            : "Aggiorna i risultati visibili al pubblico"}
+        </span>
+      </div>
 
       {/* Modern Phone-Friendly Tabs Navigation (Admin Only) */}
       <nav className="tabs" role="tablist" aria-label="Navigazione sezioni">
