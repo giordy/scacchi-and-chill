@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildSeasonArchive, seasonId, sortSeasons, withChampion } from '../seasons';
+import { buildSeasonArchive, seasonId, sortSeasons, validateNewSeasonName, withChampion } from '../seasons';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, TournamentMeta } from '../../types';
 
 const players: Player[] = [
@@ -62,5 +62,17 @@ describe('sortSeasons', () => {
     const input = [a, b];
     expect(sortSeasons(input).map((s) => s.id)).toEqual(['b', 'a']);
     expect(input[0]).toBe(a);
+  });
+});
+
+describe('validateNewSeasonName', () => {
+  const archived = [{ id: 'stagione-1' }];
+  it('accepts a fresh name', () => {
+    expect(validateNewSeasonName('Stagione 3 - Fischer', 'Stagione 2', archived)).toBeNull();
+  });
+  it('rejects empty names, the current season and archived seasons', () => {
+    expect(validateNewSeasonName('  ', 'Stagione 2', archived)).toMatch(/Inserisci/);
+    expect(validateNewSeasonName('stagione 2', 'Stagione 2', archived)).toMatch(/corrente/);
+    expect(validateNewSeasonName('Stagione 1', 'Stagione 2', archived)).toMatch(/archiviata/);
   });
 });

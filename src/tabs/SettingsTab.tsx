@@ -79,6 +79,10 @@ export function SettingsTab({
           seasons={seasons}
           flash={flash}
           onUpdateTournamentMeta={onUpdateTournamentMeta}
+          onUpdateSchedule={onUpdateSchedule}
+          setHistory={setHistory}
+          setPairs={setPairs}
+          setRound={setRound}
         />
       </CollapsibleSection>
       <CollapsibleSection title={`👥 Giocatori del Torneo (${config.players.length})`}>

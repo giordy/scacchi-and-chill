@@ -37,8 +37,10 @@ service cloud.firestore {
       match /games/{gameId} {
         // Games are publicly readable so standings and matches can be displayed to all participants
         allow read: if true;
-        // Game records can be written if they have valid round and player handles
-        allow write: if isAdmin()
+        // The organizer can delete games (used when a new season starts, after archiving)
+        allow delete: if isAdmin();
+        // Game records can be created/updated if they have valid round and player handles
+        allow create, update: if isAdmin()
                      && request.resource.data.round is string
                      && request.resource.data.white is string
                      && request.resource.data.black is string

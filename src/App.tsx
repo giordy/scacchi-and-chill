@@ -86,7 +86,7 @@ export function App() {
   };
 
   const organizer = useOrganizerData(admin.isAdminRoute && admin.isAuthenticated, (msg) => flash('err', msg));
-  const { ready } = useTournamentSync(setConfig, setHistory);
+  const { ready } = useTournamentSync(setConfig, setHistory, !admin.isAdminRoute);
   const seasons = useSeasons();
   const lichess = useLichessSync(history, setHistory, flash);
 

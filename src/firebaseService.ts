@@ -180,6 +180,19 @@ export function subscribeToOrganizerData(
   );
 }
 
+// Deletes every game of the tournament (used when starting a new season, after archiving)
+export async function deleteAllGames(): Promise<number> {
+  const snap = await getDocs(collection(db, "tournaments", TOURNAMENT_DOC_ID, "games"));
+  const refs = snap.docs.map((d) => d.ref);
+  // A Firestore batch holds at most 500 operations
+  for (let i = 0; i < refs.length; i += 400) {
+    const batch = writeBatch(db);
+    refs.slice(i, i + 400).forEach((r) => batch.delete(r));
+    await batch.commit();
+  }
+  return refs.length;
+}
+
 // Archived seasons: publicly readable, written only by the organizer
 export async function saveSeasonArchive(archive: SeasonArchive): Promise<void> {
   const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "seasons", archive.id);

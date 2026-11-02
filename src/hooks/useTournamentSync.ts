@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AppConfig, HistoryGame } from '../types';
 import { errorMessage } from '../lib/utils';
 import { validateAndNormalizeConfig } from '../lib/config';
@@ -14,9 +14,14 @@ import {
 // Loads config.json and the Firestore data on boot, then keeps tournament and games in sync in real time.
 export function useTournamentSync(
   setConfig: React.Dispatch<React.SetStateAction<AppConfig>>,
-  setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>
+  setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>,
+  // Public visitors mirror Firestore exactly, so games removed by the organizer (new season) disappear.
+  // The organizer's device keeps merging, because it may hold games not saved yet.
+  mirrorRemote: boolean
 ) {
   const [ready, setReady] = useState(false);
+  const mirrorRef = useRef(mirrorRemote);
+  mirrorRef.current = mirrorRemote;
 
   useEffect(() => {
     testFirestoreConnection();
@@ -73,7 +78,9 @@ export function useTournamentSync(
 
     // Real-time listener for Firestore games: updates games across all devices instantly
     const unsubGames = subscribeToGames((remoteGames) => {
-      if (remoteGames.length > 0) {
+      if (mirrorRef.current) {
+        setHistory(remoteGames);
+      } else if (remoteGames.length > 0) {
         setHistory((prevLocal) => {
           const remoteByUrl = new Map(remoteGames.filter((rg) => rg.url).map((rg) => [rg.url, rg]));
           const knownUrls = new Set(prevLocal.map((g) => g.url).filter(Boolean));

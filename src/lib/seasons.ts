@@ -53,6 +53,21 @@ export function withChampion(winners: SeasonWinner[] | undefined, archive: Seaso
   ];
 }
 
+// A new season needs a name that does not collide with the current one or an archived one
+// (the archive id comes from the name, so a collision would overwrite a past season)
+export function validateNewSeasonName(
+  name: string,
+  currentSeason: string,
+  archived: Array<{ id: string }>
+): string | null {
+  const trimmed = name.trim();
+  if (!trimmed) return "Inserisci il nome della nuova stagione.";
+  const id = seasonId(trimmed);
+  if (id === seasonId(currentSeason)) return "Il nome è uguale a quello della stagione corrente.";
+  if (archived.some((s) => s.id === id)) return "Esiste già una stagione archiviata con questo nome.";
+  return null;
+}
+
 // Newest first
 export const sortSeasons = (seasons: SeasonArchive[]): SeasonArchive[] =>
   [...seasons].sort((a, b) => b.archivedAt.localeCompare(a.archivedAt));

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive, TournamentMeta } from '../../types';
-import { buildSeasonArchive, seasonId, withChampion } from '../../lib/seasons';
-import { saveSeasonArchive } from '../../firebaseService';
+import { AppConfig, GamePair, HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchive, TournamentMeta } from '../../types';
+import { buildSeasonArchive, seasonId, validateNewSeasonName, withChampion } from '../../lib/seasons';
+import { deleteAllGames, saveSeasonArchive } from '../../firebaseService';
 import { errorMessage } from '../../lib/utils';
 
 export function SeasonArchiveSection({
@@ -11,6 +11,10 @@ export function SeasonArchiveSection({
   seasons,
   flash,
   onUpdateTournamentMeta,
+  onUpdateSchedule,
+  setHistory,
+  setPairs,
+  setRound,
 }: {
   config: AppConfig;
   history: HistoryGame[];
@@ -18,10 +22,18 @@ export function SeasonArchiveSection({
   seasons: SeasonArchive[];
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
+  onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
+  setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
+  setPairs: React.Dispatch<React.SetStateAction<GamePair[]>>;
+  setRound: (r: string) => void;
 }) {
   const [busy, setBusy] = useState(false);
+  const [nextSeason, setNextSeason] = useState("");
+  const [nextMaster, setNextMaster] = useState("");
+  const [clearSchedule, setClearSchedule] = useState(true);
   const meta = config.tournament;
 
+  // Hooks above must run on every render, so the early return comes after them
   if (!meta) return <p className="note">Salva prima le informazioni del torneo.</p>;
 
   const preview = buildSeasonArchive(meta, config.players, history, gameStates);
@@ -45,6 +57,54 @@ export function SeasonArchiveSection({
     }
   };
 
+  const startNewSeason = async () => {
+    const problem = validateNewSeasonName(nextSeason, meta.season, seasons);
+    if (problem) {
+      flash("err", problem);
+      return;
+    }
+    if (!preview.champion) {
+      flash("err", "La stagione corrente non ha partite concluse: sincronizza i risultati prima di chiuderla.");
+      return;
+    }
+    const ok = window.confirm(
+      `Chiudere «${meta.season}» e iniziare «${nextSeason.trim()}»?\n\n` +
+        `• la classifica finale viene archiviata (campione: ${preview.champion.name})\n` +
+        `• TUTTE le partite della stagione corrente vengono cancellate da Firestore\n` +
+        (clearSchedule ? "• il calendario ufficiale viene svuotato\n" : "") +
+        `\nL'operazione non si può annullare.`
+    );
+    if (!ok) return;
+
+    setBusy(true);
+    try {
+      // 1. Archive first: if this fails nothing is deleted
+      const snapshot = buildSeasonArchive(meta, config.players, history, gameStates);
+      await saveSeasonArchive(snapshot);
+      // 2. Remove the old season's games from Firestore and from this device
+      await deleteAllGames();
+      setHistory([]);
+      setPairs([]);
+      setRound("1");
+      // 3. New season details (the champion goes to the hall of fame)
+      onUpdateTournamentMeta({
+        season: nextSeason.trim(),
+        masterName: nextMaster.trim(),
+        imageUrl: "",
+        subtitle: "",
+        winners: withChampion(meta.winners, snapshot),
+      });
+      if (clearSchedule) onUpdateSchedule([]);
+      setNextSeason("");
+      setNextMaster("");
+      flash("ok", `Stagione «${snapshot.season}» archiviata. Iniziata «${nextSeason.trim()}».`);
+    } catch (e) {
+      flash("err", "Cambio stagione interrotto: " + errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div>
       <p className="note note-flush">
@@ -61,6 +121,30 @@ export function SeasonArchiveSection({
         </p>
         <button type="button" className="secondary" disabled={busy || !preview.champion} onClick={archive}>
           {busy ? "Archiviazione…" : alreadyArchived ? "🏛️ Aggiorna archivio stagione" : "🏛️ Archivia stagione corrente"}
+        </button>
+      </div>
+
+      <div className="subcard">
+        <h4 className="subcard-title">🆕 Inizia una nuova stagione</h4>
+        <p className="note note-sm">
+          Archivia la stagione corrente e poi <strong>cancella tutte le sue partite</strong>. Giocatori e impostazioni restano.
+        </p>
+        <div className="grid2 field">
+          <div>
+            <label htmlFor="next-season">Nome nuova stagione</label>
+            <input id="next-season" type="text" value={nextSeason} onChange={(e) => setNextSeason(e.target.value)} placeholder="es. Stagione 3 - Fischer" />
+          </div>
+          <div>
+            <label htmlFor="next-master">Maestro (opzionale)</label>
+            <input id="next-master" type="text" value={nextMaster} onChange={(e) => setNextMaster(e.target.value)} placeholder="es. Bobby Fischer" />
+          </div>
+        </div>
+        <div className="inline field">
+          <input id="next-clear-schedule" type="checkbox" checked={clearSchedule} onChange={(e) => setClearSchedule(e.target.checked)} />
+          <label htmlFor="next-clear-schedule">Svuota anche il calendario ufficiale</label>
+        </div>
+        <button type="button" className="danger" disabled={busy || !preview.champion} onClick={startNewSeason}>
+          {busy ? "Operazione in corso…" : "Archivia e inizia nuova stagione"}
         </button>
       </div>
 

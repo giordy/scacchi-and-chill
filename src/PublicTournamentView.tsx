@@ -55,7 +55,10 @@ export function PublicTournamentView({
   }
 
   const [showStoryModal, setShowStoryModal] = useState(false);
-  const masterPhoto = tournamentMeta.imageUrl || "assets/capablanca.jpg";
+  // Default photo only for the original Capablanca season: a new master without a photo shows none
+  const masterName = tournamentMeta.masterName ?? "";
+  const masterPhoto =
+    tournamentMeta.imageUrl || (!masterName || /capablanca/i.test(masterName) ? "assets/capablanca.jpg" : "");
 
   return (
     <div className="public-tournament">
