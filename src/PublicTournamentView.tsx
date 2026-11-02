@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, TournamentMeta } from "./types";
+import { computeStandings } from "./lib/standings";
 import { extractGameId } from "./lib/utils";
 
 interface PublicTournamentViewProps {
@@ -20,95 +21,7 @@ export function PublicTournamentView({
   const [subTab, setSubTab] = useState<"standings" | "matches" | "crosstable" | "rules">("standings");
   const [filterRound, setFilterRound] = useState<string>("all");
 
-  // Calculate Standings, Sonneborn-Berger and Crosstable Matrix
-  const stats: Record<
-    string,
-    {
-      played: number;
-      won: number;
-      drawn: number;
-      lost: number;
-      points: number;
-      sb: number; // Sonneborn-Berger
-    }
-  > = {};
-
-  config.players.forEach((p) => {
-    stats[p.handle] = { played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 };
-  });
-
-  // Crosstable: matrix[whiteHandle][blackHandle] = result string
-  const crosstable: Record<string, Record<string, string>> = {};
-  config.players.forEach((p1) => {
-    crosstable[p1.handle] = {};
-    config.players.forEach((p2) => {
-      crosstable[p1.handle][p2.handle] = p1.handle === p2.handle ? "✕" : "-";
-    });
-  });
-
-  // Track finished matches for Sonneborn-Berger
-  const finishedList: Array<{ white: string; black: string; result: "1-0" | "0-1" | "½-½" }> = [];
-
-  history.forEach((g) => {
-    const id = extractGameId(g.url);
-    const s = id ? gameStates[id] : undefined;
-    const white = g.white;
-    const black = g.black;
-
-    if (!stats[white]) stats[white] = { played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 };
-    if (!stats[black]) stats[black] = { played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 };
-
-    if (!s || s.status === "created" || s.status === "started" || s.status === "aborted" || s.status === "noStart") {
-      return;
-    }
-
-    stats[white].played++;
-    stats[black].played++;
-
-    if (s.winner === "white") {
-      stats[white].won++;
-      stats[white].points += 1;
-      stats[black].lost++;
-      crosstable[white][black] = "1";
-      crosstable[black][white] = "0";
-      finishedList.push({ white, black, result: "1-0" });
-    } else if (s.winner === "black") {
-      stats[black].won++;
-      stats[black].points += 1;
-      stats[white].lost++;
-      crosstable[white][black] = "0";
-      crosstable[black][white] = "1";
-      finishedList.push({ white, black, result: "0-1" });
-    } else {
-      stats[white].drawn++;
-      stats[white].points += 0.5;
-      stats[black].drawn++;
-      stats[black].points += 0.5;
-      crosstable[white][black] = "½";
-      crosstable[black][white] = "½";
-      finishedList.push({ white, black, result: "½-½" });
-    }
-  });
-
-  // Calculate Sonneborn-Berger: sum of defeated opponents' points + 0.5 * drawn opponents' points
-  finishedList.forEach((m) => {
-    if (m.result === "1-0") {
-      stats[m.white].sb += stats[m.black].points;
-    } else if (m.result === "0-1") {
-      stats[m.black].sb += stats[m.white].points;
-    } else if (m.result === "½-½") {
-      stats[m.white].sb += stats[m.black].points * 0.5;
-      stats[m.black].sb += stats[m.white].points * 0.5;
-    }
-  });
-
-  const standings = config.players
-    .map((p) => ({
-      handle: p.handle,
-      name: p.name,
-      ...stats[p.handle],
-    }))
-    .sort((a, b) => b.points - a.points || b.sb - a.sb || b.won - a.won || a.name.localeCompare(b.name));
+  const { standings, crosstable } = computeStandings(config.players, history, gameStates);
 
   const rounds = [...new Set(history.map((g) => g.round))].sort((a, b) =>
     a.localeCompare(b, undefined, { numeric: true })
