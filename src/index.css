@@ -1198,3 +1198,30 @@ details .body {
   }
 }
 
+
+/* Table helpers (public view) */
+.col-rank { width: 40px; text-align: center; }
+.col-cross { width: 36px; text-align: center; }
+.col-center { text-align: center; }
+.col-strong { font-weight: 700; text-align: center; }
+.col-points { text-align: center; font-weight: 700; color: var(--accent); }
+.standings-table .col-points { font-size: 16px; }
+.stat-won { color: #22c55e; font-weight: 600; }
+.stat-drawn { color: #eab308; }
+.stat-lost { color: #ef4444; }
+.stat-sb { opacity: 0.8; font-size: 12px; }
+.player-cell { display: flex; flex-direction: column; }
+.player-name { font-weight: 600; }
+.nowrap { white-space: nowrap; }
+
+/* Keep the player column visible while scrolling horizontally */
+.sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--panel);
+  text-align: left;
+}
+th.sticky-col { background: var(--bg); z-index: 2; }
+.row-leader .sticky-col { background: color-mix(in srgb, var(--panel) 92%, #eab308); }
+.row-podium .sticky-col { background: color-mix(in srgb, var(--panel) 96%, #22c55e); }

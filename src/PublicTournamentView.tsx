@@ -335,10 +335,14 @@ export function PublicTournamentView({
       )}
 
       {/* Public Sub-Navigation */}
-      <div className="public-subnav">
+      <div className="public-subnav" role="tablist" aria-label="Sezioni del torneo">
         <button
           type="button"
           className={`pub-tab-btn ${subTab === "standings" ? "active" : ""}`}
+          role="tab"
+          id="pub-tab-standings"
+          aria-selected={subTab === "standings"}
+          aria-controls="pub-panel-standings"
           onClick={() => setSubTab("standings")}
         >
           📊 Classifica
@@ -346,6 +350,10 @@ export function PublicTournamentView({
         <button
           type="button"
           className={`pub-tab-btn ${subTab === "crosstable" ? "active" : ""}`}
+          role="tab"
+          id="pub-tab-crosstable"
+          aria-selected={subTab === "crosstable"}
+          aria-controls="pub-panel-crosstable"
           onClick={() => setSubTab("crosstable")}
         >
           🔲 Tabellone Incrociato
@@ -353,6 +361,10 @@ export function PublicTournamentView({
         <button
           type="button"
           className={`pub-tab-btn ${subTab === "matches" ? "active" : ""}`}
+          role="tab"
+          id="pub-tab-matches"
+          aria-selected={subTab === "matches"}
+          aria-controls="pub-panel-matches"
           onClick={() => setSubTab("matches")}
         >
           ♟️ Calendario Partite ({history.length})
@@ -360,6 +372,10 @@ export function PublicTournamentView({
         <button
           type="button"
           className={`pub-tab-btn ${subTab === "rules" ? "active" : ""}`}
+          role="tab"
+          id="pub-tab-rules"
+          aria-selected={subTab === "rules"}
+          aria-controls="pub-panel-rules"
           onClick={() => setSubTab("rules")}
         >
           📜 Regolamento
@@ -368,19 +384,19 @@ export function PublicTournamentView({
 
       {/* 1. STANDINGS TAB */}
       {subTab === "standings" && (
-        <div className="public-section">
+        <div className="public-section" role="tabpanel" id="pub-panel-standings" aria-labelledby="pub-tab-standings">
           <div className="table-responsive">
             <table className="standings-table">
               <thead>
                 <tr>
-                  <th style={{ width: "40px", textAlign: "center" }}>#</th>
-                  <th>Giocatore</th>
-                  <th style={{ textAlign: "center" }}>Punti</th>
-                  <th style={{ textAlign: "center" }}>G</th>
-                  <th style={{ textAlign: "center" }}>V</th>
-                  <th style={{ textAlign: "center" }}>N</th>
-                  <th style={{ textAlign: "center" }}>P</th>
-                  <th style={{ textAlign: "center" }} title="Spareggio Sonneborn-Berger">SB</th>
+                  <th className="col-rank">#</th>
+                  <th className="sticky-col">Giocatore</th>
+                  <th className="col-center">Punti</th>
+                  <th className="col-center">G</th>
+                  <th className="col-center">V</th>
+                  <th className="col-center">N</th>
+                  <th className="col-center">P</th>
+                  <th className="col-center" title="Spareggio Sonneborn-Berger">SB</th>
                 </tr>
               </thead>
               <tbody>
@@ -389,12 +405,12 @@ export function PublicTournamentView({
                   const isPodium = idx < 3 && p.points > 0;
                   return (
                     <tr key={p.handle} className={isLeader ? "row-leader" : isPodium ? "row-podium" : ""}>
-                      <td style={{ textAlign: "center", fontWeight: "bold" }}>
+                      <td className="col-center col-strong">
                         {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : idx + 1}
                       </td>
-                      <td>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
-                          <span style={{ fontWeight: 600 }}>{p.name}</span>
+                      <td className="sticky-col">
+                        <div className="player-cell">
+                          <span className="player-name">{p.name}</span>
                           <a
                             href={`https://lichess.org/@/${p.handle}`}
                             target="_blank"
@@ -405,14 +421,14 @@ export function PublicTournamentView({
                           </a>
                         </div>
                       </td>
-                      <td style={{ textAlign: "center", fontWeight: 700, fontSize: "16px", color: "var(--accent)" }}>
+                      <td className="col-center col-points">
                         {p.points}
                       </td>
-                      <td style={{ textAlign: "center" }}>{p.played}</td>
-                      <td style={{ textAlign: "center", color: "#22c55e", fontWeight: 600 }}>{p.won}</td>
-                      <td style={{ textAlign: "center", color: "#eab308" }}>{p.drawn}</td>
-                      <td style={{ textAlign: "center", color: "#ef4444" }}>{p.lost}</td>
-                      <td style={{ textAlign: "center", opacity: 0.8, fontSize: "12px" }}>{p.sb.toFixed(1)}</td>
+                      <td className="col-center">{p.played}</td>
+                      <td className="col-center stat-won">{p.won}</td>
+                      <td className="col-center stat-drawn">{p.drawn}</td>
+                      <td className="col-center stat-lost">{p.lost}</td>
+                      <td className="col-center stat-sb">{p.sb.toFixed(1)}</td>
                     </tr>
                   );
                 })}
@@ -427,26 +443,26 @@ export function PublicTournamentView({
 
       {/* 2. CROSSTABLE TAB */}
       {subTab === "crosstable" && (
-        <div className="public-section">
+        <div className="public-section" role="tabpanel" id="pub-panel-crosstable" aria-labelledby="pub-tab-crosstable">
           <div className="table-responsive">
             <table className="crosstable">
               <thead>
                 <tr>
-                  <th style={{ width: "32px" }}>#</th>
-                  <th>Giocatore</th>
+                  <th className="col-rank">#</th>
+                  <th className="sticky-col">Giocatore</th>
                   {standings.map((_, i) => (
-                    <th key={i} style={{ width: "36px", textAlign: "center" }}>
+                    <th key={i} className="col-cross">
                       {i + 1}
                     </th>
                   ))}
-                  <th style={{ textAlign: "center" }}>Tot</th>
+                  <th className="col-center">Tot</th>
                 </tr>
               </thead>
               <tbody>
                 {standings.map((p, rowIdx) => (
                   <tr key={p.handle}>
-                    <td style={{ fontWeight: "bold", textAlign: "center" }}>{rowIdx + 1}</td>
-                    <td style={{ fontWeight: 600, whiteSpace: "nowrap" }}>{p.name}</td>
+                    <td className="col-strong">{rowIdx + 1}</td>
+                    <td className="sticky-col player-name nowrap">{p.name}</td>
                     {standings.map((opp, colIdx) => {
                       const res = crosstable[p.handle]?.[opp.handle] ?? "-";
                       const isSelf = rowIdx === colIdx;
@@ -459,7 +475,7 @@ export function PublicTournamentView({
                         </td>
                       );
                     })}
-                    <td style={{ textAlign: "center", fontWeight: 700, color: "var(--accent)" }}>
+                    <td className="col-points">
                       {p.points}
                     </td>
                   </tr>
@@ -472,7 +488,7 @@ export function PublicTournamentView({
 
       {/* 3. MATCHES CALENDAR TAB */}
       {subTab === "matches" && (
-        <div className="public-section">
+        <div className="public-section" role="tabpanel" id="pub-panel-matches" aria-labelledby="pub-tab-matches">
           {rounds.length > 0 && (
             <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
               <label htmlFor="filter-round" style={{ margin: 0, fontSize: 13, whiteSpace: "nowrap" }}>
@@ -560,7 +576,7 @@ export function PublicTournamentView({
 
       {/* 4. RULES & REGULATIONS TAB (Full Dossier) */}
       {subTab === "rules" && (
-        <div className="public-section">
+        <div className="public-section" role="tabpanel" id="pub-panel-rules" aria-labelledby="pub-tab-rules">
           {/* Master Presentation Card */}
           <div
             style={{
