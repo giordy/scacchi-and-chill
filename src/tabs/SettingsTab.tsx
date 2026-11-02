@@ -1,6 +1,8 @@
 import React from 'react';
 import {
   AppConfig,
+  LichessExportGame,
+  SeasonArchive,
   Player,
   GamePair,
   HistoryGame,
@@ -11,6 +13,7 @@ import {
 } from '../types';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { TournamentInfoSection } from './settings/TournamentInfoSection';
+import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
 import { PlayersSection } from './settings/PlayersSection';
 import { ScheduleSection } from './settings/ScheduleSection';
 import { LichessSettingsSection } from './settings/LichessSettingsSection';
@@ -30,6 +33,8 @@ export function SettingsTab({
   setPairs,
   flash,
   organizer,
+  gameStates,
+  seasons,
   panelRef,
   config,
   onUpdateTournamentMeta,
@@ -48,6 +53,8 @@ export function SettingsTab({
   setPairs: React.Dispatch<React.SetStateAction<GamePair[]>>;
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
   organizer: OrganizerStore;
+  gameStates: Record<string, LichessExportGame>;
+  seasons: SeasonArchive[];
   panelRef: React.RefObject<HTMLDivElement>;
   config: AppConfig;
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
@@ -60,6 +67,16 @@ export function SettingsTab({
         <TournamentInfoSection
           config={config}
           history={history}
+          flash={flash}
+          onUpdateTournamentMeta={onUpdateTournamentMeta}
+        />
+      </CollapsibleSection>
+      <CollapsibleSection title={`🏛️ Archivio stagioni (${seasons.length})`}>
+        <SeasonArchiveSection
+          config={config}
+          history={history}
+          gameStates={gameStates}
+          seasons={seasons}
           flash={flash}
           onUpdateTournamentMeta={onUpdateTournamentMeta}
         />

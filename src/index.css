@@ -857,7 +857,7 @@ details .body {
 
 .public-subnav {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 6px;
   margin-bottom: 16px;
   background: var(--panel);
@@ -1434,3 +1434,9 @@ a.player-page-link:hover, a.player-page-link:focus-visible { color: var(--accent
   .player-game { grid-template-columns: 1fr auto; }
   .player-game .match-round { grid-column: 1 / -1; }
 }
+
+/* Seasons history */
+.seasons-history { display: grid; gap: 12px; }
+details.season-card { margin: 0; }
+details.season-card > summary { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
+.season-champion { font-weight: 500; color: var(--accent); }

@@ -13,6 +13,7 @@ import { mergeTournamentMeta } from './lib/tournament';
 import { usePersistentState } from './hooks/usePersistentState';
 import { useAdminAuth } from './hooks/useAdminAuth';
 import { useTournamentSync } from './hooks/useTournamentSync';
+import { useSeasons } from './hooks/useSeasons';
 import { useOrganizerData } from './hooks/useOrganizerData';
 import { useLichessSync } from './hooks/useLichessSync';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -86,6 +87,7 @@ export function App() {
 
   const organizer = useOrganizerData(admin.isAdminRoute && admin.isAuthenticated, (msg) => flash('err', msg));
   const { ready } = useTournamentSync(setConfig, setHistory);
+  const seasons = useSeasons();
   const lichess = useLichessSync(history, setHistory, flash);
 
   const handleLoadRoundIntoPairs = (loadedRound: string, loadedGames: HistoryGame[]) => {
@@ -103,7 +105,7 @@ export function App() {
   };
 
   if (!admin.isAdminRoute) {
-    return <PublicPage ready={ready} config={config} history={history} gameStates={lichess.gameStates} nameOf={nameOf} />;
+    return <PublicPage seasons={seasons} ready={ready} config={config} history={history} gameStates={lichess.gameStates} nameOf={nameOf} />;
   }
 
   if (!admin.authReady) {
@@ -175,6 +177,8 @@ export function App() {
             setPairs={setPairs}
             flash={flash}
             organizer={organizer}
+            gameStates={lichess.gameStates}
+            seasons={seasons}
             panelRef={settingsTabRef}
             config={config}
             onUpdateTournamentMeta={(patch) => {

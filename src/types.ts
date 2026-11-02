@@ -180,3 +180,27 @@ export interface LichessUserProfile {
     classical?: LichessPerf;
   };
 }
+
+// Final snapshot of a finished season, saved in tournaments/{id}/seasons/{seasonId}
+export interface SeasonArchiveStanding {
+  handle: string;
+  name: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  points: number;
+  sb: number;
+}
+
+export interface SeasonArchive {
+  id: string;
+  season: string;
+  title: string;
+  masterName?: string;
+  imageUrl?: string;
+  archivedAt: string; // ISO date
+  standings: SeasonArchiveStanding[];
+  gamesPlayed: number;
+  champion?: { handle: string; name: string; points: number };
+}

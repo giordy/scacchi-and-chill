@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame, TournamentMeta, SeasonWinner } from '../../types';
 
 export function TournamentInfoSection({
@@ -34,6 +34,11 @@ export function TournamentInfoSection({
       { season: "Stagione 1", name: "Fabio", handle: "fsgach", year: "2026", notes: "Campione 1ª Edizione" },
     ]
   );
+  // Keep the hall of fame in sync when it changes elsewhere (e.g. season archiving adds the champion)
+  useEffect(() => {
+    if (config.tournament?.winners) setTournWinners(config.tournament.winners);
+  }, [config.tournament?.winners]);
+
   const [newWinnerSeason, setNewWinnerSeason] = useState("");
   const [newWinnerHandle, setNewWinnerHandle] = useState("");
   const [newWinnerNotes, setNewWinnerNotes] = useState("");

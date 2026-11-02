@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { AppConfig, HistoryGame, LichessExportGame, TournamentMeta } from "./types";
+import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive, TournamentMeta } from "./types";
+import { SeasonsHistory } from "./components/SeasonsHistory";
 import { playerHref } from "./lib/routes";
 import { computeStandings } from "./lib/standings";
 import { extractGameId } from "./lib/utils";
@@ -10,6 +11,7 @@ interface PublicTournamentViewProps {
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
   nameOf: (handle: string) => string;
+  seasons?: SeasonArchive[];
 }
 
 export function PublicTournamentView({
@@ -18,8 +20,9 @@ export function PublicTournamentView({
   history,
   gameStates,
   nameOf,
+  seasons = [],
 }: PublicTournamentViewProps) {
-  const [subTab, setSubTab] = useState<"standings" | "matches" | "crosstable" | "rules">("standings");
+  const [subTab, setSubTab] = useState<"standings" | "matches" | "crosstable" | "rules" | "history">("standings");
   const [filterRound, setFilterRound] = useState<string>("all");
 
   const { standings, crosstable } = computeStandings(config.players, history, gameStates);
@@ -218,6 +221,19 @@ export function PublicTournamentView({
         >
           📜 Regolamento
         </button>
+        {seasons.length > 0 && (
+          <button
+            type="button"
+            className={`pub-tab-btn ${subTab === "history" ? "active" : ""}`}
+            role="tab"
+            id="pub-tab-history"
+            aria-selected={subTab === "history"}
+            aria-controls="pub-panel-history"
+            onClick={() => setSubTab("history")}
+          >
+            🏛️ Storico
+          </button>
+        )}
       </div>
 
       {/* 1. STANDINGS TAB */}
@@ -411,6 +427,13 @@ export function PublicTournamentView({
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* 5. SEASONS HISTORY TAB */}
+      {subTab === "history" && seasons.length > 0 && (
+        <div className="public-section" role="tabpanel" id="pub-panel-history" aria-labelledby="pub-tab-history">
+          <SeasonsHistory seasons={seasons} />
         </div>
       )}
 

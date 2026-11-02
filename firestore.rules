@@ -26,6 +26,14 @@ service cloud.firestore {
         allow read, write: if isAdmin();
       }
 
+      // Archived seasons (final standings): public, written only by the organizer
+      match /seasons/{seasonId} {
+        allow read: if true;
+        allow write: if isAdmin()
+                     && request.resource.data.season is string
+                     && request.resource.data.standings is list;
+      }
+
       match /games/{gameId} {
         // Games are publicly readable so standings and matches can be displayed to all participants
         allow read: if true;

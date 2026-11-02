@@ -26,6 +26,7 @@ import {
   ScheduledMatch,
   SeasonWinner,
   LichessExportGame,
+  SeasonArchive,
 } from "./types";
 
 const firebaseConfig = {
@@ -176,6 +177,20 @@ export function subscribeToOrganizerData(
       console.warn("Sottoscrizione note organizzatore fallita:", err);
       onError?.(err);
     }
+  );
+}
+
+// Archived seasons: publicly readable, written only by the organizer
+export async function saveSeasonArchive(archive: SeasonArchive): Promise<void> {
+  const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "seasons", archive.id);
+  await setDoc(ref, archive);
+}
+
+export function subscribeToSeasons(onUpdate: (seasons: SeasonArchive[]) => void): () => void {
+  return onSnapshot(
+    collection(db, "tournaments", TOURNAMENT_DOC_ID, "seasons"),
+    (snap) => onUpdate(snap.docs.map((d) => ({ ...(d.data() as SeasonArchive), id: d.id }))),
+    (err) => console.warn("Sottoscrizione stagioni fallita:", err)
   );
 }
 
