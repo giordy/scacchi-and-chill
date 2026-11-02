@@ -144,73 +144,42 @@ export function PublicTournamentView({
     <div className="public-tournament">
       {/* Tournament Header with Season & Master Badge */}
       <div className="tournament-hero">
-        <div className="hero-top" style={{ alignItems: "center" }}>
-          <div style={{ display: "flex", gap: 14, alignItems: "center", flex: 1 }}>
+        <div className="hero-top centered">
+          <div className="hero-identity">
             {masterPhoto && (
               <div
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setShowStoryModal(true); }}
                 onClick={() => setShowStoryModal(true)}
                 title="Clicca per scoprire la storia della stagione"
-                style={{
-                  cursor: "pointer",
-                  position: "relative",
-                  width: 52,
-                  height: 52,
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  border: "2px solid var(--accent)",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                  flexShrink: 0,
-                  transition: "transform 0.15s ease",
-                }}
+                className="master-thumb"
               >
                 <img
                   src={masterPhoto}
                   alt={tournamentMeta.masterName || "Maestro della Stagione"}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  className="master-thumb-img"
                 />
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    right: 0,
-                    background: "rgba(0,0,0,0.75)",
-                    color: "#fff",
-                    fontSize: 9,
-                    padding: "1px 3px",
-                    borderTopLeftRadius: 4,
-                  }}
-                >
-                  🔍
+                <span className="master-thumb-zoom">
+\1
                 </span>
               </div>
             )}
             <div>
               {/* 1. Nome Principale del Torneo */}
-              <h1 className="tournament-title" style={{ margin: "0 0 4px", fontSize: 24, lineHeight: 1.2 }}>
+              <h1 className="tournament-title hero-title">
                 {tournamentMeta.title}
               </h1>
 
               {/* 2. Badge Stagione & Link Scopri */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <span className="tournament-tag" style={{ margin: 0 }}>
+              <div className="hero-tags">
+                <span className="tournament-tag m-0">
                   🏆 {tournamentMeta.season}
                 </span>
                 <button
                   type="button"
+                  className="link-accent"
                   onClick={() => setShowStoryModal(true)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    color: "var(--accent)",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 3,
-                  }}
                 >
                   📖 Info stagione ▾
                 </button>
@@ -223,97 +192,53 @@ export function PublicTournamentView({
       {/* Modal / Card espansa con la presentazione e la foto del maestro */}
       {showStoryModal && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0, 0, 0, 0.7)",
-            backdropFilter: "blur(4px)",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-          }}
+          className="modal-backdrop"
           onClick={() => setShowStoryModal(false)}
         >
           <div
-            style={{
-              background: "var(--panel)",
-              border: "1px solid var(--line)",
-              borderRadius: 16,
-              maxWidth: 480,
-              width: "100%",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              padding: 20,
-              boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-              position: "relative",
-            }}
+            className="modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Storia della stagione"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
+              className="modal-close"
+              aria-label="Chiudi"
               onClick={() => setShowStoryModal(false)}
-              style={{
-                position: "absolute",
-                top: 14,
-                right: 14,
-                background: "var(--bg)",
-                border: "1px solid var(--line)",
-                borderRadius: "50%",
-                width: 32,
-                height: 32,
-                cursor: "pointer",
-                fontSize: 14,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
             >
               ✕
             </button>
 
-            <span className="tournament-tag" style={{ marginBottom: 6 }}>
+            <span className="tournament-tag mb-6">
               🏆 {tournamentMeta.season}
             </span>
             {tournamentMeta.subtitle && (
-              <p style={{ margin: "4px 0 12px", fontStyle: "italic", fontSize: 16, color: "var(--accent)" }}>
+              <p className="story-subtitle">
                 "{tournamentMeta.subtitle}"
               </p>
             )}
 
             {masterPhoto && (
-              <div
-                style={{
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  border: "1px solid var(--line)",
-                  marginBottom: 16,
-                  textAlign: "center",
-                  background: "#000",
-                }}
-              >
+              <div className="story-photo">
                 <img
                   src={masterPhoto}
                   alt={tournamentMeta.masterName || "Maestro della Stagione"}
-                  style={{ width: "100%", maxHeight: 320, objectFit: "contain", display: "block", margin: "0 auto" }}
+                  className="story-photo-img"
                 />
               </div>
             )}
 
-            <div style={{ lineHeight: 1.6, fontSize: 14, whiteSpace: "pre-line", color: "var(--ink)" }}>
+            <div className="story-text">
               {tournamentMeta.description ||
                 "Per rendere ogni appuntamento sempre vario e coinvolgente, ogni stagione del nostro torneo è dedicata a un grande campione della storia degli scacchi, con aneddoti e curiosità legati alla sua carriera durante lo svolgimento delle partite."}
             </div>
 
-            <div style={{ marginTop: 20, display: "flex", gap: 8 }}>
+            <div className="modal-actions">
               <button
                 type="button"
                 className="secondary"
-                style={{ flex: 1, minHeight: 42 }}
                 onClick={() => {
                   setShowStoryModal(false);
                   setSubTab("rules");
@@ -324,7 +249,6 @@ export function PublicTournamentView({
               <button
                 type="button"
                 className="primary"
-                style={{ flex: 1, minHeight: 42 }}
                 onClick={() => setShowStoryModal(false)}
               >
                 Chiudi

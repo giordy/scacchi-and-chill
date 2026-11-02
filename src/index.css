@@ -1368,3 +1368,24 @@ button.link-muted { background: none; border: none; color: var(--muted); font-si
 .quick-standings-list { max-height: 200px; overflow-y: auto; font-size: 13px; }
 .quick-standings-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted var(--line); }
 textarea.ta-xl { min-height: 220px; font-family: inherit; }
+
+/* Public hero and story modal */
+.hero-top.centered { align-items: center; }
+.hero-identity { display: flex; gap: 14px; align-items: center; flex: 1; }
+.master-thumb { cursor: pointer; position: relative; width: 52px; height: 52px; border-radius: 12px; overflow: hidden; border: 2px solid var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.15); flex-shrink: 0; transition: transform 0.15s ease; }
+.master-thumb:hover { transform: scale(1.05); }
+.master-thumb-img { width: 100%; height: 100%; object-fit: cover; }
+.master-thumb-zoom { position: absolute; bottom: 0; right: 0; background: rgba(0,0,0,0.75); color: #fff; font-size: 9px; padding: 1px 3px; border-top-left-radius: 4px; }
+.tournament-title.hero-title { margin: 0 0 4px; font-size: 24px; line-height: 1.2; }
+.hero-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hero-tags .tournament-tag { margin: 0; }
+button.link-accent { background: none; border: none; padding: 0; color: var(--accent); font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; display: inline-flex; align-items: center; gap: 3px; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.modal-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; }
+button.modal-close { position: absolute; top: 14px; right: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; color: var(--ink); padding: 0; }
+.story-subtitle { margin: 4px 0 12px; font-style: italic; font-size: 16px; color: var(--accent); }
+.story-photo { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); margin-bottom: 16px; text-align: center; background: #000; }
+.story-photo-img { width: 100%; max-height: 320px; object-fit: contain; display: block; margin: 0 auto; }
+.story-text { line-height: 1.6; font-size: 14px; white-space: pre-line; color: var(--ink); }
+.modal-actions { margin-top: 20px; display: flex; gap: 8px; }
+.modal-actions > button { flex: 1; min-height: 42px; }
