@@ -26,7 +26,6 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
   const [gameStates, setGameStates] = useState<Record<string, LichessExportGame>>({});
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [generatedReview, setGeneratedReview] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [isFetchingElo, setIsFetchingElo] = useState(false);
   const [notice, setNotice] = useState<NoticeState | null>(null);
@@ -120,15 +119,6 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
             data = await directRes.json();
           }
         } catch {}
-
-        if (!data) {
-          try {
-            const proxyRes = await fetch(`/api/lichess-user/${encodeURIComponent(player.handle)}`);
-            if (proxyRes.ok) {
-              data = await proxyRes.json();
-            }
-          } catch {}
-        }
 
         if (data) {
           const perfs = data.perfs || {};
@@ -413,48 +403,6 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
     URL.revokeObjectURL(url);
   };
 
-  // Generate review in-app with Gemini
-  const handleGenerateWithAI = async () => {
-    setIsGenerating(true);
-    setNotice(null);
-    const prompt = buildPrompt();
-
-    try {
-      const res = await fetch("/api/generate-review", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-
-      if (!res.ok) {
-        if (res.status === 405 || res.status === 404) {
-          // GitHub Pages static hosting cannot handle POST requests
-          await navigator.clipboard.writeText(prompt).catch(() => {});
-          setNotice({
-            kind: "warning",
-            text: "Su GitHub Pages (hosting statico) non è presente un backend server per la generazione in-app (HTTP 405). Il prompt con tutti i dati è stato COPIATO automaticamente nei tuoi appunti: incollalo su Claude o ChatGPT!",
-          });
-          return;
-        }
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Errore HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
-      setGeneratedReview(data.text || "");
-      setNotice({ kind: "ok", text: "✨ Recensione generata con successo da Gemini!" });
-    } catch (e) {
-      // Auto-copy prompt as fallback
-      await navigator.clipboard.writeText(prompt).catch(() => {});
-      setNotice({
-        kind: "warning",
-        text: `${errorMessage(e)} Prompt copiato negli appunti: incollalo direttamente su Claude o ChatGPT!`,
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   // Copy generated review
   const handleCopyReview = async () => {
     try {
@@ -664,7 +612,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
       </div>
 
       {/* Action Buttons: Copia Prompt is the primary frictionless action */}
-      <div className="actions two mb-12">
+      <div className="actions mb-12">
         <button
           type="button"
           className="primary"
@@ -672,19 +620,11 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
         >
           {copiedPrompt ? "✅ Prompt Copiato!" : "📋 Copia Prompt per Claude / ChatGPT"}
         </button>
-        <button
-          type="button"
-          className="secondary"
-          disabled={isGenerating}
-          onClick={handleGenerateWithAI}
-        >
-          {isGenerating ? "Generazione in corso… 🧠" : "✨ Genera con AI"}
-        </button>
       </div>
 
       <div className="space-row mb-16">
         <p className="note sync-note">
-          💡 Il pulsante <strong>Copia Prompt</strong> funziona al 100% ovunque, pronto da incollare nella tua chat AI abituale.
+          💡 Copia il prompt, incollalo nella tua chat AI abituale e poi incolla qui sotto la recensione ottenuta per vedere l'anteprima WhatsApp.
         </p>
         <button
           type="button"
@@ -695,42 +635,38 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
         </button>
       </div>
 
-      {/* Generated Result Area (when generated via AI) */}
-      {generatedReview && (
-        <div className="mt-16">
-          {/* WhatsApp formatted live chat bubble */}
-          <WhatsAppPreview text={generatedReview} title="Anteprima WhatsApp (Recensione Generata)" />
+      {/* Review pasted from the AI chat: preview and share */}
+      <div className="mt-16">
+        <label htmlFor="generated-review-text">Recensione ricevuta dall'AI</label>
+        <textarea
+          id="generated-review-text"
+          value={generatedReview}
+          onChange={(e) => setGeneratedReview(e.target.value)}
+          rows={10}
+          className="ta-xl"
+          placeholder="Incolla qui il testo generato da Claude o ChatGPT…"
+        />
 
-          <details className="raw-text">
-            <summary>
-              Modifica testo grezzo prima dell'invio
-            </summary>
-            <div className="raw-text-body">
-              <textarea
-                id="generated-review-text"
-                value={generatedReview}
-                onChange={(e) => setGeneratedReview(e.target.value)}
-                rows={12}
-                className="ta-xl"
-              />
+        {generatedReview.trim() && (
+          <>
+            <WhatsAppPreview text={generatedReview} title="Anteprima WhatsApp" />
+
+            <div className="actions two mt-10">
+              <a
+                className="primary"
+                target="_blank"
+                rel="noopener noreferrer"
+                href={"https://wa.me/?text=" + encodeURIComponent(generatedReview)}
+              >
+                📲 Condividi su WhatsApp
+              </a>
+              <button type="button" className="secondary" onClick={handleCopyReview}>
+                {copiedReview ? "✅ Copiato!" : "📋 Copia Testo"}
+              </button>
             </div>
-          </details>
-
-          <div className="actions two mt-10">
-            <a
-              className="primary"
-              target="_blank"
-              rel="noopener noreferrer"
-              href={"https://wa.me/?text=" + encodeURIComponent(generatedReview)}
-            >
-              📲 Condividi su WhatsApp
-            </a>
-            <button type="button" className="secondary" onClick={handleCopyReview}>
-              {copiedReview ? "✅ Copiato!" : "📋 Copia Testo"}
-            </button>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </section>
   );
 }
