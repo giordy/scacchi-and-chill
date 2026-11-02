@@ -161,7 +161,7 @@ export function PublicTournamentView({
                   className="master-thumb-img"
                 />
                 <span className="master-thumb-zoom">
-\1
+                  🔍
                 </span>
               </div>
             )}
