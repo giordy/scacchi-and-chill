@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { AppConfig, HistoryGame, TournamentMeta, SeasonWinner } from '../../types';
+import { AppConfig, TournamentMeta, SeasonWinner } from '../../types';
 
 export function TournamentInfoSection({
   config,
-  history,
   flash,
   onUpdateTournamentMeta,
 }: {
   config: AppConfig;
-  history: HistoryGame[];
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
 }) {
@@ -42,7 +40,6 @@ export function TournamentInfoSection({
   const [newWinnerSeason, setNewWinnerSeason] = useState("");
   const [newWinnerHandle, setNewWinnerHandle] = useState("");
   const [newWinnerNotes, setNewWinnerNotes] = useState("");
-  const [tournRules, setTournRules] = useState(config.tournament?.rulesText || "");
 
   return (
     <div>
@@ -239,9 +236,9 @@ export function TournamentInfoSection({
         </div>
       </div>
 
-      <div className="actions two flush">
+      <div className="actions flush">
         <button
-          className="secondary"
+          className="primary"
           type="button"
           onClick={() => {
             onUpdateTournamentMeta({
@@ -254,46 +251,11 @@ export function TournamentInfoSection({
               howItWorks: tournHowItWorks.trim(),
               fairPlayText: tournFairPlay.trim(),
               winners: tournWinners,
-              rulesText: tournRules.trim(),
             });
             flash("ok", "Informazioni del torneo e Albo d'Oro aggiornati con successo!");
           }}
         >
           Salva informazioni torneo
-        </button>
-        <button
-          className="secondary"
-          type="button"
-          title="Scarica config.json aggiornato con le impostazioni correnti e le partite salvate"
-          onClick={() => {
-            const fullExportConfig = {
-              ...config,
-              tournament: {
-                title: tournTitle.trim(),
-                season: tournSeason.trim(),
-                description: tournDesc.trim(),
-                rulesText: tournRules.trim(),
-              },
-              schedule: history.map((g) => ({
-                round: g.round,
-                white: g.white,
-                black: g.black,
-                url: g.url,
-              })),
-            };
-            const blob = new Blob([JSON.stringify(fullExportConfig, null, 2)], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "config.json";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            flash("ok", "File config.json generato e scaricato!");
-          }}
-        >
-          📄 Esporta config.json per GitHub
         </button>
       </div>
     </div>

@@ -87,7 +87,6 @@ export interface TournamentMeta {
   imageUrl?: string;
   masterName?: string;
   description: string;
-  rulesText?: string;
   howItWorks?: string;
   fairPlayText?: string;
   winners?: SeasonWinner[];
@@ -156,11 +155,13 @@ export interface PlayerStanding {
 export interface BackupData {
   version: string;
   exportedAt: string;
-  round?: string;
+  tournament?: TournamentMeta;
+  players?: Player[];
+  schedule?: ScheduledMatch[];
   history?: HistoryGame[];
-  pairs?: GamePair[];
-  settings?: Partial<Settings>;
-  templates?: Partial<MessageTemplates> | null;
+  seasons?: SeasonArchive[];
+  settings?: Omit<Settings, "token">;
+  templates?: MessageTemplates;
   anecdotes?: Record<string, string>;
   ratings?: Record<string, string | number | null>;
 }

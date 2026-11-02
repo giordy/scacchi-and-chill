@@ -33,7 +33,6 @@ export function PublicPage({ seasons, ready, config, history, gameStates, nameOf
         tournamentMeta={
           config.tournament || {
             ...DEFAULT_TOURNAMENT,
-            rulesText: "2 giorni a mossa. Nessuna rivincita. Fair play assoluto.",
           }
         }
         history={history}

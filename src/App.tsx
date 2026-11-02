@@ -171,9 +171,7 @@ export function App() {
             setTemplates={setTemplates}
             history={history}
             setHistory={setHistory}
-            round={round}
             setRound={setRound}
-            pairs={pairs}
             setPairs={setPairs}
             flash={flash}
             organizer={organizer}

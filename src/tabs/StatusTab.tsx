@@ -7,6 +7,7 @@ import {
 import { errorMessage, fill, extractGameId, formatDeadline, HOW_WIN, HOW_DRAW, tidy, getApproxMoves } from '../lib/utils';
 import { fetchGameStates } from '../lib/lichess';
 import { WhatsAppPreview } from '../WhatsAppPreview';
+import { deleteGamesFromFirebase } from '../firebaseService';
 
 export function StatusTab({
   history,
@@ -39,18 +40,16 @@ export function StatusTab({
   const [status, setStatus] = useState({ busy: false, error: "", info: "" });
   const [showManage, setShowManage] = useState(false);
 
-  const handleDeleteRound = (roundToDelete: string) => {
-    if (window.confirm(`Sei sicuro di voler eliminare tutte le partite del Turno ${roundToDelete}?`)) {
+  const handleDeleteRound = async (roundToDelete: string) => {
+    if (!window.confirm(`Sei sicuro di voler eliminare tutte le partite del Turno ${roundToDelete}? Spariranno anche dalla pagina pubblica.`)) return;
+    try {
+      // Delete on Firestore first: otherwise the next sync would bring the games back
+      await deleteGamesFromFirebase(history.filter((g) => g.round === roundToDelete));
       setHistory((prev) => prev.filter((g) => g.round !== roundToDelete));
       if (chosen === roundToDelete) setChosen("");
-    }
-  };
-
-  const handleClearAllHistory = () => {
-    if (window.confirm("Attenzione: questo cancellerà TUTTO lo storico delle partite salvate. Continuare?")) {
-      setHistory([]);
-      setChosen("");
-      setText("");
+      triggerToast?.(`Turno ${roundToDelete} eliminato.`);
+    } catch (e) {
+      window.alert(`Eliminazione non riuscita: ${errorMessage(e)}`);
     }
   };
 
@@ -406,15 +405,6 @@ export function StatusTab({
                 </div>
               );
             })}
-            <div className="reset-row mt-12">
-              <button
-                type="button"
-                className="link-danger sm"
-                onClick={handleClearAllHistory}
-              >
-                Cancella tutto lo storico salvato
-              </button>
-            </div>
           </div>
         </details>
       )}

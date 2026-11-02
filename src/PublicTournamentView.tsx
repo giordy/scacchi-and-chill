@@ -376,8 +376,7 @@ export function PublicTournamentView({
               {filteredGames.map((g, idx) => {
                 const id = extractGameId(g.url);
                 const s = id ? gameStates[id] : undefined;
-                let statusBadge = <span className="status-badge pending">⏳ In attesa</span>;
-                let resultText = "vs";
+                let statusBadge = <span className="status-badge pending">In attesa</span>;
                 let movesText = "";
 
                 if (s) {
@@ -385,17 +384,15 @@ export function PublicTournamentView({
                   const moves = Math.ceil(plies / 2);
                   if (moves > 0) movesText = `${moves} mosse`;
 
+                  // Neutral result: here 0-1 is a win for Black, not a "loss"
                   if (s.status === "started") {
-                    statusBadge = <span className="status-badge ongoing">⚔️ In corso</span>;
+                    statusBadge = <span className="status-badge ongoing">In corso</span>;
                   } else if (s.winner === "white") {
-                    statusBadge = <span className="status-badge win">1 - 0</span>;
-                    resultText = "1 - 0";
+                    statusBadge = <span className="status-badge result">1 – 0</span>;
                   } else if (s.winner === "black") {
-                    statusBadge = <span className="status-badge loss">0 - 1</span>;
-                    resultText = "0 - 1";
+                    statusBadge = <span className="status-badge result">0 – 1</span>;
                   } else if (s.status === "draw") {
-                    statusBadge = <span className="status-badge draw">½ - ½</span>;
-                    resultText = "½ - ½";
+                    statusBadge = <span className="status-badge result">½ – ½</span>;
                   }
                 }
 

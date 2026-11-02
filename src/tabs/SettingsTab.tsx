@@ -27,9 +27,7 @@ export function SettingsTab({
   setTemplates,
   history,
   setHistory,
-  round,
   setRound,
-  pairs,
   setPairs,
   flash,
   organizer,
@@ -47,9 +45,7 @@ export function SettingsTab({
   setTemplates: React.Dispatch<React.SetStateAction<Partial<MessageTemplates> | null>>;
   history: HistoryGame[];
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
-  round: string;
   setRound: (r: string) => void;
-  pairs: GamePair[];
   setPairs: React.Dispatch<React.SetStateAction<GamePair[]>>;
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
   organizer: OrganizerStore;
@@ -66,7 +62,6 @@ export function SettingsTab({
       <CollapsibleSection title="🏆 Informazioni Torneo & Nuova Stagione" defaultOpen>
         <TournamentInfoSection
           config={config}
-          history={history}
           flash={flash}
           onUpdateTournamentMeta={onUpdateTournamentMeta}
         />
@@ -105,20 +100,15 @@ export function SettingsTab({
           flash={flash}
         />
       </CollapsibleSection>
-      <CollapsibleSection title="💾 Backup & Ripristino Dati">
+      <CollapsibleSection title="💾 Copia dei dati">
         <BackupSection
-          settings={settings}
-          setSettings={setSettings}
-          templates={templates}
-          setTemplates={setTemplates}
+          config={config}
           history={history}
-          setHistory={setHistory}
-          round={round}
-          setRound={setRound}
-          pairs={pairs}
-          setPairs={setPairs}
-          flash={flash}
+          seasons={seasons}
+          settings={settings}
+          templates={templates}
           organizer={organizer}
+          flash={flash}
         />
       </CollapsibleSection>
     </div>

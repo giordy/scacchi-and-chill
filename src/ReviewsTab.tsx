@@ -17,7 +17,7 @@ export type ReviewMoment = "andata" | "volata" | "finale";
 
 export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }: ReviewsTabProps) {
   const [reviewType, setReviewType] = useState<ReviewMoment>("finale");
-  const [tournamentTitle, setTournamentTitle] = useState("Scacchi & Chill");
+  const tournamentTitle = config.tournament?.title || "Scacchi & Chill";
   const [generalNotes, setGeneralNotes] = useState("");
   
   // Anecdotes and ratings live in the private Firestore document (see useOrganizerData)
@@ -547,17 +547,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
       </div>
 
       {/* Tournament Settings */}
-      <div className="grid2 mb-12">
-        <div>
-          <label htmlFor="rev-tournament-title">Nome del Torneo</label>
-          <input
-            id="rev-tournament-title"
-            type="text"
-            value={tournamentTitle}
-            onChange={(e) => setTournamentTitle(e.target.value)}
-            placeholder="es. Scacchi & Chill"
-          />
-        </div>
+      <div className="mb-12">
         <div>
           <label htmlFor="rev-general-notes">Note extra dell'organizzatore (opzionale)</label>
           <input

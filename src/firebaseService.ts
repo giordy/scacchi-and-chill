@@ -70,7 +70,6 @@ export interface TournamentDocData {
   imageUrl?: string;
   masterName?: string;
   description?: string;
-  rulesText?: string;
   howItWorks?: string;
   fairPlayText?: string;
   winners?: SeasonWinner[];
@@ -96,7 +95,6 @@ export async function saveTournamentFullToFirebase(data: {
     if (data.meta.imageUrl !== undefined) payload.imageUrl = data.meta.imageUrl;
     if (data.meta.masterName !== undefined) payload.masterName = data.meta.masterName;
     payload.description = data.meta.description;
-    payload.rulesText = data.meta.rulesText;
     if (data.meta.howItWorks !== undefined) payload.howItWorks = data.meta.howItWorks;
     if (data.meta.fairPlayText !== undefined) payload.fairPlayText = data.meta.fairPlayText;
     if (data.meta.winners !== undefined) payload.winners = data.meta.winners;
@@ -224,7 +222,6 @@ export async function loadTournamentMetaFromFirebase(): Promise<TournamentMeta |
       imageUrl: d.imageUrl || "",
       masterName: d.masterName || "",
       description: d.description || "",
-      rulesText: d.rulesText || "",
       howItWorks: d.howItWorks || "",
       fairPlayText: d.fairPlayText || "",
       winners: d.winners || [],
@@ -234,9 +231,25 @@ export async function loadTournamentMetaFromFirebase(): Promise<TournamentMeta |
 }
 
 // 3. Save a game to Firestore
+// Predictable ID of a game document: r<round>_<white>_<black>
+function gameDocIdOf(game: Pick<HistoryGame, "round" | "white" | "black">): string {
+  return `r${game.round}_${game.white}_${game.black}`;
+}
+
+// Deletes the given games (e.g. a round created by mistake)
+export async function deleteGamesFromFirebase(games: HistoryGame[]): Promise<void> {
+  for (let i = 0; i < games.length; i += 400) {
+    const batch = writeBatch(db);
+    games.slice(i, i + 400).forEach((g) =>
+      batch.delete(doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", gameDocIdOf(g)))
+    );
+    await batch.commit();
+  }
+}
+
 export async function saveGameToFirebase(game: HistoryGame): Promise<void> {
   // Use a predictable ID for the game: round_white_black
-  const gameDocId = `r${game.round}_${game.white}_${game.black}`;
+  const gameDocId = gameDocIdOf(game);
   const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", gameDocId);
   await setDoc(
     ref,
@@ -259,7 +272,7 @@ export async function saveGamesBatchToFirebase(
   if (games.length === 0) return;
   const batch = writeBatch(db);
   games.forEach((game) => {
-    const gameDocId = `r${game.round}_${game.white}_${game.black}`;
+    const gameDocId = gameDocIdOf(game);
     const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", gameDocId);
     batch.set(
       ref,
@@ -289,7 +302,7 @@ export async function saveLichessStatesToFirebase(
     const id = extractId(game.url);
     const state = id ? states[id] : undefined;
     if (!state) return;
-    const gameDocId = `r${game.round}_${game.white}_${game.black}`;
+    const gameDocId = gameDocIdOf(game);
     const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", gameDocId);
     // Firestore non accetta valori undefined: passiamo per JSON per ripulire l'oggetto
     const clean = JSON.parse(JSON.stringify(state));

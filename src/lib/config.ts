@@ -111,12 +111,10 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
     title: isText(cfg.tournament.title) ? cfg.tournament.title : "Scacchi & Chill",
     season: isText(cfg.tournament.season) ? cfg.tournament.season : "Edizione 2026",
     description: isText(cfg.tournament.description) ? cfg.tournament.description : "Campionato amatoriale di scacchi per corrispondenza tra amici e colleghi.",
-    rulesText: isText(cfg.tournament.rulesText) ? cfg.tournament.rulesText : "2 giorni a mossa. Nessuna rivincita. Fair play assoluto.",
   } : {
     title: "Scacchi & Chill",
     season: "Edizione 2026",
     description: "Campionato amatoriale di scacchi per corrispondenza tra amici e colleghi.",
-    rulesText: "Partite per corrispondenza con cadenza a 2 giorni per mossa. No takeback, partite Rated, rispetto e fair play tra amici.",
   };
 
   const rawSchedule = cfg.schedule || cfg.calendario;

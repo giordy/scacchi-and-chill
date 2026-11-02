@@ -1440,3 +1440,8 @@ a.player-page-link:hover, a.player-page-link:focus-visible { color: var(--accent
 details.season-card { margin: 0; }
 details.season-card > summary { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
 .season-champion { font-weight: 500; color: var(--accent); }
+
+.status-badge.result {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
