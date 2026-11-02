@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { errorMessage } from '../lib/utils';
+import { isAdminLocation } from '../lib/routes';
 import {
   subscribeToAuth,
   signInAdminWithGoogle,
@@ -8,9 +9,7 @@ import {
 } from '../firebaseService';
 
 // Admin mode is selected by the URL: #admin or ?admin
-const checkIsAdminRoute = () =>
-  window.location.hash.toLowerCase().includes("admin") ||
-  window.location.search.toLowerCase().includes("admin");
+const checkIsAdminRoute = () => isAdminLocation(window.location.hash, window.location.search);
 
 export function useAdminAuth() {
   const [isAdminRoute, setIsAdminRoute] = useState(checkIsAdminRoute);

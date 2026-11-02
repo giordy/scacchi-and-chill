@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, TournamentMeta } from "./types";
+import { playerHref } from "./lib/routes";
 import { computeStandings } from "./lib/standings";
 import { extractGameId } from "./lib/utils";
 
@@ -247,7 +248,7 @@ export function PublicTournamentView({
                       </td>
                       <td className="sticky-col">
                         <div className="player-cell">
-                          <span className="player-name">{p.name}</span>
+                          <a href={playerHref(p.handle)} className="player-name player-page-link">{p.name}</a>
                           <a
                             href={`https://lichess.org/@/${p.handle}`}
                             target="_blank"
@@ -299,7 +300,9 @@ export function PublicTournamentView({
                 {standings.map((p, rowIdx) => (
                   <tr key={p.handle}>
                     <td className="col-strong">{rowIdx + 1}</td>
-                    <td className="sticky-col player-name nowrap">{p.name}</td>
+                    <td className="sticky-col player-name nowrap">
+                      <a href={playerHref(p.handle)} className="player-page-link">{p.name}</a>
+                    </td>
                     {standings.map((opp, colIdx) => {
                       const res = crosstable[p.handle]?.[opp.handle] ?? "-";
                       const isSelf = rowIdx === colIdx;

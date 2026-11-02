@@ -1,6 +1,9 @@
 import React from 'react';
 import { AppConfig, HistoryGame, LichessExportGame } from '../types';
 import { DEFAULT_TOURNAMENT } from '../lib/tournament';
+import { useHash } from '../hooks/useHash';
+import { parsePlayerHash } from '../lib/routes';
+import { PlayerPage } from './PlayerPage';
 import { LoadingScreen } from '../components/LoadingScreen';
 import { PublicTournamentView } from '../PublicTournamentView';
 
@@ -14,7 +17,13 @@ interface PublicPageProps {
 
 // Public tournament page, with a discreet link to the organizer area
 export function PublicPage({ ready, config, history, gameStates, nameOf }: PublicPageProps) {
+  const hash = useHash();
   if (!ready) return <LoadingScreen label="Caricamento torneo…" />;
+
+  const playerHandle = parsePlayerHash(hash);
+  if (playerHandle) {
+    return <PlayerPage handle={playerHandle} config={config} history={history} gameStates={gameStates} nameOf={nameOf} />;
+  }
 
   return (
     <main>
