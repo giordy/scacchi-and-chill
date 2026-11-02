@@ -296,8 +296,8 @@ export function StatusTab({
         </p>
       ) : (
         <>
-          <div style={{ display: "flex", gap: 10, alignItems: "flex-end", marginBottom: 16 }}>
-            <div style={{ flex: 1 }}>
+          <div className="round-picker-row status-picker">
+            <div className="flex-1">
               <label htmlFor="status-round">Seleziona Turno</label>
               <select id="status-round" value={round} onChange={(e) => setChosen(e.target.value)}>
                 {rounds.map((r) => {
@@ -311,11 +311,10 @@ export function StatusTab({
               </select>
             </div>
             <button
-              className="secondary"
+              className="secondary btn-add"
               type="button"
               disabled={status.busy}
               onClick={() => loadStatusForRound(round)}
-              style={{ minHeight: 48, whiteSpace: "nowrap" }}
             >
               {status.busy ? "Verifica in corso…" : "🔄 Aggiorna da Lichess"}
             </button>
@@ -324,7 +323,7 @@ export function StatusTab({
           {status.error && <div className="notice err">{status.error}</div>}
 
           {status.busy && (
-            <div className="notice ok" style={{ marginBottom: 14 }}>
+            <div className="notice ok mb-14">
               ⏳ Recupero stati, aperture e mosse delle partite da Lichess…
             </div>
           )}
@@ -332,7 +331,7 @@ export function StatusTab({
           {text && (
             <>
               {isRoundComplete && (
-                <div className="notice ok" style={{ marginTop: 10, marginBottom: 12 }}>
+                <div className="notice ok my-10-12">
                   🏁 <strong>Turno {round} completato!</strong> Tutte le partite sono terminate. Il messaggio contiene i risultati finali.
                 </div>
               )}
@@ -340,7 +339,7 @@ export function StatusTab({
               {/* WhatsApp Live Bubble Preview */}
               <WhatsAppPreview text={text} title={`Anteprima WhatsApp (Stato Turno ${round})`} />
 
-              <div className="actions two" style={{ marginTop: 12 }}>
+              <div className="actions two mt-12">
                 <a
                   className="primary"
                   target="_blank"
@@ -354,18 +353,18 @@ export function StatusTab({
                 </button>
               </div>
 
-              {status.info && <div className="notice ok" style={{ marginTop: 8 }}>{status.info}</div>}
+              {status.info && <div className="notice ok mt-8">{status.info}</div>}
 
-              <details style={{ marginTop: 12 }}>
-                <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--muted)" }}>
+              <details className="raw-text mt-12">
+                <summary>
                   ✏️ Modifica testo prima dell'invio
                 </summary>
-                <div style={{ marginTop: 8 }}>
+                <div className="raw-text-body">
                   <textarea
                     aria-label="Messaggio di aggiornamento"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    style={{ minHeight: 180 }}
+                    className="ta-lg"
                   />
                 </div>
               </details>
@@ -376,30 +375,28 @@ export function StatusTab({
 
       {/* Archivio Compatto turni salvati */}
       {rounds.length > 0 && (
-        <details style={{ marginTop: 24 }} open={showManage} onToggle={(e) => setShowManage((e.target as HTMLDetailsElement).open)}>
-          <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--muted)" }}>
+        <details className="manage-rounds" open={showManage} onToggle={(e) => setShowManage((e.target as HTMLDetailsElement).open)}>
+          <summary className="summary-muted">
             🗂️ Archivio e pulizia turni ({rounds.length} {rounds.length === 1 ? 'turno' : 'turni'})
           </summary>
-          <div className="body" style={{ marginTop: 10 }}>
+          <div className="body mt-10">
             {rounds.map((r) => {
               const roundGames = history.filter((g) => g.round === r);
               return (
-                <div key={r} className="round-card" style={{ marginBottom: 10 }}>
-                  <div className="round-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div key={r} className="round-card mb-10">
+                  <div className="round-header">
                     <strong>Turno {r}</strong>
-                    <div style={{ display: "flex", gap: 6 }}>
+                    <div className="header-actions">
                       <button
-                        className="secondary"
+                        className="secondary btn-sm"
                         type="button"
-                        style={{ fontSize: 12, padding: "3px 8px" }}
                         onClick={() => onLoadIntoActivePairs(r, roundGames)}
                       >
                         Carica in Partite
                       </button>
                       <button
-                        className="danger"
+                        className="danger btn-sm"
                         type="button"
-                        style={{ fontSize: 12, padding: "3px 8px" }}
                         onClick={() => handleDeleteRound(r)}
                       >
                         Elimina
@@ -409,10 +406,10 @@ export function StatusTab({
                 </div>
               );
             })}
-            <div style={{ marginTop: 12, textAlign: "right" }}>
+            <div className="reset-row mt-12">
               <button
                 type="button"
-                style={{ background: "none", border: "none", color: "var(--danger)", fontSize: 12, textDecoration: "underline", cursor: "pointer" }}
+                className="link-danger sm"
                 onClick={handleClearAllHistory}
               >
                 Cancella tutto lo storico salvato

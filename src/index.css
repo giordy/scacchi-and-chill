@@ -1330,3 +1330,18 @@ textarea.ta-lg { min-height: 180px; }
 .wa-link { color: #027eb5; text-decoration: underline; word-break: break-all; }
 .wa-line { line-height: 1.45; min-height: 18px; }
 .wa-ticks { color: #53bdeb; font-size: 13px; margin-left: 3px; }
+
+/* Status tab */
+.status-picker { gap: 10px; margin-bottom: 16px; }
+.flex-1 { flex: 1; }
+.mt-8 { margin-top: 8px; }
+.mt-10 { margin-top: 10px; }
+.mt-12 { margin-top: 12px; }
+.mb-10 { margin-bottom: 10px; }
+.mb-14 { margin-bottom: 14px; }
+.my-10-12 { margin-top: 10px; margin-bottom: 12px; }
+.raw-text.mt-12 { margin-top: 12px; }
+details.manage-rounds { margin-top: 24px; }
+summary.summary-muted, details.manage-rounds > summary { cursor: pointer; font-size: 13px; color: var(--muted); }
+button.btn-sm { font-size: 12px; padding: 3px 8px; }
+button.link-danger.sm { font-size: 12px; }
