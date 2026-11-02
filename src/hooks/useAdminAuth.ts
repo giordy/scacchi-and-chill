@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { errorMessage } from '../lib/utils';
 import {
   subscribeToAuth,
   signInAdminWithGoogle,
@@ -44,9 +45,10 @@ export function useAdminAuth() {
     setIsSigningIn(true);
     try {
       await signInAdminWithGoogle();
-    } catch (err: any) {
-      if (err?.code !== "auth/popup-closed-by-user" && err?.code !== "auth/cancelled-popup-request") {
-        setError("Errore durante l'accesso: " + (err?.message || err));
+    } catch (err) {
+      const code = (err as { code?: string } | null)?.code;
+      if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
+        setError("Errore durante l'accesso: " + errorMessage(err));
       }
     } finally {
       setIsSigningIn(false);

@@ -102,7 +102,7 @@ export function LichessSettingsSection({
               id={"rule-" + key}
               type="checkbox"
               checked={!!settings.rules?.[key]}
-              onChange={(e) => set({ rules: { ...settings.rules, [key]: e.target.checked } as any })}
+              onChange={(e) => set({ rules: { ...settings.rules, [key]: e.target.checked } })}
             />
             <label htmlFor={"rule-" + key}>{label}</label>
           </div>

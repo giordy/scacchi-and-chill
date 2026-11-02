@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { errorMessage } from '../../lib/utils';
 import {
   GamePair,
   HistoryGame,
@@ -109,8 +110,8 @@ export function BackupSection({
 
         const matchCount = data.history?.length ?? 0;
         flash("ok", `Backup ripristinato con successo! Caricate ${matchCount} partite storiche, aneddoti e impostazioni.`);
-      } catch (err: any) {
-        flash("err", `Errore durante il ripristino del backup: ${err.message}`);
+      } catch (err) {
+        flash("err", `Errore durante il ripristino del backup: ${errorMessage(err)}`);
       } finally {
         if (fileInputRef.current) {
           fileInputRef.current.value = "";

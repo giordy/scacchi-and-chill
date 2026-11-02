@@ -62,7 +62,7 @@ export interface StatusPhrases {
   roundEndFooter?: string[];
   infoLine?: string;
   infoLink?: string;
-  [key: string]: any;
+  [key: string]: string | string[] | undefined;
 }
 
 export interface ScheduledMatch {
@@ -165,3 +165,18 @@ export interface BackupData {
   ratings?: Record<string, string | number | null>;
 }
 
+
+// Subset of the Lichess /api/user/{name} response used to read ratings
+export interface LichessPerf {
+  rating?: number;
+  games?: number;
+  prov?: boolean;
+}
+
+export interface LichessUserProfile {
+  perfs?: {
+    correspondence?: LichessPerf;
+    rapid?: LichessPerf;
+    classical?: LichessPerf;
+  };
+}

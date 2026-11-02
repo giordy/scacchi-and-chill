@@ -1,4 +1,4 @@
-export const fill = (template: string, vars: Record<string, any>) =>
+export const fill = (template: string, vars: Record<string, unknown>) =>
   template.replace(/\{(\w+)\}/g, (match, key) => (key in vars ? String(vars[key]) : match));
 
 export const clampDays = (value: string | number, fallback: number) => {
@@ -78,4 +78,10 @@ export function getApproxMoves(plies: number): { approxMoves: string; movesBand:
     movesBand: "> 40 mosse",
     phase: "in pieno finale",
   };
+}
+
+// Readable message from anything thrown in a catch block
+export function errorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  return typeof e === "string" ? e : String(e);
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame } from '../types';
+import { errorMessage } from '../lib/utils';
 import { validateAndNormalizeConfig } from '../lib/config';
 import { DEFAULT_TOURNAMENT, tournamentFromDoc } from '../lib/tournament';
 import {
@@ -50,7 +51,7 @@ export function useTournamentSync(
         setReady(true);
       })
       .catch((err) => {
-        console.warn("Utilizzo configurazione incorporata di default:", err.message);
+        console.warn("Utilizzo configurazione incorporata di default:", errorMessage(err));
         setReady(true);
       });
 

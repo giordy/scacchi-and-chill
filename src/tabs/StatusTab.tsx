@@ -4,7 +4,7 @@ import {
   HistoryGame,
   LichessExportGame,
 } from '../types';
-import { fill, extractGameId, formatDeadline, HOW_WIN, HOW_DRAW, tidy, getApproxMoves } from '../lib/utils';
+import { errorMessage, fill, extractGameId, formatDeadline, HOW_WIN, HOW_DRAW, tidy, getApproxMoves } from '../lib/utils';
 import { fetchGameStates } from '../lib/lichess';
 import { WhatsAppPreview } from '../WhatsAppPreview';
 
@@ -256,14 +256,14 @@ export function StatusTab({
       setDetails(built.details);
       setIsRoundComplete(built.isComplete);
       setStatus({ busy: false, error: "", info: "" });
-    } catch (e: any) {
+    } catch (e) {
       setStatus({
         busy: false,
         info: "",
         error:
           e instanceof TypeError
             ? "Errore di connessione di rete verso Lichess."
-            : e.message,
+            : errorMessage(e),
       });
     }
   };

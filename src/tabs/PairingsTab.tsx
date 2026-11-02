@@ -7,7 +7,7 @@ import {
   MessageTemplates,
   NoticeState,
 } from '../types';
-import { fill, formatDeadline } from '../lib/utils';
+import { errorMessage, fill, formatDeadline } from '../lib/utils';
 import { createChallenge } from '../lib/lichess';
 import { GameCard } from '../components/GameCard';
 import { Notice } from '../components/Notice';
@@ -131,12 +131,12 @@ export function PairingsTab({
       try {
         const url = await createChallenge(p, { round, settings, challengeName: config.challengeName });
         setPairs((prev) => prev.map((x, idx) => (idx === i ? { ...x, url } : x)));
-      } catch (e: any) {
+      } catch (e) {
         errors.push(
           `Partita ${i + 1}: ` +
             (e instanceof TypeError
               ? "errore di rete. Controlla la connessione a Internet o eventuali blocchi del browser."
-              : e.message)
+              : errorMessage(e))
         );
       }
     }

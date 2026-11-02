@@ -85,7 +85,7 @@ export async function saveTournamentFullToFirebase(data: {
   schedule?: ScheduledMatch[];
 }): Promise<void> {
   const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID);
-  const payload: any = {
+  const payload: Record<string, unknown> = {
     updatedAt: new Date().toISOString(),
   };
   if (data.meta) {

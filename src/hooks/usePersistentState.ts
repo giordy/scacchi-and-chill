@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 export function usePersistentState<T>(
   key: string,
   initial: T | (() => T),
-  isValid: (v: any) => boolean = () => true
+  isValid: (v: unknown) => boolean = () => true
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => {
     try {

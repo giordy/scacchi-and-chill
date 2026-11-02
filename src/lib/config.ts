@@ -11,12 +11,15 @@ export const RULES = [
   { key: "noEarlyDraw", label: "No early draws (draw offers blocked early in the game)" },
 ];
 
-export function validateAndNormalizeConfig(cfg: any): AppConfig {
+// Untrusted JSON from config.json: every field is checked below before use.
+type RawJson = any;
+
+export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
   const fail = (msg: string) => {
     throw new Error("config.json: " + msg);
   };
-  const isText = (v: any): v is string => typeof v === "string";
-  const isTextList = (v: any): v is string[] =>
+  const isText = (v: unknown): v is string => typeof v === "string";
+  const isTextList = (v: unknown): v is string[] =>
     Array.isArray(v) && v.length > 0 && v.every(isText);
 
   // 1. Players
@@ -24,11 +27,11 @@ export function validateAndNormalizeConfig(cfg: any): AppConfig {
   if (
     !Array.isArray(players) ||
     players.length < 2 ||
-    players.some((p: any) => !p || !isText(p.handle) || !p.handle.trim())
+    players.some((p: RawJson) => !p || !isText(p.handle) || !p.handle.trim())
   ) {
     fail('"players" must be a list of at least 2 entries with { "handle": "lichess_username", "name": "Name" }.');
   }
-  const handles = players.map((p: any) => p.handle.trim().toLowerCase());
+  const handles = players.map((p: RawJson) => p.handle.trim().toLowerCase());
   if (new Set(handles).size !== handles.length) {
     fail('"players" contains the same handle twice.');
   }
@@ -119,8 +122,8 @@ export function validateAndNormalizeConfig(cfg: any): AppConfig {
   const rawSchedule = cfg.schedule || cfg.calendario;
   const schedule = Array.isArray(rawSchedule)
     ? rawSchedule
-        .filter((m: any) => m && isText(m.round) && isText(m.white) && isText(m.black))
-        .map((m: any) => ({
+        .filter((m: RawJson) => m && isText(m.round) && isText(m.white) && isText(m.black))
+        .map((m: RawJson) => ({
           round: String(m.round).trim(),
           white: String(m.white).trim(),
           black: String(m.black).trim(),
@@ -130,7 +133,7 @@ export function validateAndNormalizeConfig(cfg: any): AppConfig {
 
   return {
     tournament: tournamentMeta,
-    players: players.map((p: any) => ({
+    players: players.map((p: RawJson) => ({
       handle: p.handle.trim(),
       name: (isText(p.name) && p.name.trim()) || p.handle.trim(),
     })),
@@ -139,7 +142,7 @@ export function validateAndNormalizeConfig(cfg: any): AppConfig {
       days,
       expiry,
       rated: d.rated !== false,
-      rules: Object.fromEntries(RULES.map(({ key }) => [key, !!d.rules?.[key]])) as any,
+      rules: Object.fromEntries(RULES.map(({ key }) => [key, !!d.rules?.[key]])) as AppConfig['defaults']['rules'],
     },
     messageTemplates: {
       header: rm.header,

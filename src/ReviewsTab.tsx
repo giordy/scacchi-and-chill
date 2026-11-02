@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding } from "./types";
 import { WhatsAppPreview } from "./WhatsAppPreview";
-import { extractGameId } from "./lib/utils";
+import { errorMessage, extractGameId } from "./lib/utils";
+import type { LichessUserProfile } from "./types";
 
 interface ReviewsTabProps {
   history: HistoryGame[];
@@ -113,10 +114,10 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
         kind: "ok",
         text: `Dati di ${Object.keys(states).length} partite sincronizzati con successo da Lichess (ore ${timeStr}).`,
       });
-    } catch (e: any) {
+    } catch (e) {
       setNotice({
         kind: "warning",
-        text: "Impossibile scaricare gli stati da Lichess: " + e.message,
+        text: "Impossibile scaricare gli stati da Lichess: " + errorMessage(e),
       });
     } finally {
       setIsFetchingData(false);
@@ -139,7 +140,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
 
     for (const player of config.players) {
       try {
-        let data: any = null;
+        let data: LichessUserProfile | null = null;
         try {
           const directRes = await fetch(
             `https://lichess.org/api/user/${encodeURIComponent(player.handle)}`,
@@ -169,11 +170,11 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
             const provSuffix = corr.prov ? "?" : "";
             updated[player.handle] = `${corr.rating}${provSuffix}`;
             successCount++;
-          } else if (rap && typeof rap.rating === "number" && rap.games > 0) {
+          } else if (rap && typeof rap.rating === "number" && (rap.games ?? 0) > 0) {
             const provSuffix = rap.prov ? "?" : "";
             updated[player.handle] = `${rap.rating}${provSuffix} [rapid]`;
             successCount++;
-          } else if (clas && typeof clas.rating === "number" && clas.games > 0) {
+          } else if (clas && typeof clas.rating === "number" && (clas.games ?? 0) > 0) {
             const provSuffix = clas.prov ? "?" : "";
             updated[player.handle] = `${clas.rating}${provSuffix} [classical]`;
             successCount++;
@@ -181,7 +182,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
             updated[player.handle] = null;
           }
         }
-      } catch (err: any) {
+      } catch (err) {
         console.warn(`Errore recupero Elo per ${player.handle}:`, err);
       }
     }
@@ -472,12 +473,12 @@ export function ReviewsTab({ history, config, nameOf, triggerToast }: ReviewsTab
       const data = await res.json();
       setGeneratedReview(data.text || "");
       setNotice({ kind: "ok", text: "✨ Recensione generata con successo da Gemini!" });
-    } catch (e: any) {
+    } catch (e) {
       // Auto-copy prompt as fallback
       await navigator.clipboard.writeText(prompt).catch(() => {});
       setNotice({
         kind: "warning",
-        text: `${e.message} Prompt copiato negli appunti: incollalo direttamente su Claude o ChatGPT!`,
+        text: `${errorMessage(e)} Prompt copiato negli appunti: incollalo direttamente su Claude o ChatGPT!`,
       });
     } finally {
       setIsGenerating(false);

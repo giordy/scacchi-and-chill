@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { HistoryGame, LichessExportGame } from '../types';
-import { extractGameId } from '../lib/utils';
+import { errorMessage, extractGameId } from '../lib/utils';
 import { fetchGameStates } from '../lib/lichess';
 import { saveLichessStatesToFirebase } from '../firebaseService';
 
@@ -64,8 +64,8 @@ export function useLichessSync(
         `Sincronizzate ${saved} partite su Firestore.` +
           (missing > 0 ? ` ${missing} non ancora trovate su Lichess (sfida non accettata).` : "")
       );
-    } catch (e: any) {
-      flash("err", "Sincronizzazione fallita: " + (e?.message || e));
+    } catch (e) {
+      flash("err", "Sincronizzazione fallita: " + errorMessage(e));
     } finally {
       setIsSyncing(false);
     }
