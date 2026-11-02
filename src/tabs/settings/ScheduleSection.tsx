@@ -24,7 +24,6 @@ export function ScheduleSection({
 
   return (
     <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
-      <h3 style={{ margin: "0 0 6px", fontSize: 16 }}>📅 Calendario Ufficiale Accoppiamenti ({scheduleList.length} partite)</h3>
       <p className="note" style={{ margin: "0 0 12px" }}>
         Gli accoppiamenti preimpostati per ciascun turno. Selezionando il turno nella scheda <em>Partite</em>, questi incontri vengono caricati in automatico con 1 clic.
       </p>

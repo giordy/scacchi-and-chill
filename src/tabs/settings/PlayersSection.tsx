@@ -16,7 +16,6 @@ export function PlayersSection({
 
   return (
     <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
-      <h3 style={{ margin: "0 0 6px", fontSize: 16 }}>👥 Giocatori del Torneo ({playersList.length})</h3>
       <p className="note" style={{ margin: "0 0 12px" }}>
         Modifica i partecipanti e i loro nickname Lichess. Le modifiche vengono salvate in tempo reale nel database cloud.
       </p>

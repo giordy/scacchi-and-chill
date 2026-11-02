@@ -138,7 +138,6 @@ export function BackupSection({
 
   return (
     <div>
-      <h3 style={{ margin: "0 0 4px", fontSize: "16px" }}>💾 Backup & Ripristino Dati</h3>
       <p className="note" style={{ margin: "0 0 12px" }}>
         Esporta tutti i dati del torneo (storico turni, partite, aneddoti dei giocatori e impostazioni) in un file JSON per sicurezza o per trasferirli su un altro dispositivo.
       </p>

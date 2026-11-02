@@ -9,6 +9,7 @@ import {
   TournamentMeta,
   ScheduledMatch,
 } from '../types';
+import { CollapsibleSection } from '../components/CollapsibleSection';
 import { TournamentInfoSection } from './settings/TournamentInfoSection';
 import { PlayersSection } from './settings/PlayersSection';
 import { ScheduleSection } from './settings/ScheduleSection';
@@ -52,39 +53,49 @@ export function SettingsTab({
 }) {
   return (
     <div ref={panelRef} style={{ display: 'grid', gap: '14px' }}>
-      <TournamentInfoSection
-        config={config}
-        history={history}
-        flash={flash}
-        onUpdateTournamentMeta={onUpdateTournamentMeta}
-      />
-      <PlayersSection players={config.players} flash={flash} onUpdatePlayers={onUpdatePlayers} />
-      <ScheduleSection
-        players={config.players}
-        schedule={config.schedule}
-        flash={flash}
-        onUpdateSchedule={onUpdateSchedule}
-      />
-      <LichessSettingsSection
-        settings={settings}
-        setSettings={setSettings}
-        templates={templates}
-        setTemplates={setTemplates}
-        flash={flash}
-      />
-      <BackupSection
-        settings={settings}
-        setSettings={setSettings}
-        templates={templates}
-        setTemplates={setTemplates}
-        history={history}
-        setHistory={setHistory}
-        round={round}
-        setRound={setRound}
-        pairs={pairs}
-        setPairs={setPairs}
-        flash={flash}
-      />
+      <CollapsibleSection title="🏆 Informazioni Torneo & Nuova Stagione" defaultOpen>
+        <TournamentInfoSection
+          config={config}
+          history={history}
+          flash={flash}
+          onUpdateTournamentMeta={onUpdateTournamentMeta}
+        />
+      </CollapsibleSection>
+      <CollapsibleSection title={`👥 Giocatori del Torneo (${config.players.length})`}>
+        <PlayersSection players={config.players} flash={flash} onUpdatePlayers={onUpdatePlayers} />
+      </CollapsibleSection>
+      <CollapsibleSection title={`📅 Calendario Ufficiale Accoppiamenti (${(config.schedule ?? []).length} partite)`}>
+        <ScheduleSection
+          players={config.players}
+          schedule={config.schedule}
+          flash={flash}
+          onUpdateSchedule={onUpdateSchedule}
+        />
+      </CollapsibleSection>
+      <CollapsibleSection title="⚙️ Lichess, regole e messaggi">
+        <LichessSettingsSection
+          settings={settings}
+          setSettings={setSettings}
+          templates={templates}
+          setTemplates={setTemplates}
+          flash={flash}
+        />
+      </CollapsibleSection>
+      <CollapsibleSection title="💾 Backup & Ripristino Dati">
+        <BackupSection
+          settings={settings}
+          setSettings={setSettings}
+          templates={templates}
+          setTemplates={setTemplates}
+          history={history}
+          setHistory={setHistory}
+          round={round}
+          setRound={setRound}
+          pairs={pairs}
+          setPairs={setPairs}
+          flash={flash}
+        />
+      </CollapsibleSection>
     </div>
   );
 }

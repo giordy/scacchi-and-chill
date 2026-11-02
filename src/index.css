@@ -1253,3 +1253,7 @@ th.sticky-col { background: var(--bg); z-index: 2; }
 @media (prefers-reduced-motion: reduce) {
   .spinner { animation-duration: 2.4s; }
 }
+
+/* Collapsible settings sections */
+details.settings-section { margin: 0; }
+details.settings-section > summary { font-weight: 600; font-size: 16px; }

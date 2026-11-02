@@ -41,7 +41,6 @@ export function TournamentInfoSection({
 
   return (
     <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
-      <h3 style={{ margin: "0 0 6px", fontSize: 16 }}>🏆 Informazioni Torneo & Nuova Stagione</h3>
       <p className="note" style={{ margin: "0 0 12px" }}>
         Questi dettagli vengono mostrati nella scheda pubblica <strong>Torneo</strong> per tutti i partecipanti.
       </p>
