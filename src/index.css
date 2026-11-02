@@ -1389,3 +1389,32 @@ button.modal-close { position: absolute; top: 14px; right: 14px; background: var
 .story-text { line-height: 1.6; font-size: 14px; white-space: pre-line; color: var(--ink); }
 .modal-actions { margin-top: 20px; display: flex; gap: 8px; }
 .modal-actions > button { flex: 1; min-height: 42px; }
+
+/* Public rules dossier and match filter */
+.note-top-xs { margin-top: 8px; font-size: 12px; }
+.filter-row { margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.filter-row label { margin: 0; font-size: 13px; white-space: nowrap; }
+select.filter-select { min-height: 38px; width: auto; }
+.dossier-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+.dossier-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+.dossier-photo { width: 140px; border-radius: 12px; overflow: hidden; border: 2px solid var(--accent); box-shadow: 0 6px 18px rgba(0,0,0,0.18); flex-shrink: 0; margin: 0 auto; }
+.dossier-photo-img { width: 100%; height: auto; display: block; }
+.dossier-body { flex: 1; min-width: 260px; }
+.dossier-name { margin: 4px 0; font-size: 20px; }
+.dossier-subtitle { margin: 0 0 10px; font-style: italic; color: var(--accent); font-size: 15px; }
+.story-text.dim { opacity: 0.9; }
+.dossier-heading { margin: 0 0 12px; display: flex; align-items: center; gap: 8px; font-size: 18px; }
+.winners-list { display: grid; gap: 8px; }
+.winner-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+.winner-link { font-size: 12px; color: var(--accent); text-decoration: none; }
+.winner-notes { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+.badge.badge-strong { font-size: 12px; font-weight: 700; }
+.rules-heading { margin: 14px 0 6px; font-size: 15px; color: var(--accent); }
+.rules-text { white-space: pre-line; line-height: 1.7; margin: 6px 0 16px; }
+.rules-list { padding-left: 20px; line-height: 1.7; margin: 6px 0 16px; }
+.rules-list.tight { line-height: 1.6; margin: 6px 0; }
+.divider.wide { margin: 16px 0; width: auto; }
+.mt-0 { margin-top: 0; }
+.mb-4 { margin-bottom: 4px; }
+.gap-10 { gap: 10px; }
+.fs-20 { font-size: 20px; }

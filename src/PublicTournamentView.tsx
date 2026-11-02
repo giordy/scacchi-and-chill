@@ -359,7 +359,7 @@ export function PublicTournamentView({
               </tbody>
             </table>
           </div>
-          <p className="note" style={{ marginTop: 8, fontSize: "12px" }}>
+          <p className="note note-top-xs">
             * Criterio di spareggio tecnico: <strong>SB (Sonneborn-Berger)</strong>, seguito dal maggior numero di vittorie. I risultati si aggiornano direttamente con le partite Lichess.
           </p>
         </div>
@@ -414,15 +414,15 @@ export function PublicTournamentView({
       {subTab === "matches" && (
         <div className="public-section" role="tabpanel" id="pub-panel-matches" aria-labelledby="pub-tab-matches">
           {rounds.length > 0 && (
-            <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
-              <label htmlFor="filter-round" style={{ margin: 0, fontSize: 13, whiteSpace: "nowrap" }}>
+            <div className="filter-row">
+              <label htmlFor="filter-round">
                 Filtra Turno:
               </label>
               <select
                 id="filter-round"
+                className="filter-select"
                 value={filterRound}
                 onChange={(e) => setFilterRound(e.target.value)}
-                style={{ minHeight: 38, width: "auto" }}
               >
                 <option value="all">Tutti i turni ({history.length} partite)</option>
                 {rounds.map((r) => (
@@ -502,48 +502,30 @@ export function PublicTournamentView({
       {subTab === "rules" && (
         <div className="public-section" role="tabpanel" id="pub-panel-rules" aria-labelledby="pub-tab-rules">
           {/* Master Presentation Card */}
-          <div
-            style={{
-              background: "var(--panel)",
-              border: "1px solid var(--line)",
-              borderRadius: 14,
-              padding: 20,
-              marginBottom: 16,
-            }}
-          >
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
+          <div className="dossier-card">
+            <div className="dossier-row">
               {masterPhoto && (
-                <div
-                  style={{
-                    width: 140,
-                    borderRadius: 12,
-                    overflow: "hidden",
-                    border: "2px solid var(--accent)",
-                    boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
-                    flexShrink: 0,
-                    margin: "0 auto",
-                  }}
-                >
+                <div className="dossier-photo">
                   <img
                     src={masterPhoto}
                     alt={tournamentMeta.masterName || "Maestro della Stagione"}
-                    style={{ width: "100%", height: "auto", display: "block" }}
+                    className="dossier-photo-img"
                   />
                 </div>
               )}
-              <div style={{ flex: 1, minWidth: 260 }}>
-                <span className="tournament-tag" style={{ marginBottom: 4 }}>
+              <div className="dossier-body">
+                <span className="tournament-tag mb-4">
                   🏆 {tournamentMeta.season}
                 </span>
-                <h3 style={{ margin: "4px 0", fontSize: 20 }}>
+                <h3 className="dossier-name">
                   {tournamentMeta.masterName || "José Raúl Capablanca"}
                 </h3>
                 {tournamentMeta.subtitle && (
-                  <p style={{ margin: "0 0 10px", fontStyle: "italic", color: "var(--accent)", fontSize: 15 }}>
+                  <p className="dossier-subtitle">
                     "{tournamentMeta.subtitle}"
                   </p>
                 )}
-                <div style={{ lineHeight: 1.6, fontSize: 14, whiteSpace: "pre-line", color: "var(--ink)", opacity: 0.9 }}>
+                <div className="story-text dim">
                   {tournamentMeta.description ||
                     "Per rendere ogni appuntamento sempre vario e coinvolgente, ogni stagione del nostro torneo è dedicata a un grande campione della storia degli scacchi, con aneddoti e curiosità legati alla sua carriera durante lo svolgimento delle partite."}
                 </div>
@@ -552,58 +534,42 @@ export function PublicTournamentView({
           </div>
 
           {/* Albo d'Oro - Vincitori delle Edizioni */}
-          <div
-            style={{
-              background: "var(--panel)",
-              border: "1px solid var(--line)",
-              borderRadius: 14,
-              padding: 20,
-              marginBottom: 16,
-            }}
-          >
-            <h3 style={{ margin: "0 0 12px", display: "flex", alignItems: "center", gap: 8, fontSize: 18 }}>
+          <div className="dossier-card">
+            <h3 className="dossier-heading">
               🏆 Albo d'Oro del Torneo
             </h3>
             {tournamentMeta.winners && tournamentMeta.winners.length > 0 ? (
-              <div style={{ display: "grid", gap: 8 }}>
+              <div className="winners-list">
                 {tournamentMeta.winners.map((w, idx) => (
                   <div
                     key={idx}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "10px 14px",
-                      background: "var(--bg)",
-                      border: "1px solid var(--line)",
-                      borderRadius: 10,
-                    }}
+                    className="winner-row"
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ fontSize: 20 }}>🥇</span>
+                    <div className="inline-row gap-10">
+                      <span className="fs-20">🥇</span>
                       <div>
                         <strong>{w.name}</strong>{" "}
                         <a
                           href={`https://lichess.org/@/${w.handle}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ fontSize: 12, color: "var(--accent)", textDecoration: "none" }}
+                          className="winner-link"
                         >
                           @{w.handle} ↗
                         </a>
                         {w.notes && (
-                          <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>{w.notes}</div>
+                          <div className="winner-notes">{w.notes}</div>
                         )}
                       </div>
                     </div>
-                    <span className="badge" style={{ fontSize: 12, fontWeight: 700 }}>
+                    <span className="badge badge-strong">
                       {w.season}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="note" style={{ margin: 0 }}>
+              <p className="note m-0">
                 Nessuna edizione precedente registrata.
               </p>
             )}
@@ -611,15 +577,15 @@ export function PublicTournamentView({
 
           {/* Tournament How It Works & Fair Play Box */}
           <div className="rules-box">
-            <h3 style={{ marginTop: 0 }}>♟️ Come funziona il torneo</h3>
+            <h3 className="mt-0">♟️ Come funziona il torneo</h3>
 
-            <h4 style={{ margin: "14px 0 6px", fontSize: 15, color: "var(--accent)" }}>Svolgimento</h4>
+            <h4 className="rules-heading">Svolgimento</h4>
             {tournamentMeta.howItWorks ? (
-              <div style={{ whiteSpace: "pre-line", lineHeight: 1.7, margin: "6px 0 16px" }}>
+              <div className="rules-text">
                 {tournamentMeta.howItWorks}
               </div>
             ) : (
-              <ol style={{ paddingLeft: 20, lineHeight: 1.7, margin: "6px 0 16px" }}>
+              <ol className="rules-list">
                 <li>
                   All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida.
                 </li>
@@ -629,15 +595,15 @@ export function PublicTournamentView({
               </ol>
             )}
 
-            <hr style={{ border: 0, borderTop: "1px solid var(--line)", margin: "16px 0" }} />
+            <hr className="divider wide" />
 
-            <h4 style={{ margin: "14px 0 6px", fontSize: 15, color: "var(--accent)" }}>🌈 Regole di fair play</h4>
+            <h4 className="rules-heading">🌈 Regole di fair play</h4>
             {tournamentMeta.fairPlayText ? (
-              <div style={{ whiteSpace: "pre-line", lineHeight: 1.7, margin: "6px 0 16px" }}>
+              <div className="rules-text">
                 {tournamentMeta.fairPlayText}
               </div>
             ) : (
-              <ul style={{ paddingLeft: 20, lineHeight: 1.7, margin: "6px 0 16px" }}>
+              <ul className="rules-list">
                 <li>
                   Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.
                 </li>
@@ -650,10 +616,10 @@ export function PublicTournamentView({
               </ul>
             )}
 
-            <hr style={{ border: 0, borderTop: "1px solid var(--line)", margin: "16px 0" }} />
+            <hr className="divider wide" />
 
-            <h4 style={{ margin: "14px 0 6px", fontSize: 15, color: "var(--accent)" }}>⚙️ Parametri Tecnici Lichess</h4>
-            <ul style={{ paddingLeft: 20, lineHeight: 1.6, margin: "6px 0" }}>
+            <h4 className="rules-heading">⚙️ Parametri Tecnici Lichess</h4>
+            <ul className="rules-list tight">
               <li><strong>Tempo di riflessione:</strong> 2 giorni per ciascuna mossa (modalità Corrispondenza).</li>
               <li><strong>Partite Rated:</strong> Le partite sono ufficiali e incidono sul tuo rating Elo Lichess.</li>
               <li><strong>Nessun rollback / No takeback:</strong> Per garantire parità e concentrazione sulla scacchiera.</li>
