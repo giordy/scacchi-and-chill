@@ -72,6 +72,8 @@ export interface TournamentDocData {
   description?: string;
   howItWorks?: string;
   fairPlayText?: string;
+  daysPerMove?: number;
+  rated?: boolean;
   winners?: SeasonWinner[];
   players?: Player[];
   schedule?: ScheduledMatch[];
@@ -97,6 +99,8 @@ export async function saveTournamentFullToFirebase(data: {
     payload.description = data.meta.description;
     if (data.meta.howItWorks !== undefined) payload.howItWorks = data.meta.howItWorks;
     if (data.meta.fairPlayText !== undefined) payload.fairPlayText = data.meta.fairPlayText;
+    if (data.meta.daysPerMove !== undefined) payload.daysPerMove = data.meta.daysPerMove;
+    if (data.meta.rated !== undefined) payload.rated = data.meta.rated;
     if (data.meta.winners !== undefined) payload.winners = data.meta.winners;
   }
   if (data.players) {
@@ -212,25 +216,6 @@ export async function saveTournamentMetaToFirebase(
   return saveTournamentFullToFirebase({ meta });
 }
 
-export async function loadTournamentMetaFromFirebase(): Promise<TournamentMeta | null> {
-  const d = await loadTournamentFullFromFirebase();
-  if (d && d.title && d.season) {
-    return {
-      title: d.title,
-      season: d.season,
-      subtitle: d.subtitle || "",
-      imageUrl: d.imageUrl || "",
-      masterName: d.masterName || "",
-      description: d.description || "",
-      howItWorks: d.howItWorks || "",
-      fairPlayText: d.fairPlayText || "",
-      winners: d.winners || [],
-    };
-  }
-  return null;
-}
-
-// 3. Save a game to Firestore
 // Predictable ID of a game document: r<round>_<white>_<black>
 function gameDocIdOf(game: Pick<HistoryGame, "round" | "white" | "black">): string {
   return `r${game.round}_${game.white}_${game.black}`;
@@ -245,24 +230,6 @@ export async function deleteGamesFromFirebase(games: HistoryGame[]): Promise<voi
     );
     await batch.commit();
   }
-}
-
-export async function saveGameToFirebase(game: HistoryGame): Promise<void> {
-  // Use a predictable ID for the game: round_white_black
-  const gameDocId = gameDocIdOf(game);
-  const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", gameDocId);
-  await setDoc(
-    ref,
-    {
-      round: game.round,
-      white: game.white,
-      black: game.black,
-      url: game.url || "",
-      createdAt: game.createdAt || Date.now(),
-      updatedAt: new Date().toISOString(),
-    },
-    { merge: true }
-  );
 }
 
 // 4. Batch save multiple games
@@ -322,32 +289,6 @@ export async function saveLichessStatesToFirebase(
   });
   if (count > 0) await batch.commit();
   return count;
-}
-
-// 5. Load all games from Firestore
-export async function loadGamesFromFirebase(): Promise<HistoryGame[]> {
-  try {
-    const gamesCol = collection(db, "tournaments", TOURNAMENT_DOC_ID, "games");
-    const snap = await getDocs(gamesCol);
-    const result: HistoryGame[] = [];
-    snap.forEach((d) => {
-      const data = d.data();
-      if (data.round && data.white && data.black) {
-        result.push({
-          round: String(data.round),
-          white: String(data.white),
-          black: String(data.black),
-          url: String(data.url || ""),
-          createdAt: Number(data.createdAt) || undefined,
-          lichess: data.lichess || undefined,
-        });
-      }
-    });
-    return result;
-  } catch (err) {
-    console.warn("Errore caricamento partite da Firestore:", err);
-    return [];
-  }
 }
 
 // 6. Real-time subscription to tournament games

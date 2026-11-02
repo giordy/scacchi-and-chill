@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   AppConfig,
   GamePair,
@@ -19,19 +19,28 @@ import { useLichessSync } from './hooks/useLichessSync';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Notice } from './components/Notice';
 import { PairingsTab } from './tabs/PairingsTab';
-import { SettingsTab } from './tabs/SettingsTab';
 import { StatusTab } from './tabs/StatusTab';
+import { RoundTab, RoundView } from './tabs/RoundTab';
+import { CalendarTab } from './tabs/CalendarTab';
+import { TournamentTab } from './tabs/TournamentTab';
 import { ReviewsTab } from './ReviewsTab';
 import { PublicPage } from './views/PublicPage';
 import { AdminLogin } from './views/AdminLogin';
-import { AdminConsole, AdminTab } from './views/AdminConsole';
+import { AdminConsole, AdminTab, isAdminTab } from './views/AdminConsole';
 import { saveTournamentMetaToFirebase, saveTournamentFullToFirebase } from './firebaseService';
+import { errorMessage } from './lib/utils';
 
 export function App() {
   const [config, setConfig] = useState<AppConfig>(defaultConfig);
   const admin = useAdminAuth();
 
-  const [activeTab, setActiveTab] = usePersistentState<AdminTab>('pairings.adminActiveTab', 'pairings');
+  // v2: the tabs were renamed, an old stored value falls back to "Turno"
+  const [activeTab, setActiveTabRaw] = usePersistentState<AdminTab>('pairings.adminActiveTab.v2', 'round', isAdminTab);
+  const [roundView, setRoundView] = usePersistentState<RoundView>(
+    'pairings.roundView',
+    'pairings',
+    (v) => v === 'pairings' || v === 'status'
+  );
 
   const gameCount = Math.floor(config.players.length / 2);
   const emptyPairs = (): GamePair[] =>
@@ -67,11 +76,13 @@ export function App() {
     ...storedSettings,
     rules: { ...defaultSettings.rules, ...(storedSettings.rules ?? {}) },
   };
+  // Days per move and rated belong to the tournament (shown in the public rules): Firestore wins over this device
+  if (config.tournament?.daysPerMove) settings.days = config.tournament.daysPerMove;
+  if (typeof config.tournament?.rated === 'boolean') settings.rated = config.tournament.rated;
   const tpl: MessageTemplates = { ...config.messageTemplates, ...(templates ?? {}) };
 
   const [notice, setNotice] = useState<NoticeState | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const settingsTabRef = useRef<HTMLDivElement>(null);
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
@@ -83,6 +94,27 @@ export function App() {
   const flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => {
     setNotice({ kind, text, items });
     if (kind === 'ok') triggerToast(text);
+  };
+
+  const setActiveTab = (tab: AdminTab) => {
+    setNotice(null);
+    setActiveTabRaw(tab);
+  };
+
+  const saveFailed = (what: string) => (e: unknown) => flash('err', `Salvataggio ${what} su Firestore non riuscito: ${errorMessage(e)}`);
+
+  const updateTournamentMeta = (patch: Partial<TournamentMeta>) => {
+    const updatedMeta: TournamentMeta = mergeTournamentMeta(config.tournament, patch);
+    setConfig((prev) => ({ ...prev, tournament: updatedMeta }));
+    saveTournamentMetaToFirebase(updatedMeta).catch(saveFailed('del torneo'));
+  };
+  const updatePlayers = (updatedPlayers: AppConfig['players']) => {
+    setConfig((prev) => ({ ...prev, players: updatedPlayers }));
+    saveTournamentFullToFirebase({ players: updatedPlayers }).catch(saveFailed('dei giocatori'));
+  };
+  const updateSchedule = (updatedSchedule: NonNullable<AppConfig['schedule']>) => {
+    setConfig((prev) => ({ ...prev, schedule: updatedSchedule }));
+    saveTournamentFullToFirebase({ schedule: updatedSchedule }).catch(saveFailed('del calendario'));
   };
 
   const organizer = useOrganizerData(admin.isAdminRoute && admin.isAuthenticated, (msg) => flash('err', msg));
@@ -99,8 +131,9 @@ export function App() {
     });
     setRound(loadedRound);
     setPairs(newPairs);
-    setActiveTab('pairings');
-    flash("ok", `Turno ${loadedRound} caricato nella scheda Partite.`);
+    setActiveTab('round');
+    setRoundView('pairings');
+    flash("ok", `Turno ${loadedRound} aperto in Accoppiamenti.`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -118,6 +151,7 @@ export function App() {
 
   return (
     <AdminConsole
+      title={config.tournament?.title || "Scacchi & Chill"}
       email={admin.email}
       onLogout={admin.logout}
       activeTab={activeTab}
@@ -127,44 +161,66 @@ export function App() {
       onSync={lichess.sync}
       toastMessage={toastMessage}
     >
-      {activeTab === 'pairings' && (
-        <PairingsTab
-          config={config}
-          settings={settings}
-          templates={tpl}
-          round={round}
-          setRound={setRound}
-          pairs={pairs}
-          setPairs={setPairs}
-          emptyPairs={emptyPairs}
-          nameOf={nameOf}
-          notice={notice}
-          setNotice={setNotice}
-          flash={flash}
-          onMissingToken={() => setActiveTab('settings')}
+      {activeTab === 'round' && (
+        <RoundTab
+          view={roundView}
+          setView={(v) => {
+            setNotice(null);
+            setRoundView(v);
+          }}
+          pairings={
+            <PairingsTab
+              config={config}
+              settings={settings}
+              templates={tpl}
+              round={round}
+              setRound={setRound}
+              pairs={pairs}
+              setPairs={setPairs}
+              emptyPairs={emptyPairs}
+              nameOf={nameOf}
+              notice={notice}
+              setNotice={setNotice}
+              flash={flash}
+              onMissingToken={() => setActiveTab('tournament')}
+            />
+          }
+          status={
+            <StatusTab
+              history={history}
+              setHistory={setHistory}
+              defaultDays={settings.days}
+              config={config}
+              triggerToast={triggerToast}
+            />
+          }
         />
       )}
 
-      {activeTab === 'status' && (
-        <StatusTab
-          history={history}
-          setHistory={setHistory}
-          defaultDays={settings.days}
-          config={config}
-          onLoadIntoActivePairs={handleLoadRoundIntoPairs}
-          triggerToast={triggerToast}
-        />
+      {activeTab === 'calendar' && (
+        <>
+          <Notice notice={notice} />
+          <CalendarTab
+            players={config.players}
+            schedule={config.schedule}
+            history={history}
+            setHistory={setHistory}
+            onUpdateSchedule={updateSchedule}
+            onLoadIntoActivePairs={handleLoadRoundIntoPairs}
+            flash={flash}
+          />
+        </>
       )}
 
       {activeTab === 'reviews' && (
         <ReviewsTab history={history} config={config} nameOf={nameOf} triggerToast={triggerToast} organizer={organizer} />
       )}
 
-      {activeTab === 'settings' && (
-        <section>
-          <h2>Impostazioni e Regole</h2>
+      {activeTab === 'tournament' && (
+        <>
           <Notice notice={notice} />
-          <SettingsTab
+          <TournamentTab
+            config={config}
             settings={settings}
             setSettings={setSettings}
             templates={tpl}
@@ -173,33 +229,15 @@ export function App() {
             setHistory={setHistory}
             setRound={setRound}
             setPairs={setPairs}
-            flash={flash}
-            organizer={organizer}
             gameStates={lichess.gameStates}
             seasons={seasons}
-            panelRef={settingsTabRef}
-            config={config}
-            onUpdateTournamentMeta={(patch) => {
-              const updatedMeta: TournamentMeta = mergeTournamentMeta(config.tournament, patch);
-              setConfig((prev) => ({ ...prev, tournament: updatedMeta }));
-              saveTournamentMetaToFirebase(updatedMeta).catch((e) =>
-                console.warn("Salvataggio metadati su Firestore fallito:", e)
-              );
-            }}
-            onUpdatePlayers={(updatedPlayers) => {
-              setConfig((prev) => ({ ...prev, players: updatedPlayers }));
-              saveTournamentFullToFirebase({ players: updatedPlayers }).catch((e) =>
-                console.warn("Salvataggio giocatori su Firestore fallito:", e)
-              );
-            }}
-            onUpdateSchedule={(updatedSchedule) => {
-              setConfig((prev) => ({ ...prev, schedule: updatedSchedule }));
-              saveTournamentFullToFirebase({ schedule: updatedSchedule }).catch((e) =>
-                console.warn("Salvataggio calendario su Firestore fallito:", e)
-              );
-            }}
+            organizer={organizer}
+            flash={flash}
+            onUpdateTournamentMeta={updateTournamentMeta}
+            onUpdatePlayers={updatePlayers}
+            onUpdateSchedule={updateSchedule}
           />
-        </section>
+        </>
       )}
     </AdminConsole>
   );

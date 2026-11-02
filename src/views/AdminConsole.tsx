@@ -1,16 +1,19 @@
 import React from 'react';
 import { Toast } from '../WhatsAppPreview';
 
-export type AdminTab = 'pairings' | 'status' | 'reviews' | 'settings';
+export type AdminTab = 'round' | 'calendar' | 'reviews' | 'tournament';
 
-const TABS: { key: AdminTab; icon: string; label: string }[] = [
-  { key: 'pairings', icon: '♟️', label: 'Partite' },
-  { key: 'status', icon: '📊', label: 'Stato' },
-  { key: 'reviews', icon: '✨', label: 'Recensione' },
-  { key: 'settings', icon: '⚙️', label: 'Opzioni' },
+export const ADMIN_TABS: { key: AdminTab; icon: string; label: string }[] = [
+  { key: 'round', icon: '♞', label: 'Turno' },
+  { key: 'calendar', icon: '▦', label: 'Calendario' },
+  { key: 'reviews', icon: '✎', label: 'Recensione' },
+  { key: 'tournament', icon: '♛', label: 'Torneo' },
 ];
 
+export const isAdminTab = (v: unknown): v is AdminTab => ADMIN_TABS.some((t) => t.key === v);
+
 interface AdminConsoleProps {
+  title: string;
   email: string;
   onLogout: () => void;
   activeTab: AdminTab;
@@ -22,8 +25,9 @@ interface AdminConsoleProps {
   children: React.ReactNode;
 }
 
-// Organizer console: header, results sync button and tab navigation. The tab content is passed as children.
+// Organizer console: header, results sync and tab navigation. The tab content is passed as children.
 export function AdminConsole({
+  title,
   email,
   onLogout,
   activeTab,
@@ -35,53 +39,32 @@ export function AdminConsole({
   children,
 }: AdminConsoleProps) {
   return (
-    <main>
-      <div className="view-header tight">
-        <div>
-          <span className="eyebrow">
-            🔒 Area Organizzatore · {email}
-          </span>
-          <h1 className="view-title">Gestione Torneo</h1>
+    <main className="admin">
+      <header className="admin-header">
+        <div className="admin-identity">
+          <span className="eyebrow">Area organizzatore</span>
+          <h1 className="view-title">{title}</h1>
         </div>
         <div className="header-actions">
-          <a
-            href="#"
-            className="chip-link"
-          >
-            👁️ Vista Pubblica
-          </a>
-          <button
-            type="button"
-            className="chip-link is-danger"
-            onClick={onLogout}
-            title="Esci dalla sessione amministratore"
-          >
-            Esci 🚪
+          <a href="#" className="chip-link">Vista pubblica</a>
+          <button type="button" className="chip-link is-danger" onClick={onLogout} title={`Esci (${email})`}>
+            Esci
           </button>
         </div>
-      </div>
-      <p className="sub">Crea gli accoppiamenti, genera le sfide su Lichess e gestisci il torneo.</p>
-      <div className="strip" aria-hidden="true" />
+      </header>
 
       {/* Results sync: Lichess → Firestore (the public view reads from there) */}
       <div className="sync-bar">
-        <button
-          type="button"
-          className="secondary sync-btn"
-          onClick={onSync}
-          disabled={isSyncing}
-        >
-          {isSyncing ? "Sincronizzazione…" : "🔄 Sincronizza risultati"}
+        <button type="button" className="secondary sync-btn" onClick={onSync} disabled={isSyncing}>
+          {isSyncing ? "Sincronizzazione…" : "↻ Sincronizza risultati"}
         </button>
         <span className="note sync-note">
-          {lastSyncTime
-            ? `Ultima sincronizzazione alle ${lastSyncTime}`
-            : "Aggiorna i risultati visibili al pubblico"}
+          {lastSyncTime ? `Ultima alle ${lastSyncTime}` : "Porta i risultati Lichess sulla pagina pubblica"}
         </span>
       </div>
 
-      <nav className="tabs" role="tablist" aria-label="Navigazione sezioni">
-        {TABS.map((t) => (
+      <nav className="tabs" role="tablist" aria-label="Sezioni">
+        {ADMIN_TABS.map((t) => (
           <button
             key={t.key}
             className={`tab-btn ${activeTab === t.key ? 'active' : ''}`}
@@ -91,7 +74,7 @@ export function AdminConsole({
             aria-controls="admin-panel"
             onClick={() => setActiveTab(t.key)}
           >
-            <span className="tab-icon">{t.icon}</span>
+            <span className="tab-icon" aria-hidden="true">{t.icon}</span>
             <span className="tab-label">{t.label}</span>
           </button>
         ))}

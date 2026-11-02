@@ -1,26 +1,32 @@
 import React from 'react';
 import {
   AppConfig,
-  LichessExportGame,
-  SeasonArchive,
-  Player,
   GamePair,
   HistoryGame,
-  Settings,
+  LichessExportGame,
   MessageTemplates,
-  TournamentMeta,
+  Player,
   ScheduledMatch,
+  SeasonArchive,
+  Settings,
+  TournamentMeta,
 } from '../types';
-import { CollapsibleSection } from '../components/CollapsibleSection';
-import { TournamentInfoSection } from './settings/TournamentInfoSection';
-import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
-import { PlayersSection } from './settings/PlayersSection';
-import { ScheduleSection } from './settings/ScheduleSection';
-import { LichessSettingsSection } from './settings/LichessSettingsSection';
 import type { OrganizerStore } from '../hooks/useOrganizerData';
+import { CollapsibleSection } from '../components/CollapsibleSection';
+import { SeasonInfoSection } from './settings/SeasonInfoSection';
+import { RulesSection } from './settings/RulesSection';
+import { PlayersSection } from './settings/PlayersSection';
+import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
+import { HallOfFameSection } from './settings/HallOfFameSection';
+import { LichessSettingsSection } from './settings/LichessSettingsSection';
 import { BackupSection } from './settings/BackupSection';
 
-export function SettingsTab({
+type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
+
+// Everything about the tournament itself, grouped by topic. Sections are native <details>,
+// so only "Stagione corrente" is open by default.
+export function TournamentTab({
+  config,
   settings,
   setSettings,
   templates,
@@ -29,16 +35,15 @@ export function SettingsTab({
   setHistory,
   setRound,
   setPairs,
-  flash,
-  organizer,
   gameStates,
   seasons,
-  panelRef,
-  config,
+  organizer,
+  flash,
   onUpdateTournamentMeta,
   onUpdatePlayers,
   onUpdateSchedule,
 }: {
+  config: AppConfig;
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Partial<Settings>>>;
   templates: MessageTemplates;
@@ -47,26 +52,36 @@ export function SettingsTab({
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
   setRound: (r: string) => void;
   setPairs: React.Dispatch<React.SetStateAction<GamePair[]>>;
-  flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
-  organizer: OrganizerStore;
   gameStates: Record<string, LichessExportGame>;
   seasons: SeasonArchive[];
-  panelRef: React.RefObject<HTMLDivElement>;
-  config: AppConfig;
+  organizer: OrganizerStore;
+  flash: Flash;
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
   onUpdatePlayers: (players: Player[]) => void;
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
 }) {
+  const meta = config.tournament;
   return (
-    <div ref={panelRef} className="settings-stack">
-      <CollapsibleSection title="🏆 Informazioni Torneo & Nuova Stagione" defaultOpen>
-        <TournamentInfoSection
-          config={config}
+    <div className="settings-stack">
+      <CollapsibleSection title="Stagione corrente" defaultOpen>
+        <SeasonInfoSection meta={meta} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
+      </CollapsibleSection>
+
+      <CollapsibleSection title={`Giocatori (${config.players.length})`}>
+        <PlayersSection players={config.players} flash={flash} onUpdatePlayers={onUpdatePlayers} />
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Regolamento">
+        <RulesSection
+          meta={meta}
+          days={settings.days}
+          rated={settings.rated}
           flash={flash}
           onUpdateTournamentMeta={onUpdateTournamentMeta}
         />
       </CollapsibleSection>
-      <CollapsibleSection title={`🏛️ Archivio stagioni (${seasons.length})`}>
+
+      <CollapsibleSection title={`Fine stagione e storico (${seasons.length})`}>
         <SeasonArchiveSection
           config={config}
           history={history}
@@ -79,19 +94,15 @@ export function SettingsTab({
           setPairs={setPairs}
           setRound={setRound}
         />
-      </CollapsibleSection>
-      <CollapsibleSection title={`👥 Giocatori del Torneo (${config.players.length})`}>
-        <PlayersSection players={config.players} flash={flash} onUpdatePlayers={onUpdatePlayers} />
-      </CollapsibleSection>
-      <CollapsibleSection title={`📅 Calendario Ufficiale Accoppiamenti (${(config.schedule ?? []).length} partite)`}>
-        <ScheduleSection
+        <HallOfFameSection
+          winners={meta?.winners ?? []}
           players={config.players}
-          schedule={config.schedule}
           flash={flash}
-          onUpdateSchedule={onUpdateSchedule}
+          onUpdateTournamentMeta={onUpdateTournamentMeta}
         />
       </CollapsibleSection>
-      <CollapsibleSection title="⚙️ Lichess, regole e messaggi">
+
+      <CollapsibleSection title="Lichess e messaggi WhatsApp">
         <LichessSettingsSection
           settings={settings}
           setSettings={setSettings}
@@ -100,7 +111,8 @@ export function SettingsTab({
           flash={flash}
         />
       </CollapsibleSection>
-      <CollapsibleSection title="💾 Copia dei dati">
+
+      <CollapsibleSection title="Copia dei dati">
         <BackupSection
           config={config}
           history={history}

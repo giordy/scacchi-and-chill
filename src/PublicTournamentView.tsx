@@ -55,6 +55,8 @@ export function PublicTournamentView({
   }
 
   const [showStoryModal, setShowStoryModal] = useState(false);
+  const days = tournamentMeta.daysPerMove ?? config.defaults.days;
+  const rated = tournamentMeta.rated ?? config.defaults.rated;
   // Default photo only for the original Capablanca season: a new master without a photo shows none
   const masterName = tournamentMeta.masterName ?? "";
   const masterPhoto =
@@ -559,8 +561,12 @@ export function PublicTournamentView({
 
             <h4 className="rules-heading">⚙️ Parametri Tecnici Lichess</h4>
             <ul className="rules-list tight">
-              <li><strong>Tempo di riflessione:</strong> 2 giorni per ciascuna mossa (modalità Corrispondenza).</li>
-              <li><strong>Partite Rated:</strong> Le partite sono ufficiali e incidono sul tuo rating Elo Lichess.</li>
+              <li><strong>Tempo di riflessione:</strong> {days} {days === 1 ? "giorno" : "giorni"} per ciascuna mossa (modalità Corrispondenza).</li>
+              {rated ? (
+                <li><strong>Partite rated:</strong> le partite sono ufficiali e incidono sul tuo Elo Lichess.</li>
+              ) : (
+                <li><strong>Partite amichevoli:</strong> le partite non incidono sul tuo Elo Lichess.</li>
+              )}
               <li><strong>Nessun rollback / No takeback:</strong> Per garantire parità e concentrazione sulla scacchiera.</li>
             </ul>
           </div>

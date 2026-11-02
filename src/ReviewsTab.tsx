@@ -47,7 +47,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
         setIsFetchingData(false);
         setNotice({
           kind: "warning",
-          text: "Nessuna partita salvata nello storico. Crea o carica prima dei turni nella scheda Partite o Stato.",
+          text: "Nessuna partita salvata nello storico. Crea prima un turno in Turno → Accoppiamenti.",
         });
         return;
       }

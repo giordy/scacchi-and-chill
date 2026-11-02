@@ -39,7 +39,7 @@ export function LichessSettingsSection({
           onChange={(e) => setTokenDraft(e.target.value)}
         />
         <p className="note">
-          Crea un token su <code>lichess.org/account/oauth/token</code> con il permesso <em>Challenge</em>. Viene salvato esclusivamente nel browser del telefono.
+          Crea un token su <code>lichess.org/account/oauth/token</code> con il permesso <em>Challenge</em>. Resta solo in questo browser: va inserito su ogni dispositivo da cui crei le sfide.
         </p>
       </div>
 
@@ -67,35 +67,16 @@ export function LichessSettingsSection({
         </button>
       </div>
 
-      <div className="grid2">
-        <DaysField
-          id="days"
-          label="Giorni per mossa"
-          value={settings.days}
-          fallback={2}
-          onCommit={(n) => set({ days: n })}
-        />
-        <DaysField
-          id="expiry"
-          label="Validità link (giorni)"
-          value={settings.expiry}
-          fallback={2}
-          onCommit={(n) => set({ expiry: n })}
-        />
-      </div>
-
-      <div className="inline">
-        <input
-          id="rated"
-          type="checkbox"
-          checked={settings.rated}
-          onChange={(e) => set({ rated: e.target.checked })}
-        />
-        <label htmlFor="rated">Partite classificate (Rated)</label>
-      </div>
+      <DaysField
+        id="expiry"
+        label="Validità del link di sfida (giorni)"
+        value={settings.expiry}
+        fallback={2}
+        onCommit={(n) => set({ expiry: n })}
+      />
 
       <div>
-        <label>Regole della partita</label>
+        <label>Regole della sfida su Lichess</label>
         {RULES.map(({ key, label }) => (
           <div className="inline" key={key}>
             <input

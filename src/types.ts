@@ -89,6 +89,9 @@ export interface TournamentMeta {
   description: string;
   howItWorks?: string;
   fairPlayText?: string;
+  // Lichess parameters shown in the public rules (and used to create the challenges)
+  daysPerMove?: number;
+  rated?: boolean;
   winners?: SeasonWinner[];
 }
 

@@ -7,21 +7,18 @@ import {
 import { errorMessage, fill, extractGameId, formatDeadline, HOW_WIN, HOW_DRAW, tidy, getApproxMoves } from '../lib/utils';
 import { fetchGameStates } from '../lib/lichess';
 import { WhatsAppPreview } from '../WhatsAppPreview';
-import { deleteGamesFromFirebase } from '../firebaseService';
 
 export function StatusTab({
   history,
   setHistory,
   defaultDays,
   config,
-  onLoadIntoActivePairs,
   triggerToast,
 }: {
   history: HistoryGame[];
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
   defaultDays: number;
   config: AppConfig;
-  onLoadIntoActivePairs: (round: string, games: HistoryGame[]) => void;
   triggerToast?: (msg: string) => void;
 }) {
   const nameOf = (handle: string) => config.players.find((p) => p.handle === handle)?.name ?? handle;
@@ -38,20 +35,6 @@ export function StatusTab({
   const [details, setDetails] = useState<string[]>([]);
   const [isRoundComplete, setIsRoundComplete] = useState(false);
   const [status, setStatus] = useState({ busy: false, error: "", info: "" });
-  const [showManage, setShowManage] = useState(false);
-
-  const handleDeleteRound = async (roundToDelete: string) => {
-    if (!window.confirm(`Sei sicuro di voler eliminare tutte le partite del Turno ${roundToDelete}? Spariranno anche dalla pagina pubblica.`)) return;
-    try {
-      // Delete on Firestore first: otherwise the next sync would bring the games back
-      await deleteGamesFromFirebase(history.filter((g) => g.round === roundToDelete));
-      setHistory((prev) => prev.filter((g) => g.round !== roundToDelete));
-      if (chosen === roundToDelete) setChosen("");
-      triggerToast?.(`Turno ${roundToDelete} eliminato.`);
-    } catch (e) {
-      window.alert(`Eliminazione non riuscita: ${errorMessage(e)}`);
-    }
-  };
 
   const buildStatusMessageInternal = (games: HistoryGame[], states: Record<string, LichessExportGame>) => {
     const count = { finished: 0, ongoing: 0, pending: 0 };
@@ -288,10 +271,9 @@ export function StatusTab({
 
   return (
     <section>
-      <h2>Stato e Risultati Partite</h2>
       {rounds.length === 0 ? (
         <p className="note">
-          Nessuna partita memorizzata. Crea un turno nella scheda <strong>Partite</strong> per monitorarne lo stato in tempo reale.
+          Nessuna partita memorizzata. Crea un turno in <strong>Accoppiamenti</strong> per seguirne lo stato qui.
         </p>
       ) : (
         <>
@@ -372,42 +354,6 @@ export function StatusTab({
         </>
       )}
 
-      {/* Archivio Compatto turni salvati */}
-      {rounds.length > 0 && (
-        <details className="manage-rounds" open={showManage} onToggle={(e) => setShowManage((e.target as HTMLDetailsElement).open)}>
-          <summary className="summary-muted">
-            🗂️ Archivio e pulizia turni ({rounds.length} {rounds.length === 1 ? 'turno' : 'turni'})
-          </summary>
-          <div className="body mt-10">
-            {rounds.map((r) => {
-              const roundGames = history.filter((g) => g.round === r);
-              return (
-                <div key={r} className="round-card mb-10">
-                  <div className="round-header">
-                    <strong>Turno {r}</strong>
-                    <div className="header-actions">
-                      <button
-                        className="secondary btn-sm"
-                        type="button"
-                        onClick={() => onLoadIntoActivePairs(r, roundGames)}
-                      >
-                        Carica in Partite
-                      </button>
-                      <button
-                        className="danger btn-sm"
-                        type="button"
-                        onClick={() => handleDeleteRound(r)}
-                      >
-                        Elimina
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </details>
-      )}
     </section>
   );
 }

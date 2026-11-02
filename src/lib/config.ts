@@ -5,10 +5,10 @@ import {
 import rawConfig from '../../config.json';
 
 export const RULES = [
-  { key: "noRematch", label: "No rematch offers" },
-  { key: "noGiveTime", label: "No giving time to the opponent" },
-  { key: "noClaimWin", label: "No claiming victory if the opponent leaves" },
-  { key: "noEarlyDraw", label: "No early draws (draw offers blocked early in the game)" },
+  { key: "noRematch", label: "Niente richieste di rivincita" },
+  { key: "noGiveTime", label: "Non si può regalare tempo all'avversario" },
+  { key: "noClaimWin", label: "Non si può reclamare la vittoria se l'avversario sparisce" },
+  { key: "noEarlyDraw", label: "Niente patta nelle prime mosse" },
 ];
 
 // Untrusted JSON from config.json: every field is checked below before use.

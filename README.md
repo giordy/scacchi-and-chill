@@ -14,14 +14,16 @@ Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli acco
 
 ### Area organizzatore (`#admin`)
 Accesso con login Google, riservato a un solo account.
-- **♟️ Partite**: accoppiamenti bianco/nero, creazione delle sfide su Lichess, messaggio WhatsApp con i link.
-- **📊 Stato**: andamento delle partite, bollettino WhatsApp, gestione dei turni salvati.
-- **✨ Recensione**: statistiche, aneddoti ed Elo dei giocatori per costruire il prompt da incollare in Claude o ChatGPT; il testo ottenuto si incolla poi nella scheda per l'anteprima WhatsApp.
-- **⚙️ Opzioni** (sezioni richiudibili): informazioni del torneo e Albo d'Oro, archivio stagioni, giocatori, calendario ufficiale, token Lichess e testi dei messaggi, backup.
-- **🔄 Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. La vista pubblica legge da Firestore, quindi i nuovi risultati compaiono solo dopo la sincronizzazione.
+- **♞ Turno**: il lavoro del turno in corso, in due passi.
+  1. *Accoppiamenti*: bianco/nero (precompilati dal calendario ufficiale), creazione delle sfide su Lichess, messaggio WhatsApp con i link.
+  2. *Bollettino*: andamento delle partite del turno e messaggio WhatsApp di aggiornamento.
+- **▦ Calendario**: turni già creati (riapri o elimina, anche da Firestore) e calendario ufficiale degli accoppiamenti.
+- **✎ Recensione**: statistiche, aneddoti ed Elo dei giocatori per costruire il prompt da incollare in Claude o ChatGPT; il testo ottenuto si incolla poi nella scheda per l'anteprima WhatsApp.
+- **♛ Torneo** (sezioni richiudibili): stagione corrente, giocatori, regolamento (con giorni per mossa e rated, mostrati anche in pubblico), fine stagione e storico con Albo d'Oro, token Lichess e testi dei messaggi, copia dei dati in JSON.
+- **↻ Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. La vista pubblica legge da Firestore, quindi i nuovi risultati compaiono solo dopo la sincronizzazione.
 
 ### Stagioni
-Da *Opzioni → Archivio stagioni*:
+Da *Torneo → Fine stagione e storico*:
 - **Archivia stagione corrente** salva la classifica finale nello storico pubblico e aggiunge il campione all'Albo d'Oro.
 - **Archivia e inizia nuova stagione** archivia, poi **cancella tutte le partite** dalla stagione corrente, imposta il nuovo nome e maestro e, se vuoi, svuota il calendario. Prima della cancellazione chiede conferma e non cancella nulla se l'archiviazione fallisce.
 
@@ -39,7 +41,7 @@ L'email dell'organizzatore compare in **due** posti, da tenere allineati:
 ### Dati su Firestore
 | Percorso | Lettura | Contenuto |
 |---|---|---|
-| `tournaments/<id>` | pubblica | titolo, stagione, giocatori, calendario, Albo d'Oro |
+| `tournaments/<id>` | pubblica | titolo, stagione, giocatori, calendario, regolamento (giorni per mossa, rated), Albo d'Oro |
 | `tournaments/<id>/games/*` | pubblica | partite e stato Lichess |
 | `tournaments/<id>/seasons/*` | pubblica | classifiche finali delle stagioni archiviate |
 | `tournaments/<id>/private/organizer` | solo admin | aneddoti sui giocatori ed Elo |
@@ -58,7 +60,7 @@ npm run build    # build di produzione in dist/
 
 ### Struttura di `src/`
 - `views/`: pagine (pubblica, giocatore, login, console admin).
-- `tabs/`: schede dell'area admin; `tabs/settings/` ha le sezioni delle impostazioni.
+- `tabs/`: schede dell'area admin; `tabs/settings/` ha le sezioni di *Torneo*, `tabs/calendar/` quelle di *Calendario*.
 - `hooks/`: login, sincronizzazione con Firestore e Lichess, dati dell'organizzatore, stagioni.
 - `lib/`: logica pura e testata (`standings`, `playerProfile`, `seasons`, `routes`, `parse`).
 - `components/`: elementi condivisi.
@@ -72,7 +74,7 @@ Il workflow `.github/workflows/deploy.yml` esegue test e build a ogni push su `m
 2. Sotto **Build and deployment** scegli **Source: GitHub Actions**.
 
 ## Configurazione iniziale del torneo
-`config.json` contiene i valori predefiniti (giocatori, calendario, testi dei messaggi). Dopo il primo avvio i dati vivono su Firestore e si modificano dall'area organizzatore. *Opzioni → Informazioni torneo → Esporta config.json* scarica una copia aggiornata.
+`config.json` contiene i valori predefiniti (giocatori, calendario, testi dei messaggi). Dopo il primo avvio i dati vivono su Firestore e si modificano dall'area organizzatore.
 
 ## Limiti noti
 - Finché l'organizzatore non preme **Sincronizza**, il pubblico non vede i nuovi risultati.

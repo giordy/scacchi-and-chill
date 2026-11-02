@@ -30,6 +30,8 @@ export function tournamentFromDoc(doc: TournamentDocData): TournamentMeta | null
     description: doc.description || DEFAULT_TOURNAMENT.description,
     howItWorks: doc.howItWorks || "",
     fairPlayText: doc.fairPlayText || "",
+    daysPerMove: typeof doc.daysPerMove === "number" && doc.daysPerMove > 0 ? doc.daysPerMove : undefined,
+    rated: typeof doc.rated === "boolean" ? doc.rated : undefined,
     winners: doc.winners || [],
   };
 }
@@ -49,6 +51,8 @@ export function mergeTournamentMeta(
     description: patch.description ?? current?.description ?? d.description,
     howItWorks: patch.howItWorks ?? current?.howItWorks ?? d.howItWorks,
     fairPlayText: patch.fairPlayText ?? current?.fairPlayText ?? d.fairPlayText,
+    daysPerMove: patch.daysPerMove ?? current?.daysPerMove,
+    rated: patch.rated ?? current?.rated,
     winners: patch.winners ?? current?.winners ?? d.winners,
   };
 }
