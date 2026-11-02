@@ -1,0 +1,105 @@
+import React, { useState } from 'react';
+import { Player } from '../../types';
+
+export function PlayersSection({
+  players,
+  flash,
+  onUpdatePlayers,
+}: {
+  players: Player[];
+  flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
+  onUpdatePlayers: (players: Player[]) => void;
+}) {
+  const playersList = players;
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerHandle, setNewPlayerHandle] = useState("");
+
+  return (
+    <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: 14 }}>
+      <h3 style={{ margin: "0 0 6px", fontSize: 16 }}>👥 Giocatori del Torneo ({playersList.length})</h3>
+      <p className="note" style={{ margin: "0 0 12px" }}>
+        Modifica i partecipanti e i loro nickname Lichess. Le modifiche vengono salvate in tempo reale nel database cloud.
+      </p>
+
+      <div style={{ display: "grid", gap: 6, marginBottom: 14, maxHeight: 220, overflowY: "auto" }}>
+        {playersList.map((p, idx) => (
+          <div
+            key={idx}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "6px 10px",
+              background: "var(--panel)",
+              border: "1px solid var(--line)",
+              borderRadius: 6,
+            }}
+          >
+            <div>
+              <strong>{p.name}</strong> <span style={{ opacity: 0.7, fontSize: 13 }}>({p.handle})</span>
+            </div>
+            <button
+              type="button"
+              className="secondary"
+              style={{ fontSize: 11, padding: "3px 8px", color: "var(--danger)" }}
+              onClick={() => {
+                const updated = playersList.filter((_, i) => i !== idx);
+                onUpdatePlayers(updated);
+                flash("ok", `Giocatore ${p.name} rimosso.`);
+              }}
+            >
+              Rimuovi
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "flex-end" }}>
+        <div>
+          <label htmlFor="new-p-name">Nome WhatsApp</label>
+          <input
+            id="new-p-name"
+            type="text"
+            placeholder="es. Marco"
+            value={newPlayerName}
+            onChange={(e) => setNewPlayerName(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="new-p-handle">Nickname Lichess</label>
+          <input
+            id="new-p-handle"
+            type="text"
+            placeholder="es. marco_chess"
+            value={newPlayerHandle}
+            onChange={(e) => setNewPlayerHandle(e.target.value)}
+          />
+        </div>
+        <button
+          type="button"
+          className="secondary"
+          style={{ minHeight: 48, whiteSpace: "nowrap" }}
+          onClick={() => {
+            const name = newPlayerName.trim();
+            const handle = newPlayerHandle.trim().toLowerCase();
+            if (!name || !handle) {
+              flash("err", "Inserisci sia il nome che il nickname Lichess.");
+              return;
+            }
+            if (playersList.some((p) => p.handle.toLowerCase() === handle)) {
+              flash("err", `Esiste già un giocatore con handle '${handle}'.`);
+              return;
+            }
+            const updated = [...playersList, { name, handle }];
+            onUpdatePlayers(updated);
+            setNewPlayerName("");
+            setNewPlayerHandle("");
+            flash("ok", `Giocatore ${name} aggiunto con successo!`);
+          }}
+        >
+          + Aggiungi
+        </button>
+      </div>
+    </div>
+  );
+}
