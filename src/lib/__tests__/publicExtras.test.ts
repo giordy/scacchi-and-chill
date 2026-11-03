@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { parseFenBoard } from '../fen';
-import { computeRecentForm } from '../form';
 import { mergeGameStates } from '../progress';
 import { computePlayerProfile } from '../playerProfile';
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch } from '../../types';
@@ -37,30 +36,6 @@ describe('parseFenBoard', () => {
     expect(parseFenBoard('8/8/8/8/8/8/8')).toBeNull();
     expect(parseFenBoard('9/8/8/8/8/8/8/8')).toBeNull();
     expect(parseFenBoard('7x/8/8/8/8/8/8/8')).toBeNull();
-  });
-});
-
-describe('computeRecentForm', () => {
-  it('keeps the last results in round order and skips unfinished or voided games', () => {
-    const history = [
-      g('2', 'bruno', 'anna', 'b2b2b2b2'),
-      g('1', 'anna', 'bruno', 'a1a1a1a1'),
-      g('3', 'anna', 'carla', 'c3c3c3c3'),
-      g('3', 'carla', 'bruno', 'd3d3d3d3'),
-      g('4', 'anna', 'bruno', 'e4e4e4e4'),
-    ];
-    const states = {
-      a1a1a1a1: st('a1a1a1a1', 'mate', 'white'),
-      b2b2b2b2: st('b2b2b2b2', 'draw'),
-      c3c3c3c3: st('c3c3c3c3', 'resign', 'black'),
-      d3d3d3d3: st('d3d3d3d3', 'aborted'),
-      e4e4e4e4: st('e4e4e4e4', 'started'),
-    };
-    const form = computeRecentForm(history, states);
-    expect(form.anna).toEqual(['win', 'draw', 'loss']);
-    expect(form.bruno).toEqual(['loss', 'draw']);
-    expect(form.carla).toEqual(['win']);
-    expect(computeRecentForm(history, states, 2).anna).toEqual(['draw', 'loss']);
   });
 });
 

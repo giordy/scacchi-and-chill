@@ -1667,29 +1667,6 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   min-width: 0;
 }
 
-/* Recent form: last results under the player's name */
-.form-strip {
-  display: inline-flex;
-  gap: 3px;
-  margin-top: 4px;
-}
-
-.form-sq {
-  display: inline-grid;
-  place-items: center;
-  width: 17px;
-  height: 17px;
-  border-radius: 3px;
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--panel);
-}
-
-.form-sq.win { background: var(--win); }
-.form-sq.draw { background: var(--draw); }
-.form-sq.loss { background: var(--loss); }
-
 /* Player page: points chart */
 .points-chart {
   margin: 0;
