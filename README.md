@@ -44,9 +44,9 @@ L'email dell'organizzatore compare in **due** posti, da tenere allineati:
 | `tournaments/<id>` | pubblica | titolo, stagione, giocatori, calendario, regolamento (giorni per mossa, rated), Albo d'Oro |
 | `tournaments/<id>/games/*` | pubblica | partite e stato Lichess |
 | `tournaments/<id>/seasons/*` | pubblica | classifiche finali delle stagioni archiviate |
-| `tournaments/<id>/private/organizer` | solo admin | aneddoti sui giocatori ed Elo |
+| `tournaments/<id>/private/organizer` | solo admin | aneddoti sui giocatori, Elo, token Lichess (permesso Challenge), opzioni delle sfide e testi dei messaggi |
 
-Gli aneddoti sono privati di proposito: non vanno mai nella parte pubblica.
+Gli aneddoti e il token sono privati di proposito: non vanno mai nella parte pubblica. Le regole Firestore permettono di leggere `private/*` solo all'account dell'organizzatore.
 
 ## Sviluppo
 

@@ -1,8 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { MessageTemplates, Settings } from '../types';
+import { initialStoredSettings } from '../lib/config';
 import { OrganizerData, saveOrganizerData, subscribeToOrganizerData } from '../firebaseService';
 
 const LS_ANECDOTES = "scacchi.anecdotes";
 const LS_RATINGS = "scacchi.ratings";
+const LS_SETTINGS = "pairings.settings.v3";
+const LS_TEMPLATES = "pairings.templates.v2";
 const SAVE_DELAY_MS = 800;
 
 const readLocal = <T,>(key: string): T | null => {
@@ -14,7 +18,18 @@ const readLocal = <T,>(key: string): T | null => {
   }
 };
 
-const EMPTY: OrganizerData = { anecdotes: {}, ratings: {} };
+const EMPTY: OrganizerData = { anecdotes: {}, ratings: {}, settings: {}, templates: null };
+
+// Settings and message texts used to live in this browser only: move them to Firestore once
+const localSettings = () => ({
+  settings: readLocal<Partial<Settings>>(LS_SETTINGS) ?? initialStoredSettings(),
+  templates: readLocal<Partial<MessageTemplates>>(LS_TEMPLATES),
+});
+const forgetLocal = (keys: string[]) => {
+  try {
+    keys.forEach((k) => localStorage.removeItem(k));
+  } catch {}
+};
 
 // Player anecdotes and ratings, synced with the private Firestore document (admin only).
 // On first use, data previously kept in localStorage is uploaded and then removed locally.
@@ -53,7 +68,15 @@ export function useOrganizerData(enabled: boolean, onError?: (msg: string) => vo
     if (!enabled) return;
     const unsub = subscribeToOrganizerData(
       (remote) => {
-        if (remote) {
+        if (remote && remote.settings === undefined) {
+          // Document from before the settings moved here: add the ones of this browser
+          const migrated = { ...remote, ...localSettings() };
+          dataRef.current = migrated;
+          setData(migrated);
+          saveOrganizerData(migrated)
+            .then(() => forgetLocal([LS_SETTINGS, LS_TEMPLATES]))
+            .catch((e) => console.warn("Migrazione impostazioni fallita:", e));
+        } else if (remote) {
           // Do not overwrite edits that are still waiting to be saved
           if (!dirty.current) {
             dataRef.current = remote;
@@ -64,15 +87,13 @@ export function useOrganizerData(enabled: boolean, onError?: (msg: string) => vo
           const local: OrganizerData = {
             anecdotes: readLocal<Record<string, string>>(LS_ANECDOTES) ?? {},
             ratings: readLocal<OrganizerData["ratings"]>(LS_RATINGS) ?? {},
+            ...localSettings(),
           };
           dataRef.current = local;
           setData(local);
           saveOrganizerData(local)
             .then(() => {
-              try {
-                localStorage.removeItem(LS_ANECDOTES);
-                localStorage.removeItem(LS_RATINGS);
-              } catch {}
+              forgetLocal([LS_ANECDOTES, LS_RATINGS, LS_SETTINGS, LS_TEMPLATES]);
             })
             .catch((e) => console.warn("Migrazione note organizzatore fallita:", e));
         }
@@ -90,9 +111,17 @@ export function useOrganizerData(enabled: boolean, onError?: (msg: string) => vo
     update({ ...dataRef.current, anecdotes: { ...dataRef.current.anecdotes, [handle]: text } });
   const setRatings = (ratings: OrganizerData["ratings"]) => update({ ...dataRef.current, ratings });
   const replaceAll = (next: Partial<OrganizerData>) => update({ ...dataRef.current, ...next });
-  const clearAll = () => update(EMPTY);
+  // Same signature as a React state setter, so the settings sections need no changes
+  const setSettings: React.Dispatch<React.SetStateAction<Partial<Settings>>> = (action) => {
+    const prev = dataRef.current.settings ?? {};
+    update({ ...dataRef.current, settings: typeof action === "function" ? action(prev) : action });
+  };
+  const setTemplates: React.Dispatch<React.SetStateAction<Partial<MessageTemplates> | null>> = (action) => {
+    const prev = dataRef.current.templates ?? null;
+    update({ ...dataRef.current, templates: typeof action === "function" ? action(prev) : action });
+  };
 
-  return { ...data, loaded, setAnecdote, setRatings, replaceAll, clearAll };
+  return { ...data, loaded, setAnecdote, setRatings, replaceAll, setSettings, setTemplates };
 }
 
 export type OrganizerStore = ReturnType<typeof useOrganizerData>;

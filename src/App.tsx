@@ -8,7 +8,7 @@ import {
   NoticeState,
   TournamentMeta,
 } from './types';
-import { defaultConfig, initialStoredSettings } from './lib/config';
+import { defaultConfig } from './lib/config';
 import { mergeTournamentMeta } from './lib/tournament';
 import { usePersistentState } from './hooks/usePersistentState';
 import { useAdminAuth } from './hooks/useAdminAuth';
@@ -56,31 +56,6 @@ export function App() {
     emptyPairs,
     (v) => Array.isArray(v) && v.length === gameCount
   );
-  const [storedSettings, setSettings] = usePersistentState<Partial<Settings>>(
-    "pairings.settings.v3",
-    initialStoredSettings
-  );
-  const [templates, setTemplates] = usePersistentState<Partial<MessageTemplates> | null>(
-    "pairings.templates.v2",
-    null
-  );
-
-  const defaultSettings: Settings = {
-    token: "",
-    days: config.defaults.days,
-    expiry: config.defaults.expiry,
-    rated: config.defaults.rated,
-    rules: config.defaults.rules,
-  };
-  const settings: Settings = {
-    ...defaultSettings,
-    ...storedSettings,
-    rules: { ...defaultSettings.rules, ...(storedSettings.rules ?? {}) },
-  };
-  // Days per move and rated belong to the tournament (shown in the public rules): Firestore wins over this device
-  if (config.tournament?.daysPerMove) settings.days = config.tournament.daysPerMove;
-  if (typeof config.tournament?.rated === 'boolean') settings.rated = config.tournament.rated;
-  const tpl: MessageTemplates = { ...config.messageTemplates, ...(templates ?? {}) };
 
   const [notice, setNotice] = useState<NoticeState | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -120,6 +95,26 @@ export function App() {
 
   const organizer = useOrganizerData(admin.isAdminRoute && admin.isAuthenticated, (msg) => flash('err', msg));
   const { ready, gamesLoaded } = useTournamentSync(setConfig, setHistory);
+
+  const defaultSettings: Settings = {
+    token: "",
+    days: config.defaults.days,
+    expiry: config.defaults.expiry,
+    rated: config.defaults.rated,
+    rules: config.defaults.rules,
+  };
+  // Organizer settings and message texts live in the private Firestore document (same on every device)
+  const storedSettings = organizer.settings ?? {};
+  const settings: Settings = {
+    ...defaultSettings,
+    ...storedSettings,
+    rules: { ...defaultSettings.rules, ...(storedSettings.rules ?? {}) },
+  };
+  // Days per move and rated belong to the tournament (shown in the public rules): they win over the organizer settings
+  if (config.tournament?.daysPerMove) settings.days = config.tournament.daysPerMove;
+  if (typeof config.tournament?.rated === 'boolean') settings.rated = config.tournament.rated;
+  const tpl: MessageTemplates = { ...config.messageTemplates, ...(organizer.templates ?? {}) };
+
   const seasons = useSeasons();
   const lichess = useLichessSync(history, setHistory, flash);
 
@@ -224,9 +219,9 @@ export function App() {
           <TournamentTab
             config={config}
             settings={settings}
-            setSettings={setSettings}
+            setSettings={organizer.setSettings}
             templates={tpl}
-            setTemplates={setTemplates}
+            setTemplates={organizer.setTemplates}
             history={history}
             setHistory={setHistory}
             setRound={setRound}

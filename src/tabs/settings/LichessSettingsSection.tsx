@@ -39,7 +39,7 @@ export function LichessSettingsSection({
           onChange={(e) => setTokenDraft(e.target.value)}
         />
         <p className="note">
-          Crea un token su <code>lichess.org/account/oauth/token</code> con il permesso <em>Challenge</em>. Resta solo in questo browser: va inserito su ogni dispositivo da cui crei le sfide.
+          Crea un token su <code>lichess.org/account/oauth/token</code> con il permesso <em>Challenge</em>. Si salva nel documento privato del torneo, leggibile solo dal tuo account: vale su tutti i tuoi dispositivi.
         </p>
       </div>
 
@@ -49,7 +49,7 @@ export function LichessSettingsSection({
           type="button"
           onClick={() => {
             set({ token: tokenDraft.trim() });
-            flash("ok", "Token salvato in questo browser.");
+            flash("ok", "Token salvato.");
           }}
         >
           Salva token
@@ -60,7 +60,7 @@ export function LichessSettingsSection({
           onClick={() => {
             setTokenDraft("");
             set({ token: "" });
-            flash("ok", "Token rimosso da questo browser.");
+            flash("ok", "Token rimosso.");
           }}
         >
           Dimentica token

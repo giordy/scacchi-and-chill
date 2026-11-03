@@ -25,6 +25,8 @@ import {
   Player,
   ScheduledMatch,
   SeasonWinner,
+  Settings,
+  MessageTemplates,
   LichessExportGame,
   SeasonArchive,
 } from "./types";
@@ -147,15 +149,22 @@ export function subscribeToTournamentDoc(
 // Organizer-only notes (player anecdotes and cached Lichess ratings).
 // Stored in a private document: Firestore rules allow only the admin to read it,
 // because the anecdotes are personal and must not be exposed on the public page.
+// The same document holds the organizer settings (Lichess token, challenge options, message texts),
+// so they are the same on every device of the organizer.
 export interface OrganizerData {
   anecdotes: Record<string, string>;
   ratings: Record<string, string | number | null>;
+  // undefined = never saved on Firestore yet (still to migrate from this browser)
+  settings?: Partial<Settings>;
+  templates?: Partial<MessageTemplates> | null;
 }
 
 const organizerRef = () => doc(db, "tournaments", TOURNAMENT_DOC_ID, "private", "organizer");
 
 export async function saveOrganizerData(data: OrganizerData): Promise<void> {
-  await setDoc(organizerRef(), { ...data, updatedAt: new Date().toISOString() });
+  // Firestore rejects undefined values: the JSON round trip drops them
+  const clean = JSON.parse(JSON.stringify(data));
+  await setDoc(organizerRef(), { ...clean, updatedAt: new Date().toISOString() });
 }
 
 // Calls onUpdate with the stored data, or null when the document does not exist yet.
@@ -173,7 +182,12 @@ export function subscribeToOrganizerData(
         return;
       }
       const d = snap.data();
-      onUpdate({ anecdotes: d.anecdotes ?? {}, ratings: d.ratings ?? {} });
+      onUpdate({
+        anecdotes: d.anecdotes ?? {},
+        ratings: d.ratings ?? {},
+        settings: d.settings,
+        templates: d.templates ?? null,
+      });
     },
     (err) => {
       console.warn("Sottoscrizione note organizzatore fallita:", err);
