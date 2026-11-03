@@ -12,7 +12,7 @@ export interface MatchesLayout {
   current?: RoundBlock;
   // Games created in earlier rounds and not finished yet, shown right below the current round
   late: HistoryGame[];
-  // Rounds after the current one, in round order
+  // Rounds after the current one, in round order, collapsed by default
   upcoming: RoundBlock[];
   // Rounds before the current one, most recent first, collapsed by default
   played: RoundBlock[];

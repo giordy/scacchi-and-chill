@@ -13,7 +13,7 @@ interface MatchesByRoundProps {
 }
 
 // Public "Partite": the current round first, then the unfinished games of earlier rounds,
-// the upcoming rounds and finally the played rounds, newest first and collapsed
+// the upcoming rounds and finally the played rounds, newest first; both collapsed
 export function MatchesByRound({ games, gameStates, nameOf, returnStart }: MatchesByRoundProps) {
   const stateOf = (g: HistoryGame) => {
     const id = extractGameId(g.url);
@@ -68,6 +68,14 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart }: Match
     </section>
   );
 
+  // One line with the round summary, open on tap
+  const collapsedRound = (block: RoundBlock) => (
+    <details key={block.round} className="round-group round-group-collapsible">
+      <summary className="round-group-header">{header(block)}</summary>
+      {grid(block.games)}
+    </details>
+  );
+
   const layout = layoutMatches(games, progressOf);
   const roundCount = layout.played.length + layout.upcoming.length + (layout.current ? 1 : 0);
 
@@ -96,19 +104,14 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart }: Match
       {layout.upcoming.length > 0 && (
         <>
           <h2 className="leg-heading">Prossimi turni</h2>
-          {layout.upcoming.map((b) => openRound(b))}
+          {layout.upcoming.map(collapsedRound)}
         </>
       )}
 
       {layout.played.length > 0 && (
         <>
           <h2 className="leg-heading">Turni giocati</h2>
-          {layout.played.map((b) => (
-            <details key={b.round} className="round-group round-group-collapsible">
-              <summary className="round-group-header">{header(b)}</summary>
-              {grid(b.games)}
-            </details>
-          ))}
+          {layout.played.map(collapsedRound)}
         </>
       )}
     </div>
