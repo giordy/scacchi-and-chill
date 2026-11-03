@@ -207,4 +207,15 @@ export interface SeasonArchive {
   standings: SeasonArchiveStanding[];
   gamesPlayed: number;
   champion?: { handle: string; name: string; points: number };
+  awards?: SeasonAward[];
+}
+
+// A light-hearted end-of-season award (see lib/awards.ts)
+export interface SeasonAward {
+  id: string;
+  emoji: string;
+  title: string;
+  description: string;
+  winners: { handle: string; name: string }[];
+  detail: string; // e.g. "3 vittorie col matto"
 }

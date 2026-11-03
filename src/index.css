@@ -973,6 +973,19 @@ a.player-page-link:hover, a.player-page-link:focus-visible { color: var(--accent
 .endings-list li { display: grid; grid-template-columns: 110px 1fr; gap: 10px; }
 .endings-label { font-weight: 600; }
 
+/* End-of-season awards */
+.awards-section { margin-top: 24px; }
+.awards-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.award-card { display: flex; gap: 12px; align-items: flex-start; padding: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+.award-emoji { font-size: 28px; line-height: 1; }
+.award-body { min-width: 0; }
+.award-title { margin: 0 0 2px; font-size: 15px; }
+.award-winners { margin: 0; font-weight: 700; color: var(--ink); }
+.award-winners a { color: inherit; }
+.award-winners a:hover { color: var(--accent); }
+.award-detail { margin: 2px 0 0; font-size: 13px; color: var(--ink); }
+.award-desc { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+
 /* Seasons history */
 .seasons-history { display: grid; gap: 12px; }
 details.season-card { margin: 0; }

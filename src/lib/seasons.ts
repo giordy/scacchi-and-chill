@@ -1,5 +1,6 @@
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonWinner, TournamentMeta } from '../types';
 import { computeStandings } from './standings';
+import { computeSeasonAwards } from './awards';
 
 // Stable document id from the season name: "Stagione 2 - Capablanca" -> "stagione-2-capablanca"
 export function seasonId(season: string): string {
@@ -35,6 +36,8 @@ export function buildSeasonArchive(
   if (meta.imageUrl) archive.imageUrl = meta.imageUrl;
   // No champion until at least one game has been scored
   if (top && top.points > 0) archive.champion = { handle: top.handle, name: top.name, points: top.points };
+  const awards = computeSeasonAwards(players, history, gameStates);
+  if (awards.length > 0) archive.awards = awards;
   return archive;
 }
 

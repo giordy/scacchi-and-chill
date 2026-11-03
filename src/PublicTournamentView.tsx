@@ -9,6 +9,8 @@ import { onTabListKeyDown } from "./lib/tabKeys";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
 import { withScheduledGames } from "./lib/publicGames";
+import { computeSeasonAwards } from "./lib/awards";
+import { SeasonAwards } from "./components/SeasonAwards";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -45,6 +47,8 @@ export function PublicTournamentView({
   const { standings, crosstable } = computeStandings(config.players, history, gameStates);
   const progress = computeSeasonProgress(history, gameStates, schedule);
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
+  const concluded = progress.total > 0 && progress.finished === progress.total;
+  const awards = concluded ? computeSeasonAwards(config.players, history, gameStates) : [];
 
   // Created games plus the scheduled ones still to be created on Lichess
   const allGames = withScheduledGames(history, schedule);
@@ -192,6 +196,12 @@ export function PublicTournamentView({
             A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il numero di vittorie. Tocca un nome per
             vedere le partite del giocatore.
           </p>
+          {awards.length > 0 && (
+            <div className="awards-section">
+              <h2 className="section-heading">I premi della stagione</h2>
+              <SeasonAwards awards={awards} />
+            </div>
+          )}
         </section>
       )}
 

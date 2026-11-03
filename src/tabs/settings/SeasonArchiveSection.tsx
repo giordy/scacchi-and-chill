@@ -3,6 +3,7 @@ import { AppConfig, HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchiv
 import { buildSeasonArchive, seasonId, standingsCsv, validateNewSeasonName, withChampion } from '../../lib/seasons';
 import { deleteAllGames, saveSeasonArchive } from '../../firebaseService';
 import { errorMessage } from '../../lib/utils';
+import { awardsMessage, awardWinnersLine } from '../../lib/awards';
 
 export function SeasonArchiveSection({
   config,
@@ -46,6 +47,15 @@ export function SeasonArchiveSection({
     a.download = `classifica-${seasonId(meta.season)}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const copyAwards = async () => {
+    try {
+      await navigator.clipboard.writeText(awardsMessage(meta.season, preview.awards ?? []));
+      flash("ok", "Premi copiati: incollali nel gruppo WhatsApp.");
+    } catch (e) {
+      flash("err", "Copia non riuscita: " + errorMessage(e));
+    }
   };
 
   const startNewSeason = async () => {
@@ -108,6 +118,7 @@ export function SeasonArchiveSection({
         <ul className="note note-sm season-steps">
           <li>la classifica finale va nello storico pubblico{alreadyArchived ? " (sostituisce quella già archiviata)" : ""};</li>
           <li>il primo in classifica entra nell'Albo d'Oro come campione;</li>
+          <li>i premi della stagione vengono salvati insieme alla classifica;</li>
           <li><strong>tutte le partite della stagione vengono cancellate</strong>; giocatori e impostazioni restano.</li>
         </ul>
         <div className="grid2 field">
@@ -135,6 +146,23 @@ export function SeasonArchiveSection({
           : non tocca lo storico né l'Albo d'Oro.
         </p>
       </div>
+
+      {preview.awards && preview.awards.length > 0 && (
+        <div className="subcard">
+          <h4 className="subcard-title">Premi di «{meta.season}» (calcolati sulle partite concluse finora)</h4>
+          <ul className="note note-sm season-steps">
+            {preview.awards.map((a) => (
+              <li key={a.id}>
+                {a.emoji} <strong>{a.title}</strong>: {awardWinnersLine(a)}
+              </li>
+            ))}
+          </ul>
+          <button type="button" className="secondary" onClick={copyAwards}>
+            Copia il messaggio per WhatsApp
+          </button>
+          <p className="note note-sm mt-12">Sul sito pubblico compaiono sotto la classifica quando tutte le partite sono concluse.</p>
+        </div>
+      )}
 
       {seasons.length > 0 && (
         <ul className="player-games">

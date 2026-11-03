@@ -1,6 +1,7 @@
 import React from 'react';
 import { SeasonArchive } from '../types';
 import { playerHref } from '../lib/routes';
+import { SeasonAwards } from './SeasonAwards';
 
 // Public "Torneo" tab, past seasons: final standings of every archived season, newest first
 export function SeasonsHistory({ seasons }: { seasons: SeasonArchive[] }) {
@@ -49,6 +50,12 @@ export function SeasonsHistory({ seasons }: { seasons: SeasonArchive[] }) {
               </tbody>
             </table>
           </div>
+          {s.awards && s.awards.length > 0 && (
+            <>
+              <h3 className="rules-heading">Premi</h3>
+              <SeasonAwards awards={s.awards} />
+            </>
+          )}
         </details>
       ))}
     </div>
