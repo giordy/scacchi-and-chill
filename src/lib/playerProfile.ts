@@ -10,6 +10,7 @@ export interface PlayerGame {
   color: "white" | "black";
   url: string;
   outcome: GameOutcome;
+  opening?: string; // Lichess opening name, when detected
 }
 
 export interface RemainingOpponent {
@@ -49,7 +50,31 @@ export interface PlayerProfile {
   pointsByRound: RoundPoints[];
   headToHead: HeadToHead[];
   pace: GamePace | null; // null until at least one game has moves on Lichess
+  byColor: Record<"white" | "black", ColorRecord>;
+  endings: Endings;
 }
+
+// Finished games with one color and the points scored with it
+export interface ColorRecord {
+  played: number;
+  points: number;
+}
+
+// How decisive games ended: "timeout" covers both a flag fall and a player gone missing
+export type EndReason = "mate" | "resign" | "timeout" | "other";
+export interface Endings {
+  wins: Record<EndReason, number>;
+  losses: Record<EndReason, number>;
+  draws: number;
+}
+
+const END_REASON: Record<string, EndReason> = {
+  mate: "mate",
+  resign: "resign",
+  outoftime: "timeout",
+  timeout: "timeout",
+};
+const noEndings = (): Record<EndReason, number> => ({ mate: 0, resign: 0, timeout: 0, other: 0 });
 
 // Average time between moves in the player's games (both sides together: Lichess keeps no
 // per-move times for correspondence games, only when the game started and its last move)
@@ -96,7 +121,7 @@ export function computePlayerProfile(
       else if (s.status === "started") outcome = "ongoing";
     }
     met.add(opponent);
-    games.push({ round: g.round, opponent, color, url: g.url, outcome });
+    games.push({ round: g.round, opponent, color, url: g.url, outcome, opening: s?.opening?.name || undefined });
   });
   games.sort(byRound);
 
@@ -174,7 +199,35 @@ export function computePlayerProfile(
 
   const pace = computeGamePace(games.map((g) => gameStates[extractGameId(g.url) ?? ""]));
 
-  return { player, rank: idx + 1, standing: standings[idx], games, remaining, pointsByRound, headToHead, pace };
+  const byColor: Record<"white" | "black", ColorRecord> = {
+    white: { played: 0, points: 0 },
+    black: { played: 0, points: 0 },
+  };
+  const endings: Endings = { wins: noEndings(), losses: noEndings(), draws: 0 };
+  games.forEach((g) => {
+    if (!(g.outcome in POINTS)) return;
+    byColor[g.color].played++;
+    byColor[g.color].points += POINTS[g.outcome];
+    if (g.outcome === "draw") {
+      endings.draws++;
+      return;
+    }
+    const status = gameStates[extractGameId(g.url) ?? ""]?.status ?? "";
+    endings[g.outcome === "win" ? "wins" : "losses"][END_REASON[status] ?? "other"]++;
+  });
+
+  return {
+    player,
+    rank: idx + 1,
+    standing: standings[idx],
+    games,
+    remaining,
+    pointsByRound,
+    headToHead,
+    pace,
+    byColor,
+    endings,
+  };
 }
 
 // (last move − start) / half-moves played, weighted by the number of moves of each game

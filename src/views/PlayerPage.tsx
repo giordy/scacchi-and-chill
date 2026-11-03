@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame } from '../types';
-import { computePlayerProfile, formatPace, GameOutcome } from '../lib/playerProfile';
+import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
 import { PointsChart } from '../components/PointsChart';
 
@@ -28,6 +28,20 @@ const OUTCOME_CLASS: Record<GameOutcome, string> = {
   pending: "pending",
 };
 
+const END_LABEL: Record<EndReason, string> = {
+  mate: "con il matto",
+  resign: "per abbandono",
+  timeout: "per tempo scaduto",
+  other: "in altro modo",
+};
+const END_ORDER: EndReason[] = ["mate", "resign", "timeout", "other"];
+
+// "2 con il matto · 1 per abbandono"
+const describeEndings = (counts: Record<EndReason, number>) =>
+  END_ORDER.filter((r) => counts[r] > 0)
+    .map((r) => `${counts[r]} ${END_LABEL[r]}`)
+    .join(" · ");
+
 // Public page of a single player: results, games and opponents still to face
 export function PlayerPage({ handle, config, history, gameStates, nameOf }: PlayerPageProps) {
   const profile = computePlayerProfile(handle, config.players, history, gameStates, config.schedule ?? []);
@@ -53,7 +67,10 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
     );
   }
 
-  const { player, rank, standing, games, pointsByRound, headToHead, pace } = profile;
+  const { player, rank, standing, games, pointsByRound, headToHead, pace, byColor, endings } = profile;
+  const sum = (counts: Record<EndReason, number>) => END_ORDER.reduce((n, r) => n + counts[r], 0);
+  const wins = sum(endings.wins);
+  const losses = sum(endings.losses);
   const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
   return (
@@ -88,6 +105,14 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
             <span className="stat-pill-label">Spareggio SB</span>
             <span className="stat-pill-val">{standing.sb.toFixed(1)}</span>
           </div>
+          {(["white", "black"] as const).map((c) => (
+            <div key={c} className="stat-pill">
+              <span className="stat-pill-label">{c === "white" ? "Col bianco" : "Col nero"}</span>
+              <span className="stat-pill-val">
+                {byColor[c].played > 0 ? `${fmt(byColor[c].points)} / ${byColor[c].played}` : "–"}
+              </span>
+            </div>
+          ))}
           {pace && (
             <div
               className="stat-pill"
@@ -104,6 +129,31 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
         <section className="dossier-card">
           <h2 className="section-heading">Andamento</h2>
           <PointsChart data={pointsByRound} nameOf={nameOf} />
+        </section>
+      )}
+
+      {wins + losses + endings.draws > 0 && (
+        <section className="dossier-card">
+          <h2 className="section-heading">Come finiscono le sue partite</h2>
+          <ul className="endings-list">
+            {wins > 0 && (
+              <li>
+                <span className="endings-label">Vittorie ({wins})</span>
+                <span>{describeEndings(endings.wins)}</span>
+              </li>
+            )}
+            {losses > 0 && (
+              <li>
+                <span className="endings-label">Sconfitte ({losses})</span>
+                <span>{describeEndings(endings.losses)}</span>
+              </li>
+            )}
+            {endings.draws > 0 && (
+              <li>
+                <span className="endings-label">Patte ({endings.draws})</span>
+              </li>
+            )}
+          </ul>
         </section>
       )}
 
@@ -147,8 +197,13 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
               <li key={game.url} className="player-game">
                 <span className="match-round">Turno {game.round}</span>
                 <span className="player-game-main">
-                  <span className={`dot ${game.color === "white" ? "w" : "b"}`} aria-label={game.color === "white" ? "Bianco" : "Nero"} />
-                  <a href={playerHref(game.opponent)}>{nameOf(game.opponent)}</a>
+                  <span className="player-game-opp">
+                    <span className={`dot ${game.color === "white" ? "w" : "b"}`} aria-label={game.color === "white" ? "Bianco" : "Nero"} />
+                    <a href={playerHref(game.opponent)}>{nameOf(game.opponent)}</a>
+                  </span>
+                  {game.opening && (
+                    <span className="opening-label" title={game.opening}>{game.opening}</span>
+                  )}
                 </span>
                 <span className={`status-badge ${OUTCOME_CLASS[game.outcome]}`}>{OUTCOME_LABEL[game.outcome]}</span>
                 <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">

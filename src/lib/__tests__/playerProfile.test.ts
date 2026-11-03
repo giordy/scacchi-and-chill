@@ -134,3 +134,32 @@ describe('game pace', () => {
     expect(formatPace(48 * 3600 * 1000)).toBe('2 giorni');
   });
 });
+
+describe('color record, endings and openings', () => {
+  it('splits points by color, counts how games ended and keeps the opening', () => {
+    const history = [
+      g('1', 'anna', 'bruno', 'aaaaaaaa'),
+      g('2', 'carla', 'anna', 'bbbbbbbb'),
+      g('3', 'anna', 'dario', 'cccccccc'),
+      g('4', 'bruno', 'anna', 'dddddddd'),
+      g('5', 'anna', 'carla', 'eeeeeeee'),
+      g('6', 'dario', 'anna', 'ffffffff'),
+    ];
+    const gs: Record<string, LichessExportGame> = {
+      aaaaaaaa: { ...st('aaaaaaaa', 'mate', 'white'), opening: { name: 'Italian Game' } },
+      bbbbbbbb: st('bbbbbbbb', 'outoftime', 'black'), // Anna wins on time with Black
+      cccccccc: st('cccccccc', 'resign', 'black'), // Anna resigns with White
+      dddddddd: st('dddddddd', 'stalemate'),
+      eeeeeeee: st('eeeeeeee', 'started'), // ongoing: not counted
+      ffffffff: st('ffffffff', 'aborted'), // void: not counted
+    };
+    const p = computePlayerProfile('anna', players, history, gs)!;
+    expect(p.byColor).toEqual({ white: { played: 2, points: 1 }, black: { played: 2, points: 1.5 } });
+    expect(p.endings).toEqual({
+      wins: { mate: 1, resign: 0, timeout: 1, other: 0 },
+      losses: { mate: 0, resign: 1, timeout: 0, other: 0 },
+      draws: 1,
+    });
+    expect(p.games.map((x) => x.opening)).toEqual(['Italian Game', undefined, undefined, undefined, undefined]);
+  });
+});
