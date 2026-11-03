@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   AppConfig,
   GamePair,
@@ -118,6 +118,15 @@ export function App() {
   const seasons = useSeasons();
   const lichess = useLichessSync(history, setHistory, flash);
 
+  // Bring the latest Lichess results to the public page as soon as the organizer opens the admin area
+  const autoSynced = useRef(false);
+  const canAutoSync = admin.isAdminRoute && admin.isAuthenticated && gamesLoaded;
+  useEffect(() => {
+    if (!canAutoSync || autoSynced.current) return;
+    autoSynced.current = true;
+    lichess.sync({ quiet: true });
+  }, [canAutoSync]);
+
   const handleLoadRoundIntoPairs = (loadedRound: string, loadedGames: HistoryGame[]) => {
     const newPairs = emptyPairs();
     loadedGames.forEach((g, idx) => {
@@ -154,7 +163,7 @@ export function App() {
       setActiveTab={setActiveTab}
       isSyncing={lichess.isSyncing}
       lastSyncTime={lichess.lastSyncTime}
-      onSync={lichess.sync}
+      onSync={() => lichess.sync()}
       toastMessage={toastMessage}
     >
       {activeTab === 'round' && (

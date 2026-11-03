@@ -29,14 +29,15 @@ export function useLichessSync(
   }, [history]);
 
   // "Sync" button (organizer only): reads from Lichess and saves to Firestore.
-  const sync = async () => {
+  // quiet: automatic sync when the organizer area opens, which reports only errors.
+  const sync = async ({ quiet = false }: { quiet?: boolean } = {}) => {
     const targets = history.filter((g) => extractGameId(g.url) && !isFinished(g.lichess));
     if (history.filter((g) => extractGameId(g.url)).length === 0) {
-      flash("warning", "Non ci sono ancora partite con un link Lichess da sincronizzare.");
+      if (!quiet) flash("warning", "Non ci sono ancora partite con un link Lichess da sincronizzare.");
       return;
     }
     if (targets.length === 0) {
-      flash("ok", "Tutte le partite risultano già concluse e salvate: niente da aggiornare.");
+      if (!quiet) flash("ok", "Tutte le partite risultano già concluse e salvate: niente da aggiornare.");
       return;
     }
 
@@ -59,13 +60,14 @@ export function useLichessSync(
       setLastSyncTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
 
       const missing = targets.length - saved;
+      if (quiet) return;
       flash(
         missing > 0 ? "warning" : "ok",
         `Sincronizzate ${saved} partite su Firestore.` +
           (missing > 0 ? ` ${missing} non ancora trovate su Lichess (sfida non accettata).` : "")
       );
     } catch (e) {
-      flash("err", "Sincronizzazione fallita: " + errorMessage(e));
+      flash(quiet ? "warning" : "err", "Sincronizzazione dei risultati fallita: " + errorMessage(e));
     } finally {
       setIsSyncing(false);
     }

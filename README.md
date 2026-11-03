@@ -20,7 +20,7 @@ Accesso con login Google, riservato a un solo account.
 - **▦ Calendario**: turni già creati (riapri o elimina, anche da Firestore) e calendario ufficiale degli accoppiamenti.
 - **✎ Recensione**: statistiche, aneddoti ed Elo dei giocatori per costruire il prompt da incollare in Claude o ChatGPT; il testo ottenuto si incolla poi nella scheda per l'anteprima WhatsApp.
 - **♛ Torneo** (sezioni richiudibili): stagione corrente, giocatori, regolamento (con giorni per mossa e rated, mostrati anche in pubblico), fine stagione e storico con Albo d'Oro, token Lichess e testi dei messaggi, copia dei dati in JSON.
-- **↻ Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. La vista pubblica legge da Firestore, quindi i nuovi risultati compaiono solo dopo la sincronizzazione.
+- **↻ Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. Parte da sola ogni volta che l'organizzatore apre l'area admin, e si può rilanciare a mano. La vista pubblica legge da Firestore, quindi i nuovi risultati compaiono solo dopo una sincronizzazione.
 
 ### Stagioni
 Da *Torneo → Fine stagione e storico*:
@@ -77,5 +77,6 @@ Il workflow `.github/workflows/deploy.yml` esegue test e build a ogni push su `m
 `config.json` contiene i valori predefiniti (giocatori, calendario, testi dei messaggi). Dopo il primo avvio i dati vivono su Firestore e si modificano dall'area organizzatore.
 
 ## Limiti noti
-- Finché l'organizzatore non preme **Sincronizza**, il pubblico non vede i nuovi risultati.
+- Il pubblico vede i nuovi risultati solo dopo una sincronizzazione, cioè quando l'organizzatore apre l'area admin o preme **Sincronizza**.
+- Per le partite in corso Lichess restituisce via API la posizione con 3 semimosse di ritardo (misura anti-cheat). Per questo il sito non dice di chi è il turno né quando scade il tempo: il dato sarebbe spesso sbagliato. Il bollettino indica solo una fascia di mosse approssimativa.
 - Il login usa `signInWithPopup`: se un browser mobile blocca i popup, serve passare a `signInWithRedirect`.
