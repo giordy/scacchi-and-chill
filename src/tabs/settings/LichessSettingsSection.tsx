@@ -94,7 +94,7 @@ export function LichessSettingsSection({
 
       <p className="note">
         <strong>Testo dei messaggi WhatsApp.</strong> Puoi usare <code>{"{round}"}</code> <code>{"{days}"}</code>{" "}
-        <code>{"{expiry}"}</code> <code>{"{type}"}</code> ovunque. Nelle singole partite puoi usare anche{" "}
+        <code>{"{expiry}"}</code> <code>{"{expiryDeadline}"}</code> <code>{"{type}"}</code> ovunque. Nelle singole partite puoi usare anche{" "}
         <code>{"{n}"}</code> <code>{"{white}"}</code> <code>{"{black}"}</code> <code>{"{url}"}</code>.
       </p>
 

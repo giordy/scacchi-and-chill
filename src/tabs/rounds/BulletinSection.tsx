@@ -4,7 +4,9 @@ import {
   HistoryGame,
   LichessExportGame,
 } from '../../types';
-import { errorMessage, fill, extractGameId, HOW_WIN, HOW_DRAW, tidy, getApproxMoves } from '../../lib/utils';
+import { errorMessage, fill, extractGameId, formatDeadline, HOW_WIN, HOW_DRAW, tidy, getApproxMoves } from '../../lib/utils';
+import { leaderLine, roundDeadline, roundSummary } from '../../lib/bulletin';
+import { computeStandings } from '../../lib/standings';
 import { fetchGameStates } from '../../lib/lichess';
 import { WhatsAppPreview } from '../../WhatsAppPreview';
 
@@ -13,11 +15,14 @@ export function BulletinSection({
   round,
   history,
   config,
+  expiryDays,
   triggerToast,
 }: {
   round: string;
   history: HistoryGame[];
   config: AppConfig;
+  // Validity of the Lichess links, to tell when a game not started yet will expire
+  expiryDays: number;
   triggerToast?: (msg: string) => void;
 }) {
   const nameOf = (handle: string) => config.players.find((p) => p.handle === handle)?.name ?? handle;
@@ -49,6 +54,10 @@ export function BulletinSection({
       return list[i];
     };
 
+    // Deadline of the links not accepted yet (from the round's oldest created challenge)
+    const deadlineMs = roundDeadline(games, expiryDays);
+    const linkExpired = Date.now() > deadlineMs;
+
     const blocks = games.map((g, i) => {
       const id = extractGameId(g.url);
       const s = id ? states[id] : undefined;
@@ -59,7 +68,9 @@ export function BulletinSection({
 
       if (!s) {
         count.pending++;
-        body = pickFor("pending");
+        body = linkExpired
+          ? "Link scaduto: la sfida va ricreata 🔁"
+          : fill(pickFor("pending"), { deadline: formatDeadline(deadlineMs) });
         detailsList.push(`${i + 1}. ${id}: non ancora trovata su Lichess (sfida non ancora accettata)`);
       } else if (s.status === "created" || s.status === "started") {
         count.ongoing++;
@@ -172,11 +183,25 @@ export function BulletinSection({
       studiesAppendix = `📚 *Studi consigliati per le aperture del turno:*\n${items.join("\n")}`;
     }
 
+    // At the end of the round, who leads (as on the site), from the saved results plus the fresh ones
+    let leader = "";
+    if (isRoundComplete) {
+      const allStates: Record<string, LichessExportGame> = {};
+      history.forEach((g) => {
+        const gid = extractGameId(g.url);
+        if (gid && g.lichess) allStates[gid] = g.lichess;
+      });
+      Object.assign(allStates, states);
+      leader = leaderLine(computeStandings(config.players, history, allStates).standings);
+    }
+
+    const vars = { round, ...count, summary: roundSummary(count) };
     const textResult = [
-      fill(headerTemplate, { round, ...count }),
+      fill(headerTemplate, vars),
       ...blocks,
-      fill(footerTemplate, { round, ...count }),
+      fill(footerTemplate, vars),
       highlight,
+      leader,
       config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
       studiesAppendix,
       isRoundComplete && config.statusPhrases.infoLine ? config.statusPhrases.infoLine : "",

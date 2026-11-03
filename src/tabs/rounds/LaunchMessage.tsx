@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AppConfig, MessageTemplates, Settings } from '../../types';
 import { fill, formatDeadline } from '../../lib/utils';
 import { RoundMatch } from '../../lib/rounds';
+import { roundDeadline } from '../../lib/bulletin';
 import { WhatsAppPreview } from '../../WhatsAppPreview';
 
 // WhatsApp message that opens the round: one line per game with its Lichess link, plus who rests
@@ -25,7 +26,8 @@ export function LaunchMessage({
   flash: (kind: 'ok' | 'err', text: string) => void;
 }) {
   const created = matches.filter((m) => m.url);
-  const expiryMs = Date.now() + settings.expiry * 86400000;
+  // The challenges expire counting from their creation, not from when this message is written
+  const expiryMs = roundDeadline(created.map((m) => m.game ?? {}), settings.expiry);
   const common = {
     round,
     days: settings.days,

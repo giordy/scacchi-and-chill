@@ -309,6 +309,7 @@ export function RoundDetail({
                 round={round}
                 history={history}
                 config={config}
+                expiryDays={settings.expiry}
                 triggerToast={triggerToast}
               />
             </div>

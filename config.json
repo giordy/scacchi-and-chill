@@ -69,10 +69,10 @@
       "8️⃣",
       "9️⃣"
     ],
-    "header": "⚔️ *TURNO {round} – ACCOPPIAMENTI & LINK*\n⏱️ *{days} giorni a mossa · Partite {type}*",
-    "game": "{n} *{white}* ⚪ vs *{black}* ⚫\n🔗 *Sfida:* {url}",
-    "bye": "🏖️ *Riposa in questo turno:* {bye}",
-    "footer": "⏳ *Attenzione:* link validi fino a {expiryDeadline}! Cliccate sul vostro link e accettate la sfida per avviare la scacchiera."
+    "header": "⚔️ *Turno {round}: accoppiamenti e link*\n⏱️ {days} giorni a mossa · partite {type}",
+    "game": "{n} *{white}* ⚪ vs *{black}* ⚫\n🔗 {url}",
+    "bye": "🏖️ Riposa in questo turno: *{bye}*",
+    "footer": "⏳ I link scadono {expiryDeadline}: aprite il vostro e accettate la sfida. Buone partite!"
   },
   "statusMessage": {
     "header": [
@@ -84,13 +84,11 @@
     ],
     "ongoing": [
       "In corso ♟️ ({approxMoves})",
-      "Partita in pieno svolgimento 🎯 ({approxMoves})",
-      "La sfida prosegue 🔄 ({approxMoves})",
-      "Partita aperta e combattuta ⚔️ ({approxMoves})",
-      "Sulla scacchiera si combatte ancora ♞ ({approxMoves})",
-      "Manovre sul centro scacchiera ♟️ ({approxMoves})",
-      "Lotta serrata sulle caselle ⚔️ ({approxMoves})",
-      "Posizioni tese e sfida aperta ♟️ ({approxMoves})"
+      "Si gioca ancora 🔄 ({approxMoves})",
+      "Partita in corso ⏳ ({approxMoves})",
+      "Ancora sulla scacchiera ♞ ({approxMoves})",
+      "In svolgimento ♟️ ({approxMoves})",
+      "La partita continua 🔄 ({approxMoves})"
     ],
     "win": [
       "Finita! Ha vinto {winner} {details} *({result})* 🎉\n{openingNote}",
@@ -124,20 +122,14 @@
       "Partita non disputata, risulta annullata 🚫"
     ],
     "pending": [
-      "Non ancora iniziata ⏳",
-      "Ancora ai blocchi di partenza 🏁",
-      "Scacchiera ancora chiusa 📦",
-      "Il link aspetta ancora di essere aperto 🔗",
-      "Ancora da avviare ⏳",
-      "Si parte appena la sfida viene accettata 🚦",
-      "Pezzi ancora in scatola 🎲",
-      "In attesa del via 🏁"
+      "Da avviare: il link scade {deadline} ⏳",
+      "Ancora da avviare, link valido fino a {deadline} 🔗",
+      "Sfida da accettare entro {deadline} ⏳"
     ],
     "footer": [
-      "📊 *{finished} finite · {ongoing} in corso · {pending} da avviare*",
-      "📊 *Riepilogo: {finished} concluse · {ongoing} in corso · {pending} da iniziare*",
-      "📊 *In numeri: {finished} finite · {ongoing} in corso · {pending} da avviare*",
-      "📊 *Totale: {finished} concluse · {ongoing} ancora in gioco · {pending} da avviare*"
+      "📊 *{summary}*",
+      "📊 *Riepilogo: {summary}*",
+      "📊 *In numeri: {summary}*"
     ],
     "highlight": [
       "🏁 La più lunga del turno: {longest}.",
