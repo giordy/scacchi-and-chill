@@ -4,9 +4,10 @@ import { SeasonsHistory } from "./components/SeasonsHistory";
 import { playerHref } from "./lib/routes";
 import { computeStandings } from "./lib/standings";
 import { computeSeasonProgress } from "./lib/progress";
-import { extractGameId } from "./lib/utils";
 import { DEFAULT_TOURNAMENT } from "./lib/tournament";
 import { onTabListKeyDown } from "./lib/tabKeys";
+import { isReturnLeg, returnLegStart } from "./lib/legs";
+import { MatchesByRound } from "./components/MatchesByRound";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -45,6 +46,8 @@ export function PublicTournamentView({
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
 
   const rounds = [...new Set(history.map((g) => g.round))].sort(byRound);
+  // Andata/ritorno: from the official schedule when there is one, otherwise from the games created so far
+  const returnStart = returnLegStart(schedule.length > 0 ? schedule : history);
   const scheduleIndex = (g: HistoryGame) =>
     schedule.findIndex((m) => m.round === g.round && m.white === g.white && m.black === g.black);
   // Round order first, then the order of the official schedule
@@ -243,7 +246,10 @@ export function PublicTournamentView({
               >
                 <option value="all">Tutti ({history.length} partite)</option>
                 {rounds.map((r) => (
-                  <option key={r} value={r}>Turno {r}</option>
+                  <option key={r} value={r}>
+                    Turno {r}
+                    {returnStart !== undefined ? (isReturnLeg(r, returnStart) ? " (ritorno)" : " (andata)") : ""}
+                  </option>
                 ))}
               </select>
             </div>
@@ -252,48 +258,7 @@ export function PublicTournamentView({
           {filteredGames.length === 0 ? (
             <p className="note">Le partite compariranno qui quando l'organizzatore crea il primo turno.</p>
           ) : (
-            <div className="matches-grid">
-              {filteredGames.map((g, idx) => {
-                const id = extractGameId(g.url);
-                const s = id ? gameStates[id] : undefined;
-                let badge = <span className="status-badge pending">Da giocare</span>;
-                if (s?.status === "started") badge = <span className="status-badge ongoing">In corso</span>;
-                // Neutral result: here 0-1 is a win for Black, not a "loss"
-                else if (s?.winner === "white") badge = <span className="status-badge result">1 – 0</span>;
-                else if (s?.winner === "black") badge = <span className="status-badge result">0 – 1</span>;
-                else if (s?.status === "draw" || s?.status === "stalemate") badge = <span className="status-badge result">½ – ½</span>;
-                const plies = s?.moves?.trim() ? s.moves.trim().split(/\s+/).length : 0;
-                const moves = Math.ceil(plies / 2);
-                // Ongoing games: Lichess hides the last moves, so their length is shown only once finished
-                const finished = s && s.status !== "started" && s.status !== "created";
-                const detail = s?.opening?.name || (finished && moves > 0 ? `${moves} ${moves === 1 ? "mossa" : "mosse"}` : "");
-
-                return (
-                  <article key={`${g.url}-${idx}`} className="match-card">
-                    <div className="match-card-header">
-                      <span className="match-round">Turno {g.round}</span>
-                      {badge}
-                    </div>
-                    <div className="match-players">
-                      <div className={`player-row ${s?.winner === "white" ? "is-winner" : ""}`}>
-                        <span className="dot w" aria-label="Bianco" />
-                        <span className="player-name">{nameOf(g.white)}</span>
-                      </div>
-                      <div className={`player-row ${s?.winner === "black" ? "is-winner" : ""}`}>
-                        <span className="dot b" aria-label="Nero" />
-                        <span className="player-name">{nameOf(g.black)}</span>
-                      </div>
-                    </div>
-                    <div className="match-footer">
-                      <span className="opening-label">{detail}</span>
-                      <a href={g.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
-                        Apri su Lichess
-                      </a>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+            <MatchesByRound games={filteredGames} gameStates={gameStates} nameOf={nameOf} returnStart={returnStart} />
           )}
         </section>
       )}

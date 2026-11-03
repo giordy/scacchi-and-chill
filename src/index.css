@@ -1432,10 +1432,48 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   border-radius: 8px;
 }
 
-.match-card-header {
+.match-card-body {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Matches grouped by round, under "Andata" / "Ritorno" when there is a return leg */
+.rounds-list {
+  display: grid;
+  gap: 22px;
+}
+
+.leg-heading {
+  margin: 8px 0 -8px;
+  padding-bottom: 8px;
+  font-size: 24px;
+  border-bottom: 6px solid transparent;
+  border-image: repeating-linear-gradient(90deg, var(--accent) 0 6px, var(--square-a) 6px 12px) 6;
+}
+
+.rounds-list > .leg-heading:first-child {
+  margin-top: 0;
+}
+
+.round-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+}
+
+.round-group-title {
+  margin: 0;
+  font-size: 19px;
+}
+
+.round-group-summary {
+  font-size: 14px;
+  color: var(--muted);
 }
 
 .match-round {
