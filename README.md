@@ -63,7 +63,7 @@ npm run build    # build di produzione in dist/ (compresa l'immagine di anteprim
 ### Immagine di anteprima
 Dopo `vite build`, `scripts/og-image.ts` legge i dati pubblici (Firestore e Lichess, senza credenziali), disegna `dist/og.png` e aggiunge i meta tag `og:image` a `dist/index.html`. I meta tag richiedono l'indirizzo assoluto del sito nella variabile `SITE_URL`, che il workflow di deploy prende da GitHub Pages. Se i dati non sono raggiungibili l'immagine mostra solo il nome del torneo e la build non si ferma.
 
-Il deploy gira anche ogni 3 ore (`schedule` in `.github/workflows/deploy.yml`) per tenere l'immagine aggiornata. GitHub sospende i workflow programmati dopo 60 giorni senza attività sul repository: in quel caso si riattivano dalla scheda Actions. WhatsApp conserva a lungo l'anteprima di un link già condiviso, quindi l'immagine nuova compare soprattutto nei link condivisi di recente.
+Il deploy gira anche ogni 3 ore (`schedule` in `.github/workflows/deploy.yml`) per tenere l'immagine aggiornata. GitHub sospende i workflow programmati dei repository pubblici dopo 60 giorni senza commit: per evitarlo, a ogni esecuzione programmata il job `keepalive` riattiva il workflow (nessun commit). Se un giorno risultasse comunque sospeso, si riattiva dalla scheda Actions. WhatsApp conserva a lungo l'anteprima di un link già condiviso, quindi l'immagine nuova compare soprattutto nei link condivisi di recente.
 
 I font in `scripts/fonts` (Alegreya, Alegreya Sans) sono distribuiti con licenza SIL Open Font License (`scripts/fonts/OFL.txt`).
 

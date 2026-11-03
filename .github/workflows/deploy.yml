@@ -61,3 +61,16 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # GitHub disables scheduled workflows of a public repository after 60 days without
+  # commits. Re-enabling it on every scheduled run resets that counter, with no commit.
+  keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Keep the scheduled deploy enabled
+        run: gh api --method PUT "repos/${{ github.repository }}/actions/workflows/deploy.yml/enable"
+        env:
+          GH_TOKEN: ${{ github.token }}
