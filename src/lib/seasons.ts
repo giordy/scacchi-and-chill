@@ -38,19 +38,21 @@ export function buildSeasonArchive(
   return archive;
 }
 
-// Adds the champion to the hall of fame, once per season name
+// Puts the champion in the hall of fame, one entry per season name. An existing entry for the
+// season is kept when it names the same player (with its notes) and replaced when the champion changed.
 export function withChampion(winners: SeasonWinner[] | undefined, archive: SeasonArchive): SeasonWinner[] {
   const list = winners ?? [];
-  if (!archive.champion || list.some((w) => w.season === archive.season)) return list;
-  return [
-    ...list,
-    {
-      season: archive.season,
-      name: archive.champion.name,
-      handle: archive.champion.handle,
-      year: String(new Date(archive.archivedAt).getFullYear()),
-    },
-  ];
+  if (!archive.champion) return list;
+  const entry: SeasonWinner = {
+    season: archive.season,
+    name: archive.champion.name,
+    handle: archive.champion.handle,
+    year: String(new Date(archive.archivedAt).getFullYear()),
+  };
+  const idx = list.findIndex((w) => w.season === archive.season);
+  if (idx === -1) return [...list, entry];
+  if (list[idx].handle === entry.handle) return list;
+  return list.map((w, i) => (i === idx ? entry : w));
 }
 
 // A new season needs a name that does not collide with the current one or an archived one

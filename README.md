@@ -26,8 +26,8 @@ Accesso con login Google, riservato a un solo account.
 
 ### Stagioni
 Da *Torneo → Fine stagione e storico*:
-- **Archivia stagione corrente** salva la classifica finale nello storico pubblico e aggiunge il campione all'Albo d'Oro.
-- **Archivia e inizia nuova stagione** archivia, poi **cancella tutte le partite** dalla stagione corrente, imposta il nuovo nome e maestro e, se vuoi, svuota il calendario. Prima della cancellazione chiede conferma e non cancella nulla se l'archiviazione fallisce.
+- **Chiudi la stagione e inizia la prossima** salva la classifica finale nello storico pubblico, mette il primo in classifica nell'Albo d'Oro, poi **cancella tutte le partite** della stagione, imposta il nuovo nome e maestro e, se vuoi, svuota il calendario. Prima della cancellazione chiede conferma e non cancella nulla se l'archiviazione fallisce.
+- Se la stagione era già nell'Albo d'Oro con un altro giocatore, la voce viene aggiornata con il campione effettivo.
 
 ## Configurazione Firebase
 

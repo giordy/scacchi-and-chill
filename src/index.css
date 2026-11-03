@@ -1780,3 +1780,8 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   height: 10px;
   border-width: 1.5px;
 }
+
+.season-steps {
+  margin: 0 0 12px;
+  padding-left: 18px;
+}

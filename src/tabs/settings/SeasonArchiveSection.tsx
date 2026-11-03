@@ -37,24 +37,6 @@ export function SeasonArchiveSection({
   const preview = buildSeasonArchive(meta, config.players, history, gameStates);
   const alreadyArchived = seasons.some((s) => s.id === seasonId(meta.season));
 
-  const archive = async () => {
-    if (alreadyArchived && !window.confirm(`La stagione «${meta.season}» è già in archivio. Sovrascrivere con la classifica attuale?`)) {
-      return;
-    }
-    setBusy(true);
-    try {
-      const snapshot = buildSeasonArchive(meta, config.players, history, gameStates);
-      await saveSeasonArchive(snapshot);
-      const winners = withChampion(meta.winners, snapshot);
-      if (winners !== meta.winners && winners !== undefined) onUpdateTournamentMeta({ winners });
-      flash("ok", `Stagione «${snapshot.season}» archiviata${snapshot.champion ? ` · campione: ${snapshot.champion.name}` : ""}.`);
-    } catch (e) {
-      flash("err", "Archiviazione fallita: " + errorMessage(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const startNewSeason = async () => {
     const problem = validateNewSeasonName(nextSeason, meta.season, seasons);
     if (problem) {
@@ -67,7 +49,8 @@ export function SeasonArchiveSection({
     }
     const ok = window.confirm(
       `Chiudere «${meta.season}» e iniziare «${nextSeason.trim()}»?\n\n` +
-        `• la classifica finale viene archiviata (campione: ${preview.champion.name})\n` +
+        `• la classifica finale viene salvata nello storico${alreadyArchived ? " (sostituisce quella già archiviata)" : ""}\n` +
+        `• ${preview.champion.name} entra nell'Albo d'Oro come campione\n` +
         `• TUTTE le partite della stagione corrente vengono cancellate da Firestore\n` +
         (clearSchedule ? "• il calendario ufficiale viene svuotato\n" : "") +
         `\nL'operazione non si può annullare.`
@@ -104,28 +87,18 @@ export function SeasonArchiveSection({
 
   return (
     <div>
-      <p className="note note-flush">
-        Salva la classifica finale della stagione corrente nello storico pubblico e aggiunge il campione all'Albo d'Oro.
-        Le partite non vengono cancellate.
-      </p>
-
       <div className="subcard">
-        <h4 className="subcard-title">{meta.season}</h4>
+        <h4 className="subcard-title">Chiudi «{meta.season}» e inizia la prossima</h4>
         <p className="note note-sm">
           {preview.champion
-            ? `Leader attuale: ${preview.champion.name} (${preview.champion.points} pt) · ${preview.gamesPlayed} partite concluse`
-            : "Nessuna partita conclusa: sincronizza i risultati prima di archiviare."}
+            ? `In testa: ${preview.champion.name} (${preview.champion.points} pt) · ${preview.gamesPlayed} partite concluse`
+            : "Nessuna partita conclusa: sincronizza i risultati prima di chiudere la stagione."}
         </p>
-        <button type="button" className="secondary" disabled={busy || !preview.champion} onClick={archive}>
-          {busy ? "Archiviazione…" : alreadyArchived ? "Aggiorna archivio stagione" : "Archivia stagione corrente"}
-        </button>
-      </div>
-
-      <div className="subcard">
-        <h4 className="subcard-title">Inizia una nuova stagione</h4>
-        <p className="note note-sm">
-          Archivia la stagione corrente e poi <strong>cancella tutte le sue partite</strong>. Giocatori e impostazioni restano.
-        </p>
+        <ul className="note note-sm season-steps">
+          <li>la classifica finale va nello storico pubblico{alreadyArchived ? " (sostituisce quella già archiviata)" : ""};</li>
+          <li>il primo in classifica entra nell'Albo d'Oro come campione;</li>
+          <li><strong>tutte le partite della stagione vengono cancellate</strong>; giocatori e impostazioni restano.</li>
+        </ul>
         <div className="grid2 field">
           <div>
             <label htmlFor="next-season">Nome nuova stagione</label>
@@ -141,7 +114,7 @@ export function SeasonArchiveSection({
           <label htmlFor="next-clear-schedule">Svuota anche il calendario ufficiale</label>
         </div>
         <button type="button" className="danger" disabled={busy || !preview.champion} onClick={startNewSeason}>
-          {busy ? "Operazione in corso…" : "Archivia e inizia nuova stagione"}
+          {busy ? "Operazione in corso…" : "Chiudi la stagione e inizia la prossima"}
         </button>
       </div>
 

@@ -48,6 +48,13 @@ describe('withChampion', () => {
     expect(withChampion(once, archive)).toBe(once);
   });
 
+  it('replaces the entry of the same season when the champion changed', () => {
+    const early = [{ season: meta.season, name: 'Bruno', handle: 'bruno', year: '2026', notes: 'in testa a metà stagione' }];
+    expect(withChampion(early, archive)).toEqual([{ season: meta.season, name: 'Anna', handle: 'anna', year: '2026' }]);
+    const same = [{ season: meta.season, name: 'Anna', handle: 'anna', notes: 'Campionessa' }];
+    expect(withChampion(same, archive)).toBe(same);
+  });
+
   it('keeps existing winners and handles undefined', () => {
     const prev = [{ season: 'Stagione 1', name: 'Fabio', handle: 'fsgach' }];
     expect(withChampion(prev, archive)).toHaveLength(2);
