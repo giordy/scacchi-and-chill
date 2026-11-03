@@ -3,6 +3,7 @@ import { HistoryGame, LichessExportGame } from '../types';
 import { extractGameId } from '../lib/utils';
 import { gameProgress } from '../lib/progress';
 import { isReturnLeg } from '../lib/legs';
+import { MiniBoard } from './MiniBoard';
 
 interface MatchesByRoundProps {
   games: HistoryGame[]; // already filtered and sorted by round
@@ -95,9 +96,17 @@ function MatchCard({
   const detail =
     s?.opening?.name || (gameProgress(s) === "finished" && moves > 0 ? `${moves} ${moves === 1 ? "mossa" : "mosse"}` : "");
 
+  // Final position only: during the game Lichess hides the latest moves
+  const finalFen = gameProgress(s) === "finished" && s?.lastFen && game.url ? s.lastFen : "";
+
   return (
     <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}`}>
       <div className="match-card-body">
+        {finalFen && (
+          <a href={game.url} target="_blank" rel="noopener noreferrer" className="mini-board-link">
+            <MiniBoard fen={finalFen} label={`Posizione finale di ${nameOf(game.white)} – ${nameOf(game.black)}`} />
+          </a>
+        )}
         <div className="match-players">
           <div className={`player-row ${s?.winner === "white" ? "is-winner" : ""}`}>
             <span className="dot w" aria-label="Bianco" />

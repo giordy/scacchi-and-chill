@@ -13,11 +13,13 @@ interface PublicPageProps {
   config: AppConfig;
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
+  // Last time the open games were read live from Lichess
+  liveUpdatedAt?: Date | null;
   nameOf: (handle: string) => string;
 }
 
 // Public tournament page, with a discreet link to the organizer area
-export function PublicPage({ seasons, ready, config, history, gameStates, nameOf }: PublicPageProps) {
+export function PublicPage({ seasons, ready, config, history, gameStates, liveUpdatedAt, nameOf }: PublicPageProps) {
   const hash = useHash();
   if (!ready) return <LoadingScreen label="Caricamento torneo…" />;
 
@@ -38,6 +40,11 @@ export function PublicPage({ seasons, ready, config, history, gameStates, nameOf
       />
 
       <footer className="public-footer">
+        {liveUpdatedAt && (
+          <p className="live-note">
+            Risultati letti da Lichess alle {liveUpdatedAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+          </p>
+        )}
         <a href="#admin" className="admin-link">Area organizzatore</a>
       </footer>
     </main>

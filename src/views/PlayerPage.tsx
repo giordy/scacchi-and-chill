@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame } from '../types';
 import { computePlayerProfile, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
+import { PointsChart } from '../components/PointsChart';
 
 interface PlayerPageProps {
   handle: string;
@@ -52,7 +53,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
     );
   }
 
-  const { player, rank, standing, games, remaining } = profile;
+  const { player, rank, standing, games, remaining, pointsByRound, headToHead } = profile;
+  const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
   return (
     <main className="public-main">
@@ -87,6 +89,33 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
             <span className="stat-pill-val">{standing.sb.toFixed(1)}</span>
           </div>
         </div>
+      </section>
+
+      {pointsByRound.length > 0 && (
+        <section className="dossier-card">
+          <h2 className="section-heading">Andamento</h2>
+          <PointsChart data={pointsByRound} nameOf={nameOf} />
+        </section>
+      )}
+
+      <section className="dossier-card">
+        <h2 className="section-heading">Scontri diretti</h2>
+        <ul className="h2h-list">
+          {headToHead.map((h) => (
+            <li key={h.opponent} className="h2h-row">
+              <a href={playerHref(h.opponent)} className="h2h-name">{nameOf(h.opponent)}</a>
+              <span className="h2h-games">
+                {h.outcomes.map((o, i) => (
+                  <span key={i} className={`status-badge ${OUTCOME_CLASS[o]}`}>{OUTCOME_LABEL[o]}</span>
+                ))}
+                {(h.toPlay > 0 || h.outcomes.length === 0) && <span className="status-badge pending">Da giocare</span>}
+              </span>
+              <span className="h2h-score" aria-label={`Punteggio ${fmt(h.scored)} a ${fmt(h.conceded)}`}>
+                {h.scored + h.conceded > 0 ? `${fmt(h.scored)} – ${fmt(h.conceded)}` : "–"}
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="dossier-card">

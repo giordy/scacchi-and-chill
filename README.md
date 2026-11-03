@@ -6,11 +6,13 @@ Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli acco
 
 ### Parte pubblica
 - **Intestazione**: torneo, stagione, turno in corso e capolista. Una striscia di caselle mostra l'avanzamento della stagione: una casella per partita, piena se conclusa, a metà se in corso.
-- **Classifica** con punti, V/N/P e spareggio Sonneborn-Berger. La colonna del giocatore resta fissa durante lo scroll orizzontale su mobile.
-- **Partite**, filtrabili per turno, con link a Lichess.
+- **Classifica** con punti, V/N/P e spareggio Sonneborn-Berger, podio in oro/argento/bronzo e, sotto ogni nome, gli ultimi 5 risultati. La colonna del giocatore resta fissa durante lo scroll orizzontale su mobile.
+- **Partite**, filtrabili per turno, con link a Lichess. Le partite concluse mostrano la posizione finale su una mini scacchiera (quelle in corso no: Lichess nasconde le ultime mosse).
 - **Tabellone** incrociato con tutti i risultati.
 - **Torneo**: il maestro della stagione, il regolamento, l'Albo d'Oro e le stagioni passate con la classifica finale.
-- **Pagina giocatore** (`#/giocatore/<handle>`): posizione, partite giocate, avversari ancora da affrontare. Si apre cliccando un nome in classifica.
+- **Pagina giocatore** (`#/giocatore/<handle>`): posizione, grafico dei punti turno per turno, scontri diretti con ogni avversario, partite giocate, avversari ancora da affrontare. Si apre cliccando un nome in classifica.
+- **Risultati live**: la pagina pubblica legge da Lichess le partite non ancora concluse su Firestore (all'apertura, poi ogni 5 minuti finché resta aperta), così classifica e tabellone sono aggiornati anche senza sincronizzazione. Non scrive nulla: il salvataggio su Firestore resta la sincronizzazione dell'organizzatore.
+- **Anteprima del link** (WhatsApp e simili): un'immagine con turno in corso e podio, rigenerata a ogni deploy (vedi sotto).
 
 ### Area organizzatore (`#admin`)
 Accesso con login Google, riservato a un solo account.
@@ -55,8 +57,15 @@ npm install
 npm run dev      # server di sviluppo su http://localhost:3000
 npm test         # test con vitest
 npm run lint     # controllo dei tipi (tsc --noEmit)
-npm run build    # build di produzione in dist/
+npm run build    # build di produzione in dist/ (compresa l'immagine di anteprima dist/og.png)
 ```
+
+### Immagine di anteprima
+Dopo `vite build`, `scripts/og-image.ts` legge i dati pubblici (Firestore e Lichess, senza credenziali), disegna `dist/og.png` e aggiunge i meta tag `og:image` a `dist/index.html`. I meta tag richiedono l'indirizzo assoluto del sito nella variabile `SITE_URL`, che il workflow di deploy prende da GitHub Pages. Se i dati non sono raggiungibili l'immagine mostra solo il nome del torneo e la build non si ferma.
+
+Il deploy gira anche ogni 3 ore (`schedule` in `.github/workflows/deploy.yml`) per tenere l'immagine aggiornata. GitHub sospende i workflow programmati dopo 60 giorni senza attività sul repository: in quel caso si riattivano dalla scheda Actions. WhatsApp conserva a lungo l'anteprima di un link già condiviso, quindi l'immagine nuova compare soprattutto nei link condivisi di recente.
+
+I font in `scripts/fonts` (Alegreya, Alegreya Sans) sono distribuiti con licenza SIL Open Font License (`scripts/fonts/OFL.txt`).
 
 ### Struttura di `src/`
 - `views/`: pagine (pubblica, giocatore, login, console admin).

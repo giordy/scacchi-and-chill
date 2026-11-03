@@ -48,3 +48,15 @@ export function computeSeasonProgress(
     currentRound: rounds[rounds.length - 1],
   };
 }
+
+// A state read live from Lichess wins over the stored one, unless the stored one is already final
+export function mergeGameStates(
+  stored: Record<string, LichessExportGame>,
+  live: Record<string, LichessExportGame>
+): Record<string, LichessExportGame> {
+  const merged = { ...stored };
+  Object.entries(live).forEach(([id, s]) => {
+    if (gameProgress(stored[id]) !== 'finished') merged[id] = s;
+  });
+  return merged;
+}

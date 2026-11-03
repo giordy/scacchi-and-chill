@@ -18,13 +18,33 @@ export interface RemainingOpponent {
   color?: "white" | "black";
 }
 
+// Cumulative points after each round in which the player finished at least one game
+export interface RoundPoints {
+  round: string;
+  points: number; // total after this round
+  games: { opponent: string; outcome: "win" | "loss" | "draw" }[];
+}
+
+// Season record against one opponent
+export interface HeadToHead {
+  opponent: string; // handle
+  outcomes: GameOutcome[]; // in round order, finished and ongoing games
+  scored: number; // points the player took from this opponent
+  conceded: number;
+  toPlay: number; // scheduled games against this opponent not created yet
+}
+
 export interface PlayerProfile {
   player: Player;
   rank: number; // 1-based
   standing: PlayerStanding;
   games: PlayerGame[];
   remaining: RemainingOpponent[];
+  pointsByRound: RoundPoints[];
+  headToHead: HeadToHead[];
 }
+
+const POINTS: Record<string, number> = { win: 1, draw: 0.5, loss: 0 };
 
 const VOID_STATUSES = new Set(["aborted", "noStart"]);
 const byRound = (a: { round: string }, b: { round: string }) =>
@@ -83,5 +103,43 @@ export function computePlayerProfile(
     remaining.push({ opponent: p.handle });
   });
 
-  return { player, rank: idx + 1, standing: standings[idx], games, remaining };
+  const pointsByRound: RoundPoints[] = [];
+  let total = 0;
+  games.forEach((g) => {
+    if (g.outcome !== "win" && g.outcome !== "draw" && g.outcome !== "loss") return;
+    total += POINTS[g.outcome];
+    const last = pointsByRound[pointsByRound.length - 1];
+    if (last && last.round === g.round) {
+      last.points = total;
+      last.games.push({ opponent: g.opponent, outcome: g.outcome });
+    } else {
+      pointsByRound.push({ round: g.round, points: total, games: [{ opponent: g.opponent, outcome: g.outcome }] });
+    }
+  });
+
+  // One row per opponent, in the order of the players list
+  const headToHead: HeadToHead[] = players
+    .filter((p) => p.handle !== me)
+    .map((p) => {
+      const vs = games.filter((g) => g.opponent === p.handle && g.outcome !== "pending");
+      const finished = vs.filter((g) => g.outcome in POINTS);
+      const created = history.filter(
+        (g) => (g.white === me && g.black === p.handle) || (g.black === me && g.white === p.handle)
+      );
+      const toPlay = schedule.filter(
+        (m) =>
+          ((m.white === me && m.black === p.handle) || (m.black === me && m.white === p.handle)) &&
+          !created.some((g) => g.round === m.round && g.white === m.white && g.black === m.black)
+      ).length;
+      const pending = games.filter((g) => g.opponent === p.handle && g.outcome === "pending").length;
+      return {
+        opponent: p.handle,
+        outcomes: vs.map((g) => g.outcome),
+        scored: finished.reduce((sum, g) => sum + POINTS[g.outcome], 0),
+        conceded: finished.reduce((sum, g) => sum + (1 - POINTS[g.outcome]), 0),
+        toPlay: toPlay + pending,
+      };
+    });
+
+  return { player, rank: idx + 1, standing: standings[idx], games, remaining, pointsByRound, headToHead };
 }

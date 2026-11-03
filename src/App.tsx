@@ -15,6 +15,7 @@ import { useTournamentSync } from './hooks/useTournamentSync';
 import { useSeasons } from './hooks/useSeasons';
 import { useOrganizerData } from './hooks/useOrganizerData';
 import { useLichessSync } from './hooks/useLichessSync';
+import { useLiveGameStates } from './hooks/useLiveGameStates';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Notice } from './components/Notice';
 import { RoundsTab } from './tabs/RoundsTab';
@@ -100,6 +101,8 @@ export function App() {
 
   const seasons = useSeasons();
   const lichess = useLichessSync(history, setHistory, flash);
+  // Public page: results read live from Lichess on top of the saved ones
+  const live = useLiveGameStates(history, lichess.gameStates, !admin.isAdminRoute && gamesLoaded);
 
   // Bring the latest Lichess results to the public page as soon as the organizer opens the admin area
   const autoSynced = useRef(false);
@@ -117,7 +120,7 @@ export function App() {
   };
 
   if (!admin.isAdminRoute) {
-    return <PublicPage seasons={seasons} ready={ready} config={config} history={history} gameStates={lichess.gameStates} nameOf={nameOf} />;
+    return <PublicPage seasons={seasons} ready={ready} config={config} history={history} gameStates={live.gameStates} liveUpdatedAt={live.updatedAt} nameOf={nameOf} />;
   }
 
   if (!admin.authReady) {

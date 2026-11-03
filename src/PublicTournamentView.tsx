@@ -8,6 +8,8 @@ import { DEFAULT_TOURNAMENT } from "./lib/tournament";
 import { onTabListKeyDown } from "./lib/tabKeys";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
+import { FormStrip } from "./components/FormStrip";
+import { computeRecentForm } from "./lib/form";
 import { withScheduledGames } from "./lib/publicGames";
 
 interface PublicTournamentViewProps {
@@ -44,6 +46,7 @@ export function PublicTournamentView({
   const schedule = config.schedule ?? [];
   const { standings, crosstable } = computeStandings(config.players, history, gameStates);
   const progress = computeSeasonProgress(history, gameStates, schedule);
+  const form = computeRecentForm(history, gameStates);
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
 
   // Created games plus the scheduled ones still to be created on Lichess
@@ -175,6 +178,7 @@ export function PublicTournamentView({
                         >
                           @{p.handle}
                         </a>
+                        <FormStrip results={form[p.handle] ?? []} />
                       </div>
                     </td>
                     <td className="col-points">{p.points}</td>
@@ -190,7 +194,7 @@ export function PublicTournamentView({
           </div>
           <p className="note note-top-xs">
             A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il numero di vittorie. Tocca un nome per
-            vedere le partite del giocatore.
+            vedere le partite del giocatore. Sotto ogni nome, gli ultimi 5 risultati (V vittoria, N patta, P sconfitta).
           </p>
         </section>
       )}
