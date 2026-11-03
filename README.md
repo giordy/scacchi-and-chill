@@ -14,10 +14,10 @@ Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli acco
 
 ### Area organizzatore (`#admin`)
 Accesso con login Google, riservato a un solo account.
-- **♞ Turno**: il lavoro del turno in corso, in due passi.
-  1. *Accoppiamenti*: bianco/nero (precompilati dal calendario ufficiale), creazione delle sfide su Lichess, messaggio WhatsApp con i link.
-  2. *Bollettino*: andamento delle partite del turno e messaggio WhatsApp di aggiornamento.
-- **▦ Calendario**: turni già creati (riapri o elimina, anche da Firestore) e calendario ufficiale degli accoppiamenti. Il girone all'italiana si genera da zero oppure si completa: *Completa i turni mancanti* tiene i turni già presenti e le partite già create e aggiunge solo quelle che mancano (se non è possibile lo dice). Il calendario non contiene link Lichess: le sfide si creano solo quando si avvia il turno.
+- **♞ Turni**: l'unico posto dove nascono e si gestiscono turni e partite.
+  - *Elenco dei turni*, pianificati e avviati, con lo stato (da avviare, link creati in parte, in corso, concluso); il turno su cui lavorare è evidenziato. *+ Nuovo turno* ne apre uno vuoto.
+  - *Genera i turni in automatico*: girone all'italiana da zero, oppure *Completa i turni mancanti*, che tiene i turni già presenti e le partite già create e aggiunge solo quelle che mancano (se non è possibile lo dice).
+  - *Dentro un turno*: aggiungi, togli o inverti i colori delle partite; **Crea link Lichess** crea le sfide che non hanno ancora un link e le salva nel torneo; **Messaggio con i link** e **Bollettino** preparano i testi WhatsApp da condividere o copiare; *Elimina turno* lo cancella (anche da Firestore; su Lichess le sfide restano aperte).
 - **✎ Recensione**: statistiche, aneddoti ed Elo dei giocatori per costruire il prompt da incollare in Claude o ChatGPT; il testo ottenuto si incolla poi nella scheda per l'anteprima WhatsApp.
 - **♛ Torneo** (sezioni richiudibili): stagione corrente, giocatori, regolamento (con giorni per mossa e rated, mostrati anche in pubblico), fine stagione e storico con Albo d'Oro, token Lichess e testi dei messaggi, copia dei dati in JSON.
 - **↻ Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. Parte da sola ogni volta che l'organizzatore apre l'area admin, e si può rilanciare a mano. La vista pubblica legge da Firestore, quindi i nuovi risultati compaiono solo dopo una sincronizzazione.
@@ -60,9 +60,9 @@ npm run build    # build di produzione in dist/
 
 ### Struttura di `src/`
 - `views/`: pagine (pubblica, giocatore, login, console admin).
-- `tabs/`: schede dell'area admin; `tabs/settings/` ha le sezioni di *Torneo*, `tabs/calendar/` quelle di *Calendario*.
+- `tabs/`: schede dell'area admin; `tabs/settings/` ha le sezioni di *Torneo*, `tabs/rounds/` quelle di *Turni*.
 - `hooks/`: login, sincronizzazione con Firestore e Lichess, dati dell'organizzatore, stagioni.
-- `lib/`: logica pura e testata (`standings`, `playerProfile`, `seasons`, `routes`, `parse`).
+- `lib/`: logica pura e testata (`standings`, `playerProfile`, `seasons`, `rounds`, `routes`, `parse`).
 - `components/`: elementi condivisi.
 
 Le funzioni di calcolo (classifica, spareggi, profilo giocatore, stagioni, lettura dei messaggi dei turni) stanno in `lib/` e hanno test in `lib/__tests__/`.

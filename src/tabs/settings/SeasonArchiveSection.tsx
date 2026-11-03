@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppConfig, GamePair, HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchive, TournamentMeta } from '../../types';
+import { AppConfig, HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchive, TournamentMeta } from '../../types';
 import { buildSeasonArchive, seasonId, validateNewSeasonName, withChampion } from '../../lib/seasons';
 import { deleteAllGames, saveSeasonArchive } from '../../firebaseService';
 import { errorMessage } from '../../lib/utils';
@@ -13,8 +13,7 @@ export function SeasonArchiveSection({
   onUpdateTournamentMeta,
   onUpdateSchedule,
   setHistory,
-  setPairs,
-  setRound,
+  onSeasonReset,
 }: {
   config: AppConfig;
   history: HistoryGame[];
@@ -24,8 +23,7 @@ export function SeasonArchiveSection({
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
-  setPairs: React.Dispatch<React.SetStateAction<GamePair[]>>;
-  setRound: (r: string) => void;
+  onSeasonReset: () => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [nextSeason, setNextSeason] = useState("");
@@ -84,8 +82,7 @@ export function SeasonArchiveSection({
       // 2. Remove the old season's games from Firestore and from this device
       await deleteAllGames();
       setHistory([]);
-      setPairs([]);
-      setRound("1");
+      onSeasonReset();
       // 3. New season details (the champion goes to the hall of fame)
       onUpdateTournamentMeta({
         season: nextSeason.trim(),

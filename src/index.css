@@ -112,7 +112,7 @@ h2 {
 /* Tabs navigation */
 .tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   background: var(--panel);
   border: 1px solid var(--line);
@@ -222,197 +222,6 @@ textarea.small {
   outline-offset: 2px;
 }
 
-.game {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 12px;
-}
-
-.game h2 {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 10px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.game .state {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ok);
-}
-
-.pair {
-  display: grid;
-  grid-template-columns: 1fr 48px;
-  gap: 8px;
-  align-items: end;
-}
-
-.selects {
-  display: grid;
-  gap: 8px;
-}
-
-.side-container {
-  position: relative;
-  width: 100%;
-}
-
-.side {
-  display: grid;
-  grid-template-columns: 28px 1fr;
-  align-items: center;
-  gap: 8px;
-}
-
-.player-chip-btn {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 48px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-align: left;
-}
-
-.player-chip-btn.filled {
-  border-color: var(--accent);
-  background: var(--panel);
-}
-
-.player-chip-btn.empty {
-  color: var(--muted);
-}
-
-.player-chip-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.chip-clear-btn {
-  width: 44px;
-  min-height: 48px;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--muted);
-  border-radius: 8px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.chip-clear-btn:hover {
-  background: color-mix(in srgb, var(--danger) 12%, transparent);
-  color: var(--danger);
-  border-color: var(--danger);
-}
-
-.player-chips-popover {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 6px;
-  z-index: 100;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  padding: 10px;
-  animation: toastPop 0.15s ease-out;
-}
-
-.player-chips-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  margin-bottom: 8px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--line);
-}
-
-.close-chips-btn {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-size: 14px;
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.player-chips-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  max-height: 240px;
-  overflow-y: auto;
-}
-
-@media (max-width: 400px) {
-  .player-chips-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.player-chip {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 8px 10px;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.12s ease;
-  text-align: left;
-}
-
-.player-chip:hover {
-  border-color: var(--accent);
-  transform: translateY(-1px);
-}
-
-.player-chip.current {
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-color: var(--accent);
-}
-
-.player-chip.current .chip-handle {
-  color: var(--accent-ink);
-  opacity: 0.8;
-}
-
-.chip-name {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.chip-handle {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-
 .dot {
   width: 20px;
   height: 20px;
@@ -427,27 +236,6 @@ textarea.small {
 
 .dot.b {
   background: #111;
-}
-
-.swap {
-  min-height: 48px;
-  height: 100%;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--ink);
-  border-radius: 8px;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.swap:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.progress {
-  color: var(--muted);
-  margin: 4px 0 14px;
 }
 
 button.primary,
@@ -759,20 +547,11 @@ details .body {
 
 /* Public Tournament Showcase (Score7 Replacement) */
 
-
-
-
-
 /* Standings Table */
-
-
-
 
 .row-leader {
   background: var(--brass-soft);
 }
-
-
 
 /* Crosstable Matrix */
 .crosstable {
@@ -821,9 +600,6 @@ details .body {
 
 /* Matches Grid */
 
-
-
-
 .status-badge {
   font-size: 11px;
   font-weight: 700;
@@ -862,8 +638,6 @@ details .body {
   gap: 4px;
 }
 
-
-
 .match-footer {
   display: flex;
   justify-content: space-between;
@@ -872,10 +646,6 @@ details .body {
   padding-top: 8px;
   margin-top: 4px;
 }
-
-
-
-
 
 /* WhatsApp Message Preview Bubble */
 .wa-preview-wrapper {
@@ -1059,7 +829,7 @@ button.sync-btn { min-height: 40px; font-weight: 600; }
 .subcard-title { margin: 0 0 6px; font-size: 14px; }
 .add-form { display: grid; gap: 8px; align-items: flex-end; }
 .add-form-player { grid-template-columns: 1fr 1fr auto; }
-.add-form-match { grid-template-columns: 70px 1fr 1fr auto; }
+
 .add-form-winner { grid-template-columns: 110px 1fr 1fr auto; gap: 6px; }
 button.btn-add { min-height: 48px; white-space: nowrap; }
 button.btn-add.compact { min-height: 44px; font-size: 12px; }
@@ -1069,15 +839,29 @@ textarea.ta-md { min-height: 90px; }
 label.label-sm { font-size: 11px; }
 .actions.flush { margin-top: 0; }
 .divider { border: 0; border-top: 1px solid var(--line); width: 100%; margin: 10px 0; }
-.player-select-row { display: flex; gap: 6px; width: 100%; }
-.fw-600 { font-weight: 600; }
-.chevron { font-size: 11px; opacity: 0.6; }
 
-/* Pairings tab and WhatsApp preview */
-.round-picker { margin-bottom: 16px; }
-.round-picker-row { display: flex; justify-content: space-between; align-items: flex-end; }
-.round-picker-field { flex: 1; margin-right: 8px; }
-button.btn-add.compact-13 { font-size: 13px; }
+/* Rounds tab */
+.round-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.round-nav .chip-link:disabled { opacity: 0.35; cursor: default; }
+.round-list { display: grid; gap: 6px; }
+button.round-row { width: 100%; min-height: 48px; font: inherit; font-size: 15px; color: var(--ink); text-align: left; cursor: pointer; gap: 8px; }
+button.round-row:hover { border-color: var(--accent); }
+button.round-row .status-badge { flex-shrink: 0; align-self: center; margin: 0; font-size: 11px; }
+button.round-row.is-current { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.round-matches { display: grid; gap: 6px; margin-bottom: 10px; }
+.round-match { gap: 8px; padding: 8px 10px; }
+.round-match-players { display: grid; gap: 4px; min-width: 0; }
+.round-match-player { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.round-match .dot { width: 14px; height: 14px; border-width: 1.5px; flex-shrink: 0; }
+.round-match .header-actions { align-items: center; flex-shrink: 0; }
+.round-match button.btn-mini { color: var(--ink); min-width: 32px; min-height: 32px; }
+.add-form-pair { grid-template-columns: 1fr 1fr auto; }
+@media (max-width: 420px) {
+  .add-form-pair { grid-template-columns: 1fr 1fr; }
+  .add-form-pair button { grid-column: 1 / -1; }
+}
+
+/* WhatsApp preview */
 details.raw-text { margin-top: 8px; margin-bottom: 12px; }
 details.raw-text > summary { font-size: 13px; color: var(--muted); }
 .raw-text-body { margin-top: 8px; }
@@ -1089,9 +873,6 @@ textarea.ta-lg { min-height: 180px; }
 .wa-line { line-height: 1.45; min-height: 18px; }
 .wa-ticks { color: #53bdeb; font-size: 13px; margin-left: 3px; }
 
-/* Status tab */
-.status-picker { gap: 10px; margin-bottom: 16px; }
-.flex-1 { flex: 1; }
 .mt-8 { margin-top: 8px; }
 .mt-10 { margin-top: 10px; }
 .mt-12 { margin-top: 12px; }
@@ -1124,7 +905,6 @@ button.link-muted { background: none; border: none; color: var(--muted); font-si
 textarea.ta-xl { min-height: 220px; font-family: inherit; }
 
 /* Public hero and story modal */
-
 
 /* Public rules dossier and match filter */
 .note-top-xs { margin-top: 8px; font-size: 12px; }

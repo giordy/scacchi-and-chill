@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   AppConfig,
-  GamePair,
   HistoryGame,
   Settings,
   MessageTemplates,
@@ -18,10 +17,7 @@ import { useOrganizerData } from './hooks/useOrganizerData';
 import { useLichessSync } from './hooks/useLichessSync';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Notice } from './components/Notice';
-import { PairingsTab } from './tabs/PairingsTab';
-import { StatusTab } from './tabs/StatusTab';
-import { RoundTab, RoundView } from './tabs/RoundTab';
-import { CalendarTab } from './tabs/CalendarTab';
+import { RoundsTab } from './tabs/RoundsTab';
 import { TournamentTab } from './tabs/TournamentTab';
 import { ReviewsTab } from './ReviewsTab';
 import { PublicPage } from './views/PublicPage';
@@ -34,28 +30,15 @@ export function App() {
   const [config, setConfig] = useState<AppConfig>(defaultConfig);
   const admin = useAdminAuth();
 
-  // v2: the tabs were renamed, an old stored value falls back to "Turno"
-  const [activeTab, setActiveTabRaw] = usePersistentState<AdminTab>('pairings.adminActiveTab.v2', 'round', isAdminTab);
-  const [roundView, setRoundView] = usePersistentState<RoundView>(
-    'pairings.roundView',
-    'pairings',
-    (v) => v === 'pairings' || v === 'status'
-  );
-
-  const gameCount = Math.floor(config.players.length / 2);
-  const emptyPairs = (): GamePair[] =>
-    Array.from({ length: gameCount }, () => ({ white: "", black: "", url: "" }));
+  // v3: "Turno" and "Calendario" became "Turni", an old stored value falls back to it
+  const [activeTab, setActiveTabRaw] = usePersistentState<AdminTab>('pairings.adminActiveTab.v3', 'rounds', isAdminTab);
 
   const nameOf = (handle: string) => config.players.find((p) => p.handle === handle)?.name ?? handle;
 
-  const [round, setRound] = usePersistentState<string>("pairings.round", "1");
+  // Round open in the "Turni" tab; empty shows the list of rounds
+  const [openRound, setOpenRoundRaw] = usePersistentState<string>("pairings.openRound", "", (v) => typeof v === "string");
   // Mirror of the games on Firestore (see useTournamentSync): never kept in this browser
   const [history, setHistory] = useState<HistoryGame[]>([]);
-  const [pairs, setPairs] = usePersistentState<GamePair[]>(
-    "pairings.pairs.v2",
-    emptyPairs,
-    (v) => Array.isArray(v) && v.length === gameCount
-  );
 
   const [notice, setNotice] = useState<NoticeState | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -127,18 +110,9 @@ export function App() {
     lichess.sync({ quiet: true });
   }, [canAutoSync]);
 
-  const handleLoadRoundIntoPairs = (loadedRound: string, loadedGames: HistoryGame[]) => {
-    const newPairs = emptyPairs();
-    loadedGames.forEach((g, idx) => {
-      if (idx < newPairs.length) {
-        newPairs[idx] = { white: g.white, black: g.black, url: g.url };
-      }
-    });
-    setRound(loadedRound);
-    setPairs(newPairs);
-    setActiveTab('round');
-    setRoundView('pairings');
-    flash("ok", `Turno ${loadedRound} aperto in Accoppiamenti.`);
+  const setOpenRound = (r: string) => {
+    setNotice(null);
+    setOpenRoundRaw(r);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -166,53 +140,23 @@ export function App() {
       onSync={() => lichess.sync()}
       toastMessage={toastMessage}
     >
-      {activeTab === 'round' && (
-        <RoundTab
-          view={roundView}
-          setView={(v) => {
-            setNotice(null);
-            setRoundView(v);
-          }}
-          pairings={
-            <PairingsTab
-              config={config}
-              history={history}
-              settings={settings}
-              templates={tpl}
-              round={round}
-              setRound={setRound}
-              pairs={pairs}
-              setPairs={setPairs}
-              emptyPairs={emptyPairs}
-              nameOf={nameOf}
-              notice={notice}
-              setNotice={setNotice}
-              flash={flash}
-              onMissingToken={() => setActiveTab('tournament')}
-            />
-          }
-          status={
-            <StatusTab
-              history={history}
-              setHistory={setHistory}
-              config={config}
-              triggerToast={triggerToast}
-            />
-          }
-        />
-      )}
-
-      {activeTab === 'calendar' && (
+      {activeTab === 'rounds' && (
         <>
           <Notice notice={notice} />
-          <CalendarTab
-            players={config.players}
-            schedule={config.schedule}
+          <RoundsTab
+            openRound={openRound}
+            setOpenRound={setOpenRound}
+            config={config}
+            settings={settings}
+            templates={tpl}
             history={history}
             setHistory={setHistory}
+            gameStates={lichess.gameStates}
             onUpdateSchedule={updateSchedule}
-            onLoadIntoActivePairs={handleLoadRoundIntoPairs}
+            nameOf={nameOf}
             flash={flash}
+            triggerToast={triggerToast}
+            onMissingToken={() => setActiveTab('tournament')}
           />
         </>
       )}
@@ -232,8 +176,7 @@ export function App() {
             setTemplates={organizer.setTemplates}
             history={history}
             setHistory={setHistory}
-            setRound={setRound}
-            setPairs={setPairs}
+            onSeasonReset={() => setOpenRoundRaw("")}
             gameStates={lichess.gameStates}
             seasons={seasons}
             organizer={organizer}

@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   AppConfig,
-  GamePair,
   HistoryGame,
   LichessExportGame,
   MessageTemplates,
@@ -33,8 +32,7 @@ export function TournamentTab({
   setTemplates,
   history,
   setHistory,
-  setRound,
-  setPairs,
+  onSeasonReset,
   gameStates,
   seasons,
   organizer,
@@ -50,8 +48,8 @@ export function TournamentTab({
   setTemplates: React.Dispatch<React.SetStateAction<Partial<MessageTemplates> | null>>;
   history: HistoryGame[];
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
-  setRound: (r: string) => void;
-  setPairs: React.Dispatch<React.SetStateAction<GamePair[]>>;
+  // Closes the open round: the new season starts from the list of rounds
+  onSeasonReset: () => void;
   gameStates: Record<string, LichessExportGame>;
   seasons: SeasonArchive[];
   organizer: OrganizerStore;
@@ -91,8 +89,7 @@ export function TournamentTab({
           onUpdateTournamentMeta={onUpdateTournamentMeta}
           onUpdateSchedule={onUpdateSchedule}
           setHistory={setHistory}
-          setPairs={setPairs}
-          setRound={setRound}
+          onSeasonReset={onSeasonReset}
         />
         <HallOfFameSection
           winners={meta?.winners ?? []}

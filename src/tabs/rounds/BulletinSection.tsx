@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   AppConfig,
   HistoryGame,
   LichessExportGame,
-} from '../types';
-import { errorMessage, fill, extractGameId, HOW_WIN, HOW_DRAW, tidy, getApproxMoves } from '../lib/utils';
-import { fetchGameStates } from '../lib/lichess';
-import { WhatsAppPreview } from '../WhatsAppPreview';
+} from '../../types';
+import { errorMessage, fill, extractGameId, HOW_WIN, HOW_DRAW, tidy, getApproxMoves } from '../../lib/utils';
+import { fetchGameStates } from '../../lib/lichess';
+import { WhatsAppPreview } from '../../WhatsAppPreview';
 
-export function StatusTab({
+// Round bulletin: state of the round's games on Lichess and the WhatsApp update message
+export function BulletinSection({
+  round,
   history,
-  setHistory,
   config,
   triggerToast,
 }: {
+  round: string;
   history: HistoryGame[];
-  setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
   config: AppConfig;
   triggerToast?: (msg: string) => void;
 }) {
@@ -23,12 +24,6 @@ export function StatusTab({
   const idToHandle = (id?: string) =>
     config.players.find((p) => p.handle.toLowerCase() === String(id ?? "").toLowerCase())?.handle;
 
-  const rounds = [...new Set(history.map((g) => g.round))].sort((a, b) =>
-    a.localeCompare(b, undefined, { numeric: true })
-  );
-
-  const [chosen, setChosen] = useState("");
-  const round = rounds.includes(chosen) ? chosen : rounds[rounds.length - 1] ?? "";
   const [text, setText] = useState("");
   const [details, setDetails] = useState<string[]>([]);
   const [isRoundComplete, setIsRoundComplete] = useState(false);
@@ -259,89 +254,65 @@ export function StatusTab({
 
   return (
     <section>
-      {rounds.length === 0 ? (
-        <p className="note">
-          Nessuna partita memorizzata. Crea un turno in <strong>Accoppiamenti</strong> per seguirne lo stato qui.
-        </p>
-      ) : (
+      <button
+        className="secondary btn-block"
+        type="button"
+        disabled={status.busy}
+        onClick={() => loadStatusForRound(round)}
+      >
+        {status.busy ? "Verifica in corso…" : "🔄 Aggiorna da Lichess"}
+      </button>
+
+      {status.error && <div className="notice err">{status.error}</div>}
+
+      {status.busy && (
+        <div className="notice ok mb-14">
+          ⏳ Recupero stati, aperture e mosse delle partite da Lichess…
+        </div>
+      )}
+
+      {text && (
         <>
-          <div className="round-picker-row status-picker">
-            <div className="flex-1">
-              <label htmlFor="status-round">Seleziona Turno</label>
-              <select id="status-round" value={round} onChange={(e) => setChosen(e.target.value)}>
-                {rounds.map((r) => {
-                  const count = history.filter((g) => g.round === r).length;
-                  return (
-                    <option key={r} value={r}>
-                      Turno {r} ({count} {count === 1 ? 'partita' : 'partite'})
-                    </option>
-                  );
-                })}
-              </select>
+          {isRoundComplete && (
+            <div className="notice ok my-10-12">
+              🏁 <strong>Turno {round} completato!</strong> Tutte le partite sono terminate. Il messaggio contiene i risultati finali.
             </div>
-            <button
-              className="secondary btn-add"
-              type="button"
-              disabled={status.busy}
-              onClick={() => loadStatusForRound(round)}
+          )}
+
+          {/* WhatsApp Live Bubble Preview */}
+          <WhatsAppPreview text={text} title={`Anteprima WhatsApp (Stato Turno ${round})`} />
+
+          <div className="actions two mt-12">
+            <a
+              className="primary"
+              target="_blank"
+              rel="noopener noreferrer"
+              href={"https://wa.me/?text=" + encodeURIComponent(text)}
             >
-              {status.busy ? "Verifica in corso…" : "🔄 Aggiorna da Lichess"}
+              📲 Condividi su WhatsApp
+            </a>
+            <button className="secondary" type="button" onClick={copy}>
+              📋 Copia testo
             </button>
           </div>
 
-          {status.error && <div className="notice err">{status.error}</div>}
+          {status.info && <div className="notice ok mt-8">{status.info}</div>}
 
-          {status.busy && (
-            <div className="notice ok mb-14">
-              ⏳ Recupero stati, aperture e mosse delle partite da Lichess…
+          <details className="raw-text mt-12">
+            <summary>
+              ✏️ Modifica testo prima dell'invio
+            </summary>
+            <div className="raw-text-body">
+              <textarea
+                aria-label="Messaggio di aggiornamento"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                className="ta-lg"
+              />
             </div>
-          )}
-
-          {text && (
-            <>
-              {isRoundComplete && (
-                <div className="notice ok my-10-12">
-                  🏁 <strong>Turno {round} completato!</strong> Tutte le partite sono terminate. Il messaggio contiene i risultati finali.
-                </div>
-              )}
-
-              {/* WhatsApp Live Bubble Preview */}
-              <WhatsAppPreview text={text} title={`Anteprima WhatsApp (Stato Turno ${round})`} />
-
-              <div className="actions two mt-12">
-                <a
-                  className="primary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={"https://wa.me/?text=" + encodeURIComponent(text)}
-                >
-                  📲 Condividi su WhatsApp
-                </a>
-                <button className="secondary" type="button" onClick={copy}>
-                  📋 Copia testo
-                </button>
-              </div>
-
-              {status.info && <div className="notice ok mt-8">{status.info}</div>}
-
-              <details className="raw-text mt-12">
-                <summary>
-                  ✏️ Modifica testo prima dell'invio
-                </summary>
-                <div className="raw-text-body">
-                  <textarea
-                    aria-label="Messaggio di aggiornamento"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    className="ta-lg"
-                  />
-                </div>
-              </details>
-            </>
-          )}
+          </details>
         </>
       )}
-
     </section>
   );
 }
