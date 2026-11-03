@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Player, ScheduledMatch } from '../../types';
+import { roundRobin, shuffled } from '../../lib/roundRobin';
 
 export function ScheduleSection({
   players,
   schedule,
+  hasGames,
   flash,
   onUpdateSchedule,
 }: {
   players: Player[];
+  // Games already created this season: regenerating would not match them any more
+  hasGames: boolean;
   schedule?: ScheduledMatch[];
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
@@ -18,15 +22,57 @@ export function ScheduleSection({
   const [newMatchWhite, setNewMatchWhite] = useState("");
   const [newMatchBlack, setNewMatchBlack] = useState("");
 
+  const [doubleRound, setDoubleRound] = useState(false);
+
   useEffect(() => {
     if (schedule) setScheduleList(schedule);
   }, [schedule]);
+
+  const generate = () => {
+    if (players.length < 2) {
+      flash("err", "Servono almeno due giocatori.");
+      return;
+    }
+    const generated = roundRobin(shuffled(players.map((p) => p.handle)), { double: doubleRound });
+    const rounds = new Set(generated.map((m) => m.round)).size;
+    const warnings = [
+      scheduleList.length > 0 ? `Il calendario attuale (${scheduleList.length} partite) verrà sostituito.` : "",
+      hasGames ? "Ci sono già partite create in questa stagione: il nuovo calendario non terrà conto di chi si è già affrontato." : "",
+    ].filter(Boolean);
+    if (
+      !window.confirm(
+        `Generare un girone ${doubleRound ? "di andata e ritorno" : "all'italiana"} per ${players.length} giocatori: ` +
+          `${rounds} turni, ${generated.length} partite, ordine casuale?` +
+          (warnings.length ? "\n\n" + warnings.join("\n") : "")
+      )
+    ) {
+      return;
+    }
+    setScheduleList(generated);
+    onUpdateSchedule(generated);
+    flash("ok", `Calendario generato: ${rounds} turni, ${generated.length} partite.`);
+  };
 
   return (
     <div>
       <p className="note note-flush">
         Gli accoppiamenti previsti per ogni turno. Quando scegli il turno in <em>Turno → Accoppiamenti</em> vengono caricati da soli.
       </p>
+
+      <div className="subcard">
+        <h3 className="subcard-title">Genera girone all'italiana</h3>
+        <p className="note note-sm">
+          Ognuno incontra tutti gli altri, con bianco e nero alternati il più possibile. Se i giocatori sono dispari, a
+          ogni turno uno riposa.
+        </p>
+        <div className="inline">
+          <input id="rr-double" type="checkbox" checked={doubleRound} onChange={(e) => setDoubleRound(e.target.checked)} />
+          <label htmlFor="rr-double">Andata e ritorno</label>
+        </div>
+        <button className="secondary btn-block" type="button" onClick={generate}>
+          Genera calendario ({players.length} giocatori)
+        </button>
+      </div>
 
       {scheduleList.length > 0 && (
         <div className="item-list">

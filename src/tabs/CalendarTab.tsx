@@ -38,7 +38,13 @@ export function CalendarTab({
         <h2 className="panel-title">
           Calendario ufficiale <span className="muted-normal">· {(schedule ?? []).length} partite</span>
         </h2>
-        <ScheduleSection players={players} schedule={schedule} flash={flash} onUpdateSchedule={onUpdateSchedule} />
+        <ScheduleSection
+          players={players}
+          schedule={schedule}
+          hasGames={history.length > 0}
+          flash={flash}
+          onUpdateSchedule={onUpdateSchedule}
+        />
       </section>
     </div>
   );
