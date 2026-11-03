@@ -53,13 +53,17 @@ async function main() {
   if (site !== '/' && fs.existsSync(image)) {
     // The hash changes the URL when the logo changes, so previews do not keep an old copy
     const version = crypto.createHash('sha1').update(fs.readFileSync(image)).digest('hex').slice(0, 10);
+    const imageUrl = `${site}og-image.png?v=${version}`;
     const tags = [
       `<meta property="og:url" content="${esc(site)}">`,
-      `<meta property="og:image" content="${esc(`${site}og-image.png?v=${version}`)}">`,
+      `<meta property="og:image" content="${esc(imageUrl)}">`,
+      `<meta property="og:image:secure_url" content="${esc(imageUrl)}">`,
+      `<meta property="og:image:type" content="image/png">`,
       `<meta property="og:image:width" content="1200">`,
       `<meta property="og:image:height" content="630">`,
       `<meta property="og:image:alt" content="Logo di Scacchi &amp; Chill: un cavallo degli scacchi rilassato su un pouf con una tazza in mano">`,
       `<meta name="twitter:card" content="summary_large_image">`,
+      `<meta name="twitter:image" content="${esc(imageUrl)}">`,
     ].join('\n  ');
     html = html.replace('</head>', `  ${tags}\n</head>`);
   } else {
