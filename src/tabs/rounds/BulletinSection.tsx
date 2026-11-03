@@ -150,10 +150,8 @@ export function BulletinSection({
       timed[0].moves !== timed[timed.length - 1].moves
     ) {
       const label = (x: { names: string; moves: number }) => `${x.names} (${x.moves} mosse)`;
-      highlight = fill(pickFor("highlight"), {
-        longest: label(timed[timed.length - 1]),
-        shortest: label(timed[0]),
-      });
+      // Only the longest game: the shortest is usually a quick defeat, not something to put on display
+      highlight = fill(pickFor("highlight"), { longest: label(timed[timed.length - 1]) });
     }
 
     const headerTemplate =

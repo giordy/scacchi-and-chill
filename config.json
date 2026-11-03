@@ -7,7 +7,6 @@
     "4. statusMessage: phrases used for the ongoing games status update.",
     "   (Leave 'closing' empty [] to end the status message right after the summary statistics)."
   ],
-
   "players": [
     {
       "handle": "matepaco",
@@ -42,7 +41,6 @@
       "name": "Matteo"
     }
   ],
-
   "defaults": {
     "days": 2,
     "expiry": 2,
@@ -54,7 +52,6 @@
       "noEarlyDraw": true
     }
   },
-
   "roundMessage": {
     "challengeName": "Turno {round}",
     "typeLabels": {
@@ -77,7 +74,6 @@
     "bye": "🏖️ *Riposa in questo turno:* {bye}",
     "footer": "⏳ *Attenzione:* link validi fino a {expiryDeadline}! Cliccate sul vostro link e accettate la sfida per avviare la scacchiera."
   },
-
   "statusMessage": {
     "header": [
       "📊 *Aggiornamento Turno {round}*",
@@ -144,12 +140,11 @@
       "📊 *Totale: {finished} concluse · {ongoing} ancora in gioco · {pending} da avviare*"
     ],
     "highlight": [
-      "🏁 La più lunga del turno: {longest}. La più rapida: {shortest}.",
-      "⏱️ Maratona del turno: {longest}. Sprint: {shortest}.",
-      "📏 Partita più lunga: {longest}. Più breve: {shortest}.",
-      "🏃 La più rapida a chiudersi: {shortest}. La maratona del turno: {longest}.",
-      "🐢 Più lunga: {longest} · 🐇 Più rapida: {shortest}",
-      "📌 Da segnare: la più lunga è {longest}, la più rapida {shortest}."
+      "🏁 La più lunga del turno: {longest}.",
+      "⏱️ Maratona del turno: {longest}.",
+      "📏 Partita più lunga del turno: {longest}.",
+      "🐢 Chi ha giocato di più: {longest}.",
+      "📌 Da segnare: la partita più lunga è {longest}."
     ],
     "roundEndHeader": [
       "🏁 *Turno {round} concluso!* Ecco i risultati finali:",

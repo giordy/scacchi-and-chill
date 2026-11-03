@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding } from "./types";
 import { WhatsAppPreview } from "./WhatsAppPreview";
 import { errorMessage, extractGameId } from "./lib/utils";
+import { computeStandings } from "./lib/standings";
 import type { LichessUserProfile } from "./types";
 import type { OrganizerStore } from "./hooks/useOrganizerData";
 
@@ -165,19 +166,11 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
   // Calculate Standings & Game Summary
   const calculateStandings = (): {
     standings: PlayerStanding[];
-    finishedMatches: Array<{ white: string; black: string; result: string; winner?: string; moves?: number; opening?: string }>;
+    finishedMatches: Array<{ round: string; white: string; black: string; result: string; winner?: string; moves?: number; opening?: string }>;
     ongoingMatches: Array<{ white: string; black: string; round: string }>;
   } => {
-    const stats: Record<
-      string,
-      { played: number; won: number; drawn: number; lost: number; points: number }
-    > = {};
-
-    config.players.forEach((p) => {
-      stats[p.handle] = { played: 0, won: 0, drawn: 0, lost: 0, points: 0 };
-    });
-
     const finishedMatches: Array<{
+      round: string;
       white: string;
       black: string;
       result: string;
@@ -194,9 +187,6 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
       const white = g.white;
       const black = g.black;
 
-      if (!stats[white]) stats[white] = { played: 0, won: 0, drawn: 0, lost: 0, points: 0 };
-      if (!stats[black]) stats[black] = { played: 0, won: 0, drawn: 0, lost: 0, points: 0 };
-
       if (!s) {
         ongoingMatches.push({ white, black, round: g.round });
         return;
@@ -205,46 +195,33 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
       if (s.status === "created" || s.status === "started") {
         ongoingMatches.push({ white, black, round: g.round });
       } else if (s.status !== "aborted" && s.status !== "noStart") {
-        stats[white].played++;
-        stats[black].played++;
-
         const plies = s.moves && s.moves.trim() ? s.moves.trim().split(/\s+/).length : 0;
         const moves = Math.ceil(plies / 2);
         const opening = s.opening?.name;
 
         if (s.winner === "white") {
-          stats[white].won++;
-          stats[white].points += 1;
-          stats[black].lost++;
-          finishedMatches.push({ white, black, result: "1-0", winner: white, moves, opening });
+          finishedMatches.push({ round: g.round, white, black, result: "1-0", winner: white, moves, opening });
         } else if (s.winner === "black") {
-          stats[black].won++;
-          stats[black].points += 1;
-          stats[white].lost++;
-          finishedMatches.push({ white, black, result: "0-1", winner: black, moves, opening });
+          finishedMatches.push({ round: g.round, white, black, result: "0-1", winner: black, moves, opening });
         } else {
-          stats[white].drawn++;
-          stats[white].points += 0.5;
-          stats[black].drawn++;
-          stats[black].points += 0.5;
-          finishedMatches.push({ white, black, result: "½-½", moves, opening });
+          finishedMatches.push({ round: g.round, white, black, result: "½-½", moves, opening });
         }
       }
     });
 
-    const standings: PlayerStanding[] = config.players
-      .map((p) => ({
-        handle: p.handle,
-        name: p.name,
-        played: stats[p.handle]?.played ?? 0,
-        won: stats[p.handle]?.won ?? 0,
-        drawn: stats[p.handle]?.drawn ?? 0,
-        lost: stats[p.handle]?.lost ?? 0,
-        points: stats[p.handle]?.points ?? 0,
-        rating: ratings[p.handle],
-        anecdote: anecdotes[p.handle] || "",
-      }))
-      .sort((a, b) => b.points - a.points || b.won - a.won || a.name.localeCompare(b.name));
+    // Same order as the public standings (points, Sonneborn-Berger, wins, name)
+    const official = computeStandings(config.players, history, gameStates).standings;
+    const standings: PlayerStanding[] = official.map((p) => ({
+      handle: p.handle,
+      name: p.name,
+      played: p.played,
+      won: p.won,
+      drawn: p.drawn,
+      lost: p.lost,
+      points: p.points,
+      rating: ratings[p.handle],
+      anecdote: anecdotes[p.handle] || "",
+    }));
 
     return { standings, finishedMatches, ongoingMatches };
   };
@@ -261,102 +238,85 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
     return "andata";
   };
 
-  // Build the sober, witty, feel-good AI prompt
+  // Prompt for the review: a friend telling the season, sober and kind to every player.
+  // Short, positive instructions and no catalog of examples (models copy them verbatim);
+  // personal facts come only from the organizer's notes, never from this code.
   const buildPrompt = () => {
-    let p = `Sei il cronista amichevole del torneo di scacchi tra amici "${tournamentTitle}".\n`;
-    p += `Devi scrivere un resoconto per il nostro gruppo WhatsApp.\n\n`;
+    const lines: string[] = [];
+    const add = (...l: string[]) => lines.push(...l);
 
-    p += `REGOLE FONDAMENTALI DI SPIRITO E TONO (CRITICHE):\n`;
-    p += `1. ATMOSFERA "FEEL-GOOD" E ZERO DERISIONE (NO SHAMING):\n`;
-    p += `   - Il torneo si chiama "${tournamentTitle}": è un gruppo di amici e colleghi che giocano per passione, divertimento e relax.\n`;
-    p += `   - NESSUN GIUDIZIO MORTIFICANTE, NESSUNA DERISIONE, NESSUNA UMILIAZIONE.\n`;
-    p += `   - Ogni singolo giocatore – dal primo all'ultimo in classifica – deve finire di leggere la sua pagella con un sorriso, sentendosi valorizzato e felice di partecipare.\n`;
-    p += `   - L'ironia deve essere affettuosa, complice e calorosa (come una battuta al bar tra amici che si vogliono bene), MAI tagliente, MAI sprezzante.\n`;
-    p += `   - VIETATE categoricamente espressioni condescendenti o offensive (ad es. NON usare: "non sa muovere i cavalli", "da arresto immediato", "sfida tra disperati", "il nickname dice tutto", "martire", "a secco").\n\n`;
-
-    p += `2. L'ELO COME METRO DI CORAGGIO E HANDICAP (NON COME PRETESTO DI CRITICA):\n`;
-    p += `   - Nel torneo convivono giocatori con Elo molto differenti (da circa 700 a oltre 1850).\n`;
-    p += `   - Chi ha un Elo più basso (ad es. Stefano ~779) e gioca contro avversari con 700-1000 punti in più di Elo è l'eroe coraggioso del torneo: durare 30 o più mosse contro chi è molto più esperto è una prova di grandissimo carattere e grinta! Celebrane l'audacia, lo spirito sportivo e la tenacia, senza mai rimarcarne la sconfitta in modo negativo.\n`;
-    p += `   - Chi ha impegni personali gravosi (es. paternità, notti insonni, biberon per Giordano) va elogiato per la passione e la dedizione con cui continua a giocare nonostante la stanchezza.\n`;
-    p += `   - Chi vince con Elo alto va riconosciuto con rispetto, ma senza sminuire chi ha lottato dall'altra parte della scacchiera.\n\n`;
-
-    p += `3. NIENTE VOTI NUMERICI – ASSEGNA IL "PEZZO GUIDA" E IL "PREMIO DEL GIRONE":\n`;
-    p += `   - NON usare MAI voti numerici (NON scrivere mai "Voto: 6", "Voto: 7.5", "Voto: 10", ecc.). I numeri scolastici sono freddi, sterili e creano gerarchie mortificanti.\n`;
-    p += `   - Al posto del voto, per OGNI giocatore assegna due elementi scacchistici divertenti, positivi e memorabili:\n`;
-    p += `     a) ♟️ *Pezzo Guida*: un parallelo con un pezzo degli scacchi che ne rispecchia lo stile di gioco o l'atteggiamento, con una breve motivazione ironica e affettuosa tra parentesi.\n`;
-    p += `        (Esempi: *Il Pedone Passato* che avanza a testa alta contro i giganti; *La Torre da Assedio* per chi costruisce difese eterne e maratone da 60 mosse; *Il Cavallo Imprevedibile* che muove a sorpresa e crea il caos creativo; *La Regina d'Assalto* per chi attacca sempre senza paura; *L'Alfiere Campestre* per chi scova diagonali invisibili da lontano; *Il Re Guerriero* che difende il castello senza dormire da mesi).\n`;
-    p += `     b) 🎖️ *Premio Speciale*: un riconoscimento personalizzato, brillante e caloroso (stile "Oscar del torneo").\n`;
-    p += `        (Esempi: *Premio "Davide contro Golia"* per chi affronta avversari con centinaia di punti Elo in più vendendo cara la pelle; *Premio "Catenaccio d'Oro"* per la difesa più ostinata; *Premio "Papà & Scacchiere"* per chi gioca con un biberon in mano; *Premio "Maratona dei Finali"* per la partita più lunga; *Premio "Fedeltà alla Bandiera"* per chi gioca sempre con coerenza la propria apertura preferita).\n\n`;
-
-    p += `4. FORMATTAZIONE WHATSAPP:\n`;
-    p += `   - Testo pulito, chiaro, con *grassetto*, _corsivo_ per i riconoscimenti, emoji gradevoli e sobrie, spaziature naturali tra i paragrafi.\n\n`;
+    add(
+      `Scrivi un messaggio WhatsApp per il gruppo del torneo di scacchi tra amici "${tournamentTitle}".`,
+      `Racconta la stagione come farebbe un amico del gruppo, non un telecronista.`,
+      ``,
+      `TONO`,
+      `- Ironia leggera e affettuosa, frasi asciutte. Niente superlativi in serie, niente parole come "epico", "leggenda", "eroe", "impresa storica".`,
+      `- Ogni giocatore, dal primo all'ultimo, deve potersi rileggere volentieri. Racconta cosa è successo sulla scacchiera, non giudicare le persone.`,
+      `- Parla dei risultati per quello che sono (una patta combattuta, una partita lunga, una vittoria netta, una rimonta). Non dividere i giocatori in forti e deboli e non usare la retorica dello sfavorito.`,
+      `- L'Elo qui sotto è solo contesto per te: non citarlo e non fare confronti di Elo nel testo.`,
+      `- Gli aneddoti personali vanno usati solo se scritti nelle note, al massimo uno per giocatore e solo se si inserisce in modo naturale.`,
+      `- Poche emoji, e mai numeri in stile voto.`,
+      ``,
+      `IL PEZZO DI OGNI GIOCATORE`,
+      `- Accanto al nome metti il simbolo di un pezzo (♔ ♕ ♖ ♗ ♘ ♙) che gli somiglia per come ha giocato in questa stagione, letto dai dati: partite lunghe, aperture ricorrenti, attacchi, patte, costanza.`,
+      `- Non scrivere "pezzo guida" né spiegare il simbolo in un'etichetta: il motivo deve capirsi da mezza frase dentro il testo.`,
+      `- Pezzi diversi per giocatori diversi quando possibile; il Re non è riservato al primo.`,
+      ``,
+      `FORMATO`,
+      `- Testo per WhatsApp: *grassetto* per i nomi, _corsivo_ con parsimonia, paragrafi brevi separati da una riga vuota.`,
+      `- Per ogni giocatore 2 o 3 frasi, nell'ordine della classifica, con la riga: <simbolo> *Posizione. Nome*`,
+    );
 
     if (reviewType === "andata") {
-      p += `CONTESTO SPECIFICO: GIRO DI BOA / FINE GIRONE D'ANDATA (7 partite disputate)\n`;
-      p += `Istruzioni per il messaggio:\n`;
-      p += `1. Titolo accogliente: 🔄 *Giro di boa: Il bilancio dell'andata di "${tournamentTitle}"*\n`;
-      p += `2. Premessa breve e calorosa: si chiude il girone di andata tra grandi battaglie, belle giocate e tanto divertimento.\n`;
-      p += `3. Per OGNI giocatore della classifica (dal primo all'ultimo):\n`;
-      p += `   * *#Posizione Nome (@handle) – Titolo simpatico e affettuoso*\n`;
-      p += `   * Paragrafo brillante che valorizza il suo percorso: i punti fatti, le difese ostinate, le partite lottate fino all'ultimo tratto, il confronto positivo con il proprio Elo e gli aneddoti di vita reale integrati con simpatia.\n`;
-      p += `   * ♟️ *Pezzo Guida:* [Pezzo degli scacchi con spiegazione tra parentesi]\n`;
-      p += `   * 🎖️ *Premio del Girone:* [Premio speciale personalizzato e caloroso]\n`;
-      p += `4. Chiusura stimolante e amichevole in vista del girone di ritorno.\n\n`;
+      add(
+        ``,
+        `MOMENTO: fine del girone d'andata.`,
+        `- Apri con una riga di titolo e una o due frasi su come è andata l'andata nel complesso.`,
+        `- Poi i giocatori, come sopra.`,
+        `- Chiudi con una frase sul ritorno, senza promesse di grandi emozioni.`,
+      );
     } else if (reviewType === "volata") {
-      p += `CONTESTO SPECIFICO: VOLATA FINALE (mancano pochissime partite alla conclusione)\n`;
-      p += `Istruzioni per il messaggio:\n`;
-      p += `1. Titolo: ⏱️ *Volata Finale: Le ultime sfide decisive di "${tournamentTitle}"*\n`;
-      p += `2. Introduzione appassionante e sportiva: mancano solo ${ongoingMatches.length || "2-3"} partite per completare il campionato.\n`;
-      p += `3. Panoramica positiva per zone della classifica:\n`;
-      p += `   * 🥇 *Corsa al vertice*: chi guida e quale traguardo può tagliare.\n`;
-      p += `   * 🥈 *Volata podio*: le belle sfide a distanza per le medaglie d'argento e bronzo.\n`;
-      p += `   * 📊 *Centro classifica*: i duelli tra chi ha dato vita a partite tiratissime.\n`;
-      p += `   * 🛡️ *Sfide d'orgoglio*: chi scende sulla scacchiera per regalare e regalarsi un'ultima bella prestazione.\n`;
-      p += `4. Cita con precisione le partite ancora da completare e i giocatori coinvolti con il loro spirito di gioco.\n`;
-      p += `5. Augurio caloroso di buon gioco a tutti per gli ultimi tratti.\n\n`;
+      add(
+        ``,
+        `MOMENTO: ultime partite della stagione (${ongoingMatches.length || "poche"} ancora da finire).`,
+        `- Niente schede per giocatore: racconta in pochi paragrafi cosa è ancora in gioco in testa, per il podio e nel resto della classifica.`,
+        `- Cita le partite ancora aperte qui sotto e i giocatori coinvolti, senza caricare le attese su chi le gioca.`,
+        `- Chiudi con un augurio di buon gioco, in una frase.`,
+      );
     } else {
-      p += `CONTESTO SPECIFICO: FINE TORNEO / PAGELLE CONCLUSIVE (tutte le partite concluse)\n`;
-      p += `Istruzioni per il messaggio:\n`;
-      p += `1. Titolo: 🏆 *Le Pagelle Finali di "${tournamentTitle}"*\n`;
-      p += `2. Introduzione calorosa: si chiude ufficialmente questa splendida edizione del torneo tra amici.\n`;
-      p += `3. Per OGNI giocatore (in rigoroso ordine di classifica dal 1° all'ultimo):\n`;
-      p += `   * *#Posizione Nome (@handle) – Soprannome d'onore affettuoso*\n`;
-      p += `   * Giudizio complessivo che esalta i momenti migliori, le partite più belle, la costanza, il coraggio rispetto all'Elo e gli aneddoti personali.\n`;
-      p += `   * ♟️ *Pezzo Guida:* [Pezzo degli scacchi con spiegazione celebrativa]\n`;
-      p += `   * 🎖️ *Premio Speciale del Campionato:* [Premio speciale personalizzato e celebrativo]\n`;
-      p += `4. Saluto finale e grande applauso corale a tutti per aver reso speciale il torneo.\n\n`;
+      add(
+        ``,
+        `MOMENTO: fine della stagione, tutte le partite concluse.`,
+        `- Apri con una riga di titolo e una o due frasi sulla stagione, poi il campione in una frase semplice.`,
+        `- Poi i giocatori, come sopra.`,
+        `- In fondo, se i dati lo permettono, al massimo 2 o 3 menzioni per tutto il gruppo (per esempio la partita più lunga o la patta più combattuta), preferibilmente non per i primi tre.`,
+        `- Chiudi con un grazie a tutti, in una frase.`,
+      );
     }
 
-    if (generalNotes.trim()) {
-      p += `NOTE DELL'ORGANIZZATORE:\n${generalNotes.trim()}\n\n`;
-    }
+    if (generalNotes.trim()) add(``, `NOTE DELL'ORGANIZZATORE`, generalNotes.trim());
 
-    p += `DATI CLASSIFICA GIOCATORI:\n`;
-    standings.forEach((s, idx) => {
-      const eloStr = s.rating ? `[Elo: ~${s.rating}]` : `[Elo: n/d]`;
-      const anecStr = s.anecdote ? ` | Aneddoto/Nota: "${s.anecdote}"` : "";
-      p += `${idx + 1}. ${s.name} (@${s.handle}) – Punti: ${s.points} (Vinte: ${s.won}, Patte: ${s.drawn}, Perse: ${s.lost}, Giocate: ${s.played}) ${eloStr}${anecStr}\n`;
+    add(``, `CLASSIFICA (ordine ufficiale del sito, spareggio Sonneborn-Berger)`);
+    standings.forEach((st, idx) => {
+      const elo = st.rating ? `Elo ~${st.rating}` : `Elo n/d`;
+      const note = st.anecdote ? ` | Nota: "${st.anecdote}"` : "";
+      add(`${idx + 1}. ${st.name} (@${st.handle}) – ${st.points} punti: ${st.won} vinte, ${st.drawn} patte, ${st.lost} perse su ${st.played} giocate [${elo}]${note}`);
     });
 
-    p += `\nPARTITE CONCLUSE:\n`;
-    if (finishedMatches.length === 0) {
-      p += `Nessuna partita ancora conclusa nello storico.\n`;
-    } else {
-      finishedMatches.forEach((m) => {
-        const opStr = m.opening ? ` (Apertura: ${m.opening})` : "";
-        const movStr = m.moves ? ` in ${m.moves} mosse` : "";
-        p += `- ${nameOf(m.white)} (@${m.white}) vs ${nameOf(m.black)} (@${m.black}): ${m.result}${movStr}${opStr}\n`;
-      });
-    }
+    add(``, `PARTITE CONCLUSE`);
+    if (finishedMatches.length === 0) add(`Nessuna partita ancora conclusa.`);
+    finishedMatches.forEach((m) => {
+      const op = m.opening ? `, apertura ${m.opening}` : "";
+      const mv = m.moves ? `, ${m.moves} mosse` : "";
+      add(`- Turno ${m.round}: ${nameOf(m.white)} (bianco) – ${nameOf(m.black)} (nero) ${m.result}${mv}${op}`);
+    });
 
     if (ongoingMatches.length > 0) {
-      p += `\nPARTITE ANCORA APERTE / IN CORSO:\n`;
-      ongoingMatches.forEach((m) => {
-        p += `- Turno ${m.round}: ${nameOf(m.white)} (@${m.white}) vs ${nameOf(m.black)} (@${m.black})\n`;
-      });
+      add(``, `PARTITE ANCORA APERTE`);
+      ongoingMatches.forEach((m) => add(`- Turno ${m.round}: ${nameOf(m.white)} – ${nameOf(m.black)}`));
     }
 
-    return p;
+    return lines.join("\n") + "\n";
   };
 
   // Copy full prompt to clipboard
@@ -419,9 +379,9 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
 
   return (
     <section>
-      <h2>✨ Recensioni & Pagelle del Torneo</h2>
+      <h2>✨ Il racconto della stagione</h2>
       <p className="note mb-14">
-        Genera il bilancio del girone d'andata, la volata delle ultime sfide o le pagelle finali, con tono sobrio e arguto tra amici.
+        Prepara il racconto di fine andata, delle ultime partite o di fine stagione: tono sobrio e affettuoso, senza voti né classifiche di bravura.
       </p>
 
       {notice && (
@@ -523,7 +483,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
             onClick={() => setReviewType("andata")}
           >
             <span className="review-moment-title">🔄 Fine Andata</span>
-            <span className="review-moment-sub">Giro di boa: bilancio delle prime 7 sfide, Pezzi Guida e riconoscimenti.</span>
+            <span className="review-moment-sub">Com'è andata l'andata, due o tre frasi per giocatore.</span>
           </button>
 
           <button
@@ -532,7 +492,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
             onClick={() => setReviewType("volata")}
           >
             <span className="review-moment-title">⏱️ Volata Finale</span>
-            <span className="review-moment-sub">Mancano 2-3 partite: calcoli per il podio e le sfide decisive.</span>
+            <span className="review-moment-sub">Cosa resta in gioco nelle ultime partite.</span>
           </button>
 
           <button
@@ -541,7 +501,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
             onClick={() => setReviewType("finale")}
           >
             <span className="review-moment-title">🏆 Fine Torneo</span>
-            <span className="review-moment-sub">Chiusura definitiva con verdetti, Pezzo Guida e premi speciali del torneo.</span>
+            <span className="review-moment-sub">Il racconto finale, il campione e poche menzioni per il gruppo.</span>
           </button>
         </div>
       </div>
@@ -555,7 +515,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
             type="text"
             value={generalNotes}
             onChange={(e) => setGeneralNotes(e.target.value)}
-            placeholder="es. Tante partite decise all'ultima mossa, ritmo rilassato..."
+            placeholder="es. Tante partite decise nel finale, ritmo rilassato..."
           />
         </div>
       </div>
@@ -576,7 +536,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
         {showAnecdotes && (
           <div className="anecdote-grid">
             <p className="note note-13">
-              Inserisci piccoli fatti della vita reale o battute di gioco per ciascun giocatore (es. paternità, orari notturni, ritiri, cambi di apertura):
+              Piccoli fatti o battute che il giocatore sarebbe contento di rileggere nel gruppo (es. gioca solo di notte, ha cambiato apertura). Vengono usati solo se si inseriscono in modo naturale:
             </p>
             {standings.map((p) => (
               <div key={p.handle} className="anecdote-card">

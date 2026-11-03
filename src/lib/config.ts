@@ -93,7 +93,10 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
   if (!isTextList(smFooter)) fail('"statusMessage.footer" must be a non-empty list of texts.');
 
   const highlightRaw = sm.highlight || sm.inEvidenza;
-  const highlight = Array.isArray(highlightRaw) && isTextList(highlightRaw) ? highlightRaw : undefined;
+  // Phrases naming the shortest game are dropped: it usually puts a quick defeat on display
+  const highlightList =
+    Array.isArray(highlightRaw) && isTextList(highlightRaw) ? highlightRaw.filter((t) => !t.includes("{shortest}")) : [];
+  const highlight = highlightList.length > 0 ? highlightList : undefined;
 
   const roundEndHeaderRaw = sm.roundEndHeader || sm.fineTurnoTitoli;
   const roundEndHeader = Array.isArray(roundEndHeaderRaw) && isTextList(roundEndHeaderRaw) ? roundEndHeaderRaw : undefined;
