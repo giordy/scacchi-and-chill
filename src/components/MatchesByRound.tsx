@@ -79,7 +79,10 @@ function MatchCard({
   state?: LichessExportGame;
   nameOf: (handle: string) => string;
 }) {
-  let badge = <span className="status-badge pending">Da giocare</span>;
+  // Scheduled game not created on Lichess yet
+  let badge = game.url
+    ? <span className="status-badge pending">Da giocare</span>
+    : <span className="status-badge pending">In programma</span>;
   if (s?.status === "started") badge = <span className="status-badge ongoing">In corso</span>;
   // Neutral result: here 0-1 is a win for Black, not a "loss"
   else if (s?.winner === "white") badge = <span className="status-badge result">1 – 0</span>;
@@ -109,9 +112,13 @@ function MatchCard({
       </div>
       <div className="match-footer">
         <span className="opening-label">{detail}</span>
-        <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
-          Apri su Lichess
-        </a>
+        {game.url ? (
+          <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
+            Apri su Lichess
+          </a>
+        ) : (
+          <span className="opening-label">Link in arrivo all'inizio del turno</span>
+        )}
       </div>
     </article>
   );
