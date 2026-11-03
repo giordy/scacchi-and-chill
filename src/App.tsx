@@ -49,7 +49,8 @@ export function App() {
   const nameOf = (handle: string) => config.players.find((p) => p.handle === handle)?.name ?? handle;
 
   const [round, setRound] = usePersistentState<string>("pairings.round", "1");
-  const [history, setHistory] = usePersistentState<HistoryGame[]>("pairings.history", [], Array.isArray);
+  // Mirror of the games on Firestore (see useTournamentSync): never kept in this browser
+  const [history, setHistory] = useState<HistoryGame[]>([]);
   const [pairs, setPairs] = usePersistentState<GamePair[]>(
     "pairings.pairs.v2",
     emptyPairs,
@@ -118,7 +119,7 @@ export function App() {
   };
 
   const organizer = useOrganizerData(admin.isAdminRoute && admin.isAuthenticated, (msg) => flash('err', msg));
-  const { ready } = useTournamentSync(setConfig, setHistory, !admin.isAdminRoute);
+  const { ready, gamesLoaded } = useTournamentSync(setConfig, setHistory);
   const seasons = useSeasons();
   const lichess = useLichessSync(history, setHistory, flash);
 
@@ -171,6 +172,7 @@ export function App() {
           pairings={
             <PairingsTab
               config={config}
+              history={history}
               settings={settings}
               templates={tpl}
               round={round}

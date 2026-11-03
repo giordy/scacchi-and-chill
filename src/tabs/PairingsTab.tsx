@@ -7,7 +7,7 @@ import {
   MessageTemplates,
   NoticeState,
 } from '../types';
-import { errorMessage, fill, formatDeadline } from '../lib/utils';
+import { errorMessage, extractGameId, fill, formatDeadline } from '../lib/utils';
 import { createChallenge } from '../lib/lichess';
 import { GameCard } from '../components/GameCard';
 import { Notice } from '../components/Notice';
@@ -16,6 +16,7 @@ import { saveGamesBatchToFirebase } from '../firebaseService';
 
 interface PairingsTabProps {
   config: AppConfig;
+  history: HistoryGame[];
   settings: Settings;
   templates: MessageTemplates;
   round: string;
@@ -32,6 +33,7 @@ interface PairingsTabProps {
 
 export function PairingsTab({
   config,
+  history,
   settings,
   templates,
   round,
@@ -104,17 +106,42 @@ export function PairingsTab({
     }
   };
 
+  // Games created on Lichess (they have a link) that the tournament on Firestore does not know yet
+  const knownIds = new Set(history.map((g) => extractGameId(g.url)).filter(Boolean));
+  const unsaved = pairs.filter((p) => p.url && p.white && p.black && !knownIds.has(extractGameId(p.url)));
+
+  // Saves the created games on Firestore: the public page and the other devices read them from there.
+  // Idempotent (one document per round/white/black), so it can be retried safely.
+  const saveCreated = async (list: GamePair[]): Promise<boolean> => {
+    const games: HistoryGame[] = list
+      .filter((p) => p.url && p.white && p.black)
+      .map((p) => ({ round, white: p.white, black: p.black, url: p.url, createdAt: Date.now() }));
+    if (games.length === 0) return true;
+    try {
+      await saveGamesBatchToFirebase(games);
+      return true;
+    } catch (e) {
+      flash(
+        "err",
+        "Le sfide esistono su Lichess ma non sono state salvate nel torneo: " +
+          errorMessage(e) +
+          ". Premi «Salva nel torneo» per riprovare."
+      );
+      return false;
+    }
+  };
+
   const createGames = async () => {
     setNotice(null);
-    if (!settings.token) {
-      onMissingToken();
-      return flash("err", "Aggiungi prima il token API Lichess in Torneo → Lichess e messaggi WhatsApp.");
-    }
     const todo = pairs.map((p, i) => ({ p, i })).filter(({ p }) => !p.url);
     const ready = todo.filter(({ p }) => p.white && p.black);
     const half = todo.filter(({ p }) => (p.white || p.black) && !(p.white && p.black));
     if (ready.length === 0) {
       return flash("err", "Seleziona un giocatore bianco e uno nero per almeno una partita.");
+    }
+    if (!settings.token) {
+      onMissingToken();
+      return flash("err", "Aggiungi prima il token API Lichess in Torneo → Lichess e messaggi WhatsApp.");
     }
     if (
       half.length &&
@@ -125,12 +152,14 @@ export function PairingsTab({
       return;
     }
 
+    // Local copy: the links created in this loop are not visible in `pairs` until the next render
+    const next = pairs.map((p) => ({ ...p }));
     const errors: string[] = [];
     for (const { p, i } of ready) {
       setBusy(`Creazione partita ${i + 1} su Lichess…`);
       try {
-        const url = await createChallenge(p, { round, settings, challengeName: config.challengeName });
-        setPairs((prev) => prev.map((x, idx) => (idx === i ? { ...x, url } : x)));
+        next[i].url = await createChallenge(p, { round, settings, challengeName: config.challengeName });
+        setPairs(next.map((x) => ({ ...x })));
       } catch (e) {
         errors.push(
           `Partita ${i + 1}: ` +
@@ -140,37 +169,29 @@ export function PairingsTab({
         );
       }
     }
+
+    // Save what was created even if some challenges failed
+    setBusy("Salvataggio nel torneo…");
+    const saved = await saveCreated(next);
     setBusy("");
+    if (!saved) return;
     if (errors.length) {
       flash(
         "err",
-        "Alcune partite non sono state create. Correggi l'errore e premi di nuovo Crea; le partite già create restano valide.",
+        "Alcune partite non sono state create. Correggi l'errore e premi di nuovo Crea; le partite già create sono salvate.",
         errors
       );
       return;
     }
-
-    // Sync created games to Firestore in background
-    try {
-      const gamesToSave: HistoryGame[] = ready
-        .map(({ p, i }) => ({
-          round,
-          white: p.white,
-          black: p.black,
-          url: pairs[i]?.url || "",
-          createdAt: Date.now(),
-        }))
-        .filter((g) => Boolean(g.url));
-
-      if (gamesToSave.length > 0) {
-        saveGamesBatchToFirebase(gamesToSave);
-      }
-    } catch (err) {
-      console.warn("Salvataggio Firebase in background fallito:", err);
-    }
-
-    flash("ok", "Partite create con successo e sincronizzate sul database cloud!");
+    flash("ok", "Partite create su Lichess e salvate nel torneo.");
     setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
+
+  const retrySave = async () => {
+    setBusy("Salvataggio nel torneo…");
+    const saved = await saveCreated(unsaved);
+    setBusy("");
+    if (saved) flash("ok", `${unsaved.length} ${unsaved.length === 1 ? "partita salvata" : "partite salvate"} nel torneo.`);
   };
 
   const clearPairs = () => {
@@ -256,6 +277,16 @@ export function PairingsTab({
         {used.size} di {config.players.length} giocatori inseriti
         {byes.length > 0 && ` (Riposa: ${byes.join(", ")})`}
       </p>
+
+      {unsaved.length > 0 && !busy && (
+        <div className="notice warning mb-14">
+          {unsaved.length === 1 ? "Una partita creata su Lichess non è" : `${unsaved.length} partite create su Lichess non sono`}{" "}
+          ancora nel torneo, quindi non compaiono nella pagina pubblica.
+          <button className="secondary btn-block mt-8" type="button" onClick={retrySave}>
+            Salva nel torneo
+          </button>
+        </div>
+      )}
 
       <button className="primary" type="button" disabled={!!busy} onClick={createGames}>
         {busy || "Crea partite su Lichess"}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame } from '../types';
 import { errorMessage } from '../lib/utils';
 import { validateAndNormalizeConfig } from '../lib/config';
@@ -12,16 +12,14 @@ import {
 } from '../firebaseService';
 
 // Loads config.json and the Firestore data on boot, then keeps tournament and games in sync in real time.
+// Firestore is the only source of the games: every device, the organizer's included, mirrors it.
 export function useTournamentSync(
   setConfig: React.Dispatch<React.SetStateAction<AppConfig>>,
-  setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>,
-  // Public visitors mirror Firestore exactly, so games removed by the organizer (new season) disappear.
-  // The organizer's device keeps merging, because it may hold games not saved yet.
-  mirrorRemote: boolean
+  setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>
 ) {
   const [ready, setReady] = useState(false);
-  const mirrorRef = useRef(mirrorRemote);
-  mirrorRef.current = mirrorRemote;
+  // True after the first snapshot of the games collection
+  const [gamesLoaded, setGamesLoaded] = useState(false);
 
   useEffect(() => {
     testFirestoreConnection();
@@ -78,21 +76,8 @@ export function useTournamentSync(
 
     // Real-time listener for Firestore games: updates games across all devices instantly
     const unsubGames = subscribeToGames((remoteGames) => {
-      if (mirrorRef.current) {
-        setHistory(remoteGames);
-      } else if (remoteGames.length > 0) {
-        setHistory((prevLocal) => {
-          const remoteByUrl = new Map(remoteGames.filter((rg) => rg.url).map((rg) => [rg.url, rg]));
-          const knownUrls = new Set(prevLocal.map((g) => g.url).filter(Boolean));
-          // Update the Lichess state of already known games with the one saved in Firestore
-          const merged = prevLocal.map((g) => {
-            const r = g.url ? remoteByUrl.get(g.url) : undefined;
-            return r?.lichess ? { ...g, lichess: r.lichess } : g;
-          });
-          const toAdd = remoteGames.filter((rg) => rg.url && !knownUrls.has(rg.url));
-          return [...merged, ...toAdd];
-        });
-      }
+      setHistory(remoteGames);
+      setGamesLoaded(true);
     });
 
     return () => {
@@ -101,5 +86,5 @@ export function useTournamentSync(
     };
   }, []);
 
-  return { ready };
+  return { ready, gamesLoaded };
 }
