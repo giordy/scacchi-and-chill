@@ -58,7 +58,7 @@ async function main() {
       `<meta property="og:image" content="${esc(`${site}og-image.png?v=${version}`)}">`,
       `<meta property="og:image:width" content="1200">`,
       `<meta property="og:image:height" content="630">`,
-      `<meta property="og:image:alt" content="Logo di Scacchi &amp; Chill">`,
+      `<meta property="og:image:alt" content="Logo di Scacchi &amp; Chill: un cavallo degli scacchi rilassato su un pouf con una tazza in mano">`,
       `<meta name="twitter:card" content="summary_large_image">`,
     ].join('\n  ');
     html = html.replace('</head>', `  ${tags}\n</head>`);

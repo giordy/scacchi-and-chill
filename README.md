@@ -62,7 +62,7 @@ npm run build    # build di produzione in dist/, con i meta tag dell'anteprima
 ```
 
 ### Anteprima dei link
-Quando il link del sito viene condiviso (WhatsApp, Linktree…) l'anteprima mostra il logo `public/og-image.png` (1200×630, con tutto il contenuto nel quadrato centrale, così regge anche il ritaglio quadrato di Linktree) e come titolo il nome del torneo con la stagione. `public/logo-square.png` (1080×1080) è la stessa grafica quadrata, da caricare a mano su Linktree se serve.
+Quando il link del sito viene condiviso (WhatsApp, Linktree…) l'anteprima mostra il logo `public/og-image.png` (1200×630: il cavallo sul pouf con i colori del sito e il nome del torneo, tutto nel quadrato centrale, così regge anche il ritaglio quadrato di Linktree) e come titolo il nome del torneo con la stagione. `public/logo-square.png` (640×640) è l'illustrazione da sola, per l'immagine del canale WhatsApp o una miniatura caricata a mano su Linktree.
 
 Dopo `vite build`, `scripts/meta-tags.mjs` legge titolo e stagione dal documento pubblico su Firestore e li scrive nel titolo della pagina; aggiunge poi i meta tag `og:image`, che richiedono l'indirizzo assoluto del sito nella variabile `SITE_URL` (il workflow di deploy la prende da GitHub Pages). Il titolo si aggiorna a ogni deploy: dopo un cambio di stagione, rilancia il deploy dalla scheda Actions (*Run workflow*) o fai un push. WhatsApp conserva a lungo l'anteprima di un link già condiviso.
 
