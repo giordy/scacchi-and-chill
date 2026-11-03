@@ -274,6 +274,16 @@ async function main() {
     .asPng();
   fs.writeFileSync(path.join(DIST, 'og.png'), png);
 
+  // Link preview title: tournament and current season ("Scacchi & Chill – Stagione 2 - Capablanca")
+  if (data) {
+    const pageTitle = esc(`${data.title} – ${data.season}`);
+    const titled = fs
+      .readFileSync(indexFile, 'utf8')
+      .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${pageTitle}">`)
+      .replace(/<title>[^<]*<\/title>/, `<title>${pageTitle}</title>`);
+    fs.writeFileSync(indexFile, titled);
+  }
+
   // Absolute URL required by WhatsApp and the other link previews; the hash busts their cache
   const site = (process.env.SITE_URL ?? '').replace(/\/?$/, '/');
   if (site === '/') {
