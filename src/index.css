@@ -1383,6 +1383,82 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   color: var(--muted);
 }
 
+.round-group-leg {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.round-group-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+/* Current round: framed so it stands out at the top of the list */
+.round-group.is-current {
+  padding: 14px;
+  background: var(--brass-soft);
+  border: 1px solid color-mix(in srgb, var(--brass) 45%, var(--line));
+  border-radius: 10px;
+}
+
+/* Unfinished games of earlier rounds */
+.round-group.is-late {
+  padding: 14px;
+  border: 1px dashed color-mix(in srgb, var(--info) 55%, var(--line));
+  border-radius: 10px;
+}
+
+.round-group.is-late .round-group-title::before {
+  background: var(--info);
+}
+
+/* Played rounds: one line each, open on tap */
+.round-group-collapsible {
+  margin: 0;
+}
+
+/* Played rounds sit closer together than open ones */
+.rounds-list > .round-group-collapsible + .round-group-collapsible {
+  margin-top: -12px;
+}
+
+.round-group-collapsible > summary {
+  list-style: none;
+  margin: 0;
+}
+
+.round-group-collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.round-group-collapsible > summary .round-group-summary::after {
+  content: "▾";
+  display: inline-block;
+  margin-left: 8px;
+  transform: rotate(-90deg);
+  transition: transform 0.15s ease;
+}
+
+.round-group-collapsible[open] > summary .round-group-summary::after {
+  transform: none;
+}
+
+.round-group-collapsible > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.round-group-collapsible[open] > .matches-grid {
+  margin-bottom: 14px;
+}
+
 .match-round {
   font-size: 14px;
   font-weight: 500;

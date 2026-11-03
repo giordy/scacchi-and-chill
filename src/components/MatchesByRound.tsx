@@ -1,9 +1,9 @@
-import React from 'react';
 import { HistoryGame, LichessExportGame } from '../types';
 import { extractGameId } from '../lib/utils';
 import { gameProgress } from '../lib/progress';
 import { isReturnLeg } from '../lib/legs';
 import { MiniBoard } from './MiniBoard';
+import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
 
 interface MatchesByRoundProps {
   games: HistoryGame[]; // already filtered and sorted by round
@@ -12,61 +12,105 @@ interface MatchesByRoundProps {
   returnStart?: string; // first round of the return leg, if any
 }
 
-// Public "Partite": one block per round, under an "Andata"/"Ritorno" heading when there is a return leg
+// Public "Partite": the current round first, then the unfinished games of earlier rounds,
+// the upcoming rounds and finally the played rounds, newest first and collapsed
 export function MatchesByRound({ games, gameStates, nameOf, returnStart }: MatchesByRoundProps) {
   const stateOf = (g: HistoryGame) => {
     const id = extractGameId(g.url);
     return (id && gameStates[id]) || g.lichess;
   };
+  const progressOf = (g: HistoryGame) => gameProgress(stateOf(g));
+  const legOf = (round: string) =>
+    returnStart === undefined ? undefined : isReturnLeg(round, returnStart) ? "ritorno" : "andata";
 
-  const rounds: { round: string; games: HistoryGame[] }[] = [];
-  games.forEach((g) => {
-    const last = rounds[rounds.length - 1];
-    if (last && last.round === g.round) last.games.push(g);
-    else rounds.push({ round: g.round, games: [g] });
-  });
+  const summaryOf = (roundGames: HistoryGame[]) => {
+    const progress = roundGames.map(progressOf);
+    const finished = progress.filter((p) => p === "finished").length;
+    const ongoing = progress.filter((p) => p === "ongoing").length;
+    const pending = progress.length - finished - ongoing;
+    return finished === progress.length
+      ? "Turno concluso"
+      : [
+          finished > 0 ? `${finished} ${finished === 1 ? "conclusa" : "concluse"}` : "",
+          ongoing > 0 ? `${ongoing} in corso` : "",
+          pending > 0 ? `${pending} da giocare` : "",
+        ]
+          .filter(Boolean)
+          .join(", ");
+  };
 
-  let previousLeg: boolean | undefined;
+  const grid = (roundGames: HistoryGame[], showRound = false) => (
+    <div className="matches-grid">
+      {roundGames.map((g, idx) => (
+        <MatchCard key={`${g.url}-${idx}`} game={g} state={stateOf(g)} nameOf={nameOf} showRound={showRound} />
+      ))}
+    </div>
+  );
+
+  const header = (block: RoundBlock, tag?: string) => {
+    const leg = legOf(block.round);
+    return (
+      <>
+        <h3 id={`round-${block.round}`} className="round-group-title">
+          Turno {block.round}
+          {leg && <span className="round-group-leg">{leg}</span>}
+          {tag && <span className="round-group-tag">{tag}</span>}
+        </h3>
+        <span className="round-group-summary">{summaryOf(block.games)}</span>
+      </>
+    );
+  };
+
+  const openRound = (block: RoundBlock, extraClass = "", tag?: string) => (
+    <section key={block.round} className={`round-group${extraClass}`} aria-labelledby={`round-${block.round}`}>
+      <header className="round-group-header">{header(block, tag)}</header>
+      {grid(block.games)}
+    </section>
+  );
+
+  const layout = layoutMatches(games, progressOf);
+  const roundCount = layout.played.length + layout.upcoming.length + (layout.current ? 1 : 0);
+
+  // A single round (filter) or a season not started yet: nothing to reorder
+  if (roundCount <= 1 || !layout.current) {
+    const blocks = [...(layout.current ? [layout.current] : []), ...layout.upcoming];
+    return <div className="rounds-list">{blocks.map((b) => openRound(b))}</div>;
+  }
+
   return (
     <div className="rounds-list">
-      {rounds.map(({ round, games: roundGames }) => {
-        const inReturn = isReturnLeg(round, returnStart);
-        const legHeading =
-          returnStart !== undefined && inReturn !== previousLeg ? (inReturn ? "Ritorno" : "Andata") : null;
-        previousLeg = inReturn;
+      {openRound(layout.current, " is-current", layout.concluded ? "Ultimo turno" : "Turno attuale")}
 
-        const progress = roundGames.map((g) => gameProgress(stateOf(g)));
-        const finished = progress.filter((p) => p === "finished").length;
-        const ongoing = progress.filter((p) => p === "ongoing").length;
-        const pending = progress.length - finished - ongoing;
-        const summary =
-          finished === progress.length
-            ? "Turno concluso"
-            : [
-                finished > 0 ? `${finished} ${finished === 1 ? "conclusa" : "concluse"}` : "",
-                ongoing > 0 ? `${ongoing} in corso` : "",
-                pending > 0 ? `${pending} da giocare` : "",
-              ]
-                .filter(Boolean)
-                .join(", ");
+      {layout.late.length > 0 && (
+        <section className="round-group is-late" aria-labelledby="late-games">
+          <header className="round-group-header">
+            <h3 id="late-games" className="round-group-title">Ancora aperte dai turni precedenti</h3>
+            <span className="round-group-summary">
+              {layout.late.length} {layout.late.length === 1 ? "partita" : "partite"}
+            </span>
+          </header>
+          {grid(layout.late, true)}
+        </section>
+      )}
 
-        return (
-          <React.Fragment key={round}>
-            {legHeading && <h2 className="leg-heading">{legHeading}</h2>}
-            <section className="round-group" aria-labelledby={`round-${round}`}>
-              <header className="round-group-header">
-                <h3 id={`round-${round}`} className="round-group-title">Turno {round}</h3>
-                <span className="round-group-summary">{summary}</span>
-              </header>
-              <div className="matches-grid">
-                {roundGames.map((g, idx) => (
-                  <MatchCard key={`${g.url}-${idx}`} game={g} state={stateOf(g)} nameOf={nameOf} />
-                ))}
-              </div>
-            </section>
-          </React.Fragment>
-        );
-      })}
+      {layout.upcoming.length > 0 && (
+        <>
+          <h2 className="leg-heading">Prossimi turni</h2>
+          {layout.upcoming.map((b) => openRound(b))}
+        </>
+      )}
+
+      {layout.played.length > 0 && (
+        <>
+          <h2 className="leg-heading">Turni giocati</h2>
+          {layout.played.map((b) => (
+            <details key={b.round} className="round-group round-group-collapsible">
+              <summary className="round-group-header">{header(b)}</summary>
+              {grid(b.games)}
+            </details>
+          ))}
+        </>
+      )}
     </div>
   );
 }
@@ -75,10 +119,12 @@ function MatchCard({
   game,
   state: s,
   nameOf,
+  showRound = false,
 }: {
   game: HistoryGame;
   state?: LichessExportGame;
   nameOf: (handle: string) => string;
+  showRound?: boolean;
 }) {
   // Scheduled game not created on Lichess yet
   let badge = game.url
@@ -120,7 +166,11 @@ function MatchCard({
         {badge}
       </div>
       <div className="match-footer">
-        <span className="opening-label">{detail}</span>
+        <span className="opening-label">
+          {showRound && <span className="match-round">Turno {game.round}</span>}
+          {showRound && detail ? " · " : ""}
+          {detail}
+        </span>
         {game.url ? (
           <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
             Apri su Lichess
