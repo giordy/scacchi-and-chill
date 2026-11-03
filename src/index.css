@@ -1,18 +1,27 @@
-/* Design tokens. One accent only (brass) and only for the leader and the champions;
-   results use the win/draw/loss tokens, never hardcoded colors. */
+/* Design tokens. Chess-club palette: warm ivory surfaces, deep green "felt" for the
+   hero and primary actions, brass for highlights (leader, champions, active tab).
+   Results use the win/draw/loss tokens, never hardcoded colors. */
 :root {
   --font-ui: "Alegreya Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: "Alegreya", Georgia, "Iowan Old Style", serif;
 
-  --bg: #dfe7e2;
-  --panel: #f9fbf9;
-  --ink: #15211d;
-  --muted: #53645d;
-  --line: #c3d0c9;
+  --bg: #f1ede3;
+  --panel: #fdfbf6;
+  --ink: #1a211e;
+  --muted: #5b625c;
+  --line: #dcd5c5;
   --accent: #1f3a34;
-  --accent-ink: #f2f6f3;
+  --accent-ink: #f4f1e8;
   --brass: #a87c2c;
-  --brass-soft: color-mix(in srgb, var(--brass) 12%, var(--panel));
+  --brass-soft: color-mix(in srgb, var(--brass) 14%, var(--panel));
+  --silver: #6f7a80;
+  --bronze: #a0623a;
+  /* Hero band */
+  --felt: #1f3a34;
+  --felt-deep: #172d28;
+  --felt-ink: #f4f1e8;
+  --felt-muted: #b8cbc1;
+  --felt-brass: #e2c07a;
   --win: #2c6a4a;
   --draw: #8a6a14;
   --loss: #a3302a;
@@ -20,21 +29,28 @@
   --danger: #a3302a;
   --ok: #2c6a4a;
   --warning: #8a5a00;
-  --square-a: #e9efeb;
-  --square-b: #bccbc2;
-  --shadow: 0 1px 2px rgba(21, 33, 29, 0.06), 0 4px 14px rgba(21, 33, 29, 0.06);
+  --square-a: #ece6d8;
+  --square-b: #cdc3ac;
+  --shadow: 0 1px 2px rgba(40, 32, 20, 0.06), 0 4px 14px rgba(40, 32, 20, 0.07);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #111916;
-    --panel: #1a2521;
-    --ink: #e6eee9;
-    --muted: #97a9a0;
-    --line: #31413a;
+    --bg: #121714;
+    --panel: #1c2320;
+    --ink: #ece9e1;
+    --muted: #a3aba4;
+    --line: #343d38;
     --accent: #8fc4ae;
     --accent-ink: #10201a;
     --brass: #d9b36a;
+    --silver: #b4bcc0;
+    --bronze: #d1916a;
+    --felt: #1d3a31;
+    --felt-deep: #152a24;
+    --felt-ink: #f1eee6;
+    --felt-muted: #a9c1b6;
+    --felt-brass: #e6c47e;
     --win: #8fd0ad;
     --draw: #e3c46f;
     --loss: #f0938b;
@@ -42,8 +58,8 @@
     --danger: #ee8a82;
     --ok: #8fc4ae;
     --warning: #f1b34c;
-    --square-a: #25332d;
-    --square-b: #3a4d44;
+    --square-a: #27302b;
+    --square-b: #3b4741;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.25);
   }
 }
@@ -553,6 +569,10 @@ details .body {
   background: var(--brass-soft);
 }
 
+.row-leader .col-rank {
+  box-shadow: inset 4px 0 0 var(--brass);
+}
+
 /* Crosstable Matrix */
 .crosstable {
   width: 100%;
@@ -578,13 +598,13 @@ details .body {
 }
 
 .cross-cell.win {
-  background: color-mix(in srgb, var(--win) 16%, transparent);
+  background: color-mix(in srgb, var(--win) 22%, transparent);
   color: var(--win);
   font-weight: 700;
 }
 
 .cross-cell.loss {
-  background: color-mix(in srgb, var(--loss) 10%, transparent);
+  background: color-mix(in srgb, var(--loss) 14%, transparent);
   color: var(--loss);
 }
 
@@ -608,8 +628,26 @@ details .body {
 }
 
 .status-badge.ongoing {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: color-mix(in srgb, var(--info) 14%, transparent);
   color: var(--info);
+}
+
+/* Live dot */
+.status-badge.ongoing::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: livePulse 1.6s ease-out infinite;
+}
+
+@keyframes livePulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 55%, transparent); }
+  100% { box-shadow: 0 0 0 6px transparent; }
 }
 
 .status-badge.win {
@@ -954,7 +992,30 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 
 /* Hero: the season told as a strip of board squares, one per game */
 .hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   margin: 0 0 18px;
+  padding: 18px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, var(--felt) 0%, var(--felt-deep) 100%);
+  color: var(--felt-ink);
+  box-shadow: var(--shadow);
+}
+
+/* A faint chessboard fading in from the top-right corner */
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 260px;
+  height: 220px;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-conic-gradient(rgba(255, 255, 255, 0.07) 0 25%, transparent 0 50%) 0 0 / 40px 40px;
+  -webkit-mask-image: radial-gradient(circle at 100% 0, #000 0%, transparent 72%);
+  mask-image: radial-gradient(circle at 100% 0, #000 0%, transparent 72%);
 }
 
 .hero-identity {
@@ -972,8 +1033,8 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
-  background: var(--accent);
-  box-shadow: 0 0 0 1px var(--line), var(--shadow);
+  background: var(--felt-deep);
+  box-shadow: 0 0 0 2px var(--felt-brass), 0 6px 18px rgba(0, 0, 0, 0.3);
 }
 
 .hero-portrait img {
@@ -1002,12 +1063,13 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 
 .hero-season {
   margin: 6px 0 0;
-  color: var(--muted);
+  color: var(--felt-brass);
   font-size: 17px;
+  font-weight: 500;
 }
 
 .hero-status {
-  margin: 18px 0 10px;
+  margin: 18px 0 12px;
   font-family: var(--font-display);
   font-size: 19px;
   line-height: 1.4;
@@ -1024,28 +1086,34 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   max-width: 100%;
   gap: 3px;
   padding: 6px;
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
 }
 
+/* Squares live on the felt band: pending = empty, finished = ivory, ongoing = brass */
 .sq {
   display: inline-block;
   width: 16px;
   height: 16px;
   border-radius: 2px;
-  background: var(--square-a);
-  box-shadow: inset 0 0 0 1px var(--line);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
 }
 
 .sq-finished {
-  background: var(--accent);
+  background: var(--felt-ink);
   box-shadow: none;
 }
 
 .sq-ongoing {
-  background: linear-gradient(135deg, var(--accent) 50%, var(--square-b) 50%);
+  background: var(--felt-brass);
   box-shadow: none;
+  animation: sqPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes sqPulse {
+  50% { opacity: 0.45; }
 }
 
 .season-legend {
@@ -1054,7 +1122,11 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   gap: 4px 16px;
   margin-top: 8px;
   font-size: 14px;
-  color: var(--muted);
+  color: var(--felt-muted);
+}
+
+.season-legend .sq-ongoing {
+  animation: none;
 }
 
 .season-legend span {
@@ -1101,7 +1173,7 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 .pub-tab-btn.active {
   color: var(--ink);
   font-weight: 700;
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--brass);
 }
 
 /* Tables */
@@ -1153,9 +1225,23 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   color: var(--muted);
 }
 
-.row-leader .rank {
-  background: var(--brass);
+.rank.podium-1,
+.rank.podium-2,
+.rank.podium-3 {
   color: var(--panel);
+}
+
+.rank.podium-1 {
+  background: var(--brass);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brass) 25%, transparent);
+}
+
+.rank.podium-2 {
+  background: var(--silver);
+}
+
+.rank.podium-3 {
+  background: var(--bronze);
 }
 
 .col-points {
@@ -1212,6 +1298,11 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   border-radius: 8px;
 }
 
+.match-card.is-ongoing {
+  border-color: color-mix(in srgb, var(--info) 45%, var(--line));
+  box-shadow: inset 4px 0 0 var(--info);
+}
+
 .match-card-body {
   display: flex;
   justify-content: space-between;
@@ -1230,7 +1321,7 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   padding-bottom: 8px;
   font-size: 24px;
   border-bottom: 6px solid transparent;
-  border-image: repeating-linear-gradient(90deg, var(--accent) 0 6px, var(--square-a) 6px 12px) 6;
+  border-image: repeating-linear-gradient(90deg, var(--accent) 0 6px, var(--square-b) 6px 12px) 6;
 }
 
 .rounds-list > .leg-heading:first-child {
@@ -1247,8 +1338,21 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 }
 
 .round-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   font-size: 19px;
+}
+
+/* Small brass square before "Turno N" */
+.round-group-title::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--brass);
+  transform: rotate(45deg);
 }
 
 .round-group-summary {
@@ -1319,6 +1423,16 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 .section-heading {
   margin: 0 0 12px;
   font-size: 22px;
+}
+
+.section-heading::after {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 3px;
+  margin-top: 6px;
+  border-radius: 2px;
+  background: var(--brass);
 }
 
 .dossier-card,
@@ -1492,6 +1606,10 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 @media (prefers-reduced-motion: reduce) {
   .hero-portrait img {
     transition: none;
+  }
+  .sq-ongoing,
+  .status-badge.ongoing::before {
+    animation: none;
   }
 }
 

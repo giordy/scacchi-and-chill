@@ -96,7 +96,7 @@ function MatchCard({
     s?.opening?.name || (gameProgress(s) === "finished" && moves > 0 ? `${moves} ${moves === 1 ? "mossa" : "mosse"}` : "");
 
   return (
-    <article className="match-card">
+    <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}`}>
       <div className="match-card-body">
         <div className="match-players">
           <div className={`player-row ${s?.winner === "white" ? "is-winner" : ""}`}>

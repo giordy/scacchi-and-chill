@@ -163,7 +163,7 @@ export function PublicTournamentView({
               <tbody>
                 {standings.map((p, idx) => (
                   <tr key={p.handle} className={idx === 0 && leader ? "row-leader" : ""}>
-                    <td className="col-rank"><span className="rank">{idx + 1}</span></td>
+                    <td className="col-rank"><span className={`rank${idx < 3 && p.points > 0 ? ` podium-${idx + 1}` : ""}`}>{idx + 1}</span></td>
                     <td className="sticky-col">
                       <div className="player-cell">
                         <a href={playerHref(p.handle)} className="player-name player-page-link">{p.name}</a>
