@@ -73,3 +73,25 @@ export function validateNewSeasonName(
 // Newest first
 export const sortSeasons = (seasons: SeasonArchive[]): SeasonArchive[] =>
   [...seasons].sort((a, b) => b.archivedAt.localeCompare(a.archivedAt));
+
+// Current standings as CSV for a spreadsheet: semicolons and decimal commas (Italian Excel),
+// with a BOM so accented names open correctly. Touches neither the archive nor the hall of fame.
+export function standingsCsv(archive: SeasonArchive): string {
+  const num = (n: number) => String(n).replace(".", ",");
+  const cell = (v: string) => (/[";\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  const rows = [
+    ["Posizione", "Giocatore", "Lichess", "Punti", "Giocate", "Vinte", "Patte", "Perse", "Sonneborn-Berger"],
+    ...archive.standings.map((s, i) => [
+      String(i + 1),
+      s.name,
+      s.handle,
+      num(s.points),
+      String(s.played),
+      String(s.won),
+      String(s.drawn),
+      String(s.lost),
+      num(s.sb),
+    ]),
+  ];
+  return "\uFEFF" + rows.map((r) => r.map(cell).join(";")).join("\r\n") + "\r\n";
+}

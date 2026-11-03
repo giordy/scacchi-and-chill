@@ -28,6 +28,7 @@ Accesso con login Google, riservato a un solo account.
 Da *Torneo → Fine stagione e storico*:
 - **Chiudi la stagione e inizia la prossima** salva la classifica finale nello storico pubblico, mette il primo in classifica nell'Albo d'Oro, poi **cancella tutte le partite** della stagione, imposta il nuovo nome e maestro e, se vuoi, svuota il calendario. Prima della cancellazione chiede conferma e non cancella nulla se l'archiviazione fallisce.
 - Se la stagione era già nell'Albo d'Oro con un altro giocatore, la voce viene aggiornata con il campione effettivo.
+- **Scaricala come file (CSV)**, sotto il pulsante, scarica una copia della classifica di oggi da aprire con Excel o Numbers. Non tocca lo storico né l'Albo d'Oro.
 
 ## Configurazione Firebase
 

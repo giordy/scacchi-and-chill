@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildSeasonArchive, seasonId, sortSeasons, validateNewSeasonName, withChampion } from '../seasons';
+import { buildSeasonArchive, seasonId, sortSeasons, standingsCsv, validateNewSeasonName, withChampion } from '../seasons';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, TournamentMeta } from '../../types';
 
 const players: Player[] = [
@@ -81,5 +81,16 @@ describe('validateNewSeasonName', () => {
     expect(validateNewSeasonName('  ', 'Stagione 2', archived)).toMatch(/Inserisci/);
     expect(validateNewSeasonName('stagione 2', 'Stagione 2', archived)).toMatch(/corrente/);
     expect(validateNewSeasonName('Stagione 1', 'Stagione 2', archived)).toMatch(/archiviata/);
+  });
+});
+
+describe('standingsCsv', () => {
+  it('writes one row per player with Italian number format', () => {
+    const named: Player[] = [{ name: 'Anna; "la Rossa"', handle: 'anna' }, { name: 'Bruno', handle: 'bruno' }];
+    const a = buildSeasonArchive(meta, named, [game('aaaaaaaa')], { aaaaaaaa: st('aaaaaaaa', 'draw') });
+    const lines = standingsCsv(a).replace(/^\uFEFF/, '').trim().split('\r\n');
+    expect(lines[0]).toBe('Posizione;Giocatore;Lichess;Punti;Giocate;Vinte;Patte;Perse;Sonneborn-Berger');
+    expect(lines[1]).toBe('1;"Anna; ""la Rossa""";anna;0,5;1;0;1;0;0,25');
+    expect(lines).toHaveLength(3);
   });
 });

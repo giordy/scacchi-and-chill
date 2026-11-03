@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchive, TournamentMeta } from '../../types';
-import { buildSeasonArchive, seasonId, validateNewSeasonName, withChampion } from '../../lib/seasons';
+import { buildSeasonArchive, seasonId, standingsCsv, validateNewSeasonName, withChampion } from '../../lib/seasons';
 import { deleteAllGames, saveSeasonArchive } from '../../firebaseService';
 import { errorMessage } from '../../lib/utils';
 
@@ -36,6 +36,17 @@ export function SeasonArchiveSection({
 
   const preview = buildSeasonArchive(meta, config.players, history, gameStates);
   const alreadyArchived = seasons.some((s) => s.id === seasonId(meta.season));
+
+  // A copy of the standings for the organizer: a file, never the public archive or the hall of fame
+  const downloadStandings = () => {
+    const blob = new Blob([standingsCsv(preview)], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `classifica-${seasonId(meta.season)}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const startNewSeason = async () => {
     const problem = validateNewSeasonName(nextSeason, meta.season, seasons);
@@ -116,6 +127,13 @@ export function SeasonArchiveSection({
         <button type="button" className="danger" disabled={busy || !preview.champion} onClick={startNewSeason}>
           {busy ? "Operazione in corso…" : "Chiudi la stagione e inizia la prossima"}
         </button>
+        <p className="note note-sm mt-12">
+          Ti serve solo una copia della classifica di oggi?{" "}
+          <button type="button" className="link-muted" onClick={downloadStandings}>
+            Scaricala come file (CSV)
+          </button>
+          : non tocca lo storico né l'Albo d'Oro.
+        </p>
       </div>
 
       {seasons.length > 0 && (
