@@ -8,6 +8,7 @@ import { DEFAULT_TOURNAMENT } from "./lib/tournament";
 import { onTabListKeyDown } from "./lib/tabKeys";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
+import { withScheduledGames } from "./lib/publicGames";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -45,13 +46,15 @@ export function PublicTournamentView({
   const progress = computeSeasonProgress(history, gameStates, schedule);
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
 
-  const rounds = [...new Set(history.map((g) => g.round))].sort(byRound);
+  // Created games plus the scheduled ones still to be created on Lichess
+  const allGames = withScheduledGames(history, schedule);
+  const rounds = [...new Set(allGames.map((g) => g.round))].sort(byRound);
   // Andata/ritorno: from the official schedule when there is one, otherwise from the games created so far
   const returnStart = returnLegStart(schedule.length > 0 ? schedule : history);
   const scheduleIndex = (g: HistoryGame) =>
     schedule.findIndex((m) => m.round === g.round && m.white === g.white && m.black === g.black);
   // Round order first, then the order of the official schedule
-  const filteredGames = (filterRound === "all" ? history : history.filter((g) => g.round === filterRound))
+  const filteredGames = (filterRound === "all" ? allGames : allGames.filter((g) => g.round === filterRound))
     .slice()
     .sort((a, b) => {
       const r = byRound(a.round, b.round);
@@ -244,7 +247,7 @@ export function PublicTournamentView({
                 value={filterRound}
                 onChange={(e) => setFilterRound(e.target.value)}
               >
-                <option value="all">Tutti ({history.length} partite)</option>
+                <option value="all">Tutti ({allGames.length} partite)</option>
                 {rounds.map((r) => (
                   <option key={r} value={r}>
                     Turno {r}
@@ -256,7 +259,7 @@ export function PublicTournamentView({
           )}
 
           {filteredGames.length === 0 ? (
-            <p className="note">Le partite compariranno qui quando l'organizzatore crea il primo turno.</p>
+            <p className="note">Le partite compariranno qui quando l'organizzatore pubblica il calendario.</p>
           ) : (
             <MatchesByRound games={filteredGames} gameStates={gameStates} nameOf={nameOf} returnStart={returnStart} />
           )}
