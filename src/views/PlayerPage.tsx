@@ -45,7 +45,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
 
   if (!profile) {
     return (
-      <main>
+      <main className="public-main">
         <a href="#" className="chip-link back-link">← Torna al torneo</a>
         <p className="note">Giocatore «{handle}» non trovato.</p>
       </main>
@@ -55,19 +55,18 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
   const { player, rank, standing, games, remaining } = profile;
 
   return (
-    <main>
+    <main className="public-main">
       <a href="#" className="chip-link back-link">← Torna al torneo</a>
 
       <section className="dossier-card player-hero">
-        <span className="eyebrow">Giocatore</span>
-        <h1 className="view-title">{player.name}</h1>
+        <h1 className="hero-title">{player.name}</h1>
         <a
           className="player-link"
           href={`https://lichess.org/@/${player.handle}`}
           target="_blank"
           rel="noopener noreferrer"
         >
-          @{player.handle} ↗
+          @{player.handle} su Lichess
         </a>
 
         <div className="stat-pills">
@@ -80,8 +79,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
             <span className="stat-pill-val">{standing.points}</span>
           </div>
           <div className="stat-pill">
-            <span className="stat-pill-label">V · N · P</span>
-            <span className="stat-pill-val">{standing.won} · {standing.drawn} · {standing.lost}</span>
+            <span className="stat-pill-label">V / N / P</span>
+            <span className="stat-pill-val">{standing.won} / {standing.drawn} / {standing.lost}</span>
           </div>
           <div className="stat-pill">
             <span className="stat-pill-label">Spareggio SB</span>
@@ -91,7 +90,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
       </section>
 
       <section className="dossier-card">
-        <h2 className="dossier-heading">♟️ Partite ({games.length})</h2>
+        <h2 className="section-heading">Partite ({games.length})</h2>
         {games.length === 0 ? (
           <p className="note m-0">Nessuna partita ancora registrata.</p>
         ) : (
@@ -105,7 +104,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
                 </span>
                 <span className={`status-badge ${OUTCOME_CLASS[game.outcome]}`}>{OUTCOME_LABEL[game.outcome]}</span>
                 <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
-                  Lichess ↗
+                  Lichess
                 </a>
               </li>
             ))}
@@ -114,9 +113,9 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
       </section>
 
       <section className="dossier-card">
-        <h2 className="dossier-heading">⏭️ Avversari da affrontare ({remaining.length})</h2>
+        <h2 className="section-heading">Avversari da affrontare ({remaining.length})</h2>
         {remaining.length === 0 ? (
-          <p className="note m-0">Ha già affrontato tutti gli avversari. 🎉</p>
+          <p className="note m-0">Ha già affrontato tutti gli avversari.</p>
         ) : (
           <ul className="player-games">
             {remaining.map((r) => (

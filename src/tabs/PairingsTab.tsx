@@ -108,7 +108,7 @@ export function PairingsTab({
     setNotice(null);
     if (!settings.token) {
       onMissingToken();
-      return flash("err", "Aggiungi prima il tuo token API Lichess nella scheda Impostazioni.");
+      return flash("err", "Aggiungi prima il token API Lichess in Torneo → Lichess e messaggi WhatsApp.");
     }
     const todo = pairs.map((p, i) => ({ p, i })).filter(({ p }) => !p.url);
     const ready = todo.filter(({ p }) => p.white && p.black);
@@ -236,7 +236,7 @@ export function PairingsTab({
                 flash("ok", `Accoppiamenti del Turno ${round} ricaricati dal calendario ufficiale!`);
               }}
             >
-              🔄 Ricarica Turno {round}
+              Ricarica turno {round}
             </button>
           )}
         </div>

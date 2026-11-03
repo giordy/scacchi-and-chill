@@ -9,7 +9,6 @@ export const DEFAULT_TOURNAMENT: TournamentMeta = {
   imageUrl: "assets/capablanca.jpg",
   description:
     "Per rendere ogni appuntamento sempre vario e coinvolgente, ogni stagione del nostro torneo è dedicata a un grande campione della storia degli scacchi, con aneddoti e curiosità legati alla sua carriera durante lo svolgimento delle partite.",
-  rulesText: "",
   howItWorks:
     "1. All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida.\n2. Quando la partita finisce, scrivi nel gruppo WhatsApp così il risultato viene registrato.",
   fairPlayText:
@@ -29,9 +28,10 @@ export function tournamentFromDoc(doc: TournamentDocData): TournamentMeta | null
     masterName: doc.masterName || DEFAULT_TOURNAMENT.masterName,
     imageUrl: doc.imageUrl || DEFAULT_TOURNAMENT.imageUrl,
     description: doc.description || DEFAULT_TOURNAMENT.description,
-    rulesText: doc.rulesText || "",
     howItWorks: doc.howItWorks || "",
     fairPlayText: doc.fairPlayText || "",
+    daysPerMove: typeof doc.daysPerMove === "number" && doc.daysPerMove > 0 ? doc.daysPerMove : undefined,
+    rated: typeof doc.rated === "boolean" ? doc.rated : undefined,
     winners: doc.winners || [],
   };
 }
@@ -51,7 +51,8 @@ export function mergeTournamentMeta(
     description: patch.description ?? current?.description ?? d.description,
     howItWorks: patch.howItWorks ?? current?.howItWorks ?? d.howItWorks,
     fairPlayText: patch.fairPlayText ?? current?.fairPlayText ?? d.fairPlayText,
+    daysPerMove: patch.daysPerMove ?? current?.daysPerMove,
+    rated: patch.rated ?? current?.rated,
     winners: patch.winners ?? current?.winners ?? d.winners,
-    rulesText: patch.rulesText ?? current?.rulesText ?? "",
   };
 }

@@ -5,10 +5,10 @@ import {
 import rawConfig from '../../config.json';
 
 export const RULES = [
-  { key: "noRematch", label: "No rematch offers" },
-  { key: "noGiveTime", label: "No giving time to the opponent" },
-  { key: "noClaimWin", label: "No claiming victory if the opponent leaves" },
-  { key: "noEarlyDraw", label: "No early draws (draw offers blocked early in the game)" },
+  { key: "noRematch", label: "Niente richieste di rivincita" },
+  { key: "noGiveTime", label: "Non si può regalare tempo all'avversario" },
+  { key: "noClaimWin", label: "Non si può reclamare la vittoria se l'avversario sparisce" },
+  { key: "noEarlyDraw", label: "Niente patta nelle prime mosse" },
 ];
 
 // Untrusted JSON from config.json: every field is checked below before use.
@@ -111,12 +111,10 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
     title: isText(cfg.tournament.title) ? cfg.tournament.title : "Scacchi & Chill",
     season: isText(cfg.tournament.season) ? cfg.tournament.season : "Edizione 2026",
     description: isText(cfg.tournament.description) ? cfg.tournament.description : "Campionato amatoriale di scacchi per corrispondenza tra amici e colleghi.",
-    rulesText: isText(cfg.tournament.rulesText) ? cfg.tournament.rulesText : "2 giorni a mossa. Nessuna rivincita. Fair play assoluto.",
   } : {
     title: "Scacchi & Chill",
     season: "Edizione 2026",
     description: "Campionato amatoriale di scacchi per corrispondenza tra amici e colleghi.",
-    rulesText: "Partite per corrispondenza con cadenza a 2 giorni per mossa. No takeback, partite Rated, rispetto e fair play tra amici.",
   };
 
   const rawSchedule = cfg.schedule || cfg.calendario;

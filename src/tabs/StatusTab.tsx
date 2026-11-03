@@ -13,14 +13,12 @@ export function StatusTab({
   setHistory,
   defaultDays,
   config,
-  onLoadIntoActivePairs,
   triggerToast,
 }: {
   history: HistoryGame[];
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
   defaultDays: number;
   config: AppConfig;
-  onLoadIntoActivePairs: (round: string, games: HistoryGame[]) => void;
   triggerToast?: (msg: string) => void;
 }) {
   const nameOf = (handle: string) => config.players.find((p) => p.handle === handle)?.name ?? handle;
@@ -37,22 +35,6 @@ export function StatusTab({
   const [details, setDetails] = useState<string[]>([]);
   const [isRoundComplete, setIsRoundComplete] = useState(false);
   const [status, setStatus] = useState({ busy: false, error: "", info: "" });
-  const [showManage, setShowManage] = useState(false);
-
-  const handleDeleteRound = (roundToDelete: string) => {
-    if (window.confirm(`Sei sicuro di voler eliminare tutte le partite del Turno ${roundToDelete}?`)) {
-      setHistory((prev) => prev.filter((g) => g.round !== roundToDelete));
-      if (chosen === roundToDelete) setChosen("");
-    }
-  };
-
-  const handleClearAllHistory = () => {
-    if (window.confirm("Attenzione: questo cancellerà TUTTO lo storico delle partite salvate. Continuare?")) {
-      setHistory([]);
-      setChosen("");
-      setText("");
-    }
-  };
 
   const buildStatusMessageInternal = (games: HistoryGame[], states: Record<string, LichessExportGame>) => {
     const count = { finished: 0, ongoing: 0, pending: 0 };
@@ -289,10 +271,9 @@ export function StatusTab({
 
   return (
     <section>
-      <h2>Stato e Risultati Partite</h2>
       {rounds.length === 0 ? (
         <p className="note">
-          Nessuna partita memorizzata. Crea un turno nella scheda <strong>Partite</strong> per monitorarne lo stato in tempo reale.
+          Nessuna partita memorizzata. Crea un turno in <strong>Accoppiamenti</strong> per seguirne lo stato qui.
         </p>
       ) : (
         <>
@@ -373,51 +354,6 @@ export function StatusTab({
         </>
       )}
 
-      {/* Archivio Compatto turni salvati */}
-      {rounds.length > 0 && (
-        <details className="manage-rounds" open={showManage} onToggle={(e) => setShowManage((e.target as HTMLDetailsElement).open)}>
-          <summary className="summary-muted">
-            🗂️ Archivio e pulizia turni ({rounds.length} {rounds.length === 1 ? 'turno' : 'turni'})
-          </summary>
-          <div className="body mt-10">
-            {rounds.map((r) => {
-              const roundGames = history.filter((g) => g.round === r);
-              return (
-                <div key={r} className="round-card mb-10">
-                  <div className="round-header">
-                    <strong>Turno {r}</strong>
-                    <div className="header-actions">
-                      <button
-                        className="secondary btn-sm"
-                        type="button"
-                        onClick={() => onLoadIntoActivePairs(r, roundGames)}
-                      >
-                        Carica in Partite
-                      </button>
-                      <button
-                        className="danger btn-sm"
-                        type="button"
-                        onClick={() => handleDeleteRound(r)}
-                      >
-                        Elimina
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            <div className="reset-row mt-12">
-              <button
-                type="button"
-                className="link-danger sm"
-                onClick={handleClearAllHistory}
-              >
-                Cancella tutto lo storico salvato
-              </button>
-            </div>
-          </div>
-        </details>
-      )}
     </section>
   );
 }

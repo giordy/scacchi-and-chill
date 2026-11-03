@@ -2,7 +2,7 @@ import React from 'react';
 import { SeasonArchive } from '../types';
 import { playerHref } from '../lib/routes';
 
-// Public "Storico" tab: final standings of every archived season, newest first
+// Public "Torneo" tab, past seasons: final standings of every archived season, newest first
 export function SeasonsHistory({ seasons }: { seasons: SeasonArchive[] }) {
   return (
     <div className="seasons-history">
@@ -10,7 +10,7 @@ export function SeasonsHistory({ seasons }: { seasons: SeasonArchive[] }) {
         <details key={s.id} className="season-card" open={i === 0}>
           <summary>
             <span className="season-name">{s.season}</span>
-            {s.champion && <span className="season-champion">🥇 {s.champion.name}</span>}
+            {s.champion && <span className="season-champion">{s.champion.name}</span>}
           </summary>
           <p className="note note-sm">
             {s.title}
@@ -21,7 +21,7 @@ export function SeasonsHistory({ seasons }: { seasons: SeasonArchive[] }) {
             <table className="standings-table">
               <thead>
                 <tr>
-                  <th className="col-rank">#</th>
+                  <th className="col-rank" scope="col"><span className="sr-only">Posizione</span></th>
                   <th className="sticky-col">Giocatore</th>
                   <th className="col-center">Punti</th>
                   <th className="col-center">G</th>
@@ -34,15 +34,15 @@ export function SeasonsHistory({ seasons }: { seasons: SeasonArchive[] }) {
               <tbody>
                 {s.standings.map((p, idx) => (
                   <tr key={p.handle} className={idx === 0 && p.points > 0 ? "row-leader" : ""}>
-                    <td className="col-center col-strong">{idx === 0 && p.points > 0 ? "🥇" : idx + 1}</td>
+                    <td className="col-rank"><span className="rank">{idx + 1}</span></td>
                     <td className="sticky-col">
                       <a href={playerHref(p.handle)} className="player-name player-page-link">{p.name}</a>
                     </td>
-                    <td className="col-center col-points">{p.points}</td>
+                    <td className="col-points">{p.points}</td>
                     <td className="col-center">{p.played}</td>
-                    <td className="col-center stat-won">{p.won}</td>
-                    <td className="col-center stat-drawn">{p.drawn}</td>
-                    <td className="col-center stat-lost">{p.lost}</td>
+                    <td className="col-center">{p.won}</td>
+                    <td className="col-center">{p.drawn}</td>
+                    <td className="col-center">{p.lost}</td>
                     <td className="col-center stat-sb">{p.sb.toFixed(1)}</td>
                   </tr>
                 ))}

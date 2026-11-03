@@ -27,26 +27,19 @@ export function PublicPage({ seasons, ready, config, history, gameStates, nameOf
   }
 
   return (
-    <main>
+    <main className="public-main">
       <PublicTournamentView
         config={config}
-        tournamentMeta={
-          config.tournament || {
-            ...DEFAULT_TOURNAMENT,
-            rulesText: "2 giorni a mossa. Nessuna rivincita. Fair play assoluto.",
-          }
-        }
+        tournamentMeta={config.tournament || DEFAULT_TOURNAMENT}
         history={history}
         gameStates={gameStates}
         nameOf={nameOf}
         seasons={seasons}
       />
 
-      <div className="public-footer">
-        <a href="#admin" className="admin-link">
-          🔒 Area Organizzatore
-        </a>
-      </div>
+      <footer className="public-footer">
+        <a href="#admin" className="admin-link">Area organizzatore</a>
+      </footer>
     </main>
   );
 }

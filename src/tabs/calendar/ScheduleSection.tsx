@@ -25,7 +25,7 @@ export function ScheduleSection({
   return (
     <div>
       <p className="note note-flush">
-        Gli accoppiamenti preimpostati per ciascun turno. Selezionando il turno nella scheda <em>Partite</em>, questi incontri vengono caricati in automatico con 1 clic.
+        Gli accoppiamenti previsti per ogni turno. Quando scegli il turno in <em>Turno → Accoppiamenti</em> vengono caricati da soli.
       </p>
 
       {scheduleList.length > 0 && (
