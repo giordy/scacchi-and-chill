@@ -48,6 +48,14 @@ export interface PlayerProfile {
   remaining: RemainingOpponent[];
   pointsByRound: RoundPoints[];
   headToHead: HeadToHead[];
+  pace: GamePace | null; // null until at least one game has moves on Lichess
+}
+
+// Average time between moves in the player's games (both sides together: Lichess keeps no
+// per-move times for correspondence games, only when the game started and its last move)
+export interface GamePace {
+  msPerMove: number;
+  games: number; // games the average is based on
 }
 
 const POINTS: Record<string, number> = { win: 1, draw: 0.5, loss: 0 };
@@ -164,5 +172,34 @@ export function computePlayerProfile(
       };
     });
 
-  return { player, rank: idx + 1, standing: standings[idx], games, remaining, pointsByRound, headToHead };
+  const pace = computeGamePace(games.map((g) => gameStates[extractGameId(g.url) ?? ""]));
+
+  return { player, rank: idx + 1, standing: standings[idx], games, remaining, pointsByRound, headToHead, pace };
+}
+
+// (last move − start) / half-moves played, weighted by the number of moves of each game
+export function computeGamePace(states: (LichessExportGame | undefined)[]): GamePace | null {
+  let ms = 0;
+  let moves = 0;
+  let games = 0;
+  states.forEach((s) => {
+    if (!s?.createdAt || !s.lastMoveAt || !s.moves) return;
+    const plies = s.moves.trim().split(/\s+/).length;
+    const elapsed = s.lastMoveAt - s.createdAt;
+    if (plies === 0 || elapsed < 0) return;
+    ms += elapsed;
+    moves += plies;
+    games++;
+  });
+  return games > 0 ? { msPerMove: ms / moves, games } : null;
+}
+
+// "25 min", "9 h", "1,5 giorni"
+export function formatPace(ms: number): string {
+  const minutes = ms / 60000;
+  if (minutes < 60) return `${Math.max(1, Math.round(minutes))} min`;
+  const hours = minutes / 60;
+  if (hours < 48) return `${Math.round(hours)} h`;
+  const days = Math.round((hours / 24) * 10) / 10;
+  return `${String(days).replace(".", ",")} giorni`;
 }

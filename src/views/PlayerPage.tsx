@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame } from '../types';
-import { computePlayerProfile, GameOutcome } from '../lib/playerProfile';
+import { computePlayerProfile, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
 import { PointsChart } from '../components/PointsChart';
 
@@ -53,7 +53,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
     );
   }
 
-  const { player, rank, standing, games, pointsByRound, headToHead } = profile;
+  const { player, rank, standing, games, pointsByRound, headToHead, pace } = profile;
   const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
   return (
@@ -88,6 +88,15 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
             <span className="stat-pill-label">Spareggio SB</span>
             <span className="stat-pill-val">{standing.sb.toFixed(1)}</span>
           </div>
+          {pace && (
+            <div
+              className="stat-pill"
+              title={`Tempo medio tra una mossa e l'altra nelle sue partite (di entrambi i giocatori), su ${pace.games} ${pace.games === 1 ? "partita" : "partite"}`}
+            >
+              <span className="stat-pill-label">Ritmo partite</span>
+              <span className="stat-pill-val">{formatPace(pace.msPerMove)} a mossa</span>
+            </div>
+          )}
         </div>
       </section>
 
