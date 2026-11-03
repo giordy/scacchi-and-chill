@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { awardsMessage, computeSeasonAwards } from '../awards';
+import { awardsMessage, computeSeasonAwards, estimateMoveTimes } from '../awards';
 import { buildSeasonArchive } from '../seasons';
 import { HistoryGame, LichessExportGame, Player } from '../../types';
 
@@ -44,10 +44,8 @@ describe('computeSeasonAwards', () => {
     expect(byId.mate.detail).toBe('2 vittorie col matto');
     expect(winners('fastest')).toEqual(['carla']);
     expect(byId.fastest.detail).toBe('in 15 mosse contro Anna');
-    expect(winners('longest')).toEqual(['bruno', 'carla']);
-    expect(byId.longest.detail).toBe('Bruno – Carla, 60 mosse');
-    expect(winners('slowest')).toEqual(['bruno']);
-    expect(byId.slowest.detail).toBe('4 h a mossa');
+    expect(winners('longest')).toEqual(['anna']); // the draw is longer, but only wins count
+    expect(byId.longest.detail).toBe('in 26 mosse contro Carla');
     expect(winners('draws')).toEqual(['bruno', 'carla']);
     expect(byId.draws.detail).toBe('1 patta');
   });
@@ -56,7 +54,7 @@ describe('computeSeasonAwards', () => {
     const only = computeSeasonAwards(players, [g('anna', 'bruno', 'aaaaaaaa')], {
       aaaaaaaa: st('aaaaaaaa', 'resign', 20, 10, 'white'),
     });
-    expect(only.map((a) => a.id)).toEqual(['fastest', 'longest']);
+    expect(only.map((a) => a.id)).toEqual(['fastest', 'longest']); // one game: no bradipo
     expect(computeSeasonAwards(players, [], {})).toEqual([]);
   });
 
@@ -69,5 +67,54 @@ describe('computeSeasonAwards', () => {
     expect(awardsMessage('S', [byId.draws])).toContain('Bruno e Carla (1 patta)');
     const archive = buildSeasonArchive({ title: 'T', season: 'S', description: '' }, players, history, gs);
     expect(archive.awards).toEqual(awards);
+  });
+});
+
+describe('il bradipo', () => {
+  const players4: Player[] = [...players, { name: 'Dario', handle: 'dario' }];
+  // True time per own move, in hours: Anna is the slowest, Dario a bit less
+  const own: Record<string, number> = { anna: 3, bruno: 1, carla: 1, dario: 2.4 };
+  // Anna mostly meets the quick Bruno and Carla, Dario meets Anna twice: Dario's games are the slowest
+  const pairs = [
+    ['anna', 'bruno'], ['anna', 'carla'], ['bruno', 'anna'], ['carla', 'anna'],
+    ['dario', 'anna'], ['anna', 'dario'], ['dario', 'bruno'], ['bruno', 'carla'],
+  ];
+  const history = pairs.map(([w, b], i) => g(w, b, `game000${i}`));
+  const gs = Object.fromEntries(
+    pairs.map(([w, b], i) => [`game000${i}`, st(`game000${i}`, 'resign', 40, 20 * (own[w] + own[b]), 'white')])
+  );
+
+  it("finds the slowest player even when another one's games are slower", () => {
+    const sloth = computeSeasonAwards(players4, history, gs).find((a) => a.id === 'slowest')!;
+    expect(sloth.winners.map((w) => w.handle)).toEqual(['anna']);
+    expect(sloth.detail).toBe('circa 3 h per ogni sua mossa');
+  });
+
+  it('recovers each own time per move', () => {
+    const t = estimateMoveTimes(
+      pairs.map(([w, b]) => ({ white: w, black: b, plies: 40, ms: 20 * (own[w] + own[b]) * H }))
+    )!;
+    Object.entries(own).forEach(([h, hours]) => expect(t.get(h)! / H).toBeCloseTo(hours, 6));
+  });
+
+  it('counts the turn a player let run out when losing on time', () => {
+    // Carla let a 7-day turn run out twice: (60 moves × 1 h + 2 × 168 h) / 62 moves ≈ 6.4 h
+    const withTimeouts = {
+      ...gs,
+      game0001: { ...gs.game0001, status: 'outoftime', daysPerTurn: 7 }, // Anna – Carla, 1-0
+      game0007: { ...gs.game0007, status: 'outoftime', daysPerTurn: 7 }, // Bruno – Carla, 1-0
+    };
+    const sloth = computeSeasonAwards(players4, history, withTimeouts).find((a) => a.id === 'slowest')!;
+    expect(sloth.winners.map((w) => w.handle)).toEqual(['carla']);
+    expect(sloth.detail).toBe('circa 6 h per ogni sua mossa');
+  });
+
+  it('gives no award when the games cannot tell the players apart', () => {
+    // Two groups that only met across (Anna, Carla vs Bruno, Dario): only sums of times are known
+    const square = [['anna', 'bruno'], ['carla', 'bruno'], ['carla', 'dario'], ['anna', 'dario']];
+    expect(estimateMoveTimes(square.map(([w, b]) => ({ white: w, black: b, plies: 40, ms: 40 * H })))).toBeNull();
+    const h = square.map(([w, b], i) => g(w, b, `sq00000${i}`));
+    const s = Object.fromEntries(square.map((_, i) => [`sq00000${i}`, st(`sq00000${i}`, 'resign', 40, 40, 'white')]));
+    expect(computeSeasonAwards(players4, [...h, ...h], s).some((a) => a.id === 'slowest')).toBe(false);
   });
 });
