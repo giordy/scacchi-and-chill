@@ -6,6 +6,7 @@ import { computeStandings } from "./lib/standings";
 import { computeSeasonProgress } from "./lib/progress";
 import { extractGameId } from "./lib/utils";
 import { DEFAULT_TOURNAMENT } from "./lib/tournament";
+import { onTabListKeyDown } from "./lib/tabKeys";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -119,7 +120,7 @@ export function PublicTournamentView({
         )}
       </header>
 
-      <nav className="public-subnav" role="tablist" aria-label="Sezioni del torneo">
+      <nav className="public-subnav" role="tablist" aria-label="Sezioni del torneo" onKeyDown={onTabListKeyDown}>
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -128,6 +129,7 @@ export function PublicTournamentView({
             role="tab"
             id={`pub-tab-${t.key}`}
             aria-selected={subTab === t.key}
+            tabIndex={subTab === t.key ? 0 : -1}
             aria-controls={`pub-panel-${t.key}`}
             onClick={() => setSubTab(t.key)}
           >
@@ -262,7 +264,9 @@ export function PublicTournamentView({
                 else if (s?.status === "draw" || s?.status === "stalemate") badge = <span className="status-badge result">½ – ½</span>;
                 const plies = s?.moves?.trim() ? s.moves.trim().split(/\s+/).length : 0;
                 const moves = Math.ceil(plies / 2);
-                const detail = s?.opening?.name || (moves > 0 ? `${moves} ${moves === 1 ? "mossa" : "mosse"}` : "");
+                // Ongoing games: Lichess hides the last moves, so their length is shown only once finished
+                const finished = s && s.status !== "started" && s.status !== "created";
+                const detail = s?.opening?.name || (finished && moves > 0 ? `${moves} ${moves === 1 ? "mossa" : "mosse"}` : "");
 
                 return (
                   <article key={`${g.url}-${idx}`} className="match-card">

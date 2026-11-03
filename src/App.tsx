@@ -195,7 +195,6 @@ export function App() {
             <StatusTab
               history={history}
               setHistory={setHistory}
-              defaultDays={settings.days}
               config={config}
               triggerToast={triggerToast}
             />

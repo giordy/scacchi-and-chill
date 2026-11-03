@@ -1,5 +1,6 @@
 import React from 'react';
 import { Toast } from '../WhatsAppPreview';
+import { onTabListKeyDown } from '../lib/tabKeys';
 
 export type AdminTab = 'round' | 'calendar' | 'reviews' | 'tournament';
 
@@ -63,7 +64,7 @@ export function AdminConsole({
         </span>
       </div>
 
-      <nav className="tabs" role="tablist" aria-label="Sezioni">
+      <nav className="tabs" role="tablist" aria-label="Sezioni" onKeyDown={onTabListKeyDown}>
         {ADMIN_TABS.map((t) => (
           <button
             key={t.key}
@@ -71,6 +72,7 @@ export function AdminConsole({
             role="tab"
             id={`admin-tab-${t.key}`}
             aria-selected={activeTab === t.key}
+            tabIndex={activeTab === t.key ? 0 : -1}
             aria-controls="admin-panel"
             onClick={() => setActiveTab(t.key)}
           >

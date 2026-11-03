@@ -1,4 +1,5 @@
 import React from 'react';
+import { onTabListKeyDown } from '../lib/tabKeys';
 
 export type RoundView = 'pairings' | 'status';
 
@@ -16,11 +17,12 @@ export function RoundTab({
 }) {
   return (
     <>
-      <div className="segmented" role="tablist" aria-label="Fase del turno">
+      <div className="segmented" role="tablist" aria-label="Fase del turno" onKeyDown={onTabListKeyDown}>
         <button
           type="button"
           role="tab"
           aria-selected={view === 'pairings'}
+          tabIndex={view === 'pairings' ? 0 : -1}
           className={view === 'pairings' ? 'active' : ''}
           onClick={() => setView('pairings')}
         >
@@ -30,6 +32,7 @@ export function RoundTab({
           type="button"
           role="tab"
           aria-selected={view === 'status'}
+          tabIndex={view === 'status' ? 0 : -1}
           className={view === 'status' ? 'active' : ''}
           onClick={() => setView('status')}
         >

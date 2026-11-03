@@ -4,20 +4,18 @@ import {
   HistoryGame,
   LichessExportGame,
 } from '../types';
-import { errorMessage, fill, extractGameId, formatDeadline, HOW_WIN, HOW_DRAW, tidy, getApproxMoves } from '../lib/utils';
+import { errorMessage, fill, extractGameId, HOW_WIN, HOW_DRAW, tidy, getApproxMoves } from '../lib/utils';
 import { fetchGameStates } from '../lib/lichess';
 import { WhatsAppPreview } from '../WhatsAppPreview';
 
 export function StatusTab({
   history,
   setHistory,
-  defaultDays,
   config,
   triggerToast,
 }: {
   history: HistoryGame[];
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
-  defaultDays: number;
   config: AppConfig;
   triggerToast?: (msg: string) => void;
 }) {
@@ -70,30 +68,20 @@ export function StatusTab({
         detailsList.push(`${i + 1}. ${id}: non ancora trovata su Lichess (sfida non ancora accettata)`);
       } else if (s.status === "created" || s.status === "started") {
         count.ongoing++;
+        // Lichess shows ongoing games 3 plies late (anti-cheat): whose turn it is and the deadline
+        // cannot be known reliably, so the message gives only an approximate number of moves.
         const plies = s.moves && s.moves.trim() ? s.moves.trim().split(/\s+/).length : 0;
-        const fen = typeof s.lastFen === "string" ? s.lastFen.trim().split(/\s+/) : [];
-        const hasFen = fen[1] === "w" || fen[1] === "b";
-        const whiteToMove = hasFen ? fen[1] === "w" : plies % 2 === 0;
-        const fenMove = parseInt(fen[5], 10);
-        const move = hasFen && Number.isFinite(fenMove) ? fenMove : Math.floor(plies / 2) + 1;
-        const days = s.daysPerTurn ?? defaultDays;
-        const deadlineMs = (s.lastMoveAt ?? s.createdAt ?? Date.now()) + days * 86400000;
-
         const approx = getApproxMoves(plies);
 
         body = fill(pickFor("ongoing"), {
-          move,
-          turn: nameOf(whiteToMove ? white : black),
           approxMoves: approx.approxMoves,
           movesBand: approx.movesBand,
           phase: approx.phase,
-          deadline: deadlineMs < Date.now() ? "adesso (tempo scaduto)" : formatDeadline(deadlineMs),
         });
 
         detailsList.push(
           `${i + 1}. ${id}: bianco=${s.players?.white?.user?.name ?? "?"}, nero=${s.players?.black?.user?.name ?? "?"}, ` +
-            `semi-mosse=${plies} (~${approx.approxMoves}), tocca a=${whiteToMove ? "bianco" : "nero"}, ` +
-            `ultimo movimento: ${s.lastMoveAt ? new Date(s.lastMoveAt).toLocaleString("it-IT", { timeZone: "Europe/Rome" }) : "?"}`
+            `semimosse visibili via API=${plies} (Lichess ne nasconde fino a 3), ~${approx.approxMoves}`
         );
       } else if (s.status === "aborted" || s.status === "noStart") {
         body = pickFor("aborted");
