@@ -31,7 +31,13 @@ export interface HeadToHead {
   outcomes: GameOutcome[]; // in round order, finished and ongoing games
   scored: number; // points the player took from this opponent
   conceded: number;
-  toPlay: number; // scheduled games against this opponent not created yet
+  upcoming: UpcomingGame[]; // games still to play, in round order
+}
+
+// A game still to play: round and color when the official schedule (or a created link) says so
+export interface UpcomingGame {
+  round?: string;
+  color?: "white" | "black";
 }
 
 export interface PlayerProfile {
@@ -123,21 +129,38 @@ export function computePlayerProfile(
     .map((p) => {
       const vs = games.filter((g) => g.opponent === p.handle && g.outcome !== "pending");
       const finished = vs.filter((g) => g.outcome in POINTS);
-      const created = history.filter(
+      const vsHistory = history.filter(
         (g) => (g.white === me && g.black === p.handle) || (g.black === me && g.white === p.handle)
       );
-      const toPlay = schedule.filter(
-        (m) =>
-          ((m.white === me && m.black === p.handle) || (m.black === me && m.white === p.handle)) &&
-          !created.some((g) => g.round === m.round && g.white === m.white && g.black === m.black)
-      ).length;
-      const pending = games.filter((g) => g.opponent === p.handle && g.outcome === "pending").length;
+      const colorOf = (m: { white: string }) => (m.white === me ? "white" : "black") as "white" | "black";
+      const upcoming: UpcomingGame[] = [
+        // Scheduled, link not created yet
+        ...schedule
+          .filter(
+            (m) =>
+              ((m.white === me && m.black === p.handle) || (m.black === me && m.white === p.handle)) &&
+              !vsHistory.some((g) => g.round === m.round && g.white === m.white && g.black === m.black)
+          )
+          .map((m): UpcomingGame => ({ round: m.round, color: colorOf(m) })),
+        // Link created, challenge not accepted yet
+        ...games
+          .filter((g) => g.opponent === p.handle && g.outcome === "pending")
+          .map((g): UpcomingGame => ({ round: g.round, color: g.color })),
+        // Aborted games are replayed: no round yet
+        ...vsHistory
+          .filter((g) => {
+            const id = extractGameId(g.url);
+            const st = id ? gameStates[id] : undefined;
+            return st && VOID_STATUSES.has(st.status);
+          })
+          .map((): UpcomingGame => ({})),
+      ].sort((a, b) => (a.round ?? "~").localeCompare(b.round ?? "~", undefined, { numeric: true }));
       return {
         opponent: p.handle,
         outcomes: vs.map((g) => g.outcome),
         scored: finished.reduce((sum, g) => sum + POINTS[g.outcome], 0),
         conceded: finished.reduce((sum, g) => sum + (1 - POINTS[g.outcome]), 0),
-        toPlay: toPlay + pending,
+        upcoming,
       };
     });
 

@@ -10,7 +10,7 @@ Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli acco
 - **Partite**, filtrabili per turno, con link a Lichess. Le partite concluse mostrano la posizione finale su una mini scacchiera (quelle in corso no: Lichess nasconde le ultime mosse).
 - **Tabellone** incrociato con tutti i risultati.
 - **Torneo**: il maestro della stagione, il regolamento, l'Albo d'Oro e le stagioni passate con la classifica finale.
-- **Pagina giocatore** (`#/giocatore/<handle>`): posizione, grafico dei punti turno per turno, scontri diretti con ogni avversario, partite giocate, avversari ancora da affrontare. Si apre cliccando un nome in classifica.
+- **Pagina giocatore** (`#/giocatore/<handle>`): posizione, grafico dei punti turno per turno, scontri diretti con ogni avversario (risultati, punteggio e partite ancora da giocare, con turno e colore se sono in calendario), partite giocate. Si apre cliccando un nome in classifica.
 - **Risultati live**: la pagina pubblica legge da Lichess le partite non ancora concluse su Firestore (all'apertura, poi ogni 5 minuti finché resta aperta), così classifica e tabellone sono aggiornati anche senza sincronizzazione. Non scrive nulla: il salvataggio su Firestore resta la sincronizzazione dell'organizzatore.
 - **Anteprima del link** (WhatsApp e simili): un'immagine con turno in corso e podio, rigenerata a ogni deploy (vedi sotto).
 

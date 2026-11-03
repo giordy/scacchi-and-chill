@@ -96,8 +96,14 @@ describe('player page extras', () => {
   it('summarizes the record against each opponent', () => {
     const p = computePlayerProfile('anna', players, history, states, schedule)!;
     expect(p.headToHead).toEqual([
-      { opponent: 'bruno', outcomes: ['win', 'ongoing'], scored: 1, conceded: 0, toPlay: 0 },
-      { opponent: 'carla', outcomes: ['draw'], scored: 0.5, conceded: 0.5, toPlay: 1 },
+      { opponent: 'bruno', outcomes: ['win', 'ongoing'], scored: 1, conceded: 0, upcoming: [] },
+      { opponent: 'carla', outcomes: ['draw'], scored: 0.5, conceded: 0.5, upcoming: [{ round: '4', color: 'white' }] },
     ]);
+  });
+
+  it('lists aborted games as still to play, without a round', () => {
+    const p = computePlayerProfile('anna', players, [g('1', 'anna', 'bruno', 'y1y1y1y1')], { y1y1y1y1: st('y1y1y1y1', 'aborted') })!;
+    expect(p.headToHead[0]).toMatchObject({ opponent: 'bruno', outcomes: [], upcoming: [{}] });
+    expect(p.headToHead[1]).toMatchObject({ opponent: 'carla', outcomes: [], upcoming: [] });
   });
 });

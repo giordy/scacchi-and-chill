@@ -1768,3 +1768,15 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   font-weight: 800;
   white-space: nowrap;
 }
+
+.h2h-upcoming {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.h2h-upcoming .dot {
+  width: 10px;
+  height: 10px;
+  border-width: 1.5px;
+}

@@ -53,7 +53,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
     );
   }
 
-  const { player, rank, standing, games, remaining, pointsByRound, headToHead } = profile;
+  const { player, rank, standing, games, pointsByRound, headToHead } = profile;
   const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
   return (
@@ -108,7 +108,17 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
                 {h.outcomes.map((o, i) => (
                   <span key={i} className={`status-badge ${OUTCOME_CLASS[o]}`}>{OUTCOME_LABEL[o]}</span>
                 ))}
-                {(h.toPlay > 0 || h.outcomes.length === 0) && <span className="status-badge pending">Da giocare</span>}
+                {h.upcoming.map((u, i) => (
+                  <span key={`u${i}`} className="status-badge pending h2h-upcoming">
+                    {u.color && (
+                      <span className={`dot ${u.color === "white" ? "w" : "b"}`} aria-label={u.color === "white" ? "Col bianco" : "Col nero"} />
+                    )}
+                    {u.round ? `Turno ${u.round}` : "Da programmare"}
+                  </span>
+                ))}
+                {h.outcomes.length === 0 && h.upcoming.length === 0 && (
+                  <span className="status-badge pending">Da programmare</span>
+                )}
               </span>
               <span className="h2h-score" aria-label={`Punteggio ${fmt(h.scored)} a ${fmt(h.conceded)}`}>
                 {h.scored + h.conceded > 0 ? `${fmt(h.scored)} – ${fmt(h.conceded)}` : "–"}
@@ -135,27 +145,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
                 <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
                   Lichess
                 </a>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="dossier-card">
-        <h2 className="section-heading">Avversari da affrontare ({remaining.length})</h2>
-        {remaining.length === 0 ? (
-          <p className="note m-0">Ha già affrontato tutti gli avversari.</p>
-        ) : (
-          <ul className="player-games">
-            {remaining.map((r) => (
-              <li key={r.opponent} className="player-game">
-                <span className="match-round">{r.round ? `Turno ${r.round}` : "Da programmare"}</span>
-                <span className="player-game-main">
-                  {r.color && (
-                    <span className={`dot ${r.color === "white" ? "w" : "b"}`} aria-label={r.color === "white" ? "Bianco" : "Nero"} />
-                  )}
-                  <a href={playerHref(r.opponent)}>{nameOf(r.opponent)}</a>
-                </span>
               </li>
             ))}
           </ul>
