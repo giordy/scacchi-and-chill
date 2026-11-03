@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame } from '../types';
 import { errorMessage } from '../lib/utils';
-import { validateAndNormalizeConfig } from '../lib/config';
+import { normalizeSchedule, validateAndNormalizeConfig } from '../lib/config';
 import { DEFAULT_TOURNAMENT, tournamentFromDoc } from '../lib/tournament';
 import {
   saveTournamentFullToFirebase,
@@ -40,7 +40,7 @@ export function useTournamentSync(
             validated.players = remoteTournament.players;
           }
           if (Array.isArray(remoteTournament.schedule) && remoteTournament.schedule.length > 0) {
-            validated.schedule = remoteTournament.schedule;
+            validated.schedule = normalizeSchedule(remoteTournament.schedule);
           }
         } else {
           // If Firestore is empty on first boot, initialize it with the default config
@@ -68,7 +68,7 @@ export function useTournamentSync(
           next.players = doc.players;
         }
         if (Array.isArray(doc.schedule)) {
-          next.schedule = doc.schedule;
+          next.schedule = normalizeSchedule(doc.schedule);
         }
         return next;
       });

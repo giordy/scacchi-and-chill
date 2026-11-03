@@ -1,5 +1,6 @@
 import {
   AppConfig,
+  ScheduledMatch,
   Settings,
 } from '../types';
 import rawConfig from '../../config.json';
@@ -118,16 +119,7 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
   };
 
   const rawSchedule = cfg.schedule || cfg.calendario;
-  const schedule = Array.isArray(rawSchedule)
-    ? rawSchedule
-        .filter((m: RawJson) => m && isText(m.round) && isText(m.white) && isText(m.black))
-        .map((m: RawJson) => ({
-          round: String(m.round).trim(),
-          white: String(m.white).trim(),
-          black: String(m.black).trim(),
-          url: isText(m.url) ? m.url.trim() : undefined,
-        }))
-    : undefined;
+  const schedule = Array.isArray(rawSchedule) ? normalizeSchedule(rawSchedule) : undefined;
 
   return {
     tournament: tournamentMeta,
@@ -170,6 +162,19 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
 }
 
 export const defaultConfig: AppConfig = validateAndNormalizeConfig(rawConfig);
+
+// Keeps only round, white and black of each planned game: any old "url" field is dropped,
+// so a Lichess link can only come from "Crea partite su Lichess" when the round starts.
+export function normalizeSchedule(raw: unknown[]): ScheduledMatch[] {
+  const isText = (v: unknown): v is string => typeof v === "string" && v.trim() !== "";
+  return raw
+    .filter((m: RawJson) => m && isText(m.round) && isText(m.white) && isText(m.black))
+    .map((m: RawJson) => ({
+      round: String(m.round).trim(),
+      white: String(m.white).trim(),
+      black: String(m.black).trim(),
+    }));
+}
 
 export function initialStoredSettings(): Partial<Settings> {
   for (const key of ["pairings.settings.v2", "pairings.settings"]) {

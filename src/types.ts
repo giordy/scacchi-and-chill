@@ -65,11 +65,11 @@ export interface StatusPhrases {
   [key: string]: string | string[] | undefined;
 }
 
+// A planned game: never carries a Lichess link, which is created only when the round starts
 export interface ScheduledMatch {
   round: string;
   white: string;
   black: string;
-  url?: string;
 }
 
 export interface SeasonWinner {

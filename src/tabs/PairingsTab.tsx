@@ -221,7 +221,7 @@ export function PairingsTab({
     const newPairs = emptyPairs();
     scheduled.forEach((m, idx) => {
       if (idx < newPairs.length) {
-        newPairs[idx] = { white: m.white, black: m.black, url: m.url || "" };
+        newPairs[idx] = { white: m.white, black: m.black, url: "" };
       }
     });
     setPairs(newPairs);

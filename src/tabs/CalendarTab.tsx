@@ -41,7 +41,7 @@ export function CalendarTab({
         <ScheduleSection
           players={players}
           schedule={schedule}
-          hasGames={history.length > 0}
+          played={history}
           flash={flash}
           onUpdateSchedule={onUpdateSchedule}
         />

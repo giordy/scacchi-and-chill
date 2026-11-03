@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Player, ScheduledMatch } from '../../types';
+import { HistoryGame, Player, ScheduledMatch } from '../../types';
 import { roundRobin, shuffled } from '../../lib/roundRobin';
+import { completeSchedule } from '../../lib/completeSchedule';
 
 export function ScheduleSection({
   players,
   schedule,
-  hasGames,
+  played,
   flash,
   onUpdateSchedule,
 }: {
   players: Player[];
-  // Games already created this season: regenerating would not match them any more
-  hasGames: boolean;
+  // Games already created on Lichess this season: completing keeps them, regenerating ignores them
+  played: HistoryGame[];
   schedule?: ScheduledMatch[];
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
@@ -27,6 +28,42 @@ export function ScheduleSection({
   useEffect(() => {
     if (schedule) setScheduleList(schedule);
   }, [schedule]);
+
+  const hasGames = played.length > 0;
+  // What is already planned or played: the starting point for "Completa i turni mancanti"
+  const existing: ScheduledMatch[] = [
+    ...scheduleList,
+    ...played.map((g) => ({ round: g.round, white: g.white, black: g.black })),
+  ];
+  const existingRounds = new Set(existing.map((m) => m.round)).size;
+
+  const complete = () => {
+    const res = completeSchedule(
+      players.map((p) => p.handle),
+      existing,
+      { double: doubleRound }
+    );
+    if (!res.ok) {
+      flash("err", res.reason);
+      return;
+    }
+    if (res.added.length === 0) {
+      flash("ok", "Il girone è già completo: non mancano turni.");
+      return;
+    }
+    if (
+      !window.confirm(
+        `Aggiungere ${res.added.length} partite${res.newRounds.length ? ` in ${res.newRounds.length} turni nuovi (${res.newRounds[0]}–${res.newRounds[res.newRounds.length - 1]})` : ""}?\n\n` +
+          (existingRounds === 1 ? "Il turno già presente resta com'è" : `I ${existingRounds} turni già presenti restano come sono`) +
+          (res.added.length > res.newRounds.length * Math.floor(players.length / 2) ? "; quelli incompleti vengono riempiti." : ".")
+      )
+    ) {
+      return;
+    }
+    setScheduleList(res.schedule);
+    onUpdateSchedule(res.schedule);
+    flash("ok", `Calendario completato: ${res.added.length} partite aggiunte.`);
+  };
 
   const generate = () => {
     if (players.length < 2) {
@@ -60,18 +97,33 @@ export function ScheduleSection({
       </p>
 
       <div className="subcard">
-        <h3 className="subcard-title">Genera girone all'italiana</h3>
+        <h3 className="subcard-title">Girone all'italiana</h3>
         <p className="note note-sm">
           Ognuno incontra tutti gli altri, con bianco e nero alternati il più possibile. Se i giocatori sono dispari, a
-          ogni turno uno riposa.
+          ogni turno uno riposa. Il calendario non crea link Lichess: le sfide nascono solo quando avvii il turno.
         </p>
         <div className="inline">
           <input id="rr-double" type="checkbox" checked={doubleRound} onChange={(e) => setDoubleRound(e.target.checked)} />
           <label htmlFor="rr-double">Andata e ritorno</label>
         </div>
-        <button className="secondary btn-block" type="button" onClick={generate}>
-          Genera calendario ({players.length} giocatori)
-        </button>
+        {existing.length > 0 ? (
+          <div className="actions flush">
+            <button className="primary" type="button" onClick={complete}>
+              Completa i turni mancanti
+            </button>
+            <p className="note note-sm m-0">
+              {existingRounds === 1 ? "Tiene il turno già presente" : `Tiene i ${existingRounds} turni già presenti`}
+              {hasGames ? ", comprese le partite già create," : ""} e aggiunge solo le partite che mancano.
+            </p>
+            <button className="danger" type="button" onClick={generate}>
+              Rigenera tutto da zero
+            </button>
+          </div>
+        ) : (
+          <button className="primary" type="button" onClick={generate}>
+            Genera calendario ({players.length} giocatori)
+          </button>
+        )}
       </div>
 
       {scheduleList.length > 0 && (

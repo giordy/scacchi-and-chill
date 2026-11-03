@@ -17,7 +17,7 @@ Accesso con login Google, riservato a un solo account.
 - **♞ Turno**: il lavoro del turno in corso, in due passi.
   1. *Accoppiamenti*: bianco/nero (precompilati dal calendario ufficiale), creazione delle sfide su Lichess, messaggio WhatsApp con i link.
   2. *Bollettino*: andamento delle partite del turno e messaggio WhatsApp di aggiornamento.
-- **▦ Calendario**: turni già creati (riapri o elimina, anche da Firestore) e calendario ufficiale degli accoppiamenti.
+- **▦ Calendario**: turni già creati (riapri o elimina, anche da Firestore) e calendario ufficiale degli accoppiamenti. Il girone all'italiana si genera da zero oppure si completa: *Completa i turni mancanti* tiene i turni già presenti e le partite già create e aggiunge solo quelle che mancano (se non è possibile lo dice). Il calendario non contiene link Lichess: le sfide si creano solo quando si avvia il turno.
 - **✎ Recensione**: statistiche, aneddoti ed Elo dei giocatori per costruire il prompt da incollare in Claude o ChatGPT; il testo ottenuto si incolla poi nella scheda per l'anteprima WhatsApp.
 - **♛ Torneo** (sezioni richiudibili): stagione corrente, giocatori, regolamento (con giorni per mossa e rated, mostrati anche in pubblico), fine stagione e storico con Albo d'Oro, token Lichess e testi dei messaggi, copia dei dati in JSON.
 - **↻ Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. Parte da sola ogni volta che l'organizzatore apre l'area admin, e si può rilanciare a mano. La vista pubblica legge da Firestore, quindi i nuovi risultati compaiono solo dopo una sincronizzazione.
