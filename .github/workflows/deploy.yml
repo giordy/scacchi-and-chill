@@ -4,9 +4,6 @@ on:
   push:
     branches: ["main", "master"]
   workflow_dispatch:
-  # Rebuild every 3 hours so the link preview image (og.png) shows the current standings
-  schedule:
-    - cron: "17 */3 * * *"
 
 permissions:
   contents: read
@@ -50,7 +47,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # Absolute site address for the og:image tag of the link preview
+          # Absolute site address for the og:image tag of the link preview (logo)
           SITE_URL: ${{ steps.pages.outputs.base_url }}
 
       - name: Upload artifact
@@ -61,16 +58,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-  # GitHub disables scheduled workflows of a public repository after 60 days without
-  # commits. Re-enabling it on every scheduled run resets that counter, with no commit.
-  keepalive:
-    if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    steps:
-      - name: Keep the scheduled deploy enabled
-        run: gh api --method PUT "repos/${{ github.repository }}/actions/workflows/deploy.yml/enable"
-        env:
-          GH_TOKEN: ${{ github.token }}

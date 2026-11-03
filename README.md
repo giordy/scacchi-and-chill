@@ -12,7 +12,7 @@ Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli acco
 - **Torneo**: il maestro della stagione, il regolamento, l'Albo d'Oro e le stagioni passate con la classifica finale.
 - **Pagina giocatore** (`#/giocatore/<handle>`): posizione, grafico dei punti turno per turno, scontri diretti con ogni avversario (risultati, punteggio e partite ancora da giocare, con turno e colore se sono in calendario), partite giocate. Si apre cliccando un nome in classifica.
 - **Risultati live**: la pagina pubblica legge da Lichess le partite non ancora concluse su Firestore (all'apertura, poi ogni 5 minuti finché resta aperta), così classifica e tabellone sono aggiornati anche senza sincronizzazione. Non scrive nulla: il salvataggio su Firestore resta la sincronizzazione dell'organizzatore.
-- **Anteprima del link** (WhatsApp e simili): un'immagine con turno in corso e podio, rigenerata a ogni deploy (vedi sotto).
+- **Anteprima del link** (WhatsApp, Linktree): logo del torneo e nome della stagione (vedi sotto).
 
 ### Area organizzatore (`#admin`)
 Accesso con login Google, riservato a un solo account.
@@ -58,15 +58,13 @@ npm install
 npm run dev      # server di sviluppo su http://localhost:3000
 npm test         # test con vitest
 npm run lint     # controllo dei tipi (tsc --noEmit)
-npm run build    # build di produzione in dist/ (compresa l'immagine di anteprima dist/og.png)
+npm run build    # build di produzione in dist/, con i meta tag dell'anteprima
 ```
 
-### Immagine di anteprima
-Dopo `vite build`, `scripts/og-image.ts` legge i dati pubblici (Firestore e Lichess, senza credenziali), disegna `dist/og.png` e aggiunge i meta tag `og:image` a `dist/index.html`. I meta tag richiedono l'indirizzo assoluto del sito nella variabile `SITE_URL`, che il workflow di deploy prende da GitHub Pages. Se i dati non sono raggiungibili l'immagine mostra solo il nome del torneo e la build non si ferma.
+### Anteprima dei link
+Quando il link del sito viene condiviso (WhatsApp, Linktree…) l'anteprima mostra il logo `public/og-image.png` (1200×630, con tutto il contenuto nel quadrato centrale, così regge anche il ritaglio quadrato di Linktree) e come titolo il nome del torneo con la stagione. `public/logo-square.png` (1080×1080) è la stessa grafica quadrata, da caricare a mano su Linktree se serve.
 
-Il deploy gira anche ogni 3 ore (`schedule` in `.github/workflows/deploy.yml`) per tenere l'immagine aggiornata. GitHub sospende i workflow programmati dei repository pubblici dopo 60 giorni senza commit: per evitarlo, a ogni esecuzione programmata il job `keepalive` riattiva il workflow (nessun commit). Se un giorno risultasse comunque sospeso, si riattiva dalla scheda Actions. WhatsApp conserva a lungo l'anteprima di un link già condiviso, quindi l'immagine nuova compare soprattutto nei link condivisi di recente.
-
-I font in `scripts/fonts` (Alegreya, Alegreya Sans) sono distribuiti con licenza SIL Open Font License (`scripts/fonts/OFL.txt`).
+Dopo `vite build`, `scripts/meta-tags.mjs` legge titolo e stagione dal documento pubblico su Firestore e li scrive nel titolo della pagina; aggiunge poi i meta tag `og:image`, che richiedono l'indirizzo assoluto del sito nella variabile `SITE_URL` (il workflow di deploy la prende da GitHub Pages). Il titolo si aggiorna a ogni deploy: dopo un cambio di stagione, rilancia il deploy dalla scheda Actions (*Run workflow*) o fai un push. WhatsApp conserva a lungo l'anteprima di un link già condiviso.
 
 ### Struttura di `src/`
 - `views/`: pagine (pubblica, giocatore, login, console admin).
