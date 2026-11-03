@@ -236,7 +236,7 @@ export function PairingsTab({
                 flash("ok", `Accoppiamenti del Turno ${round} ricaricati dal calendario ufficiale!`);
               }}
             >
-              🔄 Ricarica Turno {round}
+              Ricarica turno {round}
             </button>
           )}
         </div>

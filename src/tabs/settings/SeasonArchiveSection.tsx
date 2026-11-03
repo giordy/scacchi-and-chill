@@ -120,12 +120,12 @@ export function SeasonArchiveSection({
             : "Nessuna partita conclusa: sincronizza i risultati prima di archiviare."}
         </p>
         <button type="button" className="secondary" disabled={busy || !preview.champion} onClick={archive}>
-          {busy ? "Archiviazione…" : alreadyArchived ? "🏛️ Aggiorna archivio stagione" : "🏛️ Archivia stagione corrente"}
+          {busy ? "Archiviazione…" : alreadyArchived ? "Aggiorna archivio stagione" : "Archivia stagione corrente"}
         </button>
       </div>
 
       <div className="subcard">
-        <h4 className="subcard-title">🆕 Inizia una nuova stagione</h4>
+        <h4 className="subcard-title">Inizia una nuova stagione</h4>
         <p className="note note-sm">
           Archivia la stagione corrente e poi <strong>cancella tutte le sue partite</strong>. Giocatori e impostazioni restano.
         </p>
@@ -153,7 +153,7 @@ export function SeasonArchiveSection({
           {seasons.map((s) => (
             <li key={s.id} className="list-row small">
               <span>
-                <strong>{s.season}</strong> · {s.champion ? `🥇 ${s.champion.name}` : "senza campione"}
+                <strong>{s.season}</strong> · {s.champion ? `campione ${s.champion.name}` : "senza campione"}
               </span>
               <span className="muted-sm">{new Date(s.archivedAt).toLocaleDateString("it-IT")}</span>
             </li>
