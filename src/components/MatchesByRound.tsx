@@ -5,6 +5,7 @@ import { isReturnLeg } from '../lib/legs';
 import { MiniBoard, PhaseTile, START_FEN } from './MiniBoard';
 import { gamePhase, movesLabel, PHASE_LABEL } from '../lib/phase';
 import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
+import { gamesOfTheRound } from '../lib/gameOfTheRound';
 
 interface MatchesByRoundProps {
   games: HistoryGame[]; // already filtered and sorted by round
@@ -21,6 +22,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart }: Match
     return (id && gameStates[id]) || g.lichess;
   };
   const progressOf = (g: HistoryGame) => gameProgress(stateOf(g));
+  const highlights = gamesOfTheRound(games, stateOf);
   const legOf = (round: string) =>
     returnStart === undefined ? undefined : isReturnLeg(round, returnStart) ? "ritorno" : "andata";
 
@@ -43,7 +45,14 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart }: Match
   const grid = (roundGames: HistoryGame[], showRound = false) => (
     <div className="matches-grid">
       {roundGames.map((g, idx) => (
-        <MatchCard key={`${g.url}-${idx}`} game={g} state={stateOf(g)} nameOf={nameOf} showRound={showRound} />
+        <MatchCard
+          key={`${g.url}-${idx}`}
+          game={g}
+          state={stateOf(g)}
+          nameOf={nameOf}
+          showRound={showRound}
+          highlight={!!g.url && highlights.has(g.url)}
+        />
       ))}
     </div>
   );
@@ -124,11 +133,14 @@ function MatchCard({
   state: s,
   nameOf,
   showRound = false,
+  highlight = false,
 }: {
   game: HistoryGame;
   state?: LichessExportGame;
   nameOf: (handle: string) => string;
   showRound?: boolean;
+  // Partita del turno: the longest game of a concluded round
+  highlight?: boolean;
 }) {
   // Scheduled game not created on Lichess yet
   let badge = game.url
@@ -160,7 +172,8 @@ function MatchCard({
   ) : null;
 
   return (
-    <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}`}>
+    <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}${highlight ? " is-highlight" : ""}`}>
+
       <div className="match-card-body">
         {tile &&
           (game.url ? (
@@ -191,7 +204,16 @@ function MatchCard({
               {opening}
             </span>
           )}
-          {progressText && <span className="match-progress">{progressText}</span>}
+          {(progressText || highlight) && (
+            <span className="match-progress">
+              {progressText}
+              {highlight && (
+                <span className="match-highlight" title="La partita più lunga del turno">
+                  🏆 Partita del turno
+                </span>
+              )}
+            </span>
+          )}
         </div>
         {game.url ? (
           <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">

@@ -1322,6 +1322,21 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   border-radius: 8px;
 }
 
+.match-card.is-highlight {
+  border-color: color-mix(in srgb, var(--brass) 55%, var(--line));
+  box-shadow: inset 4px 0 0 var(--brass);
+}
+
+.match-highlight {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: var(--brass);
+  background: var(--brass-soft);
+}
+
 .match-card.is-ongoing {
   border-color: color-mix(in srgb, var(--info) 45%, var(--line));
   box-shadow: inset 4px 0 0 var(--info);
