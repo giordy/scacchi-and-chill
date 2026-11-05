@@ -11,29 +11,37 @@ const g = (round: string, white: string, black: string, winner?: 'white' | 'blac
   return { round, white, black, url: `https://lichess.org/${id}` };
 };
 
+// Three rounds: Anna 3, Carla and Elena 2, Bruno 1½: three players in the top three places
+const firstRounds = () => [
+  g('1', 'anna', 'bruno', 'white'),
+  g('1', 'carla', 'dario', 'white'),
+  g('1', 'elena', 'fabio', 'draw'),
+  g('2', 'anna', 'dario', 'white'),
+  g('2', 'carla', 'fabio', 'white'),
+  g('2', 'elena', 'bruno', 'draw'),
+  g('3', 'anna', 'fabio', 'white'),
+  g('3', 'bruno', 'carla', 'white'),
+  g('3', 'elena', 'dario', 'white'),
+];
+
 describe('summitGames', () => {
-  it('finds the games between players in the top 3 at the start of the round', () => {
-    const games = [
-      g('1', 'anna', 'bruno', 'white'), // anna 1
-      g('1', 'carla', 'dario', 'white'), // carla 1
-      g('1', 'elena', 'fabio', 'draw'), // elena, fabio ½
-      g('2', 'anna', 'carla'), // 1st vs 1st
-      g('2', 'elena', 'bruno'), // 3rd (tied with fabio) vs last
-      g('2', 'fabio', 'dario'),
-    ];
-    const s = summitGames(players, games, states);
-    expect(s.get(summitKey(games[3]))).toBe('entrambi al 1° posto');
-    expect(s.has(summitKey(games[4]))).toBe(false);
+  it('finds the games between the top three from the 4th round', () => {
+    const r4 = [g('4', 'anna', 'carla'), g('4', 'elena', 'bruno'), g('4', 'dario', 'fabio')];
+    const s = summitGames(players, [...firstRounds(), ...r4], states);
+    expect(s.get(summitKey(r4[0]))).toBe('1° contro 2°');
+    expect(s.has(summitKey(r4[1]))).toBe(false);
     expect(s.size).toBe(1);
   });
-  it('says nothing in the first round or when ties crowd the top', () => {
-    const games = [
-      g('1', 'anna', 'bruno', 'draw'),
-      g('1', 'carla', 'dario', 'draw'),
-      g('1', 'elena', 'fabio', 'draw'),
-      g('2', 'anna', 'carla'),
-    ];
+
+  it('says nothing in the first three rounds, even between the leaders', () => {
+    const games = [g('1', 'anna', 'bruno', 'white'), g('1', 'carla', 'dario', 'white'), g('2', 'anna', 'carla')];
     expect(summitGames(players, games, states).size).toBe(0);
+  });
+
+  it('says nothing when ties crowd the top three', () => {
+    // After three rounds of draws everyone is level
+    const draws = ['1', '2', '3'].flatMap((r) => [g(r, 'anna', 'bruno', 'draw'), g(r, 'carla', 'dario', 'draw'), g(r, 'elena', 'fabio', 'draw')]);
+    expect(summitGames(players, [...draws, g('4', 'anna', 'carla')], states).size).toBe(0);
   });
 });
 

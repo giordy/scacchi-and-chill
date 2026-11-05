@@ -44,8 +44,8 @@ describe('buildBulletin', () => {
     expect(b.details[1]).toContain('fase Lichess=middlegame');
   });
 
-  it('closes a round with results, leader, summit and studies', () => {
-    // Round 1 gives Anna and Carla a win each: they meet at the top in round 2
+  it('closes a round with results, leader and studies', () => {
+    // Round 1 gives Anna and Carla a win each: they meet in round 2, too early for a summit
     const r1: HistoryGame[] = [
       { round: '1', white: 'anna', black: 'bruno', url: url('a1a1a1a1'), lichess: finished('a1a1a1a1', 'white') },
       { round: '1', white: 'carla', black: 'dario', url: url('b1b1b1b1'), lichess: finished('b1b1b1b1', 'white') },
@@ -62,7 +62,7 @@ describe('buildBulletin', () => {
     const b = buildBulletin({ round: '2', games: r2, states, history: [...r1, ...r2], config, expiryDays: 2, now: NOW, random: first });
     expect(b.isComplete).toBe(true);
     expect(b.text).toContain('🏁 *Turno 2 concluso!*');
-    expect(b.text).toContain('*Anna* ⚪ vs *Carla* ⚫\n🔝 Scontro al vertice: entrambi al 1° posto in classifica');
+    expect(b.text).not.toContain('Scontro al vertice');
     expect(b.text).toContain('🥇 In testa Carla con 2 punti.');
     expect(b.text).toContain('📚 *Studi consigliati per le aperture del turno:*\n• Owen Defense:');
     expect(b.text).toContain(defaultConfig.statusPhrases.infoLine!);
