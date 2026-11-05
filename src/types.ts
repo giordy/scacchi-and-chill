@@ -89,6 +89,12 @@ export interface SeasonWinner {
   podium?: PodiumPlace[]; // the other medals of the season
 }
 
+// An anecdote about the master of the season (see lib/masterAnecdotes.ts)
+export interface MasterAnecdote {
+  title: string;
+  text: string; // WhatsApp markup: *bold*, _italic_
+}
+
 // A player who left during the season (see lib/withdrawals.ts and the "Ritiri" rule)
 export interface Withdrawal {
   handle: string;
@@ -116,6 +122,7 @@ export interface TournamentMeta {
   fairPlayText?: string;
   withdrawalText?: string; // rules for a player who leaves during the season
   withdrawals?: Withdrawal[];
+  masterAnecdotes?: MasterAnecdote[]; // one per round, in order
   // Lichess parameters shown in the public rules (and used to create the challenges)
   daysPerMove?: number;
   rated?: boolean;

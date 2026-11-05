@@ -16,6 +16,8 @@ import { withdrawalNote } from "./lib/withdrawals";
 import { titleRace } from "./lib/titleRace";
 import { SeasonStatsPanel } from "./components/SeasonStatsPanel";
 import { seasonStats } from "./lib/seasonStats";
+import { publishedAnecdotes } from "./lib/masterAnecdotes";
+import { formatWhatsAppMarkup } from "./WhatsAppPreview";
 import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { SeasonAwards } from "./components/SeasonAwards";
@@ -90,6 +92,8 @@ export function PublicTournamentView({
   const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits, race, stats } = season;
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
   const champions = reigningChampions(tournamentMeta.winners);
+  // Anecdotes of the rounds already started, newest first; the next ones stay a surprise
+  const anecdotes = useMemo(() => publishedAnecdotes(tournamentMeta.masterAnecdotes, history), [tournamentMeta.masterAnecdotes, history]);
   // Andata/ritorno: from the official schedule when there is one, otherwise from the games created so far
   const returnStart = returnLegStart(schedule.length > 0 ? schedule : history);
   const scheduleIndex = (g: HistoryGame) =>
@@ -364,10 +368,26 @@ export function PublicTournamentView({
                 <p className="dossier-kicker">{tournamentMeta.season} è dedicata a</p>
                 <h2 className="dossier-name">{masterName || "un grande maestro"}</h2>
                 {tournamentMeta.subtitle && <p className="dossier-subtitle">«{tournamentMeta.subtitle}»</p>}
-                <div className="story-text">{tournamentMeta.description || DEFAULT_TOURNAMENT.description}</div>
+                <div className="story-text">{formatWhatsAppMarkup(tournamentMeta.description || DEFAULT_TOURNAMENT.description)}</div>
               </div>
             </div>
           </article>
+
+          {anecdotes.length > 0 && (
+            <article className="dossier-card">
+              <h2 className="section-heading">Gli aneddoti di {masterName || "questa stagione"}</h2>
+              <div className="anecdotes">
+                {[...anecdotes].reverse().map(({ n, anecdote }, i) => (
+                  <details key={n} className="anecdote" open={i === 0}>
+                    <summary>
+                      <span className="anecdote-n">#{n}</span> {anecdote.title.replace(/[*_]/g, "")}
+                    </summary>
+                    <div className="anecdote-text">{formatWhatsAppMarkup(anecdote.text)}</div>
+                  </details>
+                ))}
+              </div>
+            </article>
+          )}
 
           <article className="dossier-card" id="albo-doro">
             <h2 className="section-heading">Albo d'Oro</h2>

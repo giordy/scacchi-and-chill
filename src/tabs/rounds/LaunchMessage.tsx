@@ -4,6 +4,7 @@ import { fill, formatDeadline } from '../../lib/utils';
 import { RoundMatch } from '../../lib/rounds';
 import { roundDeadline } from '../../lib/bulletin';
 import { WhatsAppPreview } from '../../WhatsAppPreview';
+import { anecdoteForRound, anecdoteText } from '../../lib/masterAnecdotes';
 
 // WhatsApp message that opens the round: one line per game with its Lichess link, plus who rests
 export function LaunchMessage({
@@ -50,6 +51,11 @@ export function LaunchMessage({
     ...games,
     byes.length > 0 ? fill(templates.bye, common) : "",
     fill(templates.footer, common),
+    // The anecdote about the master of the season that goes with this round
+    (() => {
+      const a = anecdoteForRound(config.tournament?.masterAnecdotes, round);
+      return a ? anecdoteText(a.n, a.anecdote) : "";
+    })(),
   ]
     .filter((part) => part.trim() !== "")
     .join("\n\n");
