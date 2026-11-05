@@ -53,7 +53,7 @@ export async function createChallenge(
 
 export async function fetchGameStates(ids: string[]): Promise<Record<string, LichessExportGame>> {
   if (ids.length === 0) return {};
-  const res = await fetch("https://lichess.org/api/games/export/_ids?pgnInJson=false&lastFen=true&opening=true", {
+  const res = await fetch("https://lichess.org/api/games/export/_ids?pgnInJson=false&lastFen=true&opening=true&division=true", {
     method: "POST",
     headers: { "Content-Type": "text/plain", Accept: "application/x-ndjson" },
     body: ids.join(","),

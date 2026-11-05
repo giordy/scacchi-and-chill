@@ -141,6 +141,11 @@ export interface LichessExportGame {
   opening?: {
     name?: string;
   };
+  // Plies where middlegame and endgame begin (requested with division=true); missing keys = not reached
+  division?: {
+    middle?: number;
+    end?: number;
+  };
 }
 
 export interface PlayerStanding {

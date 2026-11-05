@@ -8,6 +8,13 @@ import { errorMessage, fill, extractGameId, formatDeadline, HOW_WIN, HOW_DRAW, t
 import { leaderLine, roundDeadline, roundSummary } from '../../lib/bulletin';
 import { computeStandings } from '../../lib/standings';
 import { fetchGameStates } from '../../lib/lichess';
+import { gamePhase, GamePhase } from '../../lib/phase';
+
+const PHASE_TEXT: Record<GamePhase, string> = {
+  opening: 'in apertura',
+  middlegame: 'nel mediogioco',
+  endgame: 'nel finale',
+};
 import { WhatsAppPreview } from '../../WhatsAppPreview';
 
 // Round bulletin: state of the round's games on Lichess and the WhatsApp update message
@@ -78,16 +85,18 @@ export function BulletinSection({
         // cannot be known reliably, so the message gives only an approximate number of moves.
         const plies = s.moves && s.moves.trim() ? s.moves.trim().split(/\s+/).length : 0;
         const approx = getApproxMoves(plies);
+        const lichessPhase = gamePhase(s);
 
         body = fill(pickFor("ongoing"), {
           approxMoves: approx.approxMoves,
           movesBand: approx.movesBand,
-          phase: approx.phase,
+          // Lichess' own phase when available, the estimate from the number of moves otherwise
+          phase: lichessPhase ? PHASE_TEXT[lichessPhase] : approx.phase,
         });
 
         detailsList.push(
           `${i + 1}. ${id}: bianco=${s.players?.white?.user?.name ?? "?"}, nero=${s.players?.black?.user?.name ?? "?"}, ` +
-            `semimosse visibili via API=${plies} (Lichess ne nasconde fino a 3), ~${approx.approxMoves}`
+            `semimosse visibili via API=${plies} (Lichess ne nasconde fino a 3), ~${approx.approxMoves}, fase Lichess=${lichessPhase ?? "n/d"}`
         );
       } else if (s.status === "aborted" || s.status === "noStart") {
         body = pickFor("aborted");

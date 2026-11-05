@@ -54,7 +54,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
       }
 
       const res = await fetch(
-        "https://lichess.org/api/games/export/_ids?pgnInJson=false&lastFen=true&opening=true",
+        "https://lichess.org/api/games/export/_ids?pgnInJson=false&lastFen=true&opening=true&division=true",
         {
           method: "POST",
           headers: { "Content-Type": "text/plain", Accept: "application/x-ndjson" },

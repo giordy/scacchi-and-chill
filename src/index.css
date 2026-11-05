@@ -685,6 +685,7 @@ details .body {
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid var(--line);
+  gap: 8px;
   padding-top: 8px;
   margin-top: 4px;
 }
@@ -1495,6 +1496,21 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 .opening-label {
   min-width: 0;
   font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.match-footer-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+
+.match-progress {
+  font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;

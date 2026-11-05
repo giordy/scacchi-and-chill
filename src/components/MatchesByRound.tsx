@@ -3,6 +3,7 @@ import { extractGameId } from '../lib/utils';
 import { gameProgress } from '../lib/progress';
 import { isReturnLeg } from '../lib/legs';
 import { MiniBoard } from './MiniBoard';
+import { gamePhase, movesLabel, PHASE_LABEL } from '../lib/phase';
 import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
 
 interface MatchesByRoundProps {
@@ -139,14 +140,15 @@ function MatchCard({
   else if (s?.winner === "black") badge = <span className="status-badge result">0 – 1</span>;
   else if (s?.status === "draw" || s?.status === "stalemate") badge = <span className="status-badge result">½ – ½</span>;
 
-  const plies = s?.moves?.trim() ? s.moves.trim().split(/\s+/).length : 0;
-  const moves = Math.ceil(plies / 2);
-  // Ongoing games: Lichess hides the last moves, so their length is shown only once finished
-  const detail =
-    s?.opening?.name || (gameProgress(s) === "finished" && moves > 0 ? `${moves} ${moves === 1 ? "mossa" : "mosse"}` : "");
+  const progress = gameProgress(s);
+  // Ongoing games: Lichess hides the last moves, so only an approximate count is shown
+  const moves = progress === 'pending' ? '' : movesLabel(s, progress === 'finished');
+  const phase = progress === 'ongoing' ? gamePhase(s) : undefined;
+  const progressText = [moves, phase && PHASE_LABEL[phase]].filter(Boolean).join(' · ');
+  const opening = s?.opening?.name ?? '';
 
   // Final position only: during the game Lichess hides the latest moves
-  const finalFen = gameProgress(s) === "finished" && s?.lastFen && game.url ? s.lastFen : "";
+  const finalFen = progress === "finished" && s?.lastFen && game.url ? s.lastFen : "";
 
   return (
     <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}`}>
@@ -169,11 +171,16 @@ function MatchCard({
         {badge}
       </div>
       <div className="match-footer">
-        <span className="opening-label">
-          {showRound && <span className="match-round">Turno {game.round}</span>}
-          {showRound && detail ? " · " : ""}
-          {detail}
-        </span>
+        <div className="match-footer-info">
+          {(showRound || opening) && (
+            <span className="opening-label">
+              {showRound && <span className="match-round">Turno {game.round}</span>}
+              {showRound && opening ? " · " : ""}
+              {opening}
+            </span>
+          )}
+          {progressText && <span className="match-progress">{progressText}</span>}
+        </div>
         {game.url ? (
           <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
             Apri su Lichess
