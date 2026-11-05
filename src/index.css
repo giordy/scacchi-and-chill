@@ -2080,8 +2080,8 @@ a.champion-badge {
   border: 1px solid color-mix(in srgb, var(--brass) 35%, var(--line));
 }
 
-.season-stats {
-  margin-top: 24px;
+.season-stats .stat-pills {
+  margin-bottom: 8px;
 }
 
 /* Finished game: the final position opens the replay */
@@ -2148,9 +2148,10 @@ button.replay-close {
   cursor: pointer;
 }
 
+/* The Lichess GIF is 720×840: the board plus a bar with each player's name above and below */
 .replay-frame {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 720 / 840;
   border-radius: 6px;
   overflow: hidden;
   background: var(--bg);
