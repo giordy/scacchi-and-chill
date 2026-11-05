@@ -1,0 +1,742 @@
+{
+  "history": [
+    {
+      "black": "luca_sgarbossa",
+      "createdAt": 1793551785003,
+      "lichess": {
+        "createdAt": 1791532106538,
+        "daysPerTurn": 2,
+        "id": "KXmPfreU",
+        "lastFen": "8/5P2/8/p4KQk/P7/8/8/8 b - - 6 1",
+        "lastMove": "g8g5",
+        "lastMoveAt": 1792581321059,
+        "moves": "g3 c6 b3 d5 Bb2 Nf6 Bg2 e6 d3 Bb4+ c3 Ba5 b4 Bb6 d4 O-O Nf3 Ne4 O-O Nd7 Nbd2 Ng5 Qc2 f5 Nxg5 Qxg5 f4 Qh6 Nf3 Nf6 Ne5 Ng4 Nxg4 fxg4 Bc1 Qg6 Qxg6 hxg6 a4 a5 b5 c5 e3 c4 Ba3 Rf5 h3 gxh3 Bxh3 Rh5 Kg2 Bd7 Bg4 Rh8 Rh1 Kf7 Kf3 Bc7 e4 dxe4+ Kxe4 Rhd8 Be2 Re8 Bxc4 Kf6 Ra2 g5 fxg5+ Kxg5 Bc1+ Kg6 Bf4 Bxf4 gxf4 Rac8 Rg2+ Kf7 Kd3 Kf6 Rg5 Rf8 Rhg1 Ke7 Rxg7+ Ke8 Rg8 Ke7 R1g7+ Rf7 Rxf7+ Kxf7 Rxc8 Bxc8 Ke4 Kf6 Be2 Bd7 c4 Be8 Bd1 Bg6+ Ke3 Bf5 c5 Ke7 Bb3 Kd7 d5 exd5 Bxd5 Be6 Ke4 Bxd5+ Kxd5 Kc8 f5 Kd8 f6 Ke8 Ke6 Kf8 c6 bxc6 bxc6 Ke8 f7+ Kf8 c7 Kg7 c8=Q Kg6 Qg8+ Kh6 Kf5 Kh5 Qg5#",
+        "opening": {
+          "eco": "A00",
+          "name": "Hungarian Opening",
+          "ply": 1
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "rating": 1626,
+            "ratingDiff": -10,
+            "user": {
+              "id": "luca_sgarbossa",
+              "name": "luca_sgarbossa"
+            }
+          },
+          "white": {
+            "provisional": true,
+            "rating": 1814,
+            "ratingDiff": 84,
+            "user": {
+              "id": "fsgach",
+              "name": "fsgach"
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "mate",
+        "variant": "standard",
+        "winner": "white"
+      },
+      "round": "1",
+      "url": "https://lichess.org/KXmPfreU",
+      "white": "fsgach"
+    },
+    {
+      "black": "battimat",
+      "createdAt": 1793551785003,
+      "lichess": {
+        "createdAt": 1791470502534,
+        "daysPerTurn": 2,
+        "id": "qmKRFYcR",
+        "lastFen": "5k2/p5p1/8/6p1/P7/3n1qP1/7P/6K1 w - - 1 1",
+        "lastMove": "e5d3",
+        "lastMoveAt": 1791812539386,
+        "moves": "e4 e5 Nf3 Nc6 Nc3 Nf6 d4 Bb4 d5 Ne7 Bd3 d6 Bd2 Bg4 O-O h6 Bb5+ c6 dxc6 bxc6 Bd3 O-O a3 Bc5 Qe2 d5 exd5 cxd5 Qxe5 Bxf3 Bxh6 Bh5 Qg5 Bg6 Rfe1 Nh7 Na4 Nxg5 Bxg5 f6 Nxc5 fxg5 Ne6 Qb6 Nxf8 Kxf8 b3 Bxd3 cxd3 Qxb3 Re5 Qxd3 Rae1 Ng6 R5e3 Qb5 Rg3 Re8 Rge3 Rxe3 fxe3 Qb3 e4 dxe4 Rxe4 Qb1+ Kf2 Qxe4 g3 Ne5 Kg1 Qf3 a4 Nd3",
+        "opening": {
+          "eco": "C47",
+          "name": "Four Knights Game: Scotch Variation",
+          "ply": 7
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "provisional": true,
+            "rating": 1687,
+            "ratingDiff": 52,
+            "user": {
+              "id": "battimat",
+              "name": "battimat"
+            }
+          },
+          "white": {
+            "rating": 1690,
+            "ratingDiff": -22,
+            "user": {
+              "flair": "nature.fallen-leaf",
+              "id": "giords",
+              "name": "giords",
+              "patron": true,
+              "patronColor": 9
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "resign",
+        "variant": "standard",
+        "winner": "black"
+      },
+      "round": "1",
+      "url": "https://lichess.org/qmKRFYcR",
+      "white": "giords"
+    },
+    {
+      "black": "frasal",
+      "createdAt": 1793551785000,
+      "lichess": {
+        "createdAt": 1791472479862,
+        "daysPerTurn": 2,
+        "id": "VsBqiQKk",
+        "lastFen": "2Q5/5q1k/1p4bp/p2pB3/1r3P2/1P4RP/6P1/6K1 b - - 4 1",
+        "lastMove": "c1c8",
+        "lastMoveAt": 1792596586988,
+        "moves": "e4 e5 Nf3 Nc6 c3 Nf6 Qa4 d6 Bb5 Bd7 Bd3 Be7 O-O O-O Qd1 h6 Re1 Re8 Bc2 Bf8 d4 exd4 Nxd4 Nxd4 cxd4 c6 Bd2 Qb6 Bc3 d5 e5 Ne4 Bxe4 dxe4 Nd2 Be7 Nxe4 Rad8 a4 a5 Qd2 Ra8 f4 Qd8 Rf1 f5 exf6 Bxf6 Nxf6+ Qxf6 d5 Qf7 Rae1 cxd5 Rxe8+ Rxe8 h3 b6 Rf3 Bf5 Rg3 Bg6 Be5 Kh7 Qd4 Qe6 Bxg7 Rc8 Be5 Rc4 Qd2 Rxa4 b3 Rb4 Qc1 Qf7 Qc8",
+        "opening": {
+          "eco": "C44",
+          "name": "Ponziani Opening: Jaenisch Counterattack",
+          "ply": 6
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "provisional": true,
+            "rating": 1500,
+            "ratingDiff": -238,
+            "user": {
+              "id": "frasal",
+              "name": "frasal"
+            }
+          },
+          "white": {
+            "provisional": true,
+            "rating": 1500,
+            "ratingDiff": 237,
+            "user": {
+              "flair": "food-drink.rice-ball",
+              "id": "matepaco",
+              "name": "matepaco"
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "cheat",
+        "variant": "standard",
+        "winner": "white"
+      },
+      "round": "1",
+      "url": "https://lichess.org/VsBqiQKk",
+      "white": "matepaco"
+    },
+    {
+      "black": "drake097",
+      "createdAt": 1793551785002,
+      "lichess": {
+        "createdAt": 1791552506078,
+        "daysPerTurn": 2,
+        "id": "49lZveZH",
+        "lastFen": "6k1/p1p5/3p2pb/3Pp3/2P1PP2/8/1r6/q1KQ4 w - - 5 1",
+        "lastMove": "a3a1",
+        "lastMoveAt": 1791991872768,
+        "moves": "d4 Nf6 Nc3 g6 Bg5 Bg7 f3 O-O e4 d6 h4 Nh5 Nge2 h6 g4 hxg5 gxh5 gxh4 Rxh4 e5 d5 Qxh4+ Kd2 Bh6+ Kd3 Qf2 Kc4 Bd7 hxg6 b5+ Nxb5 Qc5+ Kb3 Qxb5+ Kc3 Qc5+ Kb3 fxg6 Nc3 Na6 a4 Rab8+ Bb5 Bxb5 axb5 Rxb5+ Nxb5 Rb8 Rxa6 Qxb5+ Kc3 Qxb2+ Kd3 Qb5+ c4 Qxa6 f4 Qa3+ Kc2 Rb2+ Kc1 Qa1#",
+        "opening": {
+          "eco": "A45",
+          "name": "Indian Defense",
+          "ply": 2
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "provisional": true,
+            "rating": 1448,
+            "ratingDiff": 42,
+            "user": {
+              "id": "drake097",
+              "name": "drake097"
+            }
+          },
+          "white": {
+            "provisional": true,
+            "rating": 838,
+            "ratingDiff": -59,
+            "user": {
+              "id": "scarsoforteh",
+              "name": "scarsoforteh"
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "mate",
+        "variant": "standard",
+        "winner": "black"
+      },
+      "round": "1",
+      "url": "https://lichess.org/49lZveZH",
+      "white": "scarsoforteh"
+    },
+    {
+      "black": "scarsoforteh",
+      "createdAt": 1793551785004,
+      "lichess": {
+        "createdAt": 1792649704096,
+        "daysPerTurn": 2,
+        "division": {
+          "middle": 21
+        },
+        "id": "n8dWafTV",
+        "lastFen": "4nq2/7k/p2p1pnp/1p1p1Np1/1PrP3P/P1P1PPQ1/5KP1/2R4R b - - 3 1",
+        "lastMove": "f1h1",
+        "lastMoveAt": 1793881058634,
+        "moves": "d4 d5 Bf4 Nc6 Nf3 Bf5 a3 Nf6 Nc3 e6 h3 h6 e3 Bd6 Bxd6 cxd6 Bb5 a6 Be2 O-O Qd2 Qa5 O-O b5 b4 Qb6 Nh4 g5 Nxf5 exf5 Bd3 Ne7 Ne2 Ne4 Qe1 Ng6 f3 Nf6 Bxf5 Rac8 Bxc8 Rxc8 c3 Rc4 Ng3 Qc6 Rc1 Qa8 Nf5 Qf8 Qg3 Ne8 h4 f6",
+        "opening": {
+          "eco": "D00",
+          "name": "Queen's Pawn Game: Accelerated London System",
+          "ply": 3
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "provisional": true,
+            "rating": 779,
+            "user": {
+              "id": "scarsoforteh",
+              "name": "scarsoforteh"
+            }
+          },
+          "white": {
+            "provisional": true,
+            "rating": 1739,
+            "user": {
+              "id": "battimat",
+              "name": "battimat"
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "started",
+        "variant": "standard"
+      },
+      "round": "2",
+      "url": "https://lichess.org/n8dWafTV",
+      "white": "battimat"
+    },
+    {
+      "black": "matepaco",
+      "createdAt": 1793551785003,
+      "lichess": {
+        "createdAt": 1792654221933,
+        "daysPerTurn": 2,
+        "id": "en2rPxjK",
+        "lastFen": "8/p7/1p5p/2p2p2/P1Pk1p2/5P2/4KP2/8 w - - 11 1",
+        "lastMove": "e5d4",
+        "lastMoveAt": 1792947047505,
+        "moves": "e4 e5 Nf3 Bc5 Nxe5 Nc6 Nxc6 dxc6 Bd3 Nf6 O-O O-O h3 Re8 Re1 Qd6 Qf3 g5 e5 Rxe5 Rxe5 Qxe5 Qe2 Qg3 b4 Bxh3 Qf3 Qxf3 gxf3 Bxb4 Bb2 Nd5 Be4 Re8 c3 Bd6 Na3 Nf4 Nc4 Ne2+ Kh1 f5 Re1 Nf4 Bd5+ Kf8 Rxe8+ Kxe8 Nxd6+ cxd6 Bg8 h6 Bh7 Nd3 Ba3 c5 Kh2 Nf4 d4 Kf7 Bc1 Kg7 Bxf4 gxf4 Kxh3 Kxh7 dxc5 dxc5 a4 b6 c4 Kg7 Kh4 Kg6 Kh3 Kg5 Kg2 Kf6 Kf1 Ke5 Ke2 Kd4",
+        "opening": {
+          "eco": "C40",
+          "name": "King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit",
+          "ply": 6
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "provisional": true,
+            "rating": 1737,
+            "ratingDiff": 117,
+            "user": {
+              "flair": "food-drink.rice-ball",
+              "id": "matepaco",
+              "name": "matepaco"
+            }
+          },
+          "white": {
+            "provisional": true,
+            "rating": 1490,
+            "ratingDiff": -86,
+            "user": {
+              "id": "drake097",
+              "name": "drake097"
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "resign",
+        "variant": "standard",
+        "winner": "black"
+      },
+      "round": "2",
+      "url": "https://lichess.org/en2rPxjK",
+      "white": "drake097"
+    },
+    {
+      "black": "fsgach",
+      "createdAt": 1793551785004,
+      "lichess": {
+        "createdAt": 1792688071202,
+        "daysPerTurn": 2,
+        "id": "1aNlBoQV",
+        "lastFen": "2R4Q/r4pk1/p2r2b1/4p3/8/1B3P2/P4K2/6R1 b - - 1 1",
+        "lastMove": "h4h8",
+        "lastMoveAt": 1792931608773,
+        "moves": "e4 b6 d4 Bb7 Nc3 g6 Nf3 Bg7 Bd3 e6 Bf4 d6 O-O Ne7 Qd2 O-O Ne2 Nd7 c3 a6 Ng3 Kh8 Bh6 Rg8 Ng5 Qe8 Qf4 Rf8 Bxg7+ Kxg7 Qh4 Rh8 Qf4 Ng8 h4 h6 Nf3 Qe7 Rfe1 Rf8 Qe3 Ndf6 Qe2 Ng4 h5 g5 c4 N4f6 d5 e5 Nf5+ Kh7 Nxe7 Nxe7 Nh2 Nd7 b4 Ra8 Ng4 Bc8 Qf3 Kg7 Rac1 Ng8 c5 bxc5 bxc5 Nxc5 Nxe5 Nf6 Bb1 dxe5 Rxc5 Bg4 Qc3 Rhe8 f3 Bxh5 Rc1 Bg6 Qc4 h5 Rxc7 g4 d6 Rad8 Qc6 gxf3 gxf3 Re6 Rd1 h4 Rc8 Rd7 Bc2 Ra7 Bb3 Bh5 Kf2 Nxe4+ Qxe4 Rf6 Rg1+ Bg6 Qxh4 Rxd6 Qh8#",
+        "opening": {
+          "eco": "B00",
+          "name": "Owen Defense",
+          "ply": 2
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "provisional": true,
+            "rating": 1898,
+            "ratingDiff": -176,
+            "user": {
+              "id": "fsgach",
+              "name": "fsgach"
+            }
+          },
+          "white": {
+            "provisional": true,
+            "rating": 1262,
+            "ratingDiff": 583,
+            "user": {
+              "id": "frasal",
+              "name": "frasal"
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "mate",
+        "variant": "standard",
+        "winner": "white"
+      },
+      "round": "2",
+      "url": "https://lichess.org/1aNlBoQV",
+      "white": "frasal"
+    },
+    {
+      "black": "giords",
+      "createdAt": 1793551785004,
+      "lichess": {
+        "createdAt": 1792653423268,
+        "daysPerTurn": 2,
+        "id": "qDjywa51",
+        "lastFen": "2k4r/pp3pp1/2p4p/8/1R4PQ/5P1K/P4N1P/5bq1 w - - 7 1",
+        "lastMove": "c4f1",
+        "lastMoveAt": 1793311601427,
+        "moves": "e4 c6 d4 d5 Nc3 Nf6 e5 Ne4 Nxe4 dxe4 Bc4 Bf5 Bg5 Nd7 f3 Qb6 b3 e3 Bxe3 e6 g4 Bg6 Nh3 h6 O-O O-O-O Qe1 Bxc2 Qh4 Nxe5 Rae1 Nxc4 bxc4 Bd3 Rf2 Bxc4 Rd1 e5 Rfd2 Bb4 Rb1 exd4 Rxd4 Rxd4 Bxd4 Qxd4+ Nf2 Qe3 Rxb4 Qe1+ Kg2 Qf1+ Kg3 Qg1+ Kh3 Bf1#",
+        "opening": {
+          "eco": "B15",
+          "name": "Caro-Kann Defense: Campomanes Attack",
+          "ply": 6
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "rating": 1668,
+            "ratingDiff": 22,
+            "user": {
+              "flair": "nature.fallen-leaf",
+              "id": "giords",
+              "name": "giords",
+              "patron": true,
+              "patronColor": 9
+            }
+          },
+          "white": {
+            "rating": 1628,
+            "ratingDiff": -20,
+            "user": {
+              "id": "luca_sgarbossa",
+              "name": "luca_sgarbossa"
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "mate",
+        "variant": "standard",
+        "winner": "black"
+      },
+      "round": "2",
+      "url": "https://lichess.org/qDjywa51",
+      "white": "luca_sgarbossa"
+    }
+  ],
+  "players": [
+    {
+      "handle": "matepaco",
+      "name": "Francesco Spa"
+    },
+    {
+      "handle": "frasal",
+      "name": "Francesco Sal"
+    },
+    {
+      "handle": "scarsoforteh",
+      "name": "Stefano"
+    },
+    {
+      "handle": "drake097",
+      "name": "Alessandro"
+    },
+    {
+      "handle": "fsgach",
+      "name": "Fabio"
+    },
+    {
+      "handle": "luca_sgarbossa",
+      "name": "Luca"
+    },
+    {
+      "handle": "giords",
+      "name": "Giordano"
+    },
+    {
+      "handle": "battimat",
+      "name": "Matteo"
+    }
+  ],
+  "schedule": [
+    {
+      "black": "frasal",
+      "round": "1",
+      "white": "matepaco"
+    },
+    {
+      "black": "drake097",
+      "round": "1",
+      "white": "scarsoforteh"
+    },
+    {
+      "black": "luca_sgarbossa",
+      "round": "1",
+      "white": "fsgach"
+    },
+    {
+      "black": "battimat",
+      "round": "1",
+      "white": "giords"
+    },
+    {
+      "black": "matepaco",
+      "round": "2",
+      "white": "drake097"
+    },
+    {
+      "black": "fsgach",
+      "round": "2",
+      "white": "frasal"
+    },
+    {
+      "black": "scarsoforteh",
+      "round": "2",
+      "white": "battimat"
+    },
+    {
+      "black": "giords",
+      "round": "2",
+      "white": "luca_sgarbossa"
+    },
+    {
+      "black": "scarsoforteh",
+      "round": "3",
+      "white": "matepaco"
+    },
+    {
+      "black": "battimat",
+      "round": "3",
+      "white": "fsgach"
+    },
+    {
+      "black": "drake097",
+      "round": "3",
+      "white": "luca_sgarbossa"
+    },
+    {
+      "black": "frasal",
+      "round": "3",
+      "white": "giords"
+    },
+    {
+      "black": "matepaco",
+      "round": "4",
+      "white": "battimat"
+    },
+    {
+      "black": "luca_sgarbossa",
+      "round": "4",
+      "white": "frasal"
+    },
+    {
+      "black": "fsgach",
+      "round": "4",
+      "white": "scarsoforteh"
+    },
+    {
+      "black": "drake097",
+      "round": "4",
+      "white": "giords"
+    },
+    {
+      "black": "giords",
+      "round": "5",
+      "white": "matepaco"
+    },
+    {
+      "black": "fsgach",
+      "round": "5",
+      "white": "drake097"
+    },
+    {
+      "black": "battimat",
+      "round": "5",
+      "white": "frasal"
+    },
+    {
+      "black": "scarsoforteh",
+      "round": "5",
+      "white": "luca_sgarbossa"
+    },
+    {
+      "black": "matepaco",
+      "round": "6",
+      "white": "fsgach"
+    },
+    {
+      "black": "luca_sgarbossa",
+      "round": "6",
+      "white": "battimat"
+    },
+    {
+      "black": "frasal",
+      "round": "6",
+      "white": "drake097"
+    },
+    {
+      "black": "scarsoforteh",
+      "round": "6",
+      "white": "giords"
+    },
+    {
+      "black": "matepaco",
+      "round": "7",
+      "white": "luca_sgarbossa"
+    },
+    {
+      "black": "frasal",
+      "round": "7",
+      "white": "scarsoforteh"
+    },
+    {
+      "black": "drake097",
+      "round": "7",
+      "white": "battimat"
+    },
+    {
+      "black": "giords",
+      "round": "7",
+      "white": "fsgach"
+    },
+    {
+      "black": "matepaco",
+      "round": "8",
+      "white": "frasal"
+    },
+    {
+      "black": "scarsoforteh",
+      "round": "8",
+      "white": "drake097"
+    },
+    {
+      "black": "fsgach",
+      "round": "8",
+      "white": "luca_sgarbossa"
+    },
+    {
+      "black": "giords",
+      "round": "8",
+      "white": "battimat"
+    },
+    {
+      "black": "drake097",
+      "round": "9",
+      "white": "matepaco"
+    },
+    {
+      "black": "frasal",
+      "round": "9",
+      "white": "fsgach"
+    },
+    {
+      "black": "battimat",
+      "round": "9",
+      "white": "scarsoforteh"
+    },
+    {
+      "black": "luca_sgarbossa",
+      "round": "9",
+      "white": "giords"
+    },
+    {
+      "black": "matepaco",
+      "round": "10",
+      "white": "scarsoforteh"
+    },
+    {
+      "black": "fsgach",
+      "round": "10",
+      "white": "battimat"
+    },
+    {
+      "black": "luca_sgarbossa",
+      "round": "10",
+      "white": "drake097"
+    },
+    {
+      "black": "giords",
+      "round": "10",
+      "white": "frasal"
+    },
+    {
+      "black": "battimat",
+      "round": "11",
+      "white": "matepaco"
+    },
+    {
+      "black": "frasal",
+      "round": "11",
+      "white": "luca_sgarbossa"
+    },
+    {
+      "black": "scarsoforteh",
+      "round": "11",
+      "white": "fsgach"
+    },
+    {
+      "black": "giords",
+      "round": "11",
+      "white": "drake097"
+    },
+    {
+      "black": "matepaco",
+      "round": "12",
+      "white": "giords"
+    },
+    {
+      "black": "drake097",
+      "round": "12",
+      "white": "fsgach"
+    },
+    {
+      "black": "frasal",
+      "round": "12",
+      "white": "battimat"
+    },
+    {
+      "black": "luca_sgarbossa",
+      "round": "12",
+      "white": "scarsoforteh"
+    },
+    {
+      "black": "fsgach",
+      "round": "13",
+      "white": "matepaco"
+    },
+    {
+      "black": "battimat",
+      "round": "13",
+      "white": "luca_sgarbossa"
+    },
+    {
+      "black": "drake097",
+      "round": "13",
+      "white": "frasal"
+    },
+    {
+      "black": "giords",
+      "round": "13",
+      "white": "scarsoforteh"
+    },
+    {
+      "black": "luca_sgarbossa",
+      "round": "14",
+      "white": "matepaco"
+    },
+    {
+      "black": "scarsoforteh",
+      "round": "14",
+      "white": "frasal"
+    },
+    {
+      "black": "battimat",
+      "round": "14",
+      "white": "drake097"
+    },
+    {
+      "black": "fsgach",
+      "round": "14",
+      "white": "giords"
+    }
+  ],
+  "seasons": [],
+  "source": "backup automatico",
+  "tournament": {
+    "description": "Nato a L'Avana nel 1888, Capablanca è passato alla storia come uno dei più grandi talenti naturali della disciplina. Imparò il gioco a soli quattro anni osservando il padre e sviluppò fin da subito un'incredibile intuizione posizionale.\n\nIl suo stile era lineare, essenziale e privo di orpelli: evitava le complicazioni inutili e convertiva i vantaggi con una precisione quasi infallibile, specialmente nei finali di partita. Questa sua regolarità gli valse il celebre soprannome di *\"La Macchina degli Scacchi\"*.\n\nTra il 1916 e il 1924 mantenne un record eccezionale: *63 partite consecutive disputate ad altissimo livello senza subire alcuna sconfitta*. Nel 1921 diventò Campione del Mondo battendo Emanuel Lasker, detenendo il titolo fino al 1927.",
+    "fairPlayText": "• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.\n• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.\n• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.",
+    "howItWorks": "1. All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida.\n2. Quando la partita finisce, scrivi nel gruppo WhatsApp così il risultato viene registrato.",
+    "imageUrl": "assets/capablanca.jpg",
+    "masterName": "José Raúl Capablanca",
+    "rulesText": "",
+    "season": "Stagione 2 - Capablanca",
+    "subtitle": "La macchina degli scacchi",
+    "title": "Scacchi & Chill",
+    "winners": [
+      {
+        "handle": "fsgach",
+        "name": "Fabio",
+        "podium": [
+          {
+            "handle": "battimat",
+            "name": "Matteo",
+            "place": 2
+          },
+          {
+            "handle": "giords",
+            "name": "Giordano",
+            "place": 2
+          }
+        ],
+        "season": "Scacchi & Chill - Stagione 1",
+        "year": "2026"
+      }
+    ]
+  },
+  "version": "2.0"
+}
