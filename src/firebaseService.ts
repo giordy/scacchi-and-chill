@@ -104,7 +104,8 @@ export async function saveTournamentFullToFirebase(data: {
     if (data.meta.fairPlayText !== undefined) payload.fairPlayText = data.meta.fairPlayText;
     if (data.meta.daysPerMove !== undefined) payload.daysPerMove = data.meta.daysPerMove;
     if (data.meta.rated !== undefined) payload.rated = data.meta.rated;
-    if (data.meta.winners !== undefined) payload.winners = data.meta.winners;
+    // Firestore rejects undefined values (e.g. a winner without notes): the JSON round trip drops them
+    if (data.meta.winners !== undefined) payload.winners = JSON.parse(JSON.stringify(data.meta.winners));
   }
   if (data.players) {
     payload.players = data.players;

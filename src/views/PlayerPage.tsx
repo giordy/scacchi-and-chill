@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame } from '../types';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
+import { Medal, MEDAL_EMOJI, medalsOf, reigningChampion } from '../lib/honours';
 import { PointsChart } from '../components/PointsChart';
 
 interface PlayerPageProps {
@@ -72,6 +73,11 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
   const wins = sum(endings.wins);
   const losses = sum(endings.losses);
   const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
+  const winners = config.tournament?.winners;
+  const champion = reigningChampion(winners);
+  const isChampion = champion?.handle.toLowerCase() === player.handle.toLowerCase();
+  const medals = medalsOf(player.handle, winners);
+  const medalCount = (m: Medal) => medals.filter((x) => x.place === m).length;
 
   return (
     <main className="public-main">
@@ -79,6 +85,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
 
       <section className="dossier-card player-hero">
         <h1 className="hero-title">{player.name}</h1>
+        {isChampion && <p className="champion-line">👑 Campione in carica · {champion!.season}</p>}
         <a
           className="player-link"
           href={`https://lichess.org/@/${player.handle}`}
@@ -120,6 +127,26 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
           )}
         </div>
       </section>
+
+      {medals.length > 0 && (
+        <section className="dossier-card">
+          <h2 className="section-heading">Medagliere</h2>
+          <p className="medal-tally" aria-label={`${medalCount(1)} ori, ${medalCount(2)} argenti, ${medalCount(3)} bronzi`}>
+            {([1, 2, 3] as Medal[]).map((m) => (
+              <span key={m} className={`medal-count${medalCount(m) === 0 ? " is-zero" : ""}`}>
+                {MEDAL_EMOJI[m]} {medalCount(m)}
+              </span>
+            ))}
+          </p>
+          <ul className="medal-list">
+            {medals.map((m, i) => (
+              <li key={i}>
+                {MEDAL_EMOJI[m.place]} {m.season}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {pointsByRound.length > 0 && (
         <section className="dossier-card">

@@ -1,6 +1,7 @@
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonWinner, TournamentMeta } from '../types';
 import { computeStandings } from './standings';
 import { computeSeasonAwards } from './awards';
+import { podiumFromStandings } from './honours';
 
 // Stable document id from the season name: "Stagione 2 - Capablanca" -> "stagione-2-capablanca"
 export function seasonId(season: string): string {
@@ -41,8 +42,8 @@ export function buildSeasonArchive(
   return archive;
 }
 
-// Puts the champion in the hall of fame, one entry per season name. An existing entry for the
-// season is kept when it names the same player (with its notes) and replaced when the champion changed.
+// Puts the champion and the podium in the hall of fame, one entry per season name. An existing
+// entry for the season keeps its notes when it names the same champion, and its podium when it has one.
 export function withChampion(winners: SeasonWinner[] | undefined, archive: SeasonArchive): SeasonWinner[] {
   const list = winners ?? [];
   if (!archive.champion) return list;
@@ -52,9 +53,14 @@ export function withChampion(winners: SeasonWinner[] | undefined, archive: Seaso
     handle: archive.champion.handle,
     year: String(new Date(archive.archivedAt).getFullYear()),
   };
+  const podium = podiumFromStandings(archive.standings);
+  if (podium.length > 0) entry.podium = podium;
   const idx = list.findIndex((w) => w.season === archive.season);
   if (idx === -1) return [...list, entry];
-  if (list[idx].handle === entry.handle) return list;
+  const old = list[idx];
+  if (old.handle === entry.handle) {
+    return old.podium || !entry.podium ? list : list.map((w, i) => (i === idx ? { ...old, podium: entry.podium } : w));
+  }
   return list.map((w, i) => (i === idx ? entry : w));
 }
 

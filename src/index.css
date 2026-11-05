@@ -873,7 +873,9 @@ button.sync-btn { min-height: 40px; font-weight: 600; }
 .add-form { display: grid; gap: 8px; align-items: flex-end; }
 .add-form-player { grid-template-columns: 1fr 1fr auto; }
 
-.add-form-winner { grid-template-columns: 110px 1fr 1fr auto; gap: 6px; }
+.add-form-podium { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 8px; }
+.row-actions { display: inline-flex; gap: 4px; flex-shrink: 0; }
+button.btn-mini.btn-mini-edit { color: var(--ink); }
 button.btn-add { min-height: 48px; white-space: nowrap; }
 button.btn-add.compact { min-height: 44px; font-size: 12px; }
 button.btn-mini { min-height: 0; font-size: 11px; padding: 3px 8px; color: var(--danger); }
@@ -1760,15 +1762,10 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 
 @media (max-width: 480px) {
   .add-form-match,
-  .add-form-winner {
-    grid-template-columns: 64px 1fr 1fr;
-  }
-  .add-form-winner {
+  .add-form-podium {
     grid-template-columns: 1fr 1fr;
   }
-  .add-form-match > button,
-  .add-form-winner > button,
-  .add-form-winner > div:nth-child(3) {
+  .add-form-match > button {
     grid-column: 1 / -1;
   }
 }
@@ -1921,4 +1918,54 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   font-size: 12px;
   color: var(--muted);
   overflow-wrap: anywhere;
+}
+
+.player-name-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.champion-badge {
+  font-size: 14px;
+  line-height: 1;
+  cursor: help;
+}
+
+.champion-line {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brass);
+}
+
+.winner-podium {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 2px;
+  font-size: 15px;
+}
+
+.medal-tally {
+  display: flex;
+  gap: 18px;
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.medal-count.is-zero {
+  opacity: 0.35;
+}
+
+.medal-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--muted);
 }

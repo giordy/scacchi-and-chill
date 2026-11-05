@@ -11,6 +11,7 @@ import { useHash } from "./hooks/useHash";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
 import { summitGames } from "./lib/summit";
+import { MEDAL_EMOJI, reigningChampion } from "./lib/honours";
 import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { SeasonAwards } from "./components/SeasonAwards";
@@ -61,6 +62,7 @@ export function PublicTournamentView({
   const allGames = withScheduledGames(history, schedule);
   const rounds = [...new Set(allGames.map((g) => g.round))].sort(byRound);
   const summits = summitGames(config.players, allGames, gameStates);
+  const champion = reigningChampion(tournamentMeta.winners);
   // Andata/ritorno: from the official schedule when there is one, otherwise from the games created so far
   const returnStart = returnLegStart(schedule.length > 0 ? schedule : history);
   const scheduleIndex = (g: HistoryGame) =>
@@ -178,7 +180,14 @@ export function PublicTournamentView({
                     <td className="col-rank"><span className={`rank${idx < 3 && p.points > 0 ? ` podium-${idx + 1}` : ""}`}>{idx + 1}</span></td>
                     <td className="sticky-col">
                       <div className="player-cell">
-                        <a href={playerHref(p.handle)} className="player-name player-page-link">{p.name}</a>
+                        <span className="player-name-line">
+                          <a href={playerHref(p.handle)} className="player-name player-page-link">{p.name}</a>
+                          {champion?.handle.toLowerCase() === p.handle.toLowerCase() && (
+                            <span className="champion-badge" title={`Campione in carica · ${champion.season}`} aria-label={`Campione in carica, ${champion.season}`}>
+                              👑
+                            </span>
+                          )}
+                        </span>
                         <a
                           href={`https://lichess.org/@/${p.handle}`}
                           target="_blank"
@@ -343,6 +352,15 @@ export function PublicTournamentView({
                       <a href={`https://lichess.org/@/${w.handle}`} target="_blank" rel="noopener noreferrer">
                         {w.name}
                       </a>
+                      {(w.podium ?? []).length > 0 && (
+                        <span className="winner-podium">
+                          {(w.podium ?? []).map((p) => (
+                            <span key={p.handle}>
+                              {MEDAL_EMOJI[p.place]} {p.name}
+                            </span>
+                          ))}
+                        </span>
+                      )}
                       {w.notes && <span className="winner-notes">{w.notes}</span>}
                     </span>
                   </li>

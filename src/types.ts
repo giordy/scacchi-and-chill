@@ -73,12 +73,20 @@ export interface ScheduledMatch {
   black: string;
 }
 
+// A podium place below the champion; a shared place uses up the next (two seconds, no third)
+export interface PodiumPlace {
+  handle: string;
+  name: string;
+  place: 1 | 2 | 3; // 1 only for a co-champion
+}
+
 export interface SeasonWinner {
   season: string; // es. "Stagione 1"
   name: string; // es. "Fabio"
   handle: string; // es. "fsgach"
   year?: string; // es. "2026"
   notes?: string;
+  podium?: PodiumPlace[]; // the other medals of the season
 }
 
 export interface TournamentMeta {
