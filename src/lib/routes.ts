@@ -20,20 +20,33 @@ export function isAdminLocation(hash: string, search: string): boolean {
   return hash.toLowerCase().startsWith("#admin") || search.toLowerCase().includes("admin");
 }
 
-// Sections of the public page: "#/partite", "#/tabellone", "#/torneo", "#/classifica" (the default)
-export type PublicTab = "standings" | "matches" | "crosstable" | "tournament";
-const TAB_SLUGS: Record<PublicTab, string> = {
+// Views of the public page, each with its own address: "#/classifica" (the default),
+// "#/tabellone", "#/partite", "#/stagione", "#/albo" and "#/regolamento". Older addresses keep
+// working: "#/torneo" is the season, "#/torneo/albo" the hall of fame.
+export type PublicView = "standings" | "crosstable" | "matches" | "season" | "hall" | "rules";
+// The four tabs; the crosstable is a view of the standings tab, the rules have no tab
+export type PublicTab = "standings" | "matches" | "season" | "hall";
+
+const VIEW_SLUGS: Record<PublicView, string> = {
   standings: "classifica",
-  matches: "partite",
   crosstable: "tabellone",
-  tournament: "torneo",
+  matches: "partite",
+  season: "stagione",
+  hall: "albo",
+  rules: "regolamento",
 };
 
-export const publicTabHref = (tab: PublicTab) => `#/${TAB_SLUGS[tab]}`;
+export const publicViewHref = (view: PublicView) => `#/${VIEW_SLUGS[view]}`;
 
 // Unknown or empty hash -> standings
-export function parsePublicTab(hash: string): PublicTab {
-  const slug = hash.toLowerCase().replace(/^#\/?/, "").split(/[/?]/)[0];
-  const found = (Object.keys(TAB_SLUGS) as PublicTab[]).find((t) => TAB_SLUGS[t] === slug);
+export function parsePublicView(hash: string): PublicView {
+  const [slug, sub] = hash.toLowerCase().replace(/^#\/?/, "").split(/[?]/)[0].split("/");
+  if (slug === "torneo") return sub === "albo" ? "hall" : "season";
+  const found = (Object.keys(VIEW_SLUGS) as PublicView[]).find((v) => VIEW_SLUGS[v] === slug);
   return found ?? "standings";
+}
+
+export function tabOfView(view: PublicView): PublicTab | undefined {
+  if (view === "crosstable") return "standings";
+  return view === "rules" ? undefined : view;
 }

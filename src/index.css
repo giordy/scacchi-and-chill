@@ -2222,3 +2222,57 @@ details.anecdote > summary::-webkit-details-marker {
   font-size: 17px;
   line-height: 1.6;
 }
+
+/* Classifica / Tabellone: two views of the same tab */
+.view-switch {
+  display: inline-flex;
+  margin: 0 0 12px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+}
+
+.view-switch button {
+  min-height: 0;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.view-switch button.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.footer-links a {
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.season-rules-link {
+  margin: 4px 0 0;
+  text-align: center;
+}
+
+.season-rules-link a {
+  color: var(--accent);
+  font-weight: 700;
+}

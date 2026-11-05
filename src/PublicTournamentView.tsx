@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive, TournamentMeta } from "./types";
 import { SeasonsHistory } from "./components/SeasonsHistory";
 import { playerHref } from "./lib/routes";
@@ -6,7 +6,7 @@ import { computeStandings } from "./lib/standings";
 import { computeSeasonProgress } from "./lib/progress";
 import { DEFAULT_TOURNAMENT } from "./lib/tournament";
 import { onTabListKeyDown } from "./lib/tabKeys";
-import { parsePublicTab, publicTabHref, PublicTab } from "./lib/routes";
+import { parsePublicView, publicViewHref, PublicTab, PublicView, tabOfView } from "./lib/routes";
 import { useHash } from "./hooks/useHash";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
@@ -32,19 +32,17 @@ interface PublicTournamentViewProps {
   seasons?: SeasonArchive[];
 }
 
-type SubTab = PublicTab;
-
-const TABS: { key: SubTab; label: string }[] = [
+const TABS: { key: PublicTab; label: string }[] = [
   { key: "standings", label: "Classifica" },
   { key: "matches", label: "Partite" },
-  { key: "crosstable", label: "Tabellone" },
-  { key: "tournament", label: "Torneo" },
+  { key: "season", label: "Stagione" },
+  { key: "hall", label: "Albo" },
 ];
 
 // "Anna", "Anna e Bruno", "Anna, Bruno e Carla"
 const namesList = (names: string[]) =>
   names.length > 1 ? `${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}` : names[0] ?? "";
-const ALBO_HREF = `${publicTabHref("tournament")}/albo`;
+const ALBO_HREF = publicViewHref("hall");
 
 export function PublicTournamentView({
   config,
@@ -55,14 +53,10 @@ export function PublicTournamentView({
   seasons = [],
 }: PublicTournamentViewProps) {
   // The open section lives in the URL hash, so a refresh or a shared link keeps it
-  const hash = useHash();
-  const subTab = parsePublicTab(hash);
-  // "#/torneo/albo" (the champion's crown) opens the Torneo tab on the hall of fame
-  useEffect(() => {
-    if (hash.toLowerCase() === ALBO_HREF) document.getElementById("albo-doro")?.scrollIntoView({ behavior: "smooth" });
-  }, [hash]);
-  const setSubTab = (tab: SubTab) => {
-    window.location.hash = publicTabHref(tab);
+  const view = parsePublicView(useHash());
+  const activeTab = tabOfView(view);
+  const show = (v: PublicView) => {
+    window.location.hash = publicViewHref(v);
   };
   const [filterRound, setFilterRound] = useState<string>("all");
 
@@ -132,7 +126,7 @@ export function PublicTournamentView({
             <button
               type="button"
               className="hero-portrait"
-              onClick={() => setSubTab("tournament")}
+              onClick={() => show("season")}
               aria-label={`${masterName || "Il maestro della stagione"}: leggi la presentazione`}
             >
               <img src={masterPhoto} alt="" />
@@ -176,21 +170,34 @@ export function PublicTournamentView({
           <button
             key={t.key}
             type="button"
-            className={`pub-tab-btn ${subTab === t.key ? "active" : ""}`}
+            className={`pub-tab-btn ${activeTab === t.key ? "active" : ""}`}
             role="tab"
             id={`pub-tab-${t.key}`}
-            aria-selected={subTab === t.key}
-            tabIndex={subTab === t.key ? 0 : -1}
+            aria-selected={activeTab === t.key}
+            tabIndex={activeTab === t.key || (!activeTab && t.key === "standings") ? 0 : -1}
             aria-controls={`pub-panel-${t.key}`}
-            onClick={() => setSubTab(t.key)}
+            onClick={() => show(t.key)}
           >
             {t.label}
           </button>
         ))}
       </nav>
 
-      {subTab === "standings" && (
+      {activeTab === "standings" && (
         <section role="tabpanel" id="pub-panel-standings" aria-labelledby="pub-tab-standings">
+          <div className="view-switch" role="group" aria-label="Vista della classifica">
+            <button type="button" className={view === "standings" ? "active" : ""} aria-pressed={view === "standings"} onClick={() => show("standings")}>
+              Classifica
+            </button>
+            <button type="button" className={view === "crosstable" ? "active" : ""} aria-pressed={view === "crosstable"} onClick={() => show("crosstable")}>
+              Tabellone
+            </button>
+          </div>
+        </section>
+      )}
+
+      {view === "standings" && (
+        <section aria-label="Classifica">
           {race && (
             <p className="title-race" role="status">
               {race.champion ? (
@@ -277,8 +284,8 @@ export function PublicTournamentView({
         </section>
       )}
 
-      {subTab === "crosstable" && (
-        <section role="tabpanel" id="pub-panel-crosstable" aria-labelledby="pub-tab-crosstable">
+      {view === "crosstable" && (
+        <section aria-label="Tabellone">
           <div className="table-responsive">
             <table className="crosstable">
               <thead>
@@ -318,7 +325,7 @@ export function PublicTournamentView({
         </section>
       )}
 
-      {subTab === "matches" && (
+      {view === "matches" && (
         <section role="tabpanel" id="pub-panel-matches" aria-labelledby="pub-tab-matches">
           {rounds.length > 0 && (
             <div className="filter-row">
@@ -354,8 +361,8 @@ export function PublicTournamentView({
         </section>
       )}
 
-      {subTab === "tournament" && (
-        <section role="tabpanel" id="pub-panel-tournament" aria-labelledby="pub-tab-tournament" className="tournament-panel">
+      {view === "season" && (
+        <section role="tabpanel" id="pub-panel-season" aria-labelledby="pub-tab-season" className="tournament-panel">
           <article className="dossier-card">
             <div className="dossier-row">
               {masterPhoto && (
@@ -394,6 +401,14 @@ export function PublicTournamentView({
             </article>
           )}
 
+          <p className="note season-rules-link">
+            Come si gioca, fair play e ritiri: <a href={publicViewHref("rules")}>leggi il regolamento</a>.
+          </p>
+        </section>
+      )}
+
+      {view === "hall" && (
+        <section role="tabpanel" id="pub-panel-hall" aria-labelledby="pub-tab-hall" className="tournament-panel">
           <article className="dossier-card" id="albo-doro">
             <h2 className="section-heading">Albo d'Oro</h2>
             {tournamentMeta.winners && tournamentMeta.winners.length > 0 ? (
@@ -424,7 +439,11 @@ export function PublicTournamentView({
               <SeasonsHistory seasons={seasons} />
             </div>
           )}
+        </section>
+      )}
 
+      {view === "rules" && (
+        <section aria-label="Regolamento" className="tournament-panel">
           <article className="rules-box">
             <h2 className="section-heading">Regolamento</h2>
 
@@ -433,17 +452,17 @@ export function PublicTournamentView({
               <div className="rules-text">{tournamentMeta.howItWorks || DEFAULT_TOURNAMENT.howItWorks}</div>
             </details>
 
-            <details className="rules-section">
+            <details className="rules-section" open>
               <summary className="rules-heading">Fair play</summary>
               <div className="rules-text">{tournamentMeta.fairPlayText || DEFAULT_TOURNAMENT.fairPlayText}</div>
             </details>
 
-            <details className="rules-section">
+            <details className="rules-section" open>
               <summary className="rules-heading">Ritiri</summary>
               <div className="rules-text">{tournamentMeta.withdrawalText || DEFAULT_TOURNAMENT.withdrawalText}</div>
             </details>
 
-            <details className="rules-section">
+            <details className="rules-section" open>
               <summary className="rules-heading">Partite su Lichess</summary>
               <ul className="rules-list">
               <li>
@@ -459,7 +478,6 @@ export function PublicTournamentView({
               </ul>
             </details>
           </article>
-
         </section>
       )}
     </div>
