@@ -2,6 +2,7 @@ import { HistoryGame, LichessExportGame, Player, SeasonAward } from '../types';
 import { formatPace } from './playerProfile';
 import { gameProgress } from './progress';
 import { extractGameId } from './utils';
+import { upsetOf, UPSET_GAP } from './upset';
 
 const VOID_STATUSES = new Set(["aborted", "noStart"]);
 
@@ -195,6 +196,24 @@ export function computeSeasonAwards(
         detail: `circa ${formatPace(slowest)} per ogni sua mossa`,
       });
     }
+  }
+
+  // L'ammazzagiganti: most colpacci (wins against a much higher rated opponent)
+  const upsets = new Map<string, number>();
+  games.forEach((g) => {
+    if (!g.winner || !upsetOf(g.state)) return;
+    upsets.set(g.winner, (upsets.get(g.winner) ?? 0) + 1);
+  });
+  const giant = leaders(upsets, players);
+  if (giant.handles.length > 0) {
+    awards.push({
+      id: "upsets",
+      emoji: "💥",
+      title: "L'ammazzagiganti",
+      description: `Più colpacci: vittorie contro chi aveva almeno ${UPSET_GAP} punti Elo in più`,
+      winners: who(giant.handles),
+      detail: plural(giant.best, "colpaccio", "colpacci"),
+    });
   }
 
   // Il muro: most draws

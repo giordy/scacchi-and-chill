@@ -9,6 +9,7 @@ import { leaderLine, roundDeadline, roundSummary } from '../../lib/bulletin';
 import { computeStandings } from '../../lib/standings';
 import { fetchGameStates } from '../../lib/lichess';
 import { gamePhase, GamePhase } from '../../lib/phase';
+import { upsetOf } from '../../lib/upset';
 
 const PHASE_TEXT: Record<GamePhase, string> = {
   opening: 'in apertura',
@@ -44,7 +45,6 @@ export function BulletinSection({
   const buildStatusMessageInternal = (games: HistoryGame[], states: Record<string, LichessExportGame>) => {
     const count = { finished: 0, ongoing: 0, pending: 0 };
     const detailsList: string[] = [];
-    const finishedInfo: Array<{ names: string; moves: number }> = [];
     const finishedOpenings = new Map<string, string>();
 
     const used: Record<string, Set<number>> = {};
@@ -151,9 +151,21 @@ export function BulletinSection({
           body = `${body}\n${openingNote}`;
         }
 
-        finishedInfo.push({ names: `${nameOf(white)}–${nameOf(black)}`, moves });
+        // Colpaccio: same rule as the badge on the site
+        const upset = upsetOf(s);
+        if (upset) {
+          const winnerHandle = upset.winner === "white" ? white : black;
+          const loserHandle = upset.winner === "white" ? black : white;
+          const line = fill(pickFor("upset") || "💥 Colpaccio: {gap} punti Elo di differenza", {
+            winner: nameOf(winnerHandle),
+            loser: nameOf(loserHandle),
+            gap: upset.gap,
+          });
+          body = `${body}\n${line}`;
+        }
+
         detailsList.push(
-          `${i + 1}. ${id}: stato ${s.status}, vincitore ${s.winner ?? "nessuno"}, mosse ${moves}, apertura ${
+          `${i + 1}. ${id}: stato ${s.status}, vincitore ${s.winner ?? "nessuno"}, mosse ${moves}, Elo bianco ${s.players?.white?.rating ?? "?"}${s.players?.white?.provisional ? "?" : ""}, Elo nero ${s.players?.black?.rating ?? "?"}${s.players?.black?.provisional ? "?" : ""}, apertura ${
             opening || "n/d"
           }`
         );
@@ -162,19 +174,6 @@ export function BulletinSection({
     });
 
     const isRoundComplete = games.length > 0 && count.finished === games.length;
-
-    let highlight = "";
-    const timed = finishedInfo.filter((x) => x.moves > 0).sort((a, b) => a.moves - b.moves);
-    if (
-      isRoundComplete &&
-      config.statusPhrases.highlight &&
-      timed.length >= 2 &&
-      timed[0].moves !== timed[timed.length - 1].moves
-    ) {
-      const label = (x: { names: string; moves: number }) => `${x.names} (${x.moves} mosse)`;
-      // Only the longest game: the shortest is usually a quick defeat, not something to put on display
-      highlight = fill(pickFor("highlight"), { longest: label(timed[timed.length - 1]) });
-    }
 
     const headerTemplate =
       isRoundComplete && config.statusPhrases.roundEndHeader && config.statusPhrases.roundEndHeader.length > 0
@@ -211,7 +210,6 @@ export function BulletinSection({
       fill(headerTemplate, vars),
       ...blocks,
       fill(footerTemplate, vars),
-      highlight,
       leader,
       config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
       studiesAppendix,

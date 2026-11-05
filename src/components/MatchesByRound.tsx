@@ -5,7 +5,7 @@ import { isReturnLeg } from '../lib/legs';
 import { MiniBoard, PhaseTile, START_FEN } from './MiniBoard';
 import { gamePhase, movesLabel, PHASE_LABEL } from '../lib/phase';
 import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
-import { gamesOfTheRound } from '../lib/gameOfTheRound';
+import { upsetOf, upsetTitle } from '../lib/upset';
 
 interface MatchesByRoundProps {
   games: HistoryGame[]; // already filtered and sorted by round
@@ -22,7 +22,6 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart }: Match
     return (id && gameStates[id]) || g.lichess;
   };
   const progressOf = (g: HistoryGame) => gameProgress(stateOf(g));
-  const highlights = gamesOfTheRound(games, stateOf);
   const legOf = (round: string) =>
     returnStart === undefined ? undefined : isReturnLeg(round, returnStart) ? "ritorno" : "andata";
 
@@ -51,7 +50,6 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart }: Match
           state={stateOf(g)}
           nameOf={nameOf}
           showRound={showRound}
-          highlight={!!g.url && highlights.has(g.url)}
         />
       ))}
     </div>
@@ -133,14 +131,11 @@ function MatchCard({
   state: s,
   nameOf,
   showRound = false,
-  highlight = false,
 }: {
   game: HistoryGame;
   state?: LichessExportGame;
   nameOf: (handle: string) => string;
   showRound?: boolean;
-  // Partita del turno: the longest game of a concluded round
-  highlight?: boolean;
 }) {
   // Scheduled game not created on Lichess yet
   let badge = game.url
@@ -158,6 +153,7 @@ function MatchCard({
   const phase = progress === 'ongoing' ? gamePhase(s) : undefined;
   const progressText = [moves, phase && PHASE_LABEL[phase]].filter(Boolean).join(' · ');
   const opening = s?.opening?.name ?? '';
+  const upset = progress === 'finished' ? upsetOf(s) : null;
 
   // Final position only: during the game Lichess hides the latest moves
   const finalFen = progress === "finished" && s?.lastFen && game.url ? s.lastFen : "";
@@ -172,7 +168,7 @@ function MatchCard({
   ) : null;
 
   return (
-    <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}${highlight ? " is-highlight" : ""}`}>
+    <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}${upset ? " is-upset" : ""}`}>
 
       <div className="match-card-body">
         {tile &&
@@ -204,12 +200,12 @@ function MatchCard({
               {opening}
             </span>
           )}
-          {(progressText || highlight) && (
+          {(progressText || upset) && (
             <span className="match-progress">
               {progressText}
-              {highlight && (
-                <span className="match-highlight" title="La partita più lunga del turno">
-                  🏆 Partita del turno
+              {upset && (
+                <span className="match-upset" title={upsetTitle(upset)}>
+                  💥 Colpaccio +{upset.gap}
                 </span>
               )}
             </span>

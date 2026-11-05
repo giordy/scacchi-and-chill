@@ -92,11 +92,8 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
   if (!isTextList(smPending)) fail('"statusMessage.pending" must be a non-empty list of texts.');
   if (!isTextList(smFooter)) fail('"statusMessage.footer" must be a non-empty list of texts.');
 
-  const highlightRaw = sm.highlight || sm.inEvidenza;
-  // Phrases naming the shortest game are dropped: it usually puts a quick defeat on display
-  const highlightList =
-    Array.isArray(highlightRaw) && isTextList(highlightRaw) ? highlightRaw.filter((t) => !t.includes("{shortest}")) : [];
-  const highlight = highlightList.length > 0 ? highlightList : undefined;
+  const upsetRaw = sm.upset || sm.colpaccio;
+  const upset = Array.isArray(upsetRaw) && isTextList(upsetRaw) ? upsetRaw : undefined;
 
   const roundEndHeaderRaw = sm.roundEndHeader || sm.fineTurnoTitoli;
   const roundEndHeader = Array.isArray(roundEndHeaderRaw) && isTextList(roundEndHeaderRaw) ? roundEndHeaderRaw : undefined;
@@ -155,7 +152,7 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
       pending: smPending,
       footer: smFooter,
       closing: smClosing,
-      highlight,
+      upset,
       roundEndHeader,
       roundEndFooter,
       infoLine,

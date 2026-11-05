@@ -57,7 +57,7 @@ export interface StatusPhrases {
   pending: string[];
   footer: string[];
   closing?: string[];
-  highlight?: string[];
+  upset?: string[]; // colpaccio line under a win
   roundEndHeader?: string[];
   roundEndFooter?: string[];
   infoLine?: string;
@@ -123,6 +123,8 @@ export interface LichessExportPlayer {
     id?: string;
     name?: string;
   };
+  rating?: number; // at the start of the game
+  provisional?: boolean; // shown as "1500?" on Lichess
 }
 
 export interface LichessExportGame {

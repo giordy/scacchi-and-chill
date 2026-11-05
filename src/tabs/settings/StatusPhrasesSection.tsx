@@ -3,7 +3,7 @@ import { StatusPhrases } from '../../types';
 
 type ListKey =
   | 'header' | 'roundEndHeader' | 'pending' | 'ongoing' | 'win' | 'draw'
-  | 'aborted' | 'footer' | 'roundEndFooter' | 'highlight' | 'closing';
+  | 'aborted' | 'footer' | 'roundEndFooter' | 'upset' | 'closing';
 
 const listOf = (v: unknown): string[] => (Array.isArray(v) ? v : []);
 
@@ -18,7 +18,7 @@ const FIELDS: { key: ListKey; label: string; vars: string; required: boolean }[]
   { key: 'aborted', label: 'Partita annullata', vars: 'nessuna', required: true },
   { key: 'footer', label: 'Riepilogo (turno in corso)', vars: '{summary}, {round}, {finished}, {ongoing}, {pending}', required: true },
   { key: 'roundEndFooter', label: 'Riepilogo (turno concluso)', vars: '{summary}, {round}, {finished}', required: false },
-  { key: 'highlight', label: 'Partita più lunga (turno concluso)', vars: '{longest}', required: false },
+  { key: 'upset', label: 'Colpaccio (sotto la vittoria, con almeno 150 punti Elo di differenza)', vars: '{winner}, {loser}, {gap}', required: false },
   { key: 'closing', label: 'Saluto finale', vars: 'nessuna', required: false },
 ];
 

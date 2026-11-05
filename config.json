@@ -131,12 +131,11 @@
       "📊 *Riepilogo: {summary}*",
       "📊 *In numeri: {summary}*"
     ],
-    "highlight": [
-      "🏁 La più lunga del turno: {longest}.",
-      "⏱️ Maratona del turno: {longest}.",
-      "📏 Partita più lunga del turno: {longest}.",
-      "🐢 Chi ha giocato di più: {longest}.",
-      "📌 Da segnare: la partita più lunga è {longest}."
+    "upset": [
+      "💥 Colpaccio! {winner} batte un avversario con {gap} punti Elo in più",
+      "💥 Pronostico ribaltato: {gap} punti Elo di differenza",
+      "🎯 Colpaccio da {gap} punti Elo",
+      "💥 Davide contro Golia: {gap} punti Elo di distanza"
     ],
     "roundEndHeader": [
       "🏁 *Turno {round} concluso!* Ecco i risultati finali:",
