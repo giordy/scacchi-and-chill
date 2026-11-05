@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive, TournamentMeta } from "./types";
 import { SeasonsHistory } from "./components/SeasonsHistory";
 import { playerHref } from "./lib/routes";
@@ -36,6 +36,7 @@ const TABS: { key: SubTab; label: string }[] = [
 ];
 
 const byRound = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true });
+const ALBO_HREF = `${publicTabHref("tournament")}/albo`;
 
 export function PublicTournamentView({
   config,
@@ -46,7 +47,12 @@ export function PublicTournamentView({
   seasons = [],
 }: PublicTournamentViewProps) {
   // The open section lives in the URL hash, so a refresh or a shared link keeps it
-  const subTab = parsePublicTab(useHash());
+  const hash = useHash();
+  const subTab = parsePublicTab(hash);
+  // "#/torneo/albo" (the champion's crown) opens the Torneo tab on the hall of fame
+  useEffect(() => {
+    if (hash.toLowerCase() === ALBO_HREF) document.getElementById("albo-doro")?.scrollIntoView({ behavior: "smooth" });
+  }, [hash]);
   const setSubTab = (tab: SubTab) => {
     window.location.hash = publicTabHref(tab);
   };
@@ -184,9 +190,14 @@ export function PublicTournamentView({
                         <span className="player-name-line">
                           <a href={playerHref(p.handle)} className="player-name player-page-link">{p.name}</a>
                           {champions?.handles.includes(p.handle.toLowerCase()) && (
-                            <span className="champion-badge" title={`Campione in carica · ${champions.season}`} aria-label={`Campione in carica, ${champions.season}`}>
+                            <a
+                              href={ALBO_HREF}
+                              className="champion-badge"
+                              title={`Campione in carica · ${champions.season}`}
+                              aria-label={`Campione in carica, ${champions.season}: vai all'Albo d'Oro`}
+                            >
                               👑
-                            </span>
+                            </a>
                           )}
                           {withdrawalNote(p.handle, tournamentMeta.withdrawals) && (
                             <span className="withdrawal-tag">{withdrawalNote(p.handle, tournamentMeta.withdrawals)}</span>
@@ -321,34 +332,7 @@ export function PublicTournamentView({
             </div>
           </article>
 
-          <article className="rules-box">
-            <h2 className="section-heading">Regolamento</h2>
-
-            <h3 className="rules-heading">Come funziona</h3>
-            <div className="rules-text">{tournamentMeta.howItWorks || DEFAULT_TOURNAMENT.howItWorks}</div>
-
-            <h3 className="rules-heading">Fair play</h3>
-            <div className="rules-text">{tournamentMeta.fairPlayText || DEFAULT_TOURNAMENT.fairPlayText}</div>
-
-            <h3 className="rules-heading">Ritiri</h3>
-            <div className="rules-text">{tournamentMeta.withdrawalText || DEFAULT_TOURNAMENT.withdrawalText}</div>
-
-            <h3 className="rules-heading">Partite su Lichess</h3>
-            <ul className="rules-list">
-              <li>
-                <strong>Tempo:</strong> {days} {days === 1 ? "giorno" : "giorni"} per mossa, in modalità corrispondenza.
-              </li>
-              <li>
-                {rated ? (
-                  <><strong>Rated:</strong> le partite contano per il tuo Elo Lichess.</>
-                ) : (
-                  <><strong>Amichevoli:</strong> le partite non contano per il tuo Elo Lichess.</>
-                )}
-              </li>
-            </ul>
-          </article>
-
-          <article className="dossier-card">
+          <article className="dossier-card" id="albo-doro">
             <h2 className="section-heading">Albo d'Oro</h2>
             {tournamentMeta.winners && tournamentMeta.winners.length > 0 ? (
               <ol className="winners-list">
@@ -378,6 +362,42 @@ export function PublicTournamentView({
               <SeasonsHistory seasons={seasons} />
             </div>
           )}
+
+          <article className="rules-box">
+            <h2 className="section-heading">Regolamento</h2>
+
+            <details className="rules-section" open>
+              <summary className="rules-heading">Come funziona</summary>
+              <div className="rules-text">{tournamentMeta.howItWorks || DEFAULT_TOURNAMENT.howItWorks}</div>
+            </details>
+
+            <details className="rules-section">
+              <summary className="rules-heading">Fair play</summary>
+              <div className="rules-text">{tournamentMeta.fairPlayText || DEFAULT_TOURNAMENT.fairPlayText}</div>
+            </details>
+
+            <details className="rules-section">
+              <summary className="rules-heading">Ritiri</summary>
+              <div className="rules-text">{tournamentMeta.withdrawalText || DEFAULT_TOURNAMENT.withdrawalText}</div>
+            </details>
+
+            <details className="rules-section">
+              <summary className="rules-heading">Partite su Lichess</summary>
+              <ul className="rules-list">
+              <li>
+                <strong>Tempo:</strong> {days} {days === 1 ? "giorno" : "giorni"} per mossa, in modalità corrispondenza.
+              </li>
+              <li>
+                {rated ? (
+                  <><strong>Rated:</strong> le partite contano per il tuo Elo Lichess.</>
+                ) : (
+                  <><strong>Amichevoli:</strong> le partite non contano per il tuo Elo Lichess.</>
+                )}
+              </li>
+              </ul>
+            </details>
+          </article>
+
         </section>
       )}
     </div>

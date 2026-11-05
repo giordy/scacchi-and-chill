@@ -1648,8 +1648,50 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   color: var(--accent);
 }
 
-.rules-box .section-heading + .rules-heading {
-  margin-top: 0;
+details.rules-section {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+}
+
+details.rules-section:first-of-type {
+  border-top: 0;
+}
+
+.rules-section > summary.rules-heading {
+  margin: 0;
+  padding: 6px 0;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rules-section > summary.rules-heading::-webkit-details-marker {
+  display: none;
+}
+
+.rules-section > summary.rules-heading::after {
+  content: "+";
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.rules-section[open] > summary.rules-heading::after {
+  content: "–";
+}
+
+.rules-section > .rules-text,
+.rules-section > .rules-list {
+  margin-bottom: 10px;
+}
+
+a.champion-badge {
+  text-decoration: none;
 }
 
 .rules-list {
@@ -1963,7 +2005,7 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 .champion-badge {
   font-size: 14px;
   line-height: 1;
-  cursor: help;
+  cursor: pointer;
 }
 
 .champion-line {
