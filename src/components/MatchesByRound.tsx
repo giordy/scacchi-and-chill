@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { HistoryGame, LichessExportGame } from '../types';
 import { GameReplay } from './GameReplay';
+import { InfoTip } from './InfoTip';
 import { gameProgress } from '../lib/progress';
 import { isReturnLeg } from '../lib/legs';
 import { MiniBoard, PhaseTile, START_FEN } from './MiniBoard';
@@ -232,14 +233,14 @@ function MatchCard({
             <span className="match-progress">
               {progressText}
               {summit && (
-                <span className="match-summit" title={`${summit} in classifica a inizio turno`}>
+                <InfoTip className="match-summit" text={`Scontro al vertice: ${summit} in classifica a inizio turno.`}>
                   🔝 Scontro al vertice
-                </span>
+                </InfoTip>
               )}
               {upset && (
-                <span className="match-upset" title={upsetTitle(upset)}>
+                <InfoTip className="match-upset" text={`Colpaccio: ${upsetTitle(upset).toLowerCase()}.`}>
                   💥 Colpaccio +{upset.gap}
-                </span>
+                </InfoTip>
               )}
             </span>
           )}

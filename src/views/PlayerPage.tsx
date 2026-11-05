@@ -3,6 +3,7 @@ import { AppConfig, HistoryGame, LichessExportGame } from '../types';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
 import { flairFromGames, flairUrl } from '../lib/flair';
+import { InfoTip } from '../components/InfoTip';
 import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampions, shortSeason } from '../lib/honours';
 import { PointsChart } from '../components/PointsChart';
 
@@ -234,12 +235,14 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
             </div>
           ))}
           {pace && (
-            <div
-              className="stat-pill"
-              title={`Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (${pace.games} sue)`}
-            >
+            <div className="stat-pill">
               <span className="stat-pill-label">Tempo a mossa</span>
-              <span className="stat-pill-val">circa {formatPace(pace.msPerMove)}</span>
+              <InfoTip
+                className="stat-pill-val"
+                text={`Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (${pace.games} sue).`}
+              >
+                circa {formatPace(pace.msPerMove)} <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+              </InfoTip>
             </div>
           )}
         </div>
