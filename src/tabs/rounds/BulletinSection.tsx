@@ -352,6 +352,19 @@ export function BulletinSection({
               />
             </div>
           </details>
+
+          {details.length > 0 && (
+            <details className="raw-text mt-12">
+              <summary>🔍 Dati letti da Lichess</summary>
+              <div className="raw-text-body">
+                <ul className="bulletin-details">
+                  {details.map((line, i) => (
+                    <li key={i}>{line}</li>
+                  ))}
+                </ul>
+              </div>
+            </details>
+          )}
         </>
       )}
     </section>
