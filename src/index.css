@@ -2062,9 +2062,9 @@ a.champion-badge {
 
 .player-flair {
   display: inline-block;
-  width: 0.8em;
-  height: 0.8em;
-  margin-left: 0.22em;
-  vertical-align: -0.04em;
+  width: 1.15em;
+  height: 1.15em;
+  margin-left: 0.25em;
+  vertical-align: -0.22em;
   object-fit: contain;
 }
