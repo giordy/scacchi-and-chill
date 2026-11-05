@@ -95,6 +95,7 @@ export function SeasonArchiveSection({
         subtitle: "",
         winners: withChampion(meta.winners, snapshot),
         withdrawals: [],
+        masterAnecdotes: [],
       });
       if (clearSchedule) onUpdateSchedule([]);
       setNextSeason("");

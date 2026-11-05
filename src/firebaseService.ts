@@ -21,6 +21,7 @@ import {
   MessageTemplates,
   StatusPhrases,
   Withdrawal,
+  MasterAnecdote,
   LichessExportGame,
   SeasonArchive,
 } from "./types";
@@ -70,6 +71,7 @@ export interface TournamentDocData {
   fairPlayText?: string;
   withdrawalText?: string;
   withdrawals?: Withdrawal[];
+  masterAnecdotes?: MasterAnecdote[];
   daysPerMove?: number;
   rated?: boolean;
   winners?: SeasonWinner[];
@@ -98,6 +100,7 @@ export async function saveTournamentFullToFirebase(data: {
     if (data.meta.howItWorks !== undefined) payload.howItWorks = data.meta.howItWorks;
     if (data.meta.fairPlayText !== undefined) payload.fairPlayText = data.meta.fairPlayText;
     if (data.meta.withdrawalText !== undefined) payload.withdrawalText = data.meta.withdrawalText;
+    if (data.meta.masterAnecdotes !== undefined) payload.masterAnecdotes = data.meta.masterAnecdotes;
     if (data.meta.withdrawals !== undefined) payload.withdrawals = JSON.parse(JSON.stringify(data.meta.withdrawals));
     if (data.meta.daysPerMove !== undefined) payload.daysPerMove = data.meta.daysPerMove;
     if (data.meta.rated !== undefined) payload.rated = data.meta.rated;

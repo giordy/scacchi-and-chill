@@ -13,6 +13,7 @@ import {
 import type { OrganizerStore } from '../hooks/useOrganizerData';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { SeasonInfoSection } from './settings/SeasonInfoSection';
+import { MasterAnecdotesSection } from './settings/MasterAnecdotesSection';
 import { RulesSection } from './settings/RulesSection';
 import { PlayersSection } from './settings/PlayersSection';
 import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
@@ -66,6 +67,7 @@ export function TournamentTab({
     <div className="settings-stack">
       <CollapsibleSection title="Stagione corrente" defaultOpen>
         <SeasonInfoSection meta={meta} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
+        <MasterAnecdotesSection meta={meta} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
       </CollapsibleSection>
 
       <CollapsibleSection title={`Giocatori (${config.players.length})`}>
