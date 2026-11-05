@@ -16,9 +16,7 @@ export function MiniBoard({ fen, label, faded = false }: { fen: string; label: s
           <g key={`${r}-${c}`} transform={`translate(${c * 100} ${r * 100})`}>
             <rect width="100" height="100" className={(r + c) % 2 === 0 ? 'mb-light' : 'mb-dark'} />
             {piece && (
-              <g transform={`scale(${100 / 45})`}>
-                <StauntonPiece piece={piece} />
-              </g>
+              <StauntonPiece piece={piece} size={100} />
             )}
           </g>
         ))
@@ -43,9 +41,7 @@ export function PhaseTile({ phase, label }: { phase?: GamePhase; label: string }
         return <rect key={i} x={c * 100} y={r * 100} width="100" height="100" className={(r + c) % 2 === 0 ? 'mb-light' : 'mb-dark'} />;
       })}
       <rect width="800" height="800" className="pt-veil" />
-      <g transform={`translate(400 ${phase ? 320 : 390}) scale(8.2) translate(-22.5 -22.5)`}>
-        <StauntonPiece piece={phase ? PHASE_PIECE[phase] : 'N'} />
-      </g>
+      <StauntonPiece piece={phase ? PHASE_PIECE[phase] : 'N'} x={160} y={phase ? 70 : 150} size={480} />
       {phase &&
         PHASES.map((p, i) => (
           <rect
