@@ -1778,7 +1778,14 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 
 /* Ongoing game: faded empty board, big piece for the phase, three phase segments */
 .phase-tile .pt-veil { fill: var(--panel); opacity: 0.6; }
-.phase-tile .pt-piece { stroke-width: 2; }
+.phase-tile .pt-piece {
+  fill: #fffdf6;
+  stroke: #1b1d1c;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.phase-tile .pt-piece .pt-ink { fill: #1b1d1c; }
 .phase-tile .pt-seg { fill: var(--line); }
 .phase-tile .pt-seg.is-done { fill: color-mix(in srgb, var(--info) 40%, var(--line)); }
 .phase-tile .pt-seg.is-current { fill: var(--info); animation: phasePulse 1.6s ease-in-out infinite; }
