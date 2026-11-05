@@ -1,0 +1,158 @@
+{
+  "_readme": [
+    "Scacchi & Chill tournament configuration.",
+    "1. players: list of participants with exact Lichess handle and WhatsApp display name.",
+    "2. defaults: default days per move, challenge link expiry days, and game rules.",
+    "3. roundMessage: message template used when creating a new round's pairings.",
+    "4. statusMessage: phrases used for the ongoing games status update.",
+    "   (Leave 'closing' empty [] to end the status message right after the summary statistics)."
+  ],
+  "players": [
+    {
+      "handle": "matepaco",
+      "name": "Francesco Spa"
+    },
+    {
+      "handle": "frasal",
+      "name": "Francesco Sal"
+    },
+    {
+      "handle": "scarsoforteh",
+      "name": "Stefano"
+    },
+    {
+      "handle": "drake097",
+      "name": "Alessandro"
+    },
+    {
+      "handle": "fsgach",
+      "name": "Fabio"
+    },
+    {
+      "handle": "luca_sgarbossa",
+      "name": "Luca"
+    },
+    {
+      "handle": "giords",
+      "name": "Giordano"
+    },
+    {
+      "handle": "battimat",
+      "name": "Matteo"
+    }
+  ],
+  "defaults": {
+    "days": 2,
+    "expiry": 2,
+    "rated": true,
+    "rules": {
+      "noRematch": true,
+      "noGiveTime": true,
+      "noClaimWin": false,
+      "noEarlyDraw": true
+    }
+  },
+  "roundMessage": {
+    "challengeName": "Turno {round}",
+    "typeLabels": {
+      "rated": "classificate",
+      "casual": "amichevoli"
+    },
+    "numberEmojis": [
+      "1️⃣",
+      "2️⃣",
+      "3️⃣",
+      "4️⃣",
+      "5️⃣",
+      "6️⃣",
+      "7️⃣",
+      "8️⃣",
+      "9️⃣"
+    ],
+    "header": "⚔️ *Turno {round}: accoppiamenti e link*\n⏱️ {days} giorni a mossa · partite {type}",
+    "game": "{n} *{white}* ⚪ vs *{black}* ⚫\n🔗 {url}",
+    "bye": "🏖️ Riposa in questo turno: *{bye}*",
+    "footer": "⏳ I link scadono {expiryDeadline}: aprite il vostro e accettate la sfida. Buone partite!"
+  },
+  "statusMessage": {
+    "header": [
+      "📊 *Aggiornamento Turno {round}*",
+      "📊 *Turno {round}*: la situazione sulle scacchiere",
+      "📊 *Turno {round}*: come siamo messi?",
+      "📊 *Turno {round}*: il punto della settimana",
+      "📊 *Il bollettino del Turno {round}*"
+    ],
+    "ongoing": [
+      "In corso ♟️ ({progress})",
+      "Si gioca ancora 🔄 ({progress})",
+      "Partita in corso ⏳ ({progress})",
+      "Ancora sulla scacchiera ♞ ({progress})",
+      "In svolgimento ♟️ ({progress})",
+      "La partita continua 🔄 ({progress})"
+    ],
+    "win": [
+      "Finita! Ha vinto {winner} {details} *({result})* 🎉\n{openingNote}",
+      "{winner} porta a casa il punto {details} *({result})* 👏\n{openingNote}",
+      "Partita chiusa: vittoria di {winner} {details} *({result})* ✅\n{openingNote}",
+      "Punto pieno per {winner} {details} *({result})* 🏆\n{openingNote}",
+      "{winner} la spunta su {loser} {details} *({result})* 🙌\n{openingNote}",
+      "Fine dei giochi: vince {winner} {details} *({result})* 🔔\n{openingNote}",
+      "Si chiude con la vittoria di {winner} {details} *({result})* 📌\n{openingNote}",
+      "{winner} incassa il punto {details} *({result})* 💪\n{openingNote}",
+      "Verdetto: {winner} vince {details} *({result})* ⚖️\n{openingNote}",
+      "Partita archiviata: vince {winner} {details} *({result})* 🗂️\n{openingNote}"
+    ],
+    "draw": [
+      "Finita in patta {details} *({result})* 🤝\n{openingNote}",
+      "Mezzo punto a testa {details} *({result})* 🤝\n{openingNote}",
+      "Pace firmata: patta {details} *({result})* 🕊️\n{openingNote}",
+      "Si divide la posta {details} *({result})* ⚖️\n{openingNote}",
+      "Niente vincitori, niente vinti: patta {details} *({result})* 🤝\n{openingNote}",
+      "Un pareggio {details} *({result})* e mezzo punto per uno ➗\n{openingNote}",
+      "Patta! Il punto si divide {details} *({result})* ✌️\n{openingNote}",
+      "Chiusa alla pari {details} *({result})* 🟰\n{openingNote}",
+      "Partita finita in parità {details} *({result})* ⚪⚫\n{openingNote}",
+      "Armistizio sulla scacchiera {details} *({result})*\n{openingNote}"
+    ],
+    "aborted": [
+      "Partita annullata 🚫",
+      "Questa partita è stata annullata ❌",
+      "Partita annullata su Lichess 🚫",
+      "Annullata: da concordare nel gruppo 💬",
+      "Partita non disputata, risulta annullata 🚫"
+    ],
+    "pending": [
+      "Da avviare: il link scade {deadline} ⏳",
+      "Ancora da avviare, link valido fino a {deadline} 🔗",
+      "Sfida da accettare entro {deadline} ⏳"
+    ],
+    "footer": [
+      "📊 *{summary}*",
+      "📊 *Riepilogo: {summary}*",
+      "📊 *In numeri: {summary}*"
+    ],
+    "summit": [
+      "🔝 Scontro al vertice: {positions} in classifica",
+      "🔥 Big match: {positions} della classifica",
+      "⚔️ Sfida d'alta quota: {positions} in classifica"
+    ],
+    "upset": [
+      "💥 Colpaccio! {winner} batte un avversario con {gap} punti Elo in più",
+      "💥 Pronostico ribaltato: {gap} punti Elo di differenza",
+      "🎯 Colpaccio da {gap} punti Elo",
+      "💥 Davide contro Golia: {gap} punti Elo di distanza"
+    ],
+    "roundEndHeader": [
+      "🏁 *Turno {round} concluso!* Ecco i risultati finali:",
+      "🏁 *Si chiude il Turno {round}!* I verdetti delle scacchiere:",
+      "🏁 *Turno {round} completato* – Tutti i risultati:"
+    ],
+    "roundEndFooter": [
+      "🏆 *Tutte le {finished} partite del Turno {round} sono terminate!*",
+      "🏆 *Turno {round} ufficialmente concluso* ({finished} su {finished} partite disputate).",
+      "🏁 *Calato il sipario sul Turno {round}!*"
+    ],
+    "closing": [],
+    "infoLine": "🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill"
+  }
+}

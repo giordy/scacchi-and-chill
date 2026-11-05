@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Solo l'organizzatore (account Google verificato) può scrivere.
+    // Se cambi l'email qui, aggiorna anche ADMIN_EMAILS in src/firebaseService.ts.
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email_verified == true
+          && request.auth.token.email == 'organizer@example.com';
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.size() == 0 || url.matches('https://lichess\\.org/.*'));
+    }
+
+    match /tournaments/{tournamentId} {
+      // Tournament data (metadata, players, schedule) is publicly readable
+      allow read: if true;
+      // Writing tournament metadata requires valid title and season
+      allow write: if isAdmin()
+                   && request.resource.data.title is string
+                   && request.resource.data.season is string;
+
+      // Organizer-only notes (player anecdotes, cached ratings): never public
+      match /private/{docId} {
+        allow read, write: if isAdmin();
+      }
+
+      // Archived seasons (final standings): public, written only by the organizer
+      match /seasons/{seasonId} {
+        allow read: if true;
+        allow write: if isAdmin()
+                     && request.resource.data.season is string
+                     && request.resource.data.standings is list;
+      }
+
+      match /games/{gameId} {
+        // Games are publicly readable so standings and matches can be displayed to all participants
+        allow read: if true;
+        // The organizer can delete games (used when a new season starts, after archiving)
+        allow delete: if isAdmin();
+        // Game records can be created/updated if they have valid round and player handles
+        allow create, update: if isAdmin()
+                     && request.resource.data.round is string
+                     && request.resource.data.white is string
+                     && request.resource.data.black is string
+                     && (!('url' in request.resource.data) || isValidUrl(request.resource.data.url));
+      }
+    }
+  }
+}

@@ -1,0 +1,150 @@
+import { HistoryGame, LichessExportGame, Player, SeasonAward } from '../types';
+export { estimateMoveTimes } from './moveTimes';
+export type { TimedGame } from './moveTimes';
+import { formatPace } from './playerProfile';
+import { collectFinishedGames, playerMoveTimes } from './moveTimes';
+import { upsetOf, UPSET_GAP } from './upset';
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+// Handles with the highest positive count, in the order of the players list
+function leaders(counts: Map<string, number>, players: Player[]): { handles: string[]; best: number } {
+  const best = Math.max(0, ...counts.values());
+  if (best === 0) return { handles: [], best };
+  return { handles: players.map((p) => p.handle).filter((h) => counts.get(h) === best), best };
+}
+
+// Pure function: the light-hearted awards of a season, computed on finished games only.
+// An award with no possible winner (e.g. no game ended in mate) is left out.
+export function computeSeasonAwards(
+  players: Player[],
+  history: HistoryGame[],
+  gameStates: Record<string, LichessExportGame>
+): SeasonAward[] {
+  const nameOf = (h: string) => players.find((p) => p.handle === h)?.name ?? h;
+  const who = (handles: string[]) => handles.map((handle) => ({ handle, name: nameOf(handle) }));
+  const games = collectFinishedGames(players, history, gameStates);
+
+  const awards: SeasonAward[] = [];
+
+  // Re del matto: most wins by checkmate
+  const mates = new Map<string, number>();
+  games.forEach((g) => g.winner && g.status === "mate" && mates.set(g.winner, (mates.get(g.winner) ?? 0) + 1));
+  const mate = leaders(mates, players);
+  if (mate.handles.length > 0) {
+    awards.push({
+      id: "mate",
+      emoji: "👑",
+      title: "Re del matto",
+      description: "Più vittorie chiuse con lo scacco matto",
+      winners: who(mate.handles),
+      detail: plural(mate.best, "vittoria col matto", "vittorie col matto"),
+    });
+  }
+
+  // Fulmine: the decisive game won in the fewest moves
+  const decisive = games.filter((g) => g.winner && g.moves > 0);
+  if (decisive.length > 0) {
+    const fewest = Math.min(...decisive.map((g) => g.moves));
+    const fastest = decisive.filter((g) => g.moves === fewest);
+    const winners = [...new Set(fastest.map((g) => g.winner as string))];
+    const only = fastest.length === 1 ? fastest[0] : undefined;
+    const loser = only && (only.winner === only.white ? only.black : only.white);
+    awards.push({
+      id: "fastest",
+      emoji: "⚡",
+      title: "Fulmine",
+      description: "La vittoria più rapida della stagione",
+      winners: who(winners),
+      detail: `in ${plural(fewest, "mossa", "mosse")}${loser ? ` contro ${nameOf(loser)}` : ""}`,
+    });
+  }
+
+  // Il maratoneta: the decisive game won in the most moves (the winner was willing to go on)
+  if (decisive.length > 0) {
+    const most = Math.max(...decisive.map((g) => g.moves));
+    const longest = decisive.filter((g) => g.moves === most);
+    const winners = [...new Set(longest.map((g) => g.winner as string))];
+    const only = longest.length === 1 ? longest[0] : undefined;
+    const loser = only && (only.winner === only.white ? only.black : only.white);
+    awards.push({
+      id: "longest",
+      emoji: "🏃",
+      title: "Il maratoneta",
+      description: "La vittoria più lunga della stagione",
+      winners: who(winners),
+      detail: `in ${plural(most, "mossa", "mosse")}${loser ? ` contro ${nameOf(loser)}` : ""}`,
+    });
+  }
+
+  // Il bradipo: the player who takes the longest over their own moves
+  const eligible = [...playerMoveTimes(games)];
+  const slowest = Math.max(...eligible.map(([, t]) => t));
+  const sloths = players.map((p) => p.handle).filter((h) => eligible.some(([e, t]) => e === h && t === slowest));
+  if (eligible.length >= 2 && sloths.length < eligible.length) {
+    awards.push({
+      id: "slowest",
+      emoji: "🦥",
+      title: "Il bradipo",
+      description: "Per chi si gode ogni mossa con calma: il più lento a rispondere, stimato dalla durata delle sue partite",
+      winners: who(sloths),
+      detail: `circa ${formatPace(slowest)} per ogni sua mossa`,
+    });
+  }
+
+  // L'ammazzagiganti: most colpacci (wins against a much higher rated opponent)
+  const upsets = new Map<string, number>();
+  games.forEach((g) => {
+    if (!g.winner || !upsetOf(g.state)) return;
+    upsets.set(g.winner, (upsets.get(g.winner) ?? 0) + 1);
+  });
+  const giant = leaders(upsets, players);
+  if (giant.handles.length > 0) {
+    awards.push({
+      id: "upsets",
+      emoji: "💥",
+      title: "L'ammazzagiganti",
+      description: `Più colpacci: vittorie contro chi aveva almeno ${UPSET_GAP} punti Elo in più`,
+      winners: who(giant.handles),
+      detail: plural(giant.best, "colpaccio", "colpacci"),
+    });
+  }
+
+  // Il muro: most draws
+  const draws = new Map<string, number>();
+  games.forEach((g) => {
+    if (!g.draw) return;
+    draws.set(g.white, (draws.get(g.white) ?? 0) + 1);
+    draws.set(g.black, (draws.get(g.black) ?? 0) + 1);
+  });
+  const wall = leaders(draws, players);
+  if (wall.handles.length > 0) {
+    awards.push({
+      id: "draws",
+      emoji: "🧱",
+      title: "Il muro",
+      description: "Più partite chiuse in parità",
+      winners: who(wall.handles),
+      detail: plural(wall.best, "patta", "patte"),
+    });
+  }
+
+  return awards;
+}
+
+const names = (award: SeasonAward) => {
+  const list = award.winners.map((w) => w.name);
+  return list.length > 1 ? `${list.slice(0, -1).join(", ")} e ${list[list.length - 1]}` : list[0] ?? "";
+};
+
+// One line per award, e.g. "Anna (3 vittorie col matto)"
+export const awardWinnersLine = (award: SeasonAward) => `${names(award)} (${award.detail})`;
+
+// Message for the WhatsApp group
+export function awardsMessage(season: string, awards: SeasonAward[]): string {
+  return [
+    `🏆 *I premi di ${season}*`,
+    "",
+    ...awards.map((a) => `${a.emoji} *${a.title}*: ${awardWinnersLine(a)}`),
+  ].join("\n");
+}
