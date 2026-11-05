@@ -23,6 +23,7 @@ import { TournamentTab } from './tabs/TournamentTab';
 import { ReviewsTab } from './ReviewsTab';
 import { PublicPage } from './views/PublicPage';
 import { applyWithdrawals } from './lib/withdrawals';
+import { FairPlayAlert } from './components/FairPlayAlert';
 import { AdminLogin } from './views/AdminLogin';
 import { AdminConsole, AdminTab, isAdminTab } from './views/AdminConsole';
 import { saveTournamentMetaToFirebase, saveTournamentFullToFirebase } from './firebaseService';
@@ -151,6 +152,15 @@ export function App() {
       onSync={() => lichess.sync()}
       toastMessage={toastMessage}
     >
+      <FairPlayAlert
+        history={history}
+        gameStates={lichess.gameStates}
+        withdrawals={config.tournament?.withdrawals ?? []}
+        seen={organizer.fairPlaySeen ?? []}
+        onSeen={(ids) => organizer.replaceAll({ fairPlaySeen: ids })}
+        nameOf={nameOf}
+      />
+
       {activeTab === 'rounds' && (
         <>
           <Notice notice={notice} />

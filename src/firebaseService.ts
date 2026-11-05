@@ -166,6 +166,8 @@ export interface OrganizerData {
   templates?: Partial<MessageTemplates> | null;
   // Bulletin phrases edited by the organizer (config.json has the defaults)
   statusPhrases?: Partial<StatusPhrases> | null;
+  // Lichess ids of the cheating cases the organizer already acknowledged
+  fairPlaySeen?: string[];
 }
 
 const organizerRef = () => doc(db, "tournaments", TOURNAMENT_DOC_ID, "private", "organizer");
@@ -197,6 +199,7 @@ export function subscribeToOrganizerData(
         settings: d.settings,
         templates: d.templates ?? null,
         statusPhrases: d.statusPhrases ?? null,
+        fairPlaySeen: d.fairPlaySeen ?? [],
       });
     },
     (err) => {

@@ -36,6 +36,8 @@ export function WithdrawalSection({
   const schedule = config.schedule ?? [];
   const [handle, setHandle] = useState('');
   const [withSub, setWithSub] = useState(false);
+  // Exclusion for cheating: every game annulled, whatever the number played
+  const [exclusion, setExclusion] = useState(false);
   const [subName, setSubName] = useState('');
   const [subHandle, setSubHandle] = useState('');
   const [busy, setBusy] = useState(false);
@@ -43,12 +45,14 @@ export function WithdrawalSection({
   // Players still playing: not already withdrawn with forfeits
   const active = config.players.filter((p) => !withdrawals.some((w) => w.mode === 'forfeit' && w.handle === p.handle));
   const player = active.find((p) => p.handle === handle);
-  const plan = player ? planWithdrawal(player.handle, history, schedule, gameStates) : null;
+  const basePlan = player ? planWithdrawal(player.handle, history, schedule, gameStates) : null;
+  const plan = basePlan && exclusion && !withSub ? { ...basePlan, mode: 'annulled' as const } : basePlan;
   const openCreated = plan?.created.filter((g) => g.url).length ?? 0;
 
   const reset = () => {
     setHandle('');
     setWithSub(false);
+    setExclusion(false);
     setSubName('');
     setSubHandle('');
   };
@@ -67,7 +71,7 @@ export function WithdrawalSection({
       ? `${substitute.name} prende il posto di ${player.name}: eredita i suoi punti e gioca ${leftPlays(plan.open.length)}.` +
         (openCreated > 0 ? `\n\n${plural(openCreated, 'partita già creata', 'partite già create')} su Lichess ${openCreated === 1 ? 'esce' : 'escono'} dal torneo e va ricreata per ${substitute.name} dal turno.` : '')
       : plan.mode === 'annulled'
-      ? `${player.name} esce dal torneo e tutte le sue partite vengono annullate (ne ha giocate ${plan.played} su ${plan.total}).`
+      ? `${player.name} esce dal torneo e tutte le sue partite vengono annullate (ne ha giocate ${plan.played} su ${plan.total})${exclusion ? ', per fair play' : ''}.`
       : `${player.name} resta in classifica con i risultati ottenuti; ${leftGo(plan.open.length)} a tavolino agli avversari.`;
     if (!window.confirm(`${what}\n\nConfermi?`)) return;
 
@@ -151,6 +155,8 @@ export function WithdrawalSection({
             Ha giocato {plan.played} {plan.played === 1 ? 'partita' : 'partite'} su {plan.total}.{' '}
             {withSub
               ? `Il sostituto eredita punti e partite giocate, e gioca ${leftPlays(plan.open.length)}.`
+              : exclusion
+              ? 'Esclusione per fair play: esce dal torneo e tutte le sue partite vengono annullate, comunque ne abbia giocate.'
               : plan.mode === 'annulled'
               ? 'Meno di metà: esce dal torneo e tutte le sue partite vengono annullate.'
               : `Almeno metà: i risultati restano e ${leftGo(plan.open.length)} a tavolino agli avversari.`}
@@ -160,7 +166,17 @@ export function WithdrawalSection({
                 : ` Ha ${plural(openCreated, 'partita aperta', 'partite aperte')} su Lichess: chiedi ai giocatori di chiuderle.`)}
           </p>
           <div className="inline">
-            <input id="wd-sub" type="checkbox" checked={withSub} onChange={(e) => setWithSub(e.target.checked)} />
+            <input
+              id="wd-exclusion"
+              type="checkbox"
+              checked={exclusion}
+              disabled={withSub}
+              onChange={(e) => setExclusion(e.target.checked)}
+            />
+            <label htmlFor="wd-exclusion">Esclusione per fair play (annulla tutte le sue partite)</label>
+          </div>
+          <div className="inline">
+            <input id="wd-sub" type="checkbox" checked={withSub} disabled={exclusion} onChange={(e) => setWithSub(e.target.checked)} />
             <label htmlFor="wd-sub">Al suo posto entra un nuovo giocatore</label>
           </div>
           {withSub && (

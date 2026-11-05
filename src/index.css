@@ -2005,3 +2005,15 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   background: color-mix(in srgb, var(--muted) 14%, transparent);
   white-space: nowrap;
 }
+
+.fairplay-alert a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.fairplay-alert ul {
+  margin: 6px 0 8px;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
