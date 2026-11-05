@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { HistoryGame, LichessExportGame } from '../types';
+import { GameReplay } from './GameReplay';
 import { gameProgress } from '../lib/progress';
 import { isReturnLeg } from '../lib/legs';
 import { MiniBoard, PhaseTile, START_FEN } from './MiniBoard';
@@ -160,6 +162,7 @@ function MatchCard({
   // Final position only: during the game Lichess hides the latest moves
   const finalFen = progress === "finished" && s?.lastFen && game.url ? s.lastFen : "";
 
+  const [replay, setReplay] = useState(false);
   const pairing = `${nameOf(game.white)} – ${nameOf(game.black)}`;
   const tile = finalFen ? (
     <MiniBoard fen={finalFen} label={`Posizione finale di ${pairing}`} />
@@ -174,7 +177,13 @@ function MatchCard({
 
       <div className="match-card-body">
         {tile &&
-          (game.url ? (
+          (finalFen ? (
+            // Finished game: the final position opens its replay
+            <button type="button" className="mini-board-link mini-board-replay" onClick={() => setReplay(true)} aria-label={`Rivedi ${pairing}`}>
+              {tile}
+              <span className="replay-badge" aria-hidden="true">▶</span>
+            </button>
+          ) : game.url ? (
             <a href={game.url} target="_blank" rel="noopener noreferrer" className="mini-board-link">
               {tile}
             </a>
@@ -228,6 +237,7 @@ function MatchCard({
           <span className="opening-label">Link in arrivo all'inizio del turno</span>
         )}
       </div>
+      {replay && <GameReplay url={game.url} title={pairing} onClose={() => setReplay(false)} />}
     </article>
   );
 }
