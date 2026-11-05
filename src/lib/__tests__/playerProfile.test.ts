@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { computePlayerProfile, formatPace } from '../playerProfile';
-import { parsePlayerHash, playerHref, isAdminLocation, parsePublicTab, publicTabHref } from '../routes';
+import { parsePlayerHash, playerHref, isAdminLocation, parsePublicView, publicViewHref, tabOfView } from '../routes';
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch } from '../../types';
 
 const players: Player[] = [
@@ -164,15 +164,25 @@ describe('color record, endings and openings', () => {
   });
 });
 
-describe('public tabs in the hash', () => {
-  it('round-trips every tab and falls back to the standings', () => {
-    (['standings', 'matches', 'crosstable', 'tournament'] as const).forEach((t) =>
-      expect(parsePublicTab(publicTabHref(t))).toBe(t)
+describe('public views in the hash', () => {
+  it('round-trips every view and falls back to the standings', () => {
+    (['standings', 'crosstable', 'matches', 'season', 'hall', 'rules'] as const).forEach((v) =>
+      expect(parsePublicView(publicViewHref(v))).toBe(v)
     );
-    expect(publicTabHref('matches')).toBe('#/partite');
-    expect(parsePublicTab('')).toBe('standings');
-    expect(parsePublicTab('#')).toBe('standings');
-    expect(parsePublicTab('#/qualcosa')).toBe('standings');
-    expect(parsePublicTab('#/Partite')).toBe('matches');
+    expect(publicViewHref('hall')).toBe('#/albo');
+    expect(parsePublicView('')).toBe('standings');
+    expect(parsePublicView('#')).toBe('standings');
+    expect(parsePublicView('#/qualcosa')).toBe('standings');
+    expect(parsePublicView('#/Partite')).toBe('matches');
+  });
+  it('keeps the addresses shared before the tabs changed', () => {
+    expect(parsePublicView('#/torneo')).toBe('season');
+    expect(parsePublicView('#/torneo/albo')).toBe('hall');
+    expect(parsePublicView('#/tabellone')).toBe('crosstable');
+  });
+  it('maps each view to its tab', () => {
+    expect(tabOfView('crosstable')).toBe('standings');
+    expect(tabOfView('season')).toBe('season');
+    expect(tabOfView('rules')).toBeUndefined();
   });
 });

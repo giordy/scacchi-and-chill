@@ -2,7 +2,7 @@ import React from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
 import { DEFAULT_TOURNAMENT } from '../lib/tournament';
 import { useHash } from '../hooks/useHash';
-import { parsePlayerHash } from '../lib/routes';
+import { parsePlayerHash, publicViewHref } from '../lib/routes';
 import { PlayerPage } from './PlayerPage';
 import { LoadingScreen } from '../components/LoadingScreen';
 import { PublicTournamentView } from '../PublicTournamentView';
@@ -45,7 +45,10 @@ export function PublicPage({ seasons, ready, config, history, gameStates, liveUp
             Risultati letti da Lichess alle {liveUpdatedAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
           </p>
         )}
-        <a href="#admin" className="admin-link">Area organizzatore</a>
+        <nav className="footer-links" aria-label="Collegamenti">
+          <a href={publicViewHref("rules")}>Regolamento</a>
+          <a href="#admin" className="admin-link">Area organizzatore</a>
+        </nav>
       </footer>
     </main>
   );
