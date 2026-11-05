@@ -1,0 +1,54 @@
+name: Backup
+
+# Every night, a copy of the public tournament data (torneo, giocatori, calendario, partite,
+# stagioni) on the "backups" branch: one commit only when something changed, so the branch
+# history is the list of versions. Restore from the organizer area: Torneo > Copia dei dati.
+on:
+  schedule:
+    - cron: "17 2 * * *" # 02:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "backup"
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Read Firestore
+        run: node scripts/backup.mjs "$RUNNER_TEMP/backup.json"
+
+      - name: Commit to the backups branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin backups > /dev/null; then
+            git fetch --depth=1 origin backups
+            git worktree add backups-tree FETCH_HEAD
+            cd backups-tree
+            git switch -C backups
+          else
+            git worktree add --detach backups-tree
+            cd backups-tree
+            git switch --orphan backups
+          fi
+          cp "$RUNNER_TEMP/backup.json" backup.json
+          git add backup.json
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica dall'ultimo backup."
+          else
+            git commit -m "Backup del $(date -u +%Y-%m-%d)"
+            git push origin backups
+          fi

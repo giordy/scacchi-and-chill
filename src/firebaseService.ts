@@ -219,6 +219,28 @@ export async function deleteAllGames(): Promise<number> {
   return refs.length;
 }
 
+// Restore from a backup: the games collection becomes exactly the given games, results included
+export async function replaceAllGames(games: HistoryGame[]): Promise<void> {
+  await deleteAllGames();
+  for (let i = 0; i < games.length; i += 400) {
+    const batch = writeBatch(db);
+    games.slice(i, i + 400).forEach((g) => {
+      const data: Record<string, unknown> = {
+        round: g.round,
+        white: g.white,
+        black: g.black,
+        url: g.url || "",
+        createdAt: g.createdAt || Date.now(),
+        updatedAt: new Date().toISOString(),
+      };
+      // Firestore rejects undefined values: the JSON round trip drops them
+      if (g.lichess) data.lichess = JSON.parse(JSON.stringify(g.lichess));
+      batch.set(doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", gameDocIdOf(g)), data);
+    });
+    await batch.commit();
+  }
+}
+
 // Archived seasons: publicly readable, written only by the organizer
 export async function saveSeasonArchive(archive: SeasonArchive): Promise<void> {
   const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "seasons", archive.id);

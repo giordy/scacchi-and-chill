@@ -140,6 +140,10 @@ export function TournamentTab({
           templates={templates}
           organizer={organizer}
           flash={flash}
+          setHistory={setHistory}
+          onUpdateTournamentMeta={onUpdateTournamentMeta}
+          onUpdatePlayers={onUpdatePlayers}
+          onUpdateSchedule={onUpdateSchedule}
         />
       </CollapsibleSection>
     </div>
