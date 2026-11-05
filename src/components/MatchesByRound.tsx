@@ -2,7 +2,7 @@ import { HistoryGame, LichessExportGame } from '../types';
 import { extractGameId } from '../lib/utils';
 import { gameProgress } from '../lib/progress';
 import { isReturnLeg } from '../lib/legs';
-import { MiniBoard } from './MiniBoard';
+import { MiniBoard, PhaseTile, START_FEN } from './MiniBoard';
 import { gamePhase, movesLabel, PHASE_LABEL } from '../lib/phase';
 import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
 
@@ -150,14 +150,26 @@ function MatchCard({
   // Final position only: during the game Lichess hides the latest moves
   const finalFen = progress === "finished" && s?.lastFen && game.url ? s.lastFen : "";
 
+  const pairing = `${nameOf(game.white)} – ${nameOf(game.black)}`;
+  const tile = finalFen ? (
+    <MiniBoard fen={finalFen} label={`Posizione finale di ${pairing}`} />
+  ) : progress === 'ongoing' ? (
+    <PhaseTile phase={phase} label={`${pairing}: partita in corso${phase ? `, ${PHASE_LABEL[phase]}` : ''}`} />
+  ) : progress === 'pending' ? (
+    <MiniBoard fen={START_FEN} faded label={`${pairing}: partita da giocare`} />
+  ) : null;
+
   return (
     <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}`}>
       <div className="match-card-body">
-        {finalFen && (
-          <a href={game.url} target="_blank" rel="noopener noreferrer" className="mini-board-link">
-            <MiniBoard fen={finalFen} label={`Posizione finale di ${nameOf(game.white)} – ${nameOf(game.black)}`} />
-          </a>
-        )}
+        {tile &&
+          (game.url ? (
+            <a href={game.url} target="_blank" rel="noopener noreferrer" className="mini-board-link">
+              {tile}
+            </a>
+          ) : (
+            <span className="mini-board-link">{tile}</span>
+          ))}
         <div className="match-players">
           <div className={`player-row ${s?.winner === "white" ? "is-winner" : ""}`}>
             <span className="dot w" aria-label="Bianco" />

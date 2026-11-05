@@ -1723,6 +1723,7 @@ details.season-card > summary { display: flex; justify-content: space-between; g
     transition: none;
   }
   .sq-ongoing,
+  .phase-tile .pt-seg.is-current,
   .status-badge.ongoing::before {
     animation: none;
   }
@@ -1772,6 +1773,19 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 .mini-board .mb-dark { fill: var(--board-dark); }
 .mini-board .mb-white { fill: #fffdf6; stroke: #1b1d1c; stroke-width: 6; stroke-linejoin: round; }
 .mini-board .mb-black { fill: #1b1d1c; stroke: #fbf8ef; stroke-width: 3; stroke-linejoin: round; }
+
+.mini-board.is-faded { opacity: 0.45; }
+
+/* Ongoing game: faded empty board, big piece for the phase, three phase segments */
+.phase-tile .pt-veil { fill: var(--panel); opacity: 0.6; }
+.phase-tile .pt-piece { stroke-width: 2; }
+.phase-tile .pt-seg { fill: var(--line); }
+.phase-tile .pt-seg.is-done { fill: color-mix(in srgb, var(--info) 40%, var(--line)); }
+.phase-tile .pt-seg.is-current { fill: var(--info); animation: phasePulse 1.6s ease-in-out infinite; }
+
+@keyframes phasePulse {
+  50% { opacity: 0.45; }
+}
 
 .match-card-body .match-players {
   flex: 1;
