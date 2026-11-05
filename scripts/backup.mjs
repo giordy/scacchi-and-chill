@@ -7,21 +7,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { fileURLToPath } from 'node:url';
+
 const ROOT = path.resolve(import.meta.dirname, '..');
 const TOURNAMENT_DOC_ID = 'scacchi-and-chill-official';
-const out = process.argv[2];
-if (!out) {
-  console.error('Uso: node scripts/backup.mjs <file di uscita>');
-  process.exit(1);
-}
-
-const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase-applet-config.json'), 'utf8'));
-const base =
-  `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/` +
-  `${encodeURIComponent(cfg.firestoreDatabaseId || '(default)')}/documents/tournaments/${TOURNAMENT_DOC_ID}`;
 
 // Firestore REST values -> plain JSON
-function plain(v) {
+export function plain(v) {
   if (!v || typeof v !== 'object') return v;
   if ('stringValue' in v) return v.stringValue;
   if ('integerValue' in v) return Number(v.integerValue);
@@ -33,7 +25,7 @@ function plain(v) {
   if ('mapValue' in v) return fields(v.mapValue.fields);
   return undefined;
 }
-const fields = (f = {}) => Object.fromEntries(Object.entries(f).map(([k, v]) => [k, plain(v)]));
+export const fields = (f = {}) => Object.fromEntries(Object.entries(f).map(([k, v]) => [k, plain(v)]));
 
 async function get(url) {
   const res = await fetch(url, { signal: AbortSignal.timeout(30000) });
@@ -42,8 +34,8 @@ async function get(url) {
 }
 
 // A query, not a plain listing: the security rules allow queries on the public collections
-async function list(collection) {
-  const res = await fetch(`${base}:runQuery?key=${cfg.apiKey}`, {
+async function list(base, apiKey, collection) {
+  const res = await fetch(`${base}:runQuery?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ structuredQuery: { from: [{ collectionId: collection }] } }),
@@ -56,25 +48,50 @@ async function list(collection) {
 }
 
 // Same key order every time, so an unchanged database gives an identical file
-function sorted(v) {
+export function sorted(v) {
   if (Array.isArray(v)) return v.map(sorted);
   if (v && typeof v === 'object') return Object.fromEntries(Object.keys(v).sort().map((k) => [k, sorted(v[k])]));
   return v;
 }
 
-const doc = fields((await get(`${base}?key=${cfg.apiKey}`)).fields);
-const { players = [], schedule = [], updatedAt: _u, ...tournament } = doc;
 // Games still on the board change at every move: only their link and status are kept (the first
 // sync after a restore reads the rest from Lichess), so a new version appears only when something
 // that counts changes (a game ends, a round starts, the calendar or the rules change)
 const ONGOING = new Set(['created', 'started']);
-const games = (await list('games'))
-  .map(({ id: _id, updatedAt: _gu, syncedAt: _s, ...g }) =>
-    g.lichess && ONGOING.has(g.lichess.status) ? { ...g, lichess: { id: g.lichess.id, status: g.lichess.status } } : g
-  )
-  .sort((a, b) => `${a.round}|${a.white}|${a.black}`.localeCompare(`${b.round}|${b.white}|${b.black}`, undefined, { numeric: true }));
-const seasons = (await list('seasons')).sort((a, b) => String(a.archivedAt).localeCompare(String(b.archivedAt)));
+const byGame = (a, b) =>
+  `${a.round}|${a.white}|${a.black}`.localeCompare(`${b.round}|${b.white}|${b.black}`, undefined, { numeric: true });
 
-const backup = { version: '2.0', source: 'backup automatico', tournament, players, schedule, history: games, seasons };
-fs.writeFileSync(out, JSON.stringify(sorted(backup), null, 2) + '\n');
-console.log(`backup: ${players.length} giocatori, ${schedule.length} partite in calendario, ${games.length} partite, ${seasons.length} stagioni archiviate`);
+// The backup file from the plain documents: same format as the manual export of the app
+export function toBackup(doc, gameDocs, seasonDocs) {
+  const { players = [], schedule = [], updatedAt: _u, ...tournament } = doc;
+  const history = gameDocs
+    .map(({ id: _id, updatedAt: _gu, syncedAt: _s, ...g }) =>
+      g.lichess && ONGOING.has(g.lichess.status) ? { ...g, lichess: { id: g.lichess.id, status: g.lichess.status } } : g
+    )
+    .sort(byGame);
+  const seasons = [...seasonDocs].sort((a, b) => String(a.archivedAt).localeCompare(String(b.archivedAt)));
+  return sorted({ version: '2.0', source: 'backup automatico', tournament, players, schedule, history, seasons });
+}
+
+async function main(out) {
+  const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase-applet-config.json'), 'utf8'));
+  const base =
+    `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/` +
+    `${encodeURIComponent(cfg.firestoreDatabaseId || '(default)')}/documents/tournaments/${TOURNAMENT_DOC_ID}`;
+  const doc = fields((await get(`${base}?key=${cfg.apiKey}`)).fields);
+  const backup = toBackup(doc, await list(base, cfg.apiKey, 'games'), await list(base, cfg.apiKey, 'seasons'));
+  fs.writeFileSync(out, JSON.stringify(backup, null, 2) + '\n');
+  console.log(
+    `backup: ${backup.players.length} giocatori, ${backup.schedule.length} partite in calendario, ` +
+      `${backup.history.length} partite, ${backup.seasons.length} stagioni archiviate`
+  );
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const out = process.argv[2];
+  if (!out) {
+    console.error('Uso: node scripts/backup.mjs <file di uscita>');
+    process.exit(1);
+  }
+  await main(out);
+}

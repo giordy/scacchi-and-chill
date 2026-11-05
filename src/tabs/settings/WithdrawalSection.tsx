@@ -3,10 +3,10 @@ import { AppConfig, HistoryGame, LichessExportGame, Player, ScheduledMatch, Tour
 import { deleteGamesFromFirebase } from '../../firebaseService';
 import { planWithdrawal, withdrawPlayer } from '../../lib/withdrawals';
 import { errorMessage } from '../../lib/utils';
+import { plural } from '../../lib/games';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 // "la partita rimasta va" / "le 3 partite rimaste vanno"
 const leftGo = (n: number) => (n === 1 ? "l'unica partita rimasta va" : `le ${n} partite rimaste vanno`);
 const leftPlays = (n: number) => (n === 1 ? "l'unica partita rimasta" : `le ${n} partite rimaste`);

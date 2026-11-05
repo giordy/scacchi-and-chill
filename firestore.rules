@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Solo l'organizzatore (account Google verificato) può scrivere.
-    // Se cambi l'email qui, aggiorna anche ADMIN_EMAILS in src/firebaseService.ts.
+    // Se cambi l'email qui, aggiorna anche ADMIN_EMAILS in src/firebaseAuth.ts.
     function isAdmin() {
       return request.auth != null
           && request.auth.token.email_verified == true

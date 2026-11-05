@@ -1,5 +1,6 @@
 import { HistoryGame } from '../types';
 import { GameProgress } from './progress';
+import { byRound } from './games';
 
 export interface RoundBlock {
   round: string;
@@ -20,7 +21,6 @@ export interface MatchesLayout {
   concluded: boolean;
 }
 
-const byRound = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true });
 
 // `games` already sorted by round; `progressOf` reads the live Lichess state of a game
 export function layoutMatches(games: HistoryGame[], progressOf: (g: HistoryGame) => GameProgress): MatchesLayout {

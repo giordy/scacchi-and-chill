@@ -1,5 +1,6 @@
 import { HistoryGame, LichessExportGame, ScheduledMatch } from '../types';
-import { extractGameId } from './utils';
+import { byRound } from './games';
+import { stateOf as stateOfGame } from './games';
 
 export type GameProgress = 'finished' | 'ongoing' | 'pending';
 
@@ -13,7 +14,6 @@ export interface SeasonProgress {
   currentRound?: string;
 }
 
-const byRound = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true });
 
 export function gameProgress(state?: LichessExportGame): GameProgress {
   if (!state || !state.status || state.status === 'created') return 'pending';
@@ -26,8 +26,7 @@ export function computeSeasonProgress(
   schedule: ScheduledMatch[] = []
 ): SeasonProgress {
   const stateOf = (g: HistoryGame) => {
-    const id = extractGameId(g.url);
-    return gameProgress((id && gameStates[id]) || g.lichess);
+    return gameProgress(stateOfGame(g, gameStates));
   };
   const sameGame = (m: ScheduledMatch, g: HistoryGame) =>
     m.round === g.round && m.white === g.white && m.black === g.black;

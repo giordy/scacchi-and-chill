@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { HistoryGame, LichessExportGame } from '../types';
 import { errorMessage, extractGameId } from '../lib/utils';
 import { fetchGameStates } from '../lib/lichess';
+import { storedStates } from '../lib/games';
 import { saveLichessStatesToFirebase } from '../firebaseService';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
@@ -19,14 +20,7 @@ export function useLichessSync(
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
 
-  const gameStates = useMemo(() => {
-    const map: Record<string, LichessExportGame> = {};
-    history.forEach((g) => {
-      const id = extractGameId(g.url);
-      if (id && g.lichess) map[id] = g.lichess;
-    });
-    return map;
-  }, [history]);
+  const gameStates = useMemo(() => storedStates(history), [history]);
 
   // "Sync" button (organizer only): reads from Lichess and saves to Firestore.
   // quiet: automatic sync when the organizer area opens, which reports only errors.

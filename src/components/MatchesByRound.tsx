@@ -1,5 +1,4 @@
 import { HistoryGame, LichessExportGame } from '../types';
-import { extractGameId } from '../lib/utils';
 import { gameProgress } from '../lib/progress';
 import { isReturnLeg } from '../lib/legs';
 import { MiniBoard, PhaseTile, START_FEN } from './MiniBoard';
@@ -7,6 +6,7 @@ import { gamePhase, movesLabel, PHASE_LABEL } from '../lib/phase';
 import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
 import { upsetOf, upsetTitle } from '../lib/upset';
 import { summitKey } from '../lib/summit';
+import { stateOf } from '../lib/games';
 
 interface MatchesByRoundProps {
   games: HistoryGame[]; // already filtered and sorted by round
@@ -19,11 +19,8 @@ interface MatchesByRoundProps {
 // Public "Partite": the current round first, then the unfinished games of earlier rounds,
 // the upcoming rounds and finally the played rounds, newest first; both collapsed
 export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits }: MatchesByRoundProps) {
-  const stateOf = (g: HistoryGame) => {
-    const id = extractGameId(g.url);
-    return (id && gameStates[id]) || g.lichess;
-  };
-  const progressOf = (g: HistoryGame) => gameProgress(stateOf(g));
+  const stateOfGame = (g: HistoryGame) => stateOf(g, gameStates);
+  const progressOf = (g: HistoryGame) => gameProgress(stateOfGame(g));
   const legOf = (round: string) =>
     returnStart === undefined ? undefined : isReturnLeg(round, returnStart) ? "ritorno" : "andata";
 
@@ -49,7 +46,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
         <MatchCard
           key={`${g.url}-${idx}`}
           game={g}
-          state={stateOf(g)}
+          state={stateOfGame(g)}
           nameOf={nameOf}
           showRound={showRound}
           summit={summits?.get(summitKey(g))}

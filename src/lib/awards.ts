@@ -3,9 +3,9 @@ export { estimateMoveTimes } from './moveTimes';
 export type { TimedGame } from './moveTimes';
 import { formatPace } from './playerProfile';
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
+import { plural } from './games';
 import { upsetOf, UPSET_GAP } from './upset';
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 // Handles with the highest positive count, in the order of the players list
 function leaders(counts: Map<string, number>, players: Player[]): { handles: string[]; best: number } {

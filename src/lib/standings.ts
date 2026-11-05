@@ -1,5 +1,5 @@
 import { HistoryGame, LichessExportGame, Player } from '../types';
-import { extractGameId } from './utils';
+import { stateOf } from './games';
 
 export interface PlayerStanding {
   handle: string;
@@ -47,8 +47,7 @@ export function computeStandings(
   const finished: Array<{ white: string; black: string; result: "1-0" | "0-1" | "½-½" }> = [];
 
   history.forEach((g) => {
-    const id = extractGameId(g.url);
-    const s = (id && gameStates[id]) || g.lichess;
+    const s = stateOf(g, gameStates);
     const { white, black } = g;
 
     if (!stats[white]) stats[white] = emptyStats();
