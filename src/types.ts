@@ -149,6 +149,7 @@ export interface LichessExportPlayer {
   user?: {
     id?: string;
     name?: string;
+    flair?: string; // Lichess flair, e.g. "food-drink.rice-ball"
   };
   rating?: number; // at the start of the game
   provisional?: boolean; // shown as "1500?" on Lichess

@@ -2059,3 +2059,12 @@ a.champion-badge {
   display: grid;
   gap: 4px;
 }
+
+.player-flair {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  margin-left: 0.22em;
+  vertical-align: -0.04em;
+  object-fit: contain;
+}

@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame } from '../types';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
+import { flairFromGames, flairUrl } from '../lib/flair';
 import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampions } from '../lib/honours';
 import { PointsChart } from '../components/PointsChart';
 
@@ -68,6 +69,37 @@ function MedalTable({ medals }: { medals: PlayerMedal[] }) {
   );
 }
 
+// The player's Lichess flair after their name, as Lichess shows it. From the games when they
+// played one, otherwise from their public Lichess profile; nothing when they have none or the
+// image does not load.
+function Flair({ handle, fromGames }: { handle: string; fromGames?: string }) {
+  const [fetched, setFetched] = useState<string | undefined>();
+  const [broken, setBroken] = useState(false);
+  useEffect(() => {
+    setBroken(false);
+    if (fromGames) return;
+    let cancelled = false;
+    fetch(`https://lichess.org/api/user/${encodeURIComponent(handle)}`, { headers: { Accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((u) => !cancelled && setFetched(typeof u?.flair === 'string' ? u.flair : undefined))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [handle, fromGames]);
+  const flair = fromGames ?? fetched;
+  if (!flair || broken) return null;
+  return (
+    <img
+      className="player-flair"
+      src={flairUrl(flair)}
+      alt=""
+      title={`Flair su Lichess: ${flair.split('.').pop()?.replace(/-/g, ' ')}`}
+      onError={() => setBroken(true)}
+    />
+  );
+}
+
 // Public page of a single player: results, games and opponents still to face
 export function PlayerPage({ handle, config, history, gameStates, nameOf }: PlayerPageProps) {
   const profile = computePlayerProfile(handle, config.players, history, gameStates, config.schedule ?? []);
@@ -130,7 +162,10 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
       <a href="#" className="chip-link back-link">← Torna al torneo</a>
 
       <section className="dossier-card player-hero">
-        <h1 className="hero-title">{player.name}</h1>
+        <h1 className="hero-title">
+          {player.name}
+          <Flair handle={player.handle} fromGames={flairFromGames(player.handle, history, gameStates)} />
+        </h1>
         {isChampion && <p className="champion-line">👑 Campione in carica · {champions!.season}</p>}
         <a
           className="player-link"
