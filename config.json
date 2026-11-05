@@ -83,12 +83,12 @@
       "📊 *Il bollettino del Turno {round}*"
     ],
     "ongoing": [
-      "In corso ♟️ ({approxMoves})",
-      "Si gioca ancora 🔄 ({approxMoves})",
-      "Partita in corso ⏳ ({approxMoves})",
-      "Ancora sulla scacchiera ♞ ({approxMoves})",
-      "In svolgimento ♟️ ({approxMoves})",
-      "La partita continua 🔄 ({approxMoves})"
+      "In corso ♟️ ({progress})",
+      "Si gioca ancora 🔄 ({progress})",
+      "Partita in corso ⏳ ({progress})",
+      "Ancora sulla scacchiera ♞ ({progress})",
+      "In svolgimento ♟️ ({progress})",
+      "La partita continua 🔄 ({progress})"
     ],
     "win": [
       "Finita! Ha vinto {winner} {details} *({result})* 🎉\n{openingNote}",

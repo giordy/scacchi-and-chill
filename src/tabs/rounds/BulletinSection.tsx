@@ -92,6 +92,8 @@ export function BulletinSection({
           movesBand: approx.movesBand,
           // Lichess' own phase when available, the estimate from the number of moves otherwise
           phase: lichessPhase ? PHASE_TEXT[lichessPhase] : approx.phase,
+          // Moves band plus the phase, the latter only when Lichess sent it
+          progress: [approx.approxMoves, lichessPhase && PHASE_TEXT[lichessPhase]].filter(Boolean).join(", "),
         });
 
         detailsList.push(
