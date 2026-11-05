@@ -114,17 +114,34 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
       {layout.upcoming.length > 0 && (
         <>
           <h2 className="leg-heading">Prossimi turni</h2>
-          {layout.upcoming.map(collapsedRound)}
+          <FoldedRounds blocks={layout.upcoming} render={collapsedRound} more="turni" />
         </>
       )}
 
       {layout.played.length > 0 && (
         <>
           <h2 className="leg-heading">Turni giocati</h2>
-          {layout.played.map(collapsedRound)}
+          <FoldedRounds blocks={layout.played} render={collapsedRound} more="turni giocati" />
         </>
       )}
     </div>
+  );
+}
+
+// The first round of a list (the next one, or the last played), the others behind a button
+function FoldedRounds({ blocks, render, more }: { blocks: RoundBlock[]; render: (b: RoundBlock) => JSX.Element; more: string }) {
+  const [all, setAll] = useState(false);
+  const shown = all ? blocks : blocks.slice(0, 1);
+  const hidden = blocks.length - shown.length;
+  return (
+    <>
+      {shown.map(render)}
+      {hidden > 0 && (
+        <button type="button" className="rounds-more" onClick={() => setAll(true)}>
+          Mostra {hidden === 1 ? `l'altro turno` : `gli altri ${hidden} ${more}`}
+        </button>
+      )}
+    </>
   );
 }
 

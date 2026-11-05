@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { medalsOf, podiumError, podiumFromStandings, reigningChampion, reigningChampions } from '../honours';
+import { medalsOf, podiumError, shortSeason, podiumFromStandings, reigningChampion, reigningChampions } from '../honours';
 import { SeasonWinner } from '../../types';
 
 const row = (handle: string, points: number, sb: number) => ({ handle, name: handle.toUpperCase(), points, sb });
@@ -64,5 +64,14 @@ describe('medals and reigning champion', () => {
   it('is the champion of the latest season', () => {
     expect(reigningChampion(winners)?.handle).toBe('giords');
     expect(reigningChampion([])).toBeUndefined();
+  });
+});
+
+describe('shortSeason', () => {
+  it('drops the tournament title from the season name', () => {
+    expect(shortSeason('Scacchi & Chill - Stagione 1', 'Scacchi & Chill')).toBe('Stagione 1');
+    expect(shortSeason('Stagione 2 - Capablanca', 'Scacchi & Chill')).toBe('Stagione 2 - Capablanca');
+    expect(shortSeason('Scacchi & Chill', 'Scacchi & Chill')).toBe('Scacchi & Chill');
+    expect(shortSeason('Stagione 1')).toBe('Stagione 1');
   });
 });

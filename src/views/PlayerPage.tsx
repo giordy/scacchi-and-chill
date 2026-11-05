@@ -3,7 +3,7 @@ import { AppConfig, HistoryGame, LichessExportGame } from '../types';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
 import { flairFromGames, flairUrl } from '../lib/flair';
-import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampions } from '../lib/honours';
+import { fullPodium, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampions, shortSeason } from '../lib/honours';
 import { PointsChart } from '../components/PointsChart';
 
 interface PlayerPageProps {
@@ -44,28 +44,25 @@ const describeEndings = (counts: Record<EndReason, number>) =>
     .map((r) => `${counts[r]} ${END_LABEL[r]}`)
     .join(" · ");
 
-// Gold, silver and bronze over the seasons; nothing for a player with no medal
-function MedalTable({ medals }: { medals: PlayerMedal[] }) {
-  if (medals.length === 0) return null;
-  const count = (m: Medal) => medals.filter((x) => x.place === m).length;
+// Trophy shelf next to the player's name, as on Lichess profiles: the crown of the reigning
+// champion, then a medal per podium, newest first. Nothing for a player without any.
+function TrophyShelf({ medals, champion, title }: { medals: PlayerMedal[]; champion?: string; title?: string }) {
+  if (medals.length === 0 && !champion) return null;
   return (
-    <section className="dossier-card">
-      <h2 className="section-heading">Medagliere</h2>
-      <p className="medal-tally" aria-label={`${count(1)} ori, ${count(2)} argenti, ${count(3)} bronzi`}>
-        {([1, 2, 3] as Medal[]).map((m) => (
-          <span key={m} className={`medal-count${count(m) === 0 ? " is-zero" : ""}`}>
-            {MEDAL_EMOJI[m]} {count(m)}
-          </span>
-        ))}
-      </p>
-      <ul className="medal-list">
-        {medals.map((m, i) => (
-          <li key={i}>
-            {MEDAL_EMOJI[m.place]} {m.season}
-          </li>
-        ))}
-      </ul>
-    </section>
+    <ul className="trophy-shelf" aria-label="Trofei">
+      {champion && (
+        <li className="trophy is-crown" title={`Campione in carica · ${champion}`}>
+          <span className="trophy-icon" aria-hidden="true">👑</span>
+          <span className="trophy-label">In carica</span>
+        </li>
+      )}
+      {[...medals].reverse().map((m, i) => (
+        <li key={i} className={`trophy place-${m.place}`} title={`${m.place}° posto · ${m.season}`}>
+          <span className="trophy-icon" aria-label={`${m.place}° posto`}>{MEDAL_EMOJI[m.place]}</span>
+          <span className="trophy-label">{shortSeason(m.season, title)}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -128,13 +125,17 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
       <main className="public-main">
         <a href="#" className="chip-link back-link">← Torna al torneo</a>
         <section className="dossier-card player-hero">
-          <h1 className="hero-title">{pastName.name}</h1>
-          <a className="player-link" href={`https://lichess.org/@/${pastName.handle}`} target="_blank" rel="noopener noreferrer">
-            @{pastName.handle} su Lichess
-          </a>
+          <div className="player-hero-top">
+            <div>
+              <h1 className="hero-title">{pastName.name}</h1>
+              <a className="player-link" href={`https://lichess.org/@/${pastName.handle}`} target="_blank" rel="noopener noreferrer">
+                @{pastName.handle} su Lichess
+              </a>
+            </div>
+            <TrophyShelf medals={medalsOf(pastName.handle, winners)} title={config.tournament?.title} />
+          </div>
           <p className="note">Non partecipa alla stagione in corso.</p>
         </section>
-        <MedalTable medals={medalsOf(pastName.handle, winners)} />
       </main>
     );
   }
@@ -162,17 +163,21 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
       <a href="#" className="chip-link back-link">← Torna al torneo</a>
 
       <section className="dossier-card player-hero">
-        <h1 className="hero-title">{player.name}</h1>
-        {isChampion && <p className="champion-line">👑 Campione in carica · {champions!.season}</p>}
-        <a
-          className="player-link"
-          href={`https://lichess.org/@/${player.handle}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          @{player.handle}
-          <Flair handle={player.handle} fromGames={flairFromGames(player.handle, history, gameStates)} /> su Lichess
-        </a>
+        <div className="player-hero-top">
+          <div>
+            <h1 className="hero-title">{player.name}</h1>
+            <a
+              className="player-link"
+              href={`https://lichess.org/@/${player.handle}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              @{player.handle}
+              <Flair handle={player.handle} fromGames={flairFromGames(player.handle, history, gameStates)} /> su Lichess
+            </a>
+          </div>
+          <TrophyShelf medals={medals} champion={isChampion ? champions!.season : undefined} title={config.tournament?.title} />
+        </div>
 
         <div className="stat-pills">
           <div className="stat-pill">
@@ -206,8 +211,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
           )}
         </div>
       </section>
-
-      <MedalTable medals={medals} />
 
       {pointsByRound.length > 0 && (
         <section className="dossier-card">

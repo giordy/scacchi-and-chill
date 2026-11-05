@@ -1462,6 +1462,22 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 .round-group-collapsible > summary {
   list-style: none;
   margin: 0;
+  align-items: center;
+}
+
+/* "Mostra gli altri N turni": the rest of a long list of rounds */
+button.rounds-more {
+  justify-self: start;
+  min-height: 0;
+  margin-top: -6px;
+  padding: 8px 14px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: none;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
 }
 
 .round-group-collapsible > summary::-webkit-details-marker {
@@ -2008,35 +2024,10 @@ a.champion-badge {
   cursor: pointer;
 }
 
-.champion-line {
-  margin: 0 0 4px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--brass);
-}
 
 
-.medal-tally {
-  display: flex;
-  gap: 18px;
-  margin: 0 0 8px;
-  font-size: 20px;
-  font-weight: 700;
-}
 
-.medal-count.is-zero {
-  opacity: 0.35;
-}
 
-.medal-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 4px;
-  font-size: 14px;
-  color: var(--muted);
-}
 
 .withdrawal-tag {
   font-size: 11px;
@@ -2275,4 +2266,81 @@ details.anecdote > summary::-webkit-details-marker {
 .season-rules-link a {
   color: var(--accent);
   font-weight: 700;
+}
+
+/* Compact header outside the standings: name, season and round, no progress board */
+.hero.is-compact {
+  padding: 12px 14px;
+}
+
+.hero.is-compact .hero-identity {
+  gap: 12px;
+}
+
+.hero.is-compact .hero-portrait {
+  width: 44px;
+  height: 54px;
+}
+
+.hero.is-compact .hero-title {
+  font-size: clamp(22px, 6vw, 30px);
+}
+
+.hero.is-compact .hero-status {
+  margin: 8px 0 0;
+  font-size: 15px;
+}
+
+.hero.is-compact .season-board {
+  display: none;
+}
+
+/* Profile header: name on the left, trophy shelf on the right (below it on a phone) */
+.player-hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+}
+
+.trophy-shelf {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.trophy {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 64px;
+  max-width: 96px;
+  padding: 6px 8px 5px;
+  border: 1px solid color-mix(in srgb, var(--brass) 35%, var(--line));
+  border-radius: 8px;
+  background: var(--brass-soft);
+  cursor: default;
+}
+
+.trophy-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.trophy-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.trophy.is-crown .trophy-label {
+  color: var(--brass);
 }

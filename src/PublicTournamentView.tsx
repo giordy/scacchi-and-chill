@@ -120,7 +120,8 @@ export function PublicTournamentView({
 
   return (
     <div className="public-tournament">
-      <header className="hero">
+      {/* Full header on the standings, the overview; a compact one on the other views */}
+      <header className={`hero${activeTab === "standings" ? "" : " is-compact"}`}>
         <div className="hero-identity">
           {masterPhoto && (
             <button
