@@ -2313,6 +2313,11 @@ details.anecdote > summary::-webkit-details-marker {
   gap: 6px;
 }
 
+.trophy-shelf-wrap {
+  display: grid;
+  justify-items: end;
+}
+
 .trophy {
   display: grid;
   justify-items: center;
@@ -2343,4 +2348,22 @@ details.anecdote > summary::-webkit-details-marker {
 
 .trophy.is-crown .trophy-label {
   color: var(--brass);
+}
+
+button.trophy {
+  min-height: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button.trophy.is-open {
+  border-color: var(--brass);
+}
+
+.trophy-seasons {
+  margin: 6px 0 0;
+  max-width: 340px;
+  font-size: 12px;
+  color: var(--muted);
 }
