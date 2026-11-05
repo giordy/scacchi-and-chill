@@ -273,8 +273,8 @@ export function PublicTournamentView({
             </table>
           </div>
           <p className="note note-top-xs">
-            A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il numero di vittorie. Tocca un nome per
-            vedere le partite del giocatore.
+            G giocate · V vinte · N patte · P perse. A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il
+            numero di vittorie. Tocca un nome per vedere le partite del giocatore.
           </p>
           {awards.length > 0 && (
             <div className="awards-section">

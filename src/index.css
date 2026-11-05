@@ -681,6 +681,7 @@ details .body {
 }
 
 .match-footer {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1542,9 +1543,13 @@ button.rounds-more {
   min-width: 0;
   font-size: 13px;
   color: var(--muted);
-  white-space: nowrap;
+  /* Long opening names wrap on a second line (no hover on phones to read them whole) */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .match-footer-info {
@@ -1555,11 +1560,12 @@ button.rounds-more {
 }
 
 .match-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 0;
   font-size: 12px;
   color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .lichess-link-btn {
@@ -2366,4 +2372,70 @@ button.trophy.is-open {
   max-width: 340px;
   font-size: 12px;
   color: var(--muted);
+}
+
+/* Tap-to-open explanations (InfoTip) */
+.infotip {
+  display: inline-flex;
+}
+
+button.infotip-trigger {
+  min-height: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* A stat pill value that opens an explanation looks like the others */
+button.infotip-trigger.stat-pill-val {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+button.infotip-trigger.match-summit,
+button.infotip-trigger.match-upset {
+  border: 0;
+}
+
+.infotip-mark {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.infotip-bubble {
+  display: none;
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: left;
+  box-shadow: var(--shadow);
+}
+
+.infotip.is-open .infotip-bubble {
+  display: block;
+}
+
+@media (hover: hover) {
+  .infotip:hover .infotip-bubble {
+    display: block;
+  }
+}
+
+/* Bubbles span the row of pills, under it */
+.stat-pills {
+  position: relative;
 }
