@@ -1771,21 +1771,11 @@ details.season-card > summary { display: flex; justify-content: space-between; g
 
 .mini-board .mb-light { fill: var(--board-light); }
 .mini-board .mb-dark { fill: var(--board-dark); }
-.mini-board .mb-white { fill: #fffdf6; stroke: #1b1d1c; stroke-width: 6; stroke-linejoin: round; }
-.mini-board .mb-black { fill: #1b1d1c; stroke: #fbf8ef; stroke-width: 3; stroke-linejoin: round; }
 
 .mini-board.is-faded { opacity: 0.45; }
 
 /* Ongoing game: faded empty board, big piece for the phase, three phase segments */
 .phase-tile .pt-veil { fill: var(--panel); opacity: 0.6; }
-.phase-tile .pt-piece {
-  fill: #fffdf6;
-  stroke: #1b1d1c;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.phase-tile .pt-piece .pt-ink { fill: #1b1d1c; }
 .phase-tile .pt-seg { fill: var(--line); }
 .phase-tile .pt-seg.is-done { fill: color-mix(in srgb, var(--info) 40%, var(--line)); }
 .phase-tile .pt-seg.is-current { fill: var(--info); animation: phasePulse 1.6s ease-in-out infinite; }
