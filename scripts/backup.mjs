@@ -1,7 +1,8 @@
 // Nightly backup (GitHub Action "Backup"): reads the public tournament data from Firestore and
 // writes it as one JSON file, in the same format as "Scarica copia JSON" in the organizer area,
-// so "Ripristina da file" can restore either. The private organizer document (token, anecdotes,
-// ratings, message texts) is readable only by the organizer and is not included.
+// so "Ripristina da file" can restore either. Games still on the board keep only link and status.
+// The private organizer document (token, anecdotes, ratings, message texts) is readable only by
+// the organizer and is not included.
 // Usage: node scripts/backup.mjs <output file>
 import fs from 'node:fs';
 import path from 'node:path';
@@ -63,8 +64,14 @@ function sorted(v) {
 
 const doc = fields((await get(`${base}?key=${cfg.apiKey}`)).fields);
 const { players = [], schedule = [], updatedAt: _u, ...tournament } = doc;
+// Games still on the board change at every move: only their link and status are kept (the first
+// sync after a restore reads the rest from Lichess), so a new version appears only when something
+// that counts changes (a game ends, a round starts, the calendar or the rules change)
+const ONGOING = new Set(['created', 'started']);
 const games = (await list('games'))
-  .map(({ id: _id, updatedAt: _gu, syncedAt: _s, ...g }) => g)
+  .map(({ id: _id, updatedAt: _gu, syncedAt: _s, ...g }) =>
+    g.lichess && ONGOING.has(g.lichess.status) ? { ...g, lichess: { id: g.lichess.id, status: g.lichess.status } } : g
+  )
   .sort((a, b) => `${a.round}|${a.white}|${a.black}`.localeCompare(`${b.round}|${b.white}|${b.black}`, undefined, { numeric: true }));
 const seasons = (await list('seasons')).sort((a, b) => String(a.archivedAt).localeCompare(String(b.archivedAt)));
 
