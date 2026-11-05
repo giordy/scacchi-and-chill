@@ -326,6 +326,9 @@ export function PublicTournamentView({
             <h3 className="rules-heading">Fair play</h3>
             <div className="rules-text">{tournamentMeta.fairPlayText || DEFAULT_TOURNAMENT.fairPlayText}</div>
 
+            <h3 className="rules-heading">Ritiri</h3>
+            <div className="rules-text">{tournamentMeta.withdrawalText || DEFAULT_TOURNAMENT.withdrawalText}</div>
+
             <h3 className="rules-heading">Partite su Lichess</h3>
             <ul className="rules-list">
               <li>

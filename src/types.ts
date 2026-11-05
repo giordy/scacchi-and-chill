@@ -98,6 +98,7 @@ export interface TournamentMeta {
   description: string;
   howItWorks?: string;
   fairPlayText?: string;
+  withdrawalText?: string; // rules for a player who leaves during the season
   // Lichess parameters shown in the public rules (and used to create the challenges)
   daysPerMove?: number;
   rated?: boolean;

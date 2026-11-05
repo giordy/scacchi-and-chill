@@ -23,10 +23,12 @@ export function RulesSection({
 }) {
   const [howItWorks, setHowItWorks] = useState(meta?.howItWorks || DEFAULT_TOURNAMENT.howItWorks || "");
   const [fairPlay, setFairPlay] = useState(meta?.fairPlayText || DEFAULT_TOURNAMENT.fairPlayText || "");
+  const [withdrawal, setWithdrawal] = useState(meta?.withdrawalText || DEFAULT_TOURNAMENT.withdrawalText || "");
   useEffect(() => {
     if (meta?.howItWorks) setHowItWorks(meta.howItWorks);
     if (meta?.fairPlayText) setFairPlay(meta.fairPlayText);
-  }, [meta?.howItWorks, meta?.fairPlayText]);
+    if (meta?.withdrawalText) setWithdrawal(meta.withdrawalText);
+  }, [meta?.howItWorks, meta?.fairPlayText, meta?.withdrawalText]);
 
   return (
     <>
@@ -58,11 +60,15 @@ export function RulesSection({
         <label htmlFor="cfg-fairplay">Regole di fair play</label>
         <textarea id="cfg-fairplay" rows={6} className="ta-md" value={fairPlay} onChange={(e) => setFairPlay(e.target.value)} />
       </div>
+      <div>
+        <label htmlFor="cfg-withdrawal">Ritiri</label>
+        <textarea id="cfg-withdrawal" rows={4} className="ta-md" value={withdrawal} onChange={(e) => setWithdrawal(e.target.value)} />
+      </div>
       <button
         className="primary"
         type="button"
         onClick={() => {
-          onUpdateTournamentMeta({ howItWorks: howItWorks.trim(), fairPlayText: fairPlay.trim() });
+          onUpdateTournamentMeta({ howItWorks: howItWorks.trim(), fairPlayText: fairPlay.trim(), withdrawalText: withdrawal.trim() });
           flash("ok", "Regolamento aggiornato.");
         }}
       >
