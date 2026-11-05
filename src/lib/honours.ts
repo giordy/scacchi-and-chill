@@ -53,6 +53,13 @@ export function podiumError(rows: Array<{ handle: string; place: Medal }>): stri
   return null;
 }
 
+// "Scacchi & Chill - Stagione 1" -> "Stagione 1": the tournament title adds nothing on a medal
+export function shortSeason(season: string, title?: string): string {
+  if (!title) return season;
+  const rest = season.startsWith(title) ? season.slice(title.length).replace(/^[\s\-–—:·,]+/, '') : season;
+  return rest || season;
+}
+
 export interface PlayerMedal {
   season: string;
   place: Medal;
