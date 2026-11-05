@@ -12,6 +12,7 @@ import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
 import { summitGames } from "./lib/summit";
 import { fullPodium, MEDAL_EMOJI, reigningChampions } from "./lib/honours";
+import { withdrawalNote } from "./lib/withdrawals";
 import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { SeasonAwards } from "./components/SeasonAwards";
@@ -186,6 +187,9 @@ export function PublicTournamentView({
                             <span className="champion-badge" title={`Campione in carica · ${champions.season}`} aria-label={`Campione in carica, ${champions.season}`}>
                               👑
                             </span>
+                          )}
+                          {withdrawalNote(p.handle, tournamentMeta.withdrawals) && (
+                            <span className="withdrawal-tag">{withdrawalNote(p.handle, tournamentMeta.withdrawals)}</span>
                           )}
                         </span>
                         <a

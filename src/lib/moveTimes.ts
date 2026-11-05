@@ -2,7 +2,8 @@ import { HistoryGame, LichessExportGame, Player } from '../types';
 import { gameProgress } from './progress';
 import { extractGameId } from './utils';
 
-const VOID_STATUSES = new Set(["aborted", "noStart"]);
+// Not played on the board: aborted, never started, or won by forfeit after a withdrawal
+const VOID_STATUSES = new Set(["aborted", "noStart", "forfeit"]);
 
 export interface FinishedGame {
   white: string;

@@ -12,6 +12,7 @@ export interface PlayerGame {
   url: string;
   outcome: GameOutcome;
   opening?: string; // Lichess opening name, when detected
+  status?: string; // Lichess status ("forfeit" for a win by forfeit after a withdrawal)
 }
 
 export interface RemainingOpponent {
@@ -111,7 +112,7 @@ export function computePlayerProfile(
     const color = g.white === me ? "white" : "black";
     const opponent = color === "white" ? g.black : g.white;
     const id = extractGameId(g.url);
-    const s = id ? gameStates[id] : undefined;
+    const s = (id && gameStates[id]) || g.lichess;
     if (s && VOID_STATUSES.has(s.status)) return; // to be replayed: shown among the remaining ones
 
     let outcome: GameOutcome = "pending";
@@ -121,7 +122,7 @@ export function computePlayerProfile(
       else if (s.status === "started") outcome = "ongoing";
     }
     met.add(opponent);
-    games.push({ round: g.round, opponent, color, url: g.url, outcome, opening: s?.opening?.name || undefined });
+    games.push({ round: g.round, opponent, color, url: g.url, outcome, opening: s?.opening?.name || undefined, status: s?.status });
   });
   games.sort(byRound);
 
@@ -183,7 +184,7 @@ export function computePlayerProfile(
         ...vsHistory
           .filter((g) => {
             const id = extractGameId(g.url);
-            const st = id ? gameStates[id] : undefined;
+            const st = (id && gameStates[id]) || g.lichess;
             return st && VOID_STATUSES.has(st.status);
           })
           .map((): UpcomingGame => ({})),
@@ -219,7 +220,7 @@ export function computePlayerProfile(
       endings.draws++;
       return;
     }
-    const status = gameStates[extractGameId(g.url) ?? ""]?.status ?? "";
+    const status = g.status ?? "";
     endings[g.outcome === "win" ? "wins" : "losses"][END_REASON[status] ?? "other"]++;
   });
 

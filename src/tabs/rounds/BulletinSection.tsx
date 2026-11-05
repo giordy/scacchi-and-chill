@@ -10,6 +10,7 @@ import { computeStandings } from '../../lib/standings';
 import { fetchGameStates } from '../../lib/lichess';
 import { gamePhase, GamePhase } from '../../lib/phase';
 import { upsetOf } from '../../lib/upset';
+import { applyWithdrawals } from '../../lib/withdrawals';
 import { summitGames, summitKey } from '../../lib/summit';
 
 const PHASE_TEXT: Record<GamePhase, string> = {
@@ -22,7 +23,7 @@ import { WhatsAppPreview } from '../../WhatsAppPreview';
 // Round bulletin: state of the round's games on Lichess and the WhatsApp update message
 export function BulletinSection({
   round,
-  history,
+  history: rawHistory,
   config,
   expiryDays,
   triggerToast,
@@ -34,6 +35,8 @@ export function BulletinSection({
   expiryDays: number;
   triggerToast?: (msg: string) => void;
 }) {
+  // Games annulled or won by forfeit after a withdrawal, as on the site
+  const history = applyWithdrawals(rawHistory, config.tournament?.withdrawals);
   const nameOf = (handle: string) => config.players.find((p) => p.handle === handle)?.name ?? handle;
   const idToHandle = (id?: string) =>
     config.players.find((p) => p.handle.toLowerCase() === String(id ?? "").toLowerCase())?.handle;
@@ -78,7 +81,8 @@ export function BulletinSection({
 
     const blocks = games.map((g, i) => {
       const id = extractGameId(g.url);
-      const s = id ? states[id] : undefined;
+      // A game won by forfeit after a withdrawal has no Lichess link: its result is stored with it
+      const s = id ? states[id] : g.lichess;
       const white = idToHandle(s?.players?.white?.user?.id) ?? g.white;
       const black = idToHandle(s?.players?.black?.user?.id) ?? g.black;
       const head = `${config.numberEmojis[i] ?? i + 1 + "."} *${nameOf(white)}* ⚪ vs *${nameOf(black)}* ⚫`;

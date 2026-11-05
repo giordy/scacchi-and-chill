@@ -22,6 +22,7 @@ import { RoundsTab } from './tabs/RoundsTab';
 import { TournamentTab } from './tabs/TournamentTab';
 import { ReviewsTab } from './ReviewsTab';
 import { PublicPage } from './views/PublicPage';
+import { applyWithdrawals } from './lib/withdrawals';
 import { AdminLogin } from './views/AdminLogin';
 import { AdminConsole, AdminTab, isAdminTab } from './views/AdminConsole';
 import { saveTournamentMetaToFirebase, saveTournamentFullToFirebase } from './firebaseService';
@@ -103,6 +104,9 @@ export function App() {
     ? { ...config, statusPhrases: { ...config.statusPhrases, ...organizer.statusPhrases } }
     : config;
 
+  // Results as the standings see them: games annulled or won by forfeit after a withdrawal
+  const seasonHistory = applyWithdrawals(history, config.tournament?.withdrawals);
+
   const seasons = useSeasons();
   const lichess = useLichessSync(history, setHistory, flash);
   // Public page: results read live from Lichess on top of the saved ones
@@ -124,7 +128,7 @@ export function App() {
   };
 
   if (!admin.isAdminRoute) {
-    return <PublicPage seasons={seasons} ready={ready} config={config} history={history} gameStates={live.gameStates} liveUpdatedAt={live.updatedAt} nameOf={nameOf} />;
+    return <PublicPage seasons={seasons} ready={ready} config={config} history={seasonHistory} gameStates={live.gameStates} liveUpdatedAt={live.updatedAt} nameOf={nameOf} />;
   }
 
   if (!admin.authReady) {
@@ -169,7 +173,7 @@ export function App() {
       )}
 
       {activeTab === 'reviews' && (
-        <ReviewsTab history={history} config={config} nameOf={nameOf} triggerToast={triggerToast} organizer={organizer} />
+        <ReviewsTab history={seasonHistory} config={config} nameOf={nameOf} triggerToast={triggerToast} organizer={organizer} />
       )}
 
       {activeTab === 'tournament' && (

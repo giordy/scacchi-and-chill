@@ -61,7 +61,9 @@ export function RoundDetail({
   const [black, setBlack] = useState("");
 
   const used = new Set(matches.flatMap((m) => [m.white, m.black]));
-  const free = config.players.filter((p) => !used.has(p.handle));
+  // A player who withdrew keeping the results is not resting: they no longer play
+  const withdrawn = new Set((config.tournament?.withdrawals ?? []).filter((w) => w.mode === 'forfeit').map((w) => w.handle));
+  const free = config.players.filter((p) => !used.has(p.handle) && !withdrawn.has(p.handle));
   const byes = free.map((p) => p.name);
 
   const add = () => {

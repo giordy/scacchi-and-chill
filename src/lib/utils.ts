@@ -34,6 +34,7 @@ export const HOW_WIN: Record<string, string> = {
   resign: "per abbandono",
   outoftime: "per tempo scaduto",
   timeout: "per tempo scaduto",
+  forfeit: "a tavolino",
 };
 export const HOW_DRAW: Record<string, string> = {
   stalemate: "per stallo",

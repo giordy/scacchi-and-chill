@@ -257,9 +257,13 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
                   )}
                 </span>
                 <span className={`status-badge ${OUTCOME_CLASS[game.outcome]}`}>{OUTCOME_LABEL[game.outcome]}</span>
-                <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
-                  Lichess
-                </a>
+                {game.url ? (
+                  <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
+                    Lichess
+                  </a>
+                ) : (
+                  <span className="opening-label">{game.status === "forfeit" ? "A tavolino" : ""}</span>
+                )}
               </li>
             ))}
           </ul>

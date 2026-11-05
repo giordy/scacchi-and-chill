@@ -20,6 +20,8 @@ import { HallOfFameSection } from './settings/HallOfFameSection';
 import { LichessSettingsSection } from './settings/LichessSettingsSection';
 import { StatusPhrasesSection } from './settings/StatusPhrasesSection';
 import { BackupSection } from './settings/BackupSection';
+import { WithdrawalSection } from './settings/WithdrawalSection';
+import { applyWithdrawals } from '../lib/withdrawals';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
@@ -68,6 +70,16 @@ export function TournamentTab({
 
       <CollapsibleSection title={`Giocatori (${config.players.length})`}>
         <PlayersSection players={config.players} flash={flash} onUpdatePlayers={onUpdatePlayers} />
+        <WithdrawalSection
+          config={config}
+          history={history}
+          setHistory={setHistory}
+          gameStates={gameStates}
+          flash={flash}
+          onUpdateTournamentMeta={onUpdateTournamentMeta}
+          onUpdatePlayers={onUpdatePlayers}
+          onUpdateSchedule={onUpdateSchedule}
+        />
       </CollapsibleSection>
 
       <CollapsibleSection title="Regolamento">
@@ -83,7 +95,7 @@ export function TournamentTab({
       <CollapsibleSection title={`Fine stagione e storico (${seasons.length})`}>
         <SeasonArchiveSection
           config={config}
-          history={history}
+          history={applyWithdrawals(history, meta?.withdrawals)}
           gameStates={gameStates}
           seasons={seasons}
           flash={flash}

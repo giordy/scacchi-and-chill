@@ -221,7 +221,9 @@ function MatchCard({
             </span>
           )}
         </div>
-        {game.url ? (
+        {s?.status === "forfeit" ? (
+          <span className="opening-label">Vittoria a tavolino</span>
+        ) : game.url ? (
           <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
             Apri su Lichess
           </a>

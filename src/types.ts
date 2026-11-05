@@ -89,6 +89,22 @@ export interface SeasonWinner {
   podium?: PodiumPlace[]; // the other medals of the season
 }
 
+// A player who left during the season (see lib/withdrawals.ts and the "Ritiri" rule)
+export interface Withdrawal {
+  handle: string;
+  name: string;
+  at: string; // ISO date
+  played: number; // games played when leaving
+  total: number; // games of the season
+  // annulled: under half played, every game annulled; forfeit: from half on, the games left are
+  // won by the opponents; replaced: a substitute took the place and the games left
+  mode: 'annulled' | 'forfeit' | 'replaced';
+  forfeits?: ScheduledMatch[];
+  replacedBy?: Player;
+  // Players and calendar before the withdrawal, to undo it (not for a replacement)
+  undo?: { players: Player[]; schedule: ScheduledMatch[] };
+}
+
 export interface TournamentMeta {
   title: string;
   season: string;
@@ -99,6 +115,7 @@ export interface TournamentMeta {
   howItWorks?: string;
   fairPlayText?: string;
   withdrawalText?: string; // rules for a player who leaves during the season
+  withdrawals?: Withdrawal[];
   // Lichess parameters shown in the public rules (and used to create the challenges)
   daysPerMove?: number;
   rated?: boolean;

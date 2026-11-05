@@ -28,6 +28,7 @@ import {
   Settings,
   MessageTemplates,
   StatusPhrases,
+  Withdrawal,
   LichessExportGame,
   SeasonArchive,
 } from "./types";
@@ -76,6 +77,7 @@ export interface TournamentDocData {
   howItWorks?: string;
   fairPlayText?: string;
   withdrawalText?: string;
+  withdrawals?: Withdrawal[];
   daysPerMove?: number;
   rated?: boolean;
   winners?: SeasonWinner[];
@@ -104,6 +106,7 @@ export async function saveTournamentFullToFirebase(data: {
     if (data.meta.howItWorks !== undefined) payload.howItWorks = data.meta.howItWorks;
     if (data.meta.fairPlayText !== undefined) payload.fairPlayText = data.meta.fairPlayText;
     if (data.meta.withdrawalText !== undefined) payload.withdrawalText = data.meta.withdrawalText;
+    if (data.meta.withdrawals !== undefined) payload.withdrawals = JSON.parse(JSON.stringify(data.meta.withdrawals));
     if (data.meta.daysPerMove !== undefined) payload.daysPerMove = data.meta.daysPerMove;
     if (data.meta.rated !== undefined) payload.rated = data.meta.rated;
     // Firestore rejects undefined values (e.g. a winner without notes): the JSON round trip drops them

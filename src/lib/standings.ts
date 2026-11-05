@@ -48,7 +48,7 @@ export function computeStandings(
 
   history.forEach((g) => {
     const id = extractGameId(g.url);
-    const s = id ? gameStates[id] : undefined;
+    const s = (id && gameStates[id]) || g.lichess;
     const { white, black } = g;
 
     if (!stats[white]) stats[white] = emptyStats();
