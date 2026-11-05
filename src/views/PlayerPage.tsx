@@ -69,7 +69,7 @@ function MedalTable({ medals }: { medals: PlayerMedal[] }) {
   );
 }
 
-// The player's Lichess flair after their name, as Lichess shows it. From the games when they
+// The player's Lichess flair after their username, as Lichess shows it. From the games when they
 // played one, otherwise from their public Lichess profile; nothing when they have none or the
 // image does not load.
 function Flair({ handle, fromGames }: { handle: string; fromGames?: string }) {
@@ -162,10 +162,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
       <a href="#" className="chip-link back-link">← Torna al torneo</a>
 
       <section className="dossier-card player-hero">
-        <h1 className="hero-title">
-          {player.name}
-          <Flair handle={player.handle} fromGames={flairFromGames(player.handle, history, gameStates)} />
-        </h1>
+        <h1 className="hero-title">{player.name}</h1>
         {isChampion && <p className="champion-line">👑 Campione in carica · {champions!.season}</p>}
         <a
           className="player-link"
@@ -173,7 +170,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
           target="_blank"
           rel="noopener noreferrer"
         >
-          @{player.handle} su Lichess
+          @{player.handle}
+          <Flair handle={player.handle} fromGames={flairFromGames(player.handle, history, gameStates)} /> su Lichess
         </a>
 
         <div className="stat-pills">
