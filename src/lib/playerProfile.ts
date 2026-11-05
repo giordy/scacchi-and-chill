@@ -1,3 +1,4 @@
+import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch } from '../types';
 import { computeStandings, PlayerStanding } from './standings';
 import { extractGameId } from './utils';
@@ -49,7 +50,7 @@ export interface PlayerProfile {
   remaining: RemainingOpponent[];
   pointsByRound: RoundPoints[];
   headToHead: HeadToHead[];
-  pace: GamePace | null; // null until at least one game has moves on Lichess
+  pace: GamePace | null; // null until the season's games pin down the estimate
   byColor: Record<"white" | "black", ColorRecord>;
   endings: Endings;
 }
@@ -76,11 +77,10 @@ const END_REASON: Record<string, EndReason> = {
 };
 const noEndings = (): Record<EndReason, number> => ({ mate: 0, resign: 0, timeout: 0, other: 0 });
 
-// Average time between moves in the player's games (both sides together: Lichess keeps no
-// per-move times for correspondence games, only when the game started and its last move)
+// The player's own time per move, told apart from the opponents' (as for "Il bradipo")
 export interface GamePace {
   msPerMove: number;
-  games: number; // games the average is based on
+  games: number; // finished games of the player behind the estimate
 }
 
 const POINTS: Record<string, number> = { win: 1, draw: 0.5, loss: 0 };
@@ -197,7 +197,14 @@ export function computePlayerProfile(
       };
     });
 
-  const pace = computeGamePace(games.map((g) => gameStates[extractGameId(g.url) ?? ""]));
+  // Own time per move: only once the finished games of the season tell the players apart
+  const finished = collectFinishedGames(players, history, gameStates);
+  const own = playerMoveTimes(finished);
+  const ownMs = own.size >= 2 ? own.get(player.handle) : undefined;
+  const pace =
+    ownMs !== undefined && ownMs > 0
+      ? { msPerMove: ownMs, games: finished.filter((g) => g.white === player.handle || g.black === player.handle).length }
+      : null;
 
   const byColor: Record<"white" | "black", ColorRecord> = {
     white: { played: 0, points: 0 },
@@ -228,23 +235,6 @@ export function computePlayerProfile(
     byColor,
     endings,
   };
-}
-
-// (last move − start) / half-moves played, weighted by the number of moves of each game
-export function computeGamePace(states: (LichessExportGame | undefined)[]): GamePace | null {
-  let ms = 0;
-  let moves = 0;
-  let games = 0;
-  states.forEach((s) => {
-    if (!s?.createdAt || !s.lastMoveAt || !s.moves) return;
-    const plies = s.moves.trim().split(/\s+/).length;
-    const elapsed = s.lastMoveAt - s.createdAt;
-    if (plies === 0 || elapsed < 0) return;
-    ms += elapsed;
-    moves += plies;
-    games++;
-  });
-  return games > 0 ? { msPerMove: ms / moves, games } : null;
 }
 
 // "25 min", "9 h", "1,5 giorni"

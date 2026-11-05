@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeGamePace, computePlayerProfile, formatPace } from '../playerProfile';
+import { computePlayerProfile, formatPace } from '../playerProfile';
 import { parsePlayerHash, playerHref, isAdminLocation, parsePublicTab, publicTabHref } from '../routes';
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch } from '../../types';
 
@@ -103,26 +103,26 @@ describe('game pace', () => {
     lastMoveAt: 1000 + hours * H,
   });
 
-  it('averages time per half-move, weighted by moves, over the player games only', () => {
-    const history = [
-      g('1', 'anna', 'bruno', 'aaaaaaaa'),
-      g('2', 'carla', 'anna', 'bbbbbbbb'),
-      g('3', 'anna', 'dario', 'cccccccc'), // aborted: ignored
-      g('4', 'bruno', 'carla', 'dddddddd'), // not Anna's
-      g('5', 'anna', 'dario', 'eeeeeeee'), // no state yet
-    ];
-    const gs = {
-      aaaaaaaa: timed('aaaaaaaa', 'mate', 'e4 e5 Nf3 Nc6', 8), // 4 moves in 8 h
-      bbbbbbbb: timed('bbbbbbbb', 'started', 'd4 d5 c4 e6 Nc3 Nf6', 28), // 6 moves in 28 h
-      cccccccc: timed('cccccccc', 'aborted', 'e4', 100),
-      dddddddd: timed('dddddddd', 'mate', 'e4', 100),
-    };
-    const p = computePlayerProfile('anna', players, history, gs)!;
-    expect(p.pace).toEqual({ msPerMove: 3.6 * H, games: 2 });
+  // Own times: Anna 1 h, Bruno 3 h, Carla 5 h per move; each game's pace is the average of its two players
+  const ten = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7';
+  const season = [g('1', 'anna', 'bruno', 'aaaaaaaa'), g('2', 'bruno', 'carla', 'bbbbbbbb'), g('3', 'carla', 'anna', 'cccccccc')];
+  const seasonStates = {
+    aaaaaaaa: timed('aaaaaaaa', 'mate', ten, 20), // (1 + 3) / 2 · 10
+    bbbbbbbb: timed('bbbbbbbb', 'resign', ten, 40), // (3 + 5) / 2 · 10
+    cccccccc: timed('cccccccc', 'draw', ten, 30), // (5 + 1) / 2 · 10
+  };
+
+  it("is the player's own time per move, told apart from the opponents'", () => {
+    const anna = computePlayerProfile('anna', players, season, seasonStates)!;
+    expect(anna.pace?.games).toBe(2);
+    expect(anna.pace!.msPerMove / H).toBeCloseTo(1);
+    expect(computePlayerProfile('carla', players, season, seasonStates)!.pace!.msPerMove / H).toBeCloseTo(5);
   });
 
-  it('is null without moves or timestamps', () => {
-    expect(computeGamePace([undefined, { id: 'x', status: 'started' }, { id: 'y', status: 'started', moves: '', createdAt: 1, lastMoveAt: 2 }])).toBeNull();
+  it('is null until the games pin it down', () => {
+    // A single game cannot tell its two players apart
+    expect(computePlayerProfile('anna', players, season.slice(0, 1), seasonStates)!.pace).toBeNull();
+    expect(computePlayerProfile('anna', players, [], {})!.pace).toBeNull();
   });
 
   it('formats minutes, hours and days', () => {

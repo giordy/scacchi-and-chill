@@ -101,10 +101,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
             <span className="stat-pill-label">V / N / P</span>
             <span className="stat-pill-val">{standing.won} / {standing.drawn} / {standing.lost}</span>
           </div>
-          <div className="stat-pill">
-            <span className="stat-pill-label">Spareggio SB</span>
-            <span className="stat-pill-val">{standing.sb.toFixed(1)}</span>
-          </div>
           {(["white", "black"] as const).map((c) => (
             <div key={c} className="stat-pill">
               <span className="stat-pill-label">{c === "white" ? "Col bianco" : "Col nero"}</span>
@@ -116,10 +112,10 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
           {pace && (
             <div
               className="stat-pill"
-              title={`Tempo medio tra una mossa e l'altra nelle sue partite (di entrambi i giocatori), su ${pace.games} ${pace.games === 1 ? "partita" : "partite"}`}
+              title={`Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (${pace.games} sue)`}
             >
-              <span className="stat-pill-label">Ritmo partite</span>
-              <span className="stat-pill-val">{formatPace(pace.msPerMove)} a mossa</span>
+              <span className="stat-pill-label">Tempo a mossa</span>
+              <span className="stat-pill-val">circa {formatPace(pace.msPerMove)}</span>
             </div>
           )}
         </div>
