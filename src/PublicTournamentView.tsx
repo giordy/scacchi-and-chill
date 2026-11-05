@@ -352,13 +352,7 @@ export function PublicTournamentView({
                       {fullPodium(w).map((p) => (
                         <li key={p.handle} className={`podium-place podium-place-${p.place}`}>
                           <span className="podium-medal" aria-label={`${p.place}° posto`}>{MEDAL_EMOJI[p.place]}</span>
-                          {p.place === 1 ? (
-                            <a href={`https://lichess.org/@/${p.handle}`} target="_blank" rel="noopener noreferrer">
-                              {p.name}
-                            </a>
-                          ) : (
-                            <span>{p.name}</span>
-                          )}
+                          <a href={playerHref(p.handle)}>{p.name}</a>
                         </li>
                       ))}
                     </ol>

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame } from '../types';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
-import { Medal, MEDAL_EMOJI, medalsOf, reigningChampions } from '../lib/honours';
+import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampions } from '../lib/honours';
 import { PointsChart } from '../components/PointsChart';
 
 interface PlayerPageProps {
@@ -43,6 +43,31 @@ const describeEndings = (counts: Record<EndReason, number>) =>
     .map((r) => `${counts[r]} ${END_LABEL[r]}`)
     .join(" · ");
 
+// Gold, silver and bronze over the seasons; nothing for a player with no medal
+function MedalTable({ medals }: { medals: PlayerMedal[] }) {
+  if (medals.length === 0) return null;
+  const count = (m: Medal) => medals.filter((x) => x.place === m).length;
+  return (
+    <section className="dossier-card">
+      <h2 className="section-heading">Medagliere</h2>
+      <p className="medal-tally" aria-label={`${count(1)} ori, ${count(2)} argenti, ${count(3)} bronzi`}>
+        {([1, 2, 3] as Medal[]).map((m) => (
+          <span key={m} className={`medal-count${count(m) === 0 ? " is-zero" : ""}`}>
+            {MEDAL_EMOJI[m]} {count(m)}
+          </span>
+        ))}
+      </p>
+      <ul className="medal-list">
+        {medals.map((m, i) => (
+          <li key={i}>
+            {MEDAL_EMOJI[m.place]} {m.season}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 // Public page of a single player: results, games and opponents still to face
 export function PlayerPage({ handle, config, history, gameStates, nameOf }: PlayerPageProps) {
   const profile = computePlayerProfile(handle, config.players, history, gameStates, config.schedule ?? []);
@@ -51,13 +76,36 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
     window.scrollTo(0, 0);
   }, [handle]);
 
+  // A former player, not in the current season: only the medals of the hall of fame
+  const winners = config.tournament?.winners;
+  const pastName = profile
+    ? undefined
+    : (winners ?? []).flatMap(fullPodium).find((p) => p.handle.toLowerCase() === handle.toLowerCase());
+  const shownName = profile?.player.name ?? pastName?.name;
+
   useEffect(() => {
     const previous = document.title;
-    if (profile) document.title = `${profile.player.name} – ${config.tournament?.title ?? "Scacchi and Chill"}`;
+    if (shownName) document.title = `${shownName} – ${config.tournament?.title ?? "Scacchi and Chill"}`;
     return () => {
       document.title = previous;
     };
-  }, [profile?.player.name, config.tournament?.title]);
+  }, [shownName, config.tournament?.title]);
+
+  if (!profile && pastName) {
+    return (
+      <main className="public-main">
+        <a href="#" className="chip-link back-link">← Torna al torneo</a>
+        <section className="dossier-card player-hero">
+          <h1 className="hero-title">{pastName.name}</h1>
+          <a className="player-link" href={`https://lichess.org/@/${pastName.handle}`} target="_blank" rel="noopener noreferrer">
+            @{pastName.handle} su Lichess
+          </a>
+          <p className="note">Non partecipa alla stagione in corso.</p>
+        </section>
+        <MedalTable medals={medalsOf(pastName.handle, winners)} />
+      </main>
+    );
+  }
 
   if (!profile) {
     return (
@@ -73,11 +121,9 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
   const wins = sum(endings.wins);
   const losses = sum(endings.losses);
   const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
-  const winners = config.tournament?.winners;
   const champions = reigningChampions(winners);
   const isChampion = !!champions?.handles.includes(player.handle.toLowerCase());
   const medals = medalsOf(player.handle, winners);
-  const medalCount = (m: Medal) => medals.filter((x) => x.place === m).length;
 
   return (
     <main className="public-main">
@@ -128,25 +174,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
         </div>
       </section>
 
-      {medals.length > 0 && (
-        <section className="dossier-card">
-          <h2 className="section-heading">Medagliere</h2>
-          <p className="medal-tally" aria-label={`${medalCount(1)} ori, ${medalCount(2)} argenti, ${medalCount(3)} bronzi`}>
-            {([1, 2, 3] as Medal[]).map((m) => (
-              <span key={m} className={`medal-count${medalCount(m) === 0 ? " is-zero" : ""}`}>
-                {MEDAL_EMOJI[m]} {medalCount(m)}
-              </span>
-            ))}
-          </p>
-          <ul className="medal-list">
-            {medals.map((m, i) => (
-              <li key={i}>
-                {MEDAL_EMOJI[m.place]} {m.season}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <MedalTable medals={medals} />
 
       {pointsByRound.length > 0 && (
         <section className="dossier-card">
