@@ -58,6 +58,7 @@ export interface StatusPhrases {
   footer: string[];
   closing?: string[];
   upset?: string[]; // colpaccio line under a win
+  summit?: string[]; // scontro al vertice line under the players
   roundEndHeader?: string[];
   roundEndFooter?: string[];
   infoLine?: string;

@@ -6,17 +6,19 @@ import { MiniBoard, PhaseTile, START_FEN } from './MiniBoard';
 import { gamePhase, movesLabel, PHASE_LABEL } from '../lib/phase';
 import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
 import { upsetOf, upsetTitle } from '../lib/upset';
+import { summitKey } from '../lib/summit';
 
 interface MatchesByRoundProps {
   games: HistoryGame[]; // already filtered and sorted by round
   gameStates: Record<string, LichessExportGame>;
   nameOf: (handle: string) => string;
   returnStart?: string; // first round of the return leg, if any
+  summits?: Map<string, string>; // scontro al vertice: positions text by summitKey
 }
 
 // Public "Partite": the current round first, then the unfinished games of earlier rounds,
 // the upcoming rounds and finally the played rounds, newest first; both collapsed
-export function MatchesByRound({ games, gameStates, nameOf, returnStart }: MatchesByRoundProps) {
+export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits }: MatchesByRoundProps) {
   const stateOf = (g: HistoryGame) => {
     const id = extractGameId(g.url);
     return (id && gameStates[id]) || g.lichess;
@@ -50,6 +52,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart }: Match
           state={stateOf(g)}
           nameOf={nameOf}
           showRound={showRound}
+          summit={summits?.get(summitKey(g))}
         />
       ))}
     </div>
@@ -131,11 +134,13 @@ function MatchCard({
   state: s,
   nameOf,
   showRound = false,
+  summit,
 }: {
   game: HistoryGame;
   state?: LichessExportGame;
   nameOf: (handle: string) => string;
   showRound?: boolean;
+  summit?: string; // e.g. "1° contro 2°"
 }) {
   // Scheduled game not created on Lichess yet
   let badge = game.url
@@ -200,9 +205,14 @@ function MatchCard({
               {opening}
             </span>
           )}
-          {(progressText || upset) && (
+          {(progressText || upset || summit) && (
             <span className="match-progress">
               {progressText}
+              {summit && (
+                <span className="match-summit" title={`${summit} in classifica a inizio turno`}>
+                  🔝 Scontro al vertice
+                </span>
+              )}
               {upset && (
                 <span className="match-upset" title={upsetTitle(upset)}>
                   💥 Colpaccio +{upset.gap}

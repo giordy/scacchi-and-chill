@@ -10,6 +10,7 @@ import { computeStandings } from '../../lib/standings';
 import { fetchGameStates } from '../../lib/lichess';
 import { gamePhase, GamePhase } from '../../lib/phase';
 import { upsetOf } from '../../lib/upset';
+import { summitGames, summitKey } from '../../lib/summit';
 
 const PHASE_TEXT: Record<GamePhase, string> = {
   opening: 'in apertura',
@@ -65,6 +66,16 @@ export function BulletinSection({
     const deadlineMs = roundDeadline(games, expiryDays);
     const linkExpired = Date.now() > deadlineMs;
 
+    // Saved results plus the fresh ones, for the standings
+    const allStates: Record<string, LichessExportGame> = {};
+    history.forEach((g) => {
+      const gid = extractGameId(g.url);
+      if (gid && g.lichess) allStates[gid] = g.lichess;
+    });
+    Object.assign(allStates, states);
+    // Scontro al vertice: same rule as the badge on the site
+    const summits = summitGames(config.players, history, allStates);
+
     const blocks = games.map((g, i) => {
       const id = extractGameId(g.url);
       const s = id ? states[id] : undefined;
@@ -72,6 +83,7 @@ export function BulletinSection({
       const black = idToHandle(s?.players?.black?.user?.id) ?? g.black;
       const head = `${config.numberEmojis[i] ?? i + 1 + "."} *${nameOf(white)}* ⚪ vs *${nameOf(black)}* ⚫`;
       let body: string;
+      const summit = summits.get(summitKey(g));
 
       if (!s) {
         count.pending++;
@@ -170,7 +182,10 @@ export function BulletinSection({
           }`
         );
       }
-      return `${head}\n${body}`;
+      const summitLine = summit
+        ? fill(pickFor("summit") || "🔝 Scontro al vertice: {positions} in classifica", { positions: summit })
+        : "";
+      return [head, summitLine, body].filter(Boolean).join("\n");
     });
 
     const isRoundComplete = games.length > 0 && count.finished === games.length;
@@ -196,12 +211,6 @@ export function BulletinSection({
     // At the end of the round, who leads (as on the site), from the saved results plus the fresh ones
     let leader = "";
     if (isRoundComplete) {
-      const allStates: Record<string, LichessExportGame> = {};
-      history.forEach((g) => {
-        const gid = extractGameId(g.url);
-        if (gid && g.lichess) allStates[gid] = g.lichess;
-      });
-      Object.assign(allStates, states);
       leader = leaderLine(computeStandings(config.players, history, allStates).standings);
     }
 

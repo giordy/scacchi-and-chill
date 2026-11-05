@@ -1337,6 +1337,16 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   background: var(--brass-soft);
 }
 
+.match-summit {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: var(--info);
+  background: color-mix(in srgb, var(--info) 12%, transparent);
+}
+
 .match-card.is-ongoing {
   border-color: color-mix(in srgb, var(--info) 45%, var(--line));
   box-shadow: inset 4px 0 0 var(--info);

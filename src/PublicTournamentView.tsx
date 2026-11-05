@@ -10,6 +10,7 @@ import { parsePublicTab, publicTabHref, PublicTab } from "./lib/routes";
 import { useHash } from "./hooks/useHash";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
+import { summitGames } from "./lib/summit";
 import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { SeasonAwards } from "./components/SeasonAwards";
@@ -59,6 +60,7 @@ export function PublicTournamentView({
   // Created games plus the scheduled ones still to be created on Lichess
   const allGames = withScheduledGames(history, schedule);
   const rounds = [...new Set(allGames.map((g) => g.round))].sort(byRound);
+  const summits = summitGames(config.players, allGames, gameStates);
   // Andata/ritorno: from the official schedule when there is one, otherwise from the games created so far
   const returnStart = returnLegStart(schedule.length > 0 ? schedule : history);
   const scheduleIndex = (g: HistoryGame) =>
@@ -277,7 +279,13 @@ export function PublicTournamentView({
           {filteredGames.length === 0 ? (
             <p className="note">Le partite compariranno qui quando l'organizzatore pubblica il calendario.</p>
           ) : (
-            <MatchesByRound games={filteredGames} gameStates={gameStates} nameOf={nameOf} returnStart={returnStart} />
+            <MatchesByRound
+              games={filteredGames}
+              gameStates={gameStates}
+              nameOf={nameOf}
+              returnStart={returnStart}
+              summits={summits}
+            />
           )}
         </section>
       )}

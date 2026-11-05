@@ -131,6 +131,11 @@
       "📊 *Riepilogo: {summary}*",
       "📊 *In numeri: {summary}*"
     ],
+    "summit": [
+      "🔝 Scontro al vertice: {positions} in classifica",
+      "🔥 Big match: {positions} della classifica",
+      "⚔️ Sfida d'alta quota: {positions} in classifica"
+    ],
     "upset": [
       "💥 Colpaccio! {winner} batte un avversario con {gap} punti Elo in più",
       "💥 Pronostico ribaltato: {gap} punti Elo di differenza",
