@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { computeGamePace, computePlayerProfile, formatPace } from '../playerProfile';
-import { parsePlayerHash, playerHref, isAdminLocation } from '../routes';
+import { parsePlayerHash, playerHref, isAdminLocation, parsePublicTab, publicTabHref } from '../routes';
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch } from '../../types';
 
 const players: Player[] = [
@@ -161,5 +161,18 @@ describe('color record, endings and openings', () => {
       draws: 1,
     });
     expect(p.games.map((x) => x.opening)).toEqual(['Italian Game', undefined, undefined, undefined, undefined]);
+  });
+});
+
+describe('public tabs in the hash', () => {
+  it('round-trips every tab and falls back to the standings', () => {
+    (['standings', 'matches', 'crosstable', 'tournament'] as const).forEach((t) =>
+      expect(parsePublicTab(publicTabHref(t))).toBe(t)
+    );
+    expect(publicTabHref('matches')).toBe('#/partite');
+    expect(parsePublicTab('')).toBe('standings');
+    expect(parsePublicTab('#')).toBe('standings');
+    expect(parsePublicTab('#/qualcosa')).toBe('standings');
+    expect(parsePublicTab('#/Partite')).toBe('matches');
   });
 });

@@ -6,6 +6,8 @@ import { computeStandings } from "./lib/standings";
 import { computeSeasonProgress } from "./lib/progress";
 import { DEFAULT_TOURNAMENT } from "./lib/tournament";
 import { onTabListKeyDown } from "./lib/tabKeys";
+import { parsePublicTab, publicTabHref, PublicTab } from "./lib/routes";
+import { useHash } from "./hooks/useHash";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
 import { withScheduledGames } from "./lib/publicGames";
@@ -21,7 +23,7 @@ interface PublicTournamentViewProps {
   seasons?: SeasonArchive[];
 }
 
-type SubTab = "standings" | "matches" | "crosstable" | "tournament";
+type SubTab = PublicTab;
 
 const TABS: { key: SubTab; label: string }[] = [
   { key: "standings", label: "Classifica" },
@@ -40,7 +42,11 @@ export function PublicTournamentView({
   nameOf,
   seasons = [],
 }: PublicTournamentViewProps) {
-  const [subTab, setSubTab] = useState<SubTab>("standings");
+  // The open section lives in the URL hash, so a refresh or a shared link keeps it
+  const subTab = parsePublicTab(useHash());
+  const setSubTab = (tab: SubTab) => {
+    window.location.hash = publicTabHref(tab);
+  };
   const [filterRound, setFilterRound] = useState<string>("all");
 
   const schedule = config.schedule ?? [];
