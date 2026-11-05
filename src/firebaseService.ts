@@ -27,6 +27,7 @@ import {
   SeasonWinner,
   Settings,
   MessageTemplates,
+  StatusPhrases,
   LichessExportGame,
   SeasonArchive,
 } from "./types";
@@ -157,6 +158,8 @@ export interface OrganizerData {
   // undefined = never saved on Firestore yet (still to migrate from this browser)
   settings?: Partial<Settings>;
   templates?: Partial<MessageTemplates> | null;
+  // Bulletin phrases edited by the organizer (config.json has the defaults)
+  statusPhrases?: Partial<StatusPhrases> | null;
 }
 
 const organizerRef = () => doc(db, "tournaments", TOURNAMENT_DOC_ID, "private", "organizer");
@@ -187,6 +190,7 @@ export function subscribeToOrganizerData(
         ratings: d.ratings ?? {},
         settings: d.settings,
         templates: d.templates ?? null,
+        statusPhrases: d.statusPhrases ?? null,
       });
     },
     (err) => {

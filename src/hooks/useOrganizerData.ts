@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { MessageTemplates, Settings } from '../types';
+import { MessageTemplates, Settings, StatusPhrases } from '../types';
 import { initialStoredSettings } from '../lib/config';
 import { OrganizerData, saveOrganizerData, subscribeToOrganizerData } from '../firebaseService';
 
@@ -18,7 +18,7 @@ const readLocal = <T,>(key: string): T | null => {
   }
 };
 
-const EMPTY: OrganizerData = { anecdotes: {}, ratings: {}, settings: {}, templates: null };
+const EMPTY: OrganizerData = { anecdotes: {}, ratings: {}, settings: {}, templates: null, statusPhrases: null };
 
 // Settings and message texts used to live in this browser only: move them to Firestore once
 const localSettings = () => ({
@@ -121,7 +121,9 @@ export function useOrganizerData(enabled: boolean, onError?: (msg: string) => vo
     update({ ...dataRef.current, templates: typeof action === "function" ? action(prev) : action });
   };
 
-  return { ...data, loaded, setAnecdote, setRatings, replaceAll, setSettings, setTemplates };
+  const setStatusPhrases = (statusPhrases: Partial<StatusPhrases> | null) => update({ ...dataRef.current, statusPhrases });
+
+  return { ...data, loaded, setAnecdote, setRatings, replaceAll, setSettings, setTemplates, setStatusPhrases };
 }
 
 export type OrganizerStore = ReturnType<typeof useOrganizerData>;

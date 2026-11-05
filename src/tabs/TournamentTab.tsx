@@ -18,6 +18,7 @@ import { PlayersSection } from './settings/PlayersSection';
 import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
 import { HallOfFameSection } from './settings/HallOfFameSection';
 import { LichessSettingsSection } from './settings/LichessSettingsSection';
+import { StatusPhrasesSection } from './settings/StatusPhrasesSection';
 import { BackupSection } from './settings/BackupSection';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
@@ -105,6 +106,15 @@ export function TournamentTab({
           setSettings={setSettings}
           templates={templates}
           setTemplates={setTemplates}
+          flash={flash}
+        />
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Frasi del bollettino">
+        <StatusPhrasesSection
+          defaults={config.statusPhrases}
+          overrides={organizer.statusPhrases ?? null}
+          setOverrides={organizer.setStatusPhrases}
           flash={flash}
         />
       </CollapsibleSection>

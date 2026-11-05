@@ -170,6 +170,7 @@ export interface BackupData {
   seasons?: SeasonArchive[];
   settings?: Omit<Settings, "token">;
   templates?: MessageTemplates;
+  statusPhrases?: Partial<StatusPhrases> | null;
   anecdotes?: Record<string, string>;
   ratings?: Record<string, string | number | null>;
 }

@@ -98,6 +98,10 @@ export function App() {
   if (config.tournament?.daysPerMove) settings.days = config.tournament.daysPerMove;
   if (typeof config.tournament?.rated === 'boolean') settings.rated = config.tournament.rated;
   const tpl: MessageTemplates = { ...config.messageTemplates, ...(organizer.templates ?? {}) };
+  // Bulletin phrases: config.json defaults, overridden by the ones edited in the organizer area
+  const adminConfig = organizer.statusPhrases
+    ? { ...config, statusPhrases: { ...config.statusPhrases, ...organizer.statusPhrases } }
+    : config;
 
   const seasons = useSeasons();
   const lichess = useLichessSync(history, setHistory, flash);
@@ -149,7 +153,7 @@ export function App() {
           <RoundsTab
             openRound={openRound}
             setOpenRound={setOpenRound}
-            config={config}
+            config={adminConfig}
             settings={settings}
             templates={tpl}
             history={history}

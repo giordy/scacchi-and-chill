@@ -1884,3 +1884,8 @@ details.season-card > summary { display: flex; justify-content: space-between; g
   margin: 0 0 12px;
   padding-left: 18px;
 }
+
+.phrase-custom {
+  font-weight: normal;
+  color: var(--info);
+}

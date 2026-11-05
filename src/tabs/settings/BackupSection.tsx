@@ -33,6 +33,7 @@ export function BackupSection({
       seasons,
       settings: safeSettings,
       templates,
+      statusPhrases: organizer.statusPhrases ?? null,
       anecdotes: organizer.anecdotes,
       ratings: organizer.ratings,
     };
