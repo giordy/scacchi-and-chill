@@ -1,29 +1,14 @@
 import { useEffect, useState } from 'react';
 import { errorMessage } from '../lib/utils';
-import { isAdminLocation } from '../lib/routes';
-import {
-  subscribeToAuth,
-  signInAdminWithGoogle,
-  signOutAdmin,
-  isAdminUser,
-} from '../firebaseService';
+import { subscribeToAuth, signInAdminWithGoogle, signOutAdmin, isAdminUser } from '../firebaseAuth';
 
-// Admin mode is selected by the URL: #admin or ?admin
-const checkIsAdminRoute = () => isAdminLocation(window.location.hash, window.location.search);
-
+// Sign-in state of the organizer (used only inside the organizer area)
 export function useAdminAuth() {
-  const [isAdminRoute, setIsAdminRoute] = useState(checkIsAdminRoute);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authReady, setAuthReady] = useState(false);
-
-  useEffect(() => {
-    const handleHash = () => setIsAdminRoute(checkIsAdminRoute());
-    window.addEventListener("hashchange", handleHash);
-    return () => window.removeEventListener("hashchange", handleHash);
-  }, []);
 
   // Firebase Authentication state: access is granted only to the accounts in ADMIN_EMAILS
   useEffect(() => {
@@ -59,5 +44,5 @@ export function useAdminAuth() {
     window.location.hash = "";
   };
 
-  return { isAdminRoute, authReady, isAuthenticated, email, error, isSigningIn, login, logout };
+  return { authReady, isAuthenticated, email, error, isSigningIn, login, logout };
 }

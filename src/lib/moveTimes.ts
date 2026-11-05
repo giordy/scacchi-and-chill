@@ -1,9 +1,9 @@
 import { HistoryGame, LichessExportGame, Player } from '../types';
 import { gameProgress } from './progress';
-import { extractGameId } from './utils';
+import { fullMovesOf, isVoid, pliesOf, stateOf } from './games';
 
 // Not played on the board: aborted, never started, or won by forfeit after a withdrawal
-const VOID_STATUSES = new Set(["aborted", "noStart", "forfeit"]);
+const notPlayed = (s: LichessExportGame) => isVoid(s) || s.status === "forfeit";
 
 export interface FinishedGame {
   white: string;
@@ -14,11 +14,6 @@ export interface FinishedGame {
   moves: number; // full moves, 0 when Lichess sent no moves
   state: LichessExportGame;
 }
-
-const fullMoves = (s: LichessExportGame) => {
-  const text = s.moves?.trim();
-  return text ? Math.ceil(text.split(/\s+/).length / 2) : 0;
-};
 
 // A game as thinking time and half-moves: Lichess keeps no per-move times for correspondence
 // games, only when the game started and its last move
@@ -33,7 +28,7 @@ const DAY = 24 * 3600 * 1000;
 
 function timedGame(g: FinishedGame): TimedGame | null {
   const s = g.state;
-  const plies = s.moves?.trim() ? s.moves.trim().split(/\s+/).length : 0;
+  const plies = pliesOf(s);
   if (!s.createdAt || !s.lastMoveAt || plies === 0 || s.lastMoveAt < s.createdAt) return null;
   return { white: g.white, black: g.black, ms: s.lastMoveAt - s.createdAt, plies };
 }
@@ -92,16 +87,15 @@ export function collectFinishedGames(
   const games: FinishedGame[] = [];
   history.forEach((g) => {
     if (!known.has(g.white) || !known.has(g.black)) return;
-    const id = extractGameId(g.url);
-    const s = (id && gameStates[id]) || g.lichess;
-    if (!s || gameProgress(s) !== "finished" || VOID_STATUSES.has(s.status)) return;
+    const s = stateOf(g, gameStates);
+    if (!s || gameProgress(s) !== "finished" || notPlayed(s)) return;
     games.push({
       white: g.white,
       black: g.black,
       winner: s.winner === "white" ? g.white : s.winner === "black" ? g.black : undefined,
       draw: !s.winner,
       status: s.status,
-      moves: fullMoves(s),
+      moves: fullMovesOf(s),
       state: s,
     });
   });

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding } from "./types";
 import { WhatsAppPreview } from "./WhatsAppPreview";
 import { errorMessage, extractGameId } from "./lib/utils";
+import { fetchGameStates } from "./lib/lichess";
+import { gameProgress } from "./lib/progress";
+import { fullMovesOf, isVoid, stateOf } from "./lib/games";
 import { computeStandings } from "./lib/standings";
 import type { LichessUserProfile } from "./types";
 import type { OrganizerStore } from "./hooks/useOrganizerData";
@@ -35,54 +38,33 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
   const [showAnecdotes, setShowAnecdotes] = useState(false);
   const [showStandingsTable, setShowStandingsTable] = useState(false);
 
-  // Fetch Lichess game states for all saved games
+  // Fresh Lichess states of the games still open; finished games are final and already stored
   const loadGameStates = async () => {
+    if (history.length === 0) {
+      setNotice({
+        kind: "warning",
+        text: "Nessuna partita salvata nello storico. Crea prima i link di un turno in Turni.",
+      });
+      return;
+    }
     setIsFetchingData(true);
     setNotice(null);
     try {
-      const ids = history
+      const open = history
+        .filter((g) => gameProgress(stateOf(g, {})) !== "finished")
         .map((g) => extractGameId(g.url))
         .filter((id): id is string => Boolean(id));
-
-      if (ids.length === 0) {
-        setIsFetchingData(false);
-        setNotice({
-          kind: "warning",
-          text: "Nessuna partita salvata nello storico. Crea prima i link di un turno in Turni.",
-        });
-        return;
-      }
-
-      const res = await fetch(
-        "https://lichess.org/api/games/export/_ids?pgnInJson=false&lastFen=true&opening=true&division=true",
-        {
-          method: "POST",
-          headers: { "Content-Type": "text/plain", Accept: "application/x-ndjson" },
-          body: ids.join(","),
-        }
-      );
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const text = await res.text();
-      const states: Record<string, LichessExportGame> = {};
-      text
-        .split("\n")
-        .filter((l) => l.trim())
-        .forEach((line) => {
-          try {
-            const g = JSON.parse(line);
-            if (g.id) states[g.id] = g;
-          } catch {}
-        });
-
+      const states = open.length > 0 ? await fetchGameStates(open) : {};
       setGameStates(states);
       const now = new Date();
       const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       setLastSyncTime(timeStr);
       setNotice({
         kind: "ok",
-        text: `Dati di ${Object.keys(states).length} partite sincronizzati con successo da Lichess (ore ${timeStr}).`,
+        text:
+          open.length > 0
+            ? `Lette da Lichess ${Object.keys(states).length} partite in corso (ore ${timeStr}); le concluse sono già salvate.`
+            : `Tutte le partite sono concluse e già salvate (ore ${timeStr}).`,
       });
     } catch (e) {
       setNotice({
@@ -94,11 +76,9 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
     }
   };
 
-  // Auto-fetch game states on first load if we have history
+  // Read the open games once when the tab opens
   useEffect(() => {
-    if (history.length > 0 && Object.keys(gameStates).length === 0) {
-      loadGameStates();
-    }
+    if (history.length > 0 && !lastSyncTime) loadGameStates();
   }, [history.length]);
 
   // Fetch correspondence Elo for all players directly from Lichess API (CORS enabled)
@@ -182,8 +162,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
     const ongoingMatches: Array<{ white: string; black: string; round: string }> = [];
 
     history.forEach((g) => {
-      const id = extractGameId(g.url);
-      const s = id ? gameStates[id] : undefined;
+      const s = stateOf(g, gameStates);
       const white = g.white;
       const black = g.black;
 
@@ -194,9 +173,8 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
 
       if (s.status === "created" || s.status === "started") {
         ongoingMatches.push({ white, black, round: g.round });
-      } else if (s.status !== "aborted" && s.status !== "noStart") {
-        const plies = s.moves && s.moves.trim() ? s.moves.trim().split(/\s+/).length : 0;
-        const moves = Math.ceil(plies / 2);
+      } else if (!isVoid(s)) {
+        const moves = fullMovesOf(s);
         const opening = s.opening?.name;
 
         if (s.winner === "white") {

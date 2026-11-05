@@ -1,5 +1,6 @@
 import { HistoryGame, LichessExportGame } from '../types';
 import { extractGameId } from './utils';
+import { byRound, stateOf } from './games';
 
 export interface CheatCase {
   id: string; // Lichess game id
@@ -15,12 +16,11 @@ export interface CheatCase {
 // Games closed by Lichess with "cheat detected", in round order. Lichess gives the win to the
 // other player, so the player at fault is the loser.
 export function cheatCases(history: HistoryGame[], gameStates: Record<string, LichessExportGame>): CheatCase[] {
-  const byRound = (a: HistoryGame, b: HistoryGame) => a.round.localeCompare(b.round, undefined, { numeric: true });
   const seen = new Map<string, number>();
   const cases: CheatCase[] = [];
-  [...history].sort(byRound).forEach((g) => {
+  [...history].sort((a, b) => byRound(a.round, b.round)).forEach((g) => {
     const id = extractGameId(g.url);
-    const s = (id && gameStates[id]) || g.lichess;
+    const s = stateOf(g, gameStates);
     if (!id || s?.status !== 'cheat' || !s.winner) return;
     const handle = s.winner === 'white' ? g.black : g.white;
     const count = (seen.get(handle) ?? 0) + 1;

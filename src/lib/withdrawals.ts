@@ -1,8 +1,7 @@
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch, Withdrawal } from '../types';
 import { gameProgress } from './progress';
-import { extractGameId } from './utils';
+import { isVoid, stateOf } from './games';
 
-const VOID = new Set(['aborted', 'noStart']);
 const same = (a: ScheduledMatch, b: ScheduledMatch) => a.round === b.round && a.white === b.white && a.black === b.black;
 const involves = (g: { white: string; black: string }, handle: string) => g.white === handle || g.black === handle;
 
@@ -21,15 +20,11 @@ export function planWithdrawal(
   schedule: ScheduledMatch[],
   gameStates: Record<string, LichessExportGame>
 ): WithdrawalPlan {
-  const stateOf = (g: HistoryGame) => {
-    const id = extractGameId(g.url);
-    return (id && gameStates[id]) || g.lichess;
-  };
   const mine = history.filter((g) => involves(g, handle));
   // Aborted games did not happen: they stay open like the ones never started
   const done = mine.filter((g) => {
-    const s = stateOf(g);
-    return gameProgress(s) === 'finished' && !VOID.has(s!.status);
+    const s = stateOf(g, gameStates);
+    return gameProgress(s) === 'finished' && !isVoid(s);
   });
   const all: ScheduledMatch[] = [
     ...schedule.filter((m) => involves(m, handle)),

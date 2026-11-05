@@ -1,4 +1,6 @@
 import { HistoryGame, ScheduledMatch } from '../types';
+import { byRound } from './games';
+export { byRound };
 
 // One game of a round as the organizer sees it: planned in the schedule, created on Lichess, or both
 export interface RoundMatch {
@@ -19,7 +21,6 @@ export interface RoundSummary {
   created: number;
 }
 
-export const byRound = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true });
 
 const same = (a: { round: string; white: string; black: string }, b: { round: string; white: string; black: string }) =>
   a.round === b.round && a.white === b.white && a.black === b.black;

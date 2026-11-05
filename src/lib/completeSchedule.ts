@@ -1,4 +1,5 @@
 import { ScheduledMatch } from '../types';
+import { byRound } from './games';
 
 // Completes a round robin that is already partly planned or played: the existing games are kept
 // as they are (also in rounds that are only partly filled) and the missing pairs are spread over
@@ -18,7 +19,6 @@ interface Options {
 
 const BYE = '\u0000riposo';
 const key = (a: string, b: string) => (a < b ? `${a}\u0001${b}` : `${b}\u0001${a}`);
-const byRound = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true });
 
 class TooComplex extends Error {}
 

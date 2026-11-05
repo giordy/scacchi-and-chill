@@ -1,10 +1,10 @@
 import { HistoryGame, LichessExportGame, Player } from '../types';
 import { computeStandings } from './standings';
+import { byRound } from './games';
 
 // Scontro al vertice: both players in the top 3 of the standings at the start of the round
 export const SUMMIT_TOP = 3;
 
-const byRound = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true });
 export const summitKey = (g: { round: string; white: string; black: string }) => `${g.round}|${g.white}|${g.black}`;
 
 // "1° contro 2°", or "entrambi al 2° posto" when they are level on points

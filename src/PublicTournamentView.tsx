@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive, TournamentMeta } from "./types";
 import { SeasonsHistory } from "./components/SeasonsHistory";
 import { playerHref } from "./lib/routes";
@@ -16,6 +16,7 @@ import { withdrawalNote } from "./lib/withdrawals";
 import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { SeasonAwards } from "./components/SeasonAwards";
+import { byRound } from "./lib/games";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -35,7 +36,6 @@ const TABS: { key: SubTab; label: string }[] = [
   { key: "tournament", label: "Torneo" },
 ];
 
-const byRound = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true });
 const ALBO_HREF = `${publicTabHref("tournament")}/albo`;
 
 export function PublicTournamentView({
@@ -58,17 +58,29 @@ export function PublicTournamentView({
   };
   const [filterRound, setFilterRound] = useState<string>("all");
 
-  const schedule = config.schedule ?? [];
-  const { standings, crosstable } = computeStandings(config.players, history, gameStates);
-  const progress = computeSeasonProgress(history, gameStates, schedule);
+  const players = config.players;
+  const schedule = useMemo(() => config.schedule ?? [], [config.schedule]);
+  // The whole season at once, recomputed only when the games or their results change
+  // (not when the visitor switches tab or round filter)
+  const season = useMemo(() => {
+    const { standings, crosstable } = computeStandings(players, history, gameStates);
+    const progress = computeSeasonProgress(history, gameStates, schedule);
+    const concluded = progress.total > 0 && progress.finished === progress.total;
+    // Created games plus the scheduled ones still to be created on Lichess
+    const allGames = withScheduledGames(history, schedule);
+    return {
+      standings,
+      crosstable,
+      progress,
+      concluded,
+      awards: concluded ? computeSeasonAwards(players, history, gameStates) : [],
+      allGames,
+      rounds: [...new Set(allGames.map((g) => g.round))].sort(byRound),
+      summits: summitGames(players, allGames, gameStates),
+    };
+  }, [players, history, gameStates, schedule]);
+  const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits } = season;
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
-  const concluded = progress.total > 0 && progress.finished === progress.total;
-  const awards = concluded ? computeSeasonAwards(config.players, history, gameStates) : [];
-
-  // Created games plus the scheduled ones still to be created on Lichess
-  const allGames = withScheduledGames(history, schedule);
-  const rounds = [...new Set(allGames.map((g) => g.round))].sort(byRound);
-  const summits = summitGames(config.players, allGames, gameStates);
   const champions = reigningChampions(tournamentMeta.winners);
   // Andata/ritorno: from the official schedule when there is one, otherwise from the games created so far
   const returnStart = returnLegStart(schedule.length > 0 ? schedule : history);

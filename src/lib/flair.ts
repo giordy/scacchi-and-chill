@@ -1,5 +1,5 @@
 import { HistoryGame, LichessExportGame } from '../types';
-import { extractGameId } from './utils';
+import { stateOf } from './games';
 
 // Lichess serves the flair images from its asset host
 export const flairUrl = (flair: string) => `https://lichess1.org/assets/flair/img/${flair}.webp`;
@@ -13,8 +13,7 @@ export function flairFromGames(
   const key = handle.toLowerCase();
   let best: { at: number; flair?: string } | undefined;
   history.forEach((g) => {
-    const id = extractGameId(g.url);
-    const s = (id && gameStates[id]) || g.lichess;
+    const s = stateOf(g, gameStates);
     if (!s?.players) return;
     (['white', 'black'] as const).forEach((c) => {
       const u = s.players?.[c]?.user;

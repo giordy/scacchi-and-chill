@@ -1,7 +1,7 @@
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch } from '../types';
 import { computeStandings, PlayerStanding } from './standings';
-import { extractGameId } from './utils';
+import { byRound, isVoid, stateOf } from './games';
 
 export type GameOutcome = "win" | "loss" | "draw" | "ongoing" | "pending";
 
@@ -86,9 +86,7 @@ export interface GamePace {
 
 const POINTS: Record<string, number> = { win: 1, draw: 0.5, loss: 0 };
 
-const VOID_STATUSES = new Set(["aborted", "noStart"]);
-const byRound = (a: { round: string }, b: { round: string }) =>
-  a.round.localeCompare(b.round, undefined, { numeric: true });
+const byRoundOf = (a: { round: string }, b: { round: string }) => byRound(a.round, b.round);
 
 // Pure function: everything shown on a player's page. Returns null for an unknown handle.
 export function computePlayerProfile(
@@ -111,9 +109,8 @@ export function computePlayerProfile(
     if (g.white !== me && g.black !== me) return;
     const color = g.white === me ? "white" : "black";
     const opponent = color === "white" ? g.black : g.white;
-    const id = extractGameId(g.url);
-    const s = (id && gameStates[id]) || g.lichess;
-    if (s && VOID_STATUSES.has(s.status)) return; // to be replayed: shown among the remaining ones
+    const s = stateOf(g, gameStates);
+    if (isVoid(s)) return; // to be replayed: shown among the remaining ones
 
     let outcome: GameOutcome = "pending";
     if (s) {
@@ -124,13 +121,13 @@ export function computePlayerProfile(
     met.add(opponent);
     games.push({ round: g.round, opponent, color, url: g.url, outcome, opening: s?.opening?.name || undefined, status: s?.status });
   });
-  games.sort(byRound);
+  games.sort(byRoundOf);
 
   const remaining: RemainingOpponent[] = [];
   const listed = new Set<string>();
   schedule
     .filter((m) => m.white === me || m.black === me)
-    .sort(byRound)
+    .sort(byRoundOf)
     .forEach((m) => {
       const color = m.white === me ? "white" : "black";
       const opponent = color === "white" ? m.black : m.white;
@@ -182,13 +179,9 @@ export function computePlayerProfile(
           .map((g): UpcomingGame => ({ round: g.round, color: g.color })),
         // Aborted games are replayed: no round yet
         ...vsHistory
-          .filter((g) => {
-            const id = extractGameId(g.url);
-            const st = (id && gameStates[id]) || g.lichess;
-            return st && VOID_STATUSES.has(st.status);
-          })
+          .filter((g) => isVoid(stateOf(g, gameStates)))
           .map((): UpcomingGame => ({})),
-      ].sort((a, b) => (a.round ?? "~").localeCompare(b.round ?? "~", undefined, { numeric: true }));
+      ].sort((a, b) => byRound(a.round ?? "~", b.round ?? "~"));
       return {
         opponent: p.handle,
         outcomes: vs.map((g) => g.outcome),

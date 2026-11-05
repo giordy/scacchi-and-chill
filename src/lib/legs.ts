@@ -1,6 +1,7 @@
+import { byRound } from './games';
+
 type Match = { round: string; white: string; black: string };
 
-const byRound = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true });
 const pairKey = (m: Match) => [m.white, m.black].sort().join('\u0000');
 
 // First round of the return leg ("ritorno"): the first round whose games are all rematches
