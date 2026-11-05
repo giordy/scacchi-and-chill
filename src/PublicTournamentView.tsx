@@ -268,7 +268,6 @@ export function PublicTournamentView({
             A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il numero di vittorie. Tocca un nome per
             vedere le partite del giocatore.
           </p>
-          {stats && <SeasonStatsPanel stats={stats} />}
           {awards.length > 0 && (
             <div className="awards-section">
               <h2 className="section-heading">I premi della stagione</h2>
@@ -386,6 +385,12 @@ export function PublicTournamentView({
                   </details>
                 ))}
               </div>
+            </article>
+          )}
+
+          {stats && (
+            <article className="dossier-card">
+              <SeasonStatsPanel stats={stats} />
             </article>
           )}
 

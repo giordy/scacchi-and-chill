@@ -4,7 +4,7 @@ import { SeasonStats } from '../lib/seasonStats';
 const pct = (n: number, of: number) => `${Math.round((n / of) * 100)}%`;
 const one = (n: number) => n.toLocaleString('it-IT', { maximumFractionDigits: 1 });
 
-// A few anonymous numbers of the season, under the standings
+// A few anonymous numbers of the season, in the Torneo tab
 export function SeasonStatsPanel({ stats: s }: { stats: SeasonStats }) {
   const items: Array<[string, string]> = [
     ['Partite giocate', String(s.games)],
