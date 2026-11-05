@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame } from '../types';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
-import { Medal, MEDAL_EMOJI, medalsOf, reigningChampion } from '../lib/honours';
+import { Medal, MEDAL_EMOJI, medalsOf, reigningChampions } from '../lib/honours';
 import { PointsChart } from '../components/PointsChart';
 
 interface PlayerPageProps {
@@ -74,8 +74,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
   const losses = sum(endings.losses);
   const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
   const winners = config.tournament?.winners;
-  const champion = reigningChampion(winners);
-  const isChampion = champion?.handle.toLowerCase() === player.handle.toLowerCase();
+  const champions = reigningChampions(winners);
+  const isChampion = !!champions?.handles.includes(player.handle.toLowerCase());
   const medals = medalsOf(player.handle, winners);
   const medalCount = (m: Medal) => medals.filter((x) => x.place === m).length;
 
@@ -85,7 +85,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
 
       <section className="dossier-card player-hero">
         <h1 className="hero-title">{player.name}</h1>
-        {isChampion && <p className="champion-line">👑 Campione in carica · {champion!.season}</p>}
+        {isChampion && <p className="champion-line">👑 Campione in carica · {champions!.season}</p>}
         <a
           className="player-link"
           href={`https://lichess.org/@/${player.handle}`}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { medalsOf, podiumFromPicks, podiumFromStandings, reigningChampion } from '../honours';
+import { medalsOf, podiumError, podiumFromStandings, reigningChampion, reigningChampions } from '../honours';
 import { SeasonWinner } from '../../types';
 
 const row = (handle: string, points: number, sb: number) => ({ handle, name: handle.toUpperCase(), points, sb });
@@ -22,16 +22,18 @@ describe('podiumFromStandings', () => {
   });
 });
 
-describe('podiumFromPicks', () => {
-  it('drops the third place after a tie for second', () => {
-    expect(podiumFromPicks(['b', 'c'], ['d'])).toEqual([
-      { handle: 'b', place: 2 },
-      { handle: 'c', place: 2 },
-    ]);
-    expect(podiumFromPicks(['b', ''], ['d'])).toEqual([
-      { handle: 'b', place: 2 },
-      { handle: 'd', place: 3 },
-    ]);
+describe('podiumError', () => {
+  const rows = (...places: number[]) => places.map((place, i) => ({ handle: `p${i}`, place: place as 1 | 2 | 3 }));
+  it('accepts every shared ranking', () => {
+    [[1, 2, 3], [1, 2, 2], [1, 1, 3], [1, 1, 1], [1, 2, 2, 2], [1, 2, 3, 3], [1], [1, 2]].forEach((p) =>
+      expect(podiumError(rows(...p))).toBeNull()
+    );
+  });
+  it('rejects places that skip or do not skip as they should', () => {
+    expect(podiumError(rows(1, 2, 2, 3))).toMatch(/3° posto/);
+    expect(podiumError(rows(1, 1, 2))).toMatch(/2° posto/);
+    expect(podiumError(rows(2, 3))).toMatch(/primo/);
+    expect(podiumError([{ handle: 'a', place: 1 }, { handle: 'A', place: 2 }])).toMatch(/due volte/);
   });
 });
 
@@ -54,6 +56,10 @@ describe('medals and reigning champion', () => {
       { season: 'Stagione 2', place: 1 },
     ]);
     expect(medalsOf('nessuno', winners)).toEqual([]);
+  });
+  it('crowns every co-champion of the latest season', () => {
+    const tied: SeasonWinner[] = [{ season: 'S', handle: 'Anna', name: 'Anna', podium: [{ handle: 'bruno', name: 'Bruno', place: 1 }] }];
+    expect(reigningChampions(tied)).toEqual({ season: 'S', handles: ['anna', 'bruno'] });
   });
   it('is the champion of the latest season', () => {
     expect(reigningChampion(winners)?.handle).toBe('giords');

@@ -11,7 +11,7 @@ import { useHash } from "./hooks/useHash";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
 import { summitGames } from "./lib/summit";
-import { MEDAL_EMOJI, reigningChampion } from "./lib/honours";
+import { fullPodium, MEDAL_EMOJI, reigningChampions } from "./lib/honours";
 import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { SeasonAwards } from "./components/SeasonAwards";
@@ -62,7 +62,7 @@ export function PublicTournamentView({
   const allGames = withScheduledGames(history, schedule);
   const rounds = [...new Set(allGames.map((g) => g.round))].sort(byRound);
   const summits = summitGames(config.players, allGames, gameStates);
-  const champion = reigningChampion(tournamentMeta.winners);
+  const champions = reigningChampions(tournamentMeta.winners);
   // Andata/ritorno: from the official schedule when there is one, otherwise from the games created so far
   const returnStart = returnLegStart(schedule.length > 0 ? schedule : history);
   const scheduleIndex = (g: HistoryGame) =>
@@ -182,8 +182,8 @@ export function PublicTournamentView({
                       <div className="player-cell">
                         <span className="player-name-line">
                           <a href={playerHref(p.handle)} className="player-name player-page-link">{p.name}</a>
-                          {champion?.handle.toLowerCase() === p.handle.toLowerCase() && (
-                            <span className="champion-badge" title={`Campione in carica · ${champion.season}`} aria-label={`Campione in carica, ${champion.season}`}>
+                          {champions?.handles.includes(p.handle.toLowerCase()) && (
+                            <span className="champion-badge" title={`Campione in carica · ${champions.season}`} aria-label={`Campione in carica, ${champions.season}`}>
                               👑
                             </span>
                           )}
@@ -348,21 +348,21 @@ export function PublicTournamentView({
                 {tournamentMeta.winners.map((w, idx) => (
                   <li key={idx} className="winner-row">
                     <span className="winner-season">{w.season}</span>
-                    <span className="winner-name">
-                      <a href={`https://lichess.org/@/${w.handle}`} target="_blank" rel="noopener noreferrer">
-                        {w.name}
-                      </a>
-                      {(w.podium ?? []).length > 0 && (
-                        <span className="winner-podium">
-                          {(w.podium ?? []).map((p) => (
-                            <span key={p.handle}>
-                              {MEDAL_EMOJI[p.place]} {p.name}
-                            </span>
-                          ))}
-                        </span>
-                      )}
-                      {w.notes && <span className="winner-notes">{w.notes}</span>}
-                    </span>
+                    <ol className="winner-podium">
+                      {fullPodium(w).map((p) => (
+                        <li key={p.handle} className={`podium-place podium-place-${p.place}`}>
+                          <span className="podium-medal" aria-label={`${p.place}° posto`}>{MEDAL_EMOJI[p.place]}</span>
+                          {p.place === 1 ? (
+                            <a href={`https://lichess.org/@/${p.handle}`} target="_blank" rel="noopener noreferrer">
+                              {p.name}
+                            </a>
+                          ) : (
+                            <span>{p.name}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                    {w.notes && <span className="winner-notes">{w.notes}</span>}
                   </li>
                 ))}
               </ol>

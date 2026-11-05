@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { Player, PodiumPlace, SeasonWinner, TournamentMeta } from '../../types';
-import { MEDAL_EMOJI, podiumFromPicks } from '../../lib/honours';
+import { fullPodium, Medal, MEDAL_EMOJI, podiumError } from '../../lib/honours';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
+type Row = { place: Medal; handle: string };
 
-const EMPTY_FORM = { season: '', handle: '', notes: '', second: '', secondTie: '', third: '' };
+const START_ROWS: Row[] = [
+  { place: 1, handle: '' },
+  { place: 2, handle: '' },
+  { place: 3, handle: '' },
+];
 
-// Manual corrections to the hall of fame: archiving a season already adds its champion and podium
+// Manual corrections to the hall of fame: archiving a season already adds its champion and podium.
+// The list is in season order: new seasons go at the bottom.
 export function HallOfFameSection({
   winners,
   players,
@@ -18,85 +24,92 @@ export function HallOfFameSection({
   flash: Flash;
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
 }) {
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [season, setSeason] = useState('');
+  const [notes, setNotes] = useState('');
+  const [rows, setRows] = useState<Row[]>(START_ROWS);
   // Index of the entry being edited, null when adding a new one
   const [editing, setEditing] = useState<number | null>(null);
-  const set = (patch: Partial<typeof EMPTY_FORM>) => setForm((f) => ({ ...f, ...patch }));
 
-  const nameOf = (handle: string, fallback?: string) => players.find((p) => p.handle === handle)?.name || fallback || handle;
+  // Names: current players, then anyone already in the hall of fame (players who left keep theirs)
+  const names = new Map<string, string>();
+  winners.forEach((w) => fullPodium(w).forEach((p) => names.set(p.handle.toLowerCase(), p.name)));
+  players.forEach((p) => names.set(p.handle.toLowerCase(), p.name));
+  const known = new Map<string, string>();
+  players.forEach((p) => known.set(p.handle, p.name));
+  winners.forEach((w) => fullPodium(w).forEach((p) => !known.has(p.handle) && known.set(p.handle, p.name)));
+  const canonical = (typed: string) => {
+    const t = typed.trim().replace(/^@/, '');
+    return [...known.keys()].find((h) => h.toLowerCase() === t.toLowerCase()) ?? t;
+  };
 
   const save = (next: SeasonWinner[], message: string) => {
     onUpdateTournamentMeta({ winners: next });
-    flash("ok", message);
+    flash('ok', message);
   };
 
   const reset = () => {
-    setForm(EMPTY_FORM);
+    setSeason('');
+    setNotes('');
+    setRows(START_ROWS);
     setEditing(null);
   };
 
   const submit = () => {
-    const season = form.season.trim();
-    if (!season || !form.handle) {
-      flash("err", "Inserisci la stagione e scegli il campione.");
+    const name = season.trim();
+    if (!name) {
+      flash('err', 'Inserisci il nome della stagione.');
       return;
     }
+    const filled = rows.filter((r) => r.handle.trim()).map((r) => ({ ...r, handle: canonical(r.handle) }));
+    const error = podiumError(filled);
+    if (error) {
+      flash('err', error);
+      return;
+    }
+    const podium: PodiumPlace[] = filled
+      .sort((a, b) => a.place - b.place)
+      .map((r) => ({ ...r, name: names.get(r.handle.toLowerCase()) ?? r.handle }));
+    const [champion, ...others] = podium;
     const old = editing !== null ? winners[editing] : undefined;
-    const oldName = (h: string) => old?.podium?.find((p) => p.handle === h)?.name;
-    const picks = podiumFromPicks([form.second, form.secondTie], [form.third]).filter((p) => p.handle !== form.handle);
-    const podium: PodiumPlace[] = picks.map((p) => ({ ...p, name: nameOf(p.handle, oldName(p.handle)) }));
     const entry: SeasonWinner = {
       ...(old ?? {}),
-      season,
-      handle: form.handle,
-      name: nameOf(form.handle, old?.handle === form.handle ? old.name : undefined),
-      notes: form.notes.trim() || undefined,
-      podium: podium.length > 0 ? podium : undefined,
+      season: name,
+      handle: champion.handle,
+      name: champion.name,
+      notes: notes.trim() || undefined,
+      podium: others.length > 0 ? others : undefined,
     };
     if (editing !== null) {
-      save(winners.map((w, i) => (i === editing ? entry : w)), `Albo d'Oro aggiornato: ${season}.`);
+      save(winners.map((w, i) => (i === editing ? entry : w)), `Albo d'Oro aggiornato: ${name}.`);
     } else {
-      save([...winners, entry], `${entry.name} aggiunto all'Albo d'Oro.`);
+      save([...winners, entry], `${name} aggiunta all'Albo d'Oro.`);
     }
     reset();
   };
 
   const edit = (idx: number) => {
     const w = winners[idx];
-    const seconds = (w.podium ?? []).filter((p) => p.place <= 2).map((p) => p.handle);
-    const third = (w.podium ?? []).find((p) => p.place === 3)?.handle ?? '';
-    setForm({ season: w.season, handle: w.handle, notes: w.notes ?? '', second: seconds[0] ?? '', secondTie: seconds[1] ?? '', third });
+    setSeason(w.season);
+    setNotes(w.notes ?? '');
+    setRows(fullPodium(w).map((p) => ({ place: p.place, handle: p.handle })));
     setEditing(idx);
   };
 
-  // Players of the current season, plus anyone already named in the entry being edited
-  const known = new Map(players.map((p) => [p.handle, p.name]));
-  if (editing !== null) {
-    const w = winners[editing];
-    if (!known.has(w.handle)) known.set(w.handle, w.name);
-    (w.podium ?? []).forEach((p) => !known.has(p.handle) && known.set(p.handle, p.name));
-  }
-  const options = [...known].map(([handle, name]) => (
-    <option key={handle} value={handle}>
-      {name}
-    </option>
-  ));
-  const select = (id: string, label: string, value: string, onChange: (v: string) => void, disabled = false) => (
-    <div>
-      <label htmlFor={id} className="label-sm">{label}</label>
-      <select id={id} value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)}>
-        <option value="">{disabled ? "—" : "Scegli…"}</option>
-        {options}
-      </select>
-    </div>
-  );
+  const move = (idx: number, by: -1 | 1) => {
+    const next = [...winners];
+    [next[idx], next[idx + by]] = [next[idx + by], next[idx]];
+    save(next, "Ordine dell'Albo d'Oro aggiornato.");
+    if (editing !== null) reset();
+  };
+
+  const setRow = (i: number, patch: Partial<Row>) => setRows((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
 
   return (
     <div className="subcard">
       <h4 className="subcard-title">Albo d'Oro</h4>
       <p className="note note-sm">
-        Archiviando una stagione campione e podio vengono aggiunti da soli. Qui puoi correggere l'elenco a mano o
-        aggiungere le stagioni passate. Con due secondi a pari merito non c'è un terzo posto.
+        Archiviando una stagione campione e podio vengono aggiunti da soli. Qui puoi correggerli o aggiungere le stagioni
+        passate, dalla più vecchia alla più recente: l'ultima dà il campione in carica.
       </p>
 
       {winners.length > 0 && (
@@ -104,20 +117,29 @@ export function HallOfFameSection({
           {winners.map((w, idx) => (
             <div key={`${w.season}-${idx}`} className="list-row small">
               <div>
-                <strong>{w.season}:</strong> {MEDAL_EMOJI[1]} {w.name} (@{w.handle})
-                {(w.podium ?? []).map((p) => (
-                  <span key={p.handle}> · {MEDAL_EMOJI[p.place]} {p.name}</span>
+                <strong>{w.season}:</strong>{' '}
+                {fullPodium(w).map((p, i) => (
+                  <span key={p.handle}>
+                    {i > 0 && ' · '}
+                    {MEDAL_EMOJI[p.place]} {p.name}
+                  </span>
                 ))}
                 {w.notes && <span className="muted-sm"> · {w.notes}</span>}
               </div>
               <span className="row-actions">
+                <button type="button" className="secondary btn-mini btn-mini-edit" aria-label={`Sposta su ${w.season}`} disabled={idx === 0} onClick={() => move(idx, -1)}>
+                  ↑
+                </button>
+                <button type="button" className="secondary btn-mini btn-mini-edit" aria-label={`Sposta giù ${w.season}`} disabled={idx === winners.length - 1} onClick={() => move(idx, 1)}>
+                  ↓
+                </button>
                 <button type="button" className="secondary btn-mini btn-mini-edit" aria-label={`Modifica ${w.season}`} onClick={() => edit(idx)}>
                   ✎
                 </button>
                 <button
                   type="button"
                   className="secondary btn-mini"
-                  aria-label={`Rimuovi ${w.name} (${w.season})`}
+                  aria-label={`Rimuovi ${w.season}`}
                   onClick={() => {
                     if (window.confirm(`Rimuovere ${w.season} dall'Albo d'Oro?`)) {
                       save(winners.filter((_, i) => i !== idx), "Albo d'Oro aggiornato.");
@@ -133,23 +155,55 @@ export function HallOfFameSection({
         </div>
       )}
 
-      <div className="add-form add-form-podium">
+      <div className="podium-form">
         <div>
-          <label htmlFor="new-w-season" className="label-sm">Stagione</label>
-          <input id="new-w-season" type="text" placeholder="es. Stagione 1" value={form.season} onChange={(e) => set({ season: e.target.value })} />
+          <label htmlFor="hof-season" className="label-sm">Stagione</label>
+          <input id="hof-season" type="text" placeholder={`es. Stagione ${winners.length + 1}`} value={season} onChange={(e) => setSeason(e.target.value)} />
         </div>
-        {select("new-w-handle", "🥇 Campione", form.handle, (v) => set({ handle: v }))}
-        {select("new-w-second", "🥈 Secondo", form.second, (v) => set({ second: v }))}
-        {select("new-w-second-tie", "🥈 Secondo a pari merito", form.secondTie, (v) => set({ secondTie: v, third: v ? "" : form.third }))}
-        {select("new-w-third", "🥉 Terzo", form.third, (v) => set({ third: v }), !!form.secondTie)}
+        <datalist id="hof-players">
+          {[...known].map(([handle, name]) => (
+            <option key={handle} value={handle}>
+              {name}
+            </option>
+          ))}
+        </datalist>
+        {rows.map((r, i) => (
+          <div key={i} className="podium-row">
+            <select aria-label="Posizione" value={r.place} onChange={(e) => setRow(i, { place: Number(e.target.value) as Medal })}>
+              {([1, 2, 3] as Medal[]).map((m) => (
+                <option key={m} value={m}>
+                  {MEDAL_EMOJI[m]} {m}°
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              aria-label="Giocatore (username Lichess)"
+              list="hof-players"
+              placeholder="username Lichess"
+              value={r.handle}
+              onChange={(e) => setRow(i, { handle: e.target.value })}
+            />
+            <button type="button" className="secondary btn-mini" aria-label="Togli riga" onClick={() => setRows((rs) => rs.filter((_, j) => j !== i))}>
+              ✕
+            </button>
+          </div>
+        ))}
+        <button type="button" className="secondary btn-mini btn-mini-edit podium-add" onClick={() => setRows((rs) => [...rs, { place: rs[rs.length - 1]?.place ?? 1, handle: '' }])}>
+          + Pari merito
+        </button>
+        <p className="note note-sm m-0">
+          A pari merito i giocatori condividono il posto e quelli dopo scalano: due primi e poi un 3°, due secondi e nessun
+          terzo. Si può scrivere anche lo username di chi non gioca più.
+        </p>
         <div>
-          <label htmlFor="new-w-notes" className="label-sm">Note</label>
-          <input id="new-w-notes" type="text" placeholder="opzionale" value={form.notes} onChange={(e) => set({ notes: e.target.value })} />
+          <label htmlFor="hof-notes" className="label-sm">Note</label>
+          <input id="hof-notes" type="text" placeholder="opzionale" value={notes} onChange={(e) => setNotes(e.target.value)} />
         </div>
       </div>
       <div className="actions two flush">
         <button type="button" className="secondary" onClick={submit}>
-          {editing !== null ? "Salva modifiche" : "Aggiungi all'Albo d'Oro"}
+          {editing !== null ? 'Salva modifiche' : "Aggiungi all'Albo d'Oro"}
         </button>
         {editing !== null && (
           <button type="button" className="secondary" onClick={reset}>
