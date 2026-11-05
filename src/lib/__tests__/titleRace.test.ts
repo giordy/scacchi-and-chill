@@ -1,0 +1,49 @@
+import { describe, expect, it } from 'vitest';
+import { titleRace } from '../titleRace';
+import { HistoryGame } from '../../types';
+
+const players = ['anna', 'bruno', 'carla'].map((h) => ({ handle: h, name: h[0].toUpperCase() + h.slice(1) }));
+const won = (round: string, white: string, black: string, winner: 'white' | 'black'): HistoryGame => ({
+  round,
+  white,
+  black,
+  url: '',
+  lichess: { id: '', status: 'resign', winner },
+});
+const todo = (round: string, white: string, black: string): HistoryGame => ({ round, white, black, url: '' });
+
+describe('titleRace', () => {
+  it('says nothing while everyone can still win', () => {
+    // Anna 1, Bruno 0 (2 left), Carla 0 (2 left)
+    expect(titleRace(players, [won('1', 'anna', 'bruno', 'white'), todo('2', 'bruno', 'carla'), todo('3', 'carla', 'anna')], {})).toBeNull();
+  });
+
+  it('names only the players still in the race', () => {
+    // Anna 2, Bruno 0 with 1 left (max 1): out. Carla 0 with 2 left (max 2): can draw level
+    const games = [won('1', 'anna', 'bruno', 'white'), won('2', 'anna', 'bruno', 'white'), todo('3', 'bruno', 'carla'), todo('4', 'carla', 'anna')];
+    const race = titleRace(players, games, {})!;
+    expect(race.contenders.map((c) => c.handle)).toEqual(['anna', 'carla']);
+    expect(race.champion).toBeUndefined();
+    expect(race.roundsLeft).toBe(2);
+  });
+
+  it('crowns the leader once nobody can reach them', () => {
+    // Anna 3, Bruno 0 and Carla 0, with one game each left
+    const games = [
+      won('1', 'anna', 'bruno', 'white'),
+      won('2', 'carla', 'anna', 'black'),
+      won('3', 'anna', 'bruno', 'white'),
+      todo('4', 'bruno', 'carla'),
+    ];
+    const race = titleRace(players, games, {})!;
+    expect(race.champion).toEqual({ handle: 'anna', name: 'Anna' });
+    expect(race.roundsLeft).toBe(1);
+  });
+
+  it('counts an aborted game as still to play, and says nothing once the season is over', () => {
+    const aborted: HistoryGame = { round: '2', white: 'bruno', black: 'carla', url: '', lichess: { id: '', status: 'aborted' } };
+    const games = [won('1', 'anna', 'bruno', 'white'), won('1', 'anna', 'carla', 'white'), aborted];
+    expect(titleRace(players, games, {})?.contenders.map((c) => c.handle)).toEqual(['anna']);
+    expect(titleRace(players, games.slice(0, 2), {})).toBeNull();
+  });
+});

@@ -13,6 +13,9 @@ import { MatchesByRound } from "./components/MatchesByRound";
 import { summitGames } from "./lib/summit";
 import { fullPodium, MEDAL_EMOJI, reigningChampions } from "./lib/honours";
 import { withdrawalNote } from "./lib/withdrawals";
+import { titleRace } from "./lib/titleRace";
+import { SeasonStatsPanel } from "./components/SeasonStatsPanel";
+import { seasonStats } from "./lib/seasonStats";
 import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { SeasonAwards } from "./components/SeasonAwards";
@@ -36,6 +39,9 @@ const TABS: { key: SubTab; label: string }[] = [
   { key: "tournament", label: "Torneo" },
 ];
 
+// "Anna", "Anna e Bruno", "Anna, Bruno e Carla"
+const namesList = (names: string[]) =>
+  names.length > 1 ? `${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}` : names[0] ?? "";
 const ALBO_HREF = `${publicTabHref("tournament")}/albo`;
 
 export function PublicTournamentView({
@@ -77,9 +83,11 @@ export function PublicTournamentView({
       allGames,
       rounds: [...new Set(allGames.map((g) => g.round))].sort(byRound),
       summits: summitGames(players, allGames, gameStates),
+      race: titleRace(players, allGames, gameStates),
+      stats: seasonStats(players, history, gameStates),
     };
   }, [players, history, gameStates, schedule]);
-  const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits } = season;
+  const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits, race, stats } = season;
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
   const champions = reigningChampions(tournamentMeta.winners);
   // Andata/ritorno: from the official schedule when there is one, otherwise from the games created so far
@@ -179,6 +187,22 @@ export function PublicTournamentView({
 
       {subTab === "standings" && (
         <section role="tabpanel" id="pub-panel-standings" aria-labelledby="pub-tab-standings">
+          {race && (
+            <p className="title-race" role="status">
+              {race.champion ? (
+                <>
+                  🏆 <strong>{race.champion.name}</strong> è campione matematico: nessuno può più raggiungerlo, con{" "}
+                  {race.roundsLeft === 1 ? "un turno" : `${race.roundsLeft} turni`} d'anticipo.
+                </>
+              ) : (
+                <>
+                  🏁 <strong>Corsa al titolo:</strong> possono ancora vincere {namesList(race.contenders.map((c) => c.name))}
+                  {" · "}
+                  {race.roundsLeft === 1 ? "manca un turno" : `mancano ${race.roundsLeft} turni`}.
+                </>
+              )}
+            </p>
+          )}
           <div className="table-responsive">
             <table className="standings-table">
               <thead>
@@ -240,6 +264,7 @@ export function PublicTournamentView({
             A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il numero di vittorie. Tocca un nome per
             vedere le partite del giocatore.
           </p>
+          {stats && <SeasonStatsPanel stats={stats} />}
           {awards.length > 0 && (
             <div className="awards-section">
               <h2 className="section-heading">I premi della stagione</h2>

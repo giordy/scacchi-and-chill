@@ -42,21 +42,19 @@ export function computeSeasonAwards(
     });
   }
 
-  // Fulmine: the decisive game won in the fewest moves
+  // Fulmine: the decisive game won in the fewest moves. The loser is not named: it would put
+  // the quickest defeat of the season on display
   const decisive = games.filter((g) => g.winner && g.moves > 0);
   if (decisive.length > 0) {
     const fewest = Math.min(...decisive.map((g) => g.moves));
-    const fastest = decisive.filter((g) => g.moves === fewest);
-    const winners = [...new Set(fastest.map((g) => g.winner as string))];
-    const only = fastest.length === 1 ? fastest[0] : undefined;
-    const loser = only && (only.winner === only.white ? only.black : only.white);
+    const winners = [...new Set(decisive.filter((g) => g.moves === fewest).map((g) => g.winner as string))];
     awards.push({
       id: "fastest",
       emoji: "⚡",
       title: "Fulmine",
       description: "La vittoria più rapida della stagione",
       winners: who(winners),
-      detail: `in ${plural(fewest, "mossa", "mosse")}${loser ? ` contro ${nameOf(loser)}` : ""}`,
+      detail: `in ${plural(fewest, "mossa", "mosse")}`,
     });
   }
 

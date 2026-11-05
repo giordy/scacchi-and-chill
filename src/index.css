@@ -2068,3 +2068,18 @@ a.champion-badge {
   vertical-align: -0.22em;
   object-fit: contain;
 }
+
+.title-race {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--brass-soft);
+  border: 1px solid color-mix(in srgb, var(--brass) 35%, var(--line));
+}
+
+.season-stats {
+  margin-top: 24px;
+}

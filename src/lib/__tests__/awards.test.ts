@@ -43,7 +43,7 @@ describe('computeSeasonAwards', () => {
     expect(winners('mate')).toEqual(['anna']);
     expect(byId.mate.detail).toBe('2 vittorie col matto');
     expect(winners('fastest')).toEqual(['carla']);
-    expect(byId.fastest.detail).toBe('in 15 mosse contro Anna');
+    expect(byId.fastest.detail).toBe('in 15 mosse'); // the loser is not named
     expect(winners('longest')).toEqual(['anna']); // the draw is longer, but only wins count
     expect(byId.longest.detail).toBe('in 26 mosse contro Carla');
     expect(winners('draws')).toEqual(['bruno', 'carla']);
