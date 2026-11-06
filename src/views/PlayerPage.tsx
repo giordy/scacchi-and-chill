@@ -53,8 +53,8 @@ const SHELF_MAX = 8;
 
 const PLACE_LABEL: Record<Medal, string> = { 1: "Campione", 2: "2° posto", 3: "3° posto" };
 
-// Trophy shelf next to the player's name, in the style of Lichess profiles: bare icons on a thin
-// ledge, the crown of the reigning champion first, then a medal per podium, newest first. What each
+// Trophy shelf next to the player's name, in the style of Lichess profiles: bare icons in a row,
+// the crown of the reigning champion first, then a medal per podium, newest first. What each
 // one is opens with a tap (or on hover). With many medals, one per kind with its count. Nothing for
 // a player without any.
 function TrophyShelf({ medals, champion, title }: { medals: PlayerMedal[]; champion?: string; title?: string }) {
