@@ -64,10 +64,9 @@ export function PublicTournamentView({
     window.location.hash = publicViewHref(v);
   };
 
-  // Phones: a swipe to the left opens the next tab, to the right the previous one. The new tab
+  // Phones: a swipe to the left, anywhere on the page, opens the next tab, to the right the previous one. The new tab
   // slides in from the side the finger came from, and starts from its top when the tab bar was
   // already stuck at the top of the screen.
-  const rootRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const [slide, setSlide] = useState<SwipeStep | null>(null);
   // Set by a swipe made with the tab bar stuck at the top: the new tab then opens from its top
@@ -78,7 +77,7 @@ export function PublicTournamentView({
     if (!header) return 0;
     return header.getBoundingClientRect().bottom + window.scrollY + parseFloat(getComputedStyle(header).marginBottom || "0");
   };
-  useSwipeTabs(rootRef, (step) => {
+  useSwipeTabs((step) => {
     const next = adjacentTab(TABS.map((t) => t.key), activeTab, step);
     if (!next) return;
     fromTop.current = window.scrollY > navHome() + 1;
@@ -158,7 +157,7 @@ export function PublicTournamentView({
   const leaderLine = leader ? ` In testa ${leader.name} con ${leader.points} ${leader.points === 1 ? "punto" : "punti"}.` : "";
 
   return (
-    <div ref={rootRef} className={`public-tournament${slide === 1 ? " slide-next" : slide === -1 ? " slide-prev" : ""}`}>
+    <div className={`public-tournament${slide === 1 ? " slide-next" : slide === -1 ? " slide-prev" : ""}`}>
       {/* Full header on the standings, the overview; a compact one on the other views */}
       <header className={`hero${activeTab === "standings" ? "" : " is-compact"}`}>
         <div className="hero-identity">
