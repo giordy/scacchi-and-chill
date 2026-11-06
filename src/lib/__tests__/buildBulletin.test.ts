@@ -159,5 +159,23 @@ describe('buildBulletin: deadlines and phrases', () => {
       });
     }
   });
+
+  it('puts the crown of the reigning champion only in the table at the end of the round', () => {
+    const champion: AppConfig = {
+      ...config,
+      tournament: { title: 'T', season: 'S2', description: '', winners: [{ season: 'S1', name: 'Bruno', handle: 'Bruno' }] },
+    };
+    const games: HistoryGame[] = [
+      { round: '1', white: 'anna', black: 'bruno', url: url('mmmmmmmm') },
+      { round: '1', white: 'carla', black: 'dario', url: url('nnnnnnnn') },
+    ];
+    const open = buildBulletin({ round: '1', games, states: { mmmmmmmm: finished('mmmmmmmm', 'white') }, history: games, config: champion, expiryDays: 2, now: NOW, random: first });
+    expect(open.text).not.toContain('👑');
+    const states = { mmmmmmmm: finished('mmmmmmmm', 'white'), nnnnnnnn: finished('nnnnnnnn', undefined) };
+    const end = buildBulletin({ round: '1', games, states, history: games, config: champion, expiryDays: 2, now: NOW, random: first });
+    expect(end.text.match(/👑/g)).toHaveLength(1);
+    expect(end.text).toContain('. Bruno 👑 – 0 punti');
+    expect(end.text).not.toMatch(/\*Bruno\* 👑/);
+  });
 });
 
