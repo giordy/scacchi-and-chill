@@ -2538,3 +2538,32 @@ button.infotip-trigger.presence-trigger {
   gap: 6px;
   white-space: nowrap;
 }
+
+/* Swiping between the public tabs (phones): the new tab slides in from the side the finger came from */
+@keyframes slideFromRight {
+  from { opacity: 0.4; transform: translateX(32px); }
+}
+
+@keyframes slideFromLeft {
+  from { opacity: 0.4; transform: translateX(-32px); }
+}
+
+.public-tournament.slide-next > [role="tabpanel"] {
+  animation: slideFromRight 0.2s ease-out;
+}
+
+.public-tournament.slide-prev > [role="tabpanel"] {
+  animation: slideFromLeft 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-tournament.slide-next > [role="tabpanel"],
+  .public-tournament.slide-prev > [role="tabpanel"] {
+    animation: none;
+  }
+}
+
+/* The slide must not widen the page for a moment */
+.public-tournament {
+  overflow-x: clip;
+}
