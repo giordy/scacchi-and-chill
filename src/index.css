@@ -2329,7 +2329,7 @@ details.anecdote > summary::-webkit-details-marker {
   }
 }
 
-/* Trophy shelf in the style of Lichess profiles: bare icons standing on a thin brass ledge */
+/* Trophy shelf in the style of Lichess profiles: bare icons in a row */
 .player-hero-top {
   position: relative; /* the trophies' explanations span the header, under it */
 }
@@ -2337,12 +2337,11 @@ details.anecdote > summary::-webkit-details-marker {
 .trophy-shelf {
   list-style: none;
   margin: 0;
-  padding: 0 6px 3px;
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 2px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--brass) 70%, transparent) 12%, color-mix(in srgb, var(--brass) 70%, transparent) 88%, transparent) bottom / 100% 2px no-repeat;
 }
 
 button.infotip-trigger.trophy {
