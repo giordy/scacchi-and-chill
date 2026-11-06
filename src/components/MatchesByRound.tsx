@@ -10,6 +10,7 @@ import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
 import { upsetOf, upsetTitle } from '../lib/upset';
 import { summitKey } from '../lib/summit';
 import { stateOf } from '../lib/games';
+import { playerHref } from '../lib/routes';
 import { PresenceInfo, seenAtOf } from '../lib/presence';
 import { ColorDot } from './PresenceDot';
 
@@ -222,7 +223,7 @@ function MatchCard({
               now={presence?.now ?? 0}
               name={nameOf(game.white)}
             />
-            <span className="player-name">{nameOf(game.white)}</span>
+            <a href={playerHref(game.white)} className="player-name player-page-link">{nameOf(game.white)}</a>
           </div>
           <div className={`player-row ${s?.winner === "black" ? "is-winner" : ""}`}>
             <ColorDot
@@ -231,7 +232,7 @@ function MatchCard({
               now={presence?.now ?? 0}
               name={nameOf(game.black)}
             />
-            <span className="player-name">{nameOf(game.black)}</span>
+            <a href={playerHref(game.black)} className="player-name player-page-link">{nameOf(game.black)}</a>
           </div>
         </div>
         {badge}
