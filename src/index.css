@@ -2576,29 +2576,3 @@ button.infotip-trigger.presence-trigger {
     font-size: 29px;
   }
 }
-
-/* Each trophy stands on a soft blurred shadow, instead of a continuous ledge */
-button.infotip-trigger.trophy::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 1px;
-  width: 80%;
-  height: 8px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(60, 40, 10, 0.45), transparent);
-  pointer-events: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  button.infotip-trigger.trophy::after {
-    background: radial-gradient(closest-side, rgba(0, 0, 0, 0.85), transparent);
-  }
-}
-
-.trophy-icon {
-  position: relative;
-  z-index: 1;
-  transform: translateY(-3px);
-}
