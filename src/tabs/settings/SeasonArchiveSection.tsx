@@ -4,6 +4,7 @@ import { buildSeasonArchive, seasonId, standingsCsv, validateNewSeasonName, with
 import { deleteAllGames, saveSeasonArchive } from '../../firebaseService';
 import { errorMessage } from '../../lib/utils';
 import { awardsMessage, awardWinnersLine } from '../../lib/awards';
+import { pastSeasonPeriod } from '../../lib/period';
 
 export function SeasonArchiveSection({
   config,
@@ -173,7 +174,7 @@ export function SeasonArchiveSection({
               <span>
                 <strong>{s.season}</strong> · {s.champion ? `campione ${s.champion.name}` : "senza campione"}
               </span>
-              <span className="muted-sm">{new Date(s.archivedAt).toLocaleDateString("it-IT")}</span>
+              <span className="muted-sm">{pastSeasonPeriod((meta?.winners ?? []).find((w) => w.season === s.season), s)}</span>
             </li>
           ))}
         </ul>

@@ -56,4 +56,18 @@ describe('SeasonsHistory', () => {
     const ranks = [...html(<SeasonsHistory seasons={[archive]} />).matchAll(/class="rank[^"]*"[^>]*>([^<]+)</g)].map((m) => m[1]);
     expect(ranks).toEqual(['1', '2', '2', '4']);
   });
+
+  it('says when each season was played, as corrected in the hall of fame', () => {
+    const plain = html(<SeasonsHistory seasons={[{ ...archive, start: '2025-11', end: '2026-03' } as SeasonArchive]} />);
+    expect(plain).toContain('nov 2025 – mar 2026');
+    expect(plain).not.toContain('archiviata');
+    const corrected = html(
+      <SeasonsHistory
+        seasons={[archive]}
+        winners={[{ season: 'Stagione 1', name: 'Anna', handle: 'anna', start: '2025-10', end: '2025-12' }]}
+      />
+    );
+    expect(corrected).toContain('ott 2025 – dic 2025');
+  });
 });
+

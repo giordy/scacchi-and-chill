@@ -80,3 +80,15 @@ describe('master photo field', () => {
     expect(await render('')).not.toContain('Togli foto');
   });
 });
+
+describe('hall of fame form', () => {
+  it('asks for the period of a season, month by month', async () => {
+    const { HallOfFameSection } = await import('../../tabs/settings/HallOfFameSection');
+    const winners = [{ season: 'Stagione 1', name: 'Anna', handle: 'anna', start: '2025-10', end: '2026-02' }, { season: 'Stagione 0', name: 'Bruno', handle: 'bruno', year: '2024' }];
+    const html = renderToStaticMarkup(<HallOfFameSection winners={winners} players={[]} flash={noop} onUpdateTournamentMeta={noop} />);
+    expect(html).toContain('id="hof-start" type="month"');
+    expect(html).toContain('id="hof-end" type="month"');
+    expect(html).toContain('ott 2025 – feb 2026');
+    expect(html).toContain(' · 2024');
+  });
+});

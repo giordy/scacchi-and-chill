@@ -2582,3 +2582,14 @@ button.infotip-trigger.presence-trigger {
   align-items: center;
   gap: 12px;
 }
+
+/* When a season was played: on the current season card and after each past season */
+.dossier-period {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.winner-period {
+  font-weight: 400;
+}

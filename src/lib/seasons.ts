@@ -2,6 +2,7 @@ import { HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonWinner, To
 import { computeStandings, seasonStarted, sharedRanks } from './standings';
 import { computeSeasonAwards } from './awards';
 import { podiumFromStandings } from './honours';
+import { monthKey, periodOfGames } from './period';
 
 // Stable document id from the season name: "Stagione 2 - Capablanca" -> "stagione-2-capablanca"
 export function seasonId(season: string): string {
@@ -35,6 +36,10 @@ export function buildSeasonArchive(
   };
   if (meta.masterName) archive.masterName = meta.masterName;
   if (meta.imageUrl) archive.imageUrl = meta.imageUrl;
+  // When it was played: from the games, ending at the archive date if games were left unfinished
+  const period = periodOfGames(history, gameStates);
+  if (period.start) archive.start = period.start;
+  archive.end = period.end ?? monthKey(now.getTime());
   // No champion until at least one game has been scored
   if (top && top.points > 0) archive.champion = { handle: top.handle, name: top.name, points: top.points };
   const awards = computeSeasonAwards(players, history, gameStates);
@@ -51,15 +56,22 @@ export function withChampion(winners: SeasonWinner[] | undefined, archive: Seaso
     season: archive.season,
     name: archive.champion.name,
     handle: archive.champion.handle,
-    year: String(new Date(archive.archivedAt).getFullYear()),
   };
+  if (archive.start) entry.start = archive.start;
+  if (archive.end) entry.end = archive.end;
   const podium = podiumFromStandings(archive.standings);
   if (podium.length > 0) entry.podium = podium;
   const idx = list.findIndex((w) => w.season === archive.season);
   if (idx === -1) return [...list, entry];
   const old = list[idx];
   if (old.handle === entry.handle) {
-    return old.podium || !entry.podium ? list : list.map((w, i) => (i === idx ? { ...old, podium: entry.podium } : w));
+    // Same champion: keep what was typed, fill in only what is missing
+    const filled: SeasonWinner = { ...old };
+    if (!old.podium && entry.podium) filled.podium = entry.podium;
+    if (!old.start && entry.start) filled.start = entry.start;
+    if (!old.end && entry.end) filled.end = entry.end;
+    const changed = filled.podium !== old.podium || filled.start !== old.start || filled.end !== old.end;
+    return changed ? list.map((w, i) => (i === idx ? filled : w)) : list;
   }
   return list.map((w, i) => (i === idx ? entry : w));
 }

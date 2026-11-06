@@ -11,6 +11,7 @@ import { parsePublicView, publicViewHref, PublicTab, PublicView, tabOfView } fro
 import { useHash } from "./hooks/useHash";
 import { useSwipeTabs } from "./hooks/useSwipeTabs";
 import { useImageSrc } from "./hooks/useImageSrc";
+import { pastSeasonPeriod, periodLabel, periodOfGames } from "./lib/period";
 import { adjacentTab, SwipeStep } from "./lib/swipe";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
@@ -121,9 +122,11 @@ export function PublicTournamentView({
       summits: summitGames(players, allGames, gameStates),
       race: titleRace(players, allGames, gameStates),
       stats: seasonStats(players, history, gameStates),
+      // When the current season is being played: "da novembre 2026", both months once it is over
+      currentPeriod: periodLabel(periodOfGames(history, gameStates), true),
     };
   }, [players, history, gameStates, schedule]);
-  const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits, race, stats } = season;
+  const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits, race, stats, currentPeriod } = season;
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
   // Places shared on a full tie (points, Sonneborn-Berger, wins); none before the first game
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
@@ -424,6 +427,7 @@ export function PublicTournamentView({
                 <h2 className="dossier-name">{masterName || "un grande maestro"}</h2>
                 {tournamentMeta.subtitle && <p className="dossier-subtitle">«{tournamentMeta.subtitle}»</p>}
                 <div className="story-text">{formatWhatsAppMarkup(tournamentMeta.description || DEFAULT_TOURNAMENT.description)}</div>
+                {currentPeriod && <p className="dossier-period">📅 {currentPeriod[0].toUpperCase() + currentPeriod.slice(1)}</p>}
               </div>
             </div>
           </article>
@@ -464,7 +468,13 @@ export function PublicTournamentView({
               <ol className="winners-list">
                 {tournamentMeta.winners.map((w, idx) => (
                   <li key={idx} className="winner-row">
-                    <span className="winner-season">{w.season}</span>
+                    <span className="winner-season">
+                      {w.season}
+                      {(() => {
+                        const period = pastSeasonPeriod(w, seasons.find((s) => s.season === w.season));
+                        return period ? <span className="winner-period"> · {period}</span> : null;
+                      })()}
+                    </span>
                     <ol className="winner-podium">
                       {fullPodium(w).map((p) => (
                         <li key={p.handle} className={`podium-place podium-place-${p.place}`}>
@@ -485,7 +495,7 @@ export function PublicTournamentView({
           {seasons.length > 0 && (
             <div>
               <h2 className="section-heading">Stagioni passate</h2>
-              <SeasonsHistory seasons={seasons} />
+              <SeasonsHistory seasons={seasons} winners={tournamentMeta.winners} />
             </div>
           )}
         </section>
