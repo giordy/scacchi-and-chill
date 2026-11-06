@@ -2552,3 +2552,33 @@ button.infotip-trigger.presence-trigger {
   font-weight: 700;
   vertical-align: middle;
 }
+
+/* Organizer area: the master's photo, with its preview */
+.photo-field {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.photo-preview {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.photo-field-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}

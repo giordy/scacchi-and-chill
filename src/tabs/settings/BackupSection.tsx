@@ -11,7 +11,8 @@ import {
   Settings,
   TournamentMeta,
 } from '../../types';
-import { replaceAllGames, saveSeasonArchive } from '../../firebaseService';
+import { loadAllMediaImages, replaceAllGames, saveMediaImage, saveSeasonArchive } from '../../firebaseService';
+import { isStorableImage } from '../../lib/media';
 import { BackupSummary, parseBackup } from '../../lib/backup';
 import { errorMessage } from '../../lib/utils';
 
@@ -46,7 +47,7 @@ export function BackupSection({
   const [pending, setPending] = useState<{ data: BackupData; summary: BackupSummary; fileName: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const handleExport = (quiet = false) => {
+  const handleExport = async (quiet = false) => {
     // The Lichess token stays on this device: never put it in a file
     const { token: _token, ...safeSettings } = settings;
     const backup: BackupData = {
@@ -63,6 +64,13 @@ export function BackupSection({
       anecdotes: organizer.anecdotes,
       ratings: organizer.ratings,
     };
+    // Uploaded photos: a failure to read them must not block the copy of everything else
+    try {
+      const media = await loadAllMediaImages();
+      if (Object.keys(media).length > 0) backup.media = media;
+    } catch (e) {
+      console.warn("Foto non incluse nella copia:", e);
+    }
 
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
@@ -103,7 +111,7 @@ export function BackupSection({
     }
     setBusy(true);
     try {
-      handleExport(true);
+      await handleExport(true);
       const games = data.history ?? [];
       await replaceAllGames(games);
       setHistory(games);
@@ -112,6 +120,9 @@ export function BackupSection({
       // A file from before the withdrawals had none: the current ones must not survive the restore
       onUpdateTournamentMeta({ ...data.tournament, withdrawals: data.tournament?.withdrawals ?? [] });
       for (const s of data.seasons ?? []) await saveSeasonArchive(s);
+      for (const [id, dataUrl] of Object.entries(data.media ?? {})) {
+        if (isStorableImage(dataUrl)) await saveMediaImage(id, dataUrl);
+      }
       if (summary.privateData) {
         organizer.replaceAll({
           ...(data.anecdotes ? { anecdotes: data.anecdotes } : {}),
@@ -134,7 +145,7 @@ export function BackupSection({
     <div>
       <p className="note note-flush">
         I dati del torneo sono salvati su Firestore. Qui puoi scaricarne una copia in JSON (torneo, giocatori,
-        calendario, partite, stagioni, aneddoti ed Elo). Il token Lichess non viene incluso.
+        calendario, partite, stagioni, foto caricate, aneddoti ed Elo). Il token Lichess non viene incluso.
       </p>
       <button className="secondary btn-block" type="button" onClick={() => handleExport()}>
         Scarica copia JSON

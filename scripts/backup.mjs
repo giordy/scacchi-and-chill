@@ -61,8 +61,9 @@ const ONGOING = new Set(['created', 'started']);
 const byGame = (a, b) =>
   `${a.round}|${a.white}|${a.black}`.localeCompare(`${b.round}|${b.white}|${b.black}`, undefined, { numeric: true });
 
-// The backup file from the plain documents: same format as the manual export of the app
-export function toBackup(doc, gameDocs, seasonDocs) {
+// The backup file from the plain documents: same format as the manual export of the app. Uploaded
+// photos (media) are added only when there are some, so older backups keep the same shape.
+export function toBackup(doc, gameDocs, seasonDocs, mediaDocs = []) {
   const { players = [], schedule = [], updatedAt: _u, ...tournament } = doc;
   const history = gameDocs
     .map(({ id: _id, updatedAt: _gu, syncedAt: _s, ...g }) =>
@@ -70,7 +71,17 @@ export function toBackup(doc, gameDocs, seasonDocs) {
     )
     .sort(byGame);
   const seasons = [...seasonDocs].sort((a, b) => String(a.archivedAt).localeCompare(String(b.archivedAt)));
-  return sorted({ version: '2.0', source: 'backup automatico', tournament, players, schedule, history, seasons });
+  const media = Object.fromEntries(mediaDocs.filter((m) => typeof m.dataUrl === 'string').map((m) => [m.id, m.dataUrl]));
+  return sorted({
+    version: '2.0',
+    source: 'backup automatico',
+    tournament,
+    players,
+    schedule,
+    history,
+    seasons,
+    ...(Object.keys(media).length > 0 ? { media } : {}),
+  });
 }
 
 async function main(out) {
@@ -79,7 +90,12 @@ async function main(out) {
     `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/` +
     `${encodeURIComponent(cfg.firestoreDatabaseId || '(default)')}/documents/tournaments/${TOURNAMENT_DOC_ID}`;
   const doc = fields((await get(`${base}?key=${cfg.apiKey}`)).fields);
-  const backup = toBackup(doc, await list(base, cfg.apiKey, 'games'), await list(base, cfg.apiKey, 'seasons'));
+  const backup = toBackup(
+    doc,
+    await list(base, cfg.apiKey, 'games'),
+    await list(base, cfg.apiKey, 'seasons'),
+    await list(base, cfg.apiKey, 'media')
+  );
   fs.writeFileSync(out, JSON.stringify(backup, null, 2) + '\n');
   console.log(
     `backup: ${backup.players.length} giocatori, ${backup.schedule.length} partite in calendario, ` +

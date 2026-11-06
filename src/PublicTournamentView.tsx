@@ -10,6 +10,7 @@ import { onTabListKeyDown } from "./lib/tabKeys";
 import { parsePublicView, publicViewHref, PublicTab, PublicView, tabOfView } from "./lib/routes";
 import { useHash } from "./hooks/useHash";
 import { useSwipeTabs } from "./hooks/useSwipeTabs";
+import { useImageSrc } from "./hooks/useImageSrc";
 import { adjacentTab, SwipeStep } from "./lib/swipe";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
@@ -148,8 +149,10 @@ export function PublicTournamentView({
 
   // Default photo only for the original Capablanca season: a new master without a photo shows none
   const masterName = tournamentMeta.masterName ?? "";
-  const masterPhoto =
-    tournamentMeta.imageUrl || (!masterName || /capablanca/i.test(masterName) ? "assets/capablanca.jpg" : "");
+  // A link, a path in the code, or a photo uploaded from the organizer area (read from Firestore)
+  const masterPhoto = useImageSrc(
+    tournamentMeta.imageUrl || (!masterName || /capablanca/i.test(masterName) ? "assets/capablanca.jpg" : "")
+  );
   const days = tournamentMeta.daysPerMove ?? config.defaults.days;
   const rated = tournamentMeta.rated ?? config.defaults.rated;
 

@@ -253,6 +253,27 @@ export function subscribeToSeasons(onUpdate: (seasons: SeasonArchive[]) => void)
   );
 }
 
+// Uploaded photos (see lib/media.ts): publicly readable, written only by the organizer
+export async function saveMediaImage(id: string, dataUrl: string): Promise<void> {
+  await setDoc(doc(db, "tournaments", TOURNAMENT_DOC_ID, "media", id), { dataUrl, updatedAt: new Date().toISOString() });
+}
+
+export async function loadMediaImage(id: string): Promise<string | null> {
+  const snap = await getDoc(doc(db, "tournaments", TOURNAMENT_DOC_ID, "media", id));
+  const dataUrl = snap.exists() ? snap.data().dataUrl : null;
+  return typeof dataUrl === "string" ? dataUrl : null;
+}
+
+export async function loadAllMediaImages(): Promise<Record<string, string>> {
+  const snap = await getDocs(collection(db, "tournaments", TOURNAMENT_DOC_ID, "media"));
+  const out: Record<string, string> = {};
+  snap.docs.forEach((d) => {
+    const dataUrl = d.data().dataUrl;
+    if (typeof dataUrl === "string") out[d.id] = dataUrl;
+  });
+  return out;
+}
+
 // Backward-compat helpers
 export async function saveTournamentMetaToFirebase(
   meta: TournamentMeta
