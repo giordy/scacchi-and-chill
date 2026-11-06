@@ -17,6 +17,7 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { Notice } from './components/Notice';
 import { RoundsTab } from './tabs/RoundsTab';
 import { TournamentTab } from './tabs/TournamentTab';
+import { SettingsTab } from './tabs/SettingsTab';
 import { ReviewsTab } from './ReviewsTab';
 import { applyWithdrawals } from './lib/withdrawals';
 import { FairPlayAlert } from './components/FairPlayAlert';
@@ -174,13 +175,13 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             nameOf={nameOf}
             flash={flash}
             triggerToast={triggerToast}
-            onMissingToken={() => setActiveTab('tournament')}
+            onMissingToken={() => setActiveTab('settings')}
           />
         </>
       )}
 
       {activeTab === 'reviews' && (
-        <ReviewsTab history={seasonHistory} config={config} nameOf={nameOf} triggerToast={triggerToast} organizer={organizer} />
+        <ReviewsTab history={seasonHistory} gameStates={lichess.gameStates} config={config} nameOf={nameOf} triggerToast={triggerToast} organizer={organizer} />
       )}
 
       {activeTab === 'tournament' && (
@@ -190,12 +191,30 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             config={config}
             settings={settings}
             setSettings={organizer.setSettings}
-            templates={tpl}
-            setTemplates={organizer.setTemplates}
             history={history}
             setHistory={setHistory}
             onSeasonReset={() => setOpenRoundRaw("")}
             gameStates={lichess.gameStates}
+            seasons={seasons}
+            flash={flash}
+            onUpdateTournamentMeta={updateTournamentMeta}
+            onUpdatePlayers={updatePlayers}
+            onUpdateSchedule={updateSchedule}
+          />
+        </>
+      )}
+
+      {activeTab === 'settings' && (
+        <>
+          <Notice notice={notice} />
+          <SettingsTab
+            config={config}
+            settings={settings}
+            setSettings={organizer.setSettings}
+            templates={tpl}
+            setTemplates={organizer.setTemplates}
+            history={history}
+            setHistory={setHistory}
             seasons={seasons}
             organizer={organizer}
             flash={flash}

@@ -14,12 +14,14 @@ export function RulesSection({
   rated,
   flash,
   onUpdateTournamentMeta,
+  children,
 }: {
   meta?: TournamentMeta;
   days: number;
   rated: boolean;
   flash: Flash;
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
+  children?: React.ReactNode; // more fields saved at once, next to days and rated (the challenge settings)
 }) {
   const [howItWorks, setHowItWorks] = useState(meta?.howItWorks || DEFAULT_TOURNAMENT.howItWorks || "");
   const [fairPlay, setFairPlay] = useState(meta?.fairPlayText || DEFAULT_TOURNAMENT.fairPlayText || "");
@@ -50,7 +52,13 @@ export function RulesSection({
           <label htmlFor="rated">Partite rated</label>
         </div>
       </div>
-      <p className="note">Si salvano subito e valgono per le nuove sfide e per il regolamento pubblico.</p>
+      {children}
+      <p className="note">
+        Questi campi si salvano subito e valgono per le sfide create da qui in poi; giorni per mossa e rated compaiono anche nel
+        regolamento pubblico.
+      </p>
+
+      <hr className="divider" />
 
       <div>
         <label htmlFor="cfg-how">Come funziona il torneo</label>

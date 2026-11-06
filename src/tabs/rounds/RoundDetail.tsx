@@ -124,7 +124,7 @@ export function RoundDetail({
     if (todo.length === 0) return;
     if (!settings.token) {
       onMissingToken();
-      return flash("err", "Aggiungi prima il token API Lichess in Torneo → Lichess e messaggi WhatsApp.");
+      return flash("err", "Aggiungi prima il token API Lichess in Impostazioni → Token Lichess.");
     }
     const games: HistoryGame[] = [];
     const errors: string[] = [];

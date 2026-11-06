@@ -132,7 +132,7 @@ h2 {
 /* Tabs navigation */
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 4px;
   background: var(--panel);
   border: 1px solid var(--line);
@@ -476,44 +476,6 @@ details .body {
   font-size: 11px;
   opacity: 0.85;
   line-height: 1.3;
-}
-
-/* Tournament Status Dashboard Card */
-.sync-dashboard {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 16px;
-}
-
-.sync-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-
-.sync-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.sync-badge.synced {
-  background: color-mix(in srgb, var(--win) 16%, transparent);
-  color: var(--win);
-}
-
-.sync-badge.pending {
-  background: color-mix(in srgb, var(--warning) 16%, transparent);
-  color: var(--warning);
 }
 
 .stat-pills {
@@ -943,8 +905,6 @@ button.btn-sm { font-size: 12px; padding: 3px 8px; }
 .mb-18 { margin-bottom: 18px; }
 .mt-16 { margin-top: 16px; }
 .m-0 { margin: 0; }
-.fs-14 { font-size: 14px; }
-.inline-row { display: flex; align-items: center; gap: 8px; }
 .space-row { display: flex; justify-content: space-between; align-items: center; }
 .muted { color: var(--muted); }
 .muted-normal { color: var(--muted); font-weight: normal; }
@@ -954,9 +914,6 @@ button.btn-sm { font-size: 12px; padding: 3px 8px; }
 button.btn-compact { padding: 4px 10px; font-size: 13px; min-height: 32px; }
 button.btn-compact.xs { padding: 4px 8px; font-size: 12px; min-height: 30px; }
 button.link-muted { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
-.quick-standings { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
-.quick-standings-list { max-height: 200px; overflow-y: auto; font-size: 13px; }
-.quick-standings-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted var(--line); }
 textarea.ta-xl { min-height: 220px; font-family: inherit; }
 
 /* Public hero and story modal */
@@ -2582,4 +2539,16 @@ button.infotip-trigger.presence-trigger {
   .trophy.is-crown .trophy-icon {
     font-size: 29px;
   }
+}
+
+/* Recensione: the moment detected from the games */
+.review-moment-tag {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--brass-soft);
+  color: var(--brass);
+  font-size: 10px;
+  font-weight: 700;
+  vertical-align: middle;
 }

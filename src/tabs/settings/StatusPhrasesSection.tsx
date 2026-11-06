@@ -82,6 +82,7 @@ export function StatusPhrasesSection({
 
   return (
     <>
+      <h4 className="subcard-title">Frasi del bollettino</h4>
       <p className="note">
         Separa le frasi con una riga vuota (una frase può occupare più righe): ogni volta il bollettino ne sceglie una a caso. Le modifiche si salvano quando esci dal campo e
         valgono su tutti i tuoi dispositivi. Le parole tra graffe vengono sostituite con i dati della partita.

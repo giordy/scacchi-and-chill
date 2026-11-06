@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding } from "./types";
 import { WhatsAppPreview } from "./WhatsAppPreview";
-import { errorMessage, extractGameId } from "./lib/utils";
-import { fetchGameStates, fetchUsers } from "./lib/lichess";
+import { fetchUsers } from "./lib/lichess";
 import { userKey } from "./lib/presence";
-import { gameProgress } from "./lib/progress";
 import { fullMovesOf, isVoid, stateOf } from "./lib/games";
 import { computeStandings, sharedRanks } from "./lib/standings";
 import type { LichessUserProfile } from "./types";
@@ -12,6 +10,8 @@ import type { OrganizerStore } from "./hooks/useOrganizerData";
 
 interface ReviewsTabProps {
   history: HistoryGame[];
+  // Fresh Lichess states from the organizer sync (top of the admin area); finished games are stored
+  gameStates: Record<string, LichessExportGame>;
   config: AppConfig;
   nameOf: (handle: string) => string;
   triggerToast?: (msg: string) => void;
@@ -20,67 +20,21 @@ interface ReviewsTabProps {
 
 export type ReviewMoment = "andata" | "volata" | "finale";
 
-export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }: ReviewsTabProps) {
-  const [reviewType, setReviewType] = useState<ReviewMoment>("finale");
+export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, organizer }: ReviewsTabProps) {
+  // null: the moment detected from the games, until the organizer picks one
+  const [pickedType, setReviewType] = useState<ReviewMoment | null>(null);
   const tournamentTitle = config.tournament?.title || "Scacchi & Chill";
   const [generalNotes, setGeneralNotes] = useState("");
   
   // Anecdotes and ratings live in the private Firestore document (see useOrganizerData)
   const { anecdotes, ratings, setAnecdote, setRatings } = organizer;
 
-  const [gameStates, setGameStates] = useState<Record<string, LichessExportGame>>({});
-  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [generatedReview, setGeneratedReview] = useState("");
-  const [isFetchingData, setIsFetchingData] = useState(false);
   const [isFetchingElo, setIsFetchingElo] = useState(false);
   const [notice, setNotice] = useState<NoticeState | null>(null);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [copiedReview, setCopiedReview] = useState(false);
   const [showAnecdotes, setShowAnecdotes] = useState(false);
-  const [showStandingsTable, setShowStandingsTable] = useState(false);
-
-  // Fresh Lichess states of the games still open; finished games are final and already stored
-  const loadGameStates = async () => {
-    if (history.length === 0) {
-      setNotice({
-        kind: "warning",
-        text: "Nessuna partita salvata nello storico. Crea prima i link di un turno in Turni.",
-      });
-      return;
-    }
-    setIsFetchingData(true);
-    setNotice(null);
-    try {
-      const open = history
-        .filter((g) => gameProgress(stateOf(g, {})) !== "finished")
-        .map((g) => extractGameId(g.url))
-        .filter((id): id is string => Boolean(id));
-      const states = open.length > 0 ? await fetchGameStates(open) : {};
-      setGameStates(states);
-      const now = new Date();
-      const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-      setLastSyncTime(timeStr);
-      setNotice({
-        kind: "ok",
-        text:
-          open.length > 0
-            ? `Lette da Lichess ${Object.keys(states).length} partite in corso (ore ${timeStr}); le concluse sono già salvate.`
-            : `Tutte le partite sono concluse e già salvate (ore ${timeStr}).`,
-      });
-    } catch (e) {
-      setNotice({
-        kind: "warning",
-        text: "Impossibile scaricare gli stati da Lichess: " + errorMessage(e),
-      });
-    } finally {
-      setIsFetchingData(false);
-    }
-  };
-
-  // Read the open games once when the tab opens
-  useEffect(() => {
-    if (history.length > 0 && !lastSyncTime) loadGameStates();
-  }, [history.length]);
 
   // Fetch correspondence Elo for all players from Lichess, in one call (CORS enabled)
   const fetchAllRatings = async () => {
@@ -313,30 +267,6 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
   };
 
   // Download raw JSON
-  const handleDownloadJson = () => {
-    const data = {
-      tournament: tournamentTitle,
-      reviewType,
-      exportedAt: new Date().toISOString(),
-      standings,
-      finishedMatches,
-      ongoingMatches,
-      generalNotes,
-    };
-    const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `torneo-${tournamentTitle.toLowerCase().replace(/\s+/g, "-")}-${dateStr}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   // Copy generated review
   const handleCopyReview = async () => {
     try {
@@ -350,6 +280,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
   };
 
   const recommended = getRecommendedMoment();
+  const reviewType = pickedType ?? recommended;
 
   return (
     <section>
@@ -364,87 +295,25 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
         </div>
       )}
 
-      {/* QUADRO STATO DATI TORNEO */}
-      <div className="sync-dashboard">
-        <div className="sync-header">
-          <div className="inline-row">
-            <strong className="fs-14">📊 Stato Dati Torneo</strong>
-            <span className={`sync-badge ${lastSyncTime ? "synced" : "pending"}`}>
-              {lastSyncTime ? `● Sincronizzato alle ${lastSyncTime}` : "⏳ Da sincronizzare"}
-            </span>
-          </div>
-          <button
-            type="button"
-            className="secondary btn-compact"
-            disabled={isFetchingData}
-            onClick={loadGameStates}
-          >
-            {isFetchingData ? "Aggiornamento in corso…" : "🔄 Sincronizza Partite"}
-          </button>
+      {/* What the prompt is built from: the games saved by the sync at the top of the area, and the Elo */}
+      <div className="stat-pills">
+        <div className="stat-pill">
+          <span className="stat-pill-label">Partite</span>
+          <span className="stat-pill-val">
+            {history.length} <small className="muted-normal">({finishedMatches.length} finite, {ongoingMatches.length} in corso)</small>
+          </span>
         </div>
-
-        <div className="stat-pills">
-          <div className="stat-pill">
-            <span className="stat-pill-label">Partite Totali</span>
-            <span className="stat-pill-val">
-              {history.length} <small className="muted-normal">({finishedMatches.length} finite, {ongoingMatches.length} in corso)</small>
-            </span>
-          </div>
-          <div className="stat-pill">
-            <span className="stat-pill-label">Elo Lichess</span>
-            <span className="stat-pill-val">
-              {ratedCount} / {config.players.length} <small className="muted-normal">giocatori</small>
-            </span>
-          </div>
-          <div className="stat-pill">
-            <span className="stat-pill-label">Fase Rilevata</span>
-            <span className="stat-pill-val accent">
-              {recommended === "finale" ? "🏆 Concluso" : recommended === "volata" ? "⏱️ Volata" : "🔄 Andata"}
-            </span>
-          </div>
+        <div className="stat-pill">
+          <span className="stat-pill-label">Elo Lichess</span>
+          <span className="stat-pill-val">
+            {ratedCount} / {config.players.length} <small className="muted-normal">giocatori</small>
+          </span>
         </div>
-
-        <div className="space-row mt-8">
-          <button
-            type="button"
-            className="secondary btn-compact xs"
-            disabled={isFetchingElo}
-            onClick={fetchAllRatings}
-          >
-            {isFetchingElo ? "Recupero Elo in corso..." : "♟️ Scarica Elo da Lichess"}
-          </button>
-          <button
-            type="button"
-            className="link-muted"
-            onClick={() => setShowStandingsTable(!showStandingsTable)}
-          >
-            {showStandingsTable ? "Nascondi classifica rapida ▲" : "Vedi classifica calcolata ▼"}
-          </button>
-        </div>
-
-        {/* Quick Standings Table */}
-        {showStandingsTable && (
-          <div className="quick-standings">
-            <p className="note note-xs">
-              Classifica calcolata dalle partite salvate nello storico:
-            </p>
-            <div className="quick-standings-list">
-              {standings.map((s, idx) => (
-                <div
-                  key={s.handle}
-                  className="quick-standings-row"
-                >
-                  <span>
-                    <strong>{ranks[idx]}. {s.name}</strong> <small className="muted">({s.handle})</small>
-                  </span>
-                  <span>
-                    <strong>{s.points} pt</strong> ({s.won}V {s.drawn}N {s.lost}P) · {s.rating ? `~${s.rating}` : "no elo"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+      </div>
+      <div className="space-row mt-8 mb-14">
+        <button type="button" className="secondary btn-compact xs" disabled={isFetchingElo} onClick={fetchAllRatings}>
+          {isFetchingElo ? "Recupero Elo in corso..." : "♟️ Scarica Elo da Lichess"}
+        </button>
       </div>
 
       {/* MOMENTO DEL TORNEO (3 PULSANTI CHIAVE) */}
@@ -456,7 +325,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
             className={`review-moment-btn ${reviewType === "andata" ? "active" : ""}`}
             onClick={() => setReviewType("andata")}
           >
-            <span className="review-moment-title">🔄 Fine Andata</span>
+            <span className="review-moment-title">🔄 Fine Andata{recommended === "andata" && <span className="review-moment-tag">consigliato</span>}</span>
             <span className="review-moment-sub">Com'è andata l'andata, due o tre frasi per giocatore.</span>
           </button>
 
@@ -465,7 +334,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
             className={`review-moment-btn ${reviewType === "volata" ? "active" : ""}`}
             onClick={() => setReviewType("volata")}
           >
-            <span className="review-moment-title">⏱️ Volata Finale</span>
+            <span className="review-moment-title">⏱️ Volata Finale{recommended === "volata" && <span className="review-moment-tag">consigliato</span>}</span>
             <span className="review-moment-sub">Cosa resta in gioco nelle ultime partite.</span>
           </button>
 
@@ -474,7 +343,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
             className={`review-moment-btn ${reviewType === "finale" ? "active" : ""}`}
             onClick={() => setReviewType("finale")}
           >
-            <span className="review-moment-title">🏆 Fine Torneo</span>
+            <span className="review-moment-title">🏆 Fine Torneo{recommended === "finale" && <span className="review-moment-tag">consigliato</span>}</span>
             <span className="review-moment-sub">Il racconto finale, il campione e poche menzioni per il gruppo.</span>
           </button>
         </div>
@@ -546,18 +415,9 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
         </button>
       </div>
 
-      <div className="space-row mb-16">
-        <p className="note sync-note">
-          💡 Copia il prompt, incollalo nella tua chat AI abituale e poi incolla qui sotto la recensione ottenuta per vedere l'anteprima WhatsApp.
-        </p>
-        <button
-          type="button"
-          className="link-muted nowrap"
-          onClick={handleDownloadJson}
-        >
-          💾 Scarica JSON
-        </button>
-      </div>
+      <p className="note mb-16">
+        💡 Copia il prompt, incollalo nella tua chat AI abituale e poi incolla qui sotto la recensione ottenuta per vedere l'anteprima WhatsApp.
+      </p>
 
       {/* Review pasted from the AI chat: preview and share */}
       <div className="mt-16">
