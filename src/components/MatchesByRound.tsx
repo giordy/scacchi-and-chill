@@ -11,7 +11,7 @@ import { upsetOf, upsetTitle } from '../lib/upset';
 import { summitKey } from '../lib/summit';
 import { stateOf } from '../lib/games';
 import { PresenceInfo, seenAtOf } from '../lib/presence';
-import { PresenceDot } from './PresenceDot';
+import { ColorDot } from './PresenceDot';
 
 interface MatchesByRoundProps {
   games: HistoryGame[]; // already filtered and sorted by round
@@ -216,22 +216,22 @@ function MatchCard({
           ))}
         <div className="match-players">
           <div className={`player-row ${s?.winner === "white" ? "is-winner" : ""}`}>
-            <span className="dot w" aria-label="Bianco" />
-            <span className="player-name">
-              {nameOf(game.white)}
-              {progress === "ongoing" && presence && (
-                <PresenceDot seenAt={seenAtOf(presence, game.white)} now={presence.now} name={nameOf(game.white)} />
-              )}
-            </span>
+            <ColorDot
+              color="w"
+              seenAt={progress === "ongoing" ? seenAtOf(presence, game.white) : undefined}
+              now={presence?.now ?? 0}
+              name={nameOf(game.white)}
+            />
+            <span className="player-name">{nameOf(game.white)}</span>
           </div>
           <div className={`player-row ${s?.winner === "black" ? "is-winner" : ""}`}>
-            <span className="dot b" aria-label="Nero" />
-            <span className="player-name">
-              {nameOf(game.black)}
-              {progress === "ongoing" && presence && (
-                <PresenceDot seenAt={seenAtOf(presence, game.black)} now={presence.now} name={nameOf(game.black)} />
-              )}
-            </span>
+            <ColorDot
+              color="b"
+              seenAt={progress === "ongoing" ? seenAtOf(presence, game.black) : undefined}
+              now={presence?.now ?? 0}
+              name={nameOf(game.black)}
+            />
+            <span className="player-name">{nameOf(game.black)}</span>
           </div>
         </div>
         {badge}

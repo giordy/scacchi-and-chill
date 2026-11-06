@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createChallenge, fetchGameStates } from '../lichess';
+import { createChallenge, fetchGameStates, fetchUsers } from '../lichess';
 import { Settings } from '../../types';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -47,5 +47,27 @@ describe('createChallenge', () => {
     await expect(createChallenge({ white: 'a', black: 'b', url: '' }, { round: '1', settings, challengeName: 'T' })).rejects.toThrow(
       /Token non valido/
     );
+  });
+});
+
+describe('fetchUsers', () => {
+  it('asks for all the players in one call', async () => {
+    const fetchMock = vi.fn(async () => new Response('[{"id":"anna"},{"id":"bruno"}]'));
+    vi.stubGlobal('fetch', fetchMock);
+    expect(await fetchUsers(['Anna', 'bruno'])).toEqual([{ id: 'anna' }, { id: 'bruno' }]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('https://lichess.org/api/users');
+    expect(init.body).toBe('Anna,bruno');
+  });
+  it('splits beyond the 300 names Lichess takes per call', async () => {
+    const fetchMock = vi.fn(async () => new Response('[]'));
+    vi.stubGlobal('fetch', fetchMock);
+    await fetchUsers(Array.from({ length: 301 }, (_, i) => `p${i}`));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+  it('fails on an HTTP error', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 429 })));
+    await expect(fetchUsers(['anna'])).rejects.toThrow('429');
   });
 });

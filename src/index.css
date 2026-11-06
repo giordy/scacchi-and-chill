@@ -2441,23 +2441,6 @@ button.infotip-trigger.match-upset {
 }
 
 /* When a player was last on Lichess: green within the hour, yellow within the day, grey beyond */
-.presence-dot {
-  display: inline-block;
-  flex-shrink: 0;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--presence-away);
-}
-
-.presence-dot.is-online {
-  background: var(--presence-online);
-}
-
-.presence-dot.is-recent {
-  background: var(--presence-recent);
-}
-
 :root {
   --presence-online: #2f9e5b;
   --presence-recent: #d9a21b;
@@ -2472,18 +2455,45 @@ button.infotip-trigger.match-upset {
   }
 }
 
-/* The dot after a name in a match card is a tap target bigger than the dot itself */
+.presence-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--presence-away);
+}
+
+.presence-dot.is-online {
+  background: var(--presence-online);
+}
+
+.presence-dot.is-recent {
+  background: var(--presence-recent);
+}
+
+/* Match cards: the colour disc is the tap target, its badge sits on the lower right edge, ringed
+   with the card colour like the online badge on an avatar */
 button.infotip-trigger.presence-trigger {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 24px;
   min-height: 24px;
-  margin: -6px -6px -6px -2px;
+  margin: -4px;
   padding: 0;
-  vertical-align: middle;
   border: 0;
   background: none;
+}
+
+.presence-badge {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 7px;
+  height: 7px;
+  box-shadow: 0 0 0 1.5px var(--panel);
 }
 
 /* Its explanation spans the card, under the players */
@@ -2491,15 +2501,24 @@ button.infotip-trigger.presence-trigger {
   position: relative;
 }
 
-.presence-line {
+/* Player page: "@handle su Lichess · ● ultimo accesso 5 ore fa" on one line, wrapping as a whole */
+.player-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  margin: 4px 0 0;
+  column-gap: 6px;
+  margin: 0;
   font-size: 13px;
   color: var(--muted);
 }
 
-.player-name .infotip-bubble {
-  font-family: var(--font-ui);
+.presence-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.presence-meta::before {
+  content: "·";
 }

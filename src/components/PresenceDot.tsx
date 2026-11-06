@@ -2,33 +2,35 @@ import React from 'react';
 import { InfoTip } from './InfoTip';
 import { agoLabel, presenceOf } from '../lib/presence';
 
-const Dot = ({ seenAt, now }: { seenAt: number; now: number }) => (
-  <span className={`presence-dot is-${presenceOf(seenAt, now)}`} aria-hidden="true" />
+const Dot = ({ seenAt, now, className = '' }: { seenAt: number; now: number; className?: string }) => (
+  <span className={`presence-dot is-${presenceOf(seenAt, now)} ${className}`} aria-hidden="true" />
 );
 
-// Ongoing games: a green, yellow or grey dot after the name, for when the player was last on
-// Lichess. The time opens with a tap (or on hover), since colour alone does not say it to everyone.
-// Nothing without a seenAt.
-export function PresenceDot({ seenAt, now, name }: { seenAt?: number; now: number; name: string }) {
-  if (!seenAt) return null;
+const COLOR_LABEL = { w: 'Bianco', b: 'Nero' } as const;
+
+// Ongoing games: the white or black disc before the name carries a small green, yellow or grey
+// badge, like the online badge on an avatar, for when the player was last on Lichess. The time
+// opens with a tap (or on hover), since colour alone does not say it to everyone. A plain disc
+// without a seenAt.
+export function ColorDot({ color, seenAt, now, name }: { color: 'w' | 'b'; seenAt?: number; now: number; name: string }) {
+  if (!seenAt) return <span className={`dot ${color}`} aria-label={COLOR_LABEL[color]} />;
+  const ago = agoLabel(seenAt, now);
   return (
-    <InfoTip
-      className="presence-trigger"
-      text={`${name}: ultimo accesso a Lichess ${agoLabel(seenAt, now)}. Non vuol dire che abbia già mosso in questa partita: Lichess mostra le ultime mosse in ritardo.`}
-    >
-      <Dot seenAt={seenAt} now={now} />
-      <span className="sr-only">Ultimo accesso a Lichess: {agoLabel(seenAt, now)}</span>
+    <InfoTip className="presence-trigger" text={`${name} · ultimo accesso a Lichess: ${ago}`}>
+      <span className={`dot ${color}`} aria-hidden="true" />
+      <Dot seenAt={seenAt} now={now} className="presence-badge" />
+      <span className="sr-only">{COLOR_LABEL[color]}, ultimo accesso a Lichess {ago}</span>
     </InfoTip>
   );
 }
 
-// Player page: the dot with the time written next to it
-export function PresenceLine({ seenAt, now }: { seenAt?: number; now: number }) {
+// Player page: after "@handle su Lichess", on the same line
+export function PresenceMeta({ seenAt, now }: { seenAt?: number; now: number }) {
   if (!seenAt) return null;
   return (
-    <p className="presence-line">
+    <span className="presence-meta">
       <Dot seenAt={seenAt} now={now} />
-      Ultimo accesso a Lichess: {agoLabel(seenAt, now)}
-    </p>
+      ultimo accesso {agoLabel(seenAt, now)}
+    </span>
   );
 }

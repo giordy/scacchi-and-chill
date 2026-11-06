@@ -74,3 +74,23 @@ export async function fetchGameStates(ids: string[]): Promise<Record<string, Lic
     });
   return states;
 }
+
+// Lichess takes up to 300 names per call
+const MAX_USERS = 300;
+
+// The public profiles of many players in one call (ratings, flair, seenAt...), instead of one call
+// per player; players Lichess does not know are left out
+export async function fetchUsers(handles: string[]): Promise<unknown[]> {
+  const out: unknown[] = [];
+  for (let i = 0; i < handles.length; i += MAX_USERS) {
+    const res = await fetch("https://lichess.org/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain", Accept: "application/json" },
+      body: handles.slice(i, i + MAX_USERS).join(","),
+    });
+    if (!res.ok) throw new Error(`Lichess ha risposto ${res.status}`);
+    const users = await res.json();
+    if (Array.isArray(users)) out.push(...users);
+  }
+  return out;
+}

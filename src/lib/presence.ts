@@ -8,13 +8,16 @@ const DAY = 24 * HOUR;
 
 export type Presence = 'online' | 'recent' | 'away';
 
-// What the public page knows: seenAt by lower-case handle, and when it was read
+// What the public page reads from the players' Lichess profiles, by lower-case handle: when each
+// was last on Lichess and their flair; now is when it was read
 export interface PresenceInfo {
   seenAt: Record<string, number>;
+  flair: Record<string, string>;
   now: number;
 }
 
 export const seenAtOf = (presence: PresenceInfo | undefined, handle: string) => presence?.seenAt[handle.toLowerCase()];
+export const profileFlairOf = (presence: PresenceInfo | undefined, handle: string) => presence?.flair[handle.toLowerCase()];
 
 // Green within the hour, yellow within the day, grey beyond: the tournament moves in days
 export function presenceOf(seenAt: number, now = Date.now()): Presence {
@@ -36,31 +39,19 @@ export function agoLabel(seenAt: number, now = Date.now()): string {
   return 'più di un mese fa';
 }
 
-// Lichess answers /api/users with the profiles it found, each with its seenAt: the map is keyed by
-// lower-case handle, players without a profile or a seenAt are left out
-export function seenAtFrom(users: unknown): Record<string, number> {
-  const out: Record<string, number> = {};
-  if (!Array.isArray(users)) return out;
-  for (const u of users) {
-    const id = typeof u?.id === 'string' ? u.id : typeof u?.username === 'string' ? u.username.toLowerCase() : '';
-    if (id && typeof u.seenAt === 'number' && u.seenAt > 0) out[id.toLowerCase()] = u.seenAt;
-  }
-  return out;
-}
+// Lower-case handle of a profile in the /api/users answer
+export const userKey = (u: any): string =>
+  typeof u?.id === 'string' ? u.id.toLowerCase() : typeof u?.username === 'string' ? u.username.toLowerCase() : '';
 
-// Lichess takes up to 300 names per call
-const MAX_USERS = 300;
-
-export async function fetchSeenAt(handles: string[]): Promise<Record<string, number>> {
-  const out: Record<string, number> = {};
-  for (let i = 0; i < handles.length; i += MAX_USERS) {
-    const res = await fetch('https://lichess.org/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain', Accept: 'application/json' },
-      body: handles.slice(i, i + MAX_USERS).join(','),
-    });
-    if (!res.ok) throw new Error(`Lichess ha risposto ${res.status}`);
-    Object.assign(out, seenAtFrom(await res.json()));
+// From the /api/users answer: seenAt and flair by lower-case handle, players without them left out
+export function presenceFrom(users: unknown[]): Omit<PresenceInfo, 'now'> {
+  const seenAt: Record<string, number> = {};
+  const flair: Record<string, string> = {};
+  for (const u of users as any[]) {
+    const id = userKey(u);
+    if (!id) continue;
+    if (typeof u.seenAt === 'number' && u.seenAt > 0) seenAt[id] = u.seenAt;
+    if (typeof u.flair === 'string' && u.flair) flair[id] = u.flair;
   }
-  return out;
+  return { seenAt, flair };
 }
