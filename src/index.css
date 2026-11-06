@@ -2302,12 +2302,31 @@ details.anecdote > summary::-webkit-details-marker {
 }
 
 /* Profile header: name on the left, trophy shelf on the right (below it on a phone) */
+/* Trophies always in the top right corner on wide screens, always under the name on phones:
+   never one or the other depending on how long the name line is */
 .player-hero-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px 20px;
-  flex-wrap: wrap;
+}
+
+.player-hero-top > :first-child {
+  min-width: 0;
+}
+
+.player-hero-top .trophy-shelf-wrap {
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .player-hero-top {
+    flex-direction: column;
+  }
+
+  .player-hero-top .trophy-shelf-wrap {
+    justify-items: start;
+  }
 }
 
 .trophy-shelf {
@@ -2501,12 +2520,13 @@ button.infotip-trigger.presence-trigger {
   position: relative;
 }
 
-/* Player page: "@handle su Lichess · ● ultimo accesso 5 ore fa" on one line, wrapping as a whole */
+/* Player page: "@handle su Lichess  ● ultimo accesso 5 ore fa", the dot as separator, wrapping as a whole */
 .player-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  column-gap: 6px;
+  column-gap: 12px;
+  row-gap: 2px;
   margin: 0;
   font-size: 13px;
   color: var(--muted);
@@ -2517,8 +2537,4 @@ button.infotip-trigger.presence-trigger {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-}
-
-.presence-meta::before {
-  content: "·";
 }
