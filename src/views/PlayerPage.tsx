@@ -6,8 +6,8 @@ import { flairFromGames, flairUrl } from '../lib/flair';
 import { InfoTip } from '../components/InfoTip';
 import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampions, shortSeason } from '../lib/honours';
 import { PointsChart } from '../components/PointsChart';
-import { PresenceLine } from '../components/PresenceDot';
-import { PresenceInfo, seenAtOf } from '../lib/presence';
+import { PresenceMeta } from '../components/PresenceDot';
+import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
 
 interface PlayerPageProps {
   handle: string;
@@ -104,24 +104,11 @@ function TrophyShelf({ medals, champion, title }: { medals: PlayerMedal[]; champ
 }
 
 // The player's Lichess flair after their username, as Lichess shows it. From the games when they
-// played one, otherwise from their public Lichess profile; nothing when they have none or the
-// image does not load.
-function Flair({ handle, fromGames }: { handle: string; fromGames?: string }) {
-  const [fetched, setFetched] = useState<string | undefined>();
+// played one, otherwise from their Lichess profile (read with the others' by usePresence); nothing
+// when they have none or the image does not load.
+function Flair({ flair }: { flair?: string }) {
   const [broken, setBroken] = useState(false);
-  useEffect(() => {
-    setBroken(false);
-    if (fromGames) return;
-    let cancelled = false;
-    fetch(`https://lichess.org/api/user/${encodeURIComponent(handle)}`, { headers: { Accept: 'application/json' } })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((u) => !cancelled && setFetched(typeof u?.flair === 'string' ? u.flair : undefined))
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [handle, fromGames]);
-  const flair = fromGames ?? fetched;
+  useEffect(() => setBroken(false), [flair]);
   if (!flair || broken) return null;
   return (
     <img
@@ -203,16 +190,18 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
         <div className="player-hero-top">
           <div>
             <h1 className="hero-title">{player.name}</h1>
-            <a
-              className="player-link"
-              href={`https://lichess.org/@/${player.handle}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              @{player.handle}
-              <Flair handle={player.handle} fromGames={flairFromGames(player.handle, history, gameStates)} /> su Lichess
-            </a>
-            {presence && <PresenceLine seenAt={seenAtOf(presence, player.handle)} now={presence.now} />}
+            <p className="player-meta">
+              <a
+                className="player-link"
+                href={`https://lichess.org/@/${player.handle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                @{player.handle}
+                <Flair flair={flairFromGames(player.handle, history, gameStates) ?? profileFlairOf(presence, player.handle)} /> su Lichess
+              </a>
+              {presence && <PresenceMeta seenAt={seenAtOf(presence, player.handle)} now={presence.now} />}
+            </p>
           </div>
           <TrophyShelf medals={medals} champion={isChampion ? champions!.season : undefined} title={config.tournament?.title} />
         </div>

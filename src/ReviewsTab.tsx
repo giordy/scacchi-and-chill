@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding } from "./types";
 import { WhatsAppPreview } from "./WhatsAppPreview";
 import { errorMessage, extractGameId } from "./lib/utils";
-import { fetchGameStates } from "./lib/lichess";
+import { fetchGameStates, fetchUsers } from "./lib/lichess";
+import { userKey } from "./lib/presence";
 import { gameProgress } from "./lib/progress";
 import { fullMovesOf, isVoid, stateOf } from "./lib/games";
 import { computeStandings } from "./lib/standings";
@@ -81,50 +82,44 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
     if (history.length > 0 && !lastSyncTime) loadGameStates();
   }, [history.length]);
 
-  // Fetch correspondence Elo for all players directly from Lichess API (CORS enabled)
+  // Fetch correspondence Elo for all players from Lichess, in one call (CORS enabled)
   const fetchAllRatings = async () => {
     setIsFetchingElo(true);
     setNotice(null);
     const updated: Record<string, string | number | null> = { ...ratings };
     let successCount = 0;
 
+    // One call for all the players instead of one each
+    let profiles: Record<string, LichessUserProfile> = {};
+    try {
+      const users = await fetchUsers(config.players.map((p) => p.handle));
+      profiles = Object.fromEntries(users.map((u) => [userKey(u), u as LichessUserProfile]));
+    } catch (err) {
+      console.warn("Errore recupero Elo da Lichess:", err);
+    }
+
     for (const player of config.players) {
-      try {
-        let data: LichessUserProfile | null = null;
-        try {
-          const directRes = await fetch(
-            `https://lichess.org/api/user/${encodeURIComponent(player.handle)}`,
-            { headers: { Accept: "application/json" } }
-          );
-          if (directRes.ok) {
-            data = await directRes.json();
-          }
-        } catch {}
+      const data = profiles[player.handle.toLowerCase()];
+      if (!data) continue;
+      const perfs = data.perfs || {};
+      const corr = perfs.correspondence;
+      const rap = perfs.rapid;
+      const clas = perfs.classical;
 
-        if (data) {
-          const perfs = data.perfs || {};
-          const corr = perfs.correspondence;
-          const rap = perfs.rapid;
-          const clas = perfs.classical;
-
-          if (corr && typeof corr.rating === "number") {
-            const provSuffix = corr.prov ? "?" : "";
-            updated[player.handle] = `${corr.rating}${provSuffix}`;
-            successCount++;
-          } else if (rap && typeof rap.rating === "number" && (rap.games ?? 0) > 0) {
-            const provSuffix = rap.prov ? "?" : "";
-            updated[player.handle] = `${rap.rating}${provSuffix} [rapid]`;
-            successCount++;
-          } else if (clas && typeof clas.rating === "number" && (clas.games ?? 0) > 0) {
-            const provSuffix = clas.prov ? "?" : "";
-            updated[player.handle] = `${clas.rating}${provSuffix} [classical]`;
-            successCount++;
-          } else {
-            updated[player.handle] = null;
-          }
-        }
-      } catch (err) {
-        console.warn(`Errore recupero Elo per ${player.handle}:`, err);
+      if (corr && typeof corr.rating === "number") {
+        const provSuffix = corr.prov ? "?" : "";
+        updated[player.handle] = `${corr.rating}${provSuffix}`;
+        successCount++;
+      } else if (rap && typeof rap.rating === "number" && (rap.games ?? 0) > 0) {
+        const provSuffix = rap.prov ? "?" : "";
+        updated[player.handle] = `${rap.rating}${provSuffix} [rapid]`;
+        successCount++;
+      } else if (clas && typeof clas.rating === "number" && (clas.games ?? 0) > 0) {
+        const provSuffix = clas.prov ? "?" : "";
+        updated[player.handle] = `${clas.rating}${provSuffix} [classical]`;
+        successCount++;
+      } else {
+        updated[player.handle] = null;
       }
     }
 

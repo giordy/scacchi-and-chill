@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { agoLabel, presenceOf, seenAtFrom, seenAtOf } from '../presence';
+import { agoLabel, presenceFrom, presenceOf, profileFlairOf, seenAtOf } from '../presence';
 
 const MIN = 60 * 1000;
 const H = 60 * MIN;
@@ -28,20 +28,21 @@ describe('agoLabel', () => {
   });
 });
 
-describe('seenAtFrom', () => {
-  it('keys the seenAt by lower-case handle and skips users without one', () => {
+describe('presenceFrom', () => {
+  it('keys seenAt and flair by lower-case handle and skips what is missing', () => {
     const users = [
-      { id: 'anna', username: 'Anna', seenAt: 5 },
+      { id: 'anna', username: 'Anna', seenAt: 5, flair: 'food-drink.rice-ball' },
       { username: 'Bruno', seenAt: 7 },
       { id: 'carla', username: 'Carla' },
       null,
     ];
-    expect(seenAtFrom(users)).toEqual({ anna: 5, bruno: 7 });
-    expect(seenAtFrom({ error: 'x' })).toEqual({});
+    expect(presenceFrom(users)).toEqual({ seenAt: { anna: 5, bruno: 7 }, flair: { anna: 'food-drink.rice-ball' } });
   });
 
   it('is read in any case', () => {
-    expect(seenAtOf({ seenAt: { anna: 5 }, now: 0 }, 'Anna')).toBe(5);
+    const presence = { seenAt: { anna: 5 }, flair: { anna: 'a.b' }, now: 0 };
+    expect(seenAtOf(presence, 'Anna')).toBe(5);
+    expect(profileFlairOf(presence, 'ANNA')).toBe('a.b');
     expect(seenAtOf(undefined, 'Anna')).toBeUndefined();
   });
 });
