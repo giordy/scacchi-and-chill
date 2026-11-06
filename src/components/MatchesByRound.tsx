@@ -10,6 +10,8 @@ import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
 import { upsetOf, upsetTitle } from '../lib/upset';
 import { summitKey } from '../lib/summit';
 import { stateOf } from '../lib/games';
+import { PresenceInfo, seenAtOf } from '../lib/presence';
+import { PresenceDot } from './PresenceDot';
 
 interface MatchesByRoundProps {
   games: HistoryGame[]; // already filtered and sorted by round
@@ -17,11 +19,12 @@ interface MatchesByRoundProps {
   nameOf: (handle: string) => string;
   returnStart?: string; // first round of the return leg, if any
   summits?: Map<string, string>; // scontro al vertice: positions text by summitKey
+  presence?: PresenceInfo; // when each player was last on Lichess, for the ongoing games
 }
 
 // Public "Partite": the current round first, then the unfinished games of earlier rounds,
 // the upcoming rounds and finally the played rounds, newest first; both collapsed
-export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits }: MatchesByRoundProps) {
+export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence }: MatchesByRoundProps) {
   const stateOfGame = (g: HistoryGame) => stateOf(g, gameStates);
   const progressOf = (g: HistoryGame) => gameProgress(stateOfGame(g));
   const legOf = (round: string) =>
@@ -53,6 +56,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
           nameOf={nameOf}
           showRound={showRound}
           summit={summits?.get(summitKey(g))}
+          presence={presence}
         />
       ))}
     </div>
@@ -152,12 +156,14 @@ function MatchCard({
   nameOf,
   showRound = false,
   summit,
+  presence,
 }: {
   game: HistoryGame;
   state?: LichessExportGame;
   nameOf: (handle: string) => string;
   showRound?: boolean;
   summit?: string; // e.g. "1° contro 2°"
+  presence?: PresenceInfo;
 }) {
   // Scheduled game not created on Lichess yet
   let badge = game.url
@@ -211,11 +217,21 @@ function MatchCard({
         <div className="match-players">
           <div className={`player-row ${s?.winner === "white" ? "is-winner" : ""}`}>
             <span className="dot w" aria-label="Bianco" />
-            <span className="player-name">{nameOf(game.white)}</span>
+            <span className="player-name">
+              {nameOf(game.white)}
+              {progress === "ongoing" && presence && (
+                <PresenceDot seenAt={seenAtOf(presence, game.white)} now={presence.now} name={nameOf(game.white)} />
+              )}
+            </span>
           </div>
           <div className={`player-row ${s?.winner === "black" ? "is-winner" : ""}`}>
             <span className="dot b" aria-label="Nero" />
-            <span className="player-name">{nameOf(game.black)}</span>
+            <span className="player-name">
+              {nameOf(game.black)}
+              {progress === "ongoing" && presence && (
+                <PresenceDot seenAt={seenAtOf(presence, game.black)} now={presence.now} name={nameOf(game.black)} />
+              )}
+            </span>
           </div>
         </div>
         {badge}

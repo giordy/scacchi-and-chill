@@ -2439,3 +2439,67 @@ button.infotip-trigger.match-upset {
 .stat-pills {
   position: relative;
 }
+
+/* When a player was last on Lichess: green within the hour, yellow within the day, grey beyond */
+.presence-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--presence-away);
+}
+
+.presence-dot.is-online {
+  background: var(--presence-online);
+}
+
+.presence-dot.is-recent {
+  background: var(--presence-recent);
+}
+
+:root {
+  --presence-online: #2f9e5b;
+  --presence-recent: #d9a21b;
+  --presence-away: #a3a8a2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --presence-online: #5cc98a;
+    --presence-recent: #f0c14b;
+    --presence-away: #6b736d;
+  }
+}
+
+/* The dot after a name in a match card is a tap target bigger than the dot itself */
+button.infotip-trigger.presence-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  margin: -6px -6px -6px -2px;
+  padding: 0;
+  vertical-align: middle;
+  border: 0;
+  background: none;
+}
+
+/* Its explanation spans the card, under the players */
+.match-card-body {
+  position: relative;
+}
+
+.presence-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.player-name .infotip-bubble {
+  font-family: var(--font-ui);
+}

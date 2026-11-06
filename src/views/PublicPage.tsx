@@ -6,6 +6,7 @@ import { parsePlayerHash, publicViewHref } from '../lib/routes';
 import { PlayerPage } from './PlayerPage';
 import { LoadingScreen } from '../components/LoadingScreen';
 import { PublicTournamentView } from '../PublicTournamentView';
+import { PresenceInfo } from '../lib/presence';
 
 interface PublicPageProps {
   seasons: SeasonArchive[];
@@ -16,16 +17,18 @@ interface PublicPageProps {
   // Last time the open games were read live from Lichess
   liveUpdatedAt?: Date | null;
   nameOf: (handle: string) => string;
+  // When each player was last on Lichess
+  presence?: PresenceInfo;
 }
 
 // Public tournament page, with a discreet link to the organizer area
-export function PublicPage({ seasons, ready, config, history, gameStates, liveUpdatedAt, nameOf }: PublicPageProps) {
+export function PublicPage({ seasons, ready, config, history, gameStates, liveUpdatedAt, nameOf, presence }: PublicPageProps) {
   const hash = useHash();
   if (!ready) return <LoadingScreen label="Caricamento torneo…" />;
 
   const playerHandle = parsePlayerHash(hash);
   if (playerHandle) {
-    return <PlayerPage handle={playerHandle} config={config} history={history} gameStates={gameStates} nameOf={nameOf} />;
+    return <PlayerPage handle={playerHandle} config={config} history={history} gameStates={gameStates} nameOf={nameOf} presence={presence} />;
   }
 
   return (
@@ -37,6 +40,7 @@ export function PublicPage({ seasons, ready, config, history, gameStates, liveUp
         gameStates={gameStates}
         nameOf={nameOf}
         seasons={seasons}
+        presence={presence}
       />
 
       <footer className="public-footer">
