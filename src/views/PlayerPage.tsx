@@ -48,58 +48,38 @@ const describeEndings = (counts: Record<EndReason, number>) =>
     .map((r) => `${counts[r]} ${END_LABEL[r]}`)
     .join(" · ");
 
-// Beyond this many trophies the shelf groups the medals by kind, to stay on one line
-const SHELF_MAX = 5;
+// Bare icons are narrow: beyond this many trophies the shelf groups the medals by kind
+const SHELF_MAX = 8;
 
-// Trophy shelf next to the player's name, as on Lichess profiles: the crown of the reigning
-// champion, then a medal per podium, newest first. With many medals, one trophy per kind with its
-// count, and a tap lists its seasons. Nothing for a player without any.
+const PLACE_LABEL: Record<Medal, string> = { 1: "Campione", 2: "2° posto", 3: "3° posto" };
+
+// Trophy shelf next to the player's name, in the style of Lichess profiles: bare icons on a thin
+// ledge, the crown of the reigning champion first, then a medal per podium, newest first. What each
+// one is opens with a tap (or on hover). With many medals, one per kind with its count. Nothing for
+// a player without any.
 function TrophyShelf({ medals, champion, title }: { medals: PlayerMedal[]; champion?: string; title?: string }) {
-  const [open, setOpen] = useState<Medal | null>(null);
   if (medals.length === 0 && !champion) return null;
   const newestFirst = [...medals].reverse();
   const grouped = medals.length + (champion ? 1 : 0) > SHELF_MAX;
   const seasonsOf = (m: Medal) => newestFirst.filter((x) => x.place === m).map((x) => shortSeason(x.season, title));
+  const trophy = (key: string | number, icon: string, text: string, className = "", count?: number) => (
+    <li key={key}>
+      <InfoTip className={`trophy ${className}`} text={text}>
+        <span className="trophy-icon" aria-hidden="true">{icon}</span>
+        {count !== undefined && <span className="trophy-count" aria-hidden="true">×{count}</span>}
+        <span className="sr-only">{text}</span>
+      </InfoTip>
+    </li>
+  );
   return (
-    <div className="trophy-shelf-wrap">
-      <ul className="trophy-shelf" aria-label="Trofei">
-        {champion && (
-          <li className="trophy is-crown" title={`Campione in carica · ${champion}`}>
-            <span className="trophy-icon" aria-hidden="true">👑</span>
-            <span className="trophy-label">In carica</span>
-          </li>
-        )}
-        {grouped
-          ? ([1, 2, 3] as Medal[])
-              .filter((m) => seasonsOf(m).length > 0)
-              .map((m) => (
-                <li key={m}>
-                  <button
-                    type="button"
-                    className={`trophy place-${m}${open === m ? ' is-open' : ''}`}
-                    title={seasonsOf(m).join(', ')}
-                    aria-expanded={open === m}
-                    aria-label={`${seasonsOf(m).length} volte ${m}° posto: mostra le stagioni`}
-                    onClick={() => setOpen(open === m ? null : m)}
-                  >
-                    <span className="trophy-icon" aria-hidden="true">{MEDAL_EMOJI[m]}</span>
-                    <span className="trophy-label">×{seasonsOf(m).length}</span>
-                  </button>
-                </li>
-              ))
-          : newestFirst.map((m, i) => (
-              <li key={i} className={`trophy place-${m.place}`} title={`${m.place}° posto · ${m.season}`}>
-                <span className="trophy-icon" aria-label={`${m.place}° posto`}>{MEDAL_EMOJI[m.place]}</span>
-                <span className="trophy-label">{shortSeason(m.season, title)}</span>
-              </li>
-            ))}
-      </ul>
-      {grouped && open && (
-        <p className="trophy-seasons">
-          {MEDAL_EMOJI[open]} {seasonsOf(open).join(' · ')}
-        </p>
-      )}
-    </div>
+    <ul className="trophy-shelf" aria-label="Trofei">
+      {champion && trophy("crown", "👑", `Campione in carica · ${champion}`, "is-crown")}
+      {grouped
+        ? ([1, 2, 3] as Medal[])
+            .filter((m) => seasonsOf(m).length > 0)
+            .map((m) => trophy(m, MEDAL_EMOJI[m], `${PLACE_LABEL[m]} · ${seasonsOf(m).join(", ")}`, `place-${m}`, seasonsOf(m).length))
+        : newestFirst.map((m, i) => trophy(i, MEDAL_EMOJI[m.place], `${PLACE_LABEL[m.place]} · ${m.season}`, `place-${m.place}`))}
+    </ul>
   );
 }
 
