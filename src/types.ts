@@ -209,6 +209,7 @@ export interface BackupData {
   statusPhrases?: Partial<StatusPhrases> | null;
   anecdotes?: Record<string, string>;
   ratings?: Record<string, string | number | null>;
+  media?: Record<string, string>; // uploaded photos by id (see lib/media.ts): compressed JPEG data URLs
 }
 
 

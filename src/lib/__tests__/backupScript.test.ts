@@ -37,4 +37,13 @@ describe('nightly backup script', () => {
   it('sorts keys at every level', () => {
     expect(JSON.stringify(sorted({ b: 1, a: { d: 1, c: [{ f: 1, e: 2 }] } }))).toBe('{"a":{"c":[{"e":2,"f":1}],"d":1},"b":1}');
   });
+
+  it('adds the uploaded photos only when there are some', () => {
+    const doc = { title: 'T', season: 'S', players: [], schedule: [] };
+    expect(toBackup(doc, [], [])).not.toHaveProperty('media');
+    const withPhoto = toBackup(doc, [], [], [{ id: 'stagione-3', dataUrl: 'data:image/jpeg;base64,AAAA', updatedAt: 'x' }]);
+    expect(withPhoto.media).toEqual({ 'stagione-3': 'data:image/jpeg;base64,AAAA' });
+    expect(parseBackup(JSON.stringify({ ...withPhoto, players: [{ handle: 'a', name: 'A' }] })).data.media).toEqual(withPhoto.media);
+  });
 });
+

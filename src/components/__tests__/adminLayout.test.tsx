@@ -52,3 +52,31 @@ describe('admin layout', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
+
+describe('master photo field', () => {
+  const render = async (imageUrl: string) => {
+    const { SeasonInfoSection } = await import('../../tabs/settings/SeasonInfoSection');
+    return renderToStaticMarkup(
+      <SeasonInfoSection meta={{ title: 'T', season: 'Stagione 3', description: '', imageUrl }} flash={noop} onUpdateTournamentMeta={noop} />
+    );
+  };
+
+  it('offers a link or an upload when no photo was uploaded', async () => {
+    const html = await render('https://example.com/x.jpg');
+    expect(html).toContain('id="cfg-img"');
+    expect(html).toContain('📷 Carica foto');
+    expect(html).toContain('accept="image/*"');
+    expect(html).toContain('Togli foto');
+  });
+
+  it('shows an uploaded photo as such, not as its reference', async () => {
+    const html = await render('media:stagione-3');
+    expect(html).toContain("Foto caricata dall&#x27;area organizzatore.");
+    expect(html).not.toContain('media:stagione-3');
+    expect(html).toContain('📷 Cambia foto');
+  });
+
+  it('has nothing to remove without a photo', async () => {
+    expect(await render('')).not.toContain('Togli foto');
+  });
+});
