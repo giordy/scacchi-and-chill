@@ -6,7 +6,7 @@ Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli acco
 
 ### Parte pubblica
 - **Intestazione**: torneo, stagione, turno in corso e capolista. Una striscia di caselle mostra l'avanzamento della stagione: una casella per partita, piena se conclusa, a metà se in corso.
-- **Classifica** con punti, V/N/P e spareggio Sonneborn-Berger, podio in oro/argento/bronzo. La colonna del giocatore resta fissa durante lo scroll orizzontale su mobile.
+- **Classifica** con punti, V/N/P e spareggio Sonneborn-Berger, podio in oro/argento/bronzo. L'ordine è punti, poi Sonneborn-Berger, poi vittorie; chi è pari su tutti e tre condivide la posizione (due 2° e poi un 4°, entrambi in argento) e l'intestazione li nomina insieme («In testa a pari merito…»). La stessa regola vale per la pagina giocatore («pari merito»), le stagioni passate, il CSV e il podio salvato nell'Albo. Prima della prima partita al posto della posizione c'è un trattino. La colonna del giocatore resta fissa durante lo scroll orizzontale su mobile.
 - **Partite**, filtrabili per turno, con link a Lichess. Le partite concluse mostrano la posizione finale su una mini scacchiera (quelle in corso no: Lichess nasconde le ultime mosse).
 - **Tabellone** incrociato con tutti i risultati.
 - **Torneo**: il maestro della stagione, il regolamento, l'Albo d'Oro e le stagioni passate con la classifica finale.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeStandings } from '../standings';
+import { computeStandings, isTied, leadersOf, leaderText, podiumPlace, seasonStarted, sharedRanks } from '../standings';
 import { HistoryGame, LichessExportGame, Player } from '../../types';
 
 const players: Player[] = [
@@ -127,5 +127,118 @@ describe('computeStandings', () => {
     expect(standings.find((s) => s.handle === 'anna')!.points).toBe(1);
     expect(standings.some((s) => s.handle === 'ghost')).toBe(false);
     expect(crosstable.anna.ghost).toBeUndefined();
+  });
+});
+
+describe('sharedRanks', () => {
+  const r = (points: number, sb: number, won?: number) => ({ points, sb, won });
+
+  it('numbers players apart on points, then Sonneborn-Berger, then wins', () => {
+    expect(sharedRanks([r(3, 4, 3), r(2, 5, 2), r(2, 3, 2), r(2, 3, 1)])).toEqual([1, 2, 3, 4]);
+  });
+
+  it('shares the place on a full tie, and the next place skips', () => {
+    // two seconds, then a fourth
+    expect(sharedRanks([r(3, 4, 3), r(2, 3, 2), r(2, 3, 2), r(1, 1, 1)])).toEqual([1, 2, 2, 4]);
+    // three firsts, then a fourth
+    expect(sharedRanks([r(2, 1, 2), r(2, 1, 2), r(2, 1, 2), r(0, 0, 0)])).toEqual([1, 1, 1, 4]);
+    // two ties in the same table
+    expect(sharedRanks([r(3, 2, 3), r(3, 2, 3), r(1, 0, 1), r(1, 0, 1)])).toEqual([1, 1, 3, 3]);
+  });
+
+  it('ignores wins when an old archive does not have them', () => {
+    expect(sharedRanks([r(2, 1), r(2, 1), r(1, 0)])).toEqual([1, 1, 3]);
+  });
+
+  it('gives everyone the first place when nobody has played', () => {
+    expect(sharedRanks([r(0, 0, 0), r(0, 0, 0)])).toEqual([1, 1]);
+    expect(sharedRanks([])).toEqual([]);
+  });
+});
+
+describe('isTied', () => {
+  it('tells whether a place is shared', () => {
+    const ranks = [1, 2, 2, 4];
+    expect([0, 1, 2, 3].map((i) => isTied(ranks, i))).toEqual([false, true, true, false]);
+  });
+});
+
+describe('seasonStarted', () => {
+  it('is false until someone has played a game', () => {
+    expect(seasonStarted(computeStandings(players, [], {}).standings)).toBe(false);
+    expect(seasonStarted([{ played: 0 }, { played: 1 }])).toBe(true);
+  });
+});
+
+describe('podiumPlace', () => {
+  it('gives gold, silver and bronze to the first three places with points', () => {
+    expect([1, 2, 3, 4].map((rank) => podiumPlace(rank, 1))).toEqual([1, 2, 3, undefined]);
+    expect(podiumPlace(1, 0)).toBeUndefined();
+  });
+  it('gives two silvers to two shared seconds, then no bronze to the fourth', () => {
+    expect([1, 2, 2, 4].map((rank) => podiumPlace(rank, 1))).toEqual([1, 2, 2, undefined]);
+  });
+});
+
+describe('shared places from real games', () => {
+  const four: Player[] = [...players, { name: 'Dario', handle: 'dario' }];
+
+  it('shares the place of players level on points, tiebreak and wins, ordered by name', () => {
+    // Anna and Carla each beat a player who scored nothing: same points, SB and wins
+    const history = [game('anna', 'bruno', 'aaaaaaaa'), game('carla', 'dario', 'bbbbbbbb')];
+    const gs = states(state('aaaaaaaa', 'mate', 'white'), state('bbbbbbbb', 'resign', 'white'));
+    const { standings } = computeStandings(four, history, gs);
+    expect(standings.map((s) => s.handle)).toEqual(['anna', 'carla', 'bruno', 'dario']);
+    expect(sharedRanks(standings)).toEqual([1, 1, 3, 3]);
+  });
+
+  it('separates equal points by the tiebreak, and shares the place where it does not', () => {
+    // Everyone but Dario scores 1 point. Anna beat Bruno, who has 1 point (SB 1); Carla and Bruno
+    // beat Dario, who has none (SB 0 each, one win each): Anna 1st, Bruno and Carla both 2nd
+    const history = [
+      game('anna', 'bruno', 'aaaaaaaa'),
+      game('carla', 'dario', 'bbbbbbbb'),
+      game('bruno', 'dario', 'cccccccc'),
+    ];
+    const gs = states(state('aaaaaaaa', 'mate', 'white'), state('bbbbbbbb', 'mate', 'white'), state('cccccccc', 'mate', 'white'));
+    const { standings } = computeStandings(four, history, gs);
+    expect(standings.map((s) => [s.handle, s.points, s.sb])).toEqual([
+      ['anna', 1, 1],
+      ['bruno', 1, 0],
+      ['carla', 1, 0],
+      ['dario', 0, 0],
+    ]);
+    expect(sharedRanks(standings)).toEqual([1, 2, 2, 4]);
+  });
+});
+
+describe('leaderText', () => {
+  const r = (name: string, points: number, sb = 0, won = 0) => ({ name, points, sb, won });
+
+  it('names the leader', () => {
+    expect(leaderText([r('Anna', 3, 2, 3), r('Bruno', 2)])).toBe(' In testa Anna con 3 punti.');
+    expect(leaderText([r('Anna', 1, 0, 1), r('Bruno', 0)])).toBe(' In testa Anna con 1 punto.');
+  });
+
+  it('names tied leaders together', () => {
+    expect(leaderText([r('Anna', 2, 1, 2), r('Bruno', 2, 1, 2), r('Carla', 1)])).toBe(' In testa a pari merito Anna e Bruno, con 2 punti.');
+    expect(leaderText([r('Anna', 1, 0, 1), r('Bruno', 1, 0, 1), r('Carla', 1, 0, 1), r('Dario', 0)])).toBe(
+      ' In testa a pari merito Anna, Bruno e Carla, con 1 punto.'
+    );
+  });
+
+  it('only counts more than three tied leaders', () => {
+    const five = ['A', 'B', 'C', 'D', 'E'].map((n) => r(n, 1, 0, 1));
+    expect(leaderText(five)).toBe(' In testa 5 giocatori a pari merito, con 1 punto.');
+  });
+
+  it('names one leader when the tiebreak separates equal points', () => {
+    expect(leaderText([r('Anna', 2, 3, 2), r('Bruno', 2, 1, 2)])).toBe(' In testa Anna con 2 punti.');
+  });
+
+  it('says nothing while nobody has points', () => {
+    expect(leaderText([r('Anna', 0), r('Bruno', 0)])).toBe('');
+    expect(leaderText([])).toBe('');
+    expect(leadersOf([r('Anna', 0)])).toEqual([]);
   });
 });

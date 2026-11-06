@@ -543,6 +543,13 @@ details .body {
   color: var(--ink);
 }
 
+/* "pari merito" under a shared place */
+.stat-pill-note {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+}
+
 .anecdote-grid {
   display: flex;
   flex-direction: column;

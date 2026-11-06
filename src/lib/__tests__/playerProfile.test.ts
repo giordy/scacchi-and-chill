@@ -18,6 +18,31 @@ const g = (round: string, white: string, black: string, id: string): HistoryGame
 const st = (id: string, status: string, winner?: 'white' | 'black'): LichessExportGame => ({ id, status, winner });
 
 describe('computePlayerProfile', () => {
+  it('has no place before the first game', () => {
+    const p = computePlayerProfile('anna', players, [], {})!;
+    expect(p.rank).toBeNull();
+    expect(p.tied).toBe(false);
+  });
+
+  it('shares the place on a full tie and says so', () => {
+    // Anna and Carla each beat a player with no points: same points, SB and wins
+    const history = [g('1', 'anna', 'bruno', 'aaaaaaaa'), g('1', 'carla', 'dario', 'bbbbbbbb')];
+    const gs = { aaaaaaaa: st('aaaaaaaa', 'mate', 'white'), bbbbbbbb: st('bbbbbbbb', 'mate', 'white') };
+    const anna = computePlayerProfile('anna', players, history, gs)!;
+    const carla = computePlayerProfile('carla', players, history, gs)!;
+    const bruno = computePlayerProfile('bruno', players, history, gs)!;
+    expect([anna.rank, anna.tied]).toEqual([1, true]);
+    expect([carla.rank, carla.tied]).toEqual([1, true]);
+    expect([bruno.rank, bruno.tied]).toEqual([3, true]);
+  });
+
+  it('gives a place of its own when nobody is level', () => {
+    const history = [g('1', 'anna', 'bruno', 'aaaaaaaa'), g('1', 'carla', 'dario', 'bbbbbbbb')];
+    const gs = { aaaaaaaa: st('aaaaaaaa', 'mate', 'white'), bbbbbbbb: st('bbbbbbbb', 'draw') };
+    expect(computePlayerProfile('anna', players, history, gs)).toMatchObject({ rank: 1, tied: false });
+    expect(computePlayerProfile('bruno', players, history, gs)).toMatchObject({ rank: 4, tied: false });
+  });
+
   it('returns null for an unknown handle and matches case-insensitively', () => {
     expect(computePlayerProfile('nobody', players, [], {})).toBeNull();
     expect(computePlayerProfile('ANNA', players, [], {})?.player.handle).toBe('anna');

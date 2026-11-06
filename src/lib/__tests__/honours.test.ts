@@ -17,6 +17,30 @@ describe('podiumFromStandings', () => {
       ['c', 2],
     ]);
   });
+  it('separates equal points and tiebreak by wins, as the standings do', () => {
+    const withWins = (handle: string, points: number, sb: number, won: number) => ({ ...row(handle, points, sb), won });
+    expect(
+      podiumFromStandings([withWins('a', 5, 9, 5), withWins('b', 4, 7, 4), withWins('c', 4, 7, 3), withWins('d', 3, 1, 3)]).map((p) => [p.handle, p.place])
+    ).toEqual([
+      ['b', 2],
+      ['c', 3],
+    ]);
+  });
+  it('shares the place when wins are equal too, and gives the next place no medal', () => {
+    const withWins = (handle: string, points: number, sb: number, won: number) => ({ ...row(handle, points, sb), won });
+    expect(
+      podiumFromStandings([withWins('a', 5, 9, 5), withWins('b', 4, 7, 4), withWins('c', 4, 7, 4), withWins('d', 3, 1, 3)]).map((p) => [p.handle, p.place])
+    ).toEqual([
+      ['b', 2],
+      ['c', 2],
+    ]);
+  });
+  it('makes a co-champion first on a full tie at the top', () => {
+    expect(podiumFromStandings([row('a', 5, 9), row('b', 5, 9), row('c', 3, 1)]).map((p) => [p.handle, p.place])).toEqual([
+      ['b', 1],
+      ['c', 3],
+    ]);
+  });
   it('gives no medal without points', () => {
     expect(podiumFromStandings([row('a', 1, 0), row('b', 0, 0), row('c', 0, 0)])).toEqual([]);
   });

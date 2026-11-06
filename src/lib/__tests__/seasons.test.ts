@@ -93,4 +93,17 @@ describe('standingsCsv', () => {
     expect(lines[1]).toBe('1;"Anna; ""la Rossa""";anna;0,5;1;0;1;0;0,25');
     expect(lines).toHaveLength(3);
   });
+
+  it('writes the same place for tied players, as on the site', () => {
+    // A draw: Anna and Bruno level on points, SB and wins
+    const a = buildSeasonArchive(meta, players, [game('aaaaaaaa')], { aaaaaaaa: st('aaaaaaaa', 'draw') });
+    const lines = standingsCsv(a).replace(/^\uFEFF/, '').trim().split('\r\n');
+    expect(lines.slice(1).map((l) => l.split(';')[0])).toEqual(['1', '1']);
+  });
+
+  it('leaves the place empty before the first game', () => {
+    const a = buildSeasonArchive(meta, players, [], {});
+    const lines = standingsCsv(a).replace(/^\uFEFF/, '').trim().split('\r\n');
+    expect(lines.slice(1).map((l) => l.split(';')[0])).toEqual(['', '']);
+  });
 });
