@@ -79,6 +79,11 @@ describe('standingsBlock', () => {
   it('is empty before the first game', () => {
     expect(standingsBlock([s('Anna', 0, 0), s('Bruno', 0, 0)], '1')).toBe('');
   });
+
+  it('crowns the reigning champions (co-champions too)', () => {
+    const out = standingsBlock([s('Carla', 2, 2, 1, 2), s('Anna', 1, 2), s('Bruno', 0, 2)], '3', ['anna', 'carla']).split('\n');
+    expect(out.slice(1)).toEqual(['1. Carla 👑 – 2 punti', '2. Anna 👑 – 1 punto', '3. Bruno – 0 punti']);
+  });
 });
 
 describe('studySearchUrl', () => {

@@ -6,6 +6,7 @@ import { upsetOf } from './upset';
 import { fullMovesOf, isVoid, movesText, nameFrom, pliesOf, storedStates } from './games';
 import { summitGames, summitKey } from './summit';
 import { gameProgress } from './progress';
+import { reigningChampions } from './honours';
 
 const DAY_MS = 86400000;
 
@@ -36,11 +37,14 @@ export function leaderLine(standings: PlayerStanding[]): string {
 // At the end of a round: the whole table, compact, with the places shared as on the site
 //   📈 *Classifica dopo il Turno 2*
 //   1. Carla – 2 punti
-//   2. Anna – 1½ punti
-export function standingsBlock(standings: PlayerStanding[], round: string): string {
+//   2. Anna 👑 – 1½ punti
+// The crown marks the reigning champion(s) (lower-case handles), as in the site's table: only
+// here, once per round, not on every game line
+export function standingsBlock(standings: PlayerStanding[], round: string, champions: string[] = []): string {
   if (!seasonStarted(standings)) return '';
   const ranks = sharedRanks(standings);
-  const rows = standings.map((s, i) => `${ranks[i]}. ${s.name} – ${pointsText(s.points)}`);
+  const crown = (s: PlayerStanding) => (champions.includes(s.handle.toLowerCase()) ? ' 👑' : '');
+  const rows = standings.map((s, i) => `${ranks[i]}. ${s.name}${crown(s)} – ${pointsText(s.points)}`);
   return [`📈 *Classifica dopo il Turno ${round}*`, ...rows].join('\n');
 }
 
@@ -248,7 +252,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
   if (isRoundComplete) {
     const { standings } = computeStandings(config.players, history, allStates);
     leader = leaderLine(standings);
-    table = standingsBlock(standings, round);
+    table = standingsBlock(standings, round, reigningChampions(config.tournament?.winners)?.handles);
   }
 
   // The challenges still to accept, with their one deadline
