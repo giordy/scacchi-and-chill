@@ -1,4 +1,5 @@
 import { PodiumPlace, SeasonWinner } from '../types';
+import { sharedRanks } from './standings';
 
 export type Medal = 1 | 2 | 3;
 export const MEDAL_EMOJI: Record<Medal, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
@@ -23,18 +24,18 @@ export function reigningChampion(winners: SeasonWinner[] | undefined): SeasonWin
   return winners && winners.length > 0 ? winners[winners.length - 1] : undefined;
 }
 
-// Podium of a final table, champion excluded. Places are shared on equal points and tiebreak,
-// and a shared place uses up the next ones (two seconds, no third). No medal without points.
+// Podium of a final table, champion excluded. Places are shared as in the standings (equal points,
+// Sonneborn-Berger and wins), and a shared place uses up the next ones (two seconds, no third).
+// No medal without points.
 export function podiumFromStandings(
-  standings: Array<{ handle: string; name: string; points: number; sb: number }>
+  standings: Array<{ handle: string; name: string; points: number; sb: number; won?: number }>
 ): PodiumPlace[] {
-  const better = (a: { points: number; sb: number }, b: { points: number; sb: number }) =>
-    a.points > b.points || (a.points === b.points && a.sb > b.sb);
+  const ranks = sharedRanks(standings);
   return standings
+    .map((s, i) => ({ s, place: ranks[i] }))
     .slice(1)
-    .filter((s) => s.points > 0)
-    .map((s) => ({ handle: s.handle, name: s.name, place: 1 + standings.filter((o) => better(o, s)).length }))
-    .filter((p): p is PodiumPlace => p.place <= 3);
+    .filter(({ s, place }) => s.points > 0 && place <= 3)
+    .map(({ s, place }) => ({ handle: s.handle, name: s.name, place: place as Medal }));
 }
 
 // A podium typed by the organizer is valid when every place follows the shared ranking:

@@ -1,5 +1,5 @@
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonWinner, TournamentMeta } from '../types';
-import { computeStandings } from './standings';
+import { computeStandings, seasonStarted, sharedRanks } from './standings';
 import { computeSeasonAwards } from './awards';
 import { podiumFromStandings } from './honours';
 
@@ -88,10 +88,13 @@ export const sortSeasons = (seasons: SeasonArchive[]): SeasonArchive[] =>
 export function standingsCsv(archive: SeasonArchive): string {
   const num = (n: number) => String(n).replace(".", ",");
   const cell = (v: string) => (/[";\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  // Shared places, as on the site; none before the first game
+  const ranks = sharedRanks(archive.standings);
+  const started = seasonStarted(archive.standings);
   const rows = [
     ["Posizione", "Giocatore", "Lichess", "Punti", "Giocate", "Vinte", "Patte", "Perse", "Sonneborn-Berger"],
     ...archive.standings.map((s, i) => [
-      String(i + 1),
+      started ? String(ranks[i]) : "",
       s.name,
       s.handle,
       num(s.points),

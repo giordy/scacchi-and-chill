@@ -6,7 +6,7 @@ import { fetchGameStates, fetchUsers } from "./lib/lichess";
 import { userKey } from "./lib/presence";
 import { gameProgress } from "./lib/progress";
 import { fullMovesOf, isVoid, stateOf } from "./lib/games";
-import { computeStandings } from "./lib/standings";
+import { computeStandings, sharedRanks } from "./lib/standings";
 import type { LichessUserProfile } from "./types";
 import type { OrganizerStore } from "./hooks/useOrganizerData";
 
@@ -141,6 +141,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
   // Calculate Standings & Game Summary
   const calculateStandings = (): {
     standings: PlayerStanding[];
+    ranks: number[]; // shared on a full tie, as on the site
     finishedMatches: Array<{ round: string; white: string; black: string; result: string; winner?: string; moves?: number; opening?: string }>;
     ongoingMatches: Array<{ white: string; black: string; round: string }>;
   } => {
@@ -196,10 +197,10 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
       anecdote: anecdotes[p.handle] || "",
     }));
 
-    return { standings, finishedMatches, ongoingMatches };
+    return { standings, ranks: sharedRanks(official), finishedMatches, ongoingMatches };
   };
 
-  const { standings, finishedMatches, ongoingMatches } = calculateStandings();
+  const { standings, ranks, finishedMatches, ongoingMatches } = calculateStandings();
 
   // Count players with loaded rating
   const ratedCount = standings.filter((s) => s.rating).length;
@@ -269,11 +270,11 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
 
     if (generalNotes.trim()) add(``, `NOTE DELL'ORGANIZZATORE`, generalNotes.trim());
 
-    add(``, `CLASSIFICA (ordine ufficiale del sito, spareggio Sonneborn-Berger)`);
+    add(``, `CLASSIFICA (ordine ufficiale del sito, spareggio Sonneborn-Berger; stesso numero = pari merito)`);
     standings.forEach((st, idx) => {
       const elo = st.rating ? `Elo ~${st.rating}` : `Elo n/d`;
       const note = st.anecdote ? ` | Nota: "${st.anecdote}"` : "";
-      add(`${idx + 1}. ${st.name} (@${st.handle}) – ${st.points} punti: ${st.won} vinte, ${st.drawn} patte, ${st.lost} perse su ${st.played} giocate [${elo}]${note}`);
+      add(`${ranks[idx]}. ${st.name} (@${st.handle}) – ${st.points} punti: ${st.won} vinte, ${st.drawn} patte, ${st.lost} perse su ${st.played} giocate [${elo}]${note}`);
     });
 
     add(``, `PARTITE CONCLUSE`);
@@ -434,7 +435,7 @@ export function ReviewsTab({ history, config, nameOf, triggerToast, organizer }:
                   className="quick-standings-row"
                 >
                   <span>
-                    <strong>{idx + 1}. {s.name}</strong> <small className="muted">({s.handle})</small>
+                    <strong>{ranks[idx]}. {s.name}</strong> <small className="muted">({s.handle})</small>
                   </span>
                   <span>
                     <strong>{s.points} pt</strong> ({s.won}V {s.drawn}N {s.lost}P) · {s.rating ? `~${s.rating}` : "no elo"}

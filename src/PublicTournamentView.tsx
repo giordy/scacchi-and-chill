@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive, TournamentMeta } from "./types";
 import { SeasonsHistory } from "./components/SeasonsHistory";
 import { playerHref } from "./lib/routes";
-import { computeStandings } from "./lib/standings";
+import { computeStandings, isTied, leaderText, seasonStarted, sharedRanks } from "./lib/standings";
+import { RankCell } from "./components/RankCell";
 import { computeSeasonProgress } from "./lib/progress";
 import { DEFAULT_TOURNAMENT } from "./lib/tournament";
 import { onTabListKeyDown } from "./lib/tabKeys";
@@ -123,6 +124,9 @@ export function PublicTournamentView({
   }, [players, history, gameStates, schedule]);
   const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits, race, stats } = season;
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
+  // Places shared on a full tie (points, Sonneborn-Berger, wins); none before the first game
+  const ranks = useMemo(() => sharedRanks(standings), [standings]);
+  const started = seasonStarted(standings);
   const champions = reigningChampions(tournamentMeta.winners);
   // Anecdotes of the rounds already started, newest first; the next ones stay a surprise
   const anecdotes = useMemo(() => publishedAnecdotes(tournamentMeta.masterAnecdotes, history), [tournamentMeta.masterAnecdotes, history]);
@@ -154,7 +158,7 @@ export function PublicTournamentView({
       ? "Stagione conclusa."
       : `Turno ${progress.currentRound} in corso.`
     : "La stagione sta per cominciare.";
-  const leaderLine = leader ? ` In testa ${leader.name} con ${leader.points} ${leader.points === 1 ? "punto" : "punti"}.` : "";
+  const leaderLine = leaderText(standings);
 
   return (
     <div className={`public-tournament${slide === 1 ? " slide-next" : slide === -1 ? " slide-prev" : ""}`}>
@@ -269,8 +273,10 @@ export function PublicTournamentView({
               </thead>
               <tbody>
                 {standings.map((p, idx) => (
-                  <tr key={p.handle} className={idx === 0 && leader ? "row-leader" : ""}>
-                    <td className="col-rank"><span className={`rank${idx < 3 && p.points > 0 ? ` podium-${idx + 1}` : ""}`}>{idx + 1}</span></td>
+                  <tr key={p.handle} className={leader && ranks[idx] === 1 ? "row-leader" : ""}>
+                    <td className="col-rank">
+                      <RankCell rank={started ? ranks[idx] : null} points={p.points} tied={started && isTied(ranks, idx)} />
+                    </td>
                     <td className="sticky-col">
                       <div className="player-cell">
                         <span className="player-name-line">
@@ -312,7 +318,7 @@ export function PublicTournamentView({
           </div>
           <p className="note note-top-xs">
             G giocate · V vinte · N patte · P perse. A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il
-            numero di vittorie. Tocca un nome per vedere le partite del giocatore.
+            numero di vittorie; chi è pari anche lì condivide la posizione. Tocca un nome per vedere le partite del giocatore.
           </p>
           {awards.length > 0 && (
             <div className="awards-section">

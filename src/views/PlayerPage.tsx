@@ -153,7 +153,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
     );
   }
 
-  const { player, rank, standing, games, pointsByRound, headToHead, pace, byColor, endings } = profile;
+  const { player, rank, tied, standing, games, pointsByRound, headToHead, pace, byColor, endings } = profile;
   const sum = (counts: Record<EndReason, number>) => END_ORDER.reduce((n, r) => n + counts[r], 0);
   const wins = sum(endings.wins);
   const losses = sum(endings.losses);
@@ -189,7 +189,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
         <div className="stat-pills">
           <div className="stat-pill">
             <span className="stat-pill-label">Posizione</span>
-            <span className="stat-pill-val accent">{rank}° / {config.players.length}</span>
+            <span className="stat-pill-val accent">{rank === null ? "–" : `${rank}° / ${config.players.length}`}</span>
+            {tied && <span className="stat-pill-note">pari merito</span>}
           </div>
           <div className="stat-pill">
             <span className="stat-pill-label">Punti</span>

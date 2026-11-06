@@ -1,6 +1,6 @@
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch } from '../types';
-import { computeStandings, PlayerStanding } from './standings';
+import { computeStandings, isTied, PlayerStanding, seasonStarted, sharedRanks } from './standings';
 import { byRound, isVoid, stateOf } from './games';
 
 export type GameOutcome = "win" | "loss" | "draw" | "ongoing" | "pending";
@@ -45,7 +45,8 @@ export interface UpcomingGame {
 
 export interface PlayerProfile {
   player: Player;
-  rank: number; // 1-based
+  rank: number | null; // 1-based and shared on a full tie (see sharedRanks); null before the first game
+  tied: boolean; // the place is shared with someone else
   standing: PlayerStanding;
   games: PlayerGame[];
   remaining: RemainingOpponent[];
@@ -102,6 +103,8 @@ export function computePlayerProfile(
 
   const { standings } = computeStandings(players, history, gameStates);
   const idx = standings.findIndex((s) => s.handle === me);
+  const ranks = sharedRanks(standings);
+  const started = seasonStarted(standings);
 
   const games: PlayerGame[] = [];
   const met = new Set<string>(); // opponents with a valid (not aborted) game
@@ -219,7 +222,8 @@ export function computePlayerProfile(
 
   return {
     player,
-    rank: idx + 1,
+    rank: started ? ranks[idx] : null,
+    tied: started && isTied(ranks, idx),
     standing: standings[idx],
     games,
     remaining,
