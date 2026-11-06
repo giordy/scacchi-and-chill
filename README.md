@@ -10,8 +10,9 @@ Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli acco
 - **Partite**, filtrabili per turno, con link a Lichess. Le partite concluse mostrano la posizione finale su una mini scacchiera (quelle in corso no: Lichess nasconde le ultime mosse).
 - **Tabellone** incrociato con tutti i risultati.
 - **Torneo**: il maestro della stagione, il regolamento, l'Albo d'Oro e le stagioni passate con la classifica finale.
-- **Pagina giocatore** (`#/giocatore/<handle>`): posizione, grafico dei punti turno per turno, scontri diretti con ogni avversario (risultati, punteggio e partite ancora da giocare, con turno e colore se sono in calendario), partite giocate. Si apre cliccando un nome in classifica.
+- **Pagina giocatore** (`#/giocatore/<handle>`): ultimo accesso a Lichess, posizione, grafico dei punti turno per turno, scontri diretti con ogni avversario (risultati, punteggio e partite ancora da giocare, con turno e colore se sono in calendario), partite giocate. Si apre cliccando un nome in classifica.
 - **Risultati live**: la pagina pubblica legge da Lichess le partite non ancora concluse su Firestore (all'apertura, poi ogni 5 minuti finché resta aperta), così classifica e tabellone sono aggiornati anche senza sincronizzazione. Non scrive nulla: il salvataggio su Firestore resta la sincronizzazione dell'organizzatore.
+- **Ultimo accesso a Lichess**: nelle partite in corso un pallino accanto a ogni giocatore dice quando è passato da Lichess l'ultima volta: verde entro un'ora, giallo entro 24 ore, grigio oltre. Toccandolo si legge il tempo esatto. Il dato viene dal profilo Lichess (`seenAt`, una sola chiamata per tutti i giocatori, ripetuta ogni 5 minuti), non dalle partite, quindi il ritardo con cui Lichess mostra le ultime mosse non lo tocca; però non dice se il giocatore ha mosso nella partita del torneo. Se Lichess non risponde, il pallino non compare.
 - **Anteprima del link** (WhatsApp, Linktree): logo del torneo e nome della stagione (vedi sotto).
 
 ### Area organizzatore (`#admin`)

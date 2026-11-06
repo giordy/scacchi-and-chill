@@ -22,6 +22,7 @@ import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound } from "./lib/games";
+import { PresenceInfo } from "./lib/presence";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -30,6 +31,7 @@ interface PublicTournamentViewProps {
   gameStates: Record<string, LichessExportGame>;
   nameOf: (handle: string) => string;
   seasons?: SeasonArchive[];
+  presence?: PresenceInfo; // when each player was last on Lichess
 }
 
 const TABS: { key: PublicTab; label: string }[] = [
@@ -51,6 +53,7 @@ export function PublicTournamentView({
   gameStates,
   nameOf,
   seasons = [],
+  presence,
 }: PublicTournamentViewProps) {
   // The open section lives in the URL hash, so a refresh or a shared link keeps it
   const view = parsePublicView(useHash());
@@ -357,6 +360,7 @@ export function PublicTournamentView({
               nameOf={nameOf}
               returnStart={returnStart}
               summits={summits}
+              presence={presence}
             />
           )}
         </section>

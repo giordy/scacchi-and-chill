@@ -6,6 +6,8 @@ import { flairFromGames, flairUrl } from '../lib/flair';
 import { InfoTip } from '../components/InfoTip';
 import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampions, shortSeason } from '../lib/honours';
 import { PointsChart } from '../components/PointsChart';
+import { PresenceLine } from '../components/PresenceDot';
+import { PresenceInfo, seenAtOf } from '../lib/presence';
 
 interface PlayerPageProps {
   handle: string;
@@ -13,6 +15,7 @@ interface PlayerPageProps {
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
   nameOf: (handle: string) => string;
+  presence?: PresenceInfo; // when each player was last on Lichess
 }
 
 const OUTCOME_LABEL: Record<GameOutcome, string> = {
@@ -132,7 +135,7 @@ function Flair({ handle, fromGames }: { handle: string; fromGames?: string }) {
 }
 
 // Public page of a single player: results, games and opponents still to face
-export function PlayerPage({ handle, config, history, gameStates, nameOf }: PlayerPageProps) {
+export function PlayerPage({ handle, config, history, gameStates, nameOf, presence }: PlayerPageProps) {
   const profile = computePlayerProfile(handle, config.players, history, gameStates, config.schedule ?? []);
 
   useEffect(() => {
@@ -209,6 +212,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf }: Play
               @{player.handle}
               <Flair handle={player.handle} fromGames={flairFromGames(player.handle, history, gameStates)} /> su Lichess
             </a>
+            {presence && <PresenceLine seenAt={seenAtOf(presence, player.handle)} now={presence.now} />}
           </div>
           <TrophyShelf medals={medals} champion={isChampion ? champions!.season : undefined} title={config.tournament?.title} />
         </div>
