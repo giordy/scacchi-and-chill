@@ -1,5 +1,5 @@
 import { AppConfig, HistoryGame, LichessExportGame } from '../types';
-import { computeStandings, PlayerStanding } from './standings';
+import { computeStandings, leaderText, PlayerStanding, pointsText, seasonStarted, sharedRanks } from './standings';
 import { extractGameId, fill, formatDeadline, getApproxMoves, HOW_DRAW, HOW_WIN, tidy } from './utils';
 import { gamePhase, GamePhase } from './phase';
 import { upsetOf } from './upset';
@@ -27,22 +27,26 @@ export function roundSummary(count: { finished: number; ongoing: number; pending
   return parts.join(' · ');
 }
 
-const pts = (n: number) => {
-  const s = String(n).replace('.5', '½').replace(/^0½/, '½');
-  return `${s} ${n === 1 ? 'punto' : 'punti'}`;
-};
-
-// Who leads, as on the site's hero; ties on points are named together instead of picking one
+// Who leads, with the same rule and words as the site's header (tied leaders named together)
 export function leaderLine(standings: PlayerStanding[]): string {
-  const top = standings[0];
-  if (!top || top.points <= 0) return '';
-  const tied = standings.filter((s) => s.points === top.points);
-  if (tied.length === 1) return `🥇 In testa ${top.name} con ${pts(top.points)}.`;
-  if (tied.length > 3) return '';
-  const names = tied.map((s) => s.name);
-  const list = `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}`;
-  return `🥇 In testa a pari punti ${list}, con ${pts(top.points)}.`;
+  const text = leaderText(standings).trim();
+  return text ? `🥇 ${text}` : '';
 }
+
+// At the end of a round: the whole table, compact, with the places shared as on the site
+//   📈 *Classifica dopo il Turno 2*
+//   1. Carla – 2 punti
+//   2. Anna – 1½ punti
+export function standingsBlock(standings: PlayerStanding[], round: string): string {
+  if (!seasonStarted(standings)) return '';
+  const ranks = sharedRanks(standings);
+  const rows = standings.map((s, i) => `${ranks[i]}. ${s.name} – ${pointsText(s.points)}`);
+  return [`📈 *Classifica dopo il Turno ${round}*`, ...rows].join('\n');
+}
+
+// Lichess study search for an opening, readable in a chat ("+" instead of "%20")
+export const studySearchUrl = (opening: string) =>
+  `https://lichess.org/study/search?q=${encodeURIComponent(opening).replace(/%20/g, '+')}&order=popular`;
 
 export interface BulletinInput {
   round: string;
@@ -90,6 +94,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
   const count = { finished: 0, ongoing: 0, pending: 0 };
   const detailsList: string[] = [];
   const finishedOpenings = new Map<string, string>();
+  const toAccept: string[] = []; // games whose challenge is still to accept, "Anna–Bruno"
 
   const pickFor = phrasePicker(config.statusPhrases, random);
 
@@ -115,6 +120,9 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
 
     if (!s) {
       count.pending++;
+      if (!linkExpired) toAccept.push(`${nameOf(white)}–${nameOf(black)}`);
+      // The deadline is the same for the whole round: written once, under the games
+      // ({deadline} still works in a phrase that asks for it)
       body = linkExpired
         ? "Link scaduto: la sfida va ricreata 🔁"
         : fill(pickFor("pending"), { deadline: formatDeadline(deadlineMs) });
@@ -150,8 +158,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
       const opening = s.opening?.name ?? "";
       const mainOpening = opening.split(":")[0].trim();
       if (mainOpening) {
-        const studyUrl = `https://lichess.org/study/search?q=${encodeURIComponent(mainOpening)}&order=popular`;
-        finishedOpenings.set(mainOpening, studyUrl);
+        finishedOpenings.set(mainOpening, studySearchUrl(mainOpening));
       }
       const openingNote = opening ? `♟️ Apertura: ${opening}` : "";
       const common = { moves, opening, mainOpening, openingNote };
@@ -222,10 +229,9 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
       ? pickFor("roundEndHeader")
       : pickFor("header");
 
-  const footerTemplate =
-    isRoundComplete && config.statusPhrases.roundEndFooter && config.statusPhrases.roundEndFooter.length > 0
-      ? pickFor("roundEndFooter")
-      : pickFor("footer");
+  // During the round: the summary. At its end the summary would only repeat the header, so the
+  // leader and the table after the round take its place
+  const footerTemplate = isRoundComplete ? "" : pickFor("footer");
 
   let studiesAppendix = "";
   if (isRoundComplete && finishedOpenings.size > 0) {
@@ -235,21 +241,32 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     studiesAppendix = `📚 *Studi consigliati per le aperture del turno:*\n${items.join("\n")}`;
   }
 
-  // At the end of the round, who leads (as on the site), from the saved results plus the fresh ones
+  // At the end of the round, who leads and the table (as on the site), from the saved results plus
+  // the fresh ones
   let leader = "";
+  let table = "";
   if (isRoundComplete) {
-    leader = leaderLine(computeStandings(config.players, history, allStates).standings);
+    const { standings } = computeStandings(config.players, history, allStates);
+    leader = leaderLine(standings);
+    table = standingsBlock(standings, round);
   }
+
+  // The challenges still to accept, with their one deadline
+  const reminder =
+    toAccept.length > 0 ? `⏳ *Da accettare entro ${formatDeadline(deadlineMs)}:* ${toAccept.join(", ")}` : "";
 
   const vars = { round, ...count, summary: roundSummary(count) };
   const textResult = [
     fill(headerTemplate, vars),
     ...blocks,
-    fill(footerTemplate, vars),
+    reminder,
+    footerTemplate ? fill(footerTemplate, vars) : "",
     leader,
+    table,
     config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
     studiesAppendix,
-    isRoundComplete && config.statusPhrases.infoLine ? config.statusPhrases.infoLine : "",
+    // The site, where results update between two bulletins
+    config.statusPhrases.infoLine ?? "",
   ]
     .filter(Boolean)
     .join("\n\n");
