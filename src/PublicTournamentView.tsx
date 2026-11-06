@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive, TournamentMeta } from "./types";
 import { SeasonsHistory } from "./components/SeasonsHistory";
 import { playerHref } from "./lib/routes";
@@ -8,6 +8,8 @@ import { DEFAULT_TOURNAMENT } from "./lib/tournament";
 import { onTabListKeyDown } from "./lib/tabKeys";
 import { parsePublicView, publicViewHref, PublicTab, PublicView, tabOfView } from "./lib/routes";
 import { useHash } from "./hooks/useHash";
+import { useSwipeTabs } from "./hooks/useSwipeTabs";
+import { adjacentTab, SwipeStep } from "./lib/swipe";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
 import { summitGames } from "./lib/summit";
@@ -61,6 +63,40 @@ export function PublicTournamentView({
   const show = (v: PublicView) => {
     window.location.hash = publicViewHref(v);
   };
+
+  // Phones: a swipe to the left opens the next tab, to the right the previous one. The new tab
+  // slides in from the side the finger came from, and starts from its top when the tab bar was
+  // already stuck at the top of the screen.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const [slide, setSlide] = useState<SwipeStep | null>(null);
+  // Set by a swipe made with the tab bar stuck at the top: the new tab then opens from its top
+  const fromTop = useRef(false);
+  // Where the tab bar sits in the page when not stuck: under the header and its margin
+  const navHome = () => {
+    const header = navRef.current?.previousElementSibling;
+    if (!header) return 0;
+    return header.getBoundingClientRect().bottom + window.scrollY + parseFloat(getComputedStyle(header).marginBottom || "0");
+  };
+  useSwipeTabs(rootRef, (step) => {
+    const next = adjacentTab(TABS.map((t) => t.key), activeTab, step);
+    if (!next) return;
+    fromTop.current = window.scrollY > navHome() + 1;
+    setSlide(step);
+    show(next);
+  });
+  useEffect(() => {
+    if (!fromTop.current) return;
+    fromTop.current = false;
+    // The header changes height between tabs: measured once the new tab is on screen
+    window.scrollTo({ top: navHome(), behavior: "instant" as ScrollBehavior });
+  }, [activeTab]);
+  useEffect(() => {
+    if (slide === null) return;
+    const timer = window.setTimeout(() => setSlide(null), 300);
+    return () => window.clearTimeout(timer);
+  }, [slide]);
+
   const [filterRound, setFilterRound] = useState<string>("all");
 
   const players = config.players;
@@ -122,7 +158,7 @@ export function PublicTournamentView({
   const leaderLine = leader ? ` In testa ${leader.name} con ${leader.points} ${leader.points === 1 ? "punto" : "punti"}.` : "";
 
   return (
-    <div className="public-tournament">
+    <div ref={rootRef} className={`public-tournament${slide === 1 ? " slide-next" : slide === -1 ? " slide-prev" : ""}`}>
       {/* Full header on the standings, the overview; a compact one on the other views */}
       <header className={`hero${activeTab === "standings" ? "" : " is-compact"}`}>
         <div className="hero-identity">
@@ -169,7 +205,7 @@ export function PublicTournamentView({
         )}
       </header>
 
-      <nav className="public-subnav" role="tablist" aria-label="Sezioni del torneo" onKeyDown={onTabListKeyDown}>
+      <nav ref={navRef} className="public-subnav" role="tablist" aria-label="Sezioni del torneo" onKeyDown={onTabListKeyDown}>
         {TABS.map((t) => (
           <button
             key={t.key}
