@@ -2,12 +2,13 @@ import React from 'react';
 import { Toast } from '../WhatsAppPreview';
 import { onTabListKeyDown } from '../lib/tabKeys';
 
-export type AdminTab = 'rounds' | 'reviews' | 'tournament';
+export type AdminTab = 'rounds' | 'reviews' | 'tournament' | 'settings';
 
 export const ADMIN_TABS: { key: AdminTab; icon: string; label: string }[] = [
   { key: 'rounds', icon: '♞', label: 'Turni' },
   { key: 'reviews', icon: '✎', label: 'Recensione' },
   { key: 'tournament', icon: '♛', label: 'Torneo' },
+  { key: 'settings', icon: '⚙', label: 'Impostazioni' },
 ];
 
 export const isAdminTab = (v: unknown): v is AdminTab => ADMIN_TABS.some((t) => t.key === v);
