@@ -40,8 +40,16 @@ export const HOW_DRAW: Record<string, string> = {
   stalemate: "per stallo",
 };
 
+// Cleans a filled phrase: empty brackets, double spaces, blank lines, and the space an empty
+// variable leaves before a colon or comma ("Patta {details}: …" without details)
 export const tidy = (t: string) =>
-  t.replace(/\(\s*\)/g, "").replace(/[ \t]+/g, " ").replace(/ ?\n ?/g, "\n").replace(/\n+/g, "\n").trim();
+  t
+    .replace(/\(\s*\)/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/ ([:,])/g, "$1")
+    .replace(/ ?\n ?/g, "\n")
+    .replace(/\n+/g, "\n")
+    .trim();
 
 // Estimates the moves threshold for ongoing games (single thresholds: meno di 10, più di 10/20/30/40)
 export function getApproxMoves(plies: number): { approxMoves: string; movesBand: string; phase: string } {

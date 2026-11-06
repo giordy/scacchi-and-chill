@@ -35,7 +35,12 @@ describe('buildBulletin', () => {
     const b = buildBulletin({ round: '2', games, states, history: games, config, expiryDays: 2, now: NOW, random: first });
     expect(b.isComplete).toBe(false);
     expect(b.text).toContain('📊 *Aggiornamento Turno 2*');
-    expect(b.text).toContain('*Anna* ⚪ vs *Bruno* ⚫\nDa avviare: il link scade');
+    expect(b.text).toContain('*Anna* ⚪ vs *Bruno* ⚫\nDa avviare ⏳');
+    // the deadline once, under the games, with the games still to accept
+    expect(b.text).toMatch(/⏳ \*Da accettare entro \w+ \d+\/\d+ alle \d\d:\d\d:\* Anna–Bruno/);
+    expect(b.text.match(/alle \d\d:\d\d/g)).toHaveLength(1);
+    // the site, also during the round
+    expect(b.text).toContain(defaultConfig.statusPhrases.infoLine!);
     expect(b.text).toContain('In corso ♟️ (più di 20 mosse, nel mediogioco)');
     expect(b.text).toContain('Finita! Ha vinto Elena col bianco per abbandono in 30 mosse *(1-0)* 🎉\n♟️ Apertura: Caro-Kann Defense: Campomanes Attack');
     expect(b.text).toContain('💥 Colpaccio! Elena batte un avversario con 200 punti Elo in più');
@@ -64,6 +69,11 @@ describe('buildBulletin', () => {
     expect(b.text).toContain('🏁 *Turno 2 concluso!*');
     expect(b.text).not.toContain('Scontro al vertice');
     expect(b.text).toContain('🥇 In testa Carla con 2 punti.');
+    // the table after the round takes the place of the summary, which would repeat the header
+    expect(b.text).toContain('📈 *Classifica dopo il Turno 2*\n1. Carla – 2 punti\n');
+    expect(b.text).not.toContain('📊');
+    expect(b.text).not.toContain('Da accettare');
+    expect(b.text).toContain('Owen+Defense');
     expect(b.text).toContain('📚 *Studi consigliati per le aperture del turno:*\n• Owen Defense:');
     expect(b.text).toContain(defaultConfig.statusPhrases.infoLine!);
   });
@@ -96,4 +106,58 @@ describe('phrasePicker', () => {
     expect(pick('none')).toBe('');
     expect(pick('missing')).toBe('');
   });
+
 });
+
+describe('buildBulletin: deadlines and phrases', () => {
+  it('groups the challenges still to accept under one deadline', () => {
+    const games: HistoryGame[] = [
+      { round: '4', white: 'anna', black: 'bruno', url: url('gggggggg'), createdAt: NOW - 3600e3 },
+      { round: '4', white: 'carla', black: 'dario', url: url('hhhhhhhh'), createdAt: NOW - 3600e3 },
+      { round: '4', white: 'elena', black: 'fabio', url: url('iiiiiiii'), createdAt: NOW - 3600e3 },
+    ];
+    const states = { iiiiiiii: { id: 'iiiiiiii', status: 'started', moves: 'e4 e5' } as LichessExportGame };
+    const b = buildBulletin({ round: '4', games, states, history: games, config, expiryDays: 2, now: NOW, random: first });
+    expect(b.text).toContain('*Da accettare entro');
+    expect(b.text).toContain(':* Anna–Bruno, Carla–Dario');
+    expect(b.text).not.toContain('Elena–Fabio');
+    // before the summary of the round
+    expect(b.text.indexOf('Da accettare')).toBeLessThan(b.text.lastIndexOf('📊 *'));
+  });
+
+  it('asks to recreate expired challenges, without a deadline already past', () => {
+    const games: HistoryGame[] = [{ round: '4', white: 'anna', black: 'bruno', url: url('jjjjjjjj'), createdAt: NOW - 5 * 86400e3 }];
+    const b = buildBulletin({ round: '4', games, states: {}, history: games, config, expiryDays: 2, now: NOW, random: first });
+    expect(b.text).toContain('Link scaduto: la sfida va ricreata');
+    expect(b.text).not.toContain('Da accettare');
+  });
+
+  it('still fills a custom phrase that asks for the deadline', () => {
+    const custom: AppConfig = { ...config, statusPhrases: { ...config.statusPhrases, pending: ['Entro {deadline}'] } };
+    const games: HistoryGame[] = [{ round: '4', white: 'anna', black: 'bruno', url: url('kkkkkkkk'), createdAt: NOW - 3600e3 }];
+    const b = buildBulletin({ round: '4', games, states: {}, history: games, config: custom, expiryDays: 2, now: NOW, random: first });
+    expect(b.text).toMatch(/Entro \w+ \d+\/\d+ alle/);
+    expect(b.text).not.toContain('{deadline}');
+  });
+
+  it('reads well with every draw and win phrase, with or without details', () => {
+    const phrases = defaultConfig.statusPhrases;
+    const games: HistoryGame[] = [{ round: '5', white: 'anna', black: 'bruno', url: url('llllllll') }];
+    const cases: LichessExportGame[] = [
+      finished('llllllll', undefined), // draw in 30 moves
+      { id: 'llllllll', status: 'draw' }, // draw, no moves known
+      finished('llllllll', 'white', { status: 'mate' }),
+      { id: 'llllllll', status: 'resign', winner: 'black' }, // win, no moves known
+    ];
+    for (const s of cases) {
+      const list = s.winner ? phrases.win : phrases.draw;
+      list.forEach((_, i) => {
+        const pick = () => (i + 0.5) / list.length;
+        const b = buildBulletin({ round: '5', games, states: { llllllll: s }, history: games, config, expiryDays: 2, now: NOW, random: pick });
+        const line = b.text.split('\n').find((l) => l.includes('*(')) ?? '';
+        expect(line, line).not.toMatch(/\{|\}| [:,]|  |\( \)/);
+      });
+    }
+  });
+});
+

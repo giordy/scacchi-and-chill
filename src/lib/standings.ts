@@ -139,7 +139,11 @@ export function leadersOf<T extends RankKey>(standings: T[]): T[] {
   return standings.filter((_, i) => ranks[i] === 1);
 }
 
-const pointsText = (n: number) => `${n} ${n === 1 ? "punto" : "punti"}`;
+// "1 punto", "2½ punti", "½ punto"
+export const pointsText = (n: number) => {
+  const s = String(n).replace(".5", "½").replace(/^0½/, "½");
+  return `${s} ${n === 1 || n === 0.5 ? "punto" : "punti"}`;
+};
 
 // The hero line: " In testa Anna con 3 punti.", tied leaders named together, more than three
 // only counted. Empty while nobody has points.

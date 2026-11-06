@@ -100,8 +100,6 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
   const roundEndHeaderRaw = sm.roundEndHeader || sm.fineTurnoTitoli;
   const roundEndHeader = Array.isArray(roundEndHeaderRaw) && isTextList(roundEndHeaderRaw) ? roundEndHeaderRaw : undefined;
 
-  const roundEndFooterRaw = sm.roundEndFooter || sm.fineTurnoRiepilogo;
-  const roundEndFooter = Array.isArray(roundEndFooterRaw) && isTextList(roundEndFooterRaw) ? roundEndFooterRaw : undefined;
 
   const infoLink = isText(sm.infoLink) ? sm.infoLink.trim() : (isText(cfg.infoLink) ? cfg.infoLink.trim() : undefined);
   const infoLine = isText(sm.infoLine)
@@ -157,7 +155,6 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
       upset,
       summit,
       roundEndHeader,
-      roundEndFooter,
       infoLine,
       infoLink,
     },
