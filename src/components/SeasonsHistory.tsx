@@ -1,18 +1,20 @@
 import React from 'react';
-import { SeasonArchive } from '../types';
+import { SeasonArchive, SeasonWinner } from '../types';
+import { pastSeasonPeriod } from '../lib/period';
 import { playerHref } from '../lib/routes';
 import { SeasonAwards } from './SeasonAwards';
 import { RankCell } from './RankCell';
 import { isTied, seasonStarted, sharedRanks } from '../lib/standings';
 
 // Public "Torneo" tab, past seasons: final standings of every archived season, newest first
-export function SeasonsHistory({ seasons }: { seasons: SeasonArchive[] }) {
+export function SeasonsHistory({ seasons, winners = [] }: { seasons: SeasonArchive[]; winners?: SeasonWinner[] }) {
   return (
     <div className="seasons-history">
       {seasons.map((s, i) => {
         // Shared places on a full tie, as in the live standings
         const ranks = sharedRanks(s.standings);
         const started = seasonStarted(s.standings);
+        const period = pastSeasonPeriod(winners.find((w) => w.season === s.season), s);
         return (
           <details key={s.id} className="season-card" open={i === 0}>
             <summary>
@@ -21,8 +23,8 @@ export function SeasonsHistory({ seasons }: { seasons: SeasonArchive[] }) {
             </summary>
             <p className="note note-sm">
               {s.title}
-              {s.masterName ? ` · dedicata a ${s.masterName}` : ""} · {s.gamesPlayed} partite · archiviata il{" "}
-              {new Date(s.archivedAt).toLocaleDateString("it-IT")}
+              {s.masterName ? ` · dedicata a ${s.masterName}` : ""} · {s.gamesPlayed} partite
+              {period ? ` · ${period}` : ""}
             </p>
             <div className="table-responsive">
               <table className="standings-table">

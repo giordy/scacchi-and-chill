@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Player, PodiumPlace, SeasonWinner, TournamentMeta } from '../../types';
 import { fullPodium, Medal, MEDAL_EMOJI, podiumError } from '../../lib/honours';
+import { isMonthKey, periodLabel } from '../../lib/period';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 type Row = { place: Medal; handle: string };
@@ -26,6 +27,9 @@ export function HallOfFameSection({
 }) {
   const [season, setSeason] = useState('');
   const [notes, setNotes] = useState('');
+  // When the season was played, "2026-11" (filled in by itself when a season is archived)
+  const [start, setStart] = useState('');
+  const [end, setEnd] = useState('');
   const [rows, setRows] = useState<Row[]>(START_ROWS);
   // Index of the entry being edited, null when adding a new one
   const [editing, setEditing] = useState<number | null>(null);
@@ -50,6 +54,8 @@ export function HallOfFameSection({
   const reset = () => {
     setSeason('');
     setNotes('');
+    setStart('');
+    setEnd('');
     setRows(START_ROWS);
     setEditing(null);
   };
@@ -58,6 +64,16 @@ export function HallOfFameSection({
     const name = season.trim();
     if (!name) {
       flash('err', 'Inserisci il nome della stagione.');
+      return;
+    }
+    const from = start.trim();
+    const to = end.trim();
+    if ((from && !isMonthKey(from)) || (to && !isMonthKey(to))) {
+      flash('err', 'Scrivi i mesi come anno-mese, per esempio 2026-11.');
+      return;
+    }
+    if (from && to && from > to) {
+      flash('err', 'Il mese di fine viene prima di quello di inizio.');
       return;
     }
     const filled = rows.filter((r) => r.handle.trim()).map((r) => ({ ...r, handle: canonical(r.handle) }));
@@ -78,7 +94,11 @@ export function HallOfFameSection({
       name: champion.name,
       notes: notes.trim() || undefined,
       podium: others.length > 0 ? others : undefined,
+      start: from || undefined,
+      end: to || undefined,
     };
+    // The period replaces the year of older entries
+    if (from || to) delete entry.year;
     if (editing !== null) {
       save(winners.map((w, i) => (i === editing ? entry : w)), `Albo d'Oro aggiornato: ${name}.`);
     } else {
@@ -91,6 +111,8 @@ export function HallOfFameSection({
     const w = winners[idx];
     setSeason(w.season);
     setNotes(w.notes ?? '');
+    setStart(w.start ?? '');
+    setEnd(w.end ?? '');
     setRows(fullPodium(w).map((p) => ({ place: p.place, handle: p.handle })));
     setEditing(idx);
   };
@@ -124,6 +146,7 @@ export function HallOfFameSection({
                     {MEDAL_EMOJI[p.place]} {p.name}
                   </span>
                 ))}
+                {(periodLabel(w) || w.year) && <span className="muted-sm"> · {periodLabel(w) || w.year}</span>}
                 {w.notes && <span className="muted-sm"> · {w.notes}</span>}
               </div>
               <span className="row-actions">
@@ -195,6 +218,19 @@ export function HallOfFameSection({
         <p className="note note-sm m-0">
           A pari merito i giocatori condividono il posto e quelli dopo scalano: due primi e poi un 3°, due secondi e nessun
           terzo. Si può scrivere anche lo username di chi non gioca più.
+        </p>
+        <div className="grid2">
+          <div>
+            <label htmlFor="hof-start" className="label-sm">Dal mese</label>
+            <input id="hof-start" type="month" placeholder="2026-11" value={start} onChange={(e) => setStart(e.target.value)} />
+          </div>
+          <div>
+            <label htmlFor="hof-end" className="label-sm">Al mese</label>
+            <input id="hof-end" type="month" placeholder="2027-03" value={end} onChange={(e) => setEnd(e.target.value)} />
+          </div>
+        </div>
+        <p className="note note-sm m-0">
+          Il periodo si compila da solo quando archivi una stagione; qui lo puoi aggiungere alle stagioni passate o correggere.
         </p>
         <div>
           <label htmlFor="hof-notes" className="label-sm">Note</label>

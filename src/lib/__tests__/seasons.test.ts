@@ -44,15 +44,21 @@ describe('withChampion', () => {
 
   it('adds the champion once', () => {
     const once = withChampion([], archive);
-    expect(once).toEqual([{ season: meta.season, name: 'Anna', handle: 'anna', year: '2026' }]);
+    // Without dates in the games, the period ends with the archive date
+    expect(once).toEqual([{ season: meta.season, name: 'Anna', handle: 'anna', end: '2026-12' }]);
     expect(withChampion(once, archive)).toBe(once);
   });
 
   it('replaces the entry of the same season when the champion changed', () => {
     const early = [{ season: meta.season, name: 'Bruno', handle: 'bruno', year: '2026', notes: 'in testa a metà stagione' }];
-    expect(withChampion(early, archive)).toEqual([{ season: meta.season, name: 'Anna', handle: 'anna', year: '2026' }]);
-    const same = [{ season: meta.season, name: 'Anna', handle: 'anna', notes: 'Campionessa' }];
+    expect(withChampion(early, archive)).toEqual([{ season: meta.season, name: 'Anna', handle: 'anna', end: '2026-12' }]);
+    const same = [{ season: meta.season, name: 'Anna', handle: 'anna', notes: 'Campionessa', end: '2026-11' }];
     expect(withChampion(same, archive)).toBe(same);
+  });
+
+  it('fills in the period of an entry typed by hand, keeping what was typed', () => {
+    const typed = [{ season: meta.season, name: 'Anna', handle: 'anna', notes: 'Campionessa' }];
+    expect(withChampion(typed, archive)).toEqual([{ ...typed[0], end: '2026-12' }]);
   });
 
   it('keeps existing winners and handles undefined', () => {
@@ -107,3 +113,26 @@ describe('standingsCsv', () => {
     expect(lines.slice(1).map((l) => l.split(';')[0])).toEqual(['', '']);
   });
 });
+
+describe('season period in the archive', () => {
+  const D = 86400e3;
+  const at = Date.UTC(2026, 10, 3, 12); // 3 November 2026
+  const dated = (id: string, round: string, created: number): HistoryGame => ({ ...game(id), round, createdAt: created });
+
+  it('goes from the first challenge to the last move of the last game', () => {
+    const history = [dated('aaaaaaaa', '1', at), dated('bbbbbbbb', '2', at + 40 * D)];
+    const states = {
+      aaaaaaaa: { ...st('aaaaaaaa', 'mate', 'white'), lastMoveAt: at + 10 * D },
+      bbbbbbbb: { ...st('bbbbbbbb', 'draw'), lastMoveAt: at + 120 * D }, // March 2027
+    };
+    const a = buildSeasonArchive(meta, players, history, states, new Date(at + 130 * D));
+    expect([a.start, a.end]).toEqual(['2026-11', '2027-03']);
+  });
+
+  it('ends at the archive date when games were left unfinished', () => {
+    const history = [dated('aaaaaaaa', '1', at)];
+    const a = buildSeasonArchive(meta, players, history, { aaaaaaaa: st('aaaaaaaa', 'started') }, new Date(at + 60 * D));
+    expect([a.start, a.end]).toEqual(['2026-11', '2027-01']);
+  });
+});
+

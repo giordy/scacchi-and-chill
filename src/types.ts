@@ -83,7 +83,9 @@ export interface SeasonWinner {
   season: string; // es. "Stagione 1"
   name: string; // es. "Fabio"
   handle: string; // es. "fsgach"
-  year?: string; // es. "2026"
+  start?: string; // first month of the season, "2026-11" (see lib/period.ts)
+  end?: string; // last month, "2027-03"
+  year?: string; // older entries only: the year, shown when there is no period
   notes?: string;
   podium?: PodiumPlace[]; // the other medals of the season
 }
@@ -247,6 +249,8 @@ export interface SeasonArchive {
   masterName?: string;
   imageUrl?: string;
   archivedAt: string; // ISO date
+  start?: string; // first month of the season, "2026-11"
+  end?: string; // last month
   standings: SeasonArchiveStanding[];
   gamesPlayed: number;
   champion?: { handle: string; name: string; points: number };
