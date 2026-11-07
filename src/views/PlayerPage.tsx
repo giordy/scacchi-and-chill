@@ -205,12 +205,16 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const eloStart = eloSeason.start.get(player.handle.toLowerCase());
   const eloMove = eloNow !== undefined && eloStart !== undefined ? eloNow - Math.round(eloStart) : 0;
   // Pronostico: points expected in the season from the Elo del torneo at its start
+  const calendar = boardCalendar(withScheduledGames(history, config.schedule ?? []), gameStates, config.players.map((p) => p.handle));
   const forecast = seasonForecast(
     player.handle,
     eloSeason,
-    boardCalendar(withScheduledGames(history, config.schedule ?? []), gameStates, config.players.map((p) => p.handle)),
+    calendar,
     eloSeasonFromCurrent(config.players.map((p) => p.handle), history, gameStates).games
   );
+  // All the player's games of the season, those against esordienti included: "10 delle 14"
+  const seasonGames = calendar.filter((g) => [g.white, g.black].some((h) => h.toLowerCase() === player.handle.toLowerCase())).length;
+  const countedOf = forecast && forecast.games < seasonGames ? `${forecast.games} delle ${seasonGames}` : String(forecast?.games ?? 0);
   const pronostico = forecast ? pronosticoPoints(forecast) : 0;
   // How it is going: at the end against the pronostico, before against the points expected so far
   // (a gap of a few tenths of a point says nothing)
@@ -288,7 +292,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           ))}
           {forecast && forecast.games > 0 && (
             <div className="stat-pill">
-              <InfoTip className="stat-pill-label" text={`I punti che ci si aspettava facesse in questa stagione, calcolati (non scelti) dall'Elo del torneo suo e dei suoi avversari a inizio stagione, arrotondati al mezzo punto. L'obiettivo resta fisso per tutta la stagione. Contano ${forecast.games} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio obiettivo vince il Premio Pillsbury. Finora: ▲ sopra, = in linea, ▼ sotto.`}>
+              <InfoTip className="stat-pill-label" text={`I punti che ci si aspettava facesse in questa stagione, calcolati (non scelti) dall'Elo del torneo suo e dei suoi avversari a inizio stagione, arrotondati al mezzo punto. L'obiettivo resta fisso per tutta la stagione. Contano ${countedOf} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio obiettivo vince il Premio Pillsbury. Finora: ▲ sopra, = in linea, ▼ sotto.`}>
                 Obiettivo <span className="infotip-mark" aria-hidden="true">ⓘ</span>
               </InfoTip>
               <span className="stat-pill-val">
@@ -297,7 +301,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               {/* How it is going, apart from the value: the objective itself never moves */}
               <span className="stat-pill-note">
                 {forecast.played === 0 ? (
-                  `su ${forecast.games} partite`
+                  `su ${countedOf} partite`
                 ) : (
                   <>
                     {forecast.played === forecast.games ? "alla fine" : "finora"} <Trend kind={forecastTrend} label={forecastLabel} />
