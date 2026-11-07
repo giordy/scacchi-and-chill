@@ -8,7 +8,7 @@ const base = () => JSON.parse(JSON.stringify(raw));
 describe('validateAndNormalizeConfig', () => {
   it('accepts the config.json of the repository', () => {
     const cfg = validateAndNormalizeConfig(base());
-    expect(cfg.players.length).toBeGreaterThanOrEqual(2);
+    expect(cfg.players).toEqual([]); // players live on Firestore, none in the repository
     expect(cfg.defaults.days).toBeGreaterThanOrEqual(1);
     expect(cfg.statusPhrases.header.length).toBeGreaterThan(0);
   });
@@ -22,7 +22,7 @@ describe('validateAndNormalizeConfig', () => {
   });
 
   it.each([
-    ['fewer than two players', { players: [{ handle: 'anna' }] }, '"players"'],
+    ['players that are not a list', { players: { handle: 'anna' } }, '"players"'],
     ['a player without handle', { players: [{ handle: 'anna' }, { name: 'X' }] }, '"players"'],
     ['the same handle twice', { players: [{ handle: 'Anna' }, { handle: 'anna' }] }, 'same handle twice'],
     ['days out of range', { defaults: { days: 30 } }, '"days"'],
@@ -40,7 +40,8 @@ describe('validateAndNormalizeConfig', () => {
   });
 
   it('accepts the Italian field names', () => {
-    const { players, defaults, roundMessage, statusMessage, ...rest } = base();
+    const { defaults, roundMessage, statusMessage, ...rest } = base();
+    const players = [{ handle: 'anna', name: 'Anna' }, { handle: 'bruno', name: 'Bruno' }];
     const sm = statusMessage;
     // The English names win when both are there: keep only the Italian ones
     const { challengeName: _c, numberEmojis: _n, ...rm } = roundMessage;

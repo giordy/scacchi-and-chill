@@ -97,7 +97,7 @@ Il workflow `.github/workflows/deploy.yml` esegue test e build a ogni push su `m
 2. Sotto **Build and deployment** scegli **Source: GitHub Actions**.
 
 ## Configurazione iniziale del torneo
-`config.json` contiene i valori predefiniti (giocatori, calendario, testi dei messaggi). Dopo il primo avvio i dati vivono su Firestore e si modificano dall'area organizzatore.
+`config.json` contiene solo i valori predefiniti (giorni per mossa, regole delle sfide, testi dei messaggi), nessun dato del torneo. Giocatori, stagione e calendario vivono su Firestore e si gestiscono dall'area organizzatore: un torneo nuovo parte senza giocatori, e i primi si aggiungono da *Giocatori → Registro dei giocatori*.
 
 ## Limiti noti
 - Il pubblico vede i nuovi risultati solo dopo una sincronizzazione, cioè quando l'organizzatore apre l'area admin o preme **Sincronizza**.

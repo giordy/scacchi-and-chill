@@ -1,45 +1,11 @@
 {
   "_readme": [
-    "Scacchi & Chill tournament configuration.",
-    "1. players: list of participants with exact Lichess handle and WhatsApp display name.",
-    "2. defaults: default days per move, challenge link expiry days, and game rules.",
-    "3. roundMessage: message template used when creating a new round's pairings.",
-    "4. statusMessage: phrases used for the ongoing games status update.",
+    "Scacchi & Chill tournament configuration: defaults only. Players, season and calendar live on",
+    "Firestore and are managed from the organizer area (#admin).",
+    "1. defaults: default days per move, challenge link expiry days, and game rules.",
+    "2. roundMessage: message template used when creating a new round's pairings.",
+    "3. statusMessage: phrases used for the ongoing games status update.",
     "   (Leave 'closing' empty [] to end the status message right after the summary statistics)."
-  ],
-  "players": [
-    {
-      "handle": "matepaco",
-      "name": "Francesco Spa"
-    },
-    {
-      "handle": "frasal",
-      "name": "Francesco Sal"
-    },
-    {
-      "handle": "scarsoforteh",
-      "name": "Stefano"
-    },
-    {
-      "handle": "drake097",
-      "name": "Alessandro"
-    },
-    {
-      "handle": "fsgach",
-      "name": "Fabio"
-    },
-    {
-      "handle": "luca_sgarbossa",
-      "name": "Luca"
-    },
-    {
-      "handle": "giords",
-      "name": "Giordano"
-    },
-    {
-      "handle": "battimat",
-      "name": "Matteo"
-    }
   ],
   "defaults": {
     "days": 2,

@@ -10,7 +10,11 @@ import { defaultConfig } from '../../lib/config';
 
 const noop = () => {};
 const settings = { token: '', days: 3, expiry: 2, rated: true, rules: {} } as any;
-const config = { ...defaultConfig, tournament: { ...(defaultConfig.tournament as any), winners: [] } } as any;
+const config = {
+  ...defaultConfig,
+  players: [{ handle: 'anna', name: 'Anna' }, { handle: 'bruno', name: 'Bruno' }],
+  tournament: { ...(defaultConfig.tournament as any), winners: [] },
+} as any;
 const organizer = { anecdotes: {}, ratings: {}, setAnecdote: noop, setRatings: noop, statusPhrases: null, setStatusPhrases: noop } as any;
 const summaries = (html: string) => [...html.matchAll(/<summary>([^<]+)<\/summary>/g)].map((m) => m[1]);
 
@@ -45,6 +49,13 @@ describe('admin layout', () => {
     expect(html).toContain('Togli dalla stagione');
     // Nobody in the history here, but current players cannot be deleted either
     expect(html).not.toContain('>Elimina<');
+  });
+
+  it('opens on a new tournament with no players, ready to add the first ones', () => {
+    const empty = { ...config, players: [], tournament: { ...config.tournament, roster: [] } };
+    const props = { config: empty, history: [], setHistory: noop as any, gameStates: {}, seasons: [], flash: noop, onUpdateTournamentMeta: noop, onUpdateSchedule: noop };
+    expect(renderToStaticMarkup(<PlayersTab {...props} onUpdatePlayers={noop} />)).toContain('+ Aggiungi');
+    expect(renderToStaticMarkup(<SeasonsTab {...props} settings={settings} setSettings={noop as any} onSeasonReset={noop} />)).toContain('Calendario');
   });
 
   it('puts the set-and-forget settings in Impostazioni, the token open while missing', () => {

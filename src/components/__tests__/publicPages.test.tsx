@@ -72,6 +72,18 @@ const playerPage = (handle: string, seasons: SeasonArchive[] = [season1]) =>
   renderToStaticMarkup(<PlayerPage handle={handle} config={config} history={history} gameStates={gameStates} nameOf={nameOf} seasons={seasons} />);
 
 describe('public tournament page', () => {
+  it('renders every section of a new tournament, with no players and no games yet', () => {
+    const empty: AppConfig = { ...defaultConfig, players: [], schedule: [], tournament: { title: 'Nuovo torneo', season: 'Stagione 1', description: '' } };
+    for (const hash of ['', '#/partite', '#/tabellone', '#/stagione', '#/albo', '#/regolamento']) {
+      at(hash);
+      const html = renderToStaticMarkup(
+        <PublicTournamentView config={empty} tournamentMeta={empty.tournament!} history={[]} gameStates={{}} nameOf={(h) => h} seasons={[]} />
+      );
+      expect(html).toContain('Nuovo torneo');
+    }
+    expect(renderToStaticMarkup(<PlayerPage handle="anna" config={empty} history={[]} gameStates={{}} nameOf={(h) => h} seasons={[]} />)).toBeTruthy();
+  });
+
   it('renders every section', () => {
     for (const hash of ['', '#/partite', '#/tabellone', '#/stagione', '#/albo', '#/regolamento']) {
       expect(publicPage(hash)).toContain('Scacchi &amp; Chill');

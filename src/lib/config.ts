@@ -23,14 +23,14 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
   const isTextList = (v: unknown): v is string[] =>
     Array.isArray(v) && v.length > 0 && v.every(isText);
 
-  // 1. Players
-  const players = cfg?.players || cfg?.giocatori;
+  // 1. Players: optional. The players of a tournament live on Firestore (added from the organizer
+  // area); a list here only seeds a new tournament on its first start.
+  const players = cfg?.players ?? cfg?.giocatori ?? [];
   if (
     !Array.isArray(players) ||
-    players.length < 2 ||
     players.some((p: RawJson) => !p || !isText(p.handle) || !p.handle.trim())
   ) {
-    fail('"players" must be a list of at least 2 entries with { "handle": "lichess_username", "name": "Name" }.');
+    fail('"players", if given, must be a list of { "handle": "lichess_username", "name": "Name" }.');
   }
   const handles = players.map((p: RawJson) => p.handle.trim().toLowerCase());
   if (new Set(handles).size !== handles.length) {

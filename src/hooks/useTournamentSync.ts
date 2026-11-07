@@ -36,7 +36,7 @@ export function useTournamentSync(
         if (remoteTournament) {
           const meta = tournamentFromDoc(remoteTournament);
           if (meta) validated.tournament = meta;
-          if (Array.isArray(remoteTournament.players) && remoteTournament.players.length > 0) {
+          if (Array.isArray(remoteTournament.players)) {
             validated.players = remoteTournament.players;
           }
           if (Array.isArray(remoteTournament.schedule) && remoteTournament.schedule.length > 0) {
@@ -64,7 +64,7 @@ export function useTournamentSync(
         const next = { ...prev };
         const meta = tournamentFromDoc(doc);
         if (meta) next.tournament = meta;
-        if (Array.isArray(doc.players) && doc.players.length > 0) {
+        if (Array.isArray(doc.players)) {
           next.players = doc.players;
         }
         if (Array.isArray(doc.schedule)) {
