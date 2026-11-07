@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { AppConfig, HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../../types';
+import { AppConfig, HistoryGame, LichessExportGame, Player, SeasonArchive } from '../../types';
 import { fetchGameStates } from '../../lib/lichess';
-import { isCurrentSeasonGame, isTournamentCandidate, lastMoveOf, lichessIdsFromText, ManualGame, playersOfGames, rebuiltHistory } from '../../lib/rebuild';
-import { buildSeasonArchive, seasonId } from '../../lib/seasons';
+import { isCurrentSeasonGame, isTournamentCandidate, lastMoveOf, rebuildArchive, lichessIdsFromText, ManualGame, playersOfGames, rebuiltHistory } from '../../lib/rebuild';
+import { seasonId } from '../../lib/seasons';
 import { computeStandings, isTied, seasonStarted, sharedRanks } from '../../lib/standings';
 import { fullPodium } from '../../lib/honours';
 import { saveSeasonArchive } from '../../firebaseService';
@@ -144,22 +144,12 @@ export function RebuildSeasonSection({
     if (!ok) return;
     setBusy(true);
     try {
-      // Who was replaced: a note under the season's table and "al posto di" in the substitute's career
-      const withdrawals: Withdrawal[] = foundPlayers
-        .filter((p) => substitutes[p.handle.toLowerCase()])
-        .map((p) => {
-          const to = players.find((o) => same(o.handle, substitutes[p.handle.toLowerCase()]))!;
-          const left = (names[p.handle.toLowerCase()] ?? '').trim() || p.handle;
-          return { handle: p.handle, name: left, at: '', played: 0, total: 0, mode: 'replaced', replacedBy: to };
-        });
-      const meta = {
-        title: config.tournament?.title ?? '',
-        season: name,
-        description: '',
-        withdrawals,
-        ...(master.trim() ? { masterName: master.trim() } : {}),
-      };
-      const archive = buildSeasonArchive(meta, players, history, states, lastMoveOf(kept) ?? new Date());
+      const replaced = Object.entries(substitutes).map(([key, by]) => ({
+        handle: foundPlayers.find((p) => p.handle.toLowerCase() === key)?.handle ?? key,
+        name: (names[key] ?? '').trim() || key,
+        by,
+      }));
+      const archive = rebuildArchive({ title: config.tournament?.title ?? '', season: name, master: master.trim(), games: kept, players, manual, replaced });
       await saveSeasonArchive(archive);
       flash('ok', `«${name}» salvata nello storico: ora conta nella classifica di sempre, nelle carriere e nei record.`);
     } catch (e) {

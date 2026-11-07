@@ -1,6 +1,7 @@
 // Rebuilding a past season that was closed without its games: from the Lichess links shared in the
 // group chat (see tabs/settings/RebuildSeasonSection.tsx). Pure helpers, the page does the fetching.
-import { HistoryGame, LichessExportGame, Player } from '../types';
+import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
+import { buildSeasonArchive } from './seasons';
 
 // Lichess game ids in any text, e.g. a WhatsApp export: "lichess.org/AbCd1234" or the 12-character
 // link of one side ("lichess.org/AbCd1234wXyZ"), each id once, in the order they first appear.
@@ -88,4 +89,35 @@ export function isCurrentSeasonGame(g: LichessExportGame, current: HistoryGame[]
   if (ids.has(g.id)) return true;
   const starts = current.map((h) => h.createdAt ?? h.lichess?.createdAt).filter((t): t is number => !!t);
   return starts.length > 0 && !!g.createdAt && g.createdAt >= Math.min(...starts);
+}
+
+// A player who left, and the substitute who took over their games
+export interface Replacement {
+  handle: string; // who left
+  name: string; // their name, for the note under the table
+  by: string; // the substitute's handle, one of the players
+}
+
+export interface RebuildInput {
+  title: string; // the tournament
+  season: string;
+  master?: string;
+  games: LichessExportGame[]; // the games kept
+  players: Player[]; // the players of the season, with the names to show
+  manual?: ManualGame[];
+  replaced?: Replacement[];
+}
+
+// The archive of a rebuilt season: standings, games, awards and period from the games; the
+// replacements as the season's withdrawals; archived at the last move, so it sorts among the others
+export function rebuildArchive({ title, season, master, games, players, manual = [], replaced = [] }: RebuildInput): SeasonArchive {
+  const substitutes = Object.fromEntries(replaced.map((r) => [r.handle.toLowerCase(), r.by]));
+  const history = rebuiltHistory(games, players, manual, substitutes);
+  const states = Object.fromEntries(games.map((g) => [g.id, g]));
+  const withdrawals: Withdrawal[] = replaced.flatMap((r) => {
+    const to = players.find((p) => p.handle.toLowerCase() === r.by.toLowerCase());
+    return to ? [{ handle: r.handle, name: r.name, at: '', played: 0, total: 0, mode: 'replaced' as const, replacedBy: to }] : [];
+  });
+  const meta = { title, season, description: '', withdrawals, ...(master ? { masterName: master } : {}) };
+  return buildSeasonArchive(meta, players, history, states, lastMoveOf(games) ?? new Date());
 }

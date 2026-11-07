@@ -1,0 +1,128 @@
+// Smoke tests of the public pages: they render with realistic data (current season, archived seasons
+// with games and a replacement, former players) and show the sections across seasons.
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { PublicTournamentView } from '../../PublicTournamentView';
+import { PlayerPage } from '../../views/PlayerPage';
+import { defaultConfig } from '../../lib/config';
+import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../../types';
+
+const players = [
+  { handle: 'anna', name: 'Anna' },
+  { handle: 'bruno', name: 'Bruno' },
+  { handle: 'carla', name: 'Carla' },
+];
+const config: AppConfig = {
+  ...defaultConfig,
+  players,
+  schedule: [],
+  tournament: {
+    title: 'Scacchi & Chill',
+    season: 'Stagione 2',
+    description: '',
+    winners: [{ season: 'Stagione 1', handle: 'anna', name: 'Anna', podium: [{ handle: 'greta', name: 'Greta', place: 2 }] }],
+  },
+};
+const history: HistoryGame[] = [
+  { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa' },
+  { round: '1', white: 'carla', black: 'anna', url: 'https://lichess.org/bbbbbbbb' },
+];
+const gameStates: Record<string, LichessExportGame> = {
+  aaaaaaaa: { id: 'aaaaaaaa', status: 'mate', winner: 'white', moves: 'e4 e5', createdAt: 1, lastMoveAt: 2 },
+  bbbbbbbb: { id: 'bbbbbbbb', status: 'started', createdAt: 1 },
+};
+const row = (handle: string, name: string, points: number, won: number, drawn: number, lost: number) => ({
+  handle,
+  name,
+  points,
+  played: won + drawn + lost,
+  won,
+  drawn,
+  lost,
+  sb: 0,
+});
+const season1: SeasonArchive = {
+  id: 'stagione-1',
+  season: 'Stagione 1',
+  title: 'Scacchi & Chill',
+  archivedAt: '2026-10-31T00:00:00Z',
+  standings: [row('anna', 'Anna', 3, 3, 0, 0), row('bruno', 'Bruno', 1, 1, 0, 2), row('dario', 'Dario', 1, 1, 0, 2)],
+  gamesPlayed: 4,
+  departures: [{ handle: 'gredip', name: 'Greta', mode: 'replaced', replacedBy: { handle: 'dario', name: 'Dario' } }],
+  games: [
+    { round: '1', white: 'anna', black: 'bruno', result: '1-0', status: 'resign', plies: 30, id: 'cccccccc' },
+    { round: '1', white: 'dario', black: 'anna', result: '0-1', status: 'mate', plies: 20 },
+    { round: '2', white: 'anna', black: 'dario', result: '1-0', status: 'resign', plies: 90 },
+    { round: '2', white: 'bruno', black: 'dario', result: '0-1', status: 'resign', plies: 50 },
+  ],
+};
+const nameOf = (h: string) => players.find((p) => p.handle === h)?.name ?? h;
+
+const at = (hash: string) => vi.stubGlobal('window', { location: { hash } });
+afterEach(() => vi.unstubAllGlobals());
+
+const publicPage = (hash: string, seasons: SeasonArchive[] = [season1]) => {
+  at(hash);
+  return renderToStaticMarkup(
+    <PublicTournamentView config={config} tournamentMeta={config.tournament!} history={history} gameStates={gameStates} nameOf={nameOf} seasons={seasons} />
+  );
+};
+const playerPage = (handle: string, seasons: SeasonArchive[] = [season1]) =>
+  renderToStaticMarkup(<PlayerPage handle={handle} config={config} history={history} gameStates={gameStates} nameOf={nameOf} seasons={seasons} />);
+
+describe('public tournament page', () => {
+  it('renders every section', () => {
+    for (const hash of ['', '#/partite', '#/tabellone', '#/stagione', '#/albo', '#/regolamento']) {
+      expect(publicPage(hash)).toContain('Scacchi &amp; Chill');
+    }
+  });
+
+  it('shows the all-time table, the records and who left in the hall of fame', () => {
+    const html = publicPage('#/albo');
+    expect(html).toContain('Classifica di sempre');
+    expect(html).toContain('Record');
+    expect(html).toContain('Greta ha lasciato il torneo; al suo posto ha giocato Dario.');
+    expect(html).toContain('4 vittorie consecutive di Anna');
+  });
+
+  it('has no all-time sections before the first archived season', () => {
+    const html = publicPage('#/albo', []);
+    expect(html).not.toContain('Classifica di sempre');
+    expect(html).not.toContain('Record');
+  });
+});
+
+describe('player page', () => {
+  it('shows the career and the all-time head-to-heads of a current player', () => {
+    const html = playerPage('anna');
+    expect(html).toContain('Carriera');
+    expect(html).toContain('2 stagioni');
+    expect(html).toContain('in corso');
+    expect(html).toContain('Scontri diretti di sempre');
+  });
+
+  it('gives a page to a former player found in an archived table', () => {
+    const html = playerPage('dario');
+    expect(html).toContain('Dario');
+    expect(html).toContain('Non partecipa alla stagione in corso.');
+    expect(html).toContain('al posto di Greta');
+    expect(html).toContain('Scontri diretti di sempre');
+  });
+
+  it('gives a page to a former player known only from the hall of fame', () => {
+    const html = playerPage('greta');
+    expect(html).toContain('Greta');
+    expect(html).not.toContain('Carriera');
+  });
+
+  it('says when a player is unknown', () => {
+    expect(playerPage('zeno')).toContain('Giocatore «zeno» non trovato.');
+  });
+
+  it('has no sections across seasons without an archive', () => {
+    const html = playerPage('anna', []);
+    expect(html).not.toContain('Carriera');
+    expect(html).not.toContain('Scontri diretti di sempre');
+  });
+});

@@ -3,6 +3,14 @@ import { useEffect, useRef } from 'react';
 // How often the public page asks Lichess again while it stays open and visible
 export const REFRESH_MS = 5 * 60 * 1000;
 
+// Whether to ask again now: never while a request is running or the tab is hidden; otherwise when
+// forced (the first load) or when the last answer is about 5 minutes old (the 5 s slack lets the
+// interval timer, which may fire a little early, through)
+export function shouldPoll({ force, busy, hidden, now, last }: { force: boolean; busy: boolean; hidden: boolean; now: number; last: number }) {
+  if (busy || hidden) return false;
+  return force || now - last >= REFRESH_MS - 5000;
+}
+
 // Runs load now, then every 5 minutes while the page is visible. A hidden tab asks nothing; coming
 // back to it asks again only when the last answer is older than 5 minutes, so switching tabs back
 // and forth does not call Lichess each time. load resolves to true when the answer arrived.
@@ -15,8 +23,7 @@ export function useVisiblePolling(load: () => Promise<boolean>, key: string, ena
     let last = 0;
     let busy = false;
     const run = (force = false) => {
-      if (busy || document.visibilityState === 'hidden') return;
-      if (!force && Date.now() - last < REFRESH_MS - 5000) return;
+      if (!shouldPoll({ force, busy, hidden: document.visibilityState === 'hidden', now: Date.now(), last })) return;
       busy = true;
       loadRef.current()
         .then((ok) => {

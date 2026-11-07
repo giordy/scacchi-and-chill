@@ -43,3 +43,14 @@ export function storedStates(history: HistoryGame[]): Record<string, LichessExpo
   });
   return map;
 }
+
+const isFinal = (s?: LichessExportGame) => Boolean(s && s.status && s.status !== 'created' && s.status !== 'started');
+
+// The games the organizer's sync reads from Lichess: those with a link whose stored result is not
+// final yet. `linked` counts every game with a link, to tell "nothing to sync" from "no links yet".
+export function syncTargets(history: HistoryGame[]): { linked: number; targets: HistoryGame[]; ids: string[] } {
+  const withLink = history.filter((g) => extractGameId(g.url));
+  const targets = withLink.filter((g) => !isFinal(g.lichess));
+  const ids = Array.from(new Set(targets.map((g) => extractGameId(g.url) as string)));
+  return { linked: withLink.length, targets, ids };
+}

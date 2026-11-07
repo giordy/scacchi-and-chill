@@ -47,7 +47,7 @@ Da *Torneo → Fine stagione e storico*:
 
 L'email dell'organizzatore compare in **due** posti, da tenere allineati:
 - `firestore.rules` (`isAdmin()`), che è la protezione vera;
-- `ADMIN_EMAILS` in `src/firebaseService.ts`, che regola solo l'interfaccia.
+- `ADMIN_EMAILS` in `src/firebaseAuth.ts`, che regola solo l'interfaccia.
 
 ### Dati su Firestore
 | Percorso | Lettura | Contenuto |
