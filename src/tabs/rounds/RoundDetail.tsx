@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, Settings } from '../../types';
+import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, SeasonArchive, Settings } from '../../types';
 import { RoundMatch, RoundSummary, addMatch, removeMatch, removeRound, swapColors } from '../../lib/rounds';
 import { createChallenge } from '../../lib/lichess';
 import { errorMessage } from '../../lib/utils';
@@ -34,6 +34,7 @@ export function RoundDetail({
   flash,
   triggerToast,
   onMissingToken,
+  seasons = [],
 }: {
   round: string;
   summary?: RoundSummary;
@@ -56,6 +57,7 @@ export function RoundDetail({
   flash: Flash;
   triggerToast: (msg: string) => void;
   onMissingToken: () => void;
+  seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo in the bulletin
 }) {
   const matches = summary?.matches ?? [];
   const created = summary?.created ?? 0;
@@ -360,6 +362,7 @@ export function RoundDetail({
                 config={config}
                 expiryDays={settings.expiry}
                 triggerToast={triggerToast}
+                seasons={seasons}
               />
             </div>
           )}

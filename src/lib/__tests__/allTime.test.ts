@@ -194,7 +194,9 @@ describe('allTimeRecords', () => {
         games: [g('bruno', 'anna', '0-1'), g('anna', 'carla', '½-½'), g('carla', 'anna', '0-1', { status: 'outoftime', plies: 3 })],
       },
     ];
-    const records = allTimeRecords(list, nameOf);
+    // The Elo del torneo the two players had when the upset started
+    const elo = { seasons: [], ratings: new Map(), before: new Map([['upset001', { white: 1800, black: 1500 }]]) };
+    const records = allTimeRecords(list, nameOf, elo);
     expect(records.map((r) => r.id)).toEqual(['win-streak', 'unbeaten', 'longest', 'quickest', 'upset']);
     expect(records[0]).toMatchObject({ detail: '3 vittorie consecutive di Anna', season: 'Stagione 1 → Stagione 2' });
     expect(records[1].detail).toBe('5 partite senza perdere di Anna');
@@ -202,10 +204,12 @@ describe('allTimeRecords', () => {
     // A win on time is not a quick win
     expect(records[3].detail).toBe('Anna, in 11 mosse'); // the loser is not named
     expect(records[3].players).toEqual(['anna']);
-    expect(records[4].detail).toBe('Carla batte Bruno, che aveva 300 punti Elo in più');
+    expect(records[4].detail).toBe('Carla batte Bruno, che aveva 300 punti Elo del torneo in più');
+    // Without the Elo del torneo there is no upset to tell
+    expect(allTimeRecords(list, nameOf).map((r) => r.id)).not.toContain('upset');
   });
 
-  it('gives no record for short runs, forfeits or provisional ratings', () => {
+  it('gives no record for short runs or forfeits', () => {
     const list: SeasonGames[] = [
       {
         season: 'Stagione 1',
@@ -216,7 +220,8 @@ describe('allTimeRecords', () => {
         ],
       },
     ];
-    expect(allTimeRecords(list, nameOf)).toEqual([]);
+    const elo = { seasons: [], ratings: new Map(), before: new Map([['stagione-1|1|bruno|carla', { white: 1800, black: 1500 }]]) };
+    expect(allTimeRecords(list, nameOf, elo).filter((r) => r.id !== 'upset')).toEqual([]);
   });
 });
 

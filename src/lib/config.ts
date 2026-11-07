@@ -94,6 +94,8 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
 
   const upsetRaw = sm.upset || sm.colpaccio;
   const upset = Array.isArray(upsetRaw) && isTextList(upsetRaw) ? upsetRaw : undefined;
+  const upsetDrawRaw = sm.upsetDraw || sm.colpaccioPatta;
+  const upsetDraw = Array.isArray(upsetDrawRaw) && isTextList(upsetDrawRaw) ? upsetDrawRaw : undefined;
   const summitRaw = sm.summit || sm.scontroAlVertice;
   const summit = Array.isArray(summitRaw) && isTextList(summitRaw) ? summitRaw : undefined;
 
@@ -153,6 +155,7 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
       footer: smFooter,
       closing: smClosing,
       upset,
+      upsetDraw,
       summit,
       roundEndHeader,
       infoLine,

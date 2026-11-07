@@ -1,52 +1,52 @@
 import { describe, expect, it } from 'vitest';
-import { upsetOf } from '../upset';
+import { upsetFrom, upsetOf, upsetSentence, UPSET_DRAW_GAP, UPSET_WIN_GAP } from '../upset';
+import { computeElo, CURRENT } from '../tournamentElo';
 import { computeSeasonAwards } from '../awards';
 import { HistoryGame, LichessExportGame } from '../../types';
 
-const game = (w: number, b: number, winner?: 'white' | 'black', provisional?: 'white' | 'black'): LichessExportGame => ({
-  id: 'x',
-  status: winner ? 'resign' : 'draw',
-  winner,
-  players: {
-    white: { user: { id: 'anna' }, rating: w, provisional: provisional === 'white' },
-    black: { user: { id: 'bruno' }, rating: b, provisional: provisional === 'black' },
-  },
+describe('colpaccio', () => {
+  it('is a win against an opponent with at least 100 points more of Elo del torneo', () => {
+    expect(UPSET_WIN_GAP).toBe(100);
+    expect(upsetFrom('1-0', { white: 1400, black: 1520 })).toEqual({ kind: 'win', player: 'white', gap: 120 });
+    expect(upsetFrom('0-1', { white: 1600, black: 1500 })).toEqual({ kind: 'win', player: 'black', gap: 100 });
+    expect(upsetFrom('1-0', { white: 1400, black: 1499 })).toBeNull();
+    expect(upsetFrom('1-0', { white: 1600, black: 1400 })).toBeNull(); // the favourite won
+  });
+
+  it('is also a draw against an opponent with at least 200 points more', () => {
+    expect(UPSET_DRAW_GAP).toBe(200);
+    expect(upsetFrom('½-½', { white: 1700, black: 1480 })).toEqual({ kind: 'draw', player: 'black', gap: 220 });
+    expect(upsetFrom('½-½', { white: 1400, black: 1600 })).toEqual({ kind: 'draw', player: 'white', gap: 200 });
+    expect(upsetFrom('½-½', { white: 1400, black: 1550 })).toBeNull();
+  });
+
+  it('needs a result and the ratings', () => {
+    expect(upsetFrom(null, { white: 1000, black: 2000 })).toBeNull();
+    expect(upsetFrom('1-0', undefined)).toBeNull();
+  });
+
+  it('reads the Elo del torneo the two players had when the game started', () => {
+    // Anna beats Bruno five times: then Bruno, far below, beats her
+    const games = [1, 2, 3, 4, 5].map((n) => ({ white: 'anna', black: 'bruno', result: '1-0' as const, end: n, round: String(n) }));
+    const report = computeElo([{ key: CURRENT, players: [], games: [...games, { white: 'bruno', black: 'anna', result: '1-0', end: 9, round: '6', id: 'last' }] }]);
+    const state: LichessExportGame = { id: 'last', status: 'resign', winner: 'white' };
+    const u = upsetOf(state, report, { round: '6', white: 'bruno', black: 'anna', id: 'last' });
+    expect(u).toMatchObject({ kind: 'win', player: 'white' });
+    expect(u!.gap).toBeGreaterThanOrEqual(100);
+    expect(upsetOf({ ...state, status: 'forfeit' }, report, { round: '6', white: 'bruno', black: 'anna', id: 'last' })).toBeNull();
+    expect(upsetSentence(u!, 'Bruno')).toMatch(/^Bruno ha battuto un avversario con \d+ punti Elo del torneo in più$/);
+    expect(upsetSentence({ kind: 'draw', player: 'white', gap: 250 }, 'Bruno')).toBe('Bruno ha pareggiato con un avversario con 250 punti Elo del torneo in più');
+  });
 });
 
-describe('upsetOf', () => {
-  it('is a win against an opponent rated at least 150 points higher', () => {
-    expect(upsetOf(game(1400, 1580, 'white'))).toEqual({ winner: 'white', gap: 180 });
-    expect(upsetOf(game(1700, 1550, 'black'))).toEqual({ winner: 'black', gap: 150 });
-    expect(upsetOf(game(1400, 1549, 'white'))).toBeNull();
-    expect(upsetOf(game(1600, 1400, 'white'))).toBeNull(); // the favourite won
-    expect(upsetOf(game(1400, 1800))).toBeNull(); // draw
-  });
-  it('ignores provisional or missing ratings', () => {
-    expect(upsetOf(game(1400, 1800, 'white', 'black'))).toBeNull();
-    expect(upsetOf(game(1400, 1800, 'white', 'white'))).toBeNull();
-    expect(upsetOf({ id: 'x', status: 'resign', winner: 'white' })).toBeNull();
-  });
-});
-
-describe("L'ammazzagiganti", () => {
-  it('goes to the player with the most colpacci', () => {
+describe('season awards', () => {
+  it("no longer give L'ammazzagiganti", () => {
     const players = [
       { name: 'Anna', handle: 'anna' },
       { name: 'Bruno', handle: 'bruno' },
     ];
-    const history: HistoryGame[] = ['aaaaaaaa', 'bbbbbbbb', 'cccccccc'].map((id) => ({
-      round: '1',
-      white: 'anna',
-      black: 'bruno',
-      url: `https://lichess.org/${id}`,
-    }));
-    const states = {
-      aaaaaaaa: { ...game(1400, 1600, 'white'), id: 'aaaaaaaa' },
-      bbbbbbbb: { ...game(1400, 1700, 'white'), id: 'bbbbbbbb' },
-      cccccccc: { ...game(1400, 1600, 'black'), id: 'cccccccc' }, // Bruno, the favourite, wins
-    };
-    const award = computeSeasonAwards(players, history, states).find((a) => a.id === 'upsets');
-    expect(award?.winners.map((w) => w.handle)).toEqual(['anna']);
-    expect(award?.detail).toBe('2 colpacci');
+    const history: HistoryGame[] = [{ round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa' }];
+    const states = { aaaaaaaa: { id: 'aaaaaaaa', status: 'resign', winner: 'white' as const } };
+    expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'upsets')).toBe(false);
   });
 });

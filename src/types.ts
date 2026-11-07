@@ -58,6 +58,7 @@ export interface StatusPhrases {
   footer: string[];
   closing?: string[];
   upset?: string[]; // colpaccio line under a win
+  upsetDraw?: string[]; // colpaccio line under a draw
   summit?: string[]; // scontro al vertice line under the players
   roundEndHeader?: string[];
   infoLine?: string;

@@ -7,7 +7,9 @@ import { isReturnLeg } from '../lib/legs';
 import { MiniBoard, PhaseTile, START_FEN } from './MiniBoard';
 import { gamePhase, movesLabel, PHASE_LABEL } from '../lib/phase';
 import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
-import { upsetOf, upsetTitle } from '../lib/upset';
+import { upsetOf, upsetSentence } from '../lib/upset';
+import { EloReport } from '../lib/tournamentElo';
+import { extractGameId } from '../lib/utils';
 import { summitKey } from '../lib/summit';
 import { stateOf } from '../lib/games';
 import { playerHref } from '../lib/routes';
@@ -21,11 +23,12 @@ interface MatchesByRoundProps {
   returnStart?: string; // first round of the return leg, if any
   summits?: Map<string, string>; // scontro al vertice: positions text by summitKey
   presence?: PresenceInfo; // when each player was last on Lichess, for the ongoing games
+  elo?: EloReport; // Elo del torneo, for the colpacci
 }
 
 // Public "Partite": the current round first, then the unfinished games of earlier rounds,
 // the upcoming rounds and finally the played rounds, newest first; both collapsed
-export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence }: MatchesByRoundProps) {
+export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence, elo }: MatchesByRoundProps) {
   const stateOfGame = (g: HistoryGame) => stateOf(g, gameStates);
   const progressOf = (g: HistoryGame) => gameProgress(stateOfGame(g));
   const legOf = (round: string) =>
@@ -58,6 +61,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
           showRound={showRound}
           summit={summits?.get(summitKey(g))}
           presence={presence}
+          elo={elo}
         />
       ))}
     </div>
@@ -158,6 +162,7 @@ function MatchCard({
   showRound = false,
   summit,
   presence,
+  elo,
 }: {
   game: HistoryGame;
   state?: LichessExportGame;
@@ -165,6 +170,7 @@ function MatchCard({
   showRound?: boolean;
   summit?: string; // e.g. "1° contro 2°"
   presence?: PresenceInfo;
+  elo?: EloReport;
 }) {
   // Scheduled game not created on Lichess yet
   let badge = game.url
@@ -182,7 +188,7 @@ function MatchCard({
   const phase = progress === 'ongoing' ? gamePhase(s) : undefined;
   const progressText = [moves, phase && PHASE_LABEL[phase]].filter(Boolean).join(' · ');
   const opening = s?.opening?.name ?? '';
-  const upset = progress === 'finished' ? upsetOf(s) : null;
+  const upset = progress === 'finished' ? upsetOf(s, elo, { ...game, id: extractGameId(game.url) || undefined }) : null;
 
   // Final position only: during the game Lichess hides the latest moves
   const finalFen = progress === "finished" && s?.lastFen && game.url ? s.lastFen : "";
@@ -255,7 +261,7 @@ function MatchCard({
                 </InfoTip>
               )}
               {upset && (
-                <InfoTip className="match-upset" text={`Colpaccio: ${upsetTitle(upset).toLowerCase()}.`}>
+                <InfoTip className="match-upset" text={`Colpaccio: ${upsetSentence(upset, nameOf(upset.player === "white" ? game.white : game.black))}.`}>
                   💥 Colpaccio +{upset.gap}
                 </InfoTip>
               )}

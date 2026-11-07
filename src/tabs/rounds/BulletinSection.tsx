@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AppConfig, HistoryGame } from '../../types';
+import { AppConfig, HistoryGame, SeasonArchive } from '../../types';
 import { errorMessage, extractGameId } from '../../lib/utils';
 import { buildBulletin } from '../../lib/bulletin';
 import { fetchGameStates } from '../../lib/lichess';
@@ -14,6 +14,7 @@ export function BulletinSection({
   config,
   expiryDays,
   triggerToast,
+  seasons = [],
 }: {
   round: string;
   history: HistoryGame[];
@@ -21,6 +22,7 @@ export function BulletinSection({
   // Validity of the Lichess links, to tell when a game not started yet will expire
   expiryDays: number;
   triggerToast?: (msg: string) => void;
+  seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo of the colpacci
 }) {
   // Games annulled or won by forfeit after a withdrawal, as on the site
   const history = applyWithdrawals(rawHistory, config.tournament?.withdrawals);
@@ -61,7 +63,7 @@ export function BulletinSection({
         .map((g) => extractGameId(g.url))
         .filter((id): id is string => Boolean(id));
       const states = ids.length > 0 ? await fetchGameStates(ids) : {};
-      const built = buildBulletin({ round, games, states, history, config, expiryDays });
+      const built = buildBulletin({ round, games, states, history, config, expiryDays, seasons });
       setText(built.text);
       setDetails(built.details);
       setIsRoundComplete(built.isComplete);

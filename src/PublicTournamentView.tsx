@@ -25,6 +25,7 @@ import { publishedAnecdotes } from "./lib/masterAnecdotes";
 import { formatWhatsAppMarkup } from "./WhatsAppPreview";
 import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
+import { tournamentElo } from "./lib/tournamentElo";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound } from "./lib/games";
 import { PresenceInfo } from "./lib/presence";
@@ -107,6 +108,8 @@ export function PublicTournamentView({
   const schedule = useMemo(() => config.schedule ?? [], [config.schedule]);
   // The whole season at once, recomputed only when the games or their results change
   // (not when the visitor switches tab or round filter)
+  // Elo del torneo, from the archived seasons and the games of this one (colpacci, awards)
+  const elo = useMemo(() => tournamentElo(seasons, players.map((p) => p.handle), history, gameStates), [seasons, players, history, gameStates]);
   const season = useMemo(() => {
     const { standings, crosstable } = computeStandings(players, history, gameStates);
     const progress = computeSeasonProgress(history, gameStates, schedule);
@@ -142,11 +145,11 @@ export function PublicTournamentView({
     const archivedWithGames = withGames.filter((s) => !s.current);
     return {
       rows: allTimeTable(seasons, tournamentMeta.winners, current),
-      records: archivedWithGames.length > 0 ? allTimeRecords(withGames, allTimeNameOf(nameOf, seasons)) : [],
+      records: archivedWithGames.length > 0 ? allTimeRecords(withGames, allTimeNameOf(nameOf, seasons), elo) : [],
       // Older seasons were archived without their games: say where the records start
       gamesSince: archivedWithGames.length < seasons.length ? archivedWithGames[0]?.season : undefined,
     };
-  }, [seasons, tournamentMeta.season, tournamentMeta.winners, standings, history, gameStates, nameOf]);
+  }, [seasons, tournamentMeta.season, tournamentMeta.winners, standings, history, gameStates, nameOf, elo]);
   // Anecdotes of the rounds already started, newest first; the next ones stay a surprise
   const anecdotes = useMemo(() => publishedAnecdotes(tournamentMeta.masterAnecdotes, history), [tournamentMeta.masterAnecdotes, history]);
   // Andata/ritorno: from the official schedule when there is one, otherwise from the games created so far
@@ -423,6 +426,7 @@ export function PublicTournamentView({
               returnStart={returnStart}
               summits={summits}
               presence={presence}
+              elo={elo}
             />
           )}
         </section>

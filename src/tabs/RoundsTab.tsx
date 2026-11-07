@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, Settings } from '../types';
+import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, SeasonArchive, Settings } from '../types';
 import { RoundSummary, currentRound, nextRoundNumber, roundsOf } from '../lib/rounds';
 import { gameProgress } from '../lib/progress';
 import { errorMessage, extractGameId } from '../lib/utils';
@@ -26,6 +26,7 @@ export function RoundsTab({
   triggerToast,
   onMissingToken,
   onOpenCalendar,
+  seasons = [],
 }: {
   // Round shown in detail; empty for the list
   openRound: string;
@@ -43,6 +44,7 @@ export function RoundsTab({
   onMissingToken: () => void;
   // Opens Stagioni, where the calendar is generated
   onOpenCalendar?: () => void;
+  seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo in the bulletin
 }) {
   const schedule = config.schedule ?? [];
 
@@ -121,6 +123,7 @@ export function RoundsTab({
           flash={flash}
           triggerToast={triggerToast}
           onMissingToken={onMissingToken}
+          seasons={seasons}
         />
       </>
     );

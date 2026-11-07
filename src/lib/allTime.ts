@@ -5,7 +5,8 @@ import { ArchivedGame, HistoryGame, LichessExportGame, SeasonArchive, SeasonWinn
 import { archivedGames, seasonId } from './seasons';
 import { RankKey, seasonStarted, sharedRanks } from './standings';
 import { fullPodium } from './honours';
-import { UPSET_GAP } from './upset';
+import { upsetFrom } from './upset';
+import { CURRENT, EloReport, gameKey } from './tournamentElo';
 import { replacedIn } from './departures';
 import { SeasonDeparture } from '../types';
 
@@ -217,8 +218,8 @@ const seasonSpan = (from: string, to: string) => (from === to ? from : `${from} 
 
 // The all-time records from the archived games: longest winning and unbeaten runs, longest game,
 // quickest win, biggest upset. A record shared by several games goes to the earliest one.
-export function allTimeRecords(list: SeasonGames[], nameOf: (handle: string) => string): GameRecord[] {
-  const all = list.flatMap(({ season, games }) => games.map((g) => ({ g, season })));
+export function allTimeRecords(list: SeasonGames[], nameOf: (handle: string) => string, elo?: EloReport): GameRecord[] {
+  const all = list.flatMap(({ season, games, current }) => games.map((g) => ({ g, season, key: current ? CURRENT : seasonId(season) })));
   const records: GameRecord[] = [];
 
   // Runs, per player, in the order the games were played
@@ -296,15 +297,16 @@ export function allTimeRecords(list: SeasonGames[], nameOf: (handle: string) => 
     });
   }
 
-  // Biggest upset: the largest rating gap overturned, provisional ratings excluded (as in lib/upset)
+  // Biggest upset: the largest gap of Elo del torneo overturned by a win (as in lib/upset; draws
+  // are colpacci too, but the record is for wins)
   let upset: { x: (typeof all)[number]; gap: number; winner: string; loser: string } | null = null;
   all.forEach((x) => {
     const { g } = x;
-    if (g.result === '½-½' || g.provisional || g.whiteRating === undefined || g.blackRating === undefined) return;
-    const whiteWon = g.result === '1-0';
-    const gap = whiteWon ? g.blackRating - g.whiteRating : g.whiteRating - g.blackRating;
-    if (gap >= UPSET_GAP && (!upset || gap > upset.gap)) {
-      upset = { x, gap, winner: whiteWon ? g.white : g.black, loser: whiteWon ? g.black : g.white };
+    if (g.status === 'forfeit') return;
+    const u = upsetFrom(g.result, elo?.before.get(gameKey(g, x.key)));
+    if (u?.kind === 'win' && (!upset || u.gap > upset.gap)) {
+      const whiteWon = g.result === '1-0';
+      upset = { x, gap: u.gap, winner: whiteWon ? g.white : g.black, loser: whiteWon ? g.black : g.white };
     }
   });
   if (upset) {
@@ -313,7 +315,7 @@ export function allTimeRecords(list: SeasonGames[], nameOf: (handle: string) => 
       id: 'upset',
       emoji: '🗡️',
       title: 'Il colpaccio più grosso',
-      detail: `${nameOf(u.winner)} batte ${nameOf(u.loser)}, che aveva ${u.gap} punti Elo in più`,
+      detail: `${nameOf(u.winner)} batte ${nameOf(u.loser)}, che aveva ${u.gap} punti Elo del torneo in più`,
       players: [u.winner, u.loser],
       season: u.x.season,
       url: gameUrl(u.x.g),

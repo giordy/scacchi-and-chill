@@ -120,7 +120,7 @@ describe('il bradipo', () => {
 });
 
 describe('games linked from the awards', () => {
-  it('links the fastest and the longest win, and the few mates and colpacci', async () => {
+  it('links the fastest and the longest win, and the few mates', async () => {
     const { computeSeasonAwards } = await import('../awards');
     const players = [{ handle: 'anna', name: 'Anna' }, { handle: 'bruno', name: 'Bruno' }];
     const h = (id: string) => ({ round: '1', white: 'anna', black: 'bruno', url: `https://lichess.org/${id}` });
@@ -137,7 +137,7 @@ describe('games linked from the awards', () => {
     expect(by('fastest').games).toEqual(['quick001']);
     expect(by('longest').games).toEqual(['long0001']);
     expect(by('mate').games).toEqual(['quick001']);
-    expect(by('upsets').games).toEqual(['upset001']);
+    expect(awards.some((a) => a.id === 'upsets')).toBe(false); // replaced by the Premio Rivelazione
   });
 
   it('finds them again in the games of a season archived before', async () => {

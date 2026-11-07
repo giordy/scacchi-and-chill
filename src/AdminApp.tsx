@@ -179,6 +179,7 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             triggerToast={triggerToast}
             onMissingToken={() => setActiveTab('settings')}
             onOpenCalendar={() => setActiveTab('seasons')}
+            seasons={seasons}
           />
         </>
       )}

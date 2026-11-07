@@ -1,8 +1,9 @@
-import { AppConfig, HistoryGame, LichessExportGame } from '../types';
+import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
 import { computeStandings, leaderText, PlayerStanding, pointsText, seasonStarted, sharedRanks } from './standings';
 import { extractGameId, fill, formatDeadline, getApproxMoves, HOW_DRAW, HOW_WIN, tidy } from './utils';
 import { gamePhase, GamePhase } from './phase';
 import { upsetOf } from './upset';
+import { tournamentElo } from './tournamentElo';
 import { fullMovesOf, isVoid, movesText, nameFrom, pliesOf, storedStates } from './games';
 import { summitGames, summitKey } from './summit';
 import { gameProgress } from './progress';
@@ -61,6 +62,7 @@ export interface BulletinInput {
   expiryDays: number;
   now?: number;
   random?: () => number; // which phrase of each list; Math.random unless a test fixes it
+  seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo of the colpacci
 }
 
 export interface Bulletin {
@@ -91,7 +93,7 @@ const PHASE_TEXT: Record<GamePhase, string> = {
 };
 
 // The WhatsApp message on the state of a round, from the games and what Lichess says of them
-export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random }: BulletinInput): Bulletin {
+export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random, seasons = [] }: BulletinInput): Bulletin {
   const nameOf = nameFrom(config.players);
   const idToHandle = (id?: string) =>
     config.players.find((p) => p.handle.toLowerCase() === String(id ?? "").toLowerCase())?.handle;
@@ -112,6 +114,8 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
   const allStates: Record<string, LichessExportGame> = { ...storedStates(history), ...states };
   // Scontro al vertice: same rule as the badge on the site
   const summits = summitGames(config.players, history, allStates);
+  // Colpaccio: same rule as the badge on the site, on the Elo del torneo
+  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, allStates);
 
   const blocks = games.map((g, i) => {
     const id = extractGameId(g.url);
@@ -204,16 +208,14 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
         body = `${body}\n${openingNote}`;
       }
 
-      // Colpaccio: same rule as the badge on the site
-      const upset = upsetOf(s);
+      const upset = upsetOf(s, elo, { round: g.round, white: g.white, black: g.black, id: id || undefined });
       if (upset) {
-        const winnerHandle = upset.winner === "white" ? white : black;
-        const loserHandle = upset.winner === "white" ? black : white;
-        const line = fill(pickFor("upset") || "💥 Colpaccio: {gap} punti Elo di differenza", {
-          winner: nameOf(winnerHandle),
-          loser: nameOf(loserHandle),
-          gap: upset.gap,
-        });
+        const player = upset.player === "white" ? white : black;
+        const opponent = upset.player === "white" ? black : white;
+        const line =
+          upset.kind === "win"
+            ? fill(pickFor("upset") || "💥 Colpaccio: {gap} punti Elo di differenza", { winner: nameOf(player), loser: nameOf(opponent), gap: upset.gap })
+            : fill(pickFor("upsetDraw") || "🛡️ Colpaccio di patta: {gap} punti Elo di differenza", { player: nameOf(player), opponent: nameOf(opponent), gap: upset.gap });
         body = `${body}\n${line}`;
       }
 

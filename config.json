@@ -108,6 +108,11 @@
       "🎯 Colpaccio da {gap} punti Elo",
       "💥 Davide contro Golia: {gap} punti Elo di distanza"
     ],
+    "upsetDraw": [
+      "🛡️ Colpaccio di patta: {player} ferma {opponent}, che aveva {gap} punti Elo in più",
+      "🛡️ Golia fermato: {gap} punti Elo di differenza, ed è patta",
+      "🛡️ Mezzo punto che vale doppio: {gap} punti Elo di distanza"
+    ],
     "roundEndHeader": [
       "🏁 *Turno {round} concluso!* Ecco i risultati finali:",
       "🏁 *Si chiude il Turno {round}!* I verdetti delle scacchiere:",

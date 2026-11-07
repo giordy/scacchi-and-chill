@@ -2,10 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { buildBulletin, phrasePicker } from '../bulletin';
 import { defaultConfig } from '../config';
 import { applyWithdrawals } from '../withdrawals';
-import { AppConfig, HistoryGame, LichessExportGame } from '../../types';
+import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../../types';
 
 const players = ['anna', 'bruno', 'carla', 'dario', 'elena', 'fabio'].map((h) => ({ handle: h, name: h[0].toUpperCase() + h.slice(1) }));
 const config: AppConfig = { ...defaultConfig, players, numberEmojis: [] };
+// A past season where Fabio beat Elena again and again: in the Elo del torneo he is well ahead
+const pastSeason = (wins: number): SeasonArchive => ({
+  id: 'stagione-1', season: 'Stagione 1', title: 'T', archivedAt: '2026-01-01', gamesPlayed: wins,
+  standings: players.map((p) => ({ handle: p.handle, name: p.name, played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 })),
+  games: Array.from({ length: wins }, (_, i) => ({ round: String(i + 1), white: 'fabio', black: 'elena', result: '1-0' as const, end: i + 1 })),
+});
 const url = (id: string) => `https://lichess.org/${id}`;
 const first = () => 0; // always the first phrase of each list
 const NOW = Date.UTC(2026, 10, 5, 12);
@@ -32,7 +38,7 @@ describe('buildBulletin', () => {
         players: { white: { rating: 1400 }, black: { rating: 1600 } },
       }),
     };
-    const b = buildBulletin({ round: '2', games, states, history: games, config, expiryDays: 2, now: NOW, random: first });
+    const b = buildBulletin({ round: '2', games, states, history: games, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(4)] });
     expect(b.isComplete).toBe(false);
     expect(b.text).toContain('📊 *Aggiornamento Turno 2*');
     expect(b.text).toContain('*Anna* ⚪ vs *Bruno* ⚫\nDa avviare ⏳');
@@ -43,7 +49,13 @@ describe('buildBulletin', () => {
     expect(b.text).toContain(defaultConfig.statusPhrases.infoLine!);
     expect(b.text).toContain('In corso ♟️ (più di 20 mosse, nel mediogioco)');
     expect(b.text).toContain('Finita! Ha vinto Elena col bianco per abbandono in 30 mosse *(1-0)* 🎉\n♟️ Apertura: Caro-Kann Defense: Campomanes Attack');
-    expect(b.text).toContain('💥 Colpaccio! Elena batte un avversario con 200 punti Elo in più');
+    expect(b.text).toMatch(/💥 Colpaccio! Elena batte un avversario con 1\d\d punti Elo in più/);
+    // A draw against him, once he is 200 points ahead, is a colpaccio too
+    const draw = { ...states, ffffffff: { ...states.ffffffff, status: 'draw', winner: undefined } };
+    const d = buildBulletin({ round: '2', games, states: draw, history: games, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(12)] });
+    expect(d.text).toMatch(/🛡️ Colpaccio di patta: Elena ferma Fabio, che aveva 2\d\d punti Elo in più/);
+    // Without past seasons everyone is at 1500: no colpaccio
+    expect(buildBulletin({ round: '2', games, states, history: games, config, expiryDays: 2, now: NOW, random: first }).text).not.toContain('Colpaccio');
     expect(b.text).toContain('📊 *1 finita · 1 in corso · 1 da avviare*');
     expect(b.details).toHaveLength(3);
     expect(b.details[1]).toContain('fase Lichess=middlegame');

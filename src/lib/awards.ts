@@ -4,7 +4,9 @@ export type { TimedGame } from './moveTimes';
 import { formatPace } from './playerProfile';
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { plural } from './games';
-import { upsetOf, UPSET_GAP } from './upset';
+// L'ammazzagiganti (most colpacci) was given until the Premio Rivelazione took its place: past
+// seasons keep it, with the Lichess ratings and the gap it used then
+const LEGACY_UPSET_GAP = 150;
 
 
 // Handles with the highest positive count, in the order of the players list
@@ -100,25 +102,6 @@ export function computeSeasonAwards(
     });
   }
 
-  // L'ammazzagiganti: most colpacci (wins against a much higher rated opponent)
-  const upsets = new Map<string, number>();
-  games.forEach((g) => {
-    if (!g.winner || !upsetOf(g.state)) return;
-    upsets.set(g.winner, (upsets.get(g.winner) ?? 0) + 1);
-  });
-  const giant = leaders(upsets, players);
-  if (giant.handles.length > 0) {
-    awards.push({
-      id: "upsets",
-      emoji: "💥",
-      title: "L'ammazzagiganti",
-      description: `Più colpacci: vittorie contro chi aveva almeno ${UPSET_GAP} punti Elo in più`,
-      winners: who(giant.handles),
-      detail: plural(giant.best, "colpaccio", "colpacci"),
-      ...linked(games.filter((g) => g.winner && giant.handles.includes(g.winner) && upsetOf(g.state)).map((g) => g.state.id)),
-    });
-  }
-
   // Il muro: most draws
   const draws = new Map<string, number>();
   games.forEach((g) => {
@@ -176,7 +159,7 @@ export function withAwardGames(awards: SeasonAward[], games: ArchivedGame[] | un
       found = decisive.filter((g) => {
         if (!won(g) || g.provisional || g.whiteRating === undefined || g.blackRating === undefined) return false;
         const gap = g.result === '1-0' ? g.blackRating - g.whiteRating : g.whiteRating - g.blackRating;
-        return gap >= UPSET_GAP;
+        return gap >= LEGACY_UPSET_GAP;
       });
     }
     return { ...a, ...linked(found.map((g) => g.id)) };
