@@ -13,6 +13,7 @@ import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampion
 import { PointsChart } from '../components/PointsChart';
 import { PresenceMeta } from '../components/PresenceDot';
 import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
+import { currentSeason as eloSeasonNow, isNewcomer, ratingOf, tournamentElo } from '../lib/tournamentElo';
 
 interface PlayerPageProps {
   handle: string;
@@ -191,6 +192,13 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const champions = reigningChampions(winners);
   const isChampion = !!champions?.handles.includes(player.handle.toLowerCase());
   const medals = medalsOf(player.handle, winners);
+  // Elo del torneo (see lib/tournamentElo): now, and how much it moved in this season
+  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, gameStates);
+  const eloNow = ratingOf(elo, player.handle);
+  const eloSeason = eloSeasonNow(elo);
+  const newcomer = isNewcomer(eloSeason, player.handle);
+  const eloStart = eloSeason.start.get(player.handle.toLowerCase());
+  const eloMove = eloNow !== undefined && eloStart !== undefined ? eloNow - Math.round(eloStart) : 0;
 
   return (
     <main className="public-main">
@@ -238,6 +246,25 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               </span>
             </div>
           ))}
+          {eloNow !== undefined && (
+            <div className="stat-pill">
+              <span className="stat-pill-label">Elo del torneo</span>
+              <InfoTip
+                className="stat-pill-val"
+                text={
+                  "Calcolato solo dalle partite del torneo, con la formula Elo: tutti partono da 1500, battere un avversario dello stesso livello vale 16 punti." +
+                  (newcomer
+                    ? " È un esordiente (prima stagione, o di ritorno dopo una pausa): nelle sue partite si muove solo il suo Elo, non quello degli avversari."
+                    : "")
+                }
+              >
+                {eloNow} <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+              </InfoTip>
+              <span className="stat-pill-note">
+                {newcomer ? "esordiente" : eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} in stagione`}
+              </span>
+            </div>
+          )}
           {pace && (
             <div className="stat-pill">
               <span className="stat-pill-label">Tempo a mossa</span>
