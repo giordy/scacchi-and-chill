@@ -90,7 +90,8 @@ export function pillsburyWins(handle: string, seasons: SeasonArchive[]): string[
 export type Form = 'fire' | 'strong' | 'calm' | 'rain';
 export const FORM_GAMES = 3;
 export const FORM_MARK: Record<Form, string> = { fire: '🔥', strong: '💪', calm: '👍', rain: '🪫' };
-export const FORM_LABEL: Record<Form, string> = { fire: 'in fiamme', strong: 'in forma', calm: 'tranquillo', rain: 'periodo no' };
+// "previsto", not "obiettivo": the objective is the season's, the forma only the last games
+export const FORM_LABEL: Record<Form, string> = { fire: 'molto sopra il previsto', strong: 'sopra il previsto', calm: 'come previsto', rain: 'sotto il previsto' };
 
 export function formOf(handle: string, report: EloReport, finished: EloGame[]): Form | undefined {
   const me = handle.toLowerCase();

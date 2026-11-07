@@ -53,9 +53,9 @@ export function PillsburyRace({
     const f = race.form[handle];
     if (!f) return '';
     return (
-      <InfoTip className="cell-tip" text={`Forma, sulle ultime ${FORM_GAMES} partite: ${FORM_LABEL[f]}`}>
+      <InfoTip className="cell-tip" text={`Ultime ${FORM_GAMES} partite: ${FORM_LABEL[f]}`}>
         <span aria-hidden="true">{FORM_MARK[f]}</span>
-        <span className="sr-only">Forma: {FORM_LABEL[f]}</span>
+        <span className="sr-only">Forma, ultime {FORM_GAMES} partite: {FORM_LABEL[f]}</span>
       </InfoTip>
     );
   };
@@ -81,15 +81,6 @@ export function PillsburyRace({
         <p className="note">Il premio parte dalla seconda stagione: nella prima sono tutti esordienti.</p>
       ) : (
         <>
-          {/* The key of the Forma column, where it is read, not at the bottom of the page */}
-          <p className="form-legend" aria-label={`Forma, sulle ultime ${FORM_GAMES} partite`}>
-            <span className="form-legend-title">Forma (ultime {FORM_GAMES} partite):</span>
-            {(Object.keys(FORM_MARK) as (keyof typeof FORM_MARK)[]).map((f) => (
-              <span key={f} className="form-legend-item">
-                <span aria-hidden="true">{FORM_MARK[f]}</span> {FORM_LABEL[f]}
-              </span>
-            ))}
-          </p>
           <div className="table-responsive">
             <table className="standings-table pillsbury-table">
               <thead>
