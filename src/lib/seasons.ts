@@ -1,5 +1,7 @@
-import { HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonWinner, TournamentMeta } from '../types';
-import { computeStandings, seasonStarted, sharedRanks } from './standings';
+import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonWinner, TournamentMeta } from '../types';
+import { computeStandings, scoredResult, seasonStarted, sharedRanks } from './standings';
+import { byRound, pliesOf, stateOf } from './games';
+import { extractGameId } from './utils';
 import { computeSeasonAwards } from './awards';
 import { podiumFromStandings } from './honours';
 import { monthKey, periodOfGames } from './period';
@@ -44,7 +46,35 @@ export function buildSeasonArchive(
   if (top && top.points > 0) archive.champion = { handle: top.handle, name: top.name, points: top.points };
   const awards = computeSeasonAwards(players, history, gameStates);
   if (awards.length > 0) archive.awards = awards;
+  const games = archivedGames(history, gameStates);
+  if (games.length > 0) archive.games = games;
   return archive;
+}
+
+// The scored games of the season in a compact form (no moves, no positions), in round order.
+// Fields Firestore would reject as undefined are left out.
+export function archivedGames(history: HistoryGame[], gameStates: Record<string, LichessExportGame>): ArchivedGame[] {
+  const out: ArchivedGame[] = [];
+  history.forEach((g) => {
+    const s = stateOf(g, gameStates);
+    const result = scoredResult(s);
+    if (!s || !result) return;
+    const game: ArchivedGame = { round: g.round, white: g.white, black: g.black, result };
+    const id = extractGameId(g.url);
+    if (id) game.id = id;
+    if (s.status) game.status = s.status;
+    const plies = pliesOf(s);
+    if (plies > 0) game.plies = plies;
+    if (s.lastMoveAt) game.end = s.lastMoveAt;
+    const w = s.players?.white;
+    const b = s.players?.black;
+    if (typeof w?.rating === "number") game.whiteRating = w.rating;
+    if (typeof b?.rating === "number") game.blackRating = b.rating;
+    if (w?.provisional || b?.provisional) game.provisional = true;
+    if (s.opening?.name) game.opening = s.opening.name;
+    out.push(game);
+  });
+  return out.sort((a, b) => byRound(a.round, b.round) || (a.end ?? 0) - (b.end ?? 0));
 }
 
 // Puts the champion and the podium in the hall of fame, one entry per season name. An existing

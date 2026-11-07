@@ -255,6 +255,25 @@ export interface SeasonArchive {
   gamesPlayed: number;
   champion?: { handle: string; name: string; points: number };
   awards?: SeasonAward[];
+  // The scored games, kept for all-time head-to-heads and records (missing on seasons closed
+  // before they were saved)
+  games?: ArchivedGame[];
+}
+
+// A scored game of an archived season: just enough for head-to-heads and records (see lib/allTime.ts)
+export interface ArchivedGame {
+  round: string;
+  white: string;
+  black: string;
+  result: '1-0' | '0-1' | '½-½';
+  id?: string; // Lichess game id; none for a game won by forfeit
+  status?: string; // Lichess status: mate, resign, outoftime, draw... or forfeit
+  plies?: number; // half-moves played
+  end?: number; // last move, ms
+  whiteRating?: number; // Lichess ratings at the start of the game
+  blackRating?: number;
+  provisional?: boolean; // either rating was provisional
+  opening?: string;
 }
 
 // A light-hearted end-of-season award (see lib/awards.ts)

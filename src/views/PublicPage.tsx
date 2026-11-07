@@ -28,7 +28,7 @@ export function PublicPage({ seasons, ready, config, history, gameStates, liveUp
 
   const playerHandle = parsePlayerHash(hash);
   if (playerHandle) {
-    return <PlayerPage handle={playerHandle} config={config} history={history} gameStates={gameStates} nameOf={nameOf} presence={presence} />;
+    return <PlayerPage handle={playerHandle} config={config} history={history} gameStates={gameStates} nameOf={nameOf} presence={presence} seasons={seasons} />;
   }
 
   return (
