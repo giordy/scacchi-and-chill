@@ -6,7 +6,7 @@ import { SeasonAwards } from './SeasonAwards';
 import { RankCell } from './RankCell';
 import { isTied, seasonStarted, sharedRanks } from '../lib/standings';
 import { departureText } from '../lib/departures';
-import { fullPodium, MEDAL_EMOJI, podiumFromStandings } from '../lib/honours';
+import { fullPodium, MEDAL_EMOJI, podiumFromStandings, shortSeason } from '../lib/honours';
 import { useNameOf } from './Names';
 
 interface PastSeason {
@@ -102,7 +102,7 @@ function SeasonDetails({ archive }: { archive: SeasonArchive }) {
 
 // Public "Albo" tab: the hall of fame, one short row per season (name, period, podium), newest first.
 // An archived season opens on its final table, awards and withdrawals; only the latest is open.
-export function SeasonsHistory({ seasons, winners = [] }: { seasons: SeasonArchive[]; winners?: SeasonWinner[] }) {
+export function SeasonsHistory({ seasons, winners = [], title }: { seasons: SeasonArchive[]; winners?: SeasonWinner[]; title?: string }) {
   const nameOf = useNameOf();
   const list = pastSeasons(seasons, winners);
   return (
@@ -111,9 +111,10 @@ export function SeasonsHistory({ seasons, winners = [] }: { seasons: SeasonArchi
         const period = pastSeasonPeriod(p.winner, p.archive);
         const head = (
           <>
+            {/* The season is the heading of its entry; the tournament's name is already the page's */}
             <span className="winner-season">
-              {p.season}
-              {period && <span className="winner-period"> · {period}</span>}
+              <span className="winner-season-name">{shortSeason(p.season, title)}</span>
+              {period && <span className="winner-period">{period}</span>}
             </span>
             <span className="winner-podium">
               {podiumOf(p).map((x) => (
