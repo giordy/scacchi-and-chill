@@ -15,6 +15,7 @@ import { PresenceMeta } from '../components/PresenceDot';
 import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
 import { currentSeason as eloSeasonNow, eloSeasonFromCurrent, isNewcomer, pronosticoPoints, ratingOf, seasonForecast, tournamentElo } from '../lib/tournamentElo';
 import { withScheduledGames } from '../lib/publicGames';
+import { Trend, TrendKind } from '../components/Trend';
 
 interface PlayerPageProps {
   handle: string;
@@ -58,17 +59,6 @@ const describeEndings = (counts: Record<EndReason, number>) =>
 
 // Bare icons are narrow: beyond this many trophies the shelf groups the medals by kind
 const SHELF_MAX = 8;
-
-// ▲ = ▼: how something moved, with the words for screen readers
-type TrendKind = "up" | "same" | "down";
-const TREND_MARK: Record<TrendKind, string> = { up: "▲", same: "=", down: "▼" };
-function Trend({ kind, label }: { kind: TrendKind; label: string }) {
-  return (
-    <span className={`trend trend-${kind}`} role="img" aria-label={label} title={label}>
-      {TREND_MARK[kind]}
-    </span>
-  );
-}
 
 // A speedometer: the level the Elo del torneo measures
 function GaugeIcon() {

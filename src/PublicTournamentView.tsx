@@ -26,6 +26,7 @@ import { formatWhatsAppMarkup } from "./WhatsAppPreview";
 import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { tournamentElo } from "./lib/tournamentElo";
+import { PillsburyRace } from "./components/PillsburyRace";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound } from "./lib/games";
 import { PresenceInfo } from "./lib/presence";
@@ -259,6 +260,9 @@ export function PublicTournamentView({
             <button type="button" className={view === "crosstable" ? "active" : ""} aria-pressed={view === "crosstable"} onClick={() => show("crosstable")}>
               Tabellone
             </button>
+            <button type="button" className={view === "pillsbury" ? "active" : ""} aria-pressed={view === "pillsbury"} onClick={() => show("pillsbury")}>
+              Pillsbury
+            </button>
           </div>
         </section>
       )}
@@ -351,6 +355,18 @@ export function PublicTournamentView({
             </div>
           )}
         </section>
+      )}
+
+      {view === "pillsbury" && (
+        <PillsburyRace
+          players={players}
+          elo={elo}
+          calendar={allGames}
+          history={history}
+          gameStates={gameStates}
+          seasons={seasons}
+          nameOf={nameOf}
+        />
       )}
 
       {view === "crosstable" && (
