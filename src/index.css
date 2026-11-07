@@ -259,6 +259,11 @@ textarea.small {
 }
 
 button.primary,
+/* Plain links in the text (vedi su Lichess, regolamento…) take the accent, visited ones too: the
+   browser's blue and purple hardly show on the dark theme. Zero specificity, so every link with a
+   style of its own keeps it. */
+:where(a) { color: var(--accent); }
+
 a.primary {
   display: flex;
   align-items: center;
