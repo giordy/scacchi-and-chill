@@ -18,7 +18,7 @@ describe('Elo del torneo', () => {
 
   it('plays the games in the order they ended, and keeps the ratings at the start of each', () => {
     const rep = computeElo([{ key: 's1', players: [], games: [{ ...g('anna', 'carla', '1-0', 20), id: 'second' }, { ...g('anna', 'bruno', '1-0', 10), id: 'first' }] }]);
-    expect(rep.before.get('first')).toEqual({ white: 1500, black: 1500 });
+    expect(rep.before.get('first')).toEqual({ white: 1500, black: 1500, newcomer: true }); // first season: all esordienti
     expect(rep.before.get('second')!.white).toBe(1516);
   });
 
@@ -68,7 +68,7 @@ describe('Elo del torneo', () => {
     expect(eloSeasonFromCurrent(['anna', 'bruno'], history, states).games[0]).toMatchObject({ result: '1-0', id: 'cccccccc' });
     const rep = tournamentElo([later, first], ['anna', 'bruno'], history, states);
     expect(rep.seasons.map((s) => s.key)).toEqual(['s1', 's2', 'current']);
-    expect(rep.before.get('abc')).toEqual({ white: 1500, black: 1500 });
+    expect(rep.before.get('abc')).toEqual({ white: 1500, black: 1500, newcomer: true });
     expect(currentSeason(rep).start.get('anna')).toBe(1516 - 32 * (1 - expectedScore(1484, 1516)));
     expect(ratingOf(rep, 'Bruno')).toBeGreaterThan(1500);
     expect(gameKey({ round: '2', white: 'Anna', black: 'bruno' }, 's2')).toBe('s2|2|anna|bruno');
@@ -90,8 +90,10 @@ describe('pronostico', () => {
     const f = seasonForecast('Anna', season, calendar, [g('bruno', 'anna', '1-0', 2)])!;
     const vsBruno = expectedScore(1516, 1484);
     const vsNew = expectedScore(1516, 1500);
-    expect(f.games).toBe(4);
-    expect(f.expected).toBeCloseTo(2 * vsBruno + 2 * vsNew, 6);
+    // The games against the esordiente are left out
+    void vsNew;
+    expect(f.games).toBe(2);
+    expect(f.expected).toBeCloseTo(2 * vsBruno, 6);
     expect(f).toMatchObject({ played: 1, points: 0 });
     expect(f.expectedSoFar).toBeCloseTo(vsBruno, 6);
     expect(seasonForecast('nuovo', season, calendar, [])).toBeNull(); // esordiente

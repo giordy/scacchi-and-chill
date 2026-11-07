@@ -13,7 +13,7 @@ import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampion
 import { PointsChart } from '../components/PointsChart';
 import { PresenceMeta } from '../components/PresenceDot';
 import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
-import { currentSeason as eloSeasonNow, eloSeasonFromCurrent, isNewcomer, ratingOf, seasonForecast, tournamentElo } from '../lib/tournamentElo';
+import { currentSeason as eloSeasonNow, eloSeasonFromCurrent, isNewcomer, pronosticoPoints, ratingOf, seasonForecast, tournamentElo } from '../lib/tournamentElo';
 import { withScheduledGames } from '../lib/publicGames';
 
 interface PlayerPageProps {
@@ -207,7 +207,10 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
     withScheduledGames(history, config.schedule ?? []),
     eloSeasonFromCurrent(config.players.map((p) => p.handle), history, gameStates).games
   );
-  const dec = (n: number) => n.toFixed(1).replace(".", ",").replace(/,0$/, "");
+  const pronostico = forecast ? pronosticoPoints(forecast) : 0;
+  // How it is going, in words: a gap of a few tenths of a point says nothing
+  const sofar = forecast ? forecast.points - forecast.expectedSoFar : 0;
+  const trend = sofar >= 0.5 ? "sopra il pronostico" : sofar <= -0.5 ? "sotto il pronostico" : "in linea col pronostico";
 
   return (
     <main className="public-main">
@@ -279,16 +282,16 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               <span className="stat-pill-label">Pronostico</span>
               <InfoTip
                 className="stat-pill-val"
-                text={`I punti che ci si aspettava facesse in questa stagione (${forecast.games} partite), dall'Elo del torneo suo e dei suoi avversari a inizio stagione (1500 per gli esordienti).`}
+                text={`I punti che ci si aspettava facesse in questa stagione, arrotondati per difetto, dall'Elo del torneo suo e dei suoi avversari a inizio stagione. Contano ${forecast.games} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio pronostico vince il Premio Rivelazione.`}
               >
-                {dec(forecast.expected)} punti <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+                {pronostico} {pronostico === 1 ? "punto" : "punti"} <span className="infotip-mark" aria-hidden="true">ⓘ</span>
               </InfoTip>
               <span className="stat-pill-note">
                 {forecast.played === 0
                   ? `su ${forecast.games} partite`
                   : forecast.played === forecast.games
-                  ? `${forecast.points >= forecast.expected ? "battuto ✓ · " : ""}fatti ${fmt(forecast.points)}`
-                  : `finora ${fmt(forecast.points)} su ${dec(forecast.expectedSoFar)} previsti`}
+                  ? `${forecast.points > pronostico ? "superato ✓ · " : ""}fatti ${fmt(forecast.points)}`
+                  : `finora ${trend}`}
               </span>
             </div>
           )}

@@ -2029,6 +2029,24 @@ a.champion-badge {
   white-space: nowrap;
 }
 
+/* Esordiente: first season, or back after a break (see lib/tournamentElo), next to the handle */
+.player-link-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.newcomer-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 6px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  white-space: nowrap;
+}
+
 .fairplay-alert a {
   color: inherit;
   text-decoration: underline;

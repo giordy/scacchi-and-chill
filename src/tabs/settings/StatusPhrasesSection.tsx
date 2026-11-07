@@ -18,8 +18,8 @@ const FIELDS: { key: ListKey; label: string; vars: string; required: boolean }[]
   { key: 'aborted', label: 'Partita annullata', vars: 'nessuna', required: true },
   { key: 'footer', label: 'Riepilogo (turno in corso; a fine turno al suo posto c\'è la classifica)', vars: '{summary}, {round}, {finished}, {ongoing}, {pending}', required: true },
   { key: 'summit', label: 'Scontro al vertice (due giocatori tra i primi 3 a inizio turno)', vars: '{positions}', required: false },
-  { key: 'upset', label: 'Colpaccio (sotto la vittoria, con almeno 100 punti Elo del torneo di differenza)', vars: '{winner}, {loser}, {gap}', required: false },
-  { key: 'upsetDraw', label: 'Colpaccio di patta (sotto la patta, con almeno 200 punti Elo del torneo di differenza)', vars: '{player}, {opponent}, {gap}', required: false },
+  { key: 'upset', label: 'Colpaccio (sotto la vittoria contro chi ha almeno 100 punti Elo del torneo in più; mai con un esordiente)', vars: '{winner}, {loser}, {gap}', required: false },
+  { key: 'upsetDraw', label: 'Colpaccio di patta (sotto la patta contro chi ha almeno 200 punti Elo del torneo in più; mai con un esordiente)', vars: '{player}, {opponent}, {gap}', required: false },
   { key: 'closing', label: 'Saluto finale', vars: 'nessuna', required: false },
 ];
 

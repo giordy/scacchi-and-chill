@@ -26,16 +26,26 @@ describe('colpaccio', () => {
   });
 
   it('reads the Elo del torneo the two players had when the game started', () => {
-    // Anna beats Bruno five times: then Bruno, far below, beats her
+    // Last season Anna beat Bruno five times: this season Bruno, far below, beats her
     const games = [1, 2, 3, 4, 5].map((n) => ({ white: 'anna', black: 'bruno', result: '1-0' as const, end: n, round: String(n) }));
-    const report = computeElo([{ key: CURRENT, players: [], games: [...games, { white: 'bruno', black: 'anna', result: '1-0', end: 9, round: '6', id: 'last' }] }]);
+    const report = computeElo([
+      { key: 's1', players: [], games },
+      { key: CURRENT, players: ['anna', 'bruno'], games: [{ white: 'bruno', black: 'anna', result: '1-0', end: 9, round: '6', id: 'last' }] },
+    ]);
     const state: LichessExportGame = { id: 'last', status: 'resign', winner: 'white' };
     const u = upsetOf(state, report, { round: '6', white: 'bruno', black: 'anna', id: 'last' });
     expect(u).toMatchObject({ kind: 'win', player: 'white' });
     expect(u!.gap).toBeGreaterThanOrEqual(100);
     expect(upsetOf({ ...state, status: 'forfeit' }, report, { round: '6', white: 'bruno', black: 'anna', id: 'last' })).toBeNull();
-    expect(upsetSentence(u!, 'Bruno')).toMatch(/^Bruno ha battuto un avversario con \d+ punti Elo del torneo in più$/);
-    expect(upsetSentence({ kind: 'draw', player: 'white', gap: 250 }, 'Bruno')).toBe('Bruno ha pareggiato con un avversario con 250 punti Elo del torneo in più');
+    expect(upsetSentence(u!, 'Bruno')).toBe("Bruno ha battuto un avversario molto più forte, secondo l'Elo del torneo");
+    expect(upsetSentence({ kind: 'draw', player: 'white', gap: 250 }, 'Bruno')).toBe("Bruno ha pareggiato con un avversario molto più forte, secondo l'Elo del torneo");
+  });
+
+  it('never happens in a game with an esordiente', () => {
+    expect(upsetFrom('1-0', { white: 1300, black: 1700, newcomer: true })).toBeNull();
+    // In the very first season everyone is an esordiente
+    const report = computeElo([{ key: CURRENT, players: [], games: [{ white: 'anna', black: 'bruno', result: '1-0', end: 1, round: '1', id: 'x' }] }]);
+    expect(upsetOf({ id: 'x', status: 'resign', winner: 'white' }, report, { round: '1', white: 'anna', black: 'bruno', id: 'x' })).toBeNull();
   });
 });
 

@@ -214,8 +214,8 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
         const opponent = upset.player === "white" ? black : white;
         const line =
           upset.kind === "win"
-            ? fill(pickFor("upset") || "💥 Colpaccio: {gap} punti Elo di differenza", { winner: nameOf(player), loser: nameOf(opponent), gap: upset.gap })
-            : fill(pickFor("upsetDraw") || "🛡️ Colpaccio di patta: {gap} punti Elo di differenza", { player: nameOf(player), opponent: nameOf(opponent), gap: upset.gap });
+            ? fill(pickFor("upset") || "💥 Colpaccio di {winner}!", { winner: nameOf(player), loser: nameOf(opponent), gap: upset.gap })
+            : fill(pickFor("upsetDraw") || "🛡️ Colpaccio di patta: {player} ferma {opponent}", { player: nameOf(player), opponent: nameOf(opponent), gap: upset.gap });
         body = `${body}\n${line}`;
       }
 

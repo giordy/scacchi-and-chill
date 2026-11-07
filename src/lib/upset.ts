@@ -17,11 +17,12 @@ export interface Upset {
 export interface Ratings {
   white: number;
   black: number;
+  newcomer?: boolean; // an esordiente played: no colpaccio, their rating says nothing yet
 }
 
 // Pure rule, from the result and the two ratings before the game
 export function upsetFrom(result: '1-0' | '0-1' | '½-½' | null | undefined, ratings: Ratings | undefined): Upset | null {
-  if (!result || !ratings) return null;
+  if (!result || !ratings || ratings.newcomer) return null;
   const diff = Math.round(ratings.black - ratings.white); // > 0: Black was stronger
   if (result === '½-½') {
     const gap = Math.abs(diff);
@@ -50,9 +51,9 @@ export function upsetOf(
   return upsetFrom(scoredResult(state), ratingsBefore(report, game));
 }
 
-// "Stefano ha battuto un avversario con 120 punti Elo in più"
+// "Stefano ha battuto un avversario molto più forte": the gap in points says little to most
 export function upsetSentence(u: Upset, name: string): string {
   return u.kind === 'win'
-    ? `${name} ha battuto un avversario con ${u.gap} punti Elo del torneo in più`
-    : `${name} ha pareggiato con un avversario con ${u.gap} punti Elo del torneo in più`;
+    ? `${name} ha battuto un avversario molto più forte, secondo l'Elo del torneo`
+    : `${name} ha pareggiato con un avversario molto più forte, secondo l'Elo del torneo`;
 }

@@ -186,7 +186,7 @@ describe('Premio Rivelazione', () => {
     s: { id, status: 'resign', winner, lastMoveAt: end },
   });
 
-  it('goes to the largest gain of Elo del torneo in the season, esordienti left out', async () => {
+  it('goes to who beat their pronostico by most, esordienti and the games against them left out', async () => {
     const { computeSeasonAwards } = await import('../awards');
     const games = [
       game('aaaaaaaa', 'carla', 'anna', 'white', 10), // Carla, behind, beats Anna
@@ -198,7 +198,7 @@ describe('Premio Rivelazione', () => {
     const states = Object.fromEntries(games.map((g) => [g.s.id, g.s]));
     const award = computeSeasonAwards(players, history, states, [past]).find((a) => a.id === 'revelation');
     expect(award).toMatchObject({ title: 'Premio Rivelazione', winners: [{ handle: 'carla', name: 'Carla' }] });
-    expect(award!.detail).toMatch(/^\+\d+ punti Elo del torneo$/);
+    expect(award!.detail).toBe('1 punto su 1 partita, pronostico 0'); // her one game counted: the win over Anna
     // With no archived season everyone is an esordiente: no award yet
     expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'revelation')).toBe(false);
   });

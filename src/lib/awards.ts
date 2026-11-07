@@ -1,5 +1,8 @@
 import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonAward } from '../types';
-import { currentSeason, tournamentElo } from './tournamentElo';
+import { currentSeason, eloSeasonFromCurrent, Forecast, seasonForecast, tournamentElo } from './tournamentElo';
+
+// 5.5 -> "5½", 0.5 -> "½"
+const halves = (n: number) => String(Math.round(n * 2) / 2).replace(".5", "½").replace(/^0½/, "½");
 export { estimateMoveTimes } from './moveTimes';
 export type { TimedGame } from './moveTimes';
 import { formatPace } from './playerProfile';
@@ -42,27 +45,33 @@ export function computeSeasonAwards(
 
   const awards: SeasonAward[] = [];
 
-  // Premio Rivelazione: who did best beyond what their level promised, i.e. the largest gain of
-  // Elo del torneo in the season (see lib/tournamentElo). Esordienti are left out: their rating
-  // starts from 1500, not from their level.
-  const elo = currentSeason(tournamentElo(seasons, players.map((p) => p.handle), history, gameStates));
+  // Premio Rivelazione: who beat their pronostico by most, i.e. made the most points beyond those
+  // expected from the Elo del torneo at the start of the season (see seasonForecast). Esordienti,
+  // and the games against them, are left out: their 1500 says nothing of their level.
+  const report = tournamentElo(seasons, players.map((p) => p.handle), history, gameStates);
+  const eloNow = currentSeason(report);
+  const finishedGames = eloSeasonFromCurrent(players.map((p) => p.handle), history, gameStates).games;
   const gains = new Map<string, number>();
+  const forecasts = new Map<string, Forecast>();
   players.forEach((p) => {
-    const key = p.handle.toLowerCase();
-    const start = elo.start.get(key);
-    const end = elo.end.get(key);
-    if (start === undefined || end === undefined || elo.newcomers.has(key)) return;
-    gains.set(p.handle, Math.round(end - start));
+    const f = seasonForecast(p.handle, eloNow, history, finishedGames);
+    if (!f || f.played === 0) return;
+    forecasts.set(p.handle, f);
+    gains.set(p.handle, f.points - f.expectedSoFar);
   });
   const revelation = leaders(gains, players);
+  // One winner, unless two beat it by exactly the same
   if (revelation.handles.length > 0) {
+    const f = forecasts.get(revelation.handles[0])!;
     awards.push({
       id: "revelation",
       emoji: "🌟",
       title: "Premio Rivelazione",
-      description: "A chi ha fatto più del previsto: il maggiore aumento di Elo del torneo nella stagione (esordienti esclusi)",
+      description: "A chi ha superato di più il proprio pronostico: i punti previsti dall'Elo del torneo a inizio stagione (esordienti esclusi)",
       winners: who(revelation.handles),
-      detail: `+${revelation.best} punti Elo del torneo`,
+      detail: revelation.handles.length === 1
+        ? `${halves(f.points)} ${f.points === 1 ? "punto" : "punti"} su ${plural(f.played, "partita", "partite")}, pronostico ${Math.floor(f.expectedSoFar + 1e-9)}`
+        : `${halves(revelation.best)} punti più del pronostico`,
     });
   }
 

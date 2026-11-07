@@ -262,7 +262,7 @@ function MatchCard({
               )}
               {upset && (
                 <InfoTip className="match-upset" text={`Colpaccio: ${upsetSentence(upset, nameOf(upset.player === "white" ? game.white : game.black))}.`}>
-                  💥 Colpaccio +{upset.gap}
+                  💥 Colpaccio
                 </InfoTip>
               )}
             </span>

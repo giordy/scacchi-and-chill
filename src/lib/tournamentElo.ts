@@ -44,8 +44,9 @@ export interface EloSeason {
 export interface EloReport {
   seasons: EloSeason[]; // oldest first, the current one last
   ratings: Map<string, number>; // everyone's latest rating
-  // Ratings of the two players when the game started (before its result), by gameKey
-  before: Map<string, { white: number; black: number }>;
+  // Ratings of the two players when the game started (before its result), by gameKey, and
+  // whether either was an esordiente (then the game is no colpaccio)
+  before: Map<string, { white: number; black: number; newcomer: boolean }>;
 }
 
 export const CURRENT = 'current';
@@ -62,7 +63,7 @@ export const gameKey = (g: { id?: string; round?: string; white: string; black: 
 
 export function computeElo(inputs: EloSeasonInput[]): EloReport {
   const ratings = new Map<string, number>();
-  const before = new Map<string, { white: number; black: number }>();
+  const before = new Map<string, { white: number; black: number; newcomer: boolean }>();
   const seasons: EloSeason[] = [];
   let previous = new Set<string>();
 
@@ -83,10 +84,10 @@ export function computeElo(inputs: EloSeasonInput[]): EloReport {
       const b = lower(g.black);
       const rw = ratings.get(w) ?? ELO_START;
       const rb = ratings.get(b) ?? ELO_START;
-      before.set(gameKey(g, input.key), { white: rw, black: rb });
-      const delta = ELO_K * (scoreOf(g.result) - expectedScore(rw, rb));
       const wNew = newcomers.has(w);
       const bNew = newcomers.has(b);
+      before.set(gameKey(g, input.key), { white: rw, black: rb, newcomer: wNew || bNew });
+      const delta = ELO_K * (scoreOf(g.result) - expectedScore(rw, rb));
       // Against an esordiente only the esordiente moves; two esordienti (or two regulars) both move
       if (!bNew || wNew) ratings.set(w, rw + delta);
       if (!wNew || bNew) ratings.set(b, rb - delta);
@@ -150,7 +151,9 @@ export const isNewcomer = (season: EloSeason, handle: string) => season.newcomer
 
 // Pronostico: the points a player was expected to make in the season, from the Elo del torneo at
 // its start, against every opponent of the calendar (games still to play included); and so far,
-// on the games already finished. None for an esordiente: their 1500 says nothing of their level.
+// on the games already finished. Games against an esordiente are left out, and an esordiente has
+// none: their 1500 says nothing of their level. Shown rounded down (pronosticoPoints).
+// The Premio Rivelazione goes to who beats it by most (points - expectedSoFar).
 export interface Forecast {
   expected: number; // whole season
   games: number; // games of the season in the calendar
@@ -168,8 +171,10 @@ export function seasonForecast(
   const me = lower(handle);
   const mine = season.start.get(me);
   if (mine === undefined || season.newcomers.has(me)) return null;
-  const opponentOf = (g: { white: string; black: string }) =>
-    lower(g.white) === me ? lower(g.black) : lower(g.black) === me ? lower(g.white) : null;
+  const opponentOf = (g: { white: string; black: string }) => {
+    const opp = lower(g.white) === me ? lower(g.black) : lower(g.black) === me ? lower(g.white) : null;
+    return opp === null || season.newcomers.has(opp) ? null : opp;
+  };
   const expectedVs = (opp: string) => expectedScore(mine, season.start.get(opp) ?? ELO_START);
   let expected = 0;
   let games = 0;
@@ -192,3 +197,6 @@ export function seasonForecast(
   });
   return { expected, games, expectedSoFar, points, played };
 }
+
+// The pronostico as shown: whole points, rounded down
+export const pronosticoPoints = (f: Forecast) => Math.floor(f.expected + 1e-9);
