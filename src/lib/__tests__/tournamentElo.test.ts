@@ -1,58 +1,82 @@
 import { describe, expect, it } from 'vitest';
-import { computeElo, currentSeason, ELO_START, eloSeasonFromArchive, eloSeasonFromCurrent, expectedScore, gameKey, isNewcomer, ratingOf, tournamentElo } from '../tournamentElo';
+import { computeElo, CURRENT, currentSeason, ELO_START, eloSeasonFromArchive, eloSeasonFromCurrent, expectedScore, gameKey, isNewcomer, ratingOf, tournamentElo } from '../tournamentElo';
 import { HistoryGame, LichessExportGame, SeasonArchive } from '../../types';
 
 const g = (white: string, black: string, result: '1-0' | '0-1' | '½-½', end: number) => ({ white, black, result, end });
 const r = (report: ReturnType<typeof computeElo>, h: string) => Math.round(report.ratings.get(h)! * 10) / 10;
 
 describe('Elo del torneo', () => {
-  it('uses the Elo formula with K = 32, everyone from 1500', () => {
+  it('uses the Elo formula with K = 32, everyone from 1500, game after game', () => {
     expect(expectedScore(1500, 1500)).toBe(0.5);
     expect(expectedScore(1500, 1700)).toBeCloseTo(0.24, 2);
-    const rep = computeElo([{ key: 's1', players: ['anna', 'bruno'], games: [g('anna', 'bruno', '1-0', 1)] }]);
+    // The season being played: plain Elo (the performance is only for archived seasons)
+    const rep = computeElo([{ key: CURRENT, players: ['anna', 'bruno'], games: [g('anna', 'bruno', '1-0', 1)] }]);
     expect(r(rep, 'anna')).toBe(1516);
     expect(r(rep, 'bruno')).toBe(1484);
-    const draw = computeElo([{ key: 's1', players: [], games: [g('anna', 'bruno', '½-½', 1)] }]);
+    const draw = computeElo([{ key: CURRENT, players: [], games: [g('anna', 'bruno', '½-½', 1)] }]);
     expect(r(draw, 'anna')).toBe(ELO_START);
   });
 
   it('plays the games in the order they ended, and keeps the ratings at the start of each', () => {
-    const rep = computeElo([{ key: 's1', players: [], games: [{ ...g('anna', 'carla', '1-0', 20), id: 'second' }, { ...g('anna', 'bruno', '1-0', 10), id: 'first' }] }]);
+    const rep = computeElo([{ key: CURRENT, players: [], games: [{ ...g('anna', 'carla', '1-0', 20), id: 'second' }, { ...g('anna', 'bruno', '1-0', 10), id: 'first' }] }]);
     expect(rep.before.get('first')).toEqual({ white: 1500, black: 1500, newcomer: true }); // first season: all esordienti
     expect(rep.before.get('second')!.white).toBe(1516);
   });
 
-  it('in the first season everyone is an esordiente and every rating moves', () => {
-    const rep = computeElo([{ key: 's1', players: ['anna', 'bruno'], games: [g('anna', 'bruno', '1-0', 1)] }]);
-    expect([...rep.seasons[0].newcomers].sort()).toEqual(['anna', 'bruno']);
-    expect(r(rep, 'bruno')).toBe(1484);
+  it('at the end of an archived first season, everyone gets their performance, centred on 1500', () => {
+    // Anna won all, Bruno 1½, Carla ½
+    const games = [g('anna', 'bruno', '1-0', 1), g('anna', 'carla', '1-0', 2), g('bruno', 'carla', '1-0', 3), g('carla', 'bruno', '½-½', 4)];
+    const rep = computeElo([{ key: 's1', players: ['anna', 'bruno', 'carla'], games }]);
+    expect([...rep.seasons[0].newcomers].sort()).toEqual(['anna', 'bruno', 'carla']);
+    const [a, b, c] = ['anna', 'bruno', 'carla'].map((h) => rep.ratings.get(h)!);
+    expect(a).toBeGreaterThan(b);
+    expect(b).toBeGreaterThan(c);
+    expect((a + b + c) / 3).toBeCloseTo(1500, 6);
+    // Far wider than 14 games one at a time would reach: Anna is well ahead
+    expect(a - c).toBeGreaterThan(300);
+    expect(rep.seasons[0].end.get('anna')).toBe(a);
   });
 
-  it('against an esordiente only the esordiente moves', () => {
+  it('gives an esordiente of an archived season the performance against the others as they were', () => {
     const rep = computeElo([
       { key: 's1', players: ['anna', 'bruno'], games: [g('anna', 'bruno', '1-0', 1)] },
-      { key: 's2', players: ['anna', 'bruno', 'nuovo'], games: [g('nuovo', 'anna', '1-0', 2), g('bruno', 'anna', '½-½', 3)] },
+      { key: 's2', players: ['anna', 'bruno', 'nuovo'], games: [g('nuovo', 'anna', '1-0', 2), g('nuovo', 'bruno', '½-½', 3)] },
     ]);
     const s2 = rep.seasons[1];
     expect([...s2.newcomers]).toEqual(['nuovo']);
-    expect(r(rep, 'nuovo')).toBeCloseTo(1500 + 32 * (1 - expectedScore(1500, 1516)), 1);
+    // Performance: expected points (and the virtual draw against 1500) equal the points made
+    const nuovo = rep.ratings.get('nuovo')!;
+    const expected = expectedScore(nuovo, s2.start.get('anna')!) + expectedScore(nuovo, s2.start.get('bruno')!) + expectedScore(nuovo, 1500);
+    expect(expected).toBeCloseTo(1.5 + 0.5, 3);
+    // Against the esordiente the others did not move
+    expect(rep.ratings.get('anna')).toBe(s2.start.get('anna'));
+    expect(rep.ratings.get('bruno')).toBe(s2.start.get('bruno'));
+  });
+
+  it('against an esordiente only the esordiente moves, during the season', () => {
+    const rep = computeElo([
+      { key: 's1', players: ['anna', 'bruno'], games: [g('anna', 'bruno', '1-0', 1)] },
+      { key: CURRENT, players: ['anna', 'bruno', 'nuovo'], games: [g('nuovo', 'anna', '1-0', 2), g('bruno', 'anna', '½-½', 3)] },
+    ]);
+    const s2 = rep.seasons[1];
+    const [a0, b0] = [s2.start.get('anna')!, s2.start.get('bruno')!];
+    expect(rep.ratings.get('nuovo')).toBeCloseTo(1500 + 32 * (1 - expectedScore(1500, a0)), 6);
     // anna lost to the esordiente: not counted for her, then drew with bruno (counted for both)
-    expect(s2.start.get('anna')).toBe(1516);
-    expect(r(rep, 'anna')).toBeCloseTo(1516 - 32 * (0.5 - expectedScore(1484, 1516)) , 1);
-    expect(r(rep, 'bruno')).toBeCloseTo(1484 + 32 * (0.5 - expectedScore(1484, 1516)), 1);
+    expect(rep.ratings.get('anna')).toBeCloseTo(a0 + 32 * (0.5 - expectedScore(a0, b0)), 6);
+    expect(rep.ratings.get('bruno')).toBeCloseTo(b0 + 32 * (0.5 - expectedScore(b0, a0)), 6);
   });
 
   it('a player back after skipping a season is an esordiente again, from the rating they had', () => {
     const rep = computeElo([
       { key: 's1', players: ['anna', 'bruno'], games: [g('anna', 'bruno', '1-0', 1)] },
       { key: 's2', players: ['bruno', 'carla'], games: [] },
-      { key: 's3', players: ['anna', 'bruno', 'carla'], games: [g('anna', 'bruno', '1-0', 3)] },
+      { key: CURRENT, players: ['anna', 'bruno', 'carla'], games: [g('anna', 'bruno', '1-0', 3)] },
     ]);
     const s3 = rep.seasons[2];
     expect(isNewcomer(s3, 'Anna')).toBe(true);
     expect(isNewcomer(s3, 'carla')).toBe(false);
-    expect(s3.start.get('anna')).toBe(1516);
-    expect(s3.end.get('bruno')).toBe(1484); // lost to an esordiente: unchanged
+    expect(s3.start.get('anna')).toBe(rep.seasons[0].end.get('anna'));
+    expect(s3.end.get('bruno')).toBe(s3.start.get('bruno')); // lost to an esordiente: unchanged
   });
 
   it('reads archived seasons in the order they were closed, forfeits left out, then the current one', () => {
@@ -69,8 +93,10 @@ describe('Elo del torneo', () => {
     const rep = tournamentElo([later, first], ['anna', 'bruno'], history, states);
     expect(rep.seasons.map((s) => s.key)).toEqual(['s1', 's2', 'current']);
     expect(rep.before.get('abc')).toEqual({ white: 1500, black: 1500, newcomer: true });
-    expect(currentSeason(rep).start.get('anna')).toBe(1516 - 32 * (1 - expectedScore(1484, 1516)));
-    expect(ratingOf(rep, 'Bruno')).toBeGreaterThan(1500);
+    // After s1 Anna leads; in s2 Bruno beat her
+    expect(rep.seasons[1].start.get('anna')).toBeGreaterThan(rep.seasons[1].start.get('bruno')!);
+    expect(currentSeason(rep).start.get('anna')).toBeLessThan(rep.seasons[1].start.get('anna')!);
+    expect(ratingOf(rep, 'Bruno')).toBeGreaterThan(Math.round(currentSeason(rep).start.get('bruno')!));
     expect(gameKey({ round: '2', white: 'Anna', black: 'bruno' }, 's2')).toBe('s2|2|anna|bruno');
   });
 });
@@ -88,10 +114,8 @@ describe('pronostico', () => {
       { white: 'anna', black: 'nuovo' }, { white: 'nuovo', black: 'anna' },
     ];
     const f = seasonForecast('Anna', season, calendar, [g('bruno', 'anna', '1-0', 2)])!;
-    const vsBruno = expectedScore(1516, 1484);
-    const vsNew = expectedScore(1516, 1500);
     // The games against the esordiente are left out
-    void vsNew;
+    const vsBruno = expectedScore(season.start.get('anna')!, season.start.get('bruno')!);
     expect(f.games).toBe(2);
     expect(f.expected).toBeCloseTo(2 * vsBruno, 6);
     expect(f).toMatchObject({ played: 1, points: 0 });

@@ -1,6 +1,7 @@
 // Elo del torneo: a rating of each player computed only from the games of this tournament, with
 // the classic Elo formula (K = 32), game after game in the order they ended, from the first archived
-// season to the current one. Everyone starts at 1500.
+// season to the current one. Everyone starts at 1500; at the end of a player's first season their
+// rating becomes their performance in it (see performanceRatings), as FIDE does for a first rating.
 //
 // Esordiente: a player in their first season, or back after skipping at least one season. In the
 // games of an esordiente only the esordiente's rating moves: the others neither lose nor gain
@@ -64,6 +65,63 @@ const lower = (h: string) => h.toLowerCase();
 export const gameKey = (g: { id?: string; round?: string; white: string; black: string }, season = '') =>
   g.id || `${season}|${g.round ?? ''}|${lower(g.white)}|${lower(g.black)}`;
 
+// Performance ratings of the esordienti of a season: the ratings that make the expected points of
+// each equal to the points they made, over all their games of the season at once (as FIDE gives a
+// first rating from a performance). The opponents who are not esordienti keep the rating they had
+// in each game; esordienti are solved together. One virtual draw against a 1500 player each keeps
+// a perfect or empty score finite. When everyone is an esordiente (the first season) the scale is
+// centred on 1500.
+export function performanceRatings(
+  games: EloGame[],
+  newcomers: Set<string>,
+  ratingsAt: (g: EloGame) => { white: number; black: number }
+): Map<string, number> {
+  const played = games.filter((g) => newcomers.has(lower(g.white)) || newcomers.has(lower(g.black)));
+  const who = [...new Set(played.flatMap((g) => [lower(g.white), lower(g.black)]).filter((h) => newcomers.has(h)))];
+  const fit = new Map(who.map((h) => [h, ELO_START]));
+  if (who.length === 0) return fit;
+  // Newton's method, one player at a time on the diagonal: a few dozen steps, not thousands
+  const LN = Math.LN10 / 400;
+  for (let step = 0; step < 200; step++) {
+    const grad = new Map(who.map((h) => [h, 0.5 - expectedScore(fit.get(h)!, ELO_START)]));
+    const curv = new Map(who.map((h) => {
+      const e = expectedScore(fit.get(h)!, ELO_START);
+      return [h, e * (1 - e)];
+    }));
+    played.forEach((g) => {
+      const w = lower(g.white);
+      const b = lower(g.black);
+      const at = ratingsAt(g);
+      const rw = fit.get(w) ?? at.white;
+      const rb = fit.get(b) ?? at.black;
+      const e = expectedScore(rw, rb);
+      const d = scoreOf(g.result) - e;
+      if (grad.has(w)) {
+        grad.set(w, grad.get(w)! + d);
+        curv.set(w, curv.get(w)! + e * (1 - e));
+      }
+      if (grad.has(b)) {
+        grad.set(b, grad.get(b)! - d);
+        curv.set(b, curv.get(b)! + e * (1 - e));
+      }
+    });
+    let moved = 0;
+    who.forEach((h) => {
+      // At most 400 points a step, so a lopsided start cannot overshoot
+      const delta = Math.max(-400, Math.min(400, grad.get(h)! / (LN * curv.get(h)!)));
+      fit.set(h, fit.get(h)! + delta);
+      moved = Math.max(moved, Math.abs(delta));
+    });
+    if (moved < 0.001) break;
+  }
+  const everyone = played.every((g) => newcomers.has(lower(g.white)) && newcomers.has(lower(g.black)));
+  if (everyone) {
+    const shift = ELO_START - who.reduce((sum, h) => sum + fit.get(h)!, 0) / who.length;
+    who.forEach((h) => fit.set(h, fit.get(h)! + shift));
+  }
+  return fit;
+}
+
 export function computeElo(inputs: EloSeasonInput[]): EloReport {
   const ratings = new Map<string, number>();
   const before = new Map<string, { white: number; black: number; newcomer: boolean }>();
@@ -95,6 +153,13 @@ export function computeElo(inputs: EloSeasonInput[]): EloReport {
       if (!bNew || wNew) ratings.set(w, rw + delta);
       if (!wNew || bNew) ratings.set(b, rb - delta);
     });
+
+    // At the end of an esordiente's first (archived) season, their rating becomes their
+    // performance: 14 games one at a time from 1500 are too few to reach their level
+    if (input.key !== CURRENT) {
+      const fitted = performanceRatings(ordered, newcomers, (g) => before.get(gameKey(g, input.key))!);
+      fitted.forEach((r, h) => ratings.set(h, r));
+    }
 
     seasons.push({ key: input.key, start, end: new Map([...present].map((h) => [h, ratings.get(h)!])), newcomers });
     // A doubtful rating (see EloSeasonInput) does not count as a season played

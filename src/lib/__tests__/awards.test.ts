@@ -198,7 +198,7 @@ describe('Premio Pillsbury', () => {
     const states = Object.fromEntries(games.map((g) => [g.s.id, g.s]));
     const award = computeSeasonAwards(players, history, states, [past]).find((a) => a.id === 'pillsbury');
     expect(award).toMatchObject({ title: 'Premio Pillsbury', emoji: '🌱', winners: [{ handle: 'carla', name: 'Carla' }] });
-    expect(award!.detail).toBe('1 punto su 1 partita, obiettivo ½'); // her one game counted: the win over Anna
+    expect(award!.detail).toBe('1 punto su 1 partita, obiettivo 0'); // her one game counted: the win over Anna
     // With no archived season everyone is an esordiente: no award yet
     expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'pillsbury')).toBe(false);
   });
