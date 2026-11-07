@@ -13,7 +13,8 @@ import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampion
 import { PointsChart } from '../components/PointsChart';
 import { PresenceMeta } from '../components/PresenceDot';
 import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
-import { currentSeason as eloSeasonNow, isNewcomer, ratingOf, tournamentElo } from '../lib/tournamentElo';
+import { currentSeason as eloSeasonNow, eloSeasonFromCurrent, isNewcomer, ratingOf, seasonForecast, tournamentElo } from '../lib/tournamentElo';
+import { withScheduledGames } from '../lib/publicGames';
 
 interface PlayerPageProps {
   handle: string;
@@ -199,6 +200,14 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const newcomer = isNewcomer(eloSeason, player.handle);
   const eloStart = eloSeason.start.get(player.handle.toLowerCase());
   const eloMove = eloNow !== undefined && eloStart !== undefined ? eloNow - Math.round(eloStart) : 0;
+  // Pronostico: points expected in the season from the Elo del torneo at its start
+  const forecast = seasonForecast(
+    player.handle,
+    eloSeason,
+    withScheduledGames(history, config.schedule ?? []),
+    eloSeasonFromCurrent(config.players.map((p) => p.handle), history, gameStates).games
+  );
+  const dec = (n: number) => n.toFixed(1).replace(".", ",").replace(/,0$/, "");
 
   return (
     <main className="public-main">
@@ -262,6 +271,24 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               </InfoTip>
               <span className="stat-pill-note">
                 {newcomer ? "esordiente" : eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} in stagione`}
+              </span>
+            </div>
+          )}
+          {forecast && forecast.games > 0 && (
+            <div className="stat-pill">
+              <span className="stat-pill-label">Pronostico</span>
+              <InfoTip
+                className="stat-pill-val"
+                text={`I punti che ci si aspettava facesse in questa stagione (${forecast.games} partite), dall'Elo del torneo suo e dei suoi avversari a inizio stagione (1500 per gli esordienti).`}
+              >
+                {dec(forecast.expected)} punti <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+              </InfoTip>
+              <span className="stat-pill-note">
+                {forecast.played === 0
+                  ? `su ${forecast.games} partite`
+                  : forecast.played === forecast.games
+                  ? `${forecast.points >= forecast.expected ? "battuto ✓ · " : ""}fatti ${fmt(forecast.points)}`
+                  : `finora ${fmt(forecast.points)} su ${dec(forecast.expectedSoFar)} previsti`}
               </span>
             </div>
           )}

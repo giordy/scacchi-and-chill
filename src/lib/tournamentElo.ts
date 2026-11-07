@@ -147,3 +147,48 @@ export function ratingOf(report: EloReport, handle: string): number | undefined 
 }
 
 export const isNewcomer = (season: EloSeason, handle: string) => season.newcomers.has(lower(handle));
+
+// Pronostico: the points a player was expected to make in the season, from the Elo del torneo at
+// its start, against every opponent of the calendar (games still to play included); and so far,
+// on the games already finished. None for an esordiente: their 1500 says nothing of their level.
+export interface Forecast {
+  expected: number; // whole season
+  games: number; // games of the season in the calendar
+  expectedSoFar: number; // on the finished games
+  points: number; // made on the finished games
+  played: number;
+}
+
+export function seasonForecast(
+  handle: string,
+  season: EloSeason,
+  calendar: { white: string; black: string }[],
+  finished: EloGame[]
+): Forecast | null {
+  const me = lower(handle);
+  const mine = season.start.get(me);
+  if (mine === undefined || season.newcomers.has(me)) return null;
+  const opponentOf = (g: { white: string; black: string }) =>
+    lower(g.white) === me ? lower(g.black) : lower(g.black) === me ? lower(g.white) : null;
+  const expectedVs = (opp: string) => expectedScore(mine, season.start.get(opp) ?? ELO_START);
+  let expected = 0;
+  let games = 0;
+  calendar.forEach((g) => {
+    const opp = opponentOf(g);
+    if (opp === null) return;
+    expected += expectedVs(opp);
+    games++;
+  });
+  let expectedSoFar = 0;
+  let points = 0;
+  let played = 0;
+  finished.forEach((g) => {
+    const opp = opponentOf(g);
+    if (opp === null) return;
+    expectedSoFar += expectedVs(opp);
+    const s = scoreOf(g.result);
+    points += lower(g.white) === me ? s : 1 - s;
+    played++;
+  });
+  return { expected, games, expectedSoFar, points, played };
+}

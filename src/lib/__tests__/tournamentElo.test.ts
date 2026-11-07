@@ -74,3 +74,26 @@ describe('Elo del torneo', () => {
     expect(gameKey({ round: '2', white: 'Anna', black: 'bruno' }, 's2')).toBe('s2|2|anna|bruno');
   });
 });
+
+describe('pronostico', () => {
+  it('adds up the expected points against the opponents of the calendar, from the season start', async () => {
+    const { seasonForecast } = await import('../tournamentElo');
+    const rep = computeElo([
+      { key: 's1', players: ['anna', 'bruno'], games: [g('anna', 'bruno', '1-0', 1)] },
+      { key: 'current', players: ['anna', 'bruno', 'nuovo'], games: [g('bruno', 'anna', '1-0', 2)] },
+    ]);
+    const season = rep.seasons[1];
+    const calendar = [
+      { white: 'anna', black: 'bruno' }, { white: 'bruno', black: 'anna' },
+      { white: 'anna', black: 'nuovo' }, { white: 'nuovo', black: 'anna' },
+    ];
+    const f = seasonForecast('Anna', season, calendar, [g('bruno', 'anna', '1-0', 2)])!;
+    const vsBruno = expectedScore(1516, 1484);
+    const vsNew = expectedScore(1516, 1500);
+    expect(f.games).toBe(4);
+    expect(f.expected).toBeCloseTo(2 * vsBruno + 2 * vsNew, 6);
+    expect(f).toMatchObject({ played: 1, points: 0 });
+    expect(f.expectedSoFar).toBeCloseTo(vsBruno, 6);
+    expect(seasonForecast('nuovo', season, calendar, [])).toBeNull(); // esordiente
+  });
+});
