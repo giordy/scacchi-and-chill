@@ -59,6 +59,7 @@ export function SeasonInfoSection({
     }
   };
   const removePhoto = () => {
+    if (!window.confirm("Togliere la foto del maestro? Sul sito non comparirà più.")) return;
     setForm((f) => ({ ...f, imageUrl: "" }));
     onUpdateTournamentMeta({ imageUrl: "" });
     flash("ok", "Foto tolta.");

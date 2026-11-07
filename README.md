@@ -19,7 +19,7 @@ Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli acco
 - **Anteprima del link** (WhatsApp, Linktree): logo del torneo e nome della stagione (vedi sotto).
 
 ### Area organizzatore (`#admin`)
-Accesso con login Google, riservato a un solo account.
+Accesso con login Google, riservato a un solo account. Ogni azione che cancella o sostituisce qualcosa (partite, turni, giocatori, foto, testi modificati, token, ritiri, stagioni) chiede prima conferma.
 - **♞ Turni**: il lavoro di ogni turno, con i suoi messaggi.
   - *Elenco dei turni*, pianificati e avviati, con lo stato (da avviare, link creati in parte, in corso, concluso); il turno su cui lavorare è evidenziato. *+ Nuovo turno* ne apre uno vuoto.
   - *Dentro un turno*: aggiungi, togli o inverti i colori delle partite; **Crea link Lichess** crea le sfide che non hanno ancora un link e le salva nel torneo; **Messaggio con i link** e **Bollettino** preparano i testi WhatsApp da condividere o copiare (la scadenza dei link è calcolata da quando sono state create le sfide). Il bollettino scrive la scadenza una volta sola, sotto le partite, con l'elenco di quelle ancora da accettare, e chiude sempre con il link al sito; a fine turno, al posto del riepilogo, mette chi è in testa e la classifica dopo il turno (posizioni condivise come sul sito, 👑 accanto al campione in carica: solo lì, non sulle righe delle partite), poi gli studi sulle aperture giocate; *Elimina turno* lo cancella (anche da Firestore; su Lichess le sfide restano aperte).

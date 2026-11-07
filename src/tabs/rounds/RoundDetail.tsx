@@ -101,6 +101,8 @@ export function RoundDetail({
       } catch (e) {
         return flash("err", `Eliminazione non riuscita: ${errorMessage(e)}`);
       }
+    } else if (!window.confirm(`Togliere ${nameOf(m.white)} – ${nameOf(m.black)} dal Turno ${round}?`)) {
+      return;
     }
     if (m.scheduled) onUpdateSchedule(removeMatch(schedule, { round, white: m.white, black: m.black }));
     flash("ok", "Partita tolta dal turno.");
