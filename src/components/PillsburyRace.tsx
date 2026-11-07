@@ -1,6 +1,6 @@
 import React from 'react';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types';
-import { EloReport, currentSeason, ratingOf } from '../lib/tournamentElo';
+import { EloReport } from '../lib/tournamentElo';
 import { PILLSBURY_EMOJI, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
 import { playerHref } from '../lib/routes';
 import { Trend, TrendKind } from './Trend';
@@ -30,22 +30,10 @@ export function PillsburyRace({
   nameOf: (handle: string) => string;
 }) {
   const race = pillsburyRace(players, elo, calendar, history, gameStates);
-  const season = currentSeason(elo);
   const reigning = reigningPillsbury(seasons);
-  const eloCell = (handle: string) => {
-    const now = ratingOf(elo, handle);
-    const start = season.start.get(handle.toLowerCase());
-    if (now === undefined) return '–';
-    const move = start === undefined ? 0 : now - Math.round(start);
-    const kind: TrendKind = move > 0 ? 'up' : move < 0 ? 'down' : 'same';
-    return (
-      <>
-        {now} <Trend kind={kind} label={move === 0 ? 'come a inizio stagione' : `${move > 0 ? '+' : '−'}${Math.abs(move)} da inizio stagione`} />
-      </>
-    );
-  };
-  const row = (handle: string, rank: string, trend?: TrendKind) => (
-    <tr key={handle}>
+  // The Elo is left out: it is the level, and the race is about going beyond it
+  const row = (handle: string, rank: string, status: React.ReactNode, className = '') => (
+    <tr key={handle} className={className}>
       <td className="col-rank"><span className="rank">{rank}</span></td>
       <td className="sticky-col">
         <div className="player-cell">
@@ -53,17 +41,15 @@ export function PillsburyRace({
           <span className="player-link">@{handle}</span>
         </div>
       </td>
-      <td className="col-center nowrap">{eloCell(handle)}</td>
-      <td className="col-center">{trend ? <Trend kind={trend} label={TREND_LABEL[trend]} /> : '–'}</td>
+      <td className="col-center">{status}</td>
     </tr>
   );
   const firstSeason = seasons.length === 0;
 
   return (
     <section aria-label={PILLSBURY_TITLE}>
-
       {firstSeason ? (
-        <p className="note">Il premio parte dalla seconda stagione: nella prima sono tutti esordienti, e il livello di nessuno si conosce ancora.</p>
+        <p className="note">Il premio parte dalla seconda stagione: nella prima sono tutti esordienti.</p>
       ) : (
         <>
           <div className="table-responsive">
@@ -72,29 +58,26 @@ export function PillsburyRace({
                 <tr>
                   <th className="col-rank" scope="col"><span className="sr-only">Posizione</span></th>
                   <th className="sticky-col" scope="col">Giocatore</th>
-                  <th className="col-center" scope="col">Elo</th>
-                  <th className="col-center" scope="col">Pronostico</th>
+                  <th className="col-center" scope="col">Rispetto al pronostico</th>
                 </tr>
               </thead>
               <tbody>
-                {race.rows.map((r, i) => row(r.handle, String(i + 1), r.trend))}
-                {race.waiting.map((h) => row(h, '–'))}
+                {race.rows.map((r, i) => row(r.handle, String(i + 1), <Trend kind={r.trend} label={TREND_LABEL[r.trend]} />))}
+                {race.waiting.map((h) => row(h, '–', '–'))}
+                {race.newcomers.map((h) => row(h, '', <span className="newcomer-label">Esordiente</span>, 'is-newcomer'))}
               </tbody>
             </table>
           </div>
           {race.rows.length === 0 && <p className="note note-top-xs">La corsa parte con le prime partite concluse.</p>}
           {race.newcomers.length > 0 && (
-            <p className="note note-top-xs">
-              {race.newcomers.length === 1 ? 'Esordiente' : 'Esordienti'}, fuori dalla corsa per questa stagione:{' '}
-              {namesList(race.newcomers.map(nameOf))}. Il loro livello si conosce dalla prossima; intanto le partite contro di loro contano solo per la classifica.
-            </p>
+            <p className="note note-top-xs">Gli esordienti entrano in corsa dalla prossima stagione.</p>
           )}
         </>
       )}
       <div className="pillsbury-about">
         <p className="note note-top-xs">
-          Il <strong>{PILLSBURY_TITLE}</strong> {PILLSBURY_EMOJI} va a chi, a fine stagione, ha superato di più il proprio pronostico: i punti che
-          ci si aspettava facesse, dall'Elo del torneo suo e dei suoi avversari a inizio stagione. ▲ sopra il previsto, = in linea, ▼ sotto.
+          Il <strong>{PILLSBURY_TITLE}</strong> {PILLSBURY_EMOJI} va a chi, a fine stagione, ha fatto più punti del previsto. ▲ sopra il previsto · = in
+          linea · ▼ sotto.
           {reigning && <> Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).</>}
         </p>
         <p className="note note-top-xs">
