@@ -10,11 +10,14 @@ export function useAdminAuth() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authReady, setAuthReady] = useState(false);
 
-  // Firebase Authentication state: access is granted only to the accounts in ADMIN_EMAILS
+  // Firebase Authentication state: access is granted only to the accounts with a document in admins
   useEffect(() => {
-    return subscribeToAuth((user) => {
+    let latest = 0;
+    return subscribeToAuth(async (user) => {
+      const check = ++latest;
+      const ok = await isAdminUser(user);
+      if (check !== latest) return; // a newer sign-in state arrived meanwhile
       setAuthReady(true);
-      const ok = isAdminUser(user);
       setIsAuthenticated(ok);
       setEmail(ok && user?.email ? user.email : "");
       if (user && !ok) {

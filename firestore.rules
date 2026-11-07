@@ -1,12 +1,20 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Solo l'organizzatore (account Google verificato) può scrivere.
-    // Se cambi l'email qui, aggiorna anche ADMIN_EMAILS in src/firebaseAuth.ts.
+    // Solo l'organizzatore (account Google verificato) può scrivere. Gli organizzatori sono i
+    // documenti admins/<email>, creati a mano dalla console Firebase: l'email non sta nel codice.
     function isAdmin() {
       return request.auth != null
           && request.auth.token.email_verified == true
-          && request.auth.token.email == 'organizer@example.com';
+          && exists(/databases/$(database)/documents/admins/$(request.auth.token.email));
+    }
+
+    // Ognuno può solo controllare se è organizzatore (leggere il proprio documento): l'elenco
+    // non si legge e non si scrive dal sito.
+    match /admins/{email} {
+      allow get: if request.auth != null
+                 && request.auth.token.email_verified == true
+                 && request.auth.token.email == email;
     }
 
     function isValidUrl(url) {

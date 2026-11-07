@@ -4,10 +4,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
 import { assertFails, assertSucceeds, initializeTestEnvironment, RulesTestEnvironment } from '@firebase/rules-unit-testing';
-import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 
 const RULES = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'utf8');
-const ADMIN = RULES.match(/request\.auth\.token\.email == '([^']+)'/)![1];
+const ADMIN = 'organizer@example.com';
 const T = 'tournaments/scacchi-and-chill-official';
 
 const tournament = { title: 'Scacchi & Chill', season: 'Stagione 2', players: [] };
@@ -33,6 +33,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
       await setDoc(doc(db, `${T}/seasons/stagione-1`), season);
       await setDoc(doc(db, `${T}/media/m1`), photo);
       await setDoc(doc(db, `${T}/private/organizer`), { token: 'secret' });
+      await setDoc(doc(db, `admins/${ADMIN}`), {});
     });
   });
 
@@ -70,6 +71,23 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
       await assertSucceeds(getDoc(doc(admin(), `${T}/private/organizer`)));
       await assertSucceeds(setDoc(doc(admin(), `${T}/private/organizer`), { token: 'y' }));
       await assertFails(getDoc(doc(admin(false), `${T}/private/organizer`)));
+    });
+  });
+
+  describe('the list of organizers', () => {
+    it('lets an account check only its own entry, with a verified email', async () => {
+      await assertSucceeds(getDoc(doc(admin(), `admins/${ADMIN}`)));
+      await assertSucceeds(getDoc(doc(stranger(), 'admins/someone@example.com')));
+      await assertFails(getDoc(doc(stranger(), `admins/${ADMIN}`)));
+      await assertFails(getDoc(doc(visitor(), `admins/${ADMIN}`)));
+      await assertFails(getDoc(doc(admin(false), `admins/${ADMIN}`)));
+    });
+
+    it('cannot be listed or changed from the site', async () => {
+      await assertFails(getDocs(collection(admin(), 'admins')));
+      await assertFails(setDoc(doc(stranger(), 'admins/someone@example.com'), {}));
+      await assertFails(setDoc(doc(admin(), 'admins/someone@example.com'), {}));
+      await assertFails(deleteDoc(doc(admin(), `admins/${ADMIN}`)));
     });
   });
 

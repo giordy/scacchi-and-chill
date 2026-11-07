@@ -47,12 +47,10 @@ Da *Stagioni → Fine stagione e storico*:
 
 1. **Authentication → Sign-in method**: attiva Google.
 2. **Authentication → Settings → Authorized domains**: aggiungi il dominio di GitHub Pages (`<utente>.github.io`) e `localhost`.
-3. **Firestore → Rules**: pubblica il contenuto di [`firestore.rules`](firestore.rules). Ripubblicalo ogni volta che il file cambia. Le regole sono provate da `tests/firestore.rules.test.ts` sull'emulatore Firestore (`npm run test:rules`, anche nel deploy): chi non è l'organizzatore legge solo i dati pubblici e non scrive nulla, i dati privati restano privati, le partite accettano solo link Lichess, le foto solo immagini piccole. Un test controlla anche che l'email in `firestore.rules` sia la stessa di `ADMIN_EMAILS`.
+3. **Firestore → Rules**: pubblica il contenuto di [`firestore.rules`](firestore.rules). Ripubblicalo ogni volta che il file cambia. Le regole sono provate da `tests/firestore.rules.test.ts` sull'emulatore Firestore (`npm run test:rules`, anche nel deploy): chi non è l'organizzatore legge solo i dati pubblici e non scrive nulla, i dati privati restano privati, le partite accettano solo link Lichess, le foto solo immagini piccole.
 4. La chiave web in `firebase-applet-config.json` è pubblica per natura. Limitala in Google Cloud ai referrer `<utente>.github.io/*` e `localhost`.
 
-L'email dell'organizzatore compare in **due** posti, da tenere allineati:
-- `firestore.rules` (`isAdmin()`), che è la protezione vera;
-- `ADMIN_EMAILS` in `src/firebaseAuth.ts`, che regola solo l'interfaccia.
+L'email dell'organizzatore **non è nel codice** (né nel sito pubblicato): l'organizzatore è chi ha un documento nella collezione `admins` di Firestore, con l'email come ID. Per crearlo, **prima** di pubblicare le regole: *Firestore → Data → Start collection* `admins`, *Document ID* l'email dell'account Google (come appare nel login, in minuscolo), nessun campo. Per aggiungere o togliere un organizzatore si aggiunge o si cancella un documento, sempre dalla console: le regole non permettono di elencare la collezione né di scriverla dal sito, e ogni account può leggere solo il proprio documento (così l'area admin sa se mostrarsi).
 
 ### Dati su Firestore
 | Percorso | Lettura | Contenuto |
@@ -62,6 +60,7 @@ L'email dell'organizzatore compare in **due** posti, da tenere allineati:
 | `tournaments/<id>/seasons/*` | pubblica | classifiche finali delle stagioni archiviate |
 | `tournaments/<id>/media/*` | pubblica | foto del maestro caricate dall'area organizzatore, una per stagione (JPEG ridotto, scritto solo dall'organizzatore, sotto i 900 KB) |
 | `tournaments/<id>/private/organizer` | solo admin | aneddoti sui giocatori, Elo, token Lichess (permesso Challenge), opzioni delle sfide e testi dei messaggi |
+| `admins/<email>` | solo il proprio | un documento vuoto per ogni organizzatore, creato a mano dalla console Firebase |
 
 Gli aneddoti e il token sono privati di proposito: non vanno mai nella parte pubblica. Le regole Firestore permettono di leggere `private/*` solo all'account dell'organizzatore.
 
