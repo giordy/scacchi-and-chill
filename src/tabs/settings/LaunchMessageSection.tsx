@@ -44,6 +44,7 @@ export function LaunchMessageSection({
         className="secondary"
         type="button"
         onClick={() => {
+          if (!window.confirm('Ripristinare i testi predefiniti? I testi che hai modificato vengono cancellati.')) return;
           setTemplates(null);
           flash("ok", "Testi dei messaggi ripristinati da config.json.");
         }}

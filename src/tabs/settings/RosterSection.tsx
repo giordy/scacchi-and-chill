@@ -79,6 +79,7 @@ export function RosterSection({
       flash('err', `${entry.name} ha già partite in questa stagione (create o in calendario): per toglierlo usa «Ritiri» qui sotto.`);
       return;
     }
+    if (!window.confirm(`Togliere ${entry.name} da questa stagione? Resta nel registro e si può riaggiungere.`)) return;
     onUpdatePlayers(players.filter((p) => p.handle.toLowerCase() !== entry.handle.toLowerCase()));
     flash('ok', `${entry.name} non gioca più questa stagione; resta nel registro.`);
   };

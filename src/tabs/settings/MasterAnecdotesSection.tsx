@@ -38,6 +38,9 @@ export function MasterAnecdotesSection({
         disabled={draft === saved}
         onClick={() => {
           const list = anecdotesFromText(draft);
+          const before = meta?.masterAnecdotes?.length ?? 0;
+          // Fewer anecdotes than before: some are being deleted
+          if (list.length < before && !window.confirm(`Salvare ${list.length} aneddoti invece di ${before}? Quelli tolti vengono cancellati.`)) return;
           onUpdateTournamentMeta({ masterAnecdotes: list });
           flash('ok', `Aneddoti salvati: ${list.length}.`);
         }}

@@ -122,6 +122,7 @@ export function StatusPhrasesSection({
         type="button"
         disabled={!overrides}
         onClick={() => {
+          if (!window.confirm('Ripristinare le frasi predefinite? Le frasi che hai modificato vengono cancellate.')) return;
           setOverrides(null);
           flash('ok', 'Frasi del bollettino ripristinate da config.json.');
         }}

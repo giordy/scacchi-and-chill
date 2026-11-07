@@ -49,6 +49,7 @@ export function TokenSection({
           className="secondary"
           type="button"
           onClick={() => {
+            if (!window.confirm("Dimenticare il token Lichess? Per creare le sfide andrà incollato di nuovo.")) return;
             setTokenDraft("");
             set({ token: "" });
             flash("ok", "Token rimosso.");
