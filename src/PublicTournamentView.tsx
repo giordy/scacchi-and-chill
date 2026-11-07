@@ -486,7 +486,7 @@ export function PublicTournamentView({
             )}
           </article>
 
-          {allTime && <AllTimeSection rows={allTime.rows} records={allTime.records} gamesSince={allTime.gamesSince} />}
+          {allTime && <AllTimeSection rows={allTime.rows} records={allTime.records} gamesSince={allTime.gamesSince} title={tournamentMeta.title} />}
 
         </section>
       )}

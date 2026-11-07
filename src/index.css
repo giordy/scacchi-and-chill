@@ -2661,3 +2661,15 @@ button.infotip-trigger.presence-trigger {
 .relink-message { display: grid; gap: 6px; }
 .relink-message pre { margin: 0; white-space: pre-wrap; font: inherit; font-size: 13px; padding: 8px; background: var(--bg); border-radius: 6px; }
 button.btn-mini.is-active { background: var(--brass-soft); }
+
+/* Rows of a list inside a card (past season's awards, records): no cards in cards */
+.table-responsive.is-flat { border: 0; border-radius: 0; background: none; }
+.compact-list { list-style: none; margin: 0; padding: 0; }
+.compact-list li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.compact-list li:first-child { border-top: 0; padding-top: 4px; }
+.compact-emoji { font-size: 22px; line-height: 1.2; text-align: center; }
+.compact-body { display: grid; gap: 2px; font-size: 14px; min-width: 0; }
+.compact-body .award-winners { display: inline; font-weight: 700; }
+.compact-sub { font-size: 12px; color: var(--muted); }
+/* The player column sticks over the card's own background, not the panel's */
+.winner-row tr:not(.row-leader) .sticky-col { background: var(--bg); }
