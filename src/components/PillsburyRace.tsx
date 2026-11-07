@@ -87,7 +87,7 @@ export function PillsburyRace({
                 <tr>
                   <th className="col-rank" scope="col"><span className="sr-only">Posizione</span></th>
                   <th className="sticky-col" scope="col">Giocatore</th>
-                  <th className="col-center" scope="col">Andamento</th>
+                  <th className="col-center" scope="col">Stato</th>
                   <th className="col-center" scope="col">Forma</th>
                 </tr>
               </thead>
