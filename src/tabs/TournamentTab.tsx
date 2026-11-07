@@ -106,7 +106,7 @@ export function TournamentTab({
           flash={flash}
           onUpdateTournamentMeta={onUpdateTournamentMeta}
         />
-        <RebuildSeasonSection config={config} seasons={seasons} flash={flash} />
+        <RebuildSeasonSection config={config} seasons={seasons} history={history} flash={flash} />
       </CollapsibleSection>
 
     </div>
