@@ -216,13 +216,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const seasonGames = calendar.filter((g) => [g.white, g.black].some((h) => h.toLowerCase() === player.handle.toLowerCase())).length;
   const countedOf = forecast && forecast.games < seasonGames ? `${forecast.games} delle ${seasonGames}` : String(forecast?.games ?? 0);
   const pronostico = forecast ? pronosticoPoints(forecast) : 0;
-  // How it is going: at the end against the pronostico, before against the points expected so far
-  // (a gap of a few tenths of a point says nothing)
-  const over = !forecast ? 0 : forecast.played === forecast.games ? forecast.points - pronostico : forecast.points - forecast.expectedSoFar;
-  const forecastTrend: TrendKind = forecast && forecast.played === forecast.games
-    ? over > 0 ? "up" : over < 0 ? "down" : "same"
-    : over >= 0.5 ? "up" : over <= -0.5 ? "down" : "same";
-  const forecastLabel = { up: "sopra l'obiettivo", same: "in linea con l'obiettivo", down: "sotto l'obiettivo" }[forecastTrend];
   const eloTrend: TrendKind = eloMove > 0 ? "up" : eloMove < 0 ? "down" : "same";
 
   return (
@@ -301,16 +294,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               <span className="stat-pill-val">
                 {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"}
               </span>
-              {/* How it is going, apart from the value: the objective itself never moves */}
-              <span className="stat-pill-note">
-                {forecast.played === 0 ? (
-                  `su ${countedOf} partite`
-                ) : (
-                  <>
-                    {forecast.played === forecast.games ? "alla fine" : "finora"} <Trend kind={forecastTrend} label={forecastLabel} />
-                  </>
-                )}
-              </span>
+              {/* Which games the objective is on; how it is going is in the Pillsbury table */}
+              <span className="stat-pill-note">su {countedOf} partite</span>
             </div>
           )}
           {pace && (
