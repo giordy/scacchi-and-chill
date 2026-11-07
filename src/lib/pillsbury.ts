@@ -85,11 +85,11 @@ export function pillsburyWins(handle: string, seasons: SeasonArchive[]): string[
 
 // Forma: how a player is doing right now, from their last 3 finished games of the season against
 // anyone (esordienti included): the points beyond those expected from the Elo del torneo the two
-// had when each game started. As expected is good weather (☀️), and the bad weather passes. None
-// with fewer than 2.
+// had when each game started. As expected is all right (👍); a bad patch is a flat battery (🪫),
+// it recharges. None with fewer than 2.
 export type Form = 'fire' | 'strong' | 'calm' | 'rain';
 export const FORM_GAMES = 3;
-export const FORM_MARK: Record<Form, string> = { fire: '🔥', strong: '💪', calm: '☀️', rain: '🌧️' };
+export const FORM_MARK: Record<Form, string> = { fire: '🔥', strong: '💪', calm: '👍', rain: '🪫' };
 export const FORM_LABEL: Record<Form, string> = { fire: 'in fiamme', strong: 'in forma', calm: 'tranquillo', rain: 'periodo no' };
 
 export function formOf(handle: string, report: EloReport, finished: EloGame[]): Form | undefined {

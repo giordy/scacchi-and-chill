@@ -48,7 +48,7 @@ export function PillsburyRace({
 }) {
   const race = pillsburyRace(players, elo, calendar, history, gameStates);
   const reigning = reigningPillsbury(seasons);
-  // Forma: the weather of the last games; a tap says what it means
+  // Forma: how the last games went; a tap says what it means
   const formCell = (handle: string) => {
     const f = race.form[handle];
     if (!f) return '';
@@ -81,6 +81,15 @@ export function PillsburyRace({
         <p className="note">Il premio parte dalla seconda stagione: nella prima sono tutti esordienti.</p>
       ) : (
         <>
+          {/* The key of the Forma column, where it is read, not at the bottom of the page */}
+          <p className="form-legend" aria-label={`Forma, sulle ultime ${FORM_GAMES} partite`}>
+            <span className="form-legend-title">Forma (ultime {FORM_GAMES} partite):</span>
+            {(Object.keys(FORM_MARK) as (keyof typeof FORM_MARK)[]).map((f) => (
+              <span key={f} className="form-legend-item">
+                <span aria-hidden="true">{FORM_MARK[f]}</span> {FORM_LABEL[f]}
+              </span>
+            ))}
+          </p>
           <div className="table-responsive">
             <table className="standings-table pillsbury-table">
               <thead>
@@ -109,10 +118,6 @@ export function PillsburyRace({
           Il <strong>{PILLSBURY_TITLE}</strong> {PILLSBURY_EMOJI} va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti (lo trovate nel vostro profilo). ▲ sopra
           l'obiettivo · = in linea · ▼ sotto · ⏳ in attesa della prima partita che conta.
           {reigning && <> Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).</>}
-        </p>
-        <p className="note note-top-xs">
-          <strong>Forma</strong>, sulle ultime {FORM_GAMES} partite (con chiunque, esordienti compresi): {FORM_MARK.fire} in fiamme · {FORM_MARK.strong} in forma ·{' '}
-          {FORM_MARK.calm} tranquillo · {FORM_MARK.rain} periodo no.
         </p>
         <p className="note note-top-xs">
           <strong>Perché Pillsbury.</strong> {PILLSBURY_ORIGIN}
