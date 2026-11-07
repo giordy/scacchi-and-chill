@@ -1,11 +1,14 @@
-import { useState } from 'react';
-import { AppConfig, HistoryGame, MessageTemplates, ScheduledMatch, Settings } from '../../types';
+import React, { useState } from 'react';
+import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, Settings } from '../../types';
 import { RoundMatch, RoundSummary, addMatch, removeMatch, removeRound, swapColors } from '../../lib/rounds';
 import { createChallenge } from '../../lib/lichess';
 import { errorMessage } from '../../lib/utils';
 import { deleteGamesFromFirebase } from '../../firebaseService';
 import { LaunchMessage } from './LaunchMessage';
 import { BulletinSection } from './BulletinSection';
+import { RelinkPanel } from './RelinkPanel';
+import { canRelink, linkState } from '../../lib/relink';
+import { stateOf } from '../../lib/games';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
 type Panel = 'launch' | 'bulletin' | null;
@@ -23,6 +26,7 @@ export function RoundDetail({
   templates,
   history,
   setHistory,
+  gameStates = {},
   schedule,
   onUpdateSchedule,
   onCreated,
@@ -42,6 +46,8 @@ export function RoundDetail({
   templates: MessageTemplates;
   history: HistoryGame[];
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
+  // Fresh Lichess states from the sync, to tell an accepted challenge from an expired one
+  gameStates?: Record<string, LichessExportGame>;
   schedule: ScheduledMatch[];
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
   // Saves the games just created on Lichess in the tournament; false if saving failed
@@ -57,6 +63,9 @@ export function RoundDetail({
 
   const [busy, setBusy] = useState("");
   const [panel, setPanel] = useState<Panel>(null);
+  // The game whose link is being replaced, by its two players (the colors may change)
+  const [relinking, setRelinking] = useState("");
+  const pairKey = (m: { white: string; black: string }) => [m.white, m.black].sort().join("|");
   const [white, setWhite] = useState("");
   const [black, setBlack] = useState("");
 
@@ -196,8 +205,13 @@ export function RoundDetail({
         )}
 
         <div className="round-matches">
-          {matches.map((m) => (
-            <div key={`${m.white}-${m.black}`} className="list-row round-match">
+          {matches.map((m) => {
+            const link = m.game && m.url ? linkState(m.game, stateOf(m.game, gameStates), settings.expiry) : null;
+            // Stays open after a change, also when the new link is a game already started (to copy the message)
+            const open = !!link && relinking === pairKey(m);
+            return (
+            <React.Fragment key={pairKey(m)}>
+            <div className="list-row round-match">
               <div className="round-match-players">
                 <span className="round-match-player">
                   <span className="dot w" aria-label="Bianco" /> {nameOf(m.white)}
@@ -207,6 +221,21 @@ export function RoundDetail({
                 </span>
               </div>
               <div className="header-actions">
+                {link && (link.kind === 'expired' || link.kind === 'void') && (
+                  <span className="status-badge loss">{link.kind === 'expired' ? 'Scaduta' : 'Annullata'}</span>
+                )}
+                {link && canRelink(link) && (
+                  <button
+                    type="button"
+                    className={`secondary btn-mini btn-mini-edit${open ? ' is-active' : ''}`}
+                    title="Nuovo link"
+                    aria-expanded={open}
+                    aria-label={`Nuovo link per ${nameOf(m.white)} – ${nameOf(m.black)}`}
+                    onClick={() => setRelinking(open ? "" : pairKey(m))}
+                  >
+                    🔁
+                  </button>
+                )}
                 {m.url ? (
                   <a href={m.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
                     Lichess ↗
@@ -233,7 +262,23 @@ export function RoundDetail({
                 </button>
               </div>
             </div>
-          ))}
+            {open && m.game && link && (
+              <RelinkPanel
+                game={m.game}
+                link={link}
+                challengeName={config.challengeName}
+                settings={settings}
+                nameOf={nameOf}
+                flash={flash}
+                onMissingToken={onMissingToken}
+                onReplaced={(nextGame) =>
+                  setHistory((prev) => [...prev.filter((g) => g !== m.game && g.url !== m.game!.url), nextGame])
+                }
+              />
+            )}
+            </React.Fragment>
+            );
+          })}
         </div>
 
         {matches.length > 0 && byes.length > 0 && <p className="note note-sm">Riposa: {byes.join(", ")}</p>}

@@ -113,6 +113,7 @@ export function RoundsTab({
           templates={templates}
           history={history}
           setHistory={setHistory}
+          gameStates={gameStates}
           schedule={schedule}
           onUpdateSchedule={onUpdateSchedule}
           onCreated={save}

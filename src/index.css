@@ -2641,3 +2641,13 @@ button.infotip-trigger.presence-trigger {
 .roster-actions { grid-column: 2; grid-row: 1 / span 2; display: flex; flex-direction: column; gap: 4px; align-items: stretch; }
 .checkbox-line { display: flex; gap: 8px; align-items: center; font-size: 14px; }
 .roster-locked { font-size: 11px; color: var(--muted); text-align: right; max-width: 120px; }
+
+/* Organizer: new link for a game (expired, aborted, or created by the players) */
+.relink { display: grid; gap: 8px; margin: -2px 0 6px; padding: 10px; background: var(--panel); border: 1px dashed var(--line); border-radius: 8px; }
+.relink .note { margin: 0; }
+.relink-label { font-size: 13px; color: var(--muted); }
+.relink-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+.relink-row input { min-width: 0; }
+.relink-message { display: grid; gap: 6px; }
+.relink-message pre { margin: 0; white-space: pre-wrap; font: inherit; font-size: 13px; padding: 8px; background: var(--bg); border-radius: 6px; }
+button.btn-mini.is-active { background: var(--brass-soft); }

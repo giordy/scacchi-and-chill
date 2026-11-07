@@ -51,6 +51,20 @@ export async function createChallenge(
   return url;
 }
 
+// Cancels an open challenge created with the organizer's token (a challenge replaced by a new
+// link must not stay acceptable). Best effort: true when Lichess confirmed.
+export async function cancelChallenge(id: string, token: string): Promise<boolean> {
+  try {
+    const res = await fetch(`https://lichess.org/api/challenge/${id}/cancel`, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token },
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 // Lichess exports up to 300 games per call
 const MAX_GAMES = 300;
 
