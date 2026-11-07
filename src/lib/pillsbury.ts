@@ -90,7 +90,7 @@ export function pillsburyWins(handle: string, seasons: SeasonArchive[]): string[
 // count for the race (none with an esordiente): the points beyond those expected from the Elo del
 // torneo the two
 // had when each game started. As expected is all right (👍); a bad patch is a flat battery (🪫),
-// it recharges. None with fewer than 2.
+// it recharges. From the first game that counts (then it is just how that game went).
 export type Form = 'fire' | 'strong' | 'calm' | 'rain';
 export const FORM_GAMES = 3;
 export const FORM_MARK: Record<Form, string> = { fire: '🔥', strong: '💪', calm: '👍', rain: '🪫' };
@@ -105,7 +105,7 @@ export function formOf(handle: string, report: EloReport, finished: EloGame[]): 
     .filter((g) => report.before.get(gameKey(g, CURRENT))?.newcomer === false)
     .sort((a, b) => (a.end ?? 0) - (b.end ?? 0))
     .slice(-FORM_GAMES);
-  if (mine.length < 2) return undefined;
+  if (mine.length === 0) return undefined;
   let over = 0;
   for (const g of mine) {
     const r = report.before.get(gameKey(g, CURRENT));

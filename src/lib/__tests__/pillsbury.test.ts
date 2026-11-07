@@ -82,7 +82,12 @@ describe('forma', () => {
     ]);
     expect(formOf('anna', report, games)).toBe('fire');
     expect(formOf('carla', report, games)).toBe('calm'); // a loss and two draws, nothing unexpected
-    expect(formOf('nuova', report, games)).toBeUndefined(); // one game only
+    expect(formOf('nuova', report, games)).toBeUndefined(); // an esordiente: no game that counts
+    // One game that counts is enough: a win against an equal is above the expected
+    const one = [game('anna', 'bruno', '1-0', 1)];
+    const r1 = computeElo([{ key: 's1', players: ['anna', 'bruno'], games: [] }, { key: 'current', players: [], games: one }]);
+    expect(formOf('anna', r1, one)).toBe('strong');
+    expect(formOf('bruno', r1, one)).toBe('calm');
     const losses = [game('anna', 'bruno', '0-1', 1), game('carla', 'anna', '1-0', 2), game('anna', 'carla', '0-1', 3)];
     const r2 = computeElo([{ key: 's1', players: ['anna', 'bruno', 'carla'], games: [] }, { key: 'current', players: [], games: losses }]);
     expect(formOf('anna', r2, losses)).toBe('rain');
