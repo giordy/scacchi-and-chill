@@ -46,8 +46,20 @@ describe('computeSeasonAwards', () => {
     expect(byId.fastest.detail).toBe('in 15 mosse'); // the loser is not named
     expect(winners('longest')).toEqual(['anna']); // the draw is longer, but only wins count
     expect(byId.longest.detail).toBe('in 26 mosse contro Carla');
-    expect(winners('draws')).toEqual(['bruno', 'carla']);
-    expect(byId.draws.detail).toBe('1 patta');
+    expect(byId.draws).toBeUndefined(); // a single draw is no wall
+  });
+
+  it('needs at least two mates for Re del matto and two draws for Il muro', () => {
+    const one = computeSeasonAwards(players, [g('anna', 'bruno', 'aaaaaaaa')], { aaaaaaaa: st('aaaaaaaa', 'mate', 40, 20, 'white') });
+    expect(one.some((a) => a.id === 'mate')).toBe(false);
+    const draws = computeSeasonAwards(players, [g('bruno', 'carla', 'bbbbbbbb'), g('carla', 'bruno', 'ffffffff')], {
+      bbbbbbbb: st('bbbbbbbb', 'draw', 60, 30),
+      ffffffff: st('ffffffff', 'draw', 60, 30),
+    });
+    const wall = draws.find((a) => a.id === 'draws')!;
+    expect(wall.winners.map((w) => w.handle)).toEqual(['bruno', 'carla']);
+    expect(wall.detail).toBe('2 patte');
+    expect(awardsMessage('S', [wall])).toContain('Bruno e Carla (2 patte)');
   });
 
   it('leaves out awards nobody earned', () => {
@@ -64,7 +76,6 @@ describe('computeSeasonAwards', () => {
       '',
       '👑 *Re del matto*: Anna (2 vittorie col matto)',
     ]);
-    expect(awardsMessage('S', [byId.draws])).toContain('Bruno e Carla (1 patta)');
     const archive = buildSeasonArchive({ title: 'T', season: 'S', description: '' }, players, history, gs);
     expect(archive.awards).toEqual(awards);
   });
@@ -129,14 +140,15 @@ describe('games linked from the awards', () => {
     });
     const states = {
       quick001: st('quick001', 10, 'mate'),
+      mate0002: st('mate0002', 40, 'mate'),
       long0001: st('long0001', 60),
       upset001: st('upset001', 30, 'resign', { players: { white: { rating: 1400 }, black: { rating: 1700 } } }),
     };
-    const awards = computeSeasonAwards(players, [h('quick001'), h('long0001'), h('upset001')], states);
+    const awards = computeSeasonAwards(players, [h('quick001'), h('mate0002'), h('long0001'), h('upset001')], states);
     const by = (id: string) => awards.find((a) => a.id === id)!;
     expect(by('fastest').games).toEqual(['quick001']);
     expect(by('longest').games).toEqual(['long0001']);
-    expect(by('mate').games).toEqual(['quick001']);
+    expect(by('mate').games).toEqual(['quick001', 'mate0002']);
     expect(awards.some((a) => a.id === 'upsets')).toBe(false); // replaced by the Premio Rivelazione
   });
 

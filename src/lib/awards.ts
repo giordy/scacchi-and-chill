@@ -17,6 +17,10 @@ function leaders(counts: Map<string, number>, players: Player[]): { handles: str
   return { handles: players.map((p) => p.handle).filter((h) => counts.get(h) === best), best };
 }
 
+// Re del matto and Il muro need a real feat: one mate or one draw in a season says little, and
+// with few players every award given away makes the others worth less
+const MIN_COUNT = 2;
+
 // At most this many games are linked from an award: beyond, a list of links says little
 const MAX_LINKED = 3;
 const linked = (ids: Array<string | undefined>) => {
@@ -66,7 +70,7 @@ export function computeSeasonAwards(
   const mates = new Map<string, number>();
   games.forEach((g) => g.winner && g.status === "mate" && mates.set(g.winner, (mates.get(g.winner) ?? 0) + 1));
   const mate = leaders(mates, players);
-  if (mate.handles.length > 0) {
+  if (mate.handles.length > 0 && mate.best >= MIN_COUNT) {
     awards.push({
       id: "mate",
       emoji: "👑",
@@ -136,7 +140,7 @@ export function computeSeasonAwards(
     draws.set(g.black, (draws.get(g.black) ?? 0) + 1);
   });
   const wall = leaders(draws, players);
-  if (wall.handles.length > 0) {
+  if (wall.handles.length > 0 && wall.best >= MIN_COUNT) {
     awards.push({
       id: "draws",
       emoji: "🧱",
