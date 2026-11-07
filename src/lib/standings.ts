@@ -19,6 +19,12 @@ export type Crosstable = Record<string, Record<string, CrosstableResult>>;
 // Statuses of a game that has not produced a result yet
 const UNFINISHED_STATUSES = new Set(["created", "started", "aborted", "noStart"]);
 
+// The result a game counts for in the standings, null while it has none
+export function scoredResult(s?: LichessExportGame): "1-0" | "0-1" | "½-½" | null {
+  if (!s || UNFINISHED_STATUSES.has(s.status)) return null;
+  return s.winner === "white" ? "1-0" : s.winner === "black" ? "0-1" : "½-½";
+}
+
 const emptyStats = () => ({ played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 });
 
 // Pure function: standings, tiebreaks and crosstable from the games and their Lichess states.
@@ -54,19 +60,20 @@ export function computeStandings(
     if (!stats[white]) stats[white] = emptyStats();
     if (!stats[black]) stats[black] = emptyStats();
 
-    if (!s || UNFINISHED_STATUSES.has(s.status)) return;
+    const result = scoredResult(s);
+    if (!result) return;
 
     stats[white].played++;
     stats[black].played++;
 
-    if (s.winner === "white") {
+    if (result === "1-0") {
       stats[white].won++;
       stats[white].points += 1;
       stats[black].lost++;
       setCross(white, black, "1");
       setCross(black, white, "0");
       finished.push({ white, black, result: "1-0" });
-    } else if (s.winner === "black") {
+    } else if (result === "0-1") {
       stats[black].won++;
       stats[black].points += 1;
       stats[white].lost++;

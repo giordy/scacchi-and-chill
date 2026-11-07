@@ -28,6 +28,8 @@ import { computeSeasonAwards } from "./lib/awards";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound } from "./lib/games";
 import { PresenceInfo } from "./lib/presence";
+import { AllTimeSection } from "./components/AllTimeSection";
+import { allTimeNameOf, allTimeRecords, allTimeTable, seasonsWithGames } from "./lib/allTime";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -132,6 +134,19 @@ export function PublicTournamentView({
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
   const started = seasonStarted(standings);
   const champions = reigningChampions(tournamentMeta.winners);
+  // All seasons added up (only once a season has been archived: before, it is just this one)
+  const allTime = useMemo(() => {
+    if (seasons.length === 0) return null;
+    const current = { season: tournamentMeta.season, standings };
+    const withGames = seasonsWithGames(seasons, { season: tournamentMeta.season, history, gameStates });
+    const archivedWithGames = withGames.filter((s) => !s.current);
+    return {
+      rows: allTimeTable(seasons, tournamentMeta.winners, current),
+      records: archivedWithGames.length > 0 ? allTimeRecords(withGames, allTimeNameOf(nameOf, seasons)) : [],
+      // Older seasons were archived without their games: say where the records start
+      gamesSince: archivedWithGames.length < seasons.length ? archivedWithGames[0]?.season : undefined,
+    };
+  }, [seasons, tournamentMeta.season, tournamentMeta.winners, standings, history, gameStates, nameOf]);
   // Anecdotes of the rounds already started, newest first; the next ones stay a surprise
   const anecdotes = useMemo(() => publishedAnecdotes(tournamentMeta.masterAnecdotes, history), [tournamentMeta.masterAnecdotes, history]);
   // Andata/ritorno: from the official schedule when there is one, otherwise from the games created so far
@@ -491,6 +506,8 @@ export function PublicTournamentView({
               <p className="note m-0">Il primo campione sarà scritto qui a fine stagione.</p>
             )}
           </article>
+
+          {allTime && <AllTimeSection rows={allTime.rows} records={allTime.records} gamesSince={allTime.gamesSince} />}
 
           {seasons.length > 0 && (
             <div>

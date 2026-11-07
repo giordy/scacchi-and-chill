@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { AppConfig, HistoryGame, LichessExportGame } from '../types';
+import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
+import { allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, seasonsWithGames } from '../lib/allTime';
+import { computeStandings } from '../lib/standings';
+import { CareerSection, AllTimeHeadToHeadSection } from '../components/CareerSections';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
 import { flairFromGames, flairUrl } from '../lib/flair';
@@ -16,6 +19,7 @@ interface PlayerPageProps {
   gameStates: Record<string, LichessExportGame>;
   nameOf: (handle: string) => string;
   presence?: PresenceInfo; // when each player was last on Lichess
+  seasons?: SeasonArchive[]; // archived seasons, for the career and the all-time head-to-heads
 }
 
 const OUTCOME_LABEL: Record<GameOutcome, string> = {
@@ -102,19 +106,41 @@ function Flair({ flair }: { flair?: string }) {
 }
 
 // Public page of a single player: results, games and opponents still to face
-export function PlayerPage({ handle, config, history, gameStates, nameOf, presence }: PlayerPageProps) {
+export function PlayerPage({ handle, config, history, gameStates, nameOf, presence, seasons = [] }: PlayerPageProps) {
   const profile = computePlayerProfile(handle, config.players, history, gameStates, config.schedule ?? []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [handle]);
 
-  // A former player, not in the current season: only the medals of the hall of fame
+  // A former player, not in the current season: found in the hall of fame or in an archived table
   const winners = config.tournament?.winners;
-  const pastName = profile
+  const podiumEntry = profile
     ? undefined
     : (winners ?? []).flatMap(fullPodium).find((p) => p.handle.toLowerCase() === handle.toLowerCase());
+  const pastRow = profile ? undefined : seasons.flatMap((x) => x.standings).find((r) => r.handle.toLowerCase() === handle.toLowerCase());
+  const pastName = podiumEntry ?? (pastRow && { handle: pastRow.handle, name: archivedName(handle, seasons) ?? pastRow.name });
   const shownName = profile?.player.name ?? pastName?.name;
+
+  // Across seasons: the career needs an archived season, the all-time head-to-heads archived games
+  const currentSeason = config.tournament?.season ?? "";
+  const career = careerOf(handle, seasons, {
+    season: currentSeason,
+    standings: computeStandings(config.players, history, gameStates).standings,
+  });
+  const showCareer = career.some((c) => !c.current);
+  const withGames = seasonsWithGames(seasons, { season: currentSeason, history, gameStates });
+  const allTimeRows = allTimeHeadToHead(handle, withGames);
+  const pastGames = withGames.some((s) => !s.current && s.games.some((g) => [g.white, g.black].some((h) => h.toLowerCase() === handle.toLowerCase())));
+  const archivedWithGames = withGames.filter((s) => !s.current);
+  const since = archivedWithGames.length < seasons.length ? archivedWithGames[0]?.season : undefined;
+  const longNameOf = allTimeNameOf(nameOf, seasons);
+  const acrossSeasons = (
+    <>
+      {showCareer && <CareerSection career={career} />}
+      {pastGames && allTimeRows.length > 0 && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
+    </>
+  );
 
   useEffect(() => {
     const previous = document.title;
@@ -140,6 +166,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           </div>
           <p className="note">Non partecipa alla stagione in corso.</p>
         </section>
+        {acrossSeasons}
       </main>
     );
   }
@@ -283,6 +310,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           ))}
         </ul>
       </section>
+
+      {acrossSeasons}
 
       <section className="dossier-card">
         <h2 className="section-heading">Partite ({games.length})</h2>

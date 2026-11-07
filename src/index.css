@@ -1548,6 +1548,8 @@ button.rounds-more {
   display: grid;
   gap: 16px;
 }
+/* Wide tables scroll inside their card instead of widening the page */
+.tournament-panel > * { min-width: 0; }
 
 .section-heading {
   margin: 0 0 12px;
@@ -2592,3 +2594,19 @@ button.infotip-trigger.presence-trigger {
 .winner-period {
   font-weight: 400;
 }
+
+/* Player page: career across seasons */
+.career-summary { margin: 0 0 10px; }
+.career-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; font-size: 14px; }
+.career-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+.career-row:first-child { border-top: 0; }
+.career-season { font-weight: 600; min-width: 0; }
+.career-place { text-align: right; white-space: nowrap; }
+.career-current { color: var(--muted); }
+.career-score { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
