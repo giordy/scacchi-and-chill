@@ -38,7 +38,7 @@ export function FairPlayAlert({
             attribuendo la scorrettezza a <strong>{nameOf(c.handle)}</strong>.{' '}
             {c.count === 1
               ? 'Per regolamento perde la partita: il risultato di Lichess lo dice già, non serve fare altro.'
-              : `È la ${c.count}ª volta: per regolamento va escluso dal torneo e i suoi risultati annullati (Torneo → Giocatori → Ritiri e sostituzioni, «Esclusione per fair play»).`}
+              : `È la ${c.count}ª volta: per regolamento va escluso dal torneo e i suoi risultati annullati (♟ Giocatori → Ritiri, «Esclusione per fair play»).`}
           </li>
         ))}
       </ul>

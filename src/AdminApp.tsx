@@ -19,7 +19,7 @@ import { RoundsTab } from './tabs/RoundsTab';
 import { SeasonsTab } from './tabs/SeasonsTab';
 import { PlayersTab } from './tabs/PlayersTab';
 import { SettingsTab } from './tabs/SettingsTab';
-import { ReviewsTab } from './ReviewsTab';
+import { WhatsAppTab } from './tabs/WhatsAppTab';
 import { applyWithdrawals } from './lib/withdrawals';
 import { FairPlayAlert } from './components/FairPlayAlert';
 import { AdminLogin } from './views/AdminLogin';
@@ -178,12 +178,26 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             flash={flash}
             triggerToast={triggerToast}
             onMissingToken={() => setActiveTab('settings')}
+            onOpenCalendar={() => setActiveTab('seasons')}
           />
         </>
       )}
 
-      {activeTab === 'reviews' && (
-        <ReviewsTab history={seasonHistory} gameStates={lichess.gameStates} config={config} nameOf={nameOf} triggerToast={triggerToast} organizer={organizer} />
+      {activeTab === 'whatsapp' && (
+        <>
+          <Notice notice={notice} />
+          <WhatsAppTab
+            config={config}
+            history={seasonHistory}
+            gameStates={lichess.gameStates}
+            nameOf={nameOf}
+            templates={tpl}
+            setTemplates={organizer.setTemplates}
+            organizer={organizer}
+            flash={flash}
+            triggerToast={triggerToast}
+          />
+        </>
       )}
 
       {activeTab === 'players' && (

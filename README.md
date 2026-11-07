@@ -20,16 +20,18 @@ Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli acco
 
 ### Area organizzatore (`#admin`)
 Accesso con login Google, riservato a un solo account.
-- **♞ Turni**: l'unico posto dove nascono e si gestiscono turni e partite.
+- **♞ Turni**: il lavoro di ogni turno, con i suoi messaggi.
   - *Elenco dei turni*, pianificati e avviati, con lo stato (da avviare, link creati in parte, in corso, concluso); il turno su cui lavorare è evidenziato. *+ Nuovo turno* ne apre uno vuoto.
-  - *Genera i turni in automatico*: girone all'italiana da zero, oppure *Completa i turni mancanti*, che tiene i turni già presenti e le partite già create e aggiunge solo quelle che mancano (se non è possibile lo dice).
   - *Dentro un turno*: aggiungi, togli o inverti i colori delle partite; **Crea link Lichess** crea le sfide che non hanno ancora un link e le salva nel torneo; **Messaggio con i link** e **Bollettino** preparano i testi WhatsApp da condividere o copiare (la scadenza dei link è calcolata da quando sono state create le sfide). Il bollettino scrive la scadenza una volta sola, sotto le partite, con l'elenco di quelle ancora da accettare, e chiude sempre con il link al sito; a fine turno, al posto del riepilogo, mette chi è in testa e la classifica dopo il turno (posizioni condivise come sul sito, 👑 accanto al campione in carica: solo lì, non sulle righe delle partite), poi gli studi sulle aperture giocate; *Elimina turno* lo cancella (anche da Firestore; su Lichess le sfide restano aperte).
-- **✎ Recensione**: partite, aneddoti ed Elo dei giocatori (scaricabile da Lichess con un solo pulsante) per costruire il prompt da incollare in Claude o ChatGPT; il testo ottenuto si incolla poi nella scheda per l'anteprima WhatsApp. Usa i risultati portati dalla sincronizzazione in cima all'area, senza chiamate a Lichess in più; il momento (fine andata, volata, fine torneo) parte da quello rilevato dalle partite, segnato come «consigliato». Il prompt chiede un racconto sobrio e affettuoso: due o tre frasi per giocatore nell'ordine della classifica del sito, il simbolo di un pezzo accanto al nome, niente voti, l'Elo solo come contesto (mai citato) e gli aneddoti solo dalle note.
+- **💬 WhatsApp**: quello che si scrive nel gruppo e non riguarda un solo turno (messaggio con i link e bollettino sono dentro il turno, in *Turni*).
+  - *Il racconto della stagione*: partite, aneddoti ed Elo dei giocatori (scaricabile da Lichess con un solo pulsante) per costruire il prompt da incollare in Claude o ChatGPT; il testo ottenuto si incolla poi nella scheda per l'anteprima WhatsApp. Usa i risultati portati dalla sincronizzazione in cima all'area, senza chiamate a Lichess in più; il momento (fine andata, volata, fine torneo) parte da quello rilevato dalle partite, segnato come «consigliato». Il prompt chiede un racconto sobrio e affettuoso: due o tre frasi per giocatore nell'ordine della classifica del sito, il simbolo di un pezzo accanto al nome, niente voti, l'Elo solo come contesto (mai citato) e gli aneddoti solo dalle note.
+  - *Premi della stagione*: i premi calcolati sulle partite concluse, con **Copia il messaggio per WhatsApp**.
+  - *Testi dei messaggi*: le frasi del messaggio con i link e del bollettino, modificabili.
 - **♟ Giocatori**:
   - *Registro dei giocatori*: tutti quelli passati dal torneo, distinti dal nome utente Lichess. Il nome è quello mostrato sul sito ovunque, **anche nelle stagioni passate** (classifiche archiviate, Albo d'Oro, premi, record, carriere): si cambia direttamente nell'elenco e si salva uscendo dal campo. Due giocatori con lo stesso nome sono segnalati, per aggiungere un'iniziale. I giocatori sono divisi in *in questa stagione*, *nello storico* (hanno giocato stagioni passate: si rinominano ma non si eliminano) e *registrati senza partite* (gli unici che si possono eliminare). *Aggiungi alla stagione* / *Togli dalla stagione* decide chi gioca la stagione corrente; chi ha già partite (create o in calendario) si toglie solo con *Ritiri*. Un nuovo giocatore si registra con nome e nome utente Lichess, e se serve entra subito nella stagione.
   - *Ritiri*: ritiro durante la stagione, con la regola della metà o con un sostituto.
-- **♛ Stagioni** (sezioni richiudibili): stagione corrente (con la foto del maestro: un link, oppure **📷 Carica foto**, che la riduce a 600 px e la salva su Firestore, senza toccare il codice), regolamento (giorni per mossa e rated, mostrati anche in pubblico, con accanto validità del link e regole della sfida su Lichess), fine stagione e storico con Albo d'Oro.
-- **⚙ Impostazioni**, da configurare una volta: token Lichess, messaggi WhatsApp (messaggio con i link del turno e frasi del bollettino), copia dei dati in JSON.
+- **♛ Stagioni** (sezioni richiudibili): stagione corrente (con la foto del maestro: un link, oppure **📷 Carica foto**, che la riduce a 600 px e la salva su Firestore, senza toccare il codice), regolamento (giorni per mossa e rated, mostrati anche in pubblico, con accanto validità del link e regole della sfida su Lichess), **calendario** (girone all'italiana da zero, oppure *Completa i turni mancanti*, che tiene i turni già presenti e le partite già create e aggiunge solo quelle che mancano; aperto quando non ci sono ancora turni), fine stagione e storico con Albo d'Oro.
+- **⚙ Impostazioni**, da configurare una volta: token Lichess e copia dei dati in JSON.
 - **↻ Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. Parte da sola ogni volta che l'organizzatore apre l'area admin, e si può rilanciare a mano. La vista pubblica legge da Firestore, quindi i nuovi risultati compaiono solo dopo una sincronizzazione.
 
 ### Stagioni
@@ -80,7 +82,7 @@ Dopo `vite build`, `scripts/meta-tags.mjs` legge titolo e stagione dal documento
 
 ### Struttura di `src/`
 - `views/`: pagine (pubblica, giocatore, login, console admin).
-- `tabs/`: schede dell'area admin; `tabs/settings/` ha le sezioni di *Giocatori*, *Stagioni* e *Impostazioni*, `tabs/rounds/` quelle di *Turni*.
+- `tabs/`: schede dell'area admin; `tabs/settings/` ha le sezioni di *Giocatori*, *Stagioni*, *WhatsApp* e *Impostazioni*, `tabs/rounds/` quelle di *Turni*.
 - `hooks/`: login, sincronizzazione con Firestore e Lichess, dati dell'organizzatore, stagioni.
 - `lib/`: logica pura e testata (`standings`, `playerProfile`, `seasons`, `rounds`, `routes`, `parse`).
 - `components/`: elementi condivisi.

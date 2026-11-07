@@ -2,11 +2,11 @@ import React from 'react';
 import { Toast } from '../WhatsAppPreview';
 import { onTabListKeyDown } from '../lib/tabKeys';
 
-export type AdminTab = 'rounds' | 'reviews' | 'players' | 'seasons' | 'settings';
+export type AdminTab = 'rounds' | 'whatsapp' | 'players' | 'seasons' | 'settings';
 
 export const ADMIN_TABS: { key: AdminTab; icon: string; label: string }[] = [
   { key: 'rounds', icon: '♞', label: 'Turni' },
-  { key: 'reviews', icon: '✎', label: 'Recensione' },
+  { key: 'whatsapp', icon: '💬', label: 'WhatsApp' },
   { key: 'players', icon: '♟', label: 'Giocatori' },
   { key: 'seasons', icon: '♛', label: 'Stagioni' },
   { key: 'settings', icon: '⚙', label: 'Impostazioni' },

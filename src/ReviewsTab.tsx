@@ -284,7 +284,6 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
 
   return (
     <section>
-      <h2>✨ Il racconto della stagione</h2>
       <p className="note mb-14">
         Prepara il racconto di fine andata, delle ultime partite o di fine stagione: tono sobrio e affettuoso, senza voti né classifiche di bravura.
       </p>
