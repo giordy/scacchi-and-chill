@@ -480,7 +480,7 @@ export function PublicTournamentView({
           <article className="dossier-card" id="albo-doro">
             <h2 className="section-heading">Albo d'Oro</h2>
             {(tournamentMeta.winners?.length ?? 0) > 0 || seasons.length > 0 ? (
-              <SeasonsHistory seasons={seasons} winners={tournamentMeta.winners} />
+              <SeasonsHistory seasons={seasons} winners={tournamentMeta.winners} title={tournamentMeta.title} />
             ) : (
               <p className="note m-0">Il primo campione sarà scritto qui a fine stagione.</p>
             )}

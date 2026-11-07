@@ -1699,24 +1699,33 @@ a.champion-badge {
   padding: 0;
 }
 
+.winners-list { display: grid; gap: 10px; }
+
+/* One card per season: the season's name as its heading, then the podium */
 .winner-row {
   display: grid;
-  gap: 4px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
-}
-
-.winner-row:first-child {
-  border-top: 0;
-  padding-top: 0;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
 }
 
 .winner-season {
-  font-size: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.winner-season-name {
+  font-family: var(--font-display);
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
+  color: var(--ink);
 }
 
 .winner-podium {
@@ -1751,7 +1760,7 @@ a.champion-badge {
 
 .podium-place-1 a {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--brass);
   text-decoration: none;
@@ -2597,7 +2606,8 @@ button.infotip-trigger.presence-trigger {
 }
 
 .winner-period {
-  font-weight: 400;
+  font-size: 13px;
+  color: var(--muted);
 }
 
 /* Player page: career across seasons */
