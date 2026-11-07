@@ -25,17 +25,19 @@ Accesso con login Google, riservato a un solo account.
   - *Genera i turni in automatico*: girone all'italiana da zero, oppure *Completa i turni mancanti*, che tiene i turni già presenti e le partite già create e aggiunge solo quelle che mancano (se non è possibile lo dice).
   - *Dentro un turno*: aggiungi, togli o inverti i colori delle partite; **Crea link Lichess** crea le sfide che non hanno ancora un link e le salva nel torneo; **Messaggio con i link** e **Bollettino** preparano i testi WhatsApp da condividere o copiare (la scadenza dei link è calcolata da quando sono state create le sfide). Il bollettino scrive la scadenza una volta sola, sotto le partite, con l'elenco di quelle ancora da accettare, e chiude sempre con il link al sito; a fine turno, al posto del riepilogo, mette chi è in testa e la classifica dopo il turno (posizioni condivise come sul sito, 👑 accanto al campione in carica: solo lì, non sulle righe delle partite), poi gli studi sulle aperture giocate; *Elimina turno* lo cancella (anche da Firestore; su Lichess le sfide restano aperte).
 - **✎ Recensione**: partite, aneddoti ed Elo dei giocatori (scaricabile da Lichess con un solo pulsante) per costruire il prompt da incollare in Claude o ChatGPT; il testo ottenuto si incolla poi nella scheda per l'anteprima WhatsApp. Usa i risultati portati dalla sincronizzazione in cima all'area, senza chiamate a Lichess in più; il momento (fine andata, volata, fine torneo) parte da quello rilevato dalle partite, segnato come «consigliato». Il prompt chiede un racconto sobrio e affettuoso: due o tre frasi per giocatore nell'ordine della classifica del sito, il simbolo di un pezzo accanto al nome, niente voti, l'Elo solo come contesto (mai citato) e gli aneddoti solo dalle note.
-- **♛ Torneo** (sezioni richiudibili), ciò che cambia durante la stagione: stagione corrente (con la foto del maestro: un link, oppure **📷 Carica foto**, che la riduce a 600 px e la salva su Firestore, senza toccare il codice), giocatori e ritiri, regolamento (giorni per mossa e rated, mostrati anche in pubblico, con accanto validità del link e regole della sfida su Lichess), fine stagione e storico con Albo d'Oro.
+- **♟ Giocatori**:
+  - *Registro dei giocatori*: tutti quelli passati dal torneo, distinti dal nome utente Lichess. Il nome è quello mostrato sul sito ovunque, **anche nelle stagioni passate** (classifiche archiviate, Albo d'Oro, premi, record, carriere): si cambia direttamente nell'elenco e si salva uscendo dal campo. Due giocatori con lo stesso nome sono segnalati, per aggiungere un'iniziale. I giocatori sono divisi in *in questa stagione*, *nello storico* (hanno giocato stagioni passate: si rinominano ma non si eliminano) e *registrati senza partite* (gli unici che si possono eliminare). *Aggiungi alla stagione* / *Togli dalla stagione* decide chi gioca la stagione corrente; chi ha già partite (create o in calendario) si toglie solo con *Ritiri*. Un nuovo giocatore si registra con nome e nome utente Lichess, e se serve entra subito nella stagione.
+  - *Ritiri*: ritiro durante la stagione, con la regola della metà o con un sostituto.
+- **♛ Stagioni** (sezioni richiudibili): stagione corrente (con la foto del maestro: un link, oppure **📷 Carica foto**, che la riduce a 600 px e la salva su Firestore, senza toccare il codice), regolamento (giorni per mossa e rated, mostrati anche in pubblico, con accanto validità del link e regole della sfida su Lichess), fine stagione e storico con Albo d'Oro.
 - **⚙ Impostazioni**, da configurare una volta: token Lichess, messaggi WhatsApp (messaggio con i link del turno e frasi del bollettino), copia dei dati in JSON.
 - **↻ Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. Parte da sola ogni volta che l'organizzatore apre l'area admin, e si può rilanciare a mano. La vista pubblica legge da Firestore, quindi i nuovi risultati compaiono solo dopo una sincronizzazione.
 
 ### Stagioni
 Il periodo di ogni stagione (mese e anno di inizio e fine) si calcola dalle partite: dalla prima sfida creata all'ultima mossa dell'ultima partita conclusa. Chiudendo la stagione viene salvato nell'archivio e nell'Albo d'Oro; per le stagioni chiuse prima si aggiunge o si corregge a mano dall'Albo d'Oro (*Dal mese* / *Al mese*).
 
-Da *Torneo → Fine stagione e storico*:
+Da *Stagioni → Fine stagione e storico*:
 - **Chiudi la stagione e inizia la prossima** salva la classifica finale nello storico pubblico, insieme alle partite con un risultato in forma compatta (giocatori, risultato, esito, numero di mosse, Elo, apertura, ID Lichess: niente mosse né posizioni), che servono a scontri diretti di sempre e record; mette il primo in classifica nell'Albo d'Oro, poi **cancella tutte le partite** della stagione, imposta il nuovo nome e maestro e, se vuoi, svuota il calendario. Prima della cancellazione chiede conferma e non cancella nulla se l'archiviazione fallisce.
 - Se la stagione era già nell'Albo d'Oro con un altro giocatore, la voce viene aggiornata con il campione effettivo.
-- **Ricostruisci una stagione passata**, per una stagione chiusa prima che si salvassero le partite (la Stagione 1): incolli l'export della chat WhatsApp, o apri il file `.txt`, oppure incolli solo i link. Il sito prende i link alle partite Lichess, le legge da Lichess (solo per corrispondenza), propone i giocatori (spunti chi era nel torneo e controlli i nomi) e ricalcola la classifica, da confrontare con quella finale. Le partite della stagione in corso restano fuori da sole: quelle che il sito ha già e quelle create da quando è iniziata, quindi l'export può contenere anche la chat attuale. Chi si è ritirato si lascia senza spunta: le sue partite non contano, oppure si sceglie chi ha preso il suo posto e passano al sostituto (come fa il sito con una sostituzione); in questo caso, sotto la classifica della stagione passata resta una nota («Greta ha lasciato il torneo; al suo posto ha giocato …») e nella carriera del sostituto compare «al posto di …». Lo stesso vale per i ritiri della stagione in corso quando la si chiude. Si possono togliere le partite fuori torneo e aggiungere le vittorie a tavolino. Il numero del turno non si ricostruisce: le partite sono in ordine di data. **Salva** scrive l'archivio della stagione (sostituendolo, se c'è già) senza toccare l'Albo d'Oro; da lì conta nella classifica di sempre, nelle carriere e nei record.
 - **Scaricala come file (CSV)**, sotto il pulsante, scarica una copia della classifica di oggi da aprire con Excel o Numbers. Non tocca lo storico né l'Albo d'Oro.
 
 ## Configurazione Firebase
@@ -52,7 +54,7 @@ L'email dell'organizzatore compare in **due** posti, da tenere allineati:
 ### Dati su Firestore
 | Percorso | Lettura | Contenuto |
 |---|---|---|
-| `tournaments/<id>` | pubblica | titolo, stagione, giocatori, calendario, regolamento (giorni per mossa, rated), Albo d'Oro |
+| `tournaments/<id>` | pubblica | titolo, stagione, giocatori, calendario, regolamento (giorni per mossa, rated), Albo d'Oro, registro dei giocatori (nome utente Lichess e nome mostrato) |
 | `tournaments/<id>/games/*` | pubblica | partite e stato Lichess |
 | `tournaments/<id>/seasons/*` | pubblica | classifiche finali delle stagioni archiviate |
 | `tournaments/<id>/media/*` | pubblica | foto del maestro caricate dall'area organizzatore, una per stagione (JPEG ridotto, scritto solo dall'organizzatore, sotto i 900 KB) |
@@ -78,7 +80,7 @@ Dopo `vite build`, `scripts/meta-tags.mjs` legge titolo e stagione dal documento
 
 ### Struttura di `src/`
 - `views/`: pagine (pubblica, giocatore, login, console admin).
-- `tabs/`: schede dell'area admin; `tabs/settings/` ha le sezioni di *Torneo*, `tabs/rounds/` quelle di *Turni*.
+- `tabs/`: schede dell'area admin; `tabs/settings/` ha le sezioni di *Giocatori*, *Stagioni* e *Impostazioni*, `tabs/rounds/` quelle di *Turni*.
 - `hooks/`: login, sincronizzazione con Firestore e Lichess, dati dell'organizzatore, stagioni.
 - `lib/`: logica pura e testata (`standings`, `playerProfile`, `seasons`, `rounds`, `routes`, `parse`).
 - `components/`: elementi condivisi.

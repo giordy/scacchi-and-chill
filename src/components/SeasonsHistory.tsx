@@ -6,9 +6,11 @@ import { SeasonAwards } from './SeasonAwards';
 import { RankCell } from './RankCell';
 import { isTied, seasonStarted, sharedRanks } from '../lib/standings';
 import { departureText } from '../lib/departures';
+import { useNameOf } from './Names';
 
 // Public "Torneo" tab, past seasons: final standings of every archived season, newest first
 export function SeasonsHistory({ seasons, winners = [] }: { seasons: SeasonArchive[]; winners?: SeasonWinner[] }) {
+  const nameOf = useNameOf();
   return (
     <div className="seasons-history">
       {seasons.map((s, i) => {
@@ -20,7 +22,7 @@ export function SeasonsHistory({ seasons, winners = [] }: { seasons: SeasonArchi
           <details key={s.id} className="season-card" open={i === 0}>
             <summary>
               <span className="season-name">{s.season}</span>
-              {s.champion && <span className="season-champion">{s.champion.name}</span>}
+              {s.champion && <span className="season-champion">{nameOf(s.champion.handle, s.champion.name)}</span>}
             </summary>
             <p className="note note-sm">
               {s.title}
@@ -48,7 +50,7 @@ export function SeasonsHistory({ seasons, winners = [] }: { seasons: SeasonArchi
                         <RankCell rank={started ? ranks[idx] : null} points={p.points} tied={started && isTied(ranks, idx)} medals={false} />
                       </td>
                       <td className="sticky-col">
-                        <a href={playerHref(p.handle)} className="player-name player-page-link">{p.name}</a>
+                        <a href={playerHref(p.handle)} className="player-name player-page-link">{nameOf(p.handle, p.name)}</a>
                       </td>
                       <td className="col-points">{p.points}</td>
                       <td className="col-center">{p.played}</td>
@@ -62,7 +64,7 @@ export function SeasonsHistory({ seasons, winners = [] }: { seasons: SeasonArchi
               </table>
             </div>
             {s.departures?.map((d) => (
-              <p key={d.handle} className="note note-sm season-departure">{departureText(d)}</p>
+              <p key={d.handle} className="note note-sm season-departure">{departureText(d, nameOf)}</p>
             ))}
             {s.awards && s.awards.length > 0 && (
               <>

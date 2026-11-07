@@ -3,7 +3,6 @@ import {
   AppConfig,
   HistoryGame,
   LichessExportGame,
-  Player,
   ScheduledMatch,
   SeasonArchive,
   Settings,
@@ -13,20 +12,17 @@ import { CollapsibleSection } from '../components/CollapsibleSection';
 import { SeasonInfoSection } from './settings/SeasonInfoSection';
 import { MasterAnecdotesSection } from './settings/MasterAnecdotesSection';
 import { RulesSection } from './settings/RulesSection';
-import { PlayersSection } from './settings/PlayersSection';
 import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
 import { HallOfFameSection } from './settings/HallOfFameSection';
-import { RebuildSeasonSection } from './settings/RebuildSeasonSection';
 import { ChallengeSection } from './settings/ChallengeSection';
-import { WithdrawalSection } from './settings/WithdrawalSection';
 import { applyWithdrawals } from '../lib/withdrawals';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
-// The season and its people, grouped by topic: what changes during a season and shows on the public
-// page. Set-and-forget settings (token, message texts, backup) are in SettingsTab. Sections are
-// native <details>, so only "Stagione corrente" is open by default.
-export function TournamentTab({
+// The seasons: the current one (name, master, anecdotes, rules), closing it, the history and the
+// hall of fame. Players and withdrawals are in PlayersTab; set-and-forget settings (token, message
+// texts, backup) in SettingsTab. Sections are native <details>, only "Stagione corrente" is open.
+export function SeasonsTab({
   config,
   settings,
   setSettings,
@@ -37,7 +33,6 @@ export function TournamentTab({
   seasons,
   flash,
   onUpdateTournamentMeta,
-  onUpdatePlayers,
   onUpdateSchedule,
 }: {
   config: AppConfig;
@@ -51,7 +46,6 @@ export function TournamentTab({
   seasons: SeasonArchive[];
   flash: Flash;
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
-  onUpdatePlayers: (players: Player[]) => void;
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
 }) {
   const meta = config.tournament;
@@ -60,20 +54,6 @@ export function TournamentTab({
       <CollapsibleSection title="Stagione corrente" defaultOpen>
         <SeasonInfoSection meta={meta} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
         <MasterAnecdotesSection meta={meta} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
-      </CollapsibleSection>
-
-      <CollapsibleSection title={`Giocatori (${config.players.length})`}>
-        <PlayersSection players={config.players} flash={flash} onUpdatePlayers={onUpdatePlayers} />
-        <WithdrawalSection
-          config={config}
-          history={history}
-          setHistory={setHistory}
-          gameStates={gameStates}
-          flash={flash}
-          onUpdateTournamentMeta={onUpdateTournamentMeta}
-          onUpdatePlayers={onUpdatePlayers}
-          onUpdateSchedule={onUpdateSchedule}
-        />
       </CollapsibleSection>
 
       <CollapsibleSection title="Regolamento">
@@ -106,7 +86,6 @@ export function TournamentTab({
           flash={flash}
           onUpdateTournamentMeta={onUpdateTournamentMeta}
         />
-        <RebuildSeasonSection config={config} seasons={seasons} history={history} flash={flash} />
       </CollapsibleSection>
 
     </div>

@@ -10,7 +10,7 @@ import { BackupSection } from './settings/BackupSection';
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
 // Set-and-forget settings: the Lichess token, the texts of the WhatsApp messages and the backup.
-// What changes during a season is in TournamentTab.
+// What changes during a season is in SeasonsTab, the players in PlayersTab.
 export function SettingsTab({
   config,
   settings,

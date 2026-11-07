@@ -1,9 +1,11 @@
 import React from 'react';
 import { SeasonAward } from '../types';
 import { playerHref } from '../lib/routes';
+import { useNameOf } from './Names';
 
 // Grid of the end-of-season awards, each winner linking to their player page
 export function SeasonAwards({ awards }: { awards: SeasonAward[] }) {
+  const nameOf = useNameOf();
   return (
     <ul className="awards-grid">
       {awards.map((a) => (
@@ -15,7 +17,7 @@ export function SeasonAwards({ awards }: { awards: SeasonAward[] }) {
               {a.winners.map((w, i) => (
                 <React.Fragment key={w.handle}>
                   {i > 0 && (i === a.winners.length - 1 ? " e " : ", ")}
-                  <a href={playerHref(w.handle)}>{w.name}</a>
+                  <a href={playerHref(w.handle)}>{nameOf(w.handle, w.name)}</a>
                 </React.Fragment>
               ))}
             </p>

@@ -20,3 +20,15 @@ describe('tournament meta', () => {
     expect(next).toMatchObject({ season: 'S2', daysPerMove: 4, rated: true });
   });
 });
+
+describe('players register in the tournament document', () => {
+  it('is read from Firestore and kept by later changes', async () => {
+    const { tournamentFromDoc, mergeTournamentMeta } = await import('../tournament');
+    const roster = [{ handle: 'anna', name: 'Anna R.' }];
+    const meta = tournamentFromDoc({ title: 'T', season: 'S', roster })!;
+    expect(meta.roster).toEqual(roster);
+    expect(mergeTournamentMeta(meta, { season: 'S2' }).roster).toEqual(roster);
+    expect(mergeTournamentMeta(meta, { roster: [] }).roster).toEqual([]);
+    expect(tournamentFromDoc({ title: 'T', season: 'S' })).not.toHaveProperty('roster');
+  });
+});

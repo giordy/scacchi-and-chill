@@ -55,6 +55,7 @@ export function tournamentFromDoc(doc: TournamentDocData): TournamentMeta | null
     daysPerMove: typeof doc.daysPerMove === "number" && doc.daysPerMove > 0 ? doc.daysPerMove : undefined,
     rated: typeof doc.rated === "boolean" ? doc.rated : undefined,
     winners: doc.winners || [],
+    ...(Array.isArray(doc.roster) ? { roster: doc.roster } : {}),
   };
 }
 
@@ -79,5 +80,6 @@ export function mergeTournamentMeta(
     daysPerMove: patch.daysPerMove ?? current?.daysPerMove,
     rated: patch.rated ?? current?.rated,
     winners: patch.winners ?? current?.winners ?? d.winners,
+    ...((patch.roster ?? current?.roster) ? { roster: patch.roster ?? current?.roster } : {}),
   };
 }

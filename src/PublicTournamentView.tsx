@@ -29,6 +29,7 @@ import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound } from "./lib/games";
 import { PresenceInfo } from "./lib/presence";
 import { AllTimeSection } from "./components/AllTimeSection";
+import { useNameOf } from "./components/Names";
 import { allTimeNameOf, allTimeRecords, allTimeTable, seasonsWithGames } from "./lib/allTime";
 
 interface PublicTournamentViewProps {
@@ -134,6 +135,8 @@ export function PublicTournamentView({
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
   const started = seasonStarted(standings);
   const champions = reigningChampions(tournamentMeta.winners);
+  // Names of the register, also for the hall of fame (renamed players show the new name)
+  const registeredName = useNameOf();
   // All seasons added up (only once a season has been archived: before, it is just this one)
   const allTime = useMemo(() => {
     if (seasons.length === 0) return null;
@@ -494,7 +497,7 @@ export function PublicTournamentView({
                       {fullPodium(w).map((p) => (
                         <li key={p.handle} className={`podium-place podium-place-${p.place}`}>
                           <span className="podium-medal" aria-label={`${p.place}° posto`}>{MEDAL_EMOJI[p.place]}</span>
-                          <a href={playerHref(p.handle)}>{p.name}</a>
+                          <a href={playerHref(p.handle)}>{registeredName(p.handle, p.name)}</a>
                         </li>
                       ))}
                     </ol>

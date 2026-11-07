@@ -1,12 +1,14 @@
 import React from 'react';
 import { AllTimeRow, allTimeRanks, GameRecord } from '../lib/allTime';
 import { playerHref } from '../lib/routes';
+import { useNameOf } from './Names';
 
 const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
 // Public "Albo" tab: the table of every season added up, then the all-time records
 export function AllTimeSection({ rows, records, gamesSince }: { rows: AllTimeRow[]; records: GameRecord[]; gamesSince?: string }) {
   const ranks = allTimeRanks(rows);
+  const nameOf = useNameOf();
   return (
     <>
       {rows.length > 0 && (
@@ -34,7 +36,7 @@ export function AllTimeSection({ rows, records, gamesSince }: { rows: AllTimeRow
                   <tr key={r.handle}>
                     <td className="col-rank">{ranks[i]}</td>
                     <td className="sticky-col">
-                      <a href={playerHref(r.handle)} className="player-name player-page-link">{r.name}</a>
+                      <a href={playerHref(r.handle)} className="player-name player-page-link">{nameOf(r.handle, r.name)}</a>
                     </td>
                     <td className="col-points">{fmt(r.points)}</td>
                     <td className="col-center">{(r.points / r.played).toFixed(2).replace(".", ",")}</td>

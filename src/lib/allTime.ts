@@ -108,7 +108,7 @@ export interface CareerSeason {
   drawn: number;
   lost: number;
   current: boolean;
-  replacing?: string; // name of the player whose place they took
+  replacing?: { handle: string; name: string }; // the player whose place they took
 }
 
 // Every season a player took part in, newest first: the one in progress, then the archived ones

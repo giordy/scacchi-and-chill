@@ -9,7 +9,9 @@ import { usePresence } from './hooks/usePresence';
 import { LoadingScreen } from './components/LoadingScreen';
 import { PublicPage } from './views/PublicPage';
 import { applyWithdrawals } from './lib/withdrawals';
-import { nameFrom, storedStates } from './lib/games';
+import { storedStates } from './lib/games';
+import { fullRoster, rosterNameOf } from './lib/roster';
+import { NamesContext } from './components/Names';
 
 // The organizer area is a separate chunk: downloaded only when #admin is opened
 const AdminApp = lazy(() => import('./AdminApp'));
@@ -31,9 +33,15 @@ export function App() {
   // Results as the standings see them: games annulled or won by forfeit after a withdrawal
   const withdrawals = config.tournament?.withdrawals;
   const seasonHistory = useMemo(() => applyWithdrawals(history, withdrawals), [history, withdrawals]);
+  // Names from the players register: the same everywhere, past seasons included
+  const nameOf = useMemo(
+    () => rosterNameOf(fullRoster({ roster: config.tournament?.roster, players: config.players, seasons, winners: config.tournament?.winners })),
+    [config.tournament?.roster, config.players, seasons, config.tournament?.winners]
+  );
 
   if (isAdminRoute) {
     return (
+      <NamesContext.Provider value={nameOf}>
       <Suspense fallback={<LoadingScreen label="Apertura area organizzatore…" />}>
         <AdminApp
           config={config}
@@ -44,11 +52,12 @@ export function App() {
           seasons={seasons}
         />
       </Suspense>
+      </NamesContext.Provider>
     );
   }
 
-  const nameOf = nameFrom(config.players);
   return (
+    <NamesContext.Provider value={nameOf}>
     <PublicPage
       seasons={seasons}
       ready={ready}
@@ -59,6 +68,7 @@ export function App() {
       presence={presence}
       nameOf={nameOf}
     />
+    </NamesContext.Provider>
   );
 }
 

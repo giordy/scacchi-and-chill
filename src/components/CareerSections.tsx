@@ -3,11 +3,13 @@ import { AllTimeHeadToHead, CareerSeason } from '../lib/allTime';
 import { podiumPlace } from '../lib/standings';
 import { MEDAL_EMOJI } from '../lib/honours';
 import { playerHref } from '../lib/routes';
+import { useNameOf } from './Names';
 
 const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
 // Player page: every season they played, newest first, with a short summary on top
 export function CareerSection({ career }: { career: CareerSeason[] }) {
+  const nameOf = useNameOf();
   const finished = career.filter((c) => !c.current && c.place !== null);
   const best = finished.length > 0 ? Math.min(...finished.map((c) => c.place!)) : null;
   const played = career.reduce((n, c) => n + c.played, 0);
@@ -36,7 +38,7 @@ export function CareerSection({ career }: { career: CareerSeason[] }) {
               </span>
               <span className="career-score">
                 {fmt(c.points)} pt · {c.won}V {c.drawn}N {c.lost}P
-                {c.replacing && ` · al posto di ${c.replacing}`}
+                {c.replacing && ` · al posto di ${nameOf(c.replacing.handle, c.replacing.name)}`}
               </span>
             </li>
           );
