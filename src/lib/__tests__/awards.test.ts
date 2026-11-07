@@ -149,7 +149,7 @@ describe('games linked from the awards', () => {
     expect(by('fastest').games).toEqual(['quick001']);
     expect(by('longest').games).toEqual(['long0001']);
     expect(by('mate').games).toEqual(['quick001', 'mate0002']);
-    expect(awards.some((a) => a.id === 'upsets')).toBe(false); // replaced by the Premio Rivelazione
+    expect(awards.some((a) => a.id === 'upsets')).toBe(false); // replaced by the Premio Pillsbury
   });
 
   it('finds them again in the games of a season archived before', async () => {
@@ -172,7 +172,7 @@ describe('games linked from the awards', () => {
   });
 });
 
-describe('Premio Rivelazione', () => {
+describe('Premio Pillsbury', () => {
   const players = ['anna', 'bruno', 'carla', 'dario'].map((h) => ({ handle: h, name: h[0].toUpperCase() + h.slice(1) }));
   const row = (handle: string) => ({ handle, name: handle, played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 });
   // Last season Anna beat Carla twice: Anna starts ahead
@@ -196,10 +196,10 @@ describe('Premio Rivelazione', () => {
     ];
     const history = games.map((g) => g.h);
     const states = Object.fromEntries(games.map((g) => [g.s.id, g.s]));
-    const award = computeSeasonAwards(players, history, states, [past]).find((a) => a.id === 'revelation');
-    expect(award).toMatchObject({ title: 'Premio Rivelazione', winners: [{ handle: 'carla', name: 'Carla' }] });
+    const award = computeSeasonAwards(players, history, states, [past]).find((a) => a.id === 'pillsbury');
+    expect(award).toMatchObject({ title: 'Premio Pillsbury', emoji: '🌱', winners: [{ handle: 'carla', name: 'Carla' }] });
     expect(award!.detail).toBe('1 punto su 1 partita, pronostico ½'); // her one game counted: the win over Anna
     // With no archived season everyone is an esordiente: no award yet
-    expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'revelation')).toBe(false);
+    expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'pillsbury')).toBe(false);
   });
 });

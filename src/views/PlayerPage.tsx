@@ -310,7 +310,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               <span className="stat-pill-label">Pronostico</span>
               <InfoTip
                 className="stat-pill-val"
-                text={`I punti che ci si aspettava facesse in questa stagione, arrotondati al mezzo punto, dall'Elo del torneo suo e dei suoi avversari a inizio stagione. Contano ${forecast.games} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio pronostico vince il Premio Rivelazione. ▲ sopra il previsto, = in linea, ▼ sotto.`}
+                text={`I punti che ci si aspettava facesse in questa stagione, arrotondati al mezzo punto, dall'Elo del torneo suo e dei suoi avversari a inizio stagione. Contano ${forecast.games} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio pronostico vince il Premio Pillsbury. ▲ sopra il previsto, = in linea, ▼ sotto.`}
               >
                 {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"}{" "}
                 {forecast.played > 0 && <Trend kind={forecastTrend} label={forecastLabel} />}{" "}

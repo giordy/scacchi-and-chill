@@ -1,5 +1,6 @@
 import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonAward } from '../types';
-import { currentSeason, eloSeasonFromCurrent, Forecast, roundHalf, seasonForecast, tournamentElo } from './tournamentElo';
+import { roundHalf, tournamentElo } from './tournamentElo';
+import { PILLSBURY_EMOJI, PILLSBURY_ID, PILLSBURY_TITLE, pillsburyRace } from './pillsbury';
 
 // 5.5 -> "5½", 0.5 -> "½"
 const halves = (n: number) => String(Math.round(n * 2) / 2).replace(".5", "½").replace(/^0½/, "½");
@@ -8,7 +9,7 @@ export type { TimedGame } from './moveTimes';
 import { formatPace } from './playerProfile';
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { plural } from './games';
-// L'ammazzagiganti (most colpacci) was given until the Premio Rivelazione took its place: past
+// L'ammazzagiganti (most colpacci) was given until the Premio Pillsbury took its place: past
 // seasons keep it, with the Lichess ratings and the gap it used then
 const LEGACY_UPSET_GAP = 150;
 
@@ -37,7 +38,7 @@ export function computeSeasonAwards(
   players: Player[],
   history: HistoryGame[],
   gameStates: Record<string, LichessExportGame>,
-  seasons: SeasonArchive[] = [] // archived seasons, for the Elo del torneo of the Premio Rivelazione
+  seasons: SeasonArchive[] = [] // archived seasons, for the Elo del torneo of the Premio Pillsbury
 ): SeasonAward[] {
   const nameOf = (h: string) => players.find((p) => p.handle === h)?.name ?? h;
   const who = (handles: string[]) => handles.map((handle) => ({ handle, name: nameOf(handle) }));
@@ -45,33 +46,22 @@ export function computeSeasonAwards(
 
   const awards: SeasonAward[] = [];
 
-  // Premio Rivelazione: who beat their pronostico by most, i.e. made the most points beyond those
-  // expected from the Elo del torneo at the start of the season (see seasonForecast). Esordienti,
-  // and the games against them, are left out: their 1500 says nothing of their level.
-  const report = tournamentElo(seasons, players.map((p) => p.handle), history, gameStates);
-  const eloNow = currentSeason(report);
-  const finishedGames = eloSeasonFromCurrent(players.map((p) => p.handle), history, gameStates).games;
-  const gains = new Map<string, number>();
-  const forecasts = new Map<string, Forecast>();
-  players.forEach((p) => {
-    const f = seasonForecast(p.handle, eloNow, history, finishedGames);
-    if (!f || f.played === 0) return;
-    forecasts.set(p.handle, f);
-    gains.set(p.handle, f.points - f.expectedSoFar);
-  });
-  const revelation = leaders(gains, players);
-  // One winner, unless two beat it by exactly the same
-  if (revelation.handles.length > 0) {
-    const f = forecasts.get(revelation.handles[0])!;
+  // Premio Pillsbury: who beat their pronostico by most (see lib/pillsbury). First, apart from
+  // the light-hearted awards. One winner, unless two beat it by exactly the same.
+  const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates), history, history, gameStates);
+  const best = race.rows[0];
+  if (best && best.over > 0) {
+    const top = race.rows.filter((r) => r.over === best.over);
+    const f = best.forecast;
     awards.push({
-      id: "revelation",
-      emoji: "🌟",
-      title: "Premio Rivelazione",
-      description: "A chi ha superato di più il proprio pronostico: i punti previsti dall'Elo del torneo a inizio stagione (esordienti esclusi)",
-      winners: who(revelation.handles),
-      detail: revelation.handles.length === 1
+      id: PILLSBURY_ID,
+      emoji: PILLSBURY_EMOJI,
+      title: PILLSBURY_TITLE,
+      description: "A chi ha superato di più il proprio pronostico, come Pillsbury a Hastings nel 1895 (esordienti esclusi)",
+      winners: who(top.map((r) => r.handle)),
+      detail: top.length === 1
         ? `${halves(f.points)} ${f.points === 1 ? "punto" : "punti"} su ${plural(f.played, "partita", "partite")}, pronostico ${halves(roundHalf(f.expectedSoFar))}`
-        : `${halves(revelation.best)} punti più del pronostico`,
+        : `${halves(best.over)} punti più del pronostico`,
     });
   }
 
@@ -173,10 +163,15 @@ export const awardWinnersLine = (award: SeasonAward) => `${names(award)} (${awar
 
 // Message for the WhatsApp group
 export function awardsMessage(season: string, awards: SeasonAward[]): string {
+  const main = awards.find((a) => a.id === PILLSBURY_ID);
+  const others = awards.filter((a) => a !== main);
+  const line = (a: SeasonAward) => `${a.emoji} *${a.title}*: ${awardWinnersLine(a)}`;
   return [
     `🏆 *I premi di ${season}*`,
     "",
-    ...awards.map((a) => `${a.emoji} *${a.title}*: ${awardWinnersLine(a)}`),
+    // The Premio Pillsbury first and apart, with what it rewards
+    ...(main ? [line(main), `_${main.description}_`, ...(others.length > 0 ? ["", "E poi, per sorridere:"] : [])] : []),
+    ...others.map(line),
   ].join("\n");
 }
 

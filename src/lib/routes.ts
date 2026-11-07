@@ -21,15 +21,16 @@ export function isAdminLocation(hash: string, search: string): boolean {
 }
 
 // Views of the public page, each with its own address: "#/classifica" (the default),
-// "#/tabellone", "#/partite", "#/stagione", "#/albo" and "#/regolamento". Older addresses keep
+// "#/tabellone", "#/pillsbury", "#/partite", "#/stagione", "#/albo" and "#/regolamento". Older addresses keep
 // working: "#/torneo" is the season, "#/torneo/albo" the hall of fame.
-export type PublicView = "standings" | "crosstable" | "matches" | "season" | "hall" | "rules";
-// The four tabs; the crosstable is a view of the standings tab, the rules have no tab
+export type PublicView = "standings" | "crosstable" | "pillsbury" | "matches" | "season" | "hall" | "rules";
+// The four tabs; the crosstable and the Premio Pillsbury are views of the standings tab, the rules have no tab
 export type PublicTab = "standings" | "matches" | "season" | "hall";
 
 const VIEW_SLUGS: Record<PublicView, string> = {
   standings: "classifica",
   crosstable: "tabellone",
+  pillsbury: "pillsbury",
   matches: "partite",
   season: "stagione",
   hall: "albo",
@@ -47,6 +48,6 @@ export function parsePublicView(hash: string): PublicView {
 }
 
 export function tabOfView(view: PublicView): PublicTab | undefined {
-  if (view === "crosstable") return "standings";
+  if (view === "crosstable" || view === "pillsbury") return "standings";
   return view === "rules" ? undefined : view;
 }

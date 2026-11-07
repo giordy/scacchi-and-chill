@@ -959,6 +959,13 @@ a.player-page-link:hover, a.player-page-link:focus-visible { color: var(--accent
 .award-winners a:hover { color: var(--accent); }
 .award-detail { margin: 2px 0 0; font-size: 13px; color: var(--ink); }
 .award-desc { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+/* The Premio Pillsbury: first, on its own, with the brass of the leader row */
+.award-main { margin-bottom: 14px; padding: 16px; border-color: var(--brass); box-shadow: inset 3px 0 0 var(--brass); }
+.award-main .award-emoji { font-size: 36px; }
+.award-main .award-title { font-size: 17px; }
+.award-main .award-winners { font-size: 17px; }
+.awards-subheading { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.award-main-row strong { color: var(--ink); }
 
 /* Seasons history */
 details.season-entry { background: none; border: 0; border-radius: 0; padding: 0; margin: 0; }

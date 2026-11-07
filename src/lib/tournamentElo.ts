@@ -4,7 +4,7 @@
 //
 // Esordiente: a player in their first season, or back after skipping at least one season. In the
 // games of an esordiente only the esordiente's rating moves: the others neither lose nor gain
-// against someone whose level is not known yet. An esordiente cannot win the Premio Rivelazione.
+// against someone whose level is not known yet. An esordiente cannot win the Premio Pillsbury.
 // A player back from a break starts again from the rating they had.
 //
 // Lichess ratings are not used: for correspondence they are provisional for almost everyone here
@@ -153,7 +153,7 @@ export const isNewcomer = (season: EloSeason, handle: string) => season.newcomer
 // its start, against every opponent of the calendar (games still to play included); and so far,
 // on the games already finished. Games against an esordiente are left out, and an esordiente has
 // none: their 1500 says nothing of their level. Shown to the half point (pronosticoPoints).
-// The Premio Rivelazione goes to who beats it by most (points - expectedSoFar).
+// The Premio Pillsbury goes to who beats it by most (points - expectedSoFar).
 export interface Forecast {
   expected: number; // whole season
   games: number; // games of the season in the calendar
