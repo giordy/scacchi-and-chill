@@ -4,16 +4,17 @@ import { playerHref } from '../lib/routes';
 import { useNameOf } from './Names';
 
 // Grid of the end-of-season awards, each winner linking to their player page
-// Links to the games of an award: "vedi la partita", or "partite: 1 · 2" when there are more
+// Links to the games of an award: "vedi su Lichess", or "su Lichess: 1 · 2" when there are more (the
+// same words as the records)
 function GameLinks({ ids }: { ids?: string[] }) {
   if (!ids || ids.length === 0) return null;
   const link = (id: string, text: string) => (
     <a key={id} href={`https://lichess.org/${id}`} target="_blank" rel="noopener noreferrer">{text}</a>
   );
-  if (ids.length === 1) return <> · {link(ids[0], 'vedi la partita')}</>;
+  if (ids.length === 1) return <> · {link(ids[0], 'vedi su Lichess')}</>;
   return (
     <>
-      {' · partite: '}
+      {' · su Lichess: '}
       {ids.map((id, i) => (
         <React.Fragment key={id}>
           {i > 0 && ' · '}
