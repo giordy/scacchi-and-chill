@@ -13,7 +13,7 @@ import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampion
 import { PointsChart } from '../components/PointsChart';
 import { PresenceMeta } from '../components/PresenceDot';
 import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
-import { currentSeason as eloSeasonNow, eloSeasonFromCurrent, isNewcomer, pronosticoPoints, ratingOf, seasonForecast, tournamentElo } from '../lib/tournamentElo';
+import { boardCalendar, currentSeason as eloSeasonNow, eloSeasonFromCurrent, isNewcomer, pronosticoPoints, ratingOf, seasonForecast, tournamentElo } from '../lib/tournamentElo';
 import { withScheduledGames } from '../lib/publicGames';
 import { Trend, TrendKind } from '../components/Trend';
 import { PILLSBURY_EMOJI, pillsburyWins } from '../lib/pillsbury';
@@ -208,7 +208,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const forecast = seasonForecast(
     player.handle,
     eloSeason,
-    withScheduledGames(history, config.schedule ?? []),
+    boardCalendar(withScheduledGames(history, config.schedule ?? []), gameStates, config.players.map((p) => p.handle)),
     eloSeasonFromCurrent(config.players.map((p) => p.handle), history, gameStates).games
   );
   const pronostico = forecast ? pronosticoPoints(forecast) : 0;

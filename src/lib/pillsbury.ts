@@ -3,7 +3,7 @@
 // after Harry Nelson Pillsbury, who in 1895, aged 22 and almost unknown, won Hastings ahead of
 // Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out.
 import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types';
-import { currentSeason, eloSeasonFromCurrent, EloReport, Forecast, seasonForecast } from './tournamentElo';
+import { boardCalendar, currentSeason, eloSeasonFromCurrent, EloReport, Forecast, seasonForecast } from './tournamentElo';
 
 export const PILLSBURY_ID = 'pillsbury';
 export const PILLSBURY_EMOJI = '🌱';
@@ -36,17 +36,19 @@ export interface PillsburyRace {
 export function pillsburyRace(
   players: Player[],
   report: EloReport,
-  calendar: { white: string; black: string }[],
+  calendar: HistoryGame[], // the season's games, created and still to create
   history: HistoryGame[],
   gameStates: Record<string, LichessExportGame>
 ): PillsburyRace {
   const season = currentSeason(report);
-  const finished = eloSeasonFromCurrent(players.map((p) => p.handle), history, gameStates).games;
+  const handles = players.map((p) => p.handle);
+  const finished = eloSeasonFromCurrent(handles, history, gameStates).games;
+  const board = boardCalendar(calendar, gameStates, handles);
   const rows: PillsburyRow[] = [];
   const waiting: string[] = [];
   const newcomers: string[] = [];
   players.forEach((p) => {
-    const f = seasonForecast(p.handle, season, calendar, finished);
+    const f = seasonForecast(p.handle, season, board, finished);
     if (!f) {
       newcomers.push(p.handle);
       return;

@@ -74,7 +74,7 @@ describe('computeSeasonAwards', () => {
     expect(awardsMessage('Stagione 2', awards).split('\n').slice(0, 3)).toEqual([
       '🏆 *I premi di Stagione 2*',
       '',
-      '👑 *Re del matto*: Anna (2 vittorie col matto)',
+      '⚔️ *Re del matto*: Anna (2 vittorie col matto)',
     ]);
     const archive = buildSeasonArchive({ title: 'T', season: 'S', description: '' }, players, history, gs);
     expect(archive.awards).toEqual(awards);
@@ -201,5 +201,13 @@ describe('Premio Pillsbury', () => {
     expect(award!.detail).toBe('1 punto su 1 partita, obiettivo ½'); // her one game counted: the win over Anna
     // With no archived season everyone is an esordiente: no award yet
     expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'pillsbury')).toBe(false);
+  });
+});
+
+describe('Re del matto', () => {
+  it('shows ⚔️, also for a season archived with the crown', async () => {
+    const { awardEmoji } = await import('../awards');
+    expect(awardEmoji({ id: 'mate', emoji: '👑', title: '', description: '', winners: [], detail: '' })).toBe('⚔️');
+    expect(awardEmoji({ id: 'draws', emoji: '🧱', title: '', description: '', winners: [], detail: '' })).toBe('🧱');
   });
 });

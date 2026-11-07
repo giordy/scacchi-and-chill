@@ -136,3 +136,21 @@ describe('season period in the archive', () => {
   });
 });
 
+
+describe('closing a season with a substitute', () => {
+  it("keeps the substitute's first round, from who played on Lichess", async () => {
+    const { buildSeasonArchive } = await import('../seasons');
+    const players = [{ handle: 'anna', name: 'Anna' }, { handle: 'sub', name: 'Sub' }];
+    const meta = {
+      title: 'T', season: 'S', description: '',
+      withdrawals: [{ handle: 'greta', name: 'Greta', at: '2026-01-01', played: 1, total: 2, mode: 'replaced' as const, replacedBy: { handle: 'sub', name: 'Sub' } }],
+    };
+    const on = (id: string, white: string, black: string) => ({ id, status: 'mate', winner: 'white' as const, players: { white: { user: { id: white } }, black: { user: { id: black } } } });
+    const history = [
+      { round: '1', white: 'sub', black: 'anna', url: 'https://lichess.org/aaaaaaaa' },
+      { round: '2', white: 'anna', black: 'sub', url: 'https://lichess.org/bbbbbbbb' },
+    ];
+    const a = buildSeasonArchive(meta, players, history, { aaaaaaaa: on('aaaaaaaa', 'greta', 'anna'), bbbbbbbb: on('bbbbbbbb', 'anna', 'sub') });
+    expect(a.departures?.[0]).toMatchObject({ handle: 'greta', fromRound: '2' });
+  });
+});

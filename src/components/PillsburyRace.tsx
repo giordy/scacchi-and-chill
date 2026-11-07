@@ -40,7 +40,7 @@ export function PillsburyRace({
 }: {
   players: Player[];
   elo: EloReport;
-  calendar: { white: string; black: string }[];
+  calendar: HistoryGame[]; // the season's games, created and still to create
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
   seasons: SeasonArchive[];

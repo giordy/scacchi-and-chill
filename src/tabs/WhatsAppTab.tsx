@@ -5,7 +5,7 @@ import { CollapsibleSection } from '../components/CollapsibleSection';
 import { ReviewsTab } from '../ReviewsTab';
 import { LaunchMessageSection } from './settings/LaunchMessageSection';
 import { StatusPhrasesSection } from './settings/StatusPhrasesSection';
-import { awardsMessage, awardWinnersLine, computeSeasonAwards } from '../lib/awards';
+import { awardEmoji, awardsMessage, awardWinnersLine, computeSeasonAwards } from '../lib/awards';
 import { errorMessage } from '../lib/utils';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
@@ -35,7 +35,7 @@ function AwardsSection({ season, config, history, gameStates, flash, seasons }: 
       <ul className="note note-sm season-steps">
         {awards.map((a) => (
           <li key={a.id}>
-            {a.emoji} <strong>{a.title}</strong>: {awardWinnersLine(a)}
+            {awardEmoji(a)} <strong>{a.title}</strong>: {awardWinnersLine(a)}
           </li>
         ))}
       </ul>

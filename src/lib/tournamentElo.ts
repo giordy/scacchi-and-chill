@@ -9,8 +9,8 @@
 //
 // Lichess ratings are not used: for correspondence they are provisional for almost everyone here
 // and jump by hundreds of points, and they also depend on games played outside the tournament.
-import { HistoryGame, LichessExportGame, SeasonArchive } from '../types';
-import { stateOf, isVoid } from './games';
+import { HistoryGame, LichessExportGame, SeasonArchive, SeasonDeparture } from '../types';
+import { byRound, stateOf, isVoid } from './games';
 import { scoredResult } from './standings';
 import { extractGameId } from './utils';
 
@@ -32,6 +32,9 @@ export interface EloSeasonInput {
   key: string; // the archive id, or CURRENT for the season being played
   players: string[]; // who played the season (games or standings)
   games: EloGame[];
+  // Players whose rating of this season is not only theirs (a substitute whose first round is not
+  // known): esordienti again in the next season
+  doubtful?: string[];
 }
 
 export interface EloSeason {
@@ -94,21 +97,47 @@ export function computeElo(inputs: EloSeasonInput[]): EloReport {
     });
 
     seasons.push({ key: input.key, start, end: new Map([...present].map((h) => [h, ratings.get(h)!])), newcomers });
-    previous = present;
+    // A doubtful rating (see EloSeasonInput) does not count as a season played
+    const doubtful = new Set((input.doubtful ?? []).map(lower));
+    previous = new Set([...present].filter((h) => !doubtful.has(h)));
   });
 
   return { seasons, ratings, before };
 }
 
 // An archived season, its forfeits left out (won at the table, not on the board)
+// After a replacement the archive gives the substitute the games already played by who left (as
+// the standings do). With the round the substitute started from, those games go back to who
+// played them; without it, the substitute's rating of that season is doubtful.
 export function eloSeasonFromArchive(archive: SeasonArchive): EloSeasonInput {
+  const replaced = (archive.departures ?? []).filter((d) => d.mode === 'replaced' && d.replacedBy);
+  // Rounds are known only for seasons archived since they were kept ("–" before)
+  const before = (d: SeasonDeparture, round: string, end?: number) =>
+    d.fromRound && /\d/.test(round)
+      ? byRound(round, d.fromRound) < 0
+      : !!d.fromDate && end !== undefined && end < Date.parse(d.fromDate);
+  const known = (d: SeasonDeparture) => !!d.fromRound || !!d.fromDate;
+  const playedBy = (handle: string, round: string, end?: number) => {
+    const d = replaced.find((x) => known(x) && lower(x.replacedBy!.handle) === lower(handle) && before(x, round, end));
+    return d ? d.handle : handle;
+  };
   return {
     key: archive.id,
-    players: archive.standings.map((s) => s.handle),
+    players: [...archive.standings.map((s) => s.handle), ...replaced.filter(known).map((d) => d.handle)],
     games: (archive.games ?? [])
       .filter((g) => g.status !== 'forfeit')
-      .map((g) => ({ white: g.white, black: g.black, result: g.result, end: g.end, round: g.round, id: g.id })),
+      .map((g) => ({ white: playedBy(g.white, g.round, g.end), black: playedBy(g.black, g.round, g.end), result: g.result, end: g.end, round: g.round, id: g.id })),
+    doubtful: replaced.filter((d) => !known(d)).map((d) => d.replacedBy!.handle),
   };
+}
+
+// Who actually played a game, by the Lichess accounts (a substitute takes over the games of who
+// left in the standings, not on the board); the handles of the calendar otherwise
+export function playersOnBoard(g: HistoryGame, s: LichessExportGame | undefined, players: string[]): { white: string; black: string } {
+  const known = (id?: string) => (id ? players.find((h) => lower(h) === lower(id)) : undefined);
+  // Someone no longer in the list (who left) is still who played: their Lichess account then
+  const side = (id: string | undefined, fallback: string) => known(id) ?? id ?? fallback;
+  return { white: side(s?.players?.white?.user?.id, g.white), black: side(s?.players?.black?.user?.id, g.black) };
 }
 
 // The season being played: its finished games, aborted ones and forfeits left out
@@ -122,7 +151,7 @@ export function eloSeasonFromCurrent(
     const s = stateOf(g, gameStates);
     const result = scoredResult(s);
     if (!s || !result || isVoid(s) || s.status === 'forfeit') return;
-    games.push({ white: g.white, black: g.black, result, end: s.lastMoveAt, round: g.round, id: extractGameId(g.url) || undefined });
+    games.push({ ...playersOnBoard(g, s, players), result, end: s.lastMoveAt, round: g.round, id: extractGameId(g.url) || undefined });
   });
   return { key: CURRENT, players, games };
 }
@@ -201,3 +230,13 @@ export function seasonForecast(
 // The pronostico as shown: rounded to the nearest half point, as the scores are
 export const pronosticoPoints = (f: Forecast) => Math.round(f.expected * 2) / 2;
 export const roundHalf = (n: number) => Math.round(n * 2) / 2;
+
+// The calendar as played on the board: a created game by its Lichess accounts (a substitute does
+// not get the games played by who left), a game still to create by the calendar
+export function boardCalendar(
+  calendar: HistoryGame[],
+  gameStates: Record<string, LichessExportGame>,
+  players: string[]
+): { white: string; black: string }[] {
+  return calendar.map((g) => playersOnBoard(g, g.url || g.lichess ? stateOf(g, gameStates) : undefined, players));
+}

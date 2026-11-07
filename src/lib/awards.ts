@@ -25,6 +25,11 @@ function leaders(counts: Map<string, number>, players: Player[]): { handles: str
 // with few players every award given away makes the others worth less
 const MIN_COUNT = 2;
 
+// Re del matto: ⚔️, not the crown, which next to a name means the reigning champion. Seasons
+// archived before keep 👑 in their data: awardEmoji shows them with the new one.
+const MATE_EMOJI = "⚔️";
+export const awardEmoji = (a: SeasonAward) => (a.id === "mate" ? MATE_EMOJI : a.emoji);
+
 // At most this many games are linked from an award: beyond, a list of links says little
 const MAX_LINKED = 3;
 const linked = (ids: Array<string | undefined>) => {
@@ -72,7 +77,7 @@ export function computeSeasonAwards(
   if (mate.handles.length > 0 && mate.best >= MIN_COUNT) {
     awards.push({
       id: "mate",
-      emoji: "👑",
+      emoji: MATE_EMOJI,
       title: "Re del matto",
       description: "Più vittorie chiuse con lo scacco matto",
       winners: who(mate.handles),
@@ -165,7 +170,7 @@ export const awardWinnersLine = (award: SeasonAward) => `${names(award)} (${awar
 export function awardsMessage(season: string, awards: SeasonAward[]): string {
   const main = awards.find((a) => a.id === PILLSBURY_ID);
   const others = awards.filter((a) => a !== main);
-  const line = (a: SeasonAward) => `${a.emoji} *${a.title}*: ${awardWinnersLine(a)}`;
+  const line = (a: SeasonAward) => `${awardEmoji(a)} *${a.title}*: ${awardWinnersLine(a)}`;
   return [
     `🏆 *I premi di ${season}*`,
     "",

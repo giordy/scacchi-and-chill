@@ -99,3 +99,51 @@ describe('pronostico', () => {
     expect(seasonForecast('nuovo', season, calendar, [])).toBeNull(); // esordiente
   });
 });
+
+describe('substitutes', () => {
+  const row = (handle: string) => ({ handle, name: handle, played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 });
+  // Greta beat Anna in round 1, then left; Sub took her place and lost to Anna in round 2. The
+  // archive gives both games to Sub, as the standings do.
+  const archive = (fromRound?: string): SeasonArchive => ({
+    id: 's1', season: 's1', title: 'T', archivedAt: '2026-01-01', gamesPlayed: 2,
+    standings: ['anna', 'sub'].map(row),
+    games: [
+      { round: '1', white: 'sub', black: 'anna', result: '1-0', end: 1 },
+      { round: '2', white: 'anna', black: 'sub', result: '1-0', end: 2 },
+    ],
+    departures: [{ handle: 'greta', name: 'Greta', mode: 'replaced', replacedBy: { handle: 'sub', name: 'Sub' }, ...(fromRound ? { fromRound } : {}) }],
+  });
+
+  it('give back to who left the games before the round the substitute started from', () => {
+    const input = eloSeasonFromArchive(archive('2'));
+    expect(input.games.map((x) => x.white)).toEqual(['greta', 'anna']);
+    const rep = tournamentElo([archive('2')], ['anna', 'sub'], [], {});
+    expect(isNewcomer(currentSeason(rep), 'sub')).toBe(false); // kept for this season
+    expect(rep.ratings.get('greta')).toBeGreaterThan(1500);
+    expect(rep.ratings.get('sub')).toBeLessThan(1500);
+  });
+
+  it('can be told apart by a date, for seasons archived without the rounds', () => {
+    const old: SeasonArchive = { ...archive(), games: archive().games!.map((g) => ({ ...g, round: '–' })) };
+    old.departures = [{ ...old.departures![0], fromDate: '1970-01-01T00:00:00.002Z' }]; // between the two games
+    expect(eloSeasonFromArchive(old).games.map((x) => x.white)).toEqual(['greta', 'anna']);
+    // A round given for games without rounds is not used
+    old.departures = [{ ...old.departures![0], fromDate: undefined, fromRound: '2' }];
+    expect(eloSeasonFromArchive(old).games.map((x) => x.white)).toEqual(['sub', 'anna']);
+  });
+
+  it('are esordienti in the next season when their first round is not known', () => {
+    const rep = tournamentElo([archive()], ['anna', 'sub'], [], {});
+    expect(isNewcomer(currentSeason(rep), 'sub')).toBe(true);
+    expect(isNewcomer(currentSeason(rep), 'anna')).toBe(false);
+  });
+
+  it('in the current season, the games are of who played them on Lichess', async () => {
+    const { playersOnBoard } = await import('../tournamentElo');
+    const g = { round: '1', white: 'sub', black: 'anna', url: 'https://lichess.org/aaaaaaaa' };
+    const s = { id: 'aaaaaaaa', status: 'mate', winner: 'white' as const, players: { white: { user: { id: 'greta' } }, black: { user: { id: 'Anna' } } } };
+    expect(playersOnBoard(g, s, ['sub', 'anna'])).toEqual({ white: 'greta', black: 'anna' });
+    expect(playersOnBoard(g, undefined, ['sub', 'anna'])).toEqual({ white: 'sub', black: 'anna' });
+    expect(eloSeasonFromCurrent(['sub', 'anna'], [g], { aaaaaaaa: s }).games[0]).toMatchObject({ white: 'greta', black: 'anna' });
+  });
+});

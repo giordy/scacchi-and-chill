@@ -273,6 +273,12 @@ export interface SeasonDeparture {
   name: string;
   mode: Withdrawal['mode'];
   replacedBy?: Player;
+  // First round the substitute played: the games of the substitute before it were played by who
+  // left (the archive gives them to the substitute, as the standings do). Kept for the Elo del torneo.
+  fromRound?: string;
+  // The same for seasons archived without the rounds of the games: the substitute's games that
+  // ended before this day ("2026-03-10") were played by who left. Set by hand, once.
+  fromDate?: string;
 }
 
 // A scored game of an archived season: just enough for head-to-heads and records (see lib/allTime.ts)

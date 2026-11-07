@@ -2,6 +2,7 @@ import React from 'react';
 import { SeasonAward } from '../types';
 import { playerHref, publicViewHref } from '../lib/routes';
 import { PILLSBURY_ID } from '../lib/pillsbury';
+import { awardEmoji } from '../lib/awards';
 import { useNameOf } from './Names';
 
 // Grid of the end-of-season awards, each winner linking to their player page
@@ -42,7 +43,7 @@ export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[
   if (compact) {
     const row = (a: SeasonAward, className = "") => (
       <li key={a.id} className={className}>
-        <span className="compact-emoji" aria-hidden="true">{a.emoji}</span>
+        <span className="compact-emoji" aria-hidden="true">{awardEmoji(a)}</span>
         <span className="compact-body">
           <span>
             <strong>{a.title}</strong>: <span className="award-winners">{winners(a)}</span>
@@ -80,7 +81,7 @@ export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[
       <ul className="awards-grid">
         {others.map((a) => (
           <li key={a.id} className="award-card">
-            <span className="award-emoji" aria-hidden="true">{a.emoji}</span>
+            <span className="award-emoji" aria-hidden="true">{awardEmoji(a)}</span>
             <div className="award-body">
               <h3 className="award-title">{a.title}</h3>
               <p className="award-winners">{winners(a)}</p>
