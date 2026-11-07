@@ -42,7 +42,7 @@ Da *Torneo → Fine stagione e storico*:
 
 1. **Authentication → Sign-in method**: attiva Google.
 2. **Authentication → Settings → Authorized domains**: aggiungi il dominio di GitHub Pages (`<utente>.github.io`) e `localhost`.
-3. **Firestore → Rules**: pubblica il contenuto di [`firestore.rules`](firestore.rules). Ripubblicalo ogni volta che il file cambia.
+3. **Firestore → Rules**: pubblica il contenuto di [`firestore.rules`](firestore.rules). Ripubblicalo ogni volta che il file cambia. Le regole sono provate da `tests/firestore.rules.test.ts` sull'emulatore Firestore (`npm run test:rules`, anche nel deploy): chi non è l'organizzatore legge solo i dati pubblici e non scrive nulla, i dati privati restano privati, le partite accettano solo link Lichess, le foto solo immagini piccole. Un test controlla anche che l'email in `firestore.rules` sia la stessa di `ADMIN_EMAILS`.
 4. La chiave web in `firebase-applet-config.json` è pubblica per natura. Limitala in Google Cloud ai referrer `<utente>.github.io/*` e `localhost`.
 
 L'email dell'organizzatore compare in **due** posti, da tenere allineati:
@@ -66,6 +66,7 @@ Gli aneddoti e il token sono privati di proposito: non vanno mai nella parte pub
 npm install
 npm run dev      # server di sviluppo su http://localhost:3000
 npm test         # test con vitest
+npm run test:rules  # test di firestore.rules sull'emulatore Firestore (serve Java 21)
 npm run lint     # controllo dei tipi (tsc --noEmit)
 npm run build    # build di produzione in dist/, con i meta tag dell'anteprima
 ```
