@@ -57,7 +57,7 @@ const season1: SeasonArchive = {
     { round: '2', white: 'bruno', black: 'dario', result: '0-1', status: 'resign', plies: 50 },
   ],
 };
-const nameOf = (h: string) => players.find((p) => p.handle === h)?.name ?? h;
+const nameOf = (h: string, fallback?: string) => players.find((p) => p.handle === h)?.name ?? fallback ?? h;
 
 const at = (hash: string) => vi.stubGlobal('window', { location: { hash } });
 afterEach(() => vi.unstubAllGlobals());
@@ -124,5 +124,22 @@ describe('player page', () => {
     const html = playerPage('anna', []);
     expect(html).not.toContain('Carriera');
     expect(html).not.toContain('Scontri diretti di sempre');
+  });
+});
+
+describe('names from the players register', () => {
+  it('shows a renamed player with the new name in past seasons and in the hall of fame', async () => {
+    const { NamesContext } = await import('../Names');
+    const { rosterNameOf } = await import('../../lib/roster');
+    const renamed = rosterNameOf([{ handle: 'anna', name: 'Anna R.' }, { handle: 'gredip', name: 'Greta D.' }]);
+    at('#/albo');
+    const html = renderToStaticMarkup(
+      <NamesContext.Provider value={renamed}>
+        <PublicTournamentView config={config} tournamentMeta={config.tournament!} history={history} gameStates={gameStates} nameOf={renamed} seasons={[season1]} />
+      </NamesContext.Provider>
+    );
+    // Albo d'Oro, past season's table and the note on who left
+    expect(html.match(/Anna R\./g)!.length).toBeGreaterThanOrEqual(3);
+    expect(html).toContain('Greta D. ha lasciato il torneo');
   });
 });

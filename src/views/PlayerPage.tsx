@@ -3,6 +3,7 @@ import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../typ
 import { allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, seasonsWithGames } from '../lib/allTime';
 import { computeStandings } from '../lib/standings';
 import { departuresOf } from '../lib/departures';
+import { NameOf } from '../lib/roster';
 import { CareerSection, AllTimeHeadToHeadSection } from '../components/CareerSections';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
@@ -18,7 +19,7 @@ interface PlayerPageProps {
   config: AppConfig;
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
-  nameOf: (handle: string) => string;
+  nameOf: NameOf;
   presence?: PresenceInfo; // when each player was last on Lichess
   seasons?: SeasonArchive[]; // archived seasons, for the career and the all-time head-to-heads
 }
@@ -121,7 +122,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
     : (winners ?? []).flatMap(fullPodium).find((p) => p.handle.toLowerCase() === handle.toLowerCase());
   const pastRow = profile ? undefined : seasons.flatMap((x) => x.standings).find((r) => r.handle.toLowerCase() === handle.toLowerCase());
   const pastName = podiumEntry ?? (pastRow && { handle: pastRow.handle, name: archivedName(handle, seasons) ?? pastRow.name });
-  const shownName = profile?.player.name ?? pastName?.name;
+  const shownName = profile?.player.name ?? (pastName && nameOf(pastName.handle, pastName.name));
 
   // Across seasons: the career needs an archived season, the all-time head-to-heads archived games
   const currentSeason = config.tournament?.season ?? "";
@@ -159,7 +160,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
         <section className="dossier-card player-hero">
           <div className="player-hero-top">
             <div>
-              <h1 className="hero-title">{pastName.name}</h1>
+              <h1 className="hero-title">{shownName}</h1>
               <a className="player-link" href={`https://lichess.org/@/${pastName.handle}`} target="_blank" rel="noopener noreferrer">
                 @{pastName.handle} su Lichess
               </a>

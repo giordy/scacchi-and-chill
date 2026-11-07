@@ -2,7 +2,8 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { ADMIN_TABS, isAdminTab } from '../../views/AdminConsole';
-import { TournamentTab } from '../../tabs/TournamentTab';
+import { SeasonsTab } from '../../tabs/SeasonsTab';
+import { PlayersTab } from '../../tabs/PlayersTab';
 import { SettingsTab } from '../../tabs/SettingsTab';
 import { ReviewsTab } from '../../ReviewsTab';
 import { defaultConfig } from '../../lib/config';
@@ -14,20 +15,33 @@ const organizer = { anecdotes: {}, ratings: {}, setAnecdote: noop, setRatings: n
 const summaries = (html: string) => [...html.matchAll(/<summary>([^<]+)<\/summary>/g)].map((m) => m[1]);
 
 describe('admin layout', () => {
-  it('has four tabs, settings last', () => {
-    expect(ADMIN_TABS.map((t) => t.key)).toEqual(['rounds', 'reviews', 'tournament', 'settings']);
+  it('has five tabs, settings last', () => {
+    expect(ADMIN_TABS.map((t) => t.key)).toEqual(['rounds', 'reviews', 'players', 'seasons', 'settings']);
+    expect(isAdminTab('tournament')).toBe(false);
     expect(isAdminTab('settings')).toBe(true);
     expect(isAdminTab('options')).toBe(false);
   });
 
-  it('keeps the season in Torneo, with the challenge settings under the rules', () => {
+  it('keeps the season in Stagioni, with the challenge settings under the rules', () => {
     const html = renderToStaticMarkup(
-      <TournamentTab config={config} settings={settings} setSettings={noop as any} history={[]} setHistory={noop as any} onSeasonReset={noop} gameStates={{}} seasons={[]} flash={noop} onUpdateTournamentMeta={noop} onUpdatePlayers={noop} onUpdateSchedule={noop} />
+      <SeasonsTab config={config} settings={settings} setSettings={noop as any} history={[]} setHistory={noop as any} onSeasonReset={noop} gameStates={{}} seasons={[]} flash={noop} onUpdateTournamentMeta={noop} onUpdateSchedule={noop} />
     );
-    expect(summaries(html)).toEqual(['Stagione corrente', `Giocatori (${config.players.length})`, 'Regolamento', 'Fine stagione e storico (0)']);
+    expect(summaries(html)).toEqual(['Stagione corrente', 'Regolamento', 'Fine stagione e storico (0)']);
+    expect(html).not.toContain('Ricostruisci');
     const rules = html.slice(html.indexOf('<summary>Regolamento'));
     expect(rules.indexOf('Validità del link di sfida')).toBeLessThan(rules.indexOf('Come funziona il torneo'));
     expect(html).not.toContain('Token API Lichess');
+  });
+
+  it('has the register and the withdrawals in Giocatori, current players first', () => {
+    const html = renderToStaticMarkup(
+      <PlayersTab config={config} history={[]} setHistory={noop as any} gameStates={{}} seasons={[]} flash={noop} onUpdateTournamentMeta={noop} onUpdatePlayers={noop} onUpdateSchedule={noop} />
+    );
+    expect(summaries(html)).toEqual(['Registro dei giocatori', 'Ritiri']);
+    expect(html).toContain(`In questa stagione (${config.players.length})`);
+    expect(html).toContain('Togli dalla stagione');
+    // Nobody in the history here, but current players cannot be deleted either
+    expect(html).not.toContain('>Elimina<');
   });
 
   it('puts the set-and-forget settings in Impostazioni, the token open while missing', () => {
@@ -90,5 +104,29 @@ describe('hall of fame form', () => {
     expect(html).toContain('id="hof-end" type="month"');
     expect(html).toContain('ott 2025 – feb 2026');
     expect(html).toContain(' · 2024');
+  });
+});
+
+describe('players register', () => {
+  const row = (handle: string, name: string) => ({ handle, name, points: 1, played: 1, won: 1, drawn: 0, lost: 0, sb: 0 });
+  const season1 = { id: 's1', season: 'Stagione 1', title: 'T', archivedAt: '2026-01-01T00:00:00Z', gamesPlayed: 1, standings: [row('battimat', 'Matteo'), row('ma_pi', 'Matteo'), row('roxylinz', 'Bianca')] } as any;
+  const cfg = {
+    ...config,
+    players: [{ handle: 'battimat', name: 'Matteo' }],
+    tournament: { ...config.tournament, roster: [{ handle: 'nuovo1', name: 'Nuovo' }] },
+  };
+
+  it('groups current, past and never-played players, and flags the same name twice', async () => {
+    const { RosterSection } = await import('../../tabs/settings/RosterSection');
+    const html = renderToStaticMarkup(
+      <RosterSection meta={cfg.tournament} players={cfg.players} seasons={[season1]} history={[]} schedule={[]} flash={noop} onUpdateTournamentMeta={noop} onUpdatePlayers={noop} />
+    );
+    expect(html).toContain('In questa stagione (1)');
+    expect(html).toContain('Nello storico');
+    expect(html).toContain('Registrati, senza partite');
+    expect(html).toContain('Alcuni giocatori hanno lo stesso nome');
+    expect(html.match(/nome doppio/g)).toHaveLength(2);
+    // Only the one who never played can be deleted
+    expect(html.match(/>Elimina</g)).toHaveLength(1);
   });
 });

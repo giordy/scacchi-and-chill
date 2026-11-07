@@ -30,10 +30,13 @@ describe('departures', () => {
     expect(departureText(r)).toBe('Greta ha lasciato il torneo; al suo posto ha giocato Paco.');
     expect(departureText(a)).toBe('Luca ha lasciato il torneo: le sue partite sono state annullate.');
     expect(departureText({ handle: 'x', name: 'X', mode: 'forfeit' })).toBe('X ha lasciato il torneo: le partite rimaste sono andate agli avversari.');
+    // With the register's names: renamed players show the new name
+    const names = (h: string, f?: string) => ({ gredip: 'Greta D.', matepaco: 'Francesco S.' } as Record<string, string>)[h] ?? f ?? h;
+    expect(departureText(r, names)).toBe('Greta D. ha lasciato il torneo; al suo posto ha giocato Francesco S.');
   });
 
   it('tells whom a player replaced', () => {
-    expect(replacedIn(departuresOf([replaced]), 'MatePaco')).toBe('Greta');
+    expect(replacedIn(departuresOf([replaced]), 'MatePaco')).toEqual({ handle: 'gredip', name: 'Greta' });
     expect(replacedIn(departuresOf([replaced]), 'gredip')).toBeUndefined();
   });
 
@@ -45,7 +48,7 @@ describe('departures', () => {
     ];
     const archive = buildSeasonArchive(meta, players, [], {}, new Date('2026-01-01T00:00:00Z'));
     expect(archive.departures).toHaveLength(1);
-    expect(careerOf('matepaco', [archive])[0].replacing).toBe('Greta');
+    expect(careerOf('matepaco', [archive])[0].replacing).toEqual({ handle: 'gredip', name: 'Greta' });
     expect(careerOf('fsgach', [archive])[0]).not.toHaveProperty('replacing');
     expect(buildSeasonArchive({ ...meta, withdrawals: [] }, players, [], {})).not.toHaveProperty('departures');
   });

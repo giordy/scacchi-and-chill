@@ -128,6 +128,8 @@ export interface TournamentMeta {
   daysPerMove?: number;
   rated?: boolean;
   winners?: SeasonWinner[];
+  // Every player who ever took part, with the name shown on the site (see lib/roster.ts)
+  roster?: Player[];
 }
 
 export interface AppConfig {

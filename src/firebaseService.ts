@@ -75,6 +75,7 @@ export interface TournamentDocData {
   daysPerMove?: number;
   rated?: boolean;
   winners?: SeasonWinner[];
+  roster?: Player[];
   players?: Player[];
   schedule?: ScheduledMatch[];
   updatedAt?: string;
@@ -106,6 +107,7 @@ export async function saveTournamentFullToFirebase(data: {
     if (data.meta.rated !== undefined) payload.rated = data.meta.rated;
     // Firestore rejects undefined values (e.g. a winner without notes): the JSON round trip drops them
     if (data.meta.winners !== undefined) payload.winners = JSON.parse(JSON.stringify(data.meta.winners));
+    if (data.meta.roster !== undefined) payload.roster = data.meta.roster.map(({ handle, name }) => ({ handle, name }));
   }
   if (data.players) {
     payload.players = data.players;

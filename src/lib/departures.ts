@@ -1,4 +1,5 @@
 import { SeasonDeparture, Withdrawal } from '../types';
+import type { NameOf } from './roster';
 
 // The withdrawals of a season as the archive keeps them: no dates, no undo data
 export const departuresOf = (withdrawals: Withdrawal[] | undefined): SeasonDeparture[] =>
@@ -10,12 +11,16 @@ export const departuresOf = (withdrawals: Withdrawal[] | undefined): SeasonDepar
   }));
 
 // The note under a past season's table
-export function departureText(d: SeasonDeparture): string {
-  if (d.mode === 'replaced' && d.replacedBy) return `${d.name} ha lasciato il torneo; al suo posto ha giocato ${d.replacedBy.name}.`;
-  if (d.mode === 'forfeit') return `${d.name} ha lasciato il torneo: le partite rimaste sono andate agli avversari.`;
-  return `${d.name} ha lasciato il torneo: le sue partite sono state annullate.`;
+export function departureText(d: SeasonDeparture, nameOf: NameOf = (_h, f) => f ?? _h): string {
+  const name = nameOf(d.handle, d.name);
+  // A name may end with an initial ("Francesco S."): no second full stop
+  if (d.mode === 'replaced' && d.replacedBy) return `${name} ha lasciato il torneo; al suo posto ha giocato ${nameOf(d.replacedBy.handle, d.replacedBy.name)}.`.replace(/\.\.$/, '.');
+  if (d.mode === 'forfeit') return `${name} ha lasciato il torneo: le partite rimaste sono andate agli avversari.`;
+  return `${name} ha lasciato il torneo: le sue partite sono state annullate.`;
 }
 
 // Whom a player replaced in a season, if anyone
-export const replacedIn = (departures: SeasonDeparture[] | undefined, handle: string): string | undefined =>
-  departures?.find((d) => d.replacedBy && d.replacedBy.handle.toLowerCase() === handle.toLowerCase())?.name;
+export function replacedIn(departures: SeasonDeparture[] | undefined, handle: string): { handle: string; name: string } | undefined {
+  const d = departures?.find((x) => x.replacedBy && x.replacedBy.handle.toLowerCase() === handle.toLowerCase());
+  return d ? { handle: d.handle, name: d.name } : undefined;
+}

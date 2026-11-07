@@ -16,16 +16,17 @@ import { useLichessSync } from './hooks/useLichessSync';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Notice } from './components/Notice';
 import { RoundsTab } from './tabs/RoundsTab';
-import { TournamentTab } from './tabs/TournamentTab';
+import { SeasonsTab } from './tabs/SeasonsTab';
+import { PlayersTab } from './tabs/PlayersTab';
 import { SettingsTab } from './tabs/SettingsTab';
 import { ReviewsTab } from './ReviewsTab';
 import { applyWithdrawals } from './lib/withdrawals';
 import { FairPlayAlert } from './components/FairPlayAlert';
 import { AdminLogin } from './views/AdminLogin';
 import { AdminConsole, AdminTab, isAdminTab } from './views/AdminConsole';
+import { useNameOf } from './components/Names';
 import { saveTournamentMetaToFirebase, saveTournamentFullToFirebase } from './firebaseService';
 import { errorMessage } from './lib/utils';
-import { nameFrom } from './lib/games';
 
 interface AdminAppProps {
   config: AppConfig;
@@ -44,7 +45,8 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
   // v3: "Turno" and "Calendario" became "Turni", an old stored value falls back to it
   const [activeTab, setActiveTabRaw] = usePersistentState<AdminTab>('pairings.adminActiveTab.v3', 'rounds', isAdminTab);
 
-  const nameOf = nameFrom(config.players);
+  // Names from the players register (provided by App)
+  const nameOf = useNameOf();
 
   // Round open in the "Turni" tab; empty shows the list of rounds
   const [openRound, setOpenRoundRaw] = usePersistentState<string>("pairings.openRound", "", (v) => typeof v === "string");
@@ -184,10 +186,27 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
         <ReviewsTab history={seasonHistory} gameStates={lichess.gameStates} config={config} nameOf={nameOf} triggerToast={triggerToast} organizer={organizer} />
       )}
 
-      {activeTab === 'tournament' && (
+      {activeTab === 'players' && (
         <>
           <Notice notice={notice} />
-          <TournamentTab
+          <PlayersTab
+            config={config}
+            history={history}
+            setHistory={setHistory}
+            gameStates={lichess.gameStates}
+            seasons={seasons}
+            flash={flash}
+            onUpdateTournamentMeta={updateTournamentMeta}
+            onUpdatePlayers={updatePlayers}
+            onUpdateSchedule={updateSchedule}
+          />
+        </>
+      )}
+
+      {activeTab === 'seasons' && (
+        <>
+          <Notice notice={notice} />
+          <SeasonsTab
             config={config}
             settings={settings}
             setSettings={organizer.setSettings}
@@ -198,7 +217,6 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             seasons={seasons}
             flash={flash}
             onUpdateTournamentMeta={updateTournamentMeta}
-            onUpdatePlayers={updatePlayers}
             onUpdateSchedule={updateSchedule}
           />
         </>

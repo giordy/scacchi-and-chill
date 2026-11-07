@@ -7,6 +7,7 @@ import { PlayerPage } from './PlayerPage';
 import { LoadingScreen } from '../components/LoadingScreen';
 import { PublicTournamentView } from '../PublicTournamentView';
 import { PresenceInfo } from '../lib/presence';
+import { NameOf } from '../lib/roster';
 
 interface PublicPageProps {
   seasons: SeasonArchive[];
@@ -16,7 +17,7 @@ interface PublicPageProps {
   gameStates: Record<string, LichessExportGame>;
   // Last time the open games were read live from Lichess
   liveUpdatedAt?: Date | null;
-  nameOf: (handle: string) => string;
+  nameOf: NameOf;
   // When each player was last on Lichess
   presence?: PresenceInfo;
 }
