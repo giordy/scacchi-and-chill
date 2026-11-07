@@ -154,6 +154,6 @@ describe('awards of a past season', () => {
     const html = publicPage('#/albo', [withAwards]);
     expect(html).toContain('in 10 mosse');
     expect(html).toContain('href="https://lichess.org/cccccccc"');
-    expect(html).toContain('vedi la partita');
+    expect(html).toContain('vedi su Lichess');
   });
 });
