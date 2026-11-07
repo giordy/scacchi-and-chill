@@ -169,3 +169,16 @@ describe('awards of a past season', () => {
     expect(html).toContain('vedi su Lichess');
   });
 });
+
+describe('the reigning Premio Pillsbury', () => {
+  const won: SeasonArchive = {
+    ...season1,
+    awards: [{ id: 'pillsbury', emoji: '🌱', title: 'Premio Pillsbury', description: '', winners: [{ handle: 'bruno', name: 'Bruno' }], detail: '' }],
+  };
+  it('has a 🌱 next to the name in the standings and on the shelf of the player page', () => {
+    const html = publicPage('', [won]);
+    expect(html).toContain('Premio Pillsbury in carica · Stagione 1');
+    expect(publicPage('', [season1])).not.toContain('Premio Pillsbury in carica');
+    expect(playerPage('bruno', [won])).toContain('Premio Pillsbury · Stagione 1');
+  });
+});

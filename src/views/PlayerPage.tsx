@@ -16,6 +16,7 @@ import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
 import { currentSeason as eloSeasonNow, eloSeasonFromCurrent, isNewcomer, pronosticoPoints, ratingOf, seasonForecast, tournamentElo } from '../lib/tournamentElo';
 import { withScheduledGames } from '../lib/publicGames';
 import { Trend, TrendKind } from '../components/Trend';
+import { PILLSBURY_EMOJI, pillsburyWins } from '../lib/pillsbury';
 
 interface PlayerPageProps {
   handle: string;
@@ -77,8 +78,8 @@ const PLACE_LABEL: Record<Medal, string> = { 1: "Campione", 2: "2° posto", 3: "
 // the crown of the reigning champion first, then a medal per podium, newest first. What each
 // one is opens with a tap (or on hover). With many medals, one per kind with its count. Nothing for
 // a player without any.
-function TrophyShelf({ medals, champion, title }: { medals: PlayerMedal[]; champion?: string; title?: string }) {
-  if (medals.length === 0 && !champion) return null;
+function TrophyShelf({ medals, champion, title, pillsbury = [] }: { medals: PlayerMedal[]; champion?: string; title?: string; pillsbury?: string[] }) {
+  if (medals.length === 0 && !champion && pillsbury.length === 0) return null;
   const newestFirst = [...medals].reverse();
   const grouped = medals.length + (champion ? 1 : 0) > SHELF_MAX;
   const seasonsOf = (m: Medal) => newestFirst.filter((x) => x.place === m).map((x) => shortSeason(x.season, title));
@@ -94,6 +95,8 @@ function TrophyShelf({ medals, champion, title }: { medals: PlayerMedal[]; champ
   return (
     <ul className="trophy-shelf" aria-label="Trofei">
       {champion && trophy("crown", "👑", `Campione in carica · ${champion}`, "is-crown")}
+      {pillsbury.length > 0 &&
+        trophy("pillsbury", PILLSBURY_EMOJI, `Premio Pillsbury · ${[...pillsbury].reverse().join(", ")}`, "is-pillsbury", pillsbury.length > 1 ? pillsbury.length : undefined)}
       {grouped
         ? ([1, 2, 3] as Medal[])
             .filter((m) => seasonsOf(m).length > 0)
@@ -179,7 +182,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                 @{pastName.handle} su Lichess
               </a>
             </div>
-            <TrophyShelf medals={medalsOf(pastName.handle, winners)} title={config.tournament?.title} />
+            <TrophyShelf medals={medalsOf(pastName.handle, winners)} title={config.tournament?.title} pillsbury={pillsburyWins(pastName.handle, seasons)} />
           </div>
           <p className="note">Non partecipa alla stagione in corso.</p>
         </section>
@@ -270,7 +273,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               {presence && <PresenceMeta seenAt={seenAtOf(presence, player.handle)} now={presence.now} />}
             </p>
           </div>
-          <TrophyShelf medals={medals} champion={isChampion ? champions!.season : undefined} title={config.tournament?.title} />
+          <TrophyShelf medals={medals} champion={isChampion ? champions!.season : undefined} title={config.tournament?.title} pillsbury={pillsburyWins(player.handle, seasons)} />
         </div>
 
         <div className="stat-pills">

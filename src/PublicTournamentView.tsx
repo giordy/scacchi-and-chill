@@ -27,6 +27,7 @@ import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { tournamentElo } from "./lib/tournamentElo";
 import { PillsburyRace } from "./components/PillsburyRace";
+import { PILLSBURY_EMOJI, reigningPillsbury } from "./lib/pillsbury";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound } from "./lib/games";
 import { PresenceInfo } from "./lib/presence";
@@ -54,6 +55,7 @@ const TABS: { key: PublicTab; label: string }[] = [
 const namesList = (names: string[]) =>
   names.length > 1 ? `${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}` : names[0] ?? "";
 const ALBO_HREF = publicViewHref("hall");
+const PILLSBURY_HREF = publicViewHref("pillsbury");
 
 export function PublicTournamentView({
   config,
@@ -138,6 +140,8 @@ export function PublicTournamentView({
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
   const started = seasonStarted(standings);
   const champions = reigningChampions(tournamentMeta.winners);
+  // Who won the Premio Pillsbury last: a 🌱 next to the name, as the crown for the champion
+  const pillsburyHolder = reigningPillsbury(seasons);
   // All seasons added up (only once a season has been archived: before, it is just this one)
   const allTime = useMemo(() => {
     if (seasons.length === 0) return null;
@@ -317,6 +321,16 @@ export function PublicTournamentView({
                               aria-label={`Campione in carica, ${champions.season}: vai all'Albo d'Oro`}
                             >
                               👑
+                            </a>
+                          )}
+                          {pillsburyHolder?.handles.includes(p.handle.toLowerCase()) && (
+                            <a
+                              href={PILLSBURY_HREF}
+                              className="champion-badge"
+                              title={`Premio Pillsbury in carica · ${pillsburyHolder.season}`}
+                              aria-label={`Premio Pillsbury in carica, ${pillsburyHolder.season}: vai alla corsa al premio`}
+                            >
+                              {PILLSBURY_EMOJI}
                             </a>
                           )}
                           {withdrawalNote(p.handle, tournamentMeta.withdrawals) && (
