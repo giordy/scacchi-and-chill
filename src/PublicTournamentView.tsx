@@ -11,12 +11,12 @@ import { parsePublicView, publicViewHref, PublicTab, PublicView, tabOfView } fro
 import { useHash } from "./hooks/useHash";
 import { useSwipeTabs } from "./hooks/useSwipeTabs";
 import { useImageSrc } from "./hooks/useImageSrc";
-import { pastSeasonPeriod, periodLabel, periodOfGames } from "./lib/period";
+import { periodLabel, periodOfGames } from "./lib/period";
 import { adjacentTab, SwipeStep } from "./lib/swipe";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
 import { summitGames } from "./lib/summit";
-import { fullPodium, MEDAL_EMOJI, reigningChampions } from "./lib/honours";
+import { reigningChampions } from "./lib/honours";
 import { withdrawalNote } from "./lib/withdrawals";
 import { titleRace } from "./lib/titleRace";
 import { SeasonStatsPanel } from "./components/SeasonStatsPanel";
@@ -29,7 +29,6 @@ import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound } from "./lib/games";
 import { PresenceInfo } from "./lib/presence";
 import { AllTimeSection } from "./components/AllTimeSection";
-import { useNameOf } from "./components/Names";
 import { allTimeNameOf, allTimeRecords, allTimeTable, seasonsWithGames } from "./lib/allTime";
 
 interface PublicTournamentViewProps {
@@ -135,8 +134,6 @@ export function PublicTournamentView({
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
   const started = seasonStarted(standings);
   const champions = reigningChampions(tournamentMeta.winners);
-  // Names of the register, also for the hall of fame (renamed players show the new name)
-  const registeredName = useNameOf();
   // All seasons added up (only once a season has been archived: before, it is just this one)
   const allTime = useMemo(() => {
     if (seasons.length === 0) return null;
@@ -482,29 +479,8 @@ export function PublicTournamentView({
         <section role="tabpanel" id="pub-panel-hall" aria-labelledby="pub-tab-hall" className="tournament-panel">
           <article className="dossier-card" id="albo-doro">
             <h2 className="section-heading">Albo d'Oro</h2>
-            {tournamentMeta.winners && tournamentMeta.winners.length > 0 ? (
-              <ol className="winners-list">
-                {tournamentMeta.winners.map((w, idx) => (
-                  <li key={idx} className="winner-row">
-                    <span className="winner-season">
-                      {w.season}
-                      {(() => {
-                        const period = pastSeasonPeriod(w, seasons.find((s) => s.season === w.season));
-                        return period ? <span className="winner-period"> · {period}</span> : null;
-                      })()}
-                    </span>
-                    <ol className="winner-podium">
-                      {fullPodium(w).map((p) => (
-                        <li key={p.handle} className={`podium-place podium-place-${p.place}`}>
-                          <span className="podium-medal" aria-label={`${p.place}° posto`}>{MEDAL_EMOJI[p.place]}</span>
-                          <a href={playerHref(p.handle)}>{registeredName(p.handle, p.name)}</a>
-                        </li>
-                      ))}
-                    </ol>
-                    {w.notes && <span className="winner-notes">{w.notes}</span>}
-                  </li>
-                ))}
-              </ol>
+            {(tournamentMeta.winners?.length ?? 0) > 0 || seasons.length > 0 ? (
+              <SeasonsHistory seasons={seasons} winners={tournamentMeta.winners} />
             ) : (
               <p className="note m-0">Il primo campione sarà scritto qui a fine stagione.</p>
             )}
@@ -512,12 +488,6 @@ export function PublicTournamentView({
 
           {allTime && <AllTimeSection rows={allTime.rows} records={allTime.records} gamesSince={allTime.gamesSince} />}
 
-          {seasons.length > 0 && (
-            <div>
-              <h2 className="section-heading">Stagioni passate</h2>
-              <SeasonsHistory seasons={seasons} winners={tournamentMeta.winners} />
-            </div>
-          )}
         </section>
       )}
 

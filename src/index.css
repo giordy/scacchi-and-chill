@@ -956,9 +956,14 @@ a.player-page-link:hover, a.player-page-link:focus-visible { color: var(--accent
 .award-desc { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
 
 /* Seasons history */
-.seasons-history { display: grid; gap: 12px; }
-details.season-card { margin: 0; }
-details.season-card > summary { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
+details.season-entry { background: none; border: 0; border-radius: 0; padding: 0; margin: 0; }
+details.season-entry > summary { display: grid; gap: 4px; min-height: 0; align-items: start; font-weight: inherit; cursor: pointer; list-style: none; }
+details.season-entry > summary::-webkit-details-marker { display: none; }
+.season-more { font-size: 13px; color: var(--accent); font-weight: 600; }
+.season-more::after { content: " ▾"; }
+details.season-entry[open] .season-more::after { content: " ▴"; }
+.season-details { display: grid; gap: 10px; margin-top: 10px; }
+.season-details .note { margin: 0; }
 
 .status-badge.result {
   background: var(--accent);
