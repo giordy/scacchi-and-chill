@@ -5,6 +5,7 @@ import { extractGameId } from './utils';
 import { computeSeasonAwards } from './awards';
 import { podiumFromStandings } from './honours';
 import { monthKey, periodOfGames } from './period';
+import { departuresOf } from './departures';
 
 // Stable document id from the season name: "Stagione 2 - Capablanca" -> "stagione-2-capablanca"
 export function seasonId(season: string): string {
@@ -46,6 +47,8 @@ export function buildSeasonArchive(
   if (top && top.points > 0) archive.champion = { handle: top.handle, name: top.name, points: top.points };
   const awards = computeSeasonAwards(players, history, gameStates);
   if (awards.length > 0) archive.awards = awards;
+  const departures = departuresOf(meta.withdrawals);
+  if (departures.length > 0) archive.departures = departures;
   const games = archivedGames(history, gameStates);
   if (games.length > 0) archive.games = games;
   return archive;

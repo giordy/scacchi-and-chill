@@ -5,6 +5,7 @@ import { playerHref } from '../lib/routes';
 import { SeasonAwards } from './SeasonAwards';
 import { RankCell } from './RankCell';
 import { isTied, seasonStarted, sharedRanks } from '../lib/standings';
+import { departureText } from '../lib/departures';
 
 // Public "Torneo" tab, past seasons: final standings of every archived season, newest first
 export function SeasonsHistory({ seasons, winners = [] }: { seasons: SeasonArchive[]; winners?: SeasonWinner[] }) {
@@ -60,6 +61,9 @@ export function SeasonsHistory({ seasons, winners = [] }: { seasons: SeasonArchi
                 </tbody>
               </table>
             </div>
+            {s.departures?.map((d) => (
+              <p key={d.handle} className="note note-sm season-departure">{departureText(d)}</p>
+            ))}
             {s.awards && s.awards.length > 0 && (
               <>
                 <h3 className="rules-heading">Premi</h3>

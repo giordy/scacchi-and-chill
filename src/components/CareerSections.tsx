@@ -36,6 +36,7 @@ export function CareerSection({ career }: { career: CareerSeason[] }) {
               </span>
               <span className="career-score">
                 {fmt(c.points)} pt · {c.won}V {c.drawn}N {c.lost}P
+                {c.replacing && ` · al posto di ${c.replacing}`}
               </span>
             </li>
           );

@@ -256,9 +256,20 @@ export interface SeasonArchive {
   gamesPlayed: number;
   champion?: { handle: string; name: string; points: number };
   awards?: SeasonAward[];
+  // Who left during the season, and who took their place (see lib/departures.ts)
+  departures?: SeasonDeparture[];
   // The scored games, kept for all-time head-to-heads and records (missing on seasons closed
   // before they were saved)
   games?: ArchivedGame[];
+}
+
+// A player who left an archived season: shown as a note under its table, and as "al posto di"
+// in the substitute's career
+export interface SeasonDeparture {
+  handle: string;
+  name: string;
+  mode: Withdrawal['mode'];
+  replacedBy?: Player;
 }
 
 // A scored game of an archived season: just enough for head-to-heads and records (see lib/allTime.ts)
