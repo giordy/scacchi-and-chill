@@ -25,7 +25,7 @@ import { publishedAnecdotes } from "./lib/masterAnecdotes";
 import { formatWhatsAppMarkup } from "./WhatsAppPreview";
 import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
-import { currentSeason as eloSeasonNow, isNewcomer, tournamentElo } from "./lib/tournamentElo";
+import { tournamentElo } from "./lib/tournamentElo";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound } from "./lib/games";
 import { PresenceInfo } from "./lib/presence";
@@ -319,20 +319,14 @@ export function PublicTournamentView({
                             <span className="withdrawal-tag">{withdrawalNote(p.handle, tournamentMeta.withdrawals)}</span>
                           )}
                         </span>
-                        <span className="player-link-line">
-                          <a
-                            href={`https://lichess.org/@/${p.handle}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="player-link"
-                          >
-                            @{p.handle}
-                          </a>
-                          {/* Esordienti: only once a season is archived (in the first one everyone is) */}
-                          {seasons.length > 0 && isNewcomer(eloSeasonNow(elo), p.handle) && (
-                            <span className="newcomer-tag" title="Prima stagione, o di ritorno dopo una pausa">esordiente</span>
-                          )}
-                        </span>
+                        <a
+                          href={`https://lichess.org/@/${p.handle}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="player-link"
+                        >
+                          @{p.handle}
+                        </a>
                       </div>
                     </td>
                     <td className="col-points">{p.points}</td>

@@ -152,7 +152,7 @@ export const isNewcomer = (season: EloSeason, handle: string) => season.newcomer
 // Pronostico: the points a player was expected to make in the season, from the Elo del torneo at
 // its start, against every opponent of the calendar (games still to play included); and so far,
 // on the games already finished. Games against an esordiente are left out, and an esordiente has
-// none: their 1500 says nothing of their level. Shown rounded down (pronosticoPoints).
+// none: their 1500 says nothing of their level. Shown to the half point (pronosticoPoints).
 // The Premio Rivelazione goes to who beats it by most (points - expectedSoFar).
 export interface Forecast {
   expected: number; // whole season
@@ -198,5 +198,6 @@ export function seasonForecast(
   return { expected, games, expectedSoFar, points, played };
 }
 
-// The pronostico as shown: whole points, rounded down
-export const pronosticoPoints = (f: Forecast) => Math.floor(f.expected + 1e-9);
+// The pronostico as shown: rounded to the nearest half point, as the scores are
+export const pronosticoPoints = (f: Forecast) => Math.round(f.expected * 2) / 2;
+export const roundHalf = (n: number) => Math.round(n * 2) / 2;

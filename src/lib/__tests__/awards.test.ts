@@ -198,7 +198,7 @@ describe('Premio Rivelazione', () => {
     const states = Object.fromEntries(games.map((g) => [g.s.id, g.s]));
     const award = computeSeasonAwards(players, history, states, [past]).find((a) => a.id === 'revelation');
     expect(award).toMatchObject({ title: 'Premio Rivelazione', winners: [{ handle: 'carla', name: 'Carla' }] });
-    expect(award!.detail).toBe('1 punto su 1 partita, pronostico 0'); // her one game counted: the win over Anna
+    expect(award!.detail).toBe('1 punto su 1 partita, pronostico ½'); // her one game counted: the win over Anna
     // With no archived season everyone is an esordiente: no award yet
     expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'revelation')).toBe(false);
   });

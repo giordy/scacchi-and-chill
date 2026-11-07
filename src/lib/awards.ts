@@ -1,5 +1,5 @@
 import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonAward } from '../types';
-import { currentSeason, eloSeasonFromCurrent, Forecast, seasonForecast, tournamentElo } from './tournamentElo';
+import { currentSeason, eloSeasonFromCurrent, Forecast, roundHalf, seasonForecast, tournamentElo } from './tournamentElo';
 
 // 5.5 -> "5½", 0.5 -> "½"
 const halves = (n: number) => String(Math.round(n * 2) / 2).replace(".5", "½").replace(/^0½/, "½");
@@ -70,7 +70,7 @@ export function computeSeasonAwards(
       description: "A chi ha superato di più il proprio pronostico: i punti previsti dall'Elo del torneo a inizio stagione (esordienti esclusi)",
       winners: who(revelation.handles),
       detail: revelation.handles.length === 1
-        ? `${halves(f.points)} ${f.points === 1 ? "punto" : "punti"} su ${plural(f.played, "partita", "partite")}, pronostico ${Math.floor(f.expectedSoFar + 1e-9)}`
+        ? `${halves(f.points)} ${f.points === 1 ? "punto" : "punti"} su ${plural(f.played, "partita", "partite")}, pronostico ${halves(roundHalf(f.expectedSoFar))}`
         : `${halves(revelation.best)} punti più del pronostico`,
     });
   }

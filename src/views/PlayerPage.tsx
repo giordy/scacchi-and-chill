@@ -59,6 +59,17 @@ const describeEndings = (counts: Record<EndReason, number>) =>
 // Bare icons are narrow: beyond this many trophies the shelf groups the medals by kind
 const SHELF_MAX = 8;
 
+// ▲ = ▼: how something moved, with the words for screen readers
+type TrendKind = "up" | "same" | "down";
+const TREND_MARK: Record<TrendKind, string> = { up: "▲", same: "=", down: "▼" };
+function Trend({ kind, label }: { kind: TrendKind; label: string }) {
+  return (
+    <span className={`trend trend-${kind}`} role="img" aria-label={label} title={label}>
+      {TREND_MARK[kind]}
+    </span>
+  );
+}
+
 const PLACE_LABEL: Record<Medal, string> = { 1: "Campione", 2: "2° posto", 3: "3° posto" };
 
 // Trophy shelf next to the player's name, in the style of Lichess profiles: bare icons in a row,
@@ -208,9 +219,14 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
     eloSeasonFromCurrent(config.players.map((p) => p.handle), history, gameStates).games
   );
   const pronostico = forecast ? pronosticoPoints(forecast) : 0;
-  // How it is going, in words: a gap of a few tenths of a point says nothing
-  const sofar = forecast ? forecast.points - forecast.expectedSoFar : 0;
-  const trend = sofar >= 0.5 ? "sopra il pronostico" : sofar <= -0.5 ? "sotto il pronostico" : "in linea col pronostico";
+  // How it is going: at the end against the pronostico, before against the points expected so far
+  // (a gap of a few tenths of a point says nothing)
+  const over = !forecast ? 0 : forecast.played === forecast.games ? forecast.points - pronostico : forecast.points - forecast.expectedSoFar;
+  const forecastTrend: TrendKind = forecast && forecast.played === forecast.games
+    ? over > 0 ? "up" : over < 0 ? "down" : "same"
+    : over >= 0.5 ? "up" : over <= -0.5 ? "down" : "same";
+  const forecastLabel = { up: "sopra il pronostico", same: "in linea col pronostico", down: "sotto il pronostico" }[forecastTrend];
+  const eloTrend: TrendKind = eloMove > 0 ? "up" : eloMove < 0 ? "down" : "same";
 
   return (
     <main className="public-main">
@@ -232,6 +248,28 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               </a>
               {presence && <PresenceMeta seenAt={seenAtOf(presence, player.handle)} now={presence.now} />}
             </p>
+            {eloNow !== undefined && (
+              <p className="player-elo">
+                <InfoTip
+                  className="player-elo-tip"
+                  text={
+                    "Calcolato solo dalle partite del torneo, con la formula Elo: tutti partono da 1500, battere un avversario dello stesso livello vale 16 punti. La freccia dice come è cambiato da inizio stagione." +
+                    (newcomer
+                      ? " È un esordiente (prima stagione, o di ritorno dopo una pausa): nelle sue partite si muove solo il suo Elo, non quello degli avversari."
+                      : "")
+                  }
+                >
+                  Elo del torneo <strong className="player-elo-val">{eloNow}</strong>{" "}
+                  {!newcomer && (
+                    <Trend
+                      kind={eloTrend}
+                      label={eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione`}
+                    />
+                  )}{" "}
+                  <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+                </InfoTip>
+              </p>
+            )}
           </div>
           <TrophyShelf medals={medals} champion={isChampion ? champions!.season : undefined} title={config.tournament?.title} />
         </div>
@@ -258,41 +296,18 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               </span>
             </div>
           ))}
-          {eloNow !== undefined && (
-            <div className="stat-pill">
-              <span className="stat-pill-label">Elo del torneo</span>
-              <InfoTip
-                className="stat-pill-val"
-                text={
-                  "Calcolato solo dalle partite del torneo, con la formula Elo: tutti partono da 1500, battere un avversario dello stesso livello vale 16 punti." +
-                  (newcomer
-                    ? " È un esordiente (prima stagione, o di ritorno dopo una pausa): nelle sue partite si muove solo il suo Elo, non quello degli avversari."
-                    : "")
-                }
-              >
-                {eloNow} <span className="infotip-mark" aria-hidden="true">ⓘ</span>
-              </InfoTip>
-              <span className="stat-pill-note">
-                {newcomer ? "esordiente" : eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} in stagione`}
-              </span>
-            </div>
-          )}
           {forecast && forecast.games > 0 && (
             <div className="stat-pill">
               <span className="stat-pill-label">Pronostico</span>
               <InfoTip
                 className="stat-pill-val"
-                text={`I punti che ci si aspettava facesse in questa stagione, arrotondati per difetto, dall'Elo del torneo suo e dei suoi avversari a inizio stagione. Contano ${forecast.games} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio pronostico vince il Premio Rivelazione.`}
+                text={`I punti che ci si aspettava facesse in questa stagione, arrotondati al mezzo punto, dall'Elo del torneo suo e dei suoi avversari a inizio stagione. Contano ${forecast.games} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio pronostico vince il Premio Rivelazione. ▲ sopra il previsto, = in linea, ▼ sotto.`}
               >
-                {pronostico} {pronostico === 1 ? "punto" : "punti"} <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+                {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"}{" "}
+                {forecast.played > 0 && <Trend kind={forecastTrend} label={forecastLabel} />}{" "}
+                <span className="infotip-mark" aria-hidden="true">ⓘ</span>
               </InfoTip>
-              <span className="stat-pill-note">
-                {forecast.played === 0
-                  ? `su ${forecast.games} partite`
-                  : forecast.played === forecast.games
-                  ? `${forecast.points > pronostico ? "superato ✓ · " : ""}fatti ${fmt(forecast.points)}`
-                  : `finora ${trend}`}
-              </span>
+              {forecast.played === 0 && <span className="stat-pill-note">su {forecast.games} partite</span>}
             </div>
           )}
           {pace && (

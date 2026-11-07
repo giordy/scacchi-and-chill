@@ -2029,23 +2029,25 @@ a.champion-badge {
   white-space: nowrap;
 }
 
-/* Esordiente: first season, or back after a break (see lib/tournamentElo), next to the handle */
-.player-link-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
+/* Player page: the Elo del torneo under the name, and the ▲ = ▼ of how things moved */
+.player-elo {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--muted);
 }
 
-.newcomer-tag {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 6px;
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  white-space: nowrap;
+.player-elo-val {
+  font-size: 18px;
+  color: var(--ink);
 }
+
+.trend {
+  font-size: 0.85em;
+  font-weight: 700;
+}
+.trend-up { color: var(--accent); }
+.trend-same { color: var(--muted); }
+.trend-down { color: var(--danger); }
 
 .fairplay-alert a {
   color: inherit;
@@ -2398,6 +2400,16 @@ button.infotip-trigger {
   margin: 0;
   font: inherit;
   cursor: pointer;
+}
+
+/* The Elo del torneo under the player's name: text, not a button */
+button.infotip-trigger.player-elo-tip {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  color: var(--muted);
+  text-align: left;
 }
 
 /* A stat pill value that opens an explanation looks like the others */
