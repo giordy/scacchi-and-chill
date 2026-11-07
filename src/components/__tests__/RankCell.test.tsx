@@ -71,3 +71,37 @@ describe('SeasonsHistory', () => {
   });
 });
 
+
+describe('hall of fame list', () => {
+  const archive = (season: string, archivedAt: string) =>
+    ({ id: season, season, title: 'T', archivedAt, gamesPlayed: 1, standings: [{ handle: 'anna', name: 'Anna', played: 1, won: 1, drawn: 0, lost: 0, points: 1, sb: 0 }], champion: { handle: 'anna', name: 'Anna', points: 1 } }) as unknown as SeasonArchive;
+
+  it('merges the hall of fame and the archives, newest first', async () => {
+    const { pastSeasons } = await import('../SeasonsHistory');
+    const winners = [
+      { season: 'Stagione 1', name: 'Anna', handle: 'anna', end: '2025-06' },
+      { season: 'Stagione 2', name: 'Bruno', handle: 'bruno' },
+    ];
+    const list = pastSeasons([archive('Stagione 2', '2026-01-01T00:00:00Z'), archive('Stagione 3', '2026-07-01T00:00:00Z')], winners);
+    expect(list.map((p) => [p.season, !!p.winner, !!p.archive])).toEqual([
+      ['Stagione 3', false, true],
+      ['Stagione 2', true, true],
+      ['Stagione 1', true, false],
+    ]);
+  });
+
+  it('keeps the latest season open and the others closed; a season without archive has nothing to open', () => {
+    const out = html(
+      <SeasonsHistory
+        seasons={[archive('Stagione 2', '2026-01-01T00:00:00Z'), archive('Stagione 3', '2026-07-01T00:00:00Z')]}
+        winners={[{ season: 'Stagione 1', name: 'Zeno', handle: 'zeno' }]}
+      />
+    );
+    expect(out.match(/<details/g)).toHaveLength(2);
+    expect(out.match(/<details class="season-entry" open="">/g)).toHaveLength(1);
+    expect(out.indexOf('Stagione 3')).toBeLessThan(out.indexOf('Stagione 2'));
+    // The podium of an archive without hall of fame entry comes from its table
+    expect(out).toContain('🥇');
+    expect(out).toContain('Zeno');
+  });
+});
