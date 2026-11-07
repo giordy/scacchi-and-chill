@@ -784,21 +784,19 @@ th.sticky-col { background: var(--bg); z-index: 2; }
   color: var(--muted);
 }
 
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--line);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+.brand-logo { display: block; height: auto; }
+.brand-logo.is-loading {
+  width: 160px;
+  animation: logo-breathe 1.8s ease-in-out infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@keyframes logo-breathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.96); opacity: 0.7; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spinner { animation-duration: 2.4s; }
+  .brand-logo.is-loading { animation: none; }
 }
 
 /* Collapsible settings sections */
@@ -819,8 +817,9 @@ details.settings-section > summary { font-weight: 600; font-size: 16px; }
 .chip-link.is-danger { color: var(--danger); }
 button.btn-block { width: 100%; min-height: 48px; }
 .login-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; max-width: 440px; margin: 20px auto; }
-.login-title { font-size: 18px; margin-top: 0; }
-.login-note { margin: 0 0 16px; }
+.login-logo { width: 140px; margin: 0 auto 12px; }
+.login-title { font-size: 18px; margin-top: 0; text-align: center; }
+.login-note { margin: 0 0 16px; text-align: center; }
 .login-error { margin-bottom: 14px; }
 .sync-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; flex-wrap: wrap; }
 button.sync-btn { min-height: 40px; font-weight: 600; }

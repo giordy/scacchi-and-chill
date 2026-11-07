@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrandLogo } from '../components/BrandLogo';
 
 interface AdminLoginProps {
   error: string;
@@ -25,6 +26,7 @@ export function AdminLogin({ error, isSigningIn, onLogin }: AdminLoginProps) {
       </div>
 
       <div className="login-card">
+        <BrandLogo className="login-logo" />
         <h2 className="login-title">Accedi con Google</h2>
         <p className="note login-note">
           La gestione del torneo è riservata all'organizzatore. Accedi con l'account Google autorizzato.
