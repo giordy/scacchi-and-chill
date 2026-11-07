@@ -35,6 +35,14 @@ Accesso con login Google, riservato a un solo account. Ogni azione che cancella 
 - **⚙ Impostazioni**, da configurare una volta: token Lichess e copia dei dati in JSON.
 - **↻ Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. Parte da sola ogni volta che l'organizzatore apre l'area admin, e si può rilanciare a mano. La vista pubblica legge da Firestore, quindi i nuovi risultati compaiono solo dopo una sincronizzazione.
 
+### Elo del torneo, colpacci e premi
+- **Elo del torneo**: un punteggio calcolato solo dalle partite del torneo, con la formula Elo classica (K = 32): tutti partono da 1500, le partite contano nell'ordine in cui sono finite, dalla prima stagione archiviata a quella in corso. Non si usa l'Elo di Lichess: per corrispondenza è provvisorio per quasi tutti, fa salti di centinaia di punti e dipende anche dalle partite giocate fuori dal torneo. Si vede nella pagina giocatore, con quanto è cambiato nella stagione.
+- **Esordiente**: chi gioca la sua prima stagione, o torna dopo averne saltata almeno una (riparte dal punteggio che aveva). Nelle sue partite si muove solo il suo Elo, non quello degli avversari; non può vincere il Premio Rivelazione e non ha pronostico. Nella prima stagione del torneo sono tutti esordienti, quindi lì tutti i punteggi si muovono.
+- **Colpaccio** (💥 sulla scheda della partita, una riga nel bollettino): vittoria contro chi aveva almeno 100 punti di Elo del torneo in più all'inizio della partita, oppure patta contro chi ne aveva almeno 200. Il record «Il colpaccio più grosso» conta solo le vittorie.
+- **Premio Rivelazione** 🌟: a fine stagione, a chi ha guadagnato più Elo del torneo, cioè a chi ha fatto più punti del previsto (esordienti esclusi). Ha preso il posto di «L'ammazzagiganti», che resta nelle stagioni già archiviate.
+- **Pronostico** (pagina giocatore): i punti che ci si aspettava facesse nella stagione, dall'Elo del torneo a inizio stagione contro tutti gli avversari del calendario, con quanti ne ha fatti finora.
+- **Premi divertenti**: Re del matto e Il muro si assegnano solo con almeno 2 vittorie col matto o 2 patte, perché con pochi giocatori ogni premio in più toglie valore agli altri.
+
 ### Stagioni
 Il periodo di ogni stagione (mese e anno di inizio e fine) si calcola dalle partite: dalla prima sfida creata all'ultima mossa dell'ultima partita conclusa. Chiudendo la stagione viene salvato nell'archivio e nell'Albo d'Oro; per le stagioni chiuse prima si aggiunge o si corregge a mano dall'Albo d'Oro (*Dal mese* / *Al mese*).
 
