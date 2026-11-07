@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { AppConfig, LichessExportGame, Player, SeasonArchive } from '../../types';
+import { AppConfig, HistoryGame, LichessExportGame, Player, SeasonArchive } from '../../types';
 import { fetchGameStates } from '../../lib/lichess';
-import { isTournamentCandidate, lastMoveOf, lichessIdsFromText, ManualGame, playersOfGames, rebuiltHistory } from '../../lib/rebuild';
+import { isCurrentSeasonGame, isTournamentCandidate, lastMoveOf, lichessIdsFromText, ManualGame, playersOfGames, rebuiltHistory } from '../../lib/rebuild';
 import { buildSeasonArchive, seasonId } from '../../lib/seasons';
 import { computeStandings, isTied, seasonStarted, sharedRanks } from '../../lib/standings';
 import { fullPodium } from '../../lib/honours';
@@ -19,7 +19,17 @@ const resultOf = (g: LichessExportGame) =>
 // Rebuilds a season closed before its games were archived, from the Lichess links shared in the
 // group chat: the games are read from Lichess, the standings recomputed and, once they match the
 // final table, saved as that season's archive. Nothing is saved before "Salva".
-export function RebuildSeasonSection({ config, seasons, flash }: { config: AppConfig; seasons: SeasonArchive[]; flash: Flash }) {
+export function RebuildSeasonSection({
+  config,
+  seasons,
+  history: currentHistory,
+  flash,
+}: {
+  config: AppConfig;
+  seasons: SeasonArchive[];
+  history: HistoryGame[]; // the season in progress, whose games are left out
+  flash: Flash;
+}) {
   const winners = config.tournament?.winners ?? [];
   // The first season of the hall of fame without an archive is the likely one to rebuild
   const suggested = winners.find((w) => !seasons.some((s) => s.id === seasonId(w.season)))?.season ?? '';
@@ -29,6 +39,9 @@ export function RebuildSeasonSection({ config, seasons, flash }: { config: AppCo
   const [busy, setBusy] = useState(false);
   const [found, setFound] = useState<LichessExportGame[] | null>(null);
   const [skipped, setSkipped] = useState(0);
+  const [current, setCurrent] = useState(0);
+  // Who left and who took over their games: lowercase handle -> substitute's handle
+  const [replacedBy, setReplacedBy] = useState<Record<string, string>>({});
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
   const [chosen, setChosen] = useState<Set<string>>(new Set());
   const [names, setNames] = useState<Record<string, string>>({});
@@ -56,9 +69,14 @@ export function RebuildSeasonSection({ config, seasons, flash }: { config: AppCo
     setBusy(true);
     try {
       const states = Object.values(await fetchGameStates(ids));
-      const candidates = states.filter(isTournamentCandidate).sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+      const correspondence = states.filter(isTournamentCandidate);
+      const candidates = correspondence
+        .filter((g) => !isCurrentSeasonGame(g, currentHistory))
+        .sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
       setFound(candidates);
-      setSkipped(ids.length - candidates.length);
+      setCurrent(correspondence.length - candidates.length);
+      setSkipped(ids.length - correspondence.length);
+      setReplacedBy({});
       setExcluded(new Set());
       // Players known to the tournament, or with several games, start ticked
       const people = playersOfGames(candidates);
@@ -77,13 +95,15 @@ export function RebuildSeasonSection({ config, seasons, flash }: { config: AppCo
     .filter((p) => chosen.has(p.handle.toLowerCase()))
     .map((p) => ({ handle: p.handle, name: (names[p.handle.toLowerCase()] ?? '').trim() || p.handle }));
   const kept = (found ?? []).filter((g) => !excluded.has(g.id));
-  const history = rebuiltHistory(kept, players, manual);
+  // Only for players left unticked: ticking someone again gives them back their games
+  const substitutes = Object.fromEntries(Object.entries(replacedBy).filter(([key]) => !chosen.has(key)));
+  const history = rebuiltHistory(kept, players, manual, substitutes);
   const states = Object.fromEntries(kept.map((g) => [g.id, g]));
   const { standings } = computeStandings(players, history, states);
   const ranks = sharedRanks(standings);
   const started = seasonStarted(standings);
-  const inSeason = (g: LichessExportGame) =>
-    players.some((p) => same(p.handle, g.players?.white?.user?.name)) && players.some((p) => same(p.handle, g.players?.black?.user?.name));
+  const counted = (name?: string) => !!name && players.some((p) => same(p.handle, substitutes[name.toLowerCase()] ?? name));
+  const inSeason = (g: LichessExportGame) => counted(g.players?.white?.user?.name) && counted(g.players?.black?.user?.name);
   const unfinished = history.filter((h) => h.lichess && ['created', 'started'].includes(h.lichess.status)).length;
 
   const toggle = (set: Set<string>, key: string) => {
@@ -175,11 +195,16 @@ export function RebuildSeasonSection({ config, seasons, flash }: { config: AppCo
       {found && (
         <>
           <p className="note note-sm">
-            {found.length} partite per corrispondenza{skipped > 0 ? `; ${skipped} link scartati (altre cadenze, pagine non di partite o duplicati)` : ''}.
+            {found.length} partite per corrispondenza
+            {current > 0 ? `; ${current} della stagione in corso lasciate fuori` : ''}
+            {skipped > 0 ? `; ${skipped} link scartati (altre cadenze o pagine che non sono partite)` : ''}.
           </p>
 
           <h4 className="rebuild-heading">Giocatori del torneo</h4>
-          <p className="note note-sm">Spunta chi ha giocato la stagione e controlla il nome con cui appare sul sito.</p>
+          <p className="note note-sm">
+            Spunta chi ha giocato la stagione e controlla il nome con cui appare sul sito. Per chi si è ritirato, lascialo senza spunta:
+            le sue partite non contano, oppure scegli chi l'ha sostituito e passano al sostituto.
+          </p>
           <ul className="rebuild-players">
             {foundPlayers.map((p) => {
               const key = p.handle.toLowerCase();
@@ -187,7 +212,25 @@ export function RebuildSeasonSection({ config, seasons, flash }: { config: AppCo
                 <li key={key}>
                   <input type="checkbox" checked={chosen.has(key)} onChange={() => setChosen(toggle(chosen, key))} aria-label={`Includi ${p.handle}`} />
                   <span className="rebuild-handle">@{p.handle} <span className="note-sm">({p.games})</span></span>
-                  <input type="text" value={names[key] ?? ''} onChange={(e) => setNames({ ...names, [key]: e.target.value })} aria-label={`Nome di ${p.handle}`} />
+                  {chosen.has(key) ? (
+                    <input type="text" value={names[key] ?? ''} onChange={(e) => setNames({ ...names, [key]: e.target.value })} aria-label={`Nome di ${p.handle}`} />
+                  ) : (
+                    <select
+                      value={replacedBy[key] ?? ''}
+                      onChange={(e) => {
+                        const next = { ...replacedBy };
+                        if (e.target.value) next[key] = e.target.value;
+                        else delete next[key];
+                        setReplacedBy(next);
+                      }}
+                      aria-label={`Partite di ${p.handle}`}
+                    >
+                      <option value="">partite non contate</option>
+                      {players.map((o) => (
+                        <option key={o.handle} value={o.handle}>sostituito da {o.name}</option>
+                      ))}
+                    </select>
+                  )}
                 </li>
               );
             })}

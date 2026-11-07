@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isTournamentCandidate, lastMoveOf, lichessIdsFromText, playersOfGames, rebuiltHistory } from '../rebuild';
+import { isCurrentSeasonGame, isTournamentCandidate, lastMoveOf, lichessIdsFromText, playersOfGames, rebuiltHistory } from '../rebuild';
 import { LichessExportGame } from '../../types';
 
 const game = (id: string, white: string, black: string, extra: Partial<LichessExportGame> = {}): LichessExportGame => ({
@@ -60,6 +60,38 @@ describe('rebuiltHistory', () => {
       ['Fabio', 'matteo', '', '–'],
     ]);
     expect(history[2].lichess).toEqual({ id: '', status: 'forfeit', winner: 'black' });
+  });
+});
+
+describe('rebuiltHistory with a substitute', () => {
+  const players = [
+    { handle: 'fsgach', name: 'Fabio' },
+    { handle: 'matepaco', name: 'Paco' },
+  ];
+  const games = [game('aaaaaaaa', 'gredip', 'fsgach'), game('bbbbbbbb', 'fsgach', 'matepaco'), game('cccccccc', 'gredip', 'matepaco')];
+
+  it('hands the games of who left to the substitute', () => {
+    const history = rebuiltHistory(games, players, [], { gredip: 'matepaco' });
+    // gredip vs matepaco would be the substitute against themselves: dropped
+    expect(history.map((h) => [h.white, h.black])).toEqual([
+      ['matepaco', 'fsgach'],
+      ['fsgach', 'matepaco'],
+    ]);
+  });
+
+  it('drops them without a substitute', () => {
+    expect(rebuiltHistory(games, players).map((h) => h.url)).toEqual(['https://lichess.org/bbbbbbbb']);
+  });
+});
+
+describe('isCurrentSeasonGame', () => {
+  const current = [{ round: '1', white: 'a', black: 'b', url: 'https://lichess.org/zzzzzzzz', createdAt: 1000 }];
+
+  it('leaves out the games the site has and those created since', () => {
+    expect(isCurrentSeasonGame(game('zzzzzzzz', 'a', 'b', { createdAt: 10 }), current)).toBe(true);
+    expect(isCurrentSeasonGame(game('yyyyyyyy', 'a', 'b', { createdAt: 1000 }), current)).toBe(true);
+    expect(isCurrentSeasonGame(game('xxxxxxxx', 'a', 'b', { createdAt: 999 }), current)).toBe(false);
+    expect(isCurrentSeasonGame(game('xxxxxxxx', 'a', 'b'), [])).toBe(false);
   });
 });
 

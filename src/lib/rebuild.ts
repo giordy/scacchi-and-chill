@@ -46,15 +46,23 @@ export interface ManualGame {
 }
 
 // The season as the standings and the archive read it: the games among the chosen players, oldest
-// first. Rounds are not known: every game gets "–".
-export function rebuiltHistory(games: LichessExportGame[], players: Player[], manual: ManualGame[] = []): HistoryGame[] {
+// first. A player who left and was replaced hands their games to the substitute (as the site does
+// with a replacement today: `replacedBy`, lowercase handle of who left -> handle of the substitute);
+// the games of one who left without a substitute are dropped, as they are not among the players.
+// Rounds are not known: every game gets "–".
+export function rebuiltHistory(
+  games: LichessExportGame[],
+  players: Player[],
+  manual: ManualGame[] = [],
+  replacedBy: Record<string, string> = {}
+): HistoryGame[] {
   const handles = new Map(players.map((p) => [p.handle.toLowerCase(), p.handle]));
-  const handleOf = (name?: string) => (name ? handles.get(name.toLowerCase()) : undefined);
+  const handleOf = (name?: string) => (name ? handles.get((replacedBy[name.toLowerCase()] ?? name).toLowerCase()) : undefined);
   const fromLichess = games
     .map((g): HistoryGame | null => {
       const white = handleOf(userOf(g, 'white'));
       const black = handleOf(userOf(g, 'black'));
-      if (!white || !black) return null;
+      if (!white || !black || white === black) return null;
       const game: HistoryGame = { round: '–', white, black, url: `https://lichess.org/${g.id}`, lichess: g };
       if (g.createdAt) game.createdAt = g.createdAt;
       return game;
@@ -71,4 +79,13 @@ export function rebuiltHistory(games: LichessExportGame[], players: Player[], ma
 export function lastMoveOf(games: LichessExportGame[]): Date | undefined {
   const last = Math.max(0, ...games.map((g) => g.lastMoveAt ?? g.createdAt ?? 0));
   return last > 0 ? new Date(last) : undefined;
+}
+
+// Games of the season in progress, left out when the export runs into it: the ones the site already
+// has, and any created since the first of them
+export function isCurrentSeasonGame(g: LichessExportGame, current: HistoryGame[]): boolean {
+  const ids = new Set(current.map((h) => h.url.match(/lichess\.org\/(\w{8})/)?.[1]).filter(Boolean));
+  if (ids.has(g.id)) return true;
+  const starts = current.map((h) => h.createdAt ?? h.lichess?.createdAt).filter((t): t is number => !!t);
+  return starts.length > 0 && !!g.createdAt && g.createdAt >= Math.min(...starts);
 }
