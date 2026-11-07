@@ -288,7 +288,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           ))}
           {forecast && forecast.games > 0 && (
             <div className="stat-pill">
-              <InfoTip className="stat-pill-label" text={`Punti previsti in questa stagione dall'Elo del torneo di inizio stagione. Contano ${countedOf} partite: quelle con gli esordienti no. Chi lo supera di più vince il Premio Pillsbury.`}>
+              <InfoTip className="stat-pill-label" text={"Punti previsti in base all'Elo, senza le partite con gli esordienti. Chi lo supera di più vince il Premio Pillsbury."}>
                 Obiettivo <span className="infotip-mark" aria-hidden="true">ⓘ</span>
               </InfoTip>
               <span className="stat-pill-val">
