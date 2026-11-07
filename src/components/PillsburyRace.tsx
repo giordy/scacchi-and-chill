@@ -111,8 +111,8 @@ export function PillsburyRace({
           {reigning && <> Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).</>}
         </p>
         <p className="note note-top-xs">
-          <strong>Forma</strong>, sulle ultime {FORM_GAMES} partite (con chiunque, esordienti compresi): {FORM_MARK.fire} in fiamme · {FORM_MARK.sun} in forma ·{' '}
-          {FORM_MARK.cloud} tranquillo · {FORM_MARK.rain} periodo no.
+          <strong>Forma</strong>, sulle ultime {FORM_GAMES} partite (con chiunque, esordienti compresi): {FORM_MARK.fire} in fiamme · {FORM_MARK.strong} in forma ·{' '}
+          {FORM_MARK.calm} tranquillo · {FORM_MARK.rain} periodo no.
         </p>
         <p className="note note-top-xs">
           <strong>Perché Pillsbury.</strong> {PILLSBURY_ORIGIN}

@@ -77,7 +77,7 @@ describe('forma', () => {
       { key: 'current', players: ['anna', 'bruno', 'carla', 'nuova'], games },
     ]);
     expect(formOf('anna', report, games)).toBe('fire');
-    expect(formOf('carla', report, games)).toBe('cloud'); // a loss and two draws, nothing unexpected
+    expect(formOf('carla', report, games)).toBe('calm'); // a loss and two draws, nothing unexpected
     expect(formOf('nuova', report, games)).toBeUndefined(); // one game only
     const losses = [game('anna', 'bruno', '0-1', 1), game('carla', 'anna', '1-0', 2), game('anna', 'carla', '0-1', 3)];
     const r2 = computeElo([{ key: 's1', players: ['anna', 'bruno', 'carla'], games: [] }, { key: 'current', players: [], games: losses }]);

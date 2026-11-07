@@ -85,11 +85,12 @@ export function pillsburyWins(handle: string, seasons: SeasonArchive[]): string[
 
 // Forma: how a player is doing right now, from their last 3 finished games of the season against
 // anyone (esordienti included): the points beyond those expected from the Elo del torneo the two
-// had when each game started. A light weather scale, the bad weather passes. None with fewer than 2.
-export type Form = 'fire' | 'sun' | 'cloud' | 'rain';
+// had when each game started. As expected is good weather (☀️), and the bad weather passes. None
+// with fewer than 2.
+export type Form = 'fire' | 'strong' | 'calm' | 'rain';
 export const FORM_GAMES = 3;
-export const FORM_MARK: Record<Form, string> = { fire: '🔥', sun: '☀️', cloud: '⛅', rain: '🌧️' };
-export const FORM_LABEL: Record<Form, string> = { fire: 'in fiamme', sun: 'in forma', cloud: 'tranquillo', rain: 'periodo no' };
+export const FORM_MARK: Record<Form, string> = { fire: '🔥', strong: '💪', calm: '☀️', rain: '🌧️' };
+export const FORM_LABEL: Record<Form, string> = { fire: 'in fiamme', strong: 'in forma', calm: 'tranquillo', rain: 'periodo no' };
 
 export function formOf(handle: string, report: EloReport, finished: EloGame[]): Form | undefined {
   const me = handle.toLowerCase();
@@ -107,5 +108,5 @@ export function formOf(handle: string, report: EloReport, finished: EloGame[]): 
     const score = g.result === '½-½' ? 0.5 : (g.result === '1-0') === white ? 1 : 0;
     over += score - expected;
   }
-  return over >= 1 ? 'fire' : over >= 0.5 ? 'sun' : over > -1 ? 'cloud' : 'rain';
+  return over >= 1 ? 'fire' : over >= 0.5 ? 'strong' : over > -1 ? 'calm' : 'rain';
 }
