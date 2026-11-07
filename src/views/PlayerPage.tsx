@@ -70,6 +70,17 @@ function Trend({ kind, label }: { kind: TrendKind; label: string }) {
   );
 }
 
+// A speedometer: the level the Elo del torneo measures
+function GaugeIcon() {
+  return (
+    <svg className="gauge-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M4 17a8 8 0 1 1 16 0" />
+      <path d="M12 17l4-5" />
+      <circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 const PLACE_LABEL: Record<Medal, string> = { 1: "Campione", 2: "2° posto", 3: "3° posto" };
 
 // Trophy shelf next to the player's name, in the style of Lichess profiles: bare icons in a row,
@@ -233,6 +244,26 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
       <a href="#" className="chip-link back-link">← Torna al torneo</a>
 
       <section className="dossier-card player-hero">
+        {eloNow !== undefined && (
+          <div className="player-elo-corner">
+            <InfoTip
+              className="player-elo-badge"
+              text={
+                `Elo del torneo: ${eloNow}. Calcolato solo dalle partite del torneo, con la formula Elo: tutti partono da 1500, battere un avversario dello stesso livello vale 16 punti.` +
+                (newcomer
+                  ? " È un esordiente (prima stagione, o di ritorno dopo una pausa): nelle sue partite si muove solo il suo Elo, non quello degli avversari."
+                  : eloMove === 0
+                  ? " Come a inizio stagione."
+                  : ` ${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione.`)
+              }
+            >
+              <GaugeIcon />
+              <span className="player-elo-val">{eloNow}</span>
+              {!newcomer && <Trend kind={eloTrend} label={eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione`} />}
+              <span className="sr-only">Elo del torneo</span>
+            </InfoTip>
+          </div>
+        )}
         <div className="player-hero-top">
           <div>
             <h1 className="hero-title">{player.name}</h1>
@@ -248,28 +279,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               </a>
               {presence && <PresenceMeta seenAt={seenAtOf(presence, player.handle)} now={presence.now} />}
             </p>
-            {eloNow !== undefined && (
-              <p className="player-elo">
-                <InfoTip
-                  className="player-elo-tip"
-                  text={
-                    "Calcolato solo dalle partite del torneo, con la formula Elo: tutti partono da 1500, battere un avversario dello stesso livello vale 16 punti. La freccia dice come è cambiato da inizio stagione." +
-                    (newcomer
-                      ? " È un esordiente (prima stagione, o di ritorno dopo una pausa): nelle sue partite si muove solo il suo Elo, non quello degli avversari."
-                      : "")
-                  }
-                >
-                  Elo del torneo <strong className="player-elo-val">{eloNow}</strong>{" "}
-                  {!newcomer && (
-                    <Trend
-                      kind={eloTrend}
-                      label={eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione`}
-                    />
-                  )}{" "}
-                  <span className="infotip-mark" aria-hidden="true">ⓘ</span>
-                </InfoTip>
-              </p>
-            )}
           </div>
           <TrophyShelf medals={medals} champion={isChampion ? champions!.season : undefined} title={config.tournament?.title} />
         </div>

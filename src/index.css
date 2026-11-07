@@ -2029,15 +2029,43 @@ a.champion-badge {
   white-space: nowrap;
 }
 
-/* Player page: the Elo del torneo under the name, and the ▲ = ▼ of how things moved */
-.player-elo {
-  margin: 6px 0 0;
-  font-size: 14px;
+/* Player page: the Elo del torneo in the top right corner of the card; a tap explains it */
+.player-hero {
+  position: relative;
+}
+
+.player-elo-corner {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+/* Room for the badge next to the name */
+.player-hero .hero-title {
+  padding-right: 96px;
+}
+
+button.infotip-trigger.player-elo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
   color: var(--muted);
+  font-size: 14px;
+}
+
+/* Its explanation opens under it, as wide as a phone allows, aligned to the right edge */
+.player-elo-corner .infotip-bubble {
+  left: auto;
+  right: 0;
+  width: min(300px, calc(100vw - 64px));
 }
 
 .player-elo-val {
-  font-size: 18px;
+  font-weight: 700;
   color: var(--ink);
 }
 
@@ -2400,16 +2428,6 @@ button.infotip-trigger {
   margin: 0;
   font: inherit;
   cursor: pointer;
-}
-
-/* The Elo del torneo under the player's name: text, not a button */
-button.infotip-trigger.player-elo-tip {
-  padding: 0;
-  border: 0;
-  background: none;
-  font-size: 14px;
-  color: var(--muted);
-  text-align: left;
 }
 
 /* A stat pill value that opens an explanation looks like the others */
