@@ -2826,3 +2826,6 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 /* Premio Pillsbury view: what it is and why the name, under the race */
 
 .pillsbury-table .trend { font-size: 1em; }
+
+/* Under the Stato of the Pillsbury table: "2 di 10", the games that count played of all */
+.counted-games { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: var(--muted); white-space: nowrap; }

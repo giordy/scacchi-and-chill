@@ -29,6 +29,7 @@ export interface PillsburyRow {
 export interface PillsburyRace {
   rows: PillsburyRow[]; // who is in the race and has played a game that counts, best first
   waiting: string[]; // in the race, no game that counts yet
+  counted: Record<string, { played: number; games: number }>; // games that count: played, in all
   newcomers: string[]; // esordienti: out of the race this season
   form: Record<string, Form | undefined>; // everyone's forma, esordienti included
 }
@@ -47,6 +48,7 @@ export function pillsburyRace(
   const board = boardCalendar(calendar, gameStates, handles);
   const rows: PillsburyRow[] = [];
   const waiting: string[] = [];
+  const counted: PillsburyRace['counted'] = {};
   const newcomers: string[] = [];
   players.forEach((p) => {
     const f = seasonForecast(p.handle, season, board, finished);
@@ -54,6 +56,7 @@ export function pillsburyRace(
       newcomers.push(p.handle);
       return;
     }
+    counted[p.handle] = { played: f.played, games: f.games };
     if (f.played === 0) {
       waiting.push(p.handle);
       return;
@@ -62,7 +65,7 @@ export function pillsburyRace(
   });
   rows.sort((a, b) => b.over - a.over);
   const form = Object.fromEntries(players.map((p) => [p.handle, formOf(p.handle, report, finished)]));
-  return { rows, waiting, newcomers, form };
+  return { rows, waiting, newcomers, form, counted };
 }
 
 // Who won the Premio Pillsbury of the latest archived season that gave it

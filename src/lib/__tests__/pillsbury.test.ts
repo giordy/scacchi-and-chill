@@ -33,6 +33,10 @@ describe('the race for the Premio Pillsbury', () => {
 
   it('keeps apart who has not played a game that counts, and the esordienti', () => {
     expect(race.waiting).toEqual(['elena']);
+    // The games that count, played of all: Carla played Anna and Bruno; Dario, an esordiente, has none
+    expect(race.counted.carla).toEqual({ played: 2, games: 2 });
+    expect(race.counted.elena).toEqual({ played: 0, games: 0 });
+    expect(race.counted.dario).toBeUndefined();
     expect(race.newcomers).toEqual(['dario']);
   });
 });

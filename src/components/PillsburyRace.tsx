@@ -69,7 +69,15 @@ export function PillsburyRace({
           <span className="player-link">@{handle}</span>
         </div>
       </td>
-      <td className="col-center">{status}</td>
+      <td className="col-center">
+        {status}
+        {/* How far the race is for them: the games that count, played of all */}
+        {race.counted[handle] && (
+          <span className="counted-games">
+            {race.counted[handle].played} di {race.counted[handle].games}
+          </span>
+        )}
+      </td>
       <td className="col-center col-form">{formCell(handle)}</td>
     </tr>
   );
@@ -100,7 +108,7 @@ export function PillsburyRace({
           {race.rows.length === 0 && <p className="note note-top-xs">La corsa parte con le prime partite concluse.</p>}
           {race.newcomers.length > 0 && (
             <p className="note note-top-xs">
-              {namesList(race.newcomers.map(nameOf))} {race.newcomers.length === 1 ? "è esordiente: entra" : "sono esordienti: entrano"} in corsa dalla prossima stagione.
+              {namesList(race.newcomers.map(nameOf))} {race.newcomers.length === 1 ? "è esordiente: entra" : "sono esordienti: entrano"} in corsa dalla prossima stagione. Le partite con gli esordienti contano solo per la classifica.
             </p>
           )}
         </>
