@@ -300,15 +300,13 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           ))}
           {forecast && forecast.games > 0 && (
             <div className="stat-pill">
-              <span className="stat-pill-label">Pronostico</span>
-              <InfoTip
-                className="stat-pill-val"
-                text={`I punti che ci si aspettava facesse in questa stagione, arrotondati al mezzo punto, dall'Elo del torneo suo e dei suoi avversari a inizio stagione. Contano ${forecast.games} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio pronostico vince il Premio Pillsbury. ▲ sopra il previsto, = in linea, ▼ sotto.`}
-              >
-                {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"}{" "}
-                {forecast.played > 0 && <Trend kind={forecastTrend} label={forecastLabel} />}{" "}
-                <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+              <InfoTip className="stat-pill-label" text={`I punti che ci si aspettava facesse in questa stagione, arrotondati al mezzo punto, dall'Elo del torneo suo e dei suoi avversari a inizio stagione. Contano ${forecast.games} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio pronostico vince il Premio Pillsbury. ▲ sopra il previsto, = in linea, ▼ sotto.`}>
+                Pronostico <span className="infotip-mark" aria-hidden="true">ⓘ</span>
               </InfoTip>
+              <span className="stat-pill-val">
+                {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"}
+                {forecast.played > 0 && <> <Trend kind={forecastTrend} label={forecastLabel} /></>}
+              </span>
               {forecast.played === 0 && <span className="stat-pill-note">su {forecast.games} partite</span>}
             </div>
           )}

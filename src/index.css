@@ -2437,6 +2437,22 @@ button.infotip-trigger {
   cursor: pointer;
 }
 
+/* A stat pill label that opens an explanation looks like the others */
+/* (its wrapper is a block, like a plain label, not a piece of a taller line) */
+.stat-pill > .infotip:first-child {
+  display: flex;
+  font-size: 11px;
+}
+button.infotip-trigger.stat-pill-label {
+  margin: 0 auto;
+  padding: 0;
+  line-height: inherit;
+  border: 0;
+  background: none;
+  font-size: 11px;
+  color: var(--muted);
+}
+
 /* A stat pill value that opens an explanation looks like the others */
 button.infotip-trigger.stat-pill-val {
   padding: 0;
