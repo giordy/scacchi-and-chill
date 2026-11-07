@@ -102,9 +102,11 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
 
   const pickFor = phrasePicker(config.statusPhrases, random);
 
-  // Deadline of the links not accepted yet (from the round's oldest created challenge)
-  const deadlineMs = roundDeadline(games, expiryDays, now);
-  const linkExpired = now > deadlineMs;
+  // Each challenge expires on its own (a link recreated later has a later deadline); the one written
+  // under the games is the earliest of those still open, or the round's when none was created yet
+  const deadlineOf = (g: HistoryGame) => roundDeadline([g], expiryDays, now);
+  const openDeadlines = games.map(deadlineOf).filter((d) => d >= now);
+  const deadlineMs = openDeadlines.length > 0 ? Math.min(...openDeadlines) : roundDeadline(games, expiryDays, now);
 
   // Saved results plus the fresh ones, for the standings
   const allStates: Record<string, LichessExportGame> = { ...storedStates(history), ...states };
@@ -124,12 +126,13 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
 
     if (!s) {
       count.pending++;
+      const linkExpired = now > deadlineOf(g);
       if (!linkExpired) toAccept.push(`${nameOf(white)}–${nameOf(black)}`);
       // The deadline is the same for the whole round: written once, under the games
       // ({deadline} still works in a phrase that asks for it)
       body = linkExpired
         ? "Link scaduto: la sfida va ricreata 🔁"
-        : fill(pickFor("pending"), { deadline: formatDeadline(deadlineMs) });
+        : fill(pickFor("pending"), { deadline: formatDeadline(deadlineOf(g)) });
       detailsList.push(`${i + 1}. ${id}: non ancora trovata su Lichess (sfida non ancora accettata)`);
     } else if (s.status === "created" || s.status === "started") {
       count.ongoing++;

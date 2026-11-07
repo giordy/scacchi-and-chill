@@ -324,6 +324,27 @@ export async function saveGamesBatchToFirebase(
   await batch.commit();
 }
 
+// A game with a new Lichess link (recreated, or created by the players): the old document goes when
+// the colors changed (its id has them), and the stored Lichess state of the old link is dropped,
+// replaced by the new one when it is already known
+export async function replaceGameLink(old: HistoryGame, next: HistoryGame): Promise<void> {
+  const batch = writeBatch(db);
+  const oldId = gameDocIdOf(old);
+  const newId = gameDocIdOf(next);
+  if (oldId !== newId) batch.delete(doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", oldId));
+  const data: Record<string, unknown> = {
+    round: next.round,
+    white: next.white,
+    black: next.black,
+    url: next.url,
+    createdAt: next.createdAt || Date.now(),
+    updatedAt: new Date().toISOString(),
+  };
+  if (next.lichess) data.lichess = JSON.parse(JSON.stringify(next.lichess));
+  batch.set(doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", newId), data);
+  await batch.commit();
+}
+
 // 4b. Salva lo stato Lichess (esito, mosse, apertura) sulle partite corrispondenti
 export async function saveLichessStatesToFirebase(
   games: HistoryGame[],
