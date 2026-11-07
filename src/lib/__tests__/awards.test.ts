@@ -186,7 +186,7 @@ describe('Premio Pillsbury', () => {
     s: { id, status: 'resign', winner, lastMoveAt: end },
   });
 
-  it('goes to who beat their pronostico by most, esordienti and the games against them left out', async () => {
+  it('goes to who beat their objective by most, esordienti and the games against them left out', async () => {
     const { computeSeasonAwards } = await import('../awards');
     const games = [
       game('aaaaaaaa', 'carla', 'anna', 'white', 10), // Carla, behind, beats Anna
@@ -198,7 +198,7 @@ describe('Premio Pillsbury', () => {
     const states = Object.fromEntries(games.map((g) => [g.s.id, g.s]));
     const award = computeSeasonAwards(players, history, states, [past]).find((a) => a.id === 'pillsbury');
     expect(award).toMatchObject({ title: 'Premio Pillsbury', emoji: '🌱', winners: [{ handle: 'carla', name: 'Carla' }] });
-    expect(award!.detail).toBe('1 punto su 1 partita, pronostico ½'); // her one game counted: the win over Anna
+    expect(award!.detail).toBe('1 punto su 1 partita, obiettivo ½'); // her one game counted: the win over Anna
     // With no archived season everyone is an esordiente: no award yet
     expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'pillsbury')).toBe(false);
   });

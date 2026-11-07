@@ -218,7 +218,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const forecastTrend: TrendKind = forecast && forecast.played === forecast.games
     ? over > 0 ? "up" : over < 0 ? "down" : "same"
     : over >= 0.5 ? "up" : over <= -0.5 ? "down" : "same";
-  const forecastLabel = { up: "sopra il pronostico", same: "in linea col pronostico", down: "sotto il pronostico" }[forecastTrend];
+  const forecastLabel = { up: "sopra l'obiettivo", same: "in linea con l'obiettivo", down: "sotto l'obiettivo" }[forecastTrend];
   const eloTrend: TrendKind = eloMove > 0 ? "up" : eloMove < 0 ? "down" : "same";
 
   return (
@@ -288,14 +288,22 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           ))}
           {forecast && forecast.games > 0 && (
             <div className="stat-pill">
-              <InfoTip className="stat-pill-label" text={`I punti che ci si aspettava facesse in questa stagione, arrotondati al mezzo punto, dall'Elo del torneo suo e dei suoi avversari a inizio stagione. Contano ${forecast.games} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio pronostico vince il Premio Pillsbury. ▲ sopra il previsto, = in linea, ▼ sotto.`}>
-                Pronostico <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+              <InfoTip className="stat-pill-label" text={`I punti che ci si aspettava facesse in questa stagione, calcolati (non scelti) dall'Elo del torneo suo e dei suoi avversari a inizio stagione, arrotondati al mezzo punto. L'obiettivo resta fisso per tutta la stagione. Contano ${forecast.games} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio obiettivo vince il Premio Pillsbury. Finora: ▲ sopra, = in linea, ▼ sotto.`}>
+                Obiettivo <span className="infotip-mark" aria-hidden="true">ⓘ</span>
               </InfoTip>
               <span className="stat-pill-val">
                 {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"}
-                {forecast.played > 0 && <> <Trend kind={forecastTrend} label={forecastLabel} /></>}
               </span>
-              {forecast.played === 0 && <span className="stat-pill-note">su {forecast.games} partite</span>}
+              {/* How it is going, apart from the value: the objective itself never moves */}
+              <span className="stat-pill-note">
+                {forecast.played === 0 ? (
+                  `su ${forecast.games} partite`
+                ) : (
+                  <>
+                    {forecast.played === forecast.games ? "alla fine" : "finora"} <Trend kind={forecastTrend} label={forecastLabel} />
+                  </>
+                )}
+              </span>
             </div>
           )}
           {pace && (

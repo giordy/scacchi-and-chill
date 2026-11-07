@@ -57,11 +57,11 @@ export function computeSeasonAwards(
       id: PILLSBURY_ID,
       emoji: PILLSBURY_EMOJI,
       title: PILLSBURY_TITLE,
-      description: "A chi ha superato di più il proprio pronostico, come Pillsbury a Hastings nel 1895 (esordienti esclusi)",
+      description: "A chi ha superato di più il proprio obiettivo, come Pillsbury a Hastings nel 1895 (esordienti esclusi)",
       winners: who(top.map((r) => r.handle)),
       detail: top.length === 1
-        ? `${halves(f.points)} ${f.points === 1 ? "punto" : "punti"} su ${plural(f.played, "partita", "partite")}, pronostico ${halves(roundHalf(f.expectedSoFar))}`
-        : `${halves(best.over)} punti più del pronostico`,
+        ? `${halves(f.points)} ${f.points === 1 ? "punto" : "punti"} su ${plural(f.played, "partita", "partite")}, obiettivo ${halves(roundHalf(f.expectedSoFar))}`
+        : `${halves(best.over)} punti più dell'obiettivo`,
     });
   }
 

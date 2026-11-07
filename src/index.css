@@ -2510,6 +2510,24 @@ button.infotip-trigger.match-upset {
 .infotip:has(> .presence-trigger) {
   position: relative;
 }
+/* The ⏳ of a player still waiting in the Pillsbury race: same, opening leftwards (last column) */
+.infotip:has(> .wait-trigger) {
+  position: relative;
+}
+.infotip:has(> .wait-trigger) .infotip-bubble {
+  left: auto;
+  right: -6px;
+  width: max-content;
+  max-width: min(220px, calc(100vw - 48px));
+}
+button.infotip-trigger.wait-trigger {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 15px;
+}
+.progress-up { color: var(--accent); font-weight: 700; white-space: nowrap; }
+
 .infotip:has(> .presence-trigger) .infotip-bubble {
   left: -6px;
   right: auto;
