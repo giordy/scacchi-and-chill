@@ -230,25 +230,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
       <a href="#" className="chip-link back-link">← Torna al torneo</a>
 
       <section className="dossier-card player-hero">
-        {eloNow !== undefined && (
-          <div className="player-elo-corner">
-            <InfoTip
-              className="player-elo-badge"
-              text={
-                "Elo del torneo, calcolato solo dalle nostre partite." +
-                (newcomer
-                  ? " Esordiente: nelle sue partite si muove solo il suo Elo."
-                  : eloMove === 0
-                  ? " Come a inizio stagione."
-                  : ` ${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione.`)
-              }
-            >
-              <span className="player-elo-label">Elo</span>
-              <span className="player-elo-val">{eloNow}</span>
-              {!newcomer && <Trend kind={eloTrend} label={eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione`} />}
-            </InfoTip>
-          </div>
-        )}
         <div className="player-hero-top">
           <div>
             <h1 className="hero-title">{player.name}</h1>
@@ -265,7 +246,29 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               {presence && <PresenceMeta seenAt={seenAtOf(presence, player.handle)} now={presence.now} />}
             </p>
           </div>
-          <TrophyShelf medals={medals} champion={isChampion ? champions!.season : undefined} title={config.tournament?.title} pillsbury={pillsburyWins(player.handle, seasons)} />
+          {/* Right side: the Elo above the trophies (on a phone the Elo goes to the corner, see CSS) */}
+          <div className="player-hero-side">
+            {eloNow !== undefined && (
+            <div className="player-elo-corner">
+              <InfoTip
+                className="player-elo-badge"
+                text={
+                  "Elo del torneo, calcolato solo dalle nostre partite." +
+                  (newcomer
+                    ? " Esordiente: nelle sue partite si muove solo il suo Elo."
+                    : eloMove === 0
+                    ? " Come a inizio stagione."
+                    : ` ${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione.`)
+                }
+              >
+                <span className="player-elo-label">Elo</span>
+                <span className="player-elo-val">{eloNow}</span>
+                {!newcomer && <Trend kind={eloTrend} label={eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione`} />}
+              </InfoTip>
+            </div>
+            )}
+            <TrophyShelf medals={medals} champion={isChampion ? champions!.season : undefined} title={config.tournament?.title} pillsbury={pillsburyWins(player.handle, seasons)} />
+          </div>
         </div>
 
         <div className="stat-pills">

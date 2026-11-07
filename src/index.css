@@ -2041,15 +2041,36 @@ a.champion-badge {
   position: relative;
 }
 
-.player-elo-corner {
-  position: absolute;
-  top: 14px;
-  right: 14px;
+.player-hero-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-/* Room for the badge next to the name */
-.player-hero .hero-title {
-  padding-right: 96px;
+/* Its own anchor for the explanation that opens under it */
+.player-elo-corner {
+  position: relative;
+}
+
+/* On a phone the name takes the width: the Elo goes to the top right corner of the card */
+@media (max-width: 600px) {
+  .player-elo-corner {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+  }
+  .player-hero-side {
+    align-items: flex-start;
+  }
+}
+
+/* Room for the badge next to the name, on a phone */
+@media (max-width: 600px) {
+  .player-hero .hero-title {
+    padding-right: 96px;
+  }
 }
 
 button.infotip-trigger.player-elo-badge {
