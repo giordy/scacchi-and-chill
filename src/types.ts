@@ -298,4 +298,5 @@ export interface SeasonAward {
   description: string;
   winners: { handle: string; name: string }[];
   detail: string; // e.g. "3 vittorie col matto"
+  games?: string[]; // Lichess ids of the games the award is about, when they are few
 }

@@ -143,3 +143,17 @@ describe('names from the players register', () => {
     expect(html).toContain('Greta D. ha lasciato il torneo');
   });
 });
+
+describe('awards of a past season', () => {
+  it('link the game of the award, found in the archived games', () => {
+    const withAwards = {
+      ...season1,
+      awards: [{ id: 'fastest', emoji: '⚡', title: 'Fulmine', description: '', winners: [{ handle: 'anna', name: 'Anna' }], detail: 'in 10 mosse' }],
+      games: [{ round: '1', white: 'anna', black: 'bruno', result: '1-0' as const, status: 'mate', plies: 19, id: 'cccccccc' }],
+    };
+    const html = publicPage('#/albo', [withAwards]);
+    expect(html).toContain('in 10 mosse');
+    expect(html).toContain('href="https://lichess.org/cccccccc"');
+    expect(html).toContain('vedi la partita');
+  });
+});

@@ -4,6 +4,26 @@ import { playerHref } from '../lib/routes';
 import { useNameOf } from './Names';
 
 // Grid of the end-of-season awards, each winner linking to their player page
+// Links to the games of an award: "vedi la partita", or "partite: 1 · 2" when there are more
+function GameLinks({ ids }: { ids?: string[] }) {
+  if (!ids || ids.length === 0) return null;
+  const link = (id: string, text: string) => (
+    <a key={id} href={`https://lichess.org/${id}`} target="_blank" rel="noopener noreferrer">{text}</a>
+  );
+  if (ids.length === 1) return <> · {link(ids[0], 'vedi la partita')}</>;
+  return (
+    <>
+      {' · partite: '}
+      {ids.map((id, i) => (
+        <React.Fragment key={id}>
+          {i > 0 && ' · '}
+          {link(id, String(i + 1))}
+        </React.Fragment>
+      ))}
+    </>
+  );
+}
+
 export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[]; compact?: boolean }) {
   const nameOf = useNameOf();
   const winners = (a: SeasonAward) =>
@@ -24,7 +44,10 @@ export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[
               <span>
                 <strong>{a.title}</strong>: <span className="award-winners">{winners(a)}</span>
               </span>
-              <span className="compact-sub">{a.detail}</span>
+              <span className="compact-sub">
+                {a.detail}
+                <GameLinks ids={a.games} />
+              </span>
             </span>
           </li>
         ))}
@@ -39,7 +62,10 @@ export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[
           <div className="award-body">
             <h3 className="award-title">{a.title}</h3>
             <p className="award-winners">{winners(a)}</p>
-            <p className="award-detail">{a.detail}</p>
+            <p className="award-detail">
+              {a.detail}
+              <GameLinks ids={a.games} />
+            </p>
             <p className="award-desc">{a.description}</p>
           </div>
         </li>

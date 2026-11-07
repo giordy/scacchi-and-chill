@@ -1,4 +1,4 @@
-import { HistoryGame, LichessExportGame, Player, SeasonAward } from '../types';
+import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonAward } from '../types';
 export { estimateMoveTimes } from './moveTimes';
 export type { TimedGame } from './moveTimes';
 import { formatPace } from './playerProfile';
@@ -13,6 +13,13 @@ function leaders(counts: Map<string, number>, players: Player[]): { handles: str
   if (best === 0) return { handles: [], best };
   return { handles: players.map((p) => p.handle).filter((h) => counts.get(h) === best), best };
 }
+
+// At most this many games are linked from an award: beyond, a list of links says little
+const MAX_LINKED = 3;
+const linked = (ids: Array<string | undefined>) => {
+  const list = [...new Set(ids.filter((id): id is string => !!id))];
+  return list.length > 0 && list.length <= MAX_LINKED ? { games: list } : {};
+};
 
 // Pure function: the light-hearted awards of a season, computed on finished games only.
 // An award with no possible winner (e.g. no game ended in mate) is left out.
@@ -39,6 +46,7 @@ export function computeSeasonAwards(
       description: "Più vittorie chiuse con lo scacco matto",
       winners: who(mate.handles),
       detail: plural(mate.best, "vittoria col matto", "vittorie col matto"),
+      ...linked(games.filter((g) => g.status === "mate" && g.winner && mate.handles.includes(g.winner)).map((g) => g.state.id)),
     });
   }
 
@@ -55,6 +63,7 @@ export function computeSeasonAwards(
       description: "La vittoria più rapida della stagione",
       winners: who(winners),
       detail: `in ${plural(fewest, "mossa", "mosse")}`,
+      ...linked(decisive.filter((g) => g.moves === fewest).map((g) => g.state.id)),
     });
   }
 
@@ -72,6 +81,7 @@ export function computeSeasonAwards(
       description: "La vittoria più lunga della stagione",
       winners: who(winners),
       detail: `in ${plural(most, "mossa", "mosse")}${loser ? ` contro ${nameOf(loser)}` : ""}`,
+      ...linked(longest.map((g) => g.state.id)),
     });
   }
 
@@ -105,6 +115,7 @@ export function computeSeasonAwards(
       description: `Più colpacci: vittorie contro chi aveva almeno ${UPSET_GAP} punti Elo in più`,
       winners: who(giant.handles),
       detail: plural(giant.best, "colpaccio", "colpacci"),
+      ...linked(games.filter((g) => g.winner && giant.handles.includes(g.winner) && upsetOf(g.state)).map((g) => g.state.id)),
     });
   }
 
@@ -145,4 +156,29 @@ export function awardsMessage(season: string, awards: SeasonAward[]): string {
     "",
     ...awards.map((a) => `${a.emoji} *${a.title}*: ${awardWinnersLine(a)}`),
   ].join("\n");
+}
+
+// The games of the awards of a season archived before awards carried them: found again in the
+// archived games with the same rules (winners as awarded, moves as full moves)
+export function withAwardGames(awards: SeasonAward[], games: ArchivedGame[] | undefined): SeasonAward[] {
+  if (!games || games.length === 0) return awards;
+  const winnerOf = (g: ArchivedGame) => (g.result === '1-0' ? g.white : g.result === '0-1' ? g.black : undefined);
+  const decisive = games.filter((g) => winnerOf(g) && g.status !== 'forfeit' && (g.plies ?? 0) > 0);
+  const moves = (g: ArchivedGame) => Math.ceil((g.plies ?? 0) / 2);
+  return awards.map((a) => {
+    if (a.games) return a;
+    const won = (g: ArchivedGame) => a.winners.some((w) => w.handle.toLowerCase() === winnerOf(g)?.toLowerCase());
+    let found: ArchivedGame[] = [];
+    if (a.id === 'fastest' && decisive.length) found = decisive.filter((g) => moves(g) === Math.min(...decisive.map(moves)));
+    else if (a.id === 'longest' && decisive.length) found = decisive.filter((g) => moves(g) === Math.max(...decisive.map(moves)));
+    else if (a.id === 'mate') found = decisive.filter((g) => g.status === 'mate' && won(g));
+    else if (a.id === 'upsets') {
+      found = decisive.filter((g) => {
+        if (!won(g) || g.provisional || g.whiteRating === undefined || g.blackRating === undefined) return false;
+        const gap = g.result === '1-0' ? g.blackRating - g.whiteRating : g.whiteRating - g.blackRating;
+        return gap >= UPSET_GAP;
+      });
+    }
+    return { ...a, ...linked(found.map((g) => g.id)) };
+  });
 }
