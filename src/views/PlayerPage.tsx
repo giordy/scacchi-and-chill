@@ -235,9 +235,9 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
             <InfoTip
               className="player-elo-badge"
               text={
-                `Elo del torneo: ${eloNow}. Calcolato solo dalle partite del torneo, con la formula Elo: tutti partono da 1500, battere un avversario dello stesso livello vale 16 punti.` +
+                "Elo del torneo, calcolato solo dalle nostre partite." +
                 (newcomer
-                  ? " È un esordiente (prima stagione, o di ritorno dopo una pausa): nelle sue partite si muove solo il suo Elo, non quello degli avversari."
+                  ? " Esordiente: nelle sue partite si muove solo il suo Elo."
                   : eloMove === 0
                   ? " Come a inizio stagione."
                   : ` ${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione.`)
@@ -292,7 +292,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           ))}
           {forecast && forecast.games > 0 && (
             <div className="stat-pill">
-              <InfoTip className="stat-pill-label" text={`I punti che ci si aspettava facesse in questa stagione, calcolati (non scelti) dall'Elo del torneo suo e dei suoi avversari a inizio stagione, arrotondati al mezzo punto. L'obiettivo resta fisso per tutta la stagione. Contano ${countedOf} partite: quelle contro gli esordienti no, il loro livello non si conosce ancora. Chi supera di più il proprio obiettivo vince il Premio Pillsbury. Finora: ▲ sopra, = in linea, ▼ sotto.`}>
+              <InfoTip className="stat-pill-label" text={`Punti previsti in questa stagione dall'Elo del torneo di inizio stagione. Contano ${countedOf} partite: quelle con gli esordienti no. Chi lo supera di più vince il Premio Pillsbury.`}>
                 Obiettivo <span className="infotip-mark" aria-hidden="true">ⓘ</span>
               </InfoTip>
               <span className="stat-pill-val">

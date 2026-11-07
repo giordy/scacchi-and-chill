@@ -106,8 +106,7 @@ export function PillsburyRace({
       )}
       <div className="pillsbury-about">
         <p className="note note-top-xs">
-          Il <strong>{PILLSBURY_TITLE}</strong> {PILLSBURY_EMOJI} va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti (lo trovate nel vostro profilo). ▲ sopra
-          l'obiettivo · = in linea · ▼ sotto · ⏳ in attesa della prima partita che conta.
+          Il <strong>{PILLSBURY_TITLE}</strong> {PILLSBURY_EMOJI} va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti (lo trovate nel vostro profilo).
           {reigning && <> Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).</>}
         </p>
         <p className="note note-top-xs">
