@@ -35,7 +35,7 @@ export function SeasonArchiveSection({
   // Hooks above must run on every render, so the early return comes after them
   if (!meta) return <p className="note">Salva prima le informazioni del torneo.</p>;
 
-  const preview = buildSeasonArchive(meta, config.players, history, gameStates);
+  const preview = buildSeasonArchive(meta, config.players, history, gameStates, undefined, seasons);
   const alreadyArchived = seasons.some((s) => s.id === seasonId(meta.season));
 
   // A copy of the standings for the organizer: a file, never the public archive or the hall of fame
@@ -72,7 +72,7 @@ export function SeasonArchiveSection({
     setBusy(true);
     try {
       // 1. Archive first: if this fails nothing is deleted
-      const snapshot = buildSeasonArchive(meta, config.players, history, gameStates);
+      const snapshot = buildSeasonArchive(meta, config.players, history, gameStates, undefined, seasons);
       await saveSeasonArchive(snapshot);
       // 2. Remove the old season's games from Firestore and from this device
       await deleteAllGames();

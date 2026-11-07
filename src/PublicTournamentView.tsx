@@ -121,7 +121,7 @@ export function PublicTournamentView({
       crosstable,
       progress,
       concluded,
-      awards: concluded ? computeSeasonAwards(players, history, gameStates) : [],
+      awards: concluded ? computeSeasonAwards(players, history, gameStates, seasons) : [],
       allGames,
       rounds: [...new Set(allGames.map((g) => g.round))].sort(byRound),
       summits: summitGames(players, allGames, gameStates),
@@ -130,7 +130,7 @@ export function PublicTournamentView({
       // When the current season is being played: "da novembre 2026", both months once it is over
       currentPeriod: periodLabel(periodOfGames(history, gameStates), true),
     };
-  }, [players, history, gameStates, schedule]);
+  }, [players, history, gameStates, schedule, seasons]);
   const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits, race, stats, currentPeriod } = season;
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
   // Places shared on a full tie (points, Sonneborn-Berger, wins); none before the first game

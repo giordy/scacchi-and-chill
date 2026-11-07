@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates } from '../types';
+import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, SeasonArchive } from '../types';
 import type { OrganizerStore } from '../hooks/useOrganizerData';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { ReviewsTab } from '../ReviewsTab';
@@ -11,14 +11,15 @@ import { errorMessage } from '../lib/utils';
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
 // The season's end-of-season awards, with the message for the group
-function AwardsSection({ season, config, history, gameStates, flash }: {
+function AwardsSection({ season, config, history, gameStates, flash, seasons }: {
   season: string;
+  seasons: SeasonArchive[];
   config: AppConfig;
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
   flash: Flash;
 }) {
-  const awards = computeSeasonAwards(config.players, history, gameStates);
+  const awards = computeSeasonAwards(config.players, history, gameStates, seasons);
   if (awards.length === 0) return <p className="note note-flush">I premi compaiono quando ci sono partite concluse.</p>;
   const copy = async () => {
     try {
@@ -58,6 +59,7 @@ export function WhatsAppTab({
   organizer,
   flash,
   triggerToast,
+  seasons = [],
 }: {
   config: AppConfig;
   history: HistoryGame[]; // as the standings see it (withdrawals applied)
@@ -68,6 +70,7 @@ export function WhatsAppTab({
   organizer: OrganizerStore;
   flash: Flash;
   triggerToast?: (msg: string) => void;
+  seasons?: SeasonArchive[]; // archived seasons, for the Premio Rivelazione
 }) {
   return (
     <div className="settings-stack">
@@ -76,7 +79,7 @@ export function WhatsAppTab({
       </CollapsibleSection>
 
       <CollapsibleSection title="🏆 Premi della stagione">
-        <AwardsSection season={config.tournament?.season ?? ''} config={config} history={history} gameStates={gameStates} flash={flash} />
+        <AwardsSection season={config.tournament?.season ?? ''} config={config} history={history} gameStates={gameStates} flash={flash} seasons={seasons} />
       </CollapsibleSection>
 
       <CollapsibleSection title="Testi dei messaggi">

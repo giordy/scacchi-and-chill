@@ -197,6 +197,7 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             organizer={organizer}
             flash={flash}
             triggerToast={triggerToast}
+            seasons={seasons}
           />
         </>
       )}

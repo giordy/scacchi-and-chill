@@ -159,3 +159,35 @@ describe('games linked from the awards', () => {
     expect(withAwardGames([{ ...old[0], games: ['x'] }], games)[0].games).toEqual(['x']);
   });
 });
+
+describe('Premio Rivelazione', () => {
+  const players = ['anna', 'bruno', 'carla', 'dario'].map((h) => ({ handle: h, name: h[0].toUpperCase() + h.slice(1) }));
+  const row = (handle: string) => ({ handle, name: handle, played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 });
+  // Last season Anna beat Carla twice: Anna starts ahead
+  const past = {
+    id: 'stagione-1', season: 'Stagione 1', title: 'T', archivedAt: '2026-01-01', gamesPlayed: 2,
+    standings: ['anna', 'bruno', 'carla'].map(row),
+    games: [1, 2].map((n) => ({ round: String(n), white: 'anna', black: 'carla', result: '1-0' as const, end: n })),
+  };
+  const game = (id: string, white: string, black: string, winner: 'white' | 'black', end: number) => ({
+    h: { round: '1', white, black, url: `https://lichess.org/${id}` },
+    s: { id, status: 'resign', winner, lastMoveAt: end },
+  });
+
+  it('goes to the largest gain of Elo del torneo in the season, esordienti left out', async () => {
+    const { computeSeasonAwards } = await import('../awards');
+    const games = [
+      game('aaaaaaaa', 'carla', 'anna', 'white', 10), // Carla, behind, beats Anna
+      game('bbbbbbbb', 'bruno', 'anna', 'white', 11),
+      game('cccccccc', 'dario', 'anna', 'white', 12), // Dario is new: wins, but is an esordiente
+      game('dddddddd', 'dario', 'carla', 'white', 13),
+    ];
+    const history = games.map((g) => g.h);
+    const states = Object.fromEntries(games.map((g) => [g.s.id, g.s]));
+    const award = computeSeasonAwards(players, history, states, [past]).find((a) => a.id === 'revelation');
+    expect(award).toMatchObject({ title: 'Premio Rivelazione', winners: [{ handle: 'carla', name: 'Carla' }] });
+    expect(award!.detail).toMatch(/^\+\d+ punti Elo del torneo$/);
+    // With no archived season everyone is an esordiente: no award yet
+    expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'revelation')).toBe(false);
+  });
+});

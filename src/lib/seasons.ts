@@ -25,7 +25,8 @@ export function buildSeasonArchive(
   players: Player[],
   history: HistoryGame[],
   gameStates: Record<string, LichessExportGame>,
-  now: Date = new Date()
+  now: Date = new Date(),
+  seasons: SeasonArchive[] = [] // the seasons archived before, for the Elo del torneo of the awards
 ): SeasonArchive {
   const { standings } = computeStandings(players, history, gameStates);
   const top = standings[0];
@@ -45,7 +46,7 @@ export function buildSeasonArchive(
   archive.end = period.end ?? monthKey(now.getTime());
   // No champion until at least one game has been scored
   if (top && top.points > 0) archive.champion = { handle: top.handle, name: top.name, points: top.points };
-  const awards = computeSeasonAwards(players, history, gameStates);
+  const awards = computeSeasonAwards(players, history, gameStates, seasons.filter((s) => s.id !== seasonId(meta.season)));
   if (awards.length > 0) archive.awards = awards;
   const departures = departuresOf(meta.withdrawals);
   if (departures.length > 0) archive.departures = departures;

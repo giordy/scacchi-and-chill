@@ -1,4 +1,5 @@
-import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonAward } from '../types';
+import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonAward } from '../types';
+import { currentSeason, tournamentElo } from './tournamentElo';
 export { estimateMoveTimes } from './moveTimes';
 export type { TimedGame } from './moveTimes';
 import { formatPace } from './playerProfile';
@@ -28,13 +29,38 @@ const linked = (ids: Array<string | undefined>) => {
 export function computeSeasonAwards(
   players: Player[],
   history: HistoryGame[],
-  gameStates: Record<string, LichessExportGame>
+  gameStates: Record<string, LichessExportGame>,
+  seasons: SeasonArchive[] = [] // archived seasons, for the Elo del torneo of the Premio Rivelazione
 ): SeasonAward[] {
   const nameOf = (h: string) => players.find((p) => p.handle === h)?.name ?? h;
   const who = (handles: string[]) => handles.map((handle) => ({ handle, name: nameOf(handle) }));
   const games = collectFinishedGames(players, history, gameStates);
 
   const awards: SeasonAward[] = [];
+
+  // Premio Rivelazione: who did best beyond what their level promised, i.e. the largest gain of
+  // Elo del torneo in the season (see lib/tournamentElo). Esordienti are left out: their rating
+  // starts from 1500, not from their level.
+  const elo = currentSeason(tournamentElo(seasons, players.map((p) => p.handle), history, gameStates));
+  const gains = new Map<string, number>();
+  players.forEach((p) => {
+    const key = p.handle.toLowerCase();
+    const start = elo.start.get(key);
+    const end = elo.end.get(key);
+    if (start === undefined || end === undefined || elo.newcomers.has(key)) return;
+    gains.set(p.handle, Math.round(end - start));
+  });
+  const revelation = leaders(gains, players);
+  if (revelation.handles.length > 0) {
+    awards.push({
+      id: "revelation",
+      emoji: "🌟",
+      title: "Premio Rivelazione",
+      description: "A chi ha fatto più del previsto: il maggiore aumento di Elo del torneo nella stagione (esordienti esclusi)",
+      winners: who(revelation.handles),
+      detail: `+${revelation.best} punti Elo del torneo`,
+    });
+  }
 
   // Re del matto: most wins by checkmate
   const mates = new Map<string, number>();
