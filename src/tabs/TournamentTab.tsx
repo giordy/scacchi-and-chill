@@ -16,6 +16,7 @@ import { RulesSection } from './settings/RulesSection';
 import { PlayersSection } from './settings/PlayersSection';
 import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
 import { HallOfFameSection } from './settings/HallOfFameSection';
+import { RebuildSeasonSection } from './settings/RebuildSeasonSection';
 import { ChallengeSection } from './settings/ChallengeSection';
 import { WithdrawalSection } from './settings/WithdrawalSection';
 import { applyWithdrawals } from '../lib/withdrawals';
@@ -105,6 +106,7 @@ export function TournamentTab({
           flash={flash}
           onUpdateTournamentMeta={onUpdateTournamentMeta}
         />
+        <RebuildSeasonSection config={config} seasons={seasons} flash={flash} />
       </CollapsibleSection>
 
     </div>

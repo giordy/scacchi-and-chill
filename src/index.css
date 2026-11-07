@@ -2610,3 +2610,23 @@ button.infotip-trigger.presence-trigger {
 .career-place { text-align: right; white-space: nowrap; }
 .career-current { color: var(--muted); }
 .career-score { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
+
+/* Organizer: rebuilding a past season from the chat links */
+.rebuild-season { display: grid; gap: 10px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.rebuild-season .note { margin: 0; }
+.rebuild-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.rebuild-fields label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.rebuild-text { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; }
+.rebuild-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rebuild-heading { margin: 8px 0 0; font-size: 15px; }
+.rebuild-players { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.rebuild-players li { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); gap: 8px; align-items: center; font-size: 14px; }
+.rebuild-handle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rebuild-games summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.rebuild-games ul { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; font-size: 13px; }
+.rebuild-games li { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
+.rebuild-games li.is-out { color: var(--muted); }
+.rebuild-date { color: var(--muted); white-space: nowrap; }
+.rebuild-result { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rebuild-forfeit { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.rebuild-games li.rebuild-manual { grid-template-columns: minmax(0, 1fr) auto; }
