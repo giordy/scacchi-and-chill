@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { errorMessage } from '../lib/utils';
-import { subscribeToAuth, signInAdminWithGoogle, signOutAdmin, isAdminUser } from '../firebaseAuth';
+import { subscribeToAuth, signInAdminWithGoogle, signInAdminWithIdToken, signOutAdmin, isAdminUser, startGoogleSignInRedirect } from '../firebaseAuth';
+import { isInstalledApp, takeGoogleAnswer } from '../lib/googleRedirect';
 
 // Sign-in state of the organizer (used only inside the organizer area)
 export function useAdminAuth() {
@@ -27,8 +28,28 @@ export function useAdminAuth() {
     });
   }, []);
 
+  // Back from Google in the installed app: the ID token kept by main.tsx becomes the Firebase sign-in
+  useEffect(() => {
+    const answer = takeGoogleAnswer();
+    if (!answer) return;
+    if ("error" in answer) {
+      setError(answer.error);
+      return;
+    }
+    setIsSigningIn(true);
+    signInAdminWithIdToken(answer.idToken)
+      .catch((err) => setError("Errore durante l'accesso: " + errorMessage(err)))
+      .finally(() => setIsSigningIn(false));
+  }, []);
+
   const login = async () => {
     setError("");
+    // Installed app: Firebase's popup cannot reach back to it, so the whole app goes to Google
+    if (isInstalledApp()) {
+      setIsSigningIn(true);
+      startGoogleSignInRedirect();
+      return;
+    }
     setIsSigningIn(true);
     try {
       await signInAdminWithGoogle();

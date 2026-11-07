@@ -47,6 +47,7 @@ Da *Stagioni → Fine stagione e storico*:
 
 1. **Authentication → Sign-in method**: attiva Google.
 2. **Authentication → Settings → Authorized domains**: aggiungi il dominio di GitHub Pages (`<utente>.github.io`) e `localhost`.
+   **App installata (PWA)**: lì il popup di Google di Firebase non funziona (resta bianco, poi «missing initial state»), quindi l'app va direttamente da Google e torna sul sito con il token. Serve una volta: in Google Cloud, *APIs & Services → Credentials*, apri il client OAuth «Web client (auto created by Google Service)» (lo stesso indicato in *Authentication → Sign-in method → Google → Web SDK configuration*, e in `oAuthClientId` di `firebase-applet-config.json`) e aggiungi l'indirizzo del sito, con la barra finale, sia in *Authorized JavaScript origins* (solo `https://<utente>.github.io`) sia in *Authorized redirect URIs* (`https://<utente>.github.io/<repository>/`; per provare in locale anche `http://localhost:3000/`).
 3. **Firestore → Rules**: pubblica il contenuto di [`firestore.rules`](firestore.rules). Ripubblicalo ogni volta che il file cambia. Le regole sono provate da `tests/firestore.rules.test.ts` sull'emulatore Firestore (`npm run test:rules`, anche nel deploy): chi non è l'organizzatore legge solo i dati pubblici e non scrive nulla, i dati privati restano privati, le partite accettano solo link Lichess, le foto solo immagini piccole.
 4. La chiave web in `firebase-applet-config.json` è pubblica per natura. Limitala in Google Cloud ai referrer `<utente>.github.io/*` e `localhost`.
 

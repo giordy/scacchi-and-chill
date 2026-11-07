@@ -1,8 +1,10 @@
 // Admin authentication (Google sign-in via Firebase Authentication). Kept apart from
 // firebaseService so that only the organizer area, loaded on demand, downloads it.
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, User } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signInWithPopup, signOut, User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { app, db } from "./firebaseService";
+import firebaseConfigRaw from "../firebase-applet-config.json";
+import { startGoogleRedirect } from "./lib/googleRedirect";
 
 const auth = getAuth(app);
 
@@ -26,6 +28,18 @@ export async function signInAdminWithGoogle(): Promise<User> {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
   const result = await signInWithPopup(auth, provider);
+  return result.user;
+}
+
+// Installed app (PWA): Google sends the ID token back to the site (see lib/googleRedirect), and
+// Firebase accepts it as a Google credential. The client is the project's own Web client, the one
+// in Authentication > Sign-in method > Google > Web SDK configuration.
+export function startGoogleSignInRedirect(): void {
+  startGoogleRedirect(firebaseConfigRaw.oAuthClientId);
+}
+
+export async function signInAdminWithIdToken(idToken: string): Promise<User> {
+  const result = await signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
   return result.user;
 }
 
