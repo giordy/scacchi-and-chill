@@ -61,17 +61,6 @@ const describeEndings = (counts: Record<EndReason, number>) =>
 // Bare icons are narrow: beyond this many trophies the shelf groups the medals by kind
 const SHELF_MAX = 8;
 
-// A speedometer: the level the Elo del torneo measures
-function GaugeIcon() {
-  return (
-    <svg className="gauge-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M4 17a8 8 0 1 1 16 0" />
-      <path d="M12 17l4-5" />
-      <circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
 const PLACE_LABEL: Record<Medal, string> = { 1: "Campione", 2: "2° posto", 3: "3° posto" };
 
 // Trophy shelf next to the player's name, in the style of Lichess profiles: bare icons in a row,
@@ -250,10 +239,9 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                   : ` ${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione.`)
               }
             >
-              <GaugeIcon />
+              <span className="player-elo-label">Elo</span>
               <span className="player-elo-val">{eloNow}</span>
               {!newcomer && <Trend kind={eloTrend} label={eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione`} />}
-              <span className="sr-only">Elo del torneo</span>
             </InfoTip>
           </div>
         )}

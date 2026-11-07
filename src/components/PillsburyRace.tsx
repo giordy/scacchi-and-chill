@@ -61,23 +61,6 @@ export function PillsburyRace({
 
   return (
     <section aria-label={PILLSBURY_TITLE}>
-      <article className="dossier-card pillsbury-intro">
-        <h2 className="section-heading">
-          <span aria-hidden="true">{PILLSBURY_EMOJI}</span> {PILLSBURY_TITLE}
-        </h2>
-        <p>
-          Va a chi, a fine stagione, ha superato di più il proprio <strong>pronostico</strong>: i punti che ci si aspettava facesse,
-          dall'Elo del torneo suo e dei suoi avversari a inizio stagione. Qui sotto la corsa: ▲ sopra il previsto, = in linea, ▼ sotto.
-        </p>
-        <p className="pillsbury-origin">
-          <strong>Perché Pillsbury.</strong> {PILLSBURY_ORIGIN}
-        </p>
-        {reigning && (
-          <p className="note note-flush">
-            Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).
-          </p>
-        )}
-      </article>
 
       {firstSeason ? (
         <p className="note">Il premio parte dalla seconda stagione: nella prima sono tutti esordienti, e il livello di nessuno si conosce ancora.</p>
@@ -108,6 +91,16 @@ export function PillsburyRace({
           )}
         </>
       )}
+      <div className="pillsbury-about">
+        <p className="note note-top-xs">
+          Il <strong>{PILLSBURY_TITLE}</strong> {PILLSBURY_EMOJI} va a chi, a fine stagione, ha superato di più il proprio pronostico: i punti che
+          ci si aspettava facesse, dall'Elo del torneo suo e dei suoi avversari a inizio stagione. ▲ sopra il previsto, = in linea, ▼ sotto.
+          {reigning && <> Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).</>}
+        </p>
+        <p className="note note-top-xs">
+          <strong>Perché Pillsbury.</strong> {PILLSBURY_ORIGIN}
+        </p>
+      </div>
     </section>
   );
 }

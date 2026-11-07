@@ -2071,6 +2071,13 @@ button.infotip-trigger.player-elo-badge {
   width: min(300px, calc(100vw - 64px));
 }
 
+.player-elo-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .player-elo-val {
   font-weight: 700;
   color: var(--ink);
@@ -2481,15 +2488,42 @@ button.infotip-trigger.match-upset {
   right: 0;
   top: calc(100% + 6px);
   padding: 8px 10px;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 8px;
-  background: var(--panel);
-  color: var(--ink);
+  /* Inverted colours (dark on the light theme, light on the dark one), so it stands out from the
+     card it opens on instead of blending in */
+  background: var(--ink);
+  color: var(--bg);
   font-size: 13px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.4;
   text-align: left;
-  box-shadow: var(--shadow);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.infotip.is-open .infotip-bubble {
+  animation: infotip-in 140ms ease-out;
+}
+
+/* A small trigger (the presence dot of a player): the bubble opens right under it, not across the
+   card, where it went unnoticed */
+.infotip:has(> .presence-trigger) {
+  position: relative;
+}
+.infotip:has(> .presence-trigger) .infotip-bubble {
+  left: -6px;
+  right: auto;
+  width: max-content;
+  max-width: min(220px, calc(100vw - 48px));
+}
+
+@keyframes infotip-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .infotip.is-open .infotip-bubble { animation: none; }
 }
 
 .infotip.is-open .infotip-bubble {
@@ -2750,7 +2784,6 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 /* The player column sticks over the card's own background, not the panel's */
 .winner-row tr:not(.row-leader) .sticky-col { background: var(--bg); }
 
-/* Premio Pillsbury view: what it is and why the name, above the race */
-.pillsbury-intro p { margin: 0 0 10px; font-size: 15px; }
-.pillsbury-origin { font-size: 14px; color: var(--muted); }
+/* Premio Pillsbury view: what it is and why the name, under the race */
+
 .pillsbury-table .trend { font-size: 1em; }
