@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isCurrentSeasonGame, isTournamentCandidate, lastMoveOf, lichessIdsFromText, playersOfGames, rebuiltHistory } from '../rebuild';
+import { isCurrentSeasonGame, isTournamentCandidate, lastMoveOf, lichessIdsFromText, playersOfGames, rebuildArchive, rebuiltHistory } from '../rebuild';
 import { LichessExportGame } from '../../types';
 
 const game = (id: string, white: string, black: string, extra: Partial<LichessExportGame> = {}): LichessExportGame => ({
@@ -99,5 +99,79 @@ describe('lastMoveOf', () => {
   it('is the latest move of the games', () => {
     expect(lastMoveOf([game('a', 'x', 'y', { lastMoveAt: 500 }), game('b', 'x', 'y', { lastMoveAt: 900 })])?.getTime()).toBe(900);
     expect(lastMoveOf([])).toBeUndefined();
+  });
+});
+
+describe('rebuildArchive, from the chat to the archive', () => {
+  // Greta (gredip) leaves after two games and matepaco takes over; a friendly game and a blitz
+  // game were shared in the chat too, and a forfeit was given by hand
+  const at = (day: number) => Date.UTC(2025, 8, day);
+  const lichess = [
+    game('aaaaaaa1', 'fsgach', 'gredip', { winner: 'white', createdAt: at(1), lastMoveAt: at(10) }),
+    game('aaaaaaa2', 'gredip', 'battimat', { winner: 'black', createdAt: at(2), lastMoveAt: at(11) }),
+    game('aaaaaaa3', 'matepaco', 'fsgach', { status: 'draw', winner: undefined, createdAt: at(20), lastMoveAt: at(30) }),
+    game('aaaaaaa4', 'battimat', 'fsgach', { winner: 'black', createdAt: at(21), lastMoveAt: Date.UTC(2025, 10, 5) }),
+    game('aaaaaaa5', 'fsgach', 'amico', { createdAt: at(22) }),
+    game('aaaaaaa6', 'fsgach', 'battimat', { speed: 'blitz', createdAt: at(23) }),
+  ];
+  const chat = lichess.map((g) => `1/9/25, 10:00 - X: finita https://lichess.org/${g.id}`).join('\n');
+
+  const ids = lichessIdsFromText(chat);
+  const candidates = lichess.filter((g) => ids.includes(g.id)).filter(isTournamentCandidate);
+  const players = [
+    { handle: 'fsgach', name: 'Fabio' },
+    { handle: 'battimat', name: 'Matteo' },
+    { handle: 'matepaco', name: 'Paco' },
+  ];
+  const archive = rebuildArchive({
+    title: 'Scacchi & Chill',
+    season: 'Scacchi & Chill - Stagione 1',
+    master: 'Tal',
+    games: candidates,
+    players,
+    manual: [{ white: 'matepaco', black: 'battimat', winner: 'black' }],
+    replaced: [{ handle: 'gredip', name: 'Greta', by: 'matepaco' }],
+  });
+
+  it('counts only the tournament games, with the substitute in place of who left', () => {
+    expect(candidates).toHaveLength(5);
+    expect(archive.standings.map((s) => [s.handle, s.points, s.played])).toEqual([
+      ['fsgach', 2.5, 3], // beat Greta (now Paco), drew Paco, beat Matteo
+      ['battimat', 2, 3], // beat Greta (now Paco), lost to Fabio, won the forfeit
+      ['matepaco', 0.5, 4], // Greta's two games, the draw with Fabio, the forfeit
+    ]);
+    expect(archive.champion).toEqual({ handle: 'fsgach', name: 'Fabio', points: 2.5 });
+    // The game with an outsider is left out, the blitz one never got in
+    expect(archive.gamesPlayed).toBe(5);
+  });
+
+  it('keeps the games, the note on who left, the period and the master', () => {
+    // Rounds are unknown: by date, the forfeit (no date) first
+    expect(archive.games?.map((g) => [g.white, g.black, g.result])).toEqual([
+      ['matepaco', 'battimat', '0-1'],
+      ['fsgach', 'matepaco', '1-0'],
+      ['matepaco', 'battimat', '0-1'],
+      ['matepaco', 'fsgach', '½-½'],
+      ['battimat', 'fsgach', '0-1'],
+    ]);
+    expect(archive.departures).toEqual([
+      { handle: 'gredip', name: 'Greta', mode: 'replaced', replacedBy: { handle: 'matepaco', name: 'Paco' } },
+    ]);
+    expect([archive.start, archive.end]).toEqual(['2025-09', '2025-11']);
+    expect(archive.archivedAt).toBe(new Date(Date.UTC(2025, 10, 5)).toISOString());
+    expect(archive.masterName).toBe('Tal');
+    expect(archive.id).toBe('scacchi-chill-stagione-1');
+  });
+
+  it('ignores a replacement by someone who is not a player', () => {
+    const a = rebuildArchive({
+      title: 'T',
+      season: 'S',
+      games: candidates,
+      players,
+      replaced: [{ handle: 'gredip', name: 'Greta', by: 'nessuno' }],
+    });
+    expect(a).not.toHaveProperty('departures');
+    expect(a.games?.some((g) => g.white === 'gredip' || g.black === 'gredip')).toBe(false);
   });
 });

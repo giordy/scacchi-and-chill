@@ -71,3 +71,16 @@ describe('fetchUsers', () => {
     await expect(fetchUsers(['anna'])).rejects.toThrow('429');
   });
 });
+
+describe('fetchGameStates in batches', () => {
+  it('asks at most 300 games per call', async () => {
+    const fetchMock = vi.fn(async (_url: string, init: RequestInit) =>
+      new Response(String(init.body).split(',').map((id) => JSON.stringify({ id, status: 'mate' })).join('\n'))
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const ids = Array.from({ length: 650 }, (_, i) => `g${String(i).padStart(7, '0')}`);
+    const states = await fetchGameStates(ids);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(Object.keys(states)).toHaveLength(650);
+  });
+});

@@ -1,14 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { HistoryGame, LichessExportGame } from '../types';
+import { HistoryGame } from '../types';
 import { errorMessage, extractGameId } from '../lib/utils';
 import { fetchGameStates } from '../lib/lichess';
-import { storedStates } from '../lib/games';
+import { storedStates, syncTargets } from '../lib/games';
 import { saveLichessStatesToFirebase } from '../firebaseService';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
-
-const isFinished = (s?: LichessExportGame) =>
-  Boolean(s && s.status && s.status !== "created" && s.status !== "started");
 
 // Game results are saved in Firestore (field `lichess`): the public view reads them from there,
 // without calling Lichess from every visitor's browser.
@@ -25,8 +22,8 @@ export function useLichessSync(
   // "Sync" button (organizer only): reads from Lichess and saves to Firestore.
   // quiet: automatic sync when the organizer area opens, which reports only errors.
   const sync = async ({ quiet = false }: { quiet?: boolean } = {}) => {
-    const targets = history.filter((g) => extractGameId(g.url) && !isFinished(g.lichess));
-    if (history.filter((g) => extractGameId(g.url)).length === 0) {
+    const { linked, targets, ids } = syncTargets(history);
+    if (linked === 0) {
       if (!quiet) flash("warning", "Non ci sono ancora partite con un link Lichess da sincronizzare.");
       return;
     }
@@ -37,7 +34,6 @@ export function useLichessSync(
 
     setIsSyncing(true);
     try {
-      const ids = Array.from(new Set(targets.map((g) => extractGameId(g.url) as string)));
       const states = await fetchGameStates(ids);
       const saved = await saveLichessStatesToFirebase(targets, states, extractGameId);
 
