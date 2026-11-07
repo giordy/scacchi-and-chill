@@ -53,7 +53,7 @@ function SeasonDetails({ archive }: { archive: SeasonArchive }) {
         {archive.title}
         {archive.masterName ? ` · dedicata a ${archive.masterName}` : ''} · {archive.gamesPlayed} partite
       </p>
-      <div className="table-responsive">
+      <div className="table-responsive is-flat">
         <table className="standings-table">
           <thead>
             <tr>
@@ -93,7 +93,7 @@ function SeasonDetails({ archive }: { archive: SeasonArchive }) {
       {archive.awards && archive.awards.length > 0 && (
         <>
           <h3 className="rules-heading">Premi</h3>
-          <SeasonAwards awards={archive.awards} />
+          <SeasonAwards awards={archive.awards} compact />
         </>
       )}
     </div>

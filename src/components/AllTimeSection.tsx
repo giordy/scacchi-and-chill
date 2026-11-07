@@ -2,11 +2,12 @@ import React from 'react';
 import { AllTimeRow, allTimeRanks, GameRecord } from '../lib/allTime';
 import { playerHref } from '../lib/routes';
 import { useNameOf } from './Names';
+import { shortSeason } from '../lib/honours';
 
 const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
 // Public "Albo" tab: the table of every season added up, then the all-time records
-export function AllTimeSection({ rows, records, gamesSince }: { rows: AllTimeRow[]; records: GameRecord[]; gamesSince?: string }) {
+export function AllTimeSection({ rows, records, gamesSince, title }: { rows: AllTimeRow[]; records: GameRecord[]; gamesSince?: string; title?: string }) {
   const ranks = allTimeRanks(rows);
   const nameOf = useNameOf();
   return (
@@ -15,7 +16,7 @@ export function AllTimeSection({ rows, records, gamesSince }: { rows: AllTimeRow
         <article className="dossier-card">
           <h2 className="section-heading">Classifica di sempre</h2>
           <p className="note note-sm">Tutte le stagioni sommate, compresa quella in corso. «Media» sono i punti per partita.</p>
-          <div className="table-responsive">
+          <div className="table-responsive is-flat">
             <table className="standings-table all-time-table">
               <thead>
                 <tr>
@@ -57,24 +58,24 @@ export function AllTimeSection({ rows, records, gamesSince }: { rows: AllTimeRow
       {records.length > 0 && (
         <article className="dossier-card">
           <h2 className="section-heading">Record</h2>
-          {gamesSince && <p className="note note-sm">Dalle partite registrate a partire da {gamesSince}.</p>}
-          <ul className="awards-grid">
+          {gamesSince && <p className="note note-sm">Dalle partite registrate a partire da {shortSeason(gamesSince, title)}.</p>}
+          <ul className="compact-list">
             {records.map((r) => (
-              <li key={r.id} className="award-card">
-                <span className="award-emoji" aria-hidden="true">{r.emoji}</span>
-                <div className="award-body">
-                  <h3 className="award-title">{r.title}</h3>
-                  <p className="award-detail">{r.detail}</p>
-                  <p className="award-desc">
-                    {r.season}
+              <li key={r.id}>
+                <span className="compact-emoji" aria-hidden="true">{r.emoji}</span>
+                <span className="compact-body">
+                  <strong>{r.title}</strong>
+                  <span>{r.detail}</span>
+                  <span className="compact-sub">
+                    {shortSeason(r.season, title)}
                     {r.url && (
                       <>
                         {" · "}
                         <a href={r.url} target="_blank" rel="noopener noreferrer">vedi su Lichess</a>
                       </>
                     )}
-                  </p>
-                </div>
+                  </span>
+                </span>
               </li>
             ))}
           </ul>
