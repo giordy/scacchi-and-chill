@@ -118,3 +118,44 @@ describe('il bradipo', () => {
     expect(computeSeasonAwards(players4, [...h, ...h], s).some((a) => a.id === 'slowest')).toBe(false);
   });
 });
+
+describe('games linked from the awards', () => {
+  it('links the fastest and the longest win, and the few mates and colpacci', async () => {
+    const { computeSeasonAwards } = await import('../awards');
+    const players = [{ handle: 'anna', name: 'Anna' }, { handle: 'bruno', name: 'Bruno' }];
+    const h = (id: string) => ({ round: '1', white: 'anna', black: 'bruno', url: `https://lichess.org/${id}` });
+    const st = (id: string, moves: number, status = 'resign', extra = {}) => ({
+      id, status, winner: 'white' as const, moves: Array.from({ length: moves * 2 }, () => 'e4').join(' '), ...extra,
+    });
+    const states = {
+      quick001: st('quick001', 10, 'mate'),
+      long0001: st('long0001', 60),
+      upset001: st('upset001', 30, 'resign', { players: { white: { rating: 1400 }, black: { rating: 1700 } } }),
+    };
+    const awards = computeSeasonAwards(players, [h('quick001'), h('long0001'), h('upset001')], states);
+    const by = (id: string) => awards.find((a) => a.id === id)!;
+    expect(by('fastest').games).toEqual(['quick001']);
+    expect(by('longest').games).toEqual(['long0001']);
+    expect(by('mate').games).toEqual(['quick001']);
+    expect(by('upsets').games).toEqual(['upset001']);
+  });
+
+  it('finds them again in the games of a season archived before', async () => {
+    const { withAwardGames } = await import('../awards');
+    const g = (id: string, plies: number, extra = {}) => ({ round: '1', white: 'anna', black: 'bruno', result: '1-0' as const, status: 'resign', plies, id, ...extra });
+    const games = [g('quick001', 19, { status: 'mate' }), g('long0001', 120), g('upset001', 60, { whiteRating: 1400, blackRating: 1700 }), g('draw0001', 200, { result: '½-½' })];
+    const w = [{ handle: 'anna', name: 'Anna' }];
+    const old = [
+      { id: 'fastest', emoji: '', title: '', description: '', winners: w, detail: '' },
+      { id: 'longest', emoji: '', title: '', description: '', winners: w, detail: '' },
+      { id: 'mate', emoji: '', title: '', description: '', winners: w, detail: '' },
+      { id: 'upsets', emoji: '', title: '', description: '', winners: w, detail: '' },
+      { id: 'draws', emoji: '', title: '', description: '', winners: w, detail: '' },
+    ];
+    const out = withAwardGames(old, games);
+    expect(out.map((a) => a.games)).toEqual([['quick001'], ['long0001'], ['quick001'], ['upset001'], undefined]);
+    // Without archived games, or with games already linked, nothing changes
+    expect(withAwardGames(old, undefined)).toBe(old);
+    expect(withAwardGames([{ ...old[0], games: ['x'] }], games)[0].games).toEqual(['x']);
+  });
+});

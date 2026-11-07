@@ -8,6 +8,7 @@ import { isTied, seasonStarted, sharedRanks } from '../lib/standings';
 import { departureText } from '../lib/departures';
 import { fullPodium, MEDAL_EMOJI, podiumFromStandings, shortSeason } from '../lib/honours';
 import { useNameOf } from './Names';
+import { withAwardGames } from '../lib/awards';
 
 interface PastSeason {
   season: string;
@@ -93,7 +94,7 @@ function SeasonDetails({ archive }: { archive: SeasonArchive }) {
       {archive.awards && archive.awards.length > 0 && (
         <>
           <h3 className="rules-heading">Premi</h3>
-          <SeasonAwards awards={archive.awards} compact />
+          <SeasonAwards awards={withAwardGames(archive.awards, archive.games)} compact />
         </>
       )}
     </div>
