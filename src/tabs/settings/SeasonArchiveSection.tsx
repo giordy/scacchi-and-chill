@@ -3,7 +3,6 @@ import { AppConfig, HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchiv
 import { buildSeasonArchive, seasonId, standingsCsv, validateNewSeasonName, withChampion } from '../../lib/seasons';
 import { deleteAllGames, saveSeasonArchive } from '../../firebaseService';
 import { errorMessage } from '../../lib/utils';
-import { awardsMessage, awardWinnersLine } from '../../lib/awards';
 import { pastSeasonPeriod } from '../../lib/period';
 
 export function SeasonArchiveSection({
@@ -48,15 +47,6 @@ export function SeasonArchiveSection({
     a.download = `classifica-${seasonId(meta.season)}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const copyAwards = async () => {
-    try {
-      await navigator.clipboard.writeText(awardsMessage(meta.season, preview.awards ?? []));
-      flash("ok", "Premi copiati: incollali nel gruppo WhatsApp.");
-    } catch (e) {
-      flash("err", "Copia non riuscita: " + errorMessage(e));
-    }
   };
 
   const startNewSeason = async () => {
@@ -151,20 +141,7 @@ export function SeasonArchiveSection({
       </div>
 
       {preview.awards && preview.awards.length > 0 && (
-        <div className="subcard">
-          <h4 className="subcard-title">Premi di «{meta.season}» (calcolati sulle partite concluse finora)</h4>
-          <ul className="note note-sm season-steps">
-            {preview.awards.map((a) => (
-              <li key={a.id}>
-                {a.emoji} <strong>{a.title}</strong>: {awardWinnersLine(a)}
-              </li>
-            ))}
-          </ul>
-          <button type="button" className="secondary" onClick={copyAwards}>
-            Copia il messaggio per WhatsApp
-          </button>
-          <p className="note note-sm mt-12">Sul sito pubblico compaiono sotto la classifica quando tutte le partite sono concluse.</p>
-        </div>
+        <p className="note note-sm">I premi della stagione, con il messaggio per il gruppo, sono in 💬 WhatsApp.</p>
       )}
 
       {seasons.length > 0 && (

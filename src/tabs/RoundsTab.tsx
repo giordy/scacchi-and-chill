@@ -5,14 +5,12 @@ import { gameProgress } from '../lib/progress';
 import { errorMessage, extractGameId } from '../lib/utils';
 import { saveGamesBatchToFirebase } from '../firebaseService';
 import { usePersistentState } from '../hooks/usePersistentState';
-import { CollapsibleSection } from '../components/CollapsibleSection';
-import { GeneratorSection } from './rounds/GeneratorSection';
 import { RoundDetail } from './rounds/RoundDetail';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
 
-// The only place where rounds live: the list of all rounds (planned and started), the automatic
-// round robin, and for each round its games, the Lichess links and the WhatsApp messages.
+// The rounds of the season: the list (planned and started) and, for each round, its games, the
+// Lichess links and its WhatsApp messages. The calendar is generated in Stagioni > Calendario.
 export function RoundsTab({
   openRound,
   setOpenRound,
@@ -27,6 +25,7 @@ export function RoundsTab({
   flash,
   triggerToast,
   onMissingToken,
+  onOpenCalendar,
 }: {
   // Round shown in detail; empty for the list
   openRound: string;
@@ -42,6 +41,8 @@ export function RoundsTab({
   flash: Flash;
   triggerToast: (msg: string) => void;
   onMissingToken: () => void;
+  // Opens Stagioni, where the calendar is generated
+  onOpenCalendar?: () => void;
 }) {
   const schedule = config.schedule ?? [];
 
@@ -133,7 +134,15 @@ export function RoundsTab({
         </h2>
         {rounds.length === 0 ? (
           <p className="note note-flush">
-            Nessun turno ancora. Generali tutti insieme con il girone all'italiana qui sotto, oppure creane uno a mano.
+            Nessun turno ancora. Genera il calendario con il girone all'italiana in{" "}
+            {onOpenCalendar ? (
+              <button type="button" className="link-muted" onClick={onOpenCalendar}>
+                ♛ Stagioni → Calendario
+              </button>
+            ) : (
+              "♛ Stagioni → Calendario"
+            )}
+            , oppure crea un turno a mano.
           </p>
         ) : (
           <div className="round-list">
@@ -164,15 +173,6 @@ export function RoundsTab({
         </button>
       </section>
 
-      <CollapsibleSection title="Genera i turni in automatico" defaultOpen={rounds.length === 0}>
-        <GeneratorSection
-          players={config.players}
-          schedule={schedule}
-          played={history}
-          flash={flash}
-          onUpdateSchedule={onUpdateSchedule}
-        />
-      </CollapsibleSection>
     </div>
   );
 }

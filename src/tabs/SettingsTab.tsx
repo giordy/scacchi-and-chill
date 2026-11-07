@@ -3,14 +3,12 @@ import { AppConfig, HistoryGame, MessageTemplates, Player, ScheduledMatch, Seaso
 import type { OrganizerStore } from '../hooks/useOrganizerData';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { TokenSection } from './settings/TokenSection';
-import { LaunchMessageSection } from './settings/LaunchMessageSection';
-import { StatusPhrasesSection } from './settings/StatusPhrasesSection';
 import { BackupSection } from './settings/BackupSection';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
-// Set-and-forget settings: the Lichess token, the texts of the WhatsApp messages and the backup.
-// What changes during a season is in SeasonsTab, the players in PlayersTab.
+// Set-and-forget settings: the Lichess token and the copy of the data. The texts of the WhatsApp
+// messages are in WhatsAppTab, the season in SeasonsTab, the players in PlayersTab.
 export function SettingsTab({
   config,
   settings,
@@ -44,17 +42,6 @@ export function SettingsTab({
     <div className="settings-stack">
       <CollapsibleSection title="Token Lichess" defaultOpen={!settings.token}>
         <TokenSection settings={settings} setSettings={setSettings} flash={flash} />
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Messaggi WhatsApp">
-        <LaunchMessageSection templates={templates} setTemplates={setTemplates} flash={flash} />
-        <hr className="divider" />
-        <StatusPhrasesSection
-          defaults={config.statusPhrases}
-          overrides={organizer.statusPhrases ?? null}
-          setOverrides={organizer.setStatusPhrases}
-          flash={flash}
-        />
       </CollapsibleSection>
 
       <CollapsibleSection title="Copia dei dati">

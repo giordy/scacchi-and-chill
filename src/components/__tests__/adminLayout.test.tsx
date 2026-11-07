@@ -16,8 +16,10 @@ const summaries = (html: string) => [...html.matchAll(/<summary>([^<]+)<\/summar
 
 describe('admin layout', () => {
   it('has five tabs, settings last', () => {
-    expect(ADMIN_TABS.map((t) => t.key)).toEqual(['rounds', 'reviews', 'players', 'seasons', 'settings']);
+    expect(ADMIN_TABS.map((t) => t.key)).toEqual(['rounds', 'whatsapp', 'players', 'seasons', 'settings']);
+    expect(ADMIN_TABS.map((t) => t.label)).toEqual(['Turni', 'WhatsApp', 'Giocatori', 'Stagioni', 'Impostazioni']);
     expect(isAdminTab('tournament')).toBe(false);
+    expect(isAdminTab('reviews')).toBe(false);
     expect(isAdminTab('settings')).toBe(true);
     expect(isAdminTab('options')).toBe(false);
   });
@@ -26,7 +28,8 @@ describe('admin layout', () => {
     const html = renderToStaticMarkup(
       <SeasonsTab config={config} settings={settings} setSettings={noop as any} history={[]} setHistory={noop as any} onSeasonReset={noop} gameStates={{}} seasons={[]} flash={noop} onUpdateTournamentMeta={noop} onUpdateSchedule={noop} />
     );
-    expect(summaries(html)).toEqual(['Stagione corrente', 'Regolamento', 'Fine stagione e storico (0)']);
+    expect(summaries(html)).toEqual(['Stagione corrente', 'Regolamento', 'Calendario', 'Fine stagione e storico (0)']);
+    expect(html).toContain('Genera');
     expect(html).not.toContain('Ricostruisci');
     const rules = html.slice(html.indexOf('<summary>Regolamento'));
     expect(rules.indexOf('Validità del link di sfida')).toBeLessThan(rules.indexOf('Come funziona il torneo'));
@@ -48,10 +51,33 @@ describe('admin layout', () => {
     const html = renderToStaticMarkup(
       <SettingsTab config={config} settings={settings} setSettings={noop as any} templates={config.messageTemplates} setTemplates={noop as any} history={[]} setHistory={noop as any} seasons={[]} organizer={organizer} flash={noop} onUpdateTournamentMeta={noop} onUpdatePlayers={noop} onUpdateSchedule={noop} />
     );
-    expect(summaries(html)).toEqual(['Token Lichess', 'Messaggi WhatsApp', 'Copia dei dati']);
+    expect(summaries(html)).toEqual(['Token Lichess', 'Copia dei dati']);
     expect(html).toMatch(/<details class="settings-section" open="">\s*<summary>Token Lichess/);
+    expect(html).not.toContain('Frasi del bollettino');
+  });
+
+  it('points to Stagioni for the calendar when there are no rounds', async () => {
+    const { RoundsTab } = await import('../../tabs/RoundsTab');
+    const html = renderToStaticMarkup(
+      <RoundsTab openRound="" setOpenRound={noop} config={{ ...config, schedule: [] }} settings={settings} templates={config.messageTemplates} history={[]} setHistory={noop as any} gameStates={{}} onUpdateSchedule={noop} nameOf={(h) => h} flash={noop} triggerToast={noop} onMissingToken={noop} onOpenCalendar={noop} />
+    );
+    expect(html).toContain('♛ Stagioni → Calendario');
+    expect(html).not.toContain('Genera i turni in automatico');
+  });
+
+  it('gathers the review, the awards and the message texts in WhatsApp', async () => {
+    const { WhatsAppTab } = await import('../../tabs/WhatsAppTab');
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const html = renderToStaticMarkup(
+      <WhatsAppTab config={config} history={[]} gameStates={{}} nameOf={(h) => h} templates={config.messageTemplates} setTemplates={noop as any} organizer={organizer} flash={noop} />
+    );
+    vi.unstubAllGlobals();
+    expect(summaries(html)).toEqual(['✨ Il racconto della stagione', '🏆 Premi della stagione', 'Testi dei messaggi']);
     expect(html).toContain('Messaggio con i link del turno');
     expect(html).toContain('Frasi del bollettino');
+    expect(html).toContain('I premi compaiono quando ci sono partite concluse.');
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('leaves the computed standings, the extra sync and the JSON download out of Recensione', () => {

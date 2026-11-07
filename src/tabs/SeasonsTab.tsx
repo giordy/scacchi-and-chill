@@ -14,6 +14,7 @@ import { MasterAnecdotesSection } from './settings/MasterAnecdotesSection';
 import { RulesSection } from './settings/RulesSection';
 import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
 import { HallOfFameSection } from './settings/HallOfFameSection';
+import { GeneratorSection } from './rounds/GeneratorSection';
 import { ChallengeSection } from './settings/ChallengeSection';
 import { applyWithdrawals } from '../lib/withdrawals';
 
@@ -66,6 +67,17 @@ export function SeasonsTab({
         >
           <ChallengeSection settings={settings} setSettings={setSettings} />
         </RulesSection>
+      </CollapsibleSection>
+
+      {/* At the start of a season: the round robin, or the rounds still missing (open while there are none) */}
+      <CollapsibleSection title="Calendario" defaultOpen={(config.schedule ?? []).length === 0 && history.length === 0}>
+        <GeneratorSection
+          players={config.players}
+          schedule={config.schedule ?? []}
+          played={history}
+          flash={flash}
+          onUpdateSchedule={onUpdateSchedule}
+        />
       </CollapsibleSection>
 
       <CollapsibleSection title={`Fine stagione e storico (${seasons.length})`}>
