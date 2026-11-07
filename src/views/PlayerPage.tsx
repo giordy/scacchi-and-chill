@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
 import { allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, seasonsWithGames } from '../lib/allTime';
 import { computeStandings } from '../lib/standings';
+import { departuresOf } from '../lib/departures';
 import { CareerSection, AllTimeHeadToHeadSection } from '../components/CareerSections';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref } from '../lib/routes';
@@ -127,6 +128,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const career = careerOf(handle, seasons, {
     season: currentSeason,
     standings: computeStandings(config.players, history, gameStates).standings,
+    departures: departuresOf(config.tournament?.withdrawals),
   });
   const showCareer = career.some((c) => !c.current);
   const withGames = seasonsWithGames(seasons, { season: currentSeason, history, gameStates });

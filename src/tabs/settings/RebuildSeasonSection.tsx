@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AppConfig, HistoryGame, LichessExportGame, Player, SeasonArchive } from '../../types';
+import { AppConfig, HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../../types';
 import { fetchGameStates } from '../../lib/lichess';
 import { isCurrentSeasonGame, isTournamentCandidate, lastMoveOf, lichessIdsFromText, ManualGame, playersOfGames, rebuiltHistory } from '../../lib/rebuild';
 import { buildSeasonArchive, seasonId } from '../../lib/seasons';
@@ -135,13 +135,30 @@ export function RebuildSeasonSection({
     const exists = seasons.some((s) => s.id === seasonId(name));
     const ok = window.confirm(
       `Salvare «${name}» nello storico con ${players.length} giocatori e ${history.length} partite?` +
+        Object.keys(substitutes)
+          .map((k) => `\n• ${(names[k] ?? '').trim() || k}: al suo posto ${players.find((p) => same(p.handle, substitutes[k]))?.name}`)
+          .join('') +
         (exists ? '\n\nEsiste già un archivio con questo nome: viene sostituito.' : '') +
         "\n\nL'Albo d'Oro non viene toccato."
     );
     if (!ok) return;
     setBusy(true);
     try {
-      const meta = { title: config.tournament?.title ?? '', season: name, description: '', ...(master.trim() ? { masterName: master.trim() } : {}) };
+      // Who was replaced: a note under the season's table and "al posto di" in the substitute's career
+      const withdrawals: Withdrawal[] = foundPlayers
+        .filter((p) => substitutes[p.handle.toLowerCase()])
+        .map((p) => {
+          const to = players.find((o) => same(o.handle, substitutes[p.handle.toLowerCase()]))!;
+          const left = (names[p.handle.toLowerCase()] ?? '').trim() || p.handle;
+          return { handle: p.handle, name: left, at: '', played: 0, total: 0, mode: 'replaced', replacedBy: to };
+        });
+      const meta = {
+        title: config.tournament?.title ?? '',
+        season: name,
+        description: '',
+        withdrawals,
+        ...(master.trim() ? { masterName: master.trim() } : {}),
+      };
       const archive = buildSeasonArchive(meta, players, history, states, lastMoveOf(kept) ?? new Date());
       await saveSeasonArchive(archive);
       flash('ok', `«${name}» salvata nello storico: ora conta nella classifica di sempre, nelle carriere e nei record.`);
@@ -227,9 +244,15 @@ export function RebuildSeasonSection({
                     >
                       <option value="">partite non contate</option>
                       {players.map((o) => (
-                        <option key={o.handle} value={o.handle}>sostituito da {o.name}</option>
+                        <option key={o.handle} value={o.handle}>al suo posto: {o.name}</option>
                       ))}
                     </select>
+                  )}
+                  {!chosen.has(key) && replacedBy[key] && (
+                    <label className="rebuild-departure">
+                      Nome nella nota
+                      <input type="text" value={names[key] ?? ''} onChange={(e) => setNames({ ...names, [key]: e.target.value })} />
+                    </label>
                   )}
                 </li>
               );

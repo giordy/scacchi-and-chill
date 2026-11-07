@@ -6,6 +6,8 @@ import { archivedGames, seasonId } from './seasons';
 import { RankKey, seasonStarted, sharedRanks } from './standings';
 import { fullPodium } from './honours';
 import { UPSET_GAP } from './upset';
+import { replacedIn } from './departures';
+import { SeasonDeparture } from '../types';
 
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
@@ -92,6 +94,7 @@ interface StandingRow extends RankKey {
 export interface CurrentStandings {
   season: string;
   standings: StandingRow[];
+  departures?: SeasonDeparture[];
 }
 
 export interface CareerSeason {
@@ -105,17 +108,20 @@ export interface CareerSeason {
   drawn: number;
   lost: number;
   current: boolean;
+  replacing?: string; // name of the player whose place they took
 }
 
 // Every season a player took part in, newest first: the one in progress, then the archived ones
 export function careerOf(handle: string, seasons: SeasonArchive[], current?: CurrentStandings): CareerSeason[] {
-  const entry = (season: string, standings: StandingRow[], isCurrent: boolean): CareerSeason | null => {
+  const entry = (season: string, standings: StandingRow[], isCurrent: boolean, departures?: SeasonDeparture[]): CareerSeason | null => {
     const i = standings.findIndex((s) => same(s.handle, handle));
     if (i === -1) return null;
     const ranks = sharedRanks(standings);
     const started = seasonStarted(standings);
     const s = standings[i];
+    const replacing = replacedIn(departures, handle);
     return {
+      ...(replacing ? { replacing } : {}),
       season,
       place: started ? ranks[i] : null,
       tied: started && ranks.filter((r) => r === ranks[i]).length > 1,
@@ -128,9 +134,9 @@ export function careerOf(handle: string, seasons: SeasonArchive[], current?: Cur
       current: isCurrent,
     };
   };
-  const archived = [...oldestFirst(seasons)].reverse().map((s) => entry(s.season, s.standings, false));
+  const archived = [...oldestFirst(seasons)].reverse().map((s) => entry(s.season, s.standings, false, s.departures));
   const live =
-    current && !seasons.some((s) => s.id === seasonId(current.season)) ? entry(current.season, current.standings, true) : null;
+    current && !seasons.some((s) => s.id === seasonId(current.season)) ? entry(current.season, current.standings, true, current.departures) : null;
   return [live, ...archived].filter((c): c is CareerSeason => c !== null);
 }
 
