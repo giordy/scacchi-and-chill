@@ -1,11 +1,9 @@
 import React, { useState } from "react";
-import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding } from "./types";
+import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding, SeasonArchive } from "./types";
 import { WhatsAppPreview } from "./WhatsAppPreview";
-import { fetchUsers } from "./lib/lichess";
-import { userKey } from "./lib/presence";
 import { fullMovesOf, isVoid, stateOf } from "./lib/games";
 import { computeStandings, sharedRanks } from "./lib/standings";
-import type { LichessUserProfile } from "./types";
+import { currentSeason, isNewcomer, ratingOf, tournamentElo } from "./lib/tournamentElo";
 import type { OrganizerStore } from "./hooks/useOrganizerData";
 
 interface ReviewsTabProps {
@@ -16,81 +14,29 @@ interface ReviewsTabProps {
   nameOf: (handle: string) => string;
   triggerToast?: (msg: string) => void;
   organizer: OrganizerStore;
+  seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo
 }
 
 export type ReviewMoment = "andata" | "volata" | "finale";
 
-export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, organizer }: ReviewsTabProps) {
+export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, organizer, seasons = [] }: ReviewsTabProps) {
   // null: the moment detected from the games, until the organizer picks one
   const [pickedType, setReviewType] = useState<ReviewMoment | null>(null);
   const tournamentTitle = config.tournament?.title || "Scacchi & Chill";
   const [generalNotes, setGeneralNotes] = useState("");
   
-  // Anecdotes and ratings live in the private Firestore document (see useOrganizerData)
-  const { anecdotes, ratings, setAnecdote, setRatings } = organizer;
+  // Anecdotes live in the private Firestore document (see useOrganizerData); the ratings are the
+  // Elo del torneo, computed from the games (the Lichess ones are no longer downloaded)
+  const { anecdotes, setAnecdote } = organizer;
+  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, gameStates);
+  const eloSeason = currentSeason(elo);
 
   const [generatedReview, setGeneratedReview] = useState("");
-  const [isFetchingElo, setIsFetchingElo] = useState(false);
   const [notice, setNotice] = useState<NoticeState | null>(null);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [copiedReview, setCopiedReview] = useState(false);
   const [showAnecdotes, setShowAnecdotes] = useState(false);
 
-  // Fetch correspondence Elo for all players from Lichess, in one call (CORS enabled)
-  const fetchAllRatings = async () => {
-    setIsFetchingElo(true);
-    setNotice(null);
-    const updated: Record<string, string | number | null> = { ...ratings };
-    let successCount = 0;
-
-    // One call for all the players instead of one each
-    let profiles: Record<string, LichessUserProfile> = {};
-    try {
-      const users = await fetchUsers(config.players.map((p) => p.handle));
-      profiles = Object.fromEntries(users.map((u) => [userKey(u), u as LichessUserProfile]));
-    } catch (err) {
-      console.warn("Errore recupero Elo da Lichess:", err);
-    }
-
-    for (const player of config.players) {
-      const data = profiles[player.handle.toLowerCase()];
-      if (!data) continue;
-      const perfs = data.perfs || {};
-      const corr = perfs.correspondence;
-      const rap = perfs.rapid;
-      const clas = perfs.classical;
-
-      if (corr && typeof corr.rating === "number") {
-        const provSuffix = corr.prov ? "?" : "";
-        updated[player.handle] = `${corr.rating}${provSuffix}`;
-        successCount++;
-      } else if (rap && typeof rap.rating === "number" && (rap.games ?? 0) > 0) {
-        const provSuffix = rap.prov ? "?" : "";
-        updated[player.handle] = `${rap.rating}${provSuffix} [rapid]`;
-        successCount++;
-      } else if (clas && typeof clas.rating === "number" && (clas.games ?? 0) > 0) {
-        const provSuffix = clas.prov ? "?" : "";
-        updated[player.handle] = `${clas.rating}${provSuffix} [classical]`;
-        successCount++;
-      } else {
-        updated[player.handle] = null;
-      }
-    }
-
-    setRatings(updated);
-    setIsFetchingElo(false);
-    if (successCount > 0) {
-      setNotice({
-        kind: "ok",
-        text: `Elo Lichess aggiornato per ${successCount} su ${config.players.length} giocatori.`,
-      });
-    } else {
-      setNotice({
-        kind: "warning",
-        text: "Nessun dato Elo recuperato da Lichess. Verifica la connessione a internet.",
-      });
-    }
-  };
 
   // Calculate Standings & Game Summary
   const calculateStandings = (): {
@@ -147,7 +93,7 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
       drawn: p.drawn,
       lost: p.lost,
       points: p.points,
-      rating: ratings[p.handle],
+      rating: ratingOf(elo, p.handle) ?? null,
       anecdote: anecdotes[p.handle] || "",
     }));
 
@@ -156,8 +102,6 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
 
   const { standings, ranks, finishedMatches, ongoingMatches } = calculateStandings();
 
-  // Count players with loaded rating
-  const ratedCount = standings.filter((s) => s.rating).length;
 
   // Recommended moment based on match numbers
   const getRecommendedMoment = (): ReviewMoment => {
@@ -181,7 +125,7 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
       `- Ironia leggera e affettuosa, frasi asciutte. Niente superlativi in serie, niente parole come "epico", "leggenda", "eroe", "impresa storica".`,
       `- Ogni giocatore, dal primo all'ultimo, deve potersi rileggere volentieri. Racconta cosa è successo sulla scacchiera, non giudicare le persone.`,
       `- Parla dei risultati per quello che sono (una patta combattuta, una partita lunga, una vittoria netta, una rimonta). Non dividere i giocatori in forti e deboli e non usare la retorica dello sfavorito.`,
-      `- L'Elo qui sotto è solo contesto per te: non citarlo e non fare confronti di Elo nel testo.`,
+      `- L'Elo qui sotto è l'Elo del torneo, calcolato solo dalle partite del torneo (per un esordiente, alla prima stagione, dice ancora poco): è solo contesto per te, non citarlo e non fare confronti di Elo nel testo.`,
       `- Gli aneddoti personali vanno usati solo se scritti nelle note, al massimo uno per giocatore e solo se si inserisce in modo naturale.`,
       `- Poche emoji, e mai numeri in stile voto.`,
       ``,
@@ -226,7 +170,7 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
 
     add(``, `CLASSIFICA (ordine ufficiale del sito, spareggio Sonneborn-Berger; stesso numero = pari merito)`);
     standings.forEach((st, idx) => {
-      const elo = st.rating ? `Elo ~${st.rating}` : `Elo n/d`;
+      const elo = st.rating ? `Elo del torneo ${st.rating}${isNewcomer(eloSeason, st.handle) ? ", esordiente" : ""}` : `Elo n/d`;
       const note = st.anecdote ? ` | Nota: "${st.anecdote}"` : "";
       add(`${ranks[idx]}. ${st.name} (@${st.handle}) – ${st.points} punti: ${st.won} vinte, ${st.drawn} patte, ${st.lost} perse su ${st.played} giocate [${elo}]${note}`);
     });
@@ -294,7 +238,7 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
         </div>
       )}
 
-      {/* What the prompt is built from: the games saved by the sync at the top of the area, and the Elo */}
+      {/* What the prompt is built from: the games saved by the sync at the top of the area */}
       <div className="stat-pills">
         <div className="stat-pill">
           <span className="stat-pill-label">Partite</span>
@@ -302,18 +246,8 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
             {history.length} <small className="muted-normal">({finishedMatches.length} finite, {ongoingMatches.length} in corso)</small>
           </span>
         </div>
-        <div className="stat-pill">
-          <span className="stat-pill-label">Elo Lichess</span>
-          <span className="stat-pill-val">
-            {ratedCount} / {config.players.length} <small className="muted-normal">giocatori</small>
-          </span>
-        </div>
       </div>
-      <div className="space-row mt-8 mb-14">
-        <button type="button" className="secondary btn-compact xs" disabled={isFetchingElo} onClick={fetchAllRatings}>
-          {isFetchingElo ? "Recupero Elo in corso..." : "♟️ Scarica Elo da Lichess"}
-        </button>
-      </div>
+      <p className="note note-13 mt-8 mb-14">L'Elo dei giocatori nel prompt è l'Elo del torneo, calcolato dalle partite: non serve scaricarlo da Lichess.</p>
 
       {/* MOMENTO DEL TORNEO (3 PULSANTI CHIAVE) */}
       <div className="mb-14">
@@ -387,7 +321,7 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
                     {p.name} <span className="muted-normal">({p.handle})</span>
                   </strong>
                   <span className="rating-badge">
-                    {p.rating ? `Elo ~${p.rating}` : "Elo n/d"} · {p.points} pt
+                    {p.rating ? `Elo ${p.rating}` : "Elo n/d"} · {p.points} pt
                   </span>
                 </div>
                 <input

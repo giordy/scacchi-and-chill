@@ -75,7 +75,7 @@ export function WhatsAppTab({
   return (
     <div className="settings-stack">
       <CollapsibleSection title="✨ Il racconto della stagione" defaultOpen>
-        <ReviewsTab history={history} gameStates={gameStates} config={config} nameOf={nameOf} triggerToast={triggerToast} organizer={organizer} />
+        <ReviewsTab history={history} gameStates={gameStates} config={config} nameOf={nameOf} triggerToast={triggerToast} organizer={organizer} seasons={seasons} />
       </CollapsibleSection>
 
       <CollapsibleSection title="🏆 Premi della stagione">

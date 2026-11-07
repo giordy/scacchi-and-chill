@@ -99,7 +99,9 @@ describe('admin layout', () => {
     expect(html).not.toContain('classifica calcolata');
     expect(html).not.toContain('Sincronizza Partite');
     expect(html).not.toContain('Scarica JSON');
-    expect(html).toContain('Scarica Elo da Lichess');
+    // The Elo is the Elo del torneo: nothing to download from Lichess
+    expect(html).not.toContain('Scarica Elo da Lichess');
+    expect(html).toContain('Elo del torneo');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
