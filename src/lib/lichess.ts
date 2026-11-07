@@ -51,8 +51,16 @@ export async function createChallenge(
   return url;
 }
 
+// Lichess exports up to 300 games per call
+const MAX_GAMES = 300;
+
 export async function fetchGameStates(ids: string[]): Promise<Record<string, LichessExportGame>> {
   if (ids.length === 0) return {};
+  if (ids.length > MAX_GAMES) {
+    const states: Record<string, LichessExportGame> = {};
+    for (let i = 0; i < ids.length; i += MAX_GAMES) Object.assign(states, await fetchGameStates(ids.slice(i, i + MAX_GAMES)));
+    return states;
+  }
   const res = await fetch("https://lichess.org/api/games/export/_ids?pgnInJson=false&lastFen=true&opening=true&division=true", {
     method: "POST",
     headers: { "Content-Type": "text/plain", Accept: "application/x-ndjson" },

@@ -174,6 +174,7 @@ export interface LichessExportGame {
   moves?: string;
   lastFen?: string;
   daysPerTurn?: number;
+  speed?: string; // "correspondence", "blitz"...
   lastMoveAt?: number;
   createdAt?: number;
   opening?: {
