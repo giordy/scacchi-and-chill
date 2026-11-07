@@ -94,13 +94,14 @@ export function PillsburyRace({
               <tbody>
                 {race.rows.map((r, i) => row(r.handle, String(i + 1), <Progress trend={r.trend} over={r.over} />))}
                 {race.waiting.map((h) => row(h, '–', <InfoTip className="cell-tip" text="Nessuna partita che conta, finora"><span aria-hidden="true">⏳</span><span className="sr-only">In attesa</span></InfoTip>))}
-                {race.newcomers.map((h) => row(h, '', <span className="newcomer-label">Esordiente</span>, 'is-newcomer'))}
               </tbody>
             </table>
           </div>
           {race.rows.length === 0 && <p className="note note-top-xs">La corsa parte con le prime partite concluse.</p>}
           {race.newcomers.length > 0 && (
-            <p className="note note-top-xs">Gli esordienti entrano in corsa dalla prossima stagione.</p>
+            <p className="note note-top-xs">
+              {namesList(race.newcomers.map(nameOf))} {race.newcomers.length === 1 ? "è esordiente: entra" : "sono esordienti: entrano"} in corsa dalla prossima stagione.
+            </p>
           )}
         </>
       )}
