@@ -55,7 +55,6 @@ const TABS: { key: PublicTab; label: string }[] = [
 const namesList = (names: string[]) =>
   names.length > 1 ? `${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}` : names[0] ?? "";
 const ALBO_HREF = publicViewHref("hall");
-const PILLSBURY_HREF = publicViewHref("pillsbury");
 
 export function PublicTournamentView({
   config,
@@ -325,10 +324,10 @@ export function PublicTournamentView({
                           )}
                           {pillsburyHolder?.handles.includes(p.handle.toLowerCase()) && (
                             <a
-                              href={PILLSBURY_HREF}
+                              href={ALBO_HREF}
                               className="champion-badge"
                               title={`Premio Pillsbury in carica · ${pillsburyHolder.season}`}
-                              aria-label={`Premio Pillsbury in carica, ${pillsburyHolder.season}: vai alla corsa al premio`}
+                              aria-label={`Premio Pillsbury in carica, ${pillsburyHolder.season}: vai all'Albo d'Oro`}
                             >
                               {PILLSBURY_EMOJI}
                             </a>
