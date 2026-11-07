@@ -284,13 +284,13 @@ export function allTimeRecords(list: SeasonGames[], nameOf: (handle: string) => 
     .reduce<(typeof board)[number] | null>((best, x) => (!best || x.g.plies! < best.g.plies! ? x : best), null);
   if (quickest) {
     const winner = quickest.g.result === '1-0' ? quickest.g.white : quickest.g.black;
-    const loser = winner === quickest.g.white ? quickest.g.black : quickest.g.white;
+    // Only the winner is named: a quick defeat is nothing to put on show
     records.push({
       id: 'quickest',
       emoji: '⚡',
       title: 'La vittoria più rapida',
-      detail: `${nameOf(winner)} su ${nameOf(loser)} in ${moves(quickest.g.plies!)} mosse`,
-      players: [winner, loser],
+      detail: `${nameOf(winner)}, in ${moves(quickest.g.plies!)} mosse`,
+      players: [winner],
       season: quickest.season,
       url: gameUrl(quickest.g),
     });

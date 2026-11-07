@@ -200,7 +200,8 @@ describe('allTimeRecords', () => {
     expect(records[1].detail).toBe('5 partite senza perdere di Anna');
     expect(records[2]).toMatchObject({ detail: '60 mosse, Anna – Carla (1-0)', url: 'https://lichess.org/long0001' });
     // A win on time is not a quick win
-    expect(records[3].detail).toBe('Anna su Bruno in 11 mosse');
+    expect(records[3].detail).toBe('Anna, in 11 mosse'); // the loser is not named
+    expect(records[3].players).toEqual(['anna']);
     expect(records[4].detail).toBe('Carla batte Bruno, che aveva 300 punti Elo in più');
   });
 
