@@ -3,7 +3,7 @@
 // after Harry Nelson Pillsbury, who in 1895, aged 22 and almost unknown, won Hastings ahead of
 // Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out.
 import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types';
-import { boardCalendar, currentSeason, eloSeasonFromCurrent, EloReport, Forecast, seasonForecast } from './tournamentElo';
+import { boardCalendar, currentSeason, CURRENT, EloGame, eloSeasonFromCurrent, EloReport, expectedScore, Forecast, gameKey, seasonForecast } from './tournamentElo';
 
 export const PILLSBURY_ID = 'pillsbury';
 export const PILLSBURY_EMOJI = '🌱';
@@ -30,6 +30,7 @@ export interface PillsburyRace {
   rows: PillsburyRow[]; // who is in the race and has played a game that counts, best first
   waiting: string[]; // in the race, no game that counts yet
   newcomers: string[]; // esordienti: out of the race this season
+  form: Record<string, Form | undefined>; // everyone's forma, esordienti included
 }
 
 // The race of the current season, in the order of the players list for the ties and the waiting
@@ -60,7 +61,8 @@ export function pillsburyRace(
     rows.push({ handle: p.handle, forecast: f, over: f.points - f.expectedSoFar, trend: trendOf(f) });
   });
   rows.sort((a, b) => b.over - a.over);
-  return { rows, waiting, newcomers };
+  const form = Object.fromEntries(players.map((p) => [p.handle, formOf(p.handle, report, finished)]));
+  return { rows, waiting, newcomers, form };
 }
 
 // Who won the Premio Pillsbury of the latest archived season that gave it
@@ -79,4 +81,31 @@ export function pillsburyWins(handle: string, seasons: SeasonArchive[]): string[
     .sort((a, b) => a.archivedAt.localeCompare(b.archivedAt))
     .filter((s) => s.awards?.some((a) => a.id === PILLSBURY_ID && a.winners.some((w) => w.handle.toLowerCase() === handle.toLowerCase())))
     .map((s) => s.season);
+}
+
+// Forma: how a player is doing right now, from their last 3 finished games of the season against
+// anyone (esordienti included): the points beyond those expected from the Elo del torneo the two
+// had when each game started. A light weather scale, the bad weather passes. None with fewer than 2.
+export type Form = 'fire' | 'sun' | 'cloud' | 'rain';
+export const FORM_GAMES = 3;
+export const FORM_MARK: Record<Form, string> = { fire: '🔥', sun: '☀️', cloud: '⛅', rain: '🌧️' };
+export const FORM_LABEL: Record<Form, string> = { fire: 'in fiamme', sun: 'in forma', cloud: 'tranquillo', rain: 'periodo no' };
+
+export function formOf(handle: string, report: EloReport, finished: EloGame[]): Form | undefined {
+  const me = handle.toLowerCase();
+  const mine = finished
+    .filter((g) => g.white.toLowerCase() === me || g.black.toLowerCase() === me)
+    .sort((a, b) => (a.end ?? 0) - (b.end ?? 0))
+    .slice(-FORM_GAMES);
+  if (mine.length < 2) return undefined;
+  let over = 0;
+  for (const g of mine) {
+    const r = report.before.get(gameKey(g, CURRENT));
+    if (!r) return undefined;
+    const white = g.white.toLowerCase() === me;
+    const expected = expectedScore(white ? r.white : r.black, white ? r.black : r.white);
+    const score = g.result === '½-½' ? 0.5 : (g.result === '1-0') === white ? 1 : 0;
+    over += score - expected;
+  }
+  return over >= 1 ? 'fire' : over >= 0.5 ? 'sun' : over > -1 ? 'cloud' : 'rain';
 }

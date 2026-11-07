@@ -1,7 +1,7 @@
 import React from 'react';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types';
 import { EloReport } from '../lib/tournamentElo';
-import { PILLSBURY_EMOJI, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
+import { FORM_GAMES, FORM_LABEL, FORM_MARK, PILLSBURY_EMOJI, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
 import { playerHref } from '../lib/routes';
 import { Trend, TrendKind } from './Trend';
 import { InfoTip } from './InfoTip';
@@ -48,6 +48,17 @@ export function PillsburyRace({
 }) {
   const race = pillsburyRace(players, elo, calendar, history, gameStates);
   const reigning = reigningPillsbury(seasons);
+  // Forma: the weather of the last games; a tap says what it means
+  const formCell = (handle: string) => {
+    const f = race.form[handle];
+    if (!f) return '';
+    return (
+      <InfoTip className="cell-tip" text={`Forma, sulle ultime ${FORM_GAMES} partite: ${FORM_LABEL[f]}`}>
+        <span aria-hidden="true">{FORM_MARK[f]}</span>
+        <span className="sr-only">Forma: {FORM_LABEL[f]}</span>
+      </InfoTip>
+    );
+  };
   // The Elo is left out: it is the level, and the race is about going beyond it
   const row = (handle: string, rank: string, status: React.ReactNode, className = '') => (
     <tr key={handle} className={className}>
@@ -59,6 +70,7 @@ export function PillsburyRace({
         </div>
       </td>
       <td className="col-center">{status}</td>
+      <td className="col-center col-form">{formCell(handle)}</td>
     </tr>
   );
   const firstSeason = seasons.length === 0;
@@ -76,11 +88,12 @@ export function PillsburyRace({
                   <th className="col-rank" scope="col"><span className="sr-only">Posizione</span></th>
                   <th className="sticky-col" scope="col">Giocatore</th>
                   <th className="col-center" scope="col">Andamento</th>
+                  <th className="col-center" scope="col">Forma</th>
                 </tr>
               </thead>
               <tbody>
                 {race.rows.map((r, i) => row(r.handle, String(i + 1), <Progress trend={r.trend} over={r.over} />))}
-                {race.waiting.map((h) => row(h, '–', <InfoTip className="wait-trigger" text="Nessuna partita che conta, finora"><span aria-hidden="true">⏳</span><span className="sr-only">In attesa</span></InfoTip>))}
+                {race.waiting.map((h) => row(h, '–', <InfoTip className="cell-tip" text="Nessuna partita che conta, finora"><span aria-hidden="true">⏳</span><span className="sr-only">In attesa</span></InfoTip>))}
                 {race.newcomers.map((h) => row(h, '', <span className="newcomer-label">Esordiente</span>, 'is-newcomer'))}
               </tbody>
             </table>
@@ -93,9 +106,13 @@ export function PillsburyRace({
       )}
       <div className="pillsbury-about">
         <p className="note note-top-xs">
-          Il <strong>{PILLSBURY_TITLE}</strong> {PILLSBURY_EMOJI} va a chi, a fine stagione, ha superato di più il proprio obiettivo: i punti previsti dall'Elo del torneo. ▲ sopra
+          Il <strong>{PILLSBURY_TITLE}</strong> {PILLSBURY_EMOJI} va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti (lo trovate nel vostro profilo). ▲ sopra
           l'obiettivo · = in linea · ▼ sotto · ⏳ in attesa della prima partita che conta.
           {reigning && <> Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).</>}
+        </p>
+        <p className="note note-top-xs">
+          <strong>Forma</strong>, sulle ultime {FORM_GAMES} partite (con chiunque, esordienti compresi): {FORM_MARK.fire} in fiamme · {FORM_MARK.sun} in forma ·{' '}
+          {FORM_MARK.cloud} tranquillo · {FORM_MARK.rain} periodo no.
         </p>
         <p className="note note-top-xs">
           <strong>Perché Pillsbury.</strong> {PILLSBURY_ORIGIN}

@@ -2510,17 +2510,17 @@ button.infotip-trigger.match-upset {
 .infotip:has(> .presence-trigger) {
   position: relative;
 }
-/* The ⏳ of a player still waiting in the Pillsbury race: same, opening leftwards (last column) */
-.infotip:has(> .wait-trigger) {
+/* The ⏳ and the forma of the Pillsbury table: same, opening leftwards (right columns) */
+.infotip:has(> .cell-tip) {
   position: relative;
 }
-.infotip:has(> .wait-trigger) .infotip-bubble {
+.infotip:has(> .cell-tip) .infotip-bubble {
   left: auto;
   right: -6px;
   width: max-content;
   max-width: min(220px, calc(100vw - 48px));
 }
-button.infotip-trigger.wait-trigger {
+button.infotip-trigger.cell-tip {
   padding: 0;
   border: 0;
   background: none;
@@ -2806,5 +2806,5 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 
 .pillsbury-table .trend { font-size: 1em; }
 /* Esordienti: listed, greyed out, out of the race for this season */
-.pillsbury-table tr.is-newcomer td { opacity: 0.55; }
+.pillsbury-table tr.is-newcomer td:not(.col-form) { opacity: 0.55; }
 .newcomer-label { font-size: 12px; color: var(--muted); }
