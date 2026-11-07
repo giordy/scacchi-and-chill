@@ -83,8 +83,9 @@ export function pillsburyWins(handle: string, seasons: SeasonArchive[]): string[
     .map((s) => s.season);
 }
 
-// Forma: how a player is doing right now, from their last 3 finished games of the season against
-// anyone (esordienti included): the points beyond those expected from the Elo del torneo the two
+// Forma: how a player is doing right now, from their last 3 finished games of the season that
+// count for the race (none with an esordiente): the points beyond those expected from the Elo del
+// torneo the two
 // had when each game started. As expected is all right (👍); a bad patch is a flat battery (🪫),
 // it recharges. None with fewer than 2.
 export type Form = 'fire' | 'strong' | 'calm' | 'rain';
@@ -95,8 +96,10 @@ export const FORM_LABEL: Record<Form, string> = { fire: 'molto sopra il previsto
 
 export function formOf(handle: string, report: EloReport, finished: EloGame[]): Form | undefined {
   const me = handle.toLowerCase();
+  // The games that count for the race: none with an esordiente, as for the objective
   const mine = finished
     .filter((g) => g.white.toLowerCase() === me || g.black.toLowerCase() === me)
+    .filter((g) => report.before.get(gameKey(g, CURRENT))?.newcomer === false)
     .sort((a, b) => (a.end ?? 0) - (b.end ?? 0))
     .slice(-FORM_GAMES);
   if (mine.length < 2) return undefined;

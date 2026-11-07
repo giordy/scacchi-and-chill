@@ -60,14 +60,14 @@ describe('the Pillsbury view', () => {
 });
 
 describe('forma', () => {
-  it('reads the last 3 games, esordienti included, against the Elo of each game', async () => {
+  it('reads the last 3 games that count (none with an esordiente), against the Elo of each game', async () => {
     const { formOf } = await import('../pillsbury');
     const { computeElo } = await import('../tournamentElo');
     const game = (white: string, black: string, result: '1-0' | '0-1' | '½-½', end: number) => ({ white, black, result, end, round: String(end), id: `g${end}` });
     const games = [
-      game('anna', 'bruno', '0-1', 1), // a loss, then three wins: on fire
+      game('anna', 'bruno', '1-0', 1), // three wins that count: on fire
       game('anna', 'carla', '1-0', 2),
-      game('nuova', 'anna', '0-1', 3), // against an esordiente: counts for the forma
+      game('nuova', 'anna', '1-0', 3), // a loss to an esordiente: left out
       game('anna', 'bruno', '1-0', 4),
       game('bruno', 'carla', '½-½', 5),
       game('carla', 'bruno', '½-½', 6),
