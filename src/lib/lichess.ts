@@ -117,9 +117,9 @@ export async function fetchUsers(handles: string[]): Promise<unknown[]> {
   return out;
 }
 
-// A player's Lichess rating history, every kind (see lib/seeds.ts). Any answer that is not a history
-// is an error that says what came back (status, the start of the body), never an empty history:
-// an empty one would silently leave the player an esordiente.
+// A player's Lichess rating history, every kind (see lib/seeds.ts). An empty list is a history: an
+// account without rated games has one (a regular of ours, at least). Any other answer that is not a
+// list is an error that says what came back (status, the start of the body).
 export async function fetchRatingHistory(handle: string): Promise<unknown> {
   const url = `https://lichess.org/api/user/${encodeURIComponent(handle)}/rating-history`;
   // A plain GET, as when the page is opened in a browser (which answers with the history)
@@ -133,6 +133,6 @@ export async function fetchRatingHistory(handle: string): Promise<unknown> {
   } catch {
     throw new Error(`storico di ${handle}: risposta non JSON (${start || "vuota"})`);
   }
-  if (!Array.isArray(data) || data.length === 0) throw new Error(`storico di ${handle}: risposta inattesa (${start || "vuota"})`);
+  if (!Array.isArray(data)) throw new Error(`storico di ${handle}: risposta inattesa (${start || "vuota"})`);
   return data;
 }
