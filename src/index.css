@@ -2522,7 +2522,7 @@ button.infotip-trigger.match-upset {
 .infotip:has(> .presence-trigger) {
   position: relative;
 }
-/* The ⏳ and the forma of the Pillsbury table: same, opening leftwards (right columns) */
+/* The ⏳ of the Pillsbury table: same, opening leftwards (right column) */
 .infotip:has(> .cell-tip) {
   position: relative;
 }

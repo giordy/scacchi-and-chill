@@ -1,7 +1,7 @@
 import React from 'react';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types';
 import { EloReport } from '../lib/tournamentElo';
-import { FORM_GAMES, FORM_LABEL, FORM_MARK, PILLSBURY_EMOJI, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
+import { PILLSBURY_EMOJI, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
 import { playerHref } from '../lib/routes';
 import { Trend, TrendKind } from './Trend';
 import { InfoTip } from './InfoTip';
@@ -48,17 +48,6 @@ export function PillsburyRace({
 }) {
   const race = pillsburyRace(players, elo, calendar, history, gameStates);
   const reigning = reigningPillsbury(seasons);
-  // Forma: how the last games went; a tap says what it means
-  const formCell = (handle: string) => {
-    const f = race.form[handle];
-    if (!f) return '';
-    return (
-      <InfoTip className="cell-tip" text={`Ultime ${FORM_GAMES} partite: ${FORM_LABEL[f]}`}>
-        <span aria-hidden="true">{FORM_MARK[f]}</span>
-        <span className="sr-only">Forma, ultime {FORM_GAMES} partite: {FORM_LABEL[f]}</span>
-      </InfoTip>
-    );
-  };
   // The Elo is left out: it is the level, and the race is about going beyond it
   const row = (handle: string, rank: string, status: React.ReactNode, className = '') => (
     <tr key={handle} className={className}>
@@ -78,7 +67,6 @@ export function PillsburyRace({
           </span>
         )}
       </td>
-      <td className="col-center col-form">{formCell(handle)}</td>
     </tr>
   );
   const firstSeason = seasons.length === 0;
@@ -100,7 +88,6 @@ export function PillsburyRace({
                   <th className="col-rank" scope="col"><span className="sr-only">Posizione</span></th>
                   <th className="sticky-col" scope="col">Giocatore</th>
                   <th className="col-center" scope="col">Stato</th>
-                  <th className="col-center" scope="col">Forma</th>
                 </tr>
               </thead>
               <tbody>

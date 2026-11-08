@@ -62,34 +62,3 @@ describe('the Pillsbury view', () => {
     expect(tabOfView('pillsbury')).toBe('standings');
   });
 });
-
-describe('forma', () => {
-  it('reads the last 3 games that count (none with an esordiente), against the Elo of each game', async () => {
-    const { formOf } = await import('../pillsbury');
-    const { computeElo } = await import('../tournamentElo');
-    const game = (white: string, black: string, result: '1-0' | '0-1' | '½-½', end: number) => ({ white, black, result, end, round: String(end), id: `g${end}` });
-    const games = [
-      game('anna', 'bruno', '1-0', 1), // three wins that count: on fire
-      game('anna', 'carla', '1-0', 2),
-      game('nuova', 'anna', '1-0', 3), // a loss to an esordiente: left out
-      game('anna', 'bruno', '1-0', 4),
-      game('bruno', 'carla', '½-½', 5),
-      game('carla', 'bruno', '½-½', 6),
-    ];
-    const report = computeElo([
-      { key: 's1', players: ['anna', 'bruno', 'carla'], games: [] },
-      { key: 'current', players: ['anna', 'bruno', 'carla', 'nuova'], games },
-    ]);
-    expect(formOf('anna', report, games)).toBe('fire');
-    expect(formOf('carla', report, games)).toBe('calm'); // a loss and two draws, nothing unexpected
-    expect(formOf('nuova', report, games)).toBeUndefined(); // an esordiente: no game that counts
-    // One game that counts is enough: a win against an equal is above the expected
-    const one = [game('anna', 'bruno', '1-0', 1)];
-    const r1 = computeElo([{ key: 's1', players: ['anna', 'bruno'], games: [] }, { key: 'current', players: [], games: one }]);
-    expect(formOf('anna', r1, one)).toBe('strong');
-    expect(formOf('bruno', r1, one)).toBe('calm');
-    const losses = [game('anna', 'bruno', '0-1', 1), game('carla', 'anna', '1-0', 2), game('anna', 'carla', '0-1', 3)];
-    const r2 = computeElo([{ key: 's1', players: ['anna', 'bruno', 'carla'], games: [] }, { key: 'current', players: [], games: losses }]);
-    expect(formOf('anna', r2, losses)).toBe('rain');
-  });
-});

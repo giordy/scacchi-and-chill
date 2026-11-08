@@ -3,7 +3,7 @@
 // after Harry Nelson Pillsbury, who in 1895, aged 22 and almost unknown, won Hastings ahead of
 // Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out.
 import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types';
-import { boardCalendar, currentSeason, CURRENT, EloGame, eloSeasonFromCurrent, EloReport, expectedScore, Forecast, gameKey, seasonForecast } from './tournamentElo';
+import { boardCalendar, currentSeason, eloSeasonFromCurrent, EloReport, Forecast, seasonForecast } from './tournamentElo';
 
 export const PILLSBURY_ID = 'pillsbury';
 export const PILLSBURY_EMOJI = '🌱';
@@ -35,7 +35,6 @@ export interface PillsburyRace {
   waiting: string[]; // in the race, no game that counts yet
   counted: Record<string, { played: number; games: number }>; // games that count: played, in all
   newcomers: string[]; // esordienti: out of the race this season
-  form: Record<string, Form | undefined>; // everyone's forma, esordienti included
 }
 
 // The race of the current season, in the order of the players list for the ties and the waiting
@@ -68,9 +67,8 @@ export function pillsburyRace(
     rows.push({ handle: p.handle, forecast: f, over: f.points - f.expectedSoFar, trend: trendOf(f) });
   });
   rows.sort((a, b) => b.over - a.over);
-  const form = Object.fromEntries(players.map((p) => [p.handle, formOf(p.handle, report, finished)]));
   const suspended = rows.length + waiting.length < PILLSBURY_MIN_PLAYERS;
-  return { suspended, rows, waiting, newcomers, form, counted };
+  return { suspended, rows, waiting, newcomers, counted };
 }
 
 // Who won the Premio Pillsbury of the latest archived season that gave it
@@ -89,36 +87,4 @@ export function pillsburyWins(handle: string, seasons: SeasonArchive[]): string[
     .sort((a, b) => a.archivedAt.localeCompare(b.archivedAt))
     .filter((s) => s.awards?.some((a) => a.id === PILLSBURY_ID && a.winners.some((w) => w.handle.toLowerCase() === handle.toLowerCase())))
     .map((s) => s.season);
-}
-
-// Forma: how a player is doing right now, from their last 3 finished games of the season that
-// count for the race (none with an esordiente): the points beyond those expected from the Elo del
-// torneo the two
-// had when each game started. As expected is all right (👍); a bad patch is a flat battery (🪫),
-// it recharges. From the first game that counts (then it is just how that game went).
-export type Form = 'fire' | 'strong' | 'calm' | 'rain';
-export const FORM_GAMES = 3;
-export const FORM_MARK: Record<Form, string> = { fire: '🔥', strong: '💪', calm: '👍', rain: '🪫' };
-// "previsto", not "obiettivo": the objective is the season's, the forma only the last games
-export const FORM_LABEL: Record<Form, string> = { fire: 'molto sopra il previsto', strong: 'sopra il previsto', calm: 'come previsto', rain: 'sotto il previsto' };
-
-export function formOf(handle: string, report: EloReport, finished: EloGame[]): Form | undefined {
-  const me = handle.toLowerCase();
-  // The games that count for the race: none with an esordiente, as for the objective
-  const mine = finished
-    .filter((g) => g.white.toLowerCase() === me || g.black.toLowerCase() === me)
-    .filter((g) => report.before.get(gameKey(g, CURRENT))?.newcomer === false)
-    .sort((a, b) => (a.end ?? 0) - (b.end ?? 0))
-    .slice(-FORM_GAMES);
-  if (mine.length === 0) return undefined;
-  let over = 0;
-  for (const g of mine) {
-    const r = report.before.get(gameKey(g, CURRENT));
-    if (!r) return undefined;
-    const white = g.white.toLowerCase() === me;
-    const expected = expectedScore(white ? r.white : r.black, white ? r.black : r.white);
-    const score = g.result === '½-½' ? 0.5 : (g.result === '1-0') === white ? 1 : 0;
-    over += score - expected;
-  }
-  return over >= 1 ? 'fire' : over >= 0.5 ? 'strong' : over > -1 ? 'calm' : 'rain';
 }
