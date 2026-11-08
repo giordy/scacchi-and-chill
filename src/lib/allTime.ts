@@ -8,6 +8,7 @@ import { fullPodium } from './honours';
 import { upsetFrom } from './upset';
 import { CURRENT, EloReport, gameKey } from './tournamentElo';
 import { replacedIn } from './departures';
+import { pillsburyWins } from './pillsbury';
 import { SeasonDeparture } from '../types';
 
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
@@ -160,6 +161,7 @@ export interface AllTimeRow {
   lost: number;
   points: number;
   titles: number;
+  pillsbury: number; // Trofei Pillsbury won, from the archived seasons (as on the player page)
 }
 
 // Totals over every season, archived and current: most points first, then the better average
@@ -169,7 +171,7 @@ export function allTimeTable(seasons: SeasonArchive[], winners: SeasonWinner[] |
     standings.forEach((s) => {
       if (s.played === 0) return;
       const key = s.handle.toLowerCase();
-      const row = rows.get(key) ?? { handle: s.handle, name: s.name, seasons: 0, played: 0, won: 0, drawn: 0, lost: 0, points: 0, titles: 0 };
+      const row = rows.get(key) ?? { handle: s.handle, name: s.name, seasons: 0, played: 0, won: 0, drawn: 0, lost: 0, points: 0, titles: 0, pillsbury: 0 };
       row.seasons++;
       row.played += s.played;
       row.won += s.won;
@@ -190,6 +192,7 @@ export function allTimeTable(seasons: SeasonArchive[], winners: SeasonWinner[] |
         if (row) row.titles++;
       })
   );
+  rows.forEach((row) => (row.pillsbury = pillsburyWins(row.handle, seasons).length));
   const avg = (r: AllTimeRow) => (r.played ? r.points / r.played : 0);
   return [...rows.values()].sort((a, b) => b.points - a.points || avg(b) - avg(a) || a.name.localeCompare(b.name));
 }

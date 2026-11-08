@@ -171,6 +171,12 @@ describe('allTimeTable', () => {
     expect(rows.find((r) => r.handle === 'carla')).toMatchObject({ points: 1, played: 3, seasons: 2 });
     expect(rows.find((r) => r.handle === 'dario')).toBeUndefined();
   });
+
+  it('counts the Trofei Pillsbury of the archived seasons', () => {
+    const award = (handle: string) => ({ id: 'pillsbury', emoji: '', title: '', description: '', winners: [{ handle, name: handle }], detail: '' });
+    const rows = allTimeTable([{ ...s2, awards: [award('Bruno')] }, { ...s1, awards: [award('bruno'), { ...award('anna'), id: 'fastest' }] }], undefined);
+    expect(rows.map((r) => [r.handle, r.pillsbury])).toEqual([['anna', 0], ['bruno', 2], ['carla', 0]]);
+  });
 });
 
 describe('allTimeRecords', () => {

@@ -3,6 +3,8 @@ import { AllTimeRow, allTimeRanks, GameRecord } from '../lib/allTime';
 import { playerHref } from '../lib/routes';
 import { useNameOf } from './Names';
 import { shortSeason } from '../lib/honours';
+import { PillsburyIcon } from './PillsburyIcon';
+import { PILLSBURY_TITLE } from '../lib/pillsbury';
 
 const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
@@ -10,6 +12,8 @@ const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 export function AllTimeSection({ rows, records, gamesSince, title }: { rows: AllTimeRow[]; records: GameRecord[]; gamesSince?: string; title?: string }) {
   const ranks = allTimeRanks(rows);
   const nameOf = useNameOf();
+  // The Trofeo Pillsbury column, once one has been given: empty for everyone before
+  const pillsbury = rows.some((r) => r.pillsbury > 0);
   return (
     <>
       {rows.length > 0 && (
@@ -30,6 +34,12 @@ export function AllTimeSection({ rows, records, gamesSince, title }: { rows: All
                   <th className="col-center">N</th>
                   <th className="col-center">P</th>
                   <th className="col-center" title="Titoli vinti">🏆</th>
+                  {pillsbury && (
+                    <th className="col-center" title={`${PILLSBURY_TITLE} vinti`}>
+                      <PillsburyIcon size="1.1em" />
+                      <span className="sr-only">{PILLSBURY_TITLE}</span>
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -47,6 +57,7 @@ export function AllTimeSection({ rows, records, gamesSince, title }: { rows: All
                     <td className="col-center">{r.drawn}</td>
                     <td className="col-center">{r.lost}</td>
                     <td className="col-center">{r.titles || ""}</td>
+                    {pillsbury && <td className="col-center">{r.pillsbury || ""}</td>}
                   </tr>
                 ))}
               </tbody>

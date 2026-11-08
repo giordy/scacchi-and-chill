@@ -197,6 +197,15 @@ describe('awards of a past season', () => {
   });
 });
 
+describe('the all-time table', () => {
+  it('has a Trofeo Pillsbury column once one has been given', () => {
+    const header = 'title="Trofeo Pillsbury vinti"';
+    expect(publicPage('#/albo')).not.toContain(header);
+    const award = { id: 'pillsbury', emoji: '', title: '', description: '', winners: [{ handle: 'bruno', name: 'Bruno' }], detail: '' };
+    expect(publicPage('#/albo', [{ ...season1, awards: [award] }])).toContain(header);
+  });
+});
+
 describe('the reigning Trofeo Pillsbury', () => {
   const won: SeasonArchive = {
     ...season1,
