@@ -23,7 +23,7 @@ Chiudere la stagione archivia classifica, premi e partite in forma compatta, agg
 - **Elo del torneo**: formula Elo (K = 32) sulle sole partite del torneo, nell'ordine in cui sono finite. A fine prima stagione l'Elo di un giocatore diventa la sua prestazione. Le partite decise a tavolino (forfeit, «cheat detected») contano per la classifica ma non per l'Elo.
 - **Elo di partenza** (prima stagione): l'Elo Lichess di 30 giorni prima della prima partita, del primo tipo affidabile tra corrispondenza, classical, rapid e blitz (almeno 10 giorni con partite, l'ultima entro un anno). Si porta sulla scala del torneo con la differenza media dei veterani (almeno 3) sullo stesso tipo, poi a metà strada verso la loro media, tra il più debole e il più forte. Si fissa da sé all'apertura dell'area organizzatore e si archivia con la stagione.
 - **Esordiente**: al primo anno senza Elo Lichess affidabile. Parte da 1500 e le partite con lui contano solo per la classifica. Chi torna dopo una pausa riparte dal suo Elo.
-- **Colpaccio**: vittoria contro chi aveva almeno 100 punti di Elo in più, o patta con almeno 200.
+- **Colpaccio**: vittoria contro chi aveva almeno 200 punti di Elo in più, o patta con almeno 400.
 - **Obiettivo**: i punti previsti dall'Elo a inizio stagione contro il calendario, fisso per la stagione.
 - **Trofeo Pillsbury**: a chi supera di più il proprio obiettivo, di almeno mezzo punto. Fuori dalla corsa esordienti e ritirati; sospeso con meno di 4 giocatori in corsa.
 - **Premi divertenti**: Re del matto e Il muro, con almeno 2 matti o 2 patte.

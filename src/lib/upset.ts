@@ -4,9 +4,9 @@ import { scoredResult } from './standings';
 
 // Colpaccio: a result against someone much stronger, by the Elo del torneo at the start of the
 // game (see lib/tournamentElo). A win counts from this many points of difference...
-export const UPSET_WIN_GAP = 100;
+export const UPSET_WIN_GAP = 200;
 // ...a draw, which is worth less, from this many
-export const UPSET_DRAW_GAP = 200;
+export const UPSET_DRAW_GAP = 400;
 
 export interface Upset {
   kind: 'win' | 'draw';

@@ -5,19 +5,19 @@ import { computeSeasonAwards } from '../awards';
 import { HistoryGame, LichessExportGame } from '../../types';
 
 describe('colpaccio', () => {
-  it('is a win against an opponent with at least 100 points more of Elo del torneo', () => {
-    expect(UPSET_WIN_GAP).toBe(100);
-    expect(upsetFrom('1-0', { white: 1400, black: 1520 })).toEqual({ kind: 'win', player: 'white', gap: 120 });
-    expect(upsetFrom('0-1', { white: 1600, black: 1500 })).toEqual({ kind: 'win', player: 'black', gap: 100 });
-    expect(upsetFrom('1-0', { white: 1400, black: 1499 })).toBeNull();
-    expect(upsetFrom('1-0', { white: 1600, black: 1400 })).toBeNull(); // the favourite won
+  it('is a win against an opponent with at least 200 points more of Elo del torneo', () => {
+    expect(UPSET_WIN_GAP).toBe(200);
+    expect(upsetFrom('1-0', { white: 1400, black: 1620 })).toEqual({ kind: 'win', player: 'white', gap: 220 });
+    expect(upsetFrom('0-1', { white: 1700, black: 1500 })).toEqual({ kind: 'win', player: 'black', gap: 200 });
+    expect(upsetFrom('1-0', { white: 1400, black: 1599 })).toBeNull();
+    expect(upsetFrom('1-0', { white: 1700, black: 1400 })).toBeNull(); // the favourite won
   });
 
-  it('is also a draw against an opponent with at least 200 points more', () => {
-    expect(UPSET_DRAW_GAP).toBe(200);
-    expect(upsetFrom('½-½', { white: 1700, black: 1480 })).toEqual({ kind: 'draw', player: 'black', gap: 220 });
-    expect(upsetFrom('½-½', { white: 1400, black: 1600 })).toEqual({ kind: 'draw', player: 'white', gap: 200 });
-    expect(upsetFrom('½-½', { white: 1400, black: 1550 })).toBeNull();
+  it('is also a draw against an opponent with at least 400 points more', () => {
+    expect(UPSET_DRAW_GAP).toBe(400);
+    expect(upsetFrom('½-½', { white: 1900, black: 1480 })).toEqual({ kind: 'draw', player: 'black', gap: 420 });
+    expect(upsetFrom('½-½', { white: 1400, black: 1800 })).toEqual({ kind: 'draw', player: 'white', gap: 400 });
+    expect(upsetFrom('½-½', { white: 1400, black: 1750 })).toBeNull();
   });
 
   it('needs a result and the ratings', () => {
@@ -35,7 +35,7 @@ describe('colpaccio', () => {
     const state: LichessExportGame = { id: 'last', status: 'resign', winner: 'white' };
     const u = upsetOf(state, report, { round: '6', white: 'bruno', black: 'anna', id: 'last' });
     expect(u).toMatchObject({ kind: 'win', player: 'white' });
-    expect(u!.gap).toBeGreaterThanOrEqual(100);
+    expect(u!.gap).toBeGreaterThanOrEqual(UPSET_WIN_GAP);
     expect(upsetOf({ ...state, status: 'forfeit' }, report, { round: '6', white: 'bruno', black: 'anna', id: 'last' })).toBeNull();
     expect(upsetSentence(u!, 'Bruno')).toBe("Bruno ha battuto un avversario molto più forte, secondo l'Elo del torneo");
     expect(upsetSentence({ kind: 'draw', player: 'white', gap: 250 }, 'Bruno')).toBe("Bruno ha pareggiato con un avversario molto più forte, secondo l'Elo del torneo");
@@ -74,14 +74,14 @@ describe('best colpaccio of a player', () => {
 
   it('is a win before any draw, then the largest gap, then the earliest', () => {
     const rep = report([
-      { season: 's1', game: game('anna', 'bruno', '½-½', '1'), ratings: { white: 1400, black: 1800 } }, // draw, 400
-      { season: 's1', game: game('carla', 'anna', '0-1', '2'), ratings: { white: 1550, black: 1400 } }, // win, 150
-      { season: CURRENT, game: game('anna', 'dario', '1-0', '3'), ratings: { white: 1450, black: 1600 } }, // win, 150: later
+      { season: 's1', game: game('anna', 'bruno', '½-½', '1'), ratings: { white: 1400, black: 1900 } }, // draw, 500
+      { season: 's1', game: game('carla', 'anna', '0-1', '2'), ratings: { white: 1650, black: 1400 } }, // win, 250
+      { season: CURRENT, game: game('anna', 'dario', '1-0', '3'), ratings: { white: 1450, black: 1700 } }, // win, 250: later
       { season: CURRENT, game: game('anna', 'bruno', '1-0', '4'), ratings: { white: 1700, black: 1500 } }, // the favourite won
     ]);
-    expect(bestUpset(rep, 'Anna')).toMatchObject({ season: 's1', opponent: 'carla', upset: { kind: 'win', gap: 150 } });
+    expect(bestUpset(rep, 'Anna')).toMatchObject({ season: 's1', opponent: 'carla', upset: { kind: 'win', gap: 250 } });
     // A draw when there is no win
-    expect(bestUpset(report([{ season: 's1', game: game('anna', 'bruno', '½-½', '1'), ratings: { white: 1400, black: 1800 } }]), 'anna')).toMatchObject({
+    expect(bestUpset(report([{ season: 's1', game: game('anna', 'bruno', '½-½', '1'), ratings: { white: 1400, black: 1900 } }]), 'anna')).toMatchObject({
       opponent: 'bruno',
       upset: { kind: 'draw' },
     });
