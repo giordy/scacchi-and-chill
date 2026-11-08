@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeSchedule, validateAndNormalizeConfig } from '../config';
+import { normalizeSchedule, validateAndNormalizeConfig, withTournamentDoc } from '../config';
 import raw from '../../../config.json';
 
 // A fresh copy of the real config.json to break in each test
@@ -97,5 +97,34 @@ describe('normalizeSchedule', () => {
         null,
       ])
     ).toEqual([{ round: '1', white: 'anna', black: 'bruno' }]);
+  });
+});
+
+describe('withTournamentDoc', () => {
+  const cfg = () => validateAndNormalizeConfig({ ...base(), players: [{ handle: 'anna', name: 'Anna' }] });
+
+  it('keeps the config as it is while the Firestore document does not exist', () => {
+    const c = cfg();
+    expect(withTournamentDoc(c, null)).toBe(c);
+  });
+
+  it('takes meta, players and schedule from the document', () => {
+    const next = withTournamentDoc(cfg(), {
+      title: 'Torneo',
+      season: 'Stagione 9',
+      players: [{ handle: 'bruno', name: 'Bruno' }],
+      schedule: [{ round: '1', white: 'bruno', black: 'carla' }] as never,
+    });
+    expect(next.tournament?.season).toBe('Stagione 9');
+    expect(next.players).toEqual([{ handle: 'bruno', name: 'Bruno' }]);
+    expect(next.schedule).toHaveLength(1);
+  });
+
+  it('keeps what the document does not have', () => {
+    const c = cfg();
+    const next = withTournamentDoc(c, { players: [] });
+    expect(next.tournament).toEqual(c.tournament); // no title and season: not a tournament meta
+    expect(next.players).toEqual([]);
+    expect(next.schedule).toEqual(c.schedule);
   });
 });

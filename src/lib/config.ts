@@ -3,6 +3,8 @@ import {
   ScheduledMatch,
   Settings,
 } from '../types';
+import { tournamentFromDoc } from './tournament';
+import type { TournamentDocData } from '../firebaseService';
 import rawConfig from '../../config.json';
 
 export const RULES = [
@@ -189,4 +191,15 @@ export function initialStoredSettings(): Partial<Settings> {
     }
   }
   return {};
+}
+
+// The Firestore tournament document over a config: what it has (meta, players, schedule) wins
+export function withTournamentDoc(cfg: AppConfig, doc: TournamentDocData | null): AppConfig {
+  if (!doc) return cfg;
+  const next = { ...cfg };
+  const meta = tournamentFromDoc(doc);
+  if (meta) next.tournament = meta;
+  if (Array.isArray(doc.players)) next.players = doc.players;
+  if (Array.isArray(doc.schedule)) next.schedule = normalizeSchedule(doc.schedule);
+  return next;
 }

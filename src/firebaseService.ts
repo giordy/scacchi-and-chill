@@ -8,7 +8,6 @@ import {
   getDoc,
   onSnapshot,
   writeBatch,
-  getDocFromServer,
 } from "firebase/firestore";
 import firebaseConfigRaw from "../firebase-applet-config.json";
 import {
@@ -46,19 +45,6 @@ export const db = getFirestore(
 
 // Default tournament ID for the tournament
 export const TOURNAMENT_DOC_ID = "scacchi-and-chill-official";
-
-// Test connection
-export async function testFirestoreConnection(): Promise<boolean> {
-  try {
-    await getDocFromServer(doc(db, "test", "connection"));
-    return true;
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("client is offline")) {
-      console.warn("Firestore client appears offline:", error.message);
-    }
-    return false;
-  }
-}
 
 export interface TournamentDocData {
   title?: string;
@@ -118,34 +104,18 @@ export async function saveTournamentFullToFirebase(data: {
   await setDoc(ref, payload, { merge: true });
 }
 
-// 2. Load complete tournament document
-export async function loadTournamentFullFromFirebase(): Promise<TournamentDocData | null> {
-  try {
-    const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      return snap.data() as TournamentDocData;
-    }
-  } catch (err) {
-    console.warn("Errore caricamento dati torneo da Firestore:", err);
-  }
-  return null;
-}
-
-// Subscribe to full tournament doc (meta, players, schedule)
+// Subscribe to full tournament doc (meta, players, schedule): null while it does not exist yet
 export function subscribeToTournamentDoc(
-  onUpdate: (doc: TournamentDocData) => void
+  onUpdate: (doc: TournamentDocData | null) => void,
+  onError?: (err: unknown) => void
 ): () => void {
   const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID);
   return onSnapshot(
     ref,
-    (snap) => {
-      if (snap.exists()) {
-        onUpdate(snap.data() as TournamentDocData);
-      }
-    },
+    (snap) => onUpdate(snap.exists() ? (snap.data() as TournamentDocData) : null),
     (err) => {
       console.warn("Sottoscrizione documento torneo fallita:", err);
+      onError?.(err);
     }
   );
 }
@@ -274,13 +244,6 @@ export async function loadAllMediaImages(): Promise<Record<string, string>> {
     if (typeof dataUrl === "string") out[d.id] = dataUrl;
   });
   return out;
-}
-
-// Backward-compat helpers
-export async function saveTournamentMetaToFirebase(
-  meta: TournamentMeta
-): Promise<void> {
-  return saveTournamentFullToFirebase({ meta });
 }
 
 // Predictable ID of a game document: r<round>_<white>_<black>

@@ -1,78 +1,61 @@
 import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame } from '../types';
 import { errorMessage } from '../lib/utils';
-import { normalizeSchedule, validateAndNormalizeConfig } from '../lib/config';
-import { DEFAULT_TOURNAMENT, tournamentFromDoc } from '../lib/tournament';
-import {
-  saveTournamentFullToFirebase,
-  loadTournamentFullFromFirebase,
-  subscribeToTournamentDoc,
-  subscribeToGames,
-  testFirestoreConnection,
-} from '../firebaseService';
+import { validateAndNormalizeConfig, withTournamentDoc } from '../lib/config';
+import { subscribeToTournamentDoc, subscribeToGames, TournamentDocData } from '../firebaseService';
 
 // Loads config.json and the Firestore data on boot, then keeps tournament and games in sync in real time.
 // Firestore is the only source of the games: every device, the organizer's included, mirrors it.
+// The tournament document is read once, by its real-time listener; nothing is written from here
+// (the organizer's saves create the document when it does not exist yet).
 export function useTournamentSync(
   setConfig: React.Dispatch<React.SetStateAction<AppConfig>>,
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>
 ) {
+  // True once config.json and the first answer for the tournament document have both arrived
   const [ready, setReady] = useState(false);
   // True after the first snapshot of the games collection
   const [gamesLoaded, setGamesLoaded] = useState(false);
 
   useEffect(() => {
-    testFirestoreConnection();
+    let cancelled = false;
+    let configDone = false;
+    let docDone = false;
+    // Latest tournament document, laid over config.json when that arrives after it
+    let latestDoc: TournamentDocData | null = null;
+    const checkReady = () => {
+      if (!cancelled && configDone && docDone) setReady(true);
+    };
 
     fetch("config.json", { cache: "no-cache" })
       .then((res) => {
         if (!res.ok) throw new Error(`config.json non trovato (HTTP ${res.status}).`);
         return res.json();
       })
-      .then(async (cfg) => {
-        const validated = validateAndNormalizeConfig(cfg);
-        // Check if Firestore already has full tournament data (meta, players, schedule)
-        const remoteTournament = await loadTournamentFullFromFirebase();
-        if (remoteTournament) {
-          const meta = tournamentFromDoc(remoteTournament);
-          if (meta) validated.tournament = meta;
-          if (Array.isArray(remoteTournament.players)) {
-            validated.players = remoteTournament.players;
-          }
-          if (Array.isArray(remoteTournament.schedule) && remoteTournament.schedule.length > 0) {
-            validated.schedule = normalizeSchedule(remoteTournament.schedule);
-          }
-        } else {
-          // If Firestore is empty on first boot, initialize it with the default config
-          saveTournamentFullToFirebase({
-            meta: DEFAULT_TOURNAMENT,
-            players: validated.players,
-            schedule: validated.schedule,
-          }).catch((e) => console.warn("Inizializzazione Firestore saltata:", e));
-        }
-        setConfig(validated);
-        setReady(true);
+      .then((cfg) => {
+        if (!cancelled) setConfig(withTournamentDoc(validateAndNormalizeConfig(cfg), latestDoc));
       })
       .catch((err) => {
         console.warn("Utilizzo configurazione incorporata di default:", errorMessage(err));
-        setReady(true);
+      })
+      .finally(() => {
+        configDone = true;
+        checkReady();
       });
 
     // Real-time listener for tournament doc changes (meta, players, schedule)
-    const unsubDoc = subscribeToTournamentDoc((doc) => {
-      setConfig((prev) => {
-        const next = { ...prev };
-        const meta = tournamentFromDoc(doc);
-        if (meta) next.tournament = meta;
-        if (Array.isArray(doc.players)) {
-          next.players = doc.players;
-        }
-        if (Array.isArray(doc.schedule)) {
-          next.schedule = normalizeSchedule(doc.schedule);
-        }
-        return next;
-      });
-    });
+    const unsubDoc = subscribeToTournamentDoc(
+      (doc) => {
+        latestDoc = doc;
+        setConfig((prev) => withTournamentDoc(prev, doc));
+        docDone = true;
+        checkReady();
+      },
+      () => {
+        docDone = true;
+        checkReady();
+      }
+    );
 
     // Real-time listener for Firestore games: updates games across all devices instantly
     const unsubGames = subscribeToGames((remoteGames) => {
@@ -81,6 +64,7 @@ export function useTournamentSync(
     });
 
     return () => {
+      cancelled = true;
       unsubDoc();
       unsubGames();
     };

@@ -25,7 +25,7 @@ import { FairPlayAlert } from './components/FairPlayAlert';
 import { AdminLogin } from './views/AdminLogin';
 import { AdminConsole, AdminTab, isAdminTab } from './views/AdminConsole';
 import { useNameOf } from './components/Names';
-import { saveTournamentMetaToFirebase, saveTournamentFullToFirebase } from './firebaseService';
+import { saveTournamentFullToFirebase } from './firebaseService';
 import { errorMessage } from './lib/utils';
 
 interface AdminAppProps {
@@ -76,7 +76,7 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
   const updateTournamentMeta = (patch: Partial<TournamentMeta>) => {
     const updatedMeta: TournamentMeta = mergeTournamentMeta(config.tournament, patch);
     setConfig((prev) => ({ ...prev, tournament: updatedMeta }));
-    saveTournamentMetaToFirebase(updatedMeta).catch(saveFailed('del torneo'));
+    saveTournamentFullToFirebase({ meta: updatedMeta }).catch(saveFailed('del torneo'));
   };
   const updatePlayers = (updatedPlayers: AppConfig['players']) => {
     setConfig((prev) => ({ ...prev, players: updatedPlayers }));
