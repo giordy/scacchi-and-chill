@@ -173,12 +173,12 @@ describe('games linked from the awards', () => {
 });
 
 describe('Premio Pillsbury', () => {
-  const players = ['anna', 'bruno', 'carla', 'dario'].map((h) => ({ handle: h, name: h[0].toUpperCase() + h.slice(1) }));
+  const players = ['anna', 'bruno', 'carla', 'elena', 'dario'].map((h) => ({ handle: h, name: h[0].toUpperCase() + h.slice(1) }));
   const row = (handle: string) => ({ handle, name: handle, played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 });
   // Last season Anna beat Carla twice: Anna starts ahead
   const past = {
     id: 'stagione-1', season: 'Stagione 1', title: 'T', archivedAt: '2026-01-01', gamesPlayed: 2,
-    standings: ['anna', 'bruno', 'carla'].map(row),
+    standings: ['anna', 'bruno', 'carla', 'elena'].map(row),
     games: [1, 2].map((n) => ({ round: String(n), white: 'anna', black: 'carla', result: '1-0' as const, end: n })),
   };
   const game = (id: string, white: string, black: string, winner: 'white' | 'black', end: number) => ({
@@ -201,6 +201,21 @@ describe('Premio Pillsbury', () => {
     expect(award!.detail).toBe('1 punto su 1 partita, obiettivo 0'); // her one game counted: the win over Anna
     // With no archived season everyone is an esordiente: no award yet
     expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'pillsbury')).toBe(false);
+  });
+
+  it('is suspended with fewer than 4 players in the race', async () => {
+    const { computeSeasonAwards } = await import('../awards');
+    const { pillsburyRace } = await import('../pillsbury');
+    const { tournamentElo } = await import('../tournamentElo');
+    const g1 = game('aaaaaaaa', 'carla', 'anna', 'white', 10);
+    const states = { aaaaaaaa: g1.s };
+    // Elena is not playing this season: Anna, Bruno and Carla are in the race, Dario is an esordiente
+    const three = players.filter((p) => p.handle !== 'elena');
+    expect(computeSeasonAwards(three, [g1.h], states, [past]).some((a) => a.id === 'pillsbury')).toBe(false);
+    const race = pillsburyRace(three, tournamentElo([past], three.map((p) => p.handle), [g1.h], states), [g1.h], [g1.h], states);
+    expect(race.suspended).toBe(true);
+    const four = pillsburyRace(players, tournamentElo([past], players.map((p) => p.handle), [g1.h], states), [g1.h], [g1.h], states);
+    expect(four.suspended).toBe(false);
   });
 });
 

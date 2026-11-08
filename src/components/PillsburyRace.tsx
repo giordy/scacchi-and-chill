@@ -1,7 +1,7 @@
 import React from 'react';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types';
 import { EloReport } from '../lib/tournamentElo';
-import { FORM_GAMES, FORM_LABEL, FORM_MARK, PILLSBURY_EMOJI, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
+import { FORM_GAMES, FORM_LABEL, FORM_MARK, PILLSBURY_EMOJI, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
 import { playerHref } from '../lib/routes';
 import { Trend, TrendKind } from './Trend';
 import { InfoTip } from './InfoTip';
@@ -87,6 +87,10 @@ export function PillsburyRace({
     <section aria-label={PILLSBURY_TITLE}>
       {firstSeason ? (
         <p className="note">Il premio parte dalla seconda stagione: nella prima sono tutti esordienti.</p>
+      ) : race.suspended ? (
+        <p className="note">
+          Quest'anno il {PILLSBURY_TITLE} è sospeso: servono almeno {PILLSBURY_MIN_PLAYERS} giocatori in corsa, e gli esordienti non lo sono.
+        </p>
       ) : (
         <>
           <div className="table-responsive">

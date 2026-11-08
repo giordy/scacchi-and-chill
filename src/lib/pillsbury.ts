@@ -26,7 +26,11 @@ export interface PillsburyRow {
   trend: Trend;
 }
 
+// With fewer players in the race (esordienti are not) the award says too little: suspended
+export const PILLSBURY_MIN_PLAYERS = 4;
+
 export interface PillsburyRace {
+  suspended: boolean; // fewer than PILLSBURY_MIN_PLAYERS in the race
   rows: PillsburyRow[]; // who is in the race and has played a game that counts, best first
   waiting: string[]; // in the race, no game that counts yet
   counted: Record<string, { played: number; games: number }>; // games that count: played, in all
@@ -65,7 +69,8 @@ export function pillsburyRace(
   });
   rows.sort((a, b) => b.over - a.over);
   const form = Object.fromEntries(players.map((p) => [p.handle, formOf(p.handle, report, finished)]));
-  return { rows, waiting, newcomers, form, counted };
+  const suspended = rows.length + waiting.length < PILLSBURY_MIN_PLAYERS;
+  return { suspended, rows, waiting, newcomers, form, counted };
 }
 
 // Who won the Premio Pillsbury of the latest archived season that gave it

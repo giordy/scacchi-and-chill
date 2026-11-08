@@ -55,7 +55,7 @@ export function computeSeasonAwards(
   // the light-hearted awards. One winner, unless two beat it by exactly the same.
   const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates), history, history, gameStates);
   const best = race.rows[0];
-  if (best && best.over > 0) {
+  if (!race.suspended && best && best.over > 0) {
     const top = race.rows.filter((r) => r.over === best.over);
     const f = best.forecast;
     awards.push({
