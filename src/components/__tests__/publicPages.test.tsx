@@ -140,6 +140,8 @@ describe('player page', () => {
     expect(html).toContain('Elo massimo');
     expect(html).toContain('Colpaccio migliore');
     expect(html).toContain('href="https://lichess.org/dddddddd"');
+    // In the Carriera, under its summary
+    expect(html.indexOf('Elo massimo')).toBeGreaterThan(html.indexOf('Carriera'));
     expect(playerPage('anna')).not.toContain('Colpaccio migliore');
     // In the first season no level is known yet
     const first = playerPage('anna', []);

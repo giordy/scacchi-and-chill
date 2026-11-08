@@ -98,8 +98,9 @@ function TrophyShelf({ medals, champion, title, pillsbury = [] }: { medals: Play
   );
 }
 
-// Two career highs, good news only: the highest Elo del torneo reached and the best colpaccio.
-// Nothing when there is neither (in a player's first season, or without any colpaccio).
+// Two career highs, good news only, under the summary of the Carriera: the highest Elo del torneo
+// reached and the best colpaccio. Nothing when there is neither (in a player's first season, or
+// without any colpaccio).
 function CareerHighs({ handle, elo, seasonName, nameOf, title }: {
   handle: string;
   elo: EloReport;
@@ -113,35 +114,36 @@ function CareerHighs({ handle, elo, seasonName, nameOf, title }: {
   const now = ratingOf(elo, handle);
   const season = (key: string) => shortSeason(seasonName(key), title);
   return (
-    <>
+    <ul className="career-highs">
       {peak && (
-        <div className="stat-pill">
-          <InfoTip className="stat-pill-label" text="Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione).">
+        <li>
+          <InfoTip className="career-high-label" text="Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione).">
             Elo massimo <span className="infotip-mark" aria-hidden="true">ⓘ</span>
-          </InfoTip>
-          <span className="stat-pill-val">{peak.rating}</span>
-          <span className="stat-pill-note">{peak.season === CURRENT && peak.rating === now ? "adesso" : season(peak.season)}</span>
-        </div>
+          </InfoTip>{" "}
+          <strong>{peak.rating}</strong> <span className="career-high-when">({peak.season === CURRENT && peak.rating === now ? "adesso" : season(peak.season)})</span>
+        </li>
       )}
       {upset && (
-        <div className="stat-pill">
-          <InfoTip className="stat-pill-label" text={`Il suo colpaccio più grosso: ${upsetSentence(upset.upset, nameOf(handle))}.`}>
+        <li>
+          <InfoTip className="career-high-label" text={`Il suo colpaccio più grosso: ${upsetSentence(upset.upset, nameOf(handle))}.`}>
             Colpaccio migliore <span className="infotip-mark" aria-hidden="true">ⓘ</span>
-          </InfoTip>
-          <span className="stat-pill-val">
+          </InfoTip>{" "}
+          <strong>
             {upset.upset.kind === "win" ? "vs " : "½ vs "}
             <a href={playerHref(upset.opponent)}>{nameOf(upset.opponent)}</a>
-          </span>
-          <span className="stat-pill-note">
+          </strong>{" "}
+          <span className="career-high-when">
+            (
             {upset.game.id ? (
               <a href={`https://lichess.org/${upset.game.id}`} target="_blank" rel="noopener noreferrer">{season(upset.season)}</a>
             ) : (
               season(upset.season)
             )}
+            )
           </span>
-        </div>
+        </li>
       )}
-    </>
+    </ul>
   );
 }
 
@@ -194,19 +196,21 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const archivedWithGames = withGames.filter((s) => !s.current);
   const since = archivedWithGames.length < seasons.length ? archivedWithGames[0]?.season : undefined;
   const longNameOf = allTimeNameOf(nameOf, seasons);
+  // Elo del torneo (see lib/tournamentElo), for the career highs and, in the season, the Elo badge
+  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, gameStates, config.tournament?.seeds);
+  const seasonName = (key: string) => (key === CURRENT ? currentSeason : seasons.find((x) => x.id === key)?.season ?? key);
+  const shownHandle = profile?.player.handle ?? pastName?.handle ?? handle;
+  // A player in their first season with a Lichess seed can already have a colpaccio: the Carriera
+  // is then shown for it, with only the season in progress
+  const hasHighs = !!peakOf(elo, shownHandle) || !!bestUpset(elo, shownHandle);
+  const highs = <CareerHighs handle={shownHandle} elo={elo} seasonName={seasonName} nameOf={longNameOf} title={config.tournament?.title} />;
   const acrossSeasons = (
     <>
-      {showCareer && <CareerSection career={career} />}
+      {(showCareer || hasHighs) && <CareerSection career={career} highs={highs} />}
       {pastGames && allTimeRows.length > 0 && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
     </>
   );
 
-  // Elo del torneo (see lib/tournamentElo), for the career highs and, in the season, the Elo badge
-  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, gameStates, config.tournament?.seeds);
-  const seasonName = (key: string) => (key === CURRENT ? currentSeason : seasons.find((x) => x.id === key)?.season ?? key);
-  const careerHighs = (h: string) => (
-    <CareerHighs handle={h} elo={elo} seasonName={seasonName} nameOf={longNameOf} title={config.tournament?.title} />
-  );
 
   useEffect(() => {
     const previous = document.title;
@@ -231,7 +235,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
             <TrophyShelf medals={medalsOf(pastName.handle, winners)} title={config.tournament?.title} pillsbury={pillsburyWins(pastName.handle, seasons)} />
           </div>
           <p className="note">Non partecipa alla stagione in corso.</p>
-          {(peakOf(elo, pastName.handle) || bestUpset(elo, pastName.handle)) && <div className="stat-pills">{careerHighs(pastName.handle)}</div>}
         </section>
         {acrossSeasons}
       </main>
@@ -342,14 +345,10 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
             <span className="stat-pill-label">V / N / P</span>
             <span className="stat-pill-val">{standing.won} / {standing.drawn} / {standing.lost}</span>
           </div>
-          {(["white", "black"] as const).map((c) => (
-            <div key={c} className="stat-pill">
-              <span className="stat-pill-label">{c === "white" ? "Col bianco" : "Col nero"}</span>
-              <span className="stat-pill-val">
-                {byColor[c].played > 0 ? `${fmt(byColor[c].points)} / ${byColor[c].played}` : "–"}
-              </span>
-            </div>
-          ))}
+        </div>
+        {/* The season beyond the standings: objective, colours, time per move */}
+        {((forecast && forecast.games > 0 && !pillsburySuspended) || byColor.white.played + byColor.black.played > 0 || pace) && (
+        <div className="stat-pills stat-pills-minor">
           {forecast && forecast.games > 0 && !pillsburySuspended && (
             <div className="stat-pill">
               <InfoTip className="stat-pill-label" text={"Punti previsti in base all'Elo, senza le partite con gli esordienti. Chi lo supera di più vince il Trofeo Pillsbury."}>
@@ -362,7 +361,19 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               <span className="stat-pill-note">su {countedOf} partite</span>
             </div>
           )}
-          {careerHighs(player.handle)}
+          {byColor.white.played + byColor.black.played > 0 && (
+            <div className="stat-pill">
+              <span className="stat-pill-label">Colori</span>
+              <span className="stat-pill-val stat-pill-colors">
+                {(["white", "black"] as const).map((c) => (
+                  <span key={c}>
+                    <span className={`dot ${c === "white" ? "w" : "b"}`} aria-label={c === "white" ? "Col bianco" : "Col nero"} />
+                    {byColor[c].played > 0 ? `${fmt(byColor[c].points)}/${byColor[c].played}` : "–"}
+                  </span>
+                ))}
+              </span>
+            </div>
+          )}
           {pace && (
             <div className="stat-pill">
               <span className="stat-pill-label">Tempo a mossa</span>
@@ -375,6 +386,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
             </div>
           )}
         </div>
+        )}
       </section>
 
       {pointsByRound.length > 0 && (

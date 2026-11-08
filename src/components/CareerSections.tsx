@@ -8,7 +8,8 @@ import { useNameOf } from './Names';
 const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
 // Player page: every season they played, newest first, with a short summary on top
-export function CareerSection({ career }: { career: CareerSeason[] }) {
+// highs: the career records under the summary (Elo massimo, colpaccio migliore), when there are any
+export function CareerSection({ career, highs }: { career: CareerSeason[]; highs?: React.ReactNode }) {
   const nameOf = useNameOf();
   const finished = career.filter((c) => !c.current && c.place !== null);
   const best = finished.length > 0 ? Math.min(...finished.map((c) => c.place!)) : null;
@@ -24,6 +25,7 @@ export function CareerSection({ career }: { career: CareerSeason[] }) {
     <section className="dossier-card">
       <h2 className="section-heading">Carriera</h2>
       <p className="note career-summary">{summary.join(" · ")}</p>
+      {highs}
       <ul className="career-list">
         {career.map((c) => {
           const medal = c.place !== null && !c.current ? podiumPlace(c.place, c.points) : undefined;
