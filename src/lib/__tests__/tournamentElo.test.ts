@@ -135,6 +135,27 @@ describe('Elo del torneo', () => {
     });
   });
 
+  it('leaves out the games decided at the table: forfeits and games closed for cheating', () => {
+    const history: HistoryGame[] = [
+      { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa' },
+      { round: '2', white: 'carla', black: 'anna', url: 'https://lichess.org/bbbbbbbb' },
+    ];
+    const states: Record<string, LichessExportGame> = {
+      aaaaaaaa: { id: 'aaaaaaaa', status: 'cheat', winner: 'white', lastMoveAt: 1 },
+      bbbbbbbb: { id: 'bbbbbbbb', status: 'resign', winner: 'white', lastMoveAt: 2 },
+    };
+    expect(eloSeasonFromCurrent(['anna', 'bruno', 'carla'], history, states).games.map((x) => x.round)).toEqual(['2']);
+    const archive = {
+      id: 's1', season: 's1', title: 'T', archivedAt: '2026-01-01', gamesPlayed: 2, standings: [],
+      games: [
+        { round: '1', white: 'anna', black: 'bruno', result: '1-0' as const, status: 'cheat' },
+        { round: '2', white: 'anna', black: 'carla', result: '1-0' as const, status: 'forfeit' },
+        { round: '3', white: 'bruno', black: 'carla', result: '0-1' as const, status: 'mate' },
+      ],
+    } as SeasonArchive;
+    expect(eloSeasonFromArchive(archive).games.map((x) => x.round)).toEqual(['3']);
+  });
+
   it('reads archived seasons in the order they were closed, forfeits left out, then the current one', () => {
     const archive = (id: string, archivedAt: string, games: SeasonArchive['games']): SeasonArchive => ({
       id, season: id, title: 'T', archivedAt, gamesPlayed: 0, games,

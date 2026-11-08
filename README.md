@@ -1,115 +1,57 @@
 # Scacchi & Chill
 
-Sito per organizzare un torneo di scacchi per corrispondenza tra amici: gli accoppiamenti si creano su Lichess, i risultati si sincronizzano su Firebase e tutti i partecipanti seguono classifica, calendario e storico delle stagioni da una pagina pubblica. Il sito è statico (React + Vite + Firebase) e viene servito da GitHub Pages.
+Sito di un torneo di scacchi per corrispondenza tra amici: sfide su Lichess, dati su Firebase, pagina pubblica statica (React + Vite) su GitHub Pages.
 
-## Cosa c'è
+## Parte pubblica
+- **Classifica** (punti, poi Sonneborn-Berger, poi vittorie; a pari su tutti e tre la posizione è condivisa), **Tabellone**, **Partite** per turno con mini scacchiera, **Pillsbury** (la corsa al trofeo).
+- **Stagione**: maestro, regolamento, numeri. **Albo**: Albo d'Oro, classifica di sempre, record.
+- **Pagina giocatore** (`#/giocatore/<handle>`): posizione, punti turno per turno, scontri diretti, carriera, Elo del torneo, obiettivo, trofei.
+- **Risultati live**: le partite non concluse si leggono da Lichess all'apertura e ogni 5 minuti a pagina visibile (al massimo due chiamate: partite e profili).
+- Su telefono si cambia sezione con uno swipe.
 
-### Parte pubblica
-- **Intestazione**: torneo, stagione, turno in corso e capolista. Una striscia di caselle mostra l'avanzamento della stagione: una casella per partita, piena se conclusa, a metà se in corso.
-- **Classifica** con punti, V/N/P e spareggio Sonneborn-Berger, podio in oro/argento/bronzo. L'ordine è punti, poi Sonneborn-Berger, poi vittorie; chi è pari su tutti e tre condivide la posizione (due 2° e poi un 4°, entrambi in argento) e l'intestazione li nomina insieme («In testa a pari merito…»). La stessa regola vale per la pagina giocatore («pari merito»), le stagioni passate, il CSV e il podio salvato nell'Albo. Prima della prima partita al posto della posizione c'è un trattino. La colonna del giocatore resta fissa durante lo scroll orizzontale su mobile.
-- **Partite**, filtrabili per turno, con link a Lichess; toccando il nome di un giocatore si apre il suo profilo. Le partite concluse mostrano la posizione finale su una mini scacchiera (quelle in corso no: Lichess nasconde le ultime mosse).
-- **Tabellone** incrociato con tutti i risultati.
-- **Stagione**: il maestro della stagione (con il periodo: «Da novembre 2026»), il regolamento e i numeri della stagione.
-- **Pagina giocatore** (`#/giocatore/<handle>`): ultimo accesso a Lichess, posizione, grafico dei punti turno per turno, scontri diretti con ogni avversario (risultati, punteggio e partite ancora da giocare, con turno e colore se sono in calendario), partite giocate. Si apre cliccando un nome in classifica. Dalla prima stagione archiviata ha anche la **carriera** (ogni stagione giocata con posizione, punti e V/N/P, e in cima stagioni, partite, punti totali e miglior piazzamento) e gli **scontri diretti di sempre** (V/N/P e punteggio contro ogni avversario mai incontrato, dalle stagioni archiviate con le partite più quella in corso). Funziona anche per chi non gioca più: basta che compaia in una classifica archiviata o nell'Albo.
-- **Albo**: l'**Albo d'Oro** è l'elenco delle stagioni, dalla più recente: per ognuna nome, periodo e podio su poche righe; quelle archiviate si aprono sulla classifica finale, i premi e l'eventuale nota sui ritiri (aperta solo l'ultima, così la pagina resta corta anche con molte stagioni). Sotto, la **classifica di sempre** (tutte le stagioni sommate, compresa quella in corso: punti, media punti a partita, stagioni, V/N/P, titoli) e i **record** (vittorie di fila, partite senza perdere, partita più lunga, vittoria più rapida, con il solo nome di chi ha vinto, colpaccio più grosso), che compaiono dopo la prima stagione archiviata.
-- **Risultati live**: la pagina pubblica legge da Lichess le partite non ancora concluse su Firestore (all'apertura, poi ogni 5 minuti finché resta aperta), così classifica e tabellone sono aggiornati anche senza sincronizzazione. Non scrive nulla: il salvataggio su Firestore resta la sincronizzazione dell'organizzatore.
-- **Swipe tra le sezioni** (telefono): scorrendo col dito in un punto qualsiasi della pagina (piè di pagina e spazio vuoto sotto le sezioni corte compresi) verso sinistra si passa alla sezione successiva (Classifica → Partite → Stagione → Albo), verso destra alla precedente, con una breve animazione; se la barra delle sezioni era già in cima allo schermo, la nuova sezione si apre dall'inizio. Lo swipe non scatta sulle tabelle che scorrono di lato (classifica e tabellone su telefono), vicino ai bordi dello schermo (lì c'è il «indietro» del browser), sui gesti lenti o diagonali, dentro la finestra di replay di una partita e oltre la prima o l'ultima sezione.
-- **Ultimo accesso a Lichess**: nelle partite in corso il cerchio bianco o nero di ogni giocatore porta un piccolo badge: verde se è passato da Lichess nell'ultima ora, giallo nelle ultime 24 ore, grigio oltre. Toccandolo si legge il tempo; nella pagina giocatore è scritto accanto a «@handle su Lichess». Il dato viene dal profilo Lichess (`seenAt`), non dalle partite, quindi il ritardo con cui Lichess mostra le ultime mosse non lo tocca; però non dice se il giocatore ha mosso nella partita del torneo. Se Lichess non risponde, il badge non compare.
-- **Chiamate a Lichess dalla pagina pubblica**: al massimo due ogni 5 minuti, e solo con la pagina in primo piano: una per le partite non concluse e una per i profili di tutti i giocatori (ultimo accesso e flair). Tornare sulla scheda del browser non ne fa partire altre se le ultime hanno meno di 5 minuti.
-- **Anteprima del link** (WhatsApp, Linktree): logo del torneo e nome della stagione (vedi sotto).
+## Area organizzatore (`#admin`)
+Login Google; organizzatore è chi ha un documento in `admins/<email>`. Ogni azione distruttiva chiede conferma. All'apertura sincronizza i risultati da Lichess su Firestore.
+- **Turni**: crea le sfide su Lichess, ricrea o sostituisce un link, prepara messaggio e bollettino per WhatsApp.
+- **WhatsApp**: prompt per il racconto della stagione, premi, testi dei messaggi.
+- **Giocatori**: registro (il nome vale anche per le stagioni passate), chi gioca la stagione, ritiri (regola della metà o sostituto).
+- **Stagioni**: stagione corrente e foto del maestro, regolamento, Elo di partenza, calendario (girone all'italiana), chiusura della stagione e Albo d'Oro.
+- **Impostazioni**: token Lichess (serve per le sfide e gli Elo di partenza), copia e ripristino dei dati.
 
-### Area organizzatore (`#admin`)
-Accesso con login Google, riservato a un solo account. Ogni azione che cancella o sostituisce qualcosa (partite, turni, giocatori, foto, testi modificati, token, ritiri, stagioni) chiede prima conferma.
-- **♞ Turni**: il lavoro di ogni turno, con i suoi messaggi.
-  - *Elenco dei turni*, pianificati e avviati, con lo stato (da avviare, link creati in parte, in corso, concluso); il turno su cui lavorare è evidenziato. *+ Nuovo turno* ne apre uno vuoto.
-  - *Dentro un turno*: aggiungi, togli o inverti i colori delle partite; **Crea link Lichess** crea le sfide che non hanno ancora un link e le salva nel torneo; **Messaggio con i link** e **Bollettino** preparano i testi WhatsApp da condividere o copiare (la scadenza dei link è calcolata da quando sono state create le sfide). Il bollettino scrive la scadenza una volta sola, sotto le partite, con l'elenco di quelle ancora da accettare, e chiude sempre con il link al sito; a fine turno, al posto del riepilogo, mette chi è in testa e la classifica dopo il turno (posizioni condivise come sul sito, 👑 accanto al campione in carica: solo lì, non sulle righe delle partite), poi gli studi sulle aperture giocate; *Elimina turno* lo cancella (anche da Firestore; su Lichess le sfide restano aperte).
-  - *Nuovo link* (🔁 accanto a una partita non ancora accettata; con il badge *Scaduta* se la sfida è scaduta, *Annullata* se Lichess l'ha annullata): **Ricrea la sfida su Lichess** ne crea una nuova con gli stessi colori (la vecchia, se ancora aperta, viene annullata), oppure si incolla il link di una partita creata dai due giocatori. Il sito controlla su Lichess che sia tra loro due (se l'hanno creata a colori invertiti usa quelli di Lichess, perché i risultati si leggono per colore) e la mette al posto della vecchia. Poi propone la riga da copiare nel gruppo con il nuovo link. Nel bollettino ogni sfida ha la sua scadenza: una ricreata non risulta scaduta.
-- **💬 WhatsApp**: quello che si scrive nel gruppo e non riguarda un solo turno (messaggio con i link e bollettino sono dentro il turno, in *Turni*).
-  - *Il racconto della stagione*: partite, aneddoti ed Elo del torneo dei giocatori (calcolato dalle partite, senza scaricare nulla da Lichess) per costruire il prompt da incollare in Claude o ChatGPT; il testo ottenuto si incolla poi nella scheda per l'anteprima WhatsApp. Usa i risultati portati dalla sincronizzazione in cima all'area, senza chiamate a Lichess in più; il momento (fine andata, volata, fine torneo) parte da quello rilevato dalle partite, segnato come «consigliato». Il prompt chiede un racconto sobrio e affettuoso: due o tre frasi per giocatore nell'ordine della classifica del sito, il simbolo di un pezzo accanto al nome, niente voti, l'Elo del torneo solo come contesto (mai citato) e gli aneddoti solo dalle note.
-  - *Premi della stagione*: i premi calcolati sulle partite concluse, con **Copia il messaggio per WhatsApp**.
-  - *Testi dei messaggi*: le frasi del messaggio con i link e del bollettino, modificabili.
-- **♟ Giocatori**:
-  - *Registro dei giocatori*: tutti quelli passati dal torneo, distinti dal nome utente Lichess. Il nome è quello mostrato sul sito ovunque, **anche nelle stagioni passate** (classifiche archiviate, Albo d'Oro, premi, record, carriere): si cambia direttamente nell'elenco e si salva uscendo dal campo. Due giocatori con lo stesso nome sono segnalati, per aggiungere un'iniziale. I giocatori sono divisi in *in questa stagione*, *nello storico* (hanno giocato stagioni passate: si rinominano ma non si eliminano) e *registrati senza partite* (gli unici che si possono eliminare). *Aggiungi alla stagione* / *Togli dalla stagione* decide chi gioca la stagione corrente; chi ha già partite (create o in calendario) si toglie solo con *Ritiri*. Un nuovo giocatore si registra con nome e nome utente Lichess, e se serve entra subito nella stagione.
-  - *Ritiri*: ritiro durante la stagione, con la regola della metà o con un sostituto.
-- **♛ Stagioni** (sezioni richiudibili): stagione corrente (con la foto del maestro: un link, oppure **📷 Carica foto**, che la riduce a 600 px e la salva su Firestore, senza toccare il codice), regolamento (giorni per mossa e rated, mostrati anche in pubblico, con accanto validità del link e regole della sfida su Lichess), **Elo di partenza** (chi gioca la prima stagione e da dove parte: il numero con l'Elo Lichess e la correzione usati, «esordiente» senza un Elo affidabile, con il motivo (per esempio «solo 2 veterani con l'Elo blitz affidabile»), «in attesa» prima della sua prima partita), **calendario** (girone all'italiana da zero, oppure *Completa i turni mancanti*, che tiene i turni già presenti e le partite già create e aggiunge solo quelle che mancano; aperto quando non ci sono ancora turni), fine stagione e storico con Albo d'Oro.
-- **⚙ Impostazioni**, da configurare una volta: token Lichess e copia dei dati in JSON.
-- **↻ Sincronizza risultati**: scarica gli esiti da Lichess e li salva su Firestore. Parte da sola ogni volta che l'organizzatore apre l'area admin, e si può rilanciare a mano. La vista pubblica mostra comunque i risultati letti da Lichess (vedi *Risultati live*); la sincronizzazione li salva su Firestore, dove restano per tutti e servono all'archivio della stagione.
+Chiudere la stagione archivia classifica, premi e partite in forma compatta, aggiorna l'Albo d'Oro e poi cancella le partite: se l'archiviazione fallisce non cancella nulla. Ogni notte il workflow `backup.yml` salva i dati pubblici sul branch `backups`.
 
-### Elo del torneo, colpacci e premi
-- **Elo del torneo**: un punteggio calcolato solo dalle partite del torneo, con la formula Elo classica (K = 32): si parte da 1500 (o dall'Elo Lichess, vedi sotto), le partite contano nell'ordine in cui sono finite, dalla prima stagione archiviata a quella in corso. Alla fine della prima stagione di un giocatore, il suo Elo diventa la sua **prestazione** in quella stagione (con una patta virtuale contro 1500, o contro il suo Elo di partenza da Lichess se ne ha uno: così chi gioca poche partite, come un sostituto, non viene spinto verso 1500): il valore per cui i punti previsti dalla formula Elo, su tutte le sue partite insieme, sono quelli che ha fatto (come la FIDE dà il primo Elo). Senza, 14 partite a una a una non bastano ad arrivare al livello di ognuno, e gli obiettivi sarebbero troppo facili per i forti e troppo difficili per gli altri. Dopo la prima stagione l'Elo di Lichess non conta più: per corrispondenza è provvisorio per quasi tutti e dipende anche dalle partite giocate fuori dal torneo. Si vede nella pagina giocatore, nell'angolo in alto a destra (la scritta «Elo», il numero e ▲ = ▼ rispetto a inizio stagione; toccandolo si apre la spiegazione).
-- **Prima stagione ed Elo di partenza**: chi gioca la sua prima stagione parte dal suo **Elo Lichess**, riportato sulla scala del torneo, e da subito conta come gli altri (obiettivo, Trofeo Pillsbury, colpacci). L'Elo è quello di 30 giorni prima della sua prima partita della stagione, dallo storico di Lichess (perdere apposta online poco prima non serve), del primo tipo affidabile tra corrispondenza, classical, rapid e blitz (il bullet no; per chi gioca online il blitz è spesso l'unico Elo ancora vivo): affidabile vuol dire almeno 10 giorni con partite valutate di quel tipo fino a quella data, l'ultima entro un anno. Per la scala si guardano i giocatori della stagione che non sono al primo anno: la differenza media tra il loro Elo del torneo a inizio stagione e il loro Elo Lichess dello stesso tipo, nello stesso giorno, si aggiunge a quello dell'esordiente (servono almeno 3 giocatori con quel tipo affidabile, altrimenti si passa al tipo dopo). Poi il numero si porta **a metà strada verso la media** dell'Elo del torneo di quei giocatori, e resta tra il più debole e il più forte: senza sapere altro un nuovo arrivato è nella media, e l'Elo Lichess dice solo una parte del livello per corrispondenza (nella Stagione 2 il blitz dei veterani era da 263 a 672 punti sotto il loro Elo del torneo). Provato sulla Stagione 2 contro il giudizio dell'organizzatore: Alessandro 1998 (Fabio 2022), Francesco Sal 1830 (Matteo 1721); senza la metà strada sarebbero stati 2333 e 1997. L'area organizzatore lo fissa da sola, una volta, appena esiste la prima partita del giocatore (chi resta senza Elo affidabile viene ricalcolato a ogni apertura, sempre alla stessa data: giocare online dopo non lo cambia; il motivo si legge in Stagioni, e un messaggio lo dice quando è nuovo o cambia), e lo salva nel torneo e poi nell'archivio della stagione; nella pagina giocatore, toccando l'Elo, si legge da dove viene.
-- **Esordiente**: chi è alla prima stagione senza un Elo Lichess affidabile. Parte da 1500 e le partite contro di lui contano solo per la classifica: non muovono l'Elo dell'avversario (solo il suo), non sono mai colpacci e non entrano nell'obiettivo né nel Trofeo Pillsbury, perché il suo livello non si conosce ancora. Un esordiente non ha obiettivo e non può vincere il trofeo. Chi torna dopo una stagione saltata non è esordiente: riparte dal punteggio che aveva. Nella prima stagione del torneo sono tutti esordienti, quindi lì tutti i punteggi si muovono e non ci sono colpacci.
-- **Sostituti**: nella classifica il sostituto prende le partite già giocate da chi si è ritirato; l'Elo del torneo invece guarda chi ha giocato davvero. Nella stagione in corso lo legge dagli account Lichess delle partite; chiudendo la stagione salva nel ritiro archiviato il turno da cui è entrato il sostituto (`fromRound`), così le partite prima di quel turno restano di chi si è ritirato. Per le stagioni archiviate senza i turni delle partite (la Stagione 1) si mette a mano, una volta, la data da cui sono del sostituto (`fromDate`, es. `"2026-03-20"`) nel ritiro dentro il documento della stagione su Firestore. Senza nessuna delle due, la stagione dopo il sostituto è di nuovo alla prima stagione (con un nuovo Elo di partenza da Lichess).
-- **Colpaccio** (💥 sulla scheda della partita, una riga nel bollettino): vittoria contro chi aveva almeno 100 punti di Elo del torneo in più all'inizio della partita, oppure patta contro chi ne aveva almeno 200. La differenza in punti non si mostra (dice poco a chi non conosce l'Elo); le frasi del bollettino possono comunque usare {gap}. Il record «Il colpaccio più grosso» conta solo le vittorie.
-- **Obiettivo** (pagina giocatore): i punti che ci si aspettava facesse nella stagione, calcolati (non scelti) dall'Elo del torneo a inizio stagione contro gli avversari del calendario e arrotondati al mezzo punto; resta fisso tutta la stagione. Sotto, su quante partite conta («su 10 delle 14 partite»); come sta andando lo dice la tabella Pillsbury.
-- **Trofeo Pillsbury** (una medaglia con un pedone, appesa a due nastri verdi; 🏅 nel messaggio WhatsApp): a fine stagione, a chi ha superato di più il proprio obiettivo (punti fatti meno punti previsti, sulle partite che contano). Prende il nome da Harry Nelson Pillsbury, che nel 1895, ventiduenne e quasi sconosciuto, vinse Hastings davanti ai più forti del mondo. Ha un riquadro suo, prima dei premi divertenti, sul sito, nell'Albo e nel messaggio WhatsApp; chi lo detiene ha la medaglia accanto al nome in classifica (come la corona del campione, porta all'Albo d'Oro) e il trofeo nella bacheca del profilo. La corsa al trofeo si segue in *Classifica → Pillsbury* (`#/pillsbury`): colonna «Stato», ordinata per rendimento: «▲ +1½» per chi è sopra l'obiettivo (il numero solo per le buone notizie), = in linea, ▼ sotto, ⏳ chi non ha ancora una partita che conta, e sotto «2 di 10», le partite che contano giocate su quelle in tutto; niente Elo, perché la corsa è andare oltre il proprio livello; gli esordienti non sono in tabella, li nomina la nota sotto, che dice anche che le partite con loro contano solo per la classifica; sotto la tabella cosa premia e perché si chiama così. Va solo a chi è sopra l'obiettivo di almeno mezzo punto (▲ nella tabella): se il primo è solo «in linea», quella stagione il trofeo non si assegna. Chi si ritira esce dalla corsa (anche se resta in classifica con le sconfitte a tavolino), e le partite decise a tavolino o annullate non entrano nell'obiettivo di nessuno. Con meno di 4 giocatori in corsa (gli esordienti non lo sono) è sospeso: non si assegna, la vista lo dice al posto della tabella e il profilo non mostra l'obiettivo. Ha preso il posto di «L'ammazzagiganti», che resta nelle stagioni già archiviate.
-- **Premi divertenti**: Re del matto (⚔️: la corona 👑 accanto a un nome è del campione in carica) e Il muro si assegnano solo con almeno 2 vittorie col matto o 2 patte, perché con pochi giocatori ogni premio in più toglie valore agli altri.
-
-### Stagioni
-Il periodo di ogni stagione (mese e anno di inizio e fine) si calcola dalle partite: dalla prima sfida creata all'ultima mossa dell'ultima partita conclusa. Chiudendo la stagione viene salvato nell'archivio e nell'Albo d'Oro; per le stagioni chiuse prima si aggiunge o si corregge a mano dall'Albo d'Oro (*Dal mese* / *Al mese*).
-
-Da *Stagioni → Fine stagione e storico*:
-- **Chiudi la stagione e inizia la prossima** salva la classifica finale nello storico pubblico, insieme alle partite con un risultato in forma compatta (giocatori, risultato, esito, numero di mosse, Elo, apertura, ID Lichess: niente mosse né posizioni), che servono a scontri diretti di sempre e record; mette il primo in classifica nell'Albo d'Oro, poi **cancella tutte le partite** della stagione, imposta il nuovo nome e maestro e, se vuoi, svuota il calendario. Prima della cancellazione chiede conferma e non cancella nulla se l'archiviazione fallisce.
-- Se la stagione era già nell'Albo d'Oro con un altro giocatore, la voce viene aggiornata con il campione effettivo.
-- **Scaricala come file (CSV)**, sotto il pulsante, scarica una copia della classifica di oggi da aprire con Excel o Numbers. Non tocca lo storico né l'Albo d'Oro.
+## Elo del torneo e Trofeo Pillsbury
+- **Elo del torneo**: formula Elo (K = 32) sulle sole partite del torneo, nell'ordine in cui sono finite. A fine prima stagione l'Elo di un giocatore diventa la sua prestazione. Le partite decise a tavolino (forfeit, «cheat detected») contano per la classifica ma non per l'Elo.
+- **Elo di partenza** (prima stagione): l'Elo Lichess di 30 giorni prima della prima partita, del primo tipo affidabile tra corrispondenza, classical, rapid e blitz (almeno 10 giorni con partite, l'ultima entro un anno). Si porta sulla scala del torneo con la differenza media dei veterani (almeno 3) sullo stesso tipo, poi a metà strada verso la loro media, tra il più debole e il più forte. Si fissa da sé all'apertura dell'area organizzatore e si archivia con la stagione.
+- **Esordiente**: al primo anno senza Elo Lichess affidabile. Parte da 1500 e le partite con lui contano solo per la classifica. Chi torna dopo una pausa riparte dal suo Elo.
+- **Colpaccio**: vittoria contro chi aveva almeno 100 punti di Elo in più, o patta con almeno 200.
+- **Obiettivo**: i punti previsti dall'Elo a inizio stagione contro il calendario, fisso per la stagione.
+- **Trofeo Pillsbury**: a chi supera di più il proprio obiettivo, di almeno mezzo punto. Fuori dalla corsa esordienti e ritirati; sospeso con meno di 4 giocatori in corsa.
+- **Premi divertenti**: Re del matto e Il muro, con almeno 2 matti o 2 patte.
 
 ## Configurazione Firebase
+1. **Authentication**: attiva Google e autorizza `<utente>.github.io` e `localhost`. Per l'app installata aggiungi in Google Cloud, nel client OAuth di `oAuthClientId`, l'origine `https://<utente>.github.io` e il redirect `https://<utente>.github.io/<repository>/`.
+2. **Firestore → Data**: crea `admins/<email dell'organizzatore>` (documento vuoto), prima delle regole.
+3. **Firestore → Rules**: pubblica [`firestore.rules`](firestore.rules) a ogni modifica.
+4. Limita la chiave web di `firebase-applet-config.json` ai referrer del sito e `localhost`.
 
-1. **Authentication → Sign-in method**: attiva Google.
-2. **Authentication → Settings → Authorized domains**: aggiungi il dominio di GitHub Pages (`<utente>.github.io`) e `localhost`.
-   **App installata (PWA)**: lì il popup di Google di Firebase non funziona (resta bianco, poi «missing initial state»), quindi l'app va direttamente da Google e torna sul sito con il token. Serve una volta: in Google Cloud, *APIs & Services → Credentials*, apri il client OAuth «Web client (auto created by Google Service)» (lo stesso indicato in *Authentication → Sign-in method → Google → Web SDK configuration*, e in `oAuthClientId` di `firebase-applet-config.json`) e aggiungi l'indirizzo del sito, con la barra finale, sia in *Authorized JavaScript origins* (solo `https://<utente>.github.io`) sia in *Authorized redirect URIs* (`https://<utente>.github.io/<repository>/`; per provare in locale anche `http://localhost:3000/`).
-3. **Firestore → Rules**: pubblica il contenuto di [`firestore.rules`](firestore.rules). Ripubblicalo ogni volta che il file cambia. Le regole sono provate da `tests/firestore.rules.test.ts` sull'emulatore Firestore (`npm run test:rules`, anche nel deploy): chi non è l'organizzatore legge solo i dati pubblici e non scrive nulla, i dati privati restano privati, le partite accettano solo link Lichess, le foto solo immagini piccole. Sullo stesso emulatore `tests/firebaseService.emulator.test.ts` prova, come organizzatore, la cancellazione delle partite a fine stagione e la loro sostituzione dal backup.
-4. La chiave web in `firebase-applet-config.json` è pubblica per natura. Limitala in Google Cloud ai referrer `<utente>.github.io/*` e `localhost`.
-
-L'email dell'organizzatore **non è nel codice** (né nel sito pubblicato): l'organizzatore è chi ha un documento nella collezione `admins` di Firestore, con l'email come ID. Per crearlo, **prima** di pubblicare le regole: *Firestore → Data → Start collection* `admins`, *Document ID* l'email dell'account Google (come appare nel login, in minuscolo), nessun campo. Per aggiungere o togliere un organizzatore si aggiunge o si cancella un documento, sempre dalla console: le regole non permettono di elencare la collezione né di scriverla dal sito, e ogni account può leggere solo il proprio documento (così l'area admin sa se mostrarsi).
-
-### Dati su Firestore
 | Percorso | Lettura | Contenuto |
 |---|---|---|
-| `tournaments/<id>` | pubblica | titolo, stagione, giocatori, calendario, regolamento (giorni per mossa, rated), Albo d'Oro, registro dei giocatori (nome utente Lichess e nome mostrato) |
+| `tournaments/<id>` | pubblica | torneo, giocatori, calendario, Albo d'Oro, Elo di partenza |
 | `tournaments/<id>/games/*` | pubblica | partite e stato Lichess |
-| `tournaments/<id>/seasons/*` | pubblica | classifiche finali delle stagioni archiviate |
-| `tournaments/<id>/media/*` | pubblica | foto del maestro caricate dall'area organizzatore, una per stagione (JPEG ridotto, scritto solo dall'organizzatore, sotto i 900 KB) |
-| `tournaments/<id>/private/organizer` | solo admin | aneddoti sui giocatori, token Lichess (permesso Challenge), opzioni delle sfide e testi dei messaggi |
-| `admins/<email>` | solo il proprio | un documento vuoto per ogni organizzatore, creato a mano dalla console Firebase |
-
-Gli aneddoti e il token sono privati di proposito: non vanno mai nella parte pubblica. Le regole Firestore permettono di leggere `private/*` solo all'account dell'organizzatore.
+| `tournaments/<id>/seasons/*` | pubblica | stagioni archiviate |
+| `tournaments/<id>/media/*` | pubblica | foto del maestro (sotto 900 KB) |
+| `tournaments/<id>/private/organizer` | organizzatore | aneddoti, token Lichess, impostazioni, testi |
+| `admins/<email>` | il proprio | un documento vuoto per organizzatore |
 
 ## Sviluppo
-
 ```bash
 npm install
-npm run dev      # server di sviluppo su http://localhost:3000
-npm test         # test con vitest
-npm run test:rules  # sull'emulatore Firestore (serve Java 21): firestore.rules e le scritture di chiusura stagione e ripristino
-npm run lint     # controllo dei tipi (tsc --noEmit)
-npm run build    # build di produzione in dist/, con i meta tag dell'anteprima
+npm run dev         # http://localhost:3000
+npm test            # vitest
+npm run test:rules  # emulatore Firestore (Java 21): regole, chiusura stagione, ripristino
+npm run build       # dist/, con i meta tag dell'anteprima
 ```
-
-### Anteprima dei link
-Quando il link del sito viene condiviso (WhatsApp, Linktree…) l'anteprima mostra il logo `public/og-image.png` (1200×630: il cavallo sul pouf con i colori del sito e il nome del torneo, tutto nel quadrato centrale, così regge anche il ritaglio quadrato di Linktree) e come titolo il nome del torneo con la stagione. `public/logo-square.png` (1024×1024) è l'illustrazione da sola, per l'immagine del canale WhatsApp o una miniatura caricata a mano su Linktree. Dalla stessa illustrazione, su fondo crema, vengono anche le icone dell'app installata e del browser (`icon-192/512.png`, `icon-maskable-512.png` con margine per il ritaglio circolare di Android, `apple-touch-icon.png`; per `favicon-32.png` e `favicon.ico` solo la testa del cavallo, che a 16–32 px resta leggibile), così sito, app e anteprime hanno la stessa immagine.
-
-Dopo `vite build`, `scripts/meta-tags.mjs` legge titolo e stagione dal documento pubblico su Firestore e li scrive nel titolo della pagina; aggiunge poi i meta tag `og:image`, che richiedono l'indirizzo assoluto del sito nella variabile `SITE_URL` (il workflow di deploy la prende da GitHub Pages). Il titolo si aggiorna a ogni deploy: dopo un cambio di stagione, rilancia il deploy dalla scheda Actions (*Run workflow*) o fai un push. WhatsApp conserva a lungo l'anteprima di un link già condiviso.
-
-### Struttura di `src/`
-- `views/`: pagine (pubblica, giocatore, login, console admin).
-- `tabs/`: schede dell'area admin; `tabs/settings/` ha le sezioni di *Giocatori*, *Stagioni*, *WhatsApp* e *Impostazioni*, `tabs/rounds/` quelle di *Turni*.
-- `hooks/`: login, sincronizzazione con Firestore e Lichess, dati dell'organizzatore, stagioni.
-- `lib/`: logica pura e testata (`standings`, `playerProfile`, `seasons`, `rounds`, `routes`, `parse`).
-- `components/`: elementi condivisi.
-
-Le funzioni di calcolo (classifica, spareggi, profilo giocatore, stagioni, lettura dei messaggi dei turni) stanno in `lib/` e hanno test in `lib/__tests__/`.
-
-## Pubblicazione su GitHub Pages
-
-Il workflow `.github/workflows/deploy.yml` esegue test e build a ogni push su `main` e pubblica `dist/`.
-1. Su GitHub vai in **Settings → Pages**.
-2. Sotto **Build and deployment** scegli **Source: GitHub Actions**.
-
-## Configurazione iniziale del torneo
-`config.json` contiene solo i valori predefiniti (giorni per mossa, regole delle sfide, testi dei messaggi), nessun dato del torneo. Giocatori, stagione e calendario vivono su Firestore e si gestiscono dall'area organizzatore: un torneo nuovo parte senza giocatori, e i primi si aggiungono da *Giocatori → Registro dei giocatori*.
+Logica pura e testata in `src/lib/`, pagine in `src/views/`, area organizzatore in `src/tabs/`. Il deploy (`deploy.yml`) esegue i test e pubblica su GitHub Pages a ogni push su `main`; `scripts/meta-tags.mjs` scrive nel titolo e nell'anteprima del link la stagione letta da Firestore.
 
 ## Limiti noti
-- Il pubblico vede i nuovi risultati solo dopo una sincronizzazione, cioè quando l'organizzatore apre l'area admin o preme **Sincronizza**.
-- Per le partite in corso Lichess restituisce via API la posizione con 3 semimosse di ritardo (misura anti-cheat). Per questo il sito non dice di chi è il turno né quando scade il tempo: il dato sarebbe spesso sbagliato. Il bollettino indica solo una fascia di mosse approssimativa.
-- Il login usa `signInWithPopup`: se un browser mobile blocca i popup, serve passare a `signInWithRedirect`.
+Lichess mostra le partite in corso con 3 semimosse di ritardo: il sito non dice di chi è il turno. Su Lichess lo storico Elo si legge solo con un token: senza, gli Elo di partenza non si fissano.

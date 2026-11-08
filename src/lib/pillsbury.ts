@@ -4,7 +4,7 @@
 // Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out;
 // so is a player who left the season, and the games won or lost at the table.
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
-import { boardCalendar, currentSeason, eloSeasonFromCurrent, EloReport, Forecast, seasonForecast } from './tournamentElo';
+import { boardCalendar, currentSeason, decidedAtTable, eloSeasonFromCurrent, EloReport, Forecast, seasonForecast } from './tournamentElo';
 import { isVoid, stateOf } from './games';
 
 export const PILLSBURY_ID = 'pillsbury';
@@ -25,11 +25,11 @@ export const trendOf = (f: Forecast): Trend => {
 };
 
 // The games of the calendar an objective is made of: not those decided at the table (forfeits after a
-// withdrawal: points in the standings, not games played) nor those aborted
+// withdrawal, games closed for cheating: points in the standings, see decidedAtTable) nor those aborted
 export function raceCalendar(calendar: HistoryGame[], gameStates: Record<string, LichessExportGame>): HistoryGame[] {
   return calendar.filter((g) => {
     const s = stateOf(g, gameStates);
-    return !s || (s.status !== 'forfeit' && !isVoid(s));
+    return !s || (!decidedAtTable(s.status) && !isVoid(s));
   });
 }
 

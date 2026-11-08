@@ -63,6 +63,11 @@ export interface EloReport {
 
 export const CURRENT = 'current';
 
+// Games decided at the table: points in the standings, but they say nothing of anyone's level, so
+// they are out of the Elo del torneo and of the Trofeo Pillsbury: forfeits after a withdrawal, and
+// games Lichess closed for cheating ("cheat detected")
+export const decidedAtTable = (status: string | undefined) => status === 'forfeit' || status === 'cheat';
+
 // The seeds with a rating, by handle, as computeElo takes them (a seed without one leaves an esordiente)
 export const seedRatings = (seeds: EloSeed[] | undefined): Record<string, number> =>
   Object.fromEntries((seeds ?? []).filter((s) => typeof s.rating === 'number').map((s) => [s.handle.toLowerCase(), s.rating as number]));
@@ -191,7 +196,7 @@ export function computeElo(inputs: EloSeasonInput[]): EloReport {
   return { seasons, ratings, before };
 }
 
-// An archived season, its forfeits left out (won at the table, not on the board)
+// An archived season, the games decided at the table left out (see decidedAtTable)
 // After a replacement the archive gives the substitute the games already played by who left (as
 // the standings do). With the round the substitute started from, those games go back to who
 // played them; without it, the substitute's rating of that season is doubtful.
@@ -211,7 +216,7 @@ export function eloSeasonFromArchive(archive: SeasonArchive): EloSeasonInput {
     key: archive.id,
     players: [...archive.standings.map((s) => s.handle), ...replaced.filter(known).map((d) => d.handle)],
     games: (archive.games ?? [])
-      .filter((g) => g.status !== 'forfeit')
+      .filter((g) => !decidedAtTable(g.status))
       .map((g) => ({ white: playedBy(g.white, g.round, g.end), black: playedBy(g.black, g.round, g.end), result: g.result, end: g.end, round: g.round, id: g.id })),
     doubtful: replaced.filter((d) => !known(d)).map((d) => d.replacedBy!.handle),
     seeds: seedRatings(archive.seeds),
@@ -227,7 +232,7 @@ export function playersOnBoard(g: HistoryGame, s: LichessExportGame | undefined,
   return { white: side(s?.players?.white?.user?.id, g.white), black: side(s?.players?.black?.user?.id, g.black) };
 }
 
-// The season being played: its finished games, aborted ones and forfeits left out
+// The season being played: its finished games, aborted ones and those decided at the table left out
 export function eloSeasonFromCurrent(
   players: string[],
   history: HistoryGame[],
@@ -238,7 +243,7 @@ export function eloSeasonFromCurrent(
   history.forEach((g) => {
     const s = stateOf(g, gameStates);
     const result = scoredResult(s);
-    if (!s || !result || isVoid(s) || s.status === 'forfeit') return;
+    if (!s || !result || isVoid(s) || decidedAtTable(s.status)) return;
     games.push({ ...playersOnBoard(g, s, players), result, end: s.lastMoveAt, round: g.round, id: extractGameId(g.url) || undefined });
   });
   return { key: CURRENT, players, games, seeds: seedRatings(seeds) };
