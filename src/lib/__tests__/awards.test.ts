@@ -40,8 +40,7 @@ describe('computeSeasonAwards', () => {
   const winners = (id: string) => byId[id].winners.map((w) => w.handle);
 
   it('gives each award to the right players with a readable detail', () => {
-    expect(winners('mate')).toEqual(['anna']);
-    expect(byId.mate.detail).toBe('2 vittorie col matto');
+    expect(byId.mate).toBeUndefined(); // Re del matto is no longer given
     expect(winners('fastest')).toEqual(['carla']);
     expect(byId.fastest.detail).toBe('in 15 mosse'); // the loser is not named
     expect(winners('longest')).toEqual(['anna']); // the draw is longer, but only wins count
@@ -49,9 +48,7 @@ describe('computeSeasonAwards', () => {
     expect(byId.draws).toBeUndefined(); // a single draw is no wall
   });
 
-  it('needs at least two mates for Re del matto and two draws for Il muro', () => {
-    const one = computeSeasonAwards(players, [g('anna', 'bruno', 'aaaaaaaa')], { aaaaaaaa: st('aaaaaaaa', 'mate', 40, 20, 'white') });
-    expect(one.some((a) => a.id === 'mate')).toBe(false);
+  it('needs at least two draws for Il muro', () => {
     const draws = computeSeasonAwards(players, [g('bruno', 'carla', 'bbbbbbbb'), g('carla', 'bruno', 'ffffffff')], {
       bbbbbbbb: st('bbbbbbbb', 'draw', 60, 30),
       ffffffff: st('ffffffff', 'draw', 60, 30),
@@ -74,7 +71,7 @@ describe('computeSeasonAwards', () => {
     expect(awardsMessage('Stagione 2', awards).split('\n').slice(0, 3)).toEqual([
       '🏆 *I premi di Stagione 2*',
       '',
-      '⚔️ *Re del matto*: Anna (2 vittorie col matto)',
+      '⚡ *Fulmine*: Carla (in 15 mosse)',
     ]);
     const archive = buildSeasonArchive({ title: 'T', season: 'S', description: '' }, players, history, gs);
     expect(archive.awards).toEqual(awards);
@@ -131,7 +128,7 @@ describe('il bradipo', () => {
 });
 
 describe('games linked from the awards', () => {
-  it('links the fastest and the longest win, and the few mates', async () => {
+  it('links the fastest and the longest win', async () => {
     const { computeSeasonAwards } = await import('../awards');
     const players = [{ handle: 'anna', name: 'Anna' }, { handle: 'bruno', name: 'Bruno' }];
     const h = (id: string) => ({ round: '1', white: 'anna', black: 'bruno', url: `https://lichess.org/${id}` });
@@ -148,7 +145,6 @@ describe('games linked from the awards', () => {
     const by = (id: string) => awards.find((a) => a.id === id)!;
     expect(by('fastest').games).toEqual(['quick001']);
     expect(by('longest').games).toEqual(['long0001']);
-    expect(by('mate').games).toEqual(['quick001', 'mate0002']);
     expect(awards.some((a) => a.id === 'upsets')).toBe(false); // replaced by the Trofeo Pillsbury
   });
 
@@ -233,7 +229,7 @@ describe('Trofeo Pillsbury', () => {
   });
 });
 
-describe('Re del matto', () => {
+describe('Re del matto of past seasons', () => {
   it('shows ⚔️, also for a season archived with the crown', async () => {
     const { awardEmoji } = await import('../awards');
     expect(awardEmoji({ id: 'mate', emoji: '👑', title: '', description: '', winners: [], detail: '' })).toBe('⚔️');

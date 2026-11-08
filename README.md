@@ -26,7 +26,7 @@ Chiudere la stagione archivia classifica, premi e partite in forma compatta, agg
 - **Colpaccio**: vittoria contro chi aveva almeno 200 punti di Elo in più, o patta con almeno 400.
 - **Obiettivo**: i punti previsti dall'Elo a inizio stagione contro il calendario, fisso per la stagione.
 - **Trofeo Pillsbury**: a chi supera di più il proprio obiettivo, di almeno mezzo punto. Fuori dalla corsa esordienti e ritirati; sospeso con meno di 4 giocatori in corsa.
-- **Premi divertenti**: Re del matto e Il muro, con almeno 2 matti o 2 patte.
+- **Premi divertenti**: Fulmine (la vittoria più rapida), Il maratoneta (la più lunga), Il bradipo (il più lento a muovere), Il muro (più patte, almeno 2).
 
 ## Configurazione Firebase
 1. **Authentication**: attiva Google e autorizza `<utente>.github.io` e `localhost`. Per l'app installata aggiungi in Google Cloud, nel client OAuth di `oAuthClientId`, l'origine `https://<utente>.github.io` e il redirect `https://<utente>.github.io/<repository>/`.

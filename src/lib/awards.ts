@@ -10,7 +10,9 @@ import { formatPace } from './playerProfile';
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { plural } from './games';
 // L'ammazzagiganti (most colpacci) was given until the Trofeo Pillsbury took its place: past
-// seasons keep it, with the Lichess ratings and the gap it used then
+// seasons keep it, with the Lichess ratings and the gap it used then. Re del matto (most wins by
+// checkmate) was given until the Stagione 2: with most games won by mate here it went to who won
+// most, the champion again; past seasons keep it too.
 const LEGACY_UPSET_GAP = 150;
 
 
@@ -21,11 +23,11 @@ function leaders(counts: Map<string, number>, players: Player[]): { handles: str
   return { handles: players.map((p) => p.handle).filter((h) => counts.get(h) === best), best };
 }
 
-// Re del matto and Il muro need a real feat: one mate or one draw in a season says little, and
-// with few players every award given away makes the others worth less
+// Il muro needs a real feat: one draw in a season says little, and with few players every award
+// given away makes the others worth less
 const MIN_COUNT = 2;
 
-// Re del matto: ⚔️, not the crown, which next to a name means the reigning champion. Seasons
+// Re del matto of past seasons: ⚔️, not the crown, which next to a name means the reigning champion. Seasons
 // archived before keep 👑 in their data: awardEmoji shows them with the new one. The same for the
 // Trofeo Pillsbury, archived with 🌱 before it became a medal.
 const MATE_EMOJI = "⚔️";
@@ -73,22 +75,6 @@ export function computeSeasonAwards(
       detail: top.length === 1
         ? `${halves(f.points)} ${f.points === 1 ? "punto" : "punti"} su ${plural(f.played, "partita", "partite")}, obiettivo ${halves(roundHalf(f.expectedSoFar))}`
         : `${halves(best.over)} punti più dell'obiettivo`,
-    });
-  }
-
-  // Re del matto: most wins by checkmate
-  const mates = new Map<string, number>();
-  games.forEach((g) => g.winner && g.status === "mate" && mates.set(g.winner, (mates.get(g.winner) ?? 0) + 1));
-  const mate = leaders(mates, players);
-  if (mate.handles.length > 0 && mate.best >= MIN_COUNT) {
-    awards.push({
-      id: "mate",
-      emoji: MATE_EMOJI,
-      title: "Re del matto",
-      description: "Più vittorie chiuse con lo scacco matto",
-      winners: who(mate.handles),
-      detail: plural(mate.best, "vittoria col matto", "vittorie col matto"),
-      ...linked(games.filter((g) => g.status === "mate" && g.winner && mate.handles.includes(g.winner)).map((g) => g.state.id)),
     });
   }
 
@@ -169,7 +155,7 @@ const names = (award: SeasonAward) => {
   return list.length > 1 ? `${list.slice(0, -1).join(", ")} e ${list[list.length - 1]}` : list[0] ?? "";
 };
 
-// One line per award, e.g. "Anna (3 vittorie col matto)"
+// One line per award, e.g. "Anna (in 12 mosse)"
 export const awardWinnersLine = (award: SeasonAward) => `${names(award)} (${award.detail})`;
 
 // Message for the WhatsApp group
