@@ -182,3 +182,10 @@ describe('the reigning Premio Pillsbury', () => {
     expect(playerPage('bruno', [won])).toContain('Premio Pillsbury · Stagione 1');
   });
 });
+
+describe('the objective on the player page', () => {
+  it('is not shown while the Premio Pillsbury is suspended (fewer than 4 in the race)', () => {
+    // Three players, all in the race after Stagione 1: too few for the award
+    expect(playerPage('anna', [season1])).not.toContain('Obiettivo');
+  });
+});
