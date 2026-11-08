@@ -149,7 +149,7 @@ describe('games linked from the awards', () => {
     expect(by('fastest').games).toEqual(['quick001']);
     expect(by('longest').games).toEqual(['long0001']);
     expect(by('mate').games).toEqual(['quick001', 'mate0002']);
-    expect(awards.some((a) => a.id === 'upsets')).toBe(false); // replaced by the Premio Pillsbury
+    expect(awards.some((a) => a.id === 'upsets')).toBe(false); // replaced by the Trofeo Pillsbury
   });
 
   it('finds them again in the games of a season archived before', async () => {
@@ -172,7 +172,7 @@ describe('games linked from the awards', () => {
   });
 });
 
-describe('Premio Pillsbury', () => {
+describe('Trofeo Pillsbury', () => {
   const players = ['anna', 'bruno', 'carla', 'elena', 'dario'].map((h) => ({ handle: h, name: h[0].toUpperCase() + h.slice(1) }));
   const row = (handle: string) => ({ handle, name: handle, played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 });
   // Last season Anna beat Carla twice: Anna starts ahead
@@ -197,7 +197,7 @@ describe('Premio Pillsbury', () => {
     const history = games.map((g) => g.h);
     const states = Object.fromEntries(games.map((g) => [g.s.id, g.s]));
     const award = computeSeasonAwards(players, history, states, [past]).find((a) => a.id === 'pillsbury');
-    expect(award).toMatchObject({ title: 'Premio Pillsbury', emoji: '🌱', winners: [{ handle: 'carla', name: 'Carla' }] });
+    expect(award).toMatchObject({ title: 'Trofeo Pillsbury', emoji: '🌱', winners: [{ handle: 'carla', name: 'Carla' }] });
     expect(award!.detail).toBe('1 punto su 1 partita, obiettivo 0'); // her one game counted: the win over Anna
     // With no archived season everyone is an esordiente: no award yet
     expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'pillsbury')).toBe(false);
@@ -224,5 +224,13 @@ describe('Re del matto', () => {
     const { awardEmoji } = await import('../awards');
     expect(awardEmoji({ id: 'mate', emoji: '👑', title: '', description: '', winners: [], detail: '' })).toBe('⚔️');
     expect(awardEmoji({ id: 'draws', emoji: '🧱', title: '', description: '', winners: [], detail: '' })).toBe('🧱');
+  });
+});
+
+describe('Trofeo Pillsbury', () => {
+  it('has its name from the code, also for a season archived as "Premio Pillsbury"', async () => {
+    const { awardTitle } = await import('../awards');
+    expect(awardTitle({ id: 'pillsbury', emoji: '🌱', title: 'Premio Pillsbury', description: '', winners: [], detail: '' })).toBe('Trofeo Pillsbury');
+    expect(awardTitle({ id: 'draws', emoji: '🧱', title: 'Il muro', description: '', winners: [], detail: '' })).toBe('Il muro');
   });
 });

@@ -9,7 +9,7 @@ export type { TimedGame } from './moveTimes';
 import { formatPace } from './playerProfile';
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { plural } from './games';
-// L'ammazzagiganti (most colpacci) was given until the Premio Pillsbury took its place: past
+// L'ammazzagiganti (most colpacci) was given until the Trofeo Pillsbury took its place: past
 // seasons keep it, with the Lichess ratings and the gap it used then
 const LEGACY_UPSET_GAP = 150;
 
@@ -29,6 +29,8 @@ const MIN_COUNT = 2;
 // archived before keep 👑 in their data: awardEmoji shows them with the new one.
 const MATE_EMOJI = "⚔️";
 export const awardEmoji = (a: SeasonAward) => (a.id === "mate" ? MATE_EMOJI : a.emoji);
+// The name of the Pillsbury from the code, as for the emoji: an archive saved as "Premio Pillsbury" shows the new name
+export const awardTitle = (a: SeasonAward) => (a.id === PILLSBURY_ID ? PILLSBURY_TITLE : a.title);
 
 // At most this many games are linked from an award: beyond, a list of links says little
 const MAX_LINKED = 3;
@@ -43,7 +45,7 @@ export function computeSeasonAwards(
   players: Player[],
   history: HistoryGame[],
   gameStates: Record<string, LichessExportGame>,
-  seasons: SeasonArchive[] = [] // archived seasons, for the Elo del torneo of the Premio Pillsbury
+  seasons: SeasonArchive[] = [] // archived seasons, for the Elo del torneo of the Trofeo Pillsbury
 ): SeasonAward[] {
   const nameOf = (h: string) => players.find((p) => p.handle === h)?.name ?? h;
   const who = (handles: string[]) => handles.map((handle) => ({ handle, name: nameOf(handle) }));
@@ -51,7 +53,7 @@ export function computeSeasonAwards(
 
   const awards: SeasonAward[] = [];
 
-  // Premio Pillsbury: who beat their pronostico by most (see lib/pillsbury). First, apart from
+  // Trofeo Pillsbury: who beat their pronostico by most (see lib/pillsbury). First, apart from
   // the light-hearted awards. One winner, unless two beat it by exactly the same.
   const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates), history, history, gameStates);
   const best = race.rows[0];
@@ -170,11 +172,11 @@ export const awardWinnersLine = (award: SeasonAward) => `${names(award)} (${awar
 export function awardsMessage(season: string, awards: SeasonAward[]): string {
   const main = awards.find((a) => a.id === PILLSBURY_ID);
   const others = awards.filter((a) => a !== main);
-  const line = (a: SeasonAward) => `${awardEmoji(a)} *${a.title}*: ${awardWinnersLine(a)}`;
+  const line = (a: SeasonAward) => `${awardEmoji(a)} *${awardTitle(a)}*: ${awardWinnersLine(a)}`;
   return [
     `🏆 *I premi di ${season}*`,
     "",
-    // The Premio Pillsbury first and apart, with what it rewards
+    // The Trofeo Pillsbury first and apart, with what it rewards
     ...(main ? [line(main), `_${main.description}_`, ...(others.length > 0 ? ["", "E poi, per sorridere:"] : [])] : []),
     ...others.map(line),
   ].join("\n");

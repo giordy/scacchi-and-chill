@@ -27,7 +27,7 @@ function Progress({ trend, over }: { trend: TrendKind; over: number }) {
   );
 }
 
-// Public view next to Classifica and Tabellone: the race for the Premio Pillsbury. Ordered by the
+// Public view next to Classifica and Tabellone: the race for the Trofeo Pillsbury. Ordered by the
 // points beyond those expected, but shown only with arrows: the gap in points would only discourage.
 export function PillsburyRace({
   players,
@@ -74,7 +74,7 @@ export function PillsburyRace({
   return (
     <section aria-label={PILLSBURY_TITLE}>
       {firstSeason ? (
-        <p className="note">Il premio parte dalla seconda stagione: nella prima sono tutti esordienti.</p>
+        <p className="note">Il trofeo parte dalla seconda stagione: nella prima sono tutti esordienti.</p>
       ) : race.suspended ? (
         <p className="note">
           Quest'anno il {PILLSBURY_TITLE} è sospeso: servono almeno {PILLSBURY_MIN_PLAYERS} giocatori in corsa, e gli esordienti non lo sono.

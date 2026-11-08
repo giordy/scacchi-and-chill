@@ -959,7 +959,7 @@ a.player-page-link:hover, a.player-page-link:focus-visible { color: var(--accent
 .award-winners a:hover { color: var(--accent); }
 .award-detail { margin: 2px 0 0; font-size: 13px; color: var(--ink); }
 .award-desc { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
-/* The Premio Pillsbury: first, on its own, with the brass of the leader row */
+/* The Trofeo Pillsbury: first, on its own, with the brass of the leader row */
 .award-main { margin-bottom: 14px; padding: 16px; border-color: var(--brass); box-shadow: inset 3px 0 0 var(--brass); }
 .award-main .award-emoji { font-size: 36px; }
 .award-main .award-title { font-size: 17px; }
@@ -2814,7 +2814,7 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 /* The player column sticks over the card's own background, not the panel's */
 .winner-row tr:not(.row-leader) .sticky-col { background: var(--bg); }
 
-/* Premio Pillsbury view: what it is and why the name, under the race */
+/* Trofeo Pillsbury view: what it is and why the name, under the race */
 
 .pillsbury-table .trend { font-size: 1em; }
 

@@ -85,7 +85,7 @@ function TrophyShelf({ medals, champion, title, pillsbury = [] }: { medals: Play
     <ul className="trophy-shelf" aria-label="Trofei">
       {champion && trophy("crown", "👑", `Campione in carica · ${champion}`, "is-crown")}
       {pillsbury.length > 0 &&
-        trophy("pillsbury", PILLSBURY_EMOJI, `Premio Pillsbury · ${[...pillsbury].reverse().join(", ")}`, "is-pillsbury", pillsbury.length > 1 ? pillsbury.length : undefined)}
+        trophy("pillsbury", PILLSBURY_EMOJI, `Trofeo Pillsbury · ${[...pillsbury].reverse().join(", ")}`, "is-pillsbury", pillsbury.length > 1 ? pillsbury.length : undefined)}
       {grouped
         ? ([1, 2, 3] as Medal[])
             .filter((m) => seasonsOf(m).length > 0)
@@ -216,7 +216,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const seasonGames = calendar.filter((g) => [g.white, g.black].some((h) => h.toLowerCase() === player.handle.toLowerCase())).length;
   const countedOf = forecast && forecast.games < seasonGames ? `${forecast.games} delle ${seasonGames}` : String(forecast?.games ?? 0);
   const pronostico = forecast ? pronosticoPoints(forecast) : 0;
-  // The objective is the Premio Pillsbury's: none when the award is suspended (too few in the race)
+  // The objective is the Trofeo Pillsbury's: none when the award is suspended (too few in the race)
   const pillsburySuspended = config.players.filter((p) => !isNewcomer(eloSeason, p.handle)).length < PILLSBURY_MIN_PLAYERS;
   const eloTrend: TrendKind = eloMove > 0 ? "up" : eloMove < 0 ? "down" : "same";
 
@@ -290,7 +290,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           ))}
           {forecast && forecast.games > 0 && !pillsburySuspended && (
             <div className="stat-pill">
-              <InfoTip className="stat-pill-label" text={"Punti previsti in base all'Elo, senza le partite con gli esordienti. Chi lo supera di più vince il Premio Pillsbury."}>
+              <InfoTip className="stat-pill-label" text={"Punti previsti in base all'Elo, senza le partite con gli esordienti. Chi lo supera di più vince il Trofeo Pillsbury."}>
                 Obiettivo <span className="infotip-mark" aria-hidden="true">ⓘ</span>
               </InfoTip>
               <span className="stat-pill-val">

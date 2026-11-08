@@ -170,21 +170,21 @@ describe('awards of a past season', () => {
   });
 });
 
-describe('the reigning Premio Pillsbury', () => {
+describe('the reigning Trofeo Pillsbury', () => {
   const won: SeasonArchive = {
     ...season1,
-    awards: [{ id: 'pillsbury', emoji: '🌱', title: 'Premio Pillsbury', description: '', winners: [{ handle: 'bruno', name: 'Bruno' }], detail: '' }],
+    awards: [{ id: 'pillsbury', emoji: '🌱', title: 'Trofeo Pillsbury', description: '', winners: [{ handle: 'bruno', name: 'Bruno' }], detail: '' }],
   };
   it('has a 🌱 next to the name in the standings and on the shelf of the player page', () => {
     const html = publicPage('', [won]);
-    expect(html).toContain('Premio Pillsbury in carica · Stagione 1');
-    expect(publicPage('', [season1])).not.toContain('Premio Pillsbury in carica');
-    expect(playerPage('bruno', [won])).toContain('Premio Pillsbury · Stagione 1');
+    expect(html).toContain('Trofeo Pillsbury in carica · Stagione 1');
+    expect(publicPage('', [season1])).not.toContain('Trofeo Pillsbury in carica');
+    expect(playerPage('bruno', [won])).toContain('Trofeo Pillsbury · Stagione 1');
   });
 });
 
 describe('the objective on the player page', () => {
-  it('is not shown while the Premio Pillsbury is suspended (fewer than 4 in the race)', () => {
+  it('is not shown while the Trofeo Pillsbury is suspended (fewer than 4 in the race)', () => {
     // Three players, all in the race after Stagione 1: too few for the award
     expect(playerPage('anna', [season1])).not.toContain('Obiettivo');
   });

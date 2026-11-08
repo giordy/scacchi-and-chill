@@ -1,4 +1,4 @@
-// Premio Pillsbury: to who beat their pronostico by most in the season, that is made the most
+// Trofeo Pillsbury: to who beat their pronostico by most in the season, that is made the most
 // points beyond those expected from the Elo del torneo at its start (see seasonForecast). Named
 // after Harry Nelson Pillsbury, who in 1895, aged 22 and almost unknown, won Hastings ahead of
 // Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out.
@@ -7,7 +7,7 @@ import { boardCalendar, currentSeason, eloSeasonFromCurrent, EloReport, Forecast
 
 export const PILLSBURY_ID = 'pillsbury';
 export const PILLSBURY_EMOJI = '🌱';
-export const PILLSBURY_TITLE = 'Premio Pillsbury';
+export const PILLSBURY_TITLE = 'Trofeo Pillsbury';
 export const PILLSBURY_ORIGIN =
   "Nel 1895, a Hastings, Harry Nelson Pillsbury era un ventiduenne americano quasi sconosciuto, al suo primo grande torneo: lo vinse davanti a Lasker, Steinitz, Tarrasch e Čigorin, i più forti del mondo. È la sorpresa più famosa della storia degli scacchi.";
 
@@ -71,7 +71,7 @@ export function pillsburyRace(
   return { suspended, rows, waiting, newcomers, counted };
 }
 
-// Who won the Premio Pillsbury of the latest archived season that gave it
+// Who won the Trofeo Pillsbury of the latest archived season that gave it
 export function reigningPillsbury(seasons: SeasonArchive[]): { season: string; handles: string[] } | undefined {
   const latest = [...seasons]
     .sort((a, b) => b.archivedAt.localeCompare(a.archivedAt))

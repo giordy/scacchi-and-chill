@@ -2,7 +2,7 @@ import React from 'react';
 import { SeasonAward } from '../types';
 import { playerHref, publicViewHref } from '../lib/routes';
 import { PILLSBURY_ID } from '../lib/pillsbury';
-import { awardEmoji } from '../lib/awards';
+import { awardEmoji, awardTitle } from '../lib/awards';
 import { useNameOf } from './Names';
 
 // Grid of the end-of-season awards, each winner linking to their player page
@@ -27,7 +27,7 @@ function GameLinks({ ids }: { ids?: string[] }) {
   );
 }
 
-// The Premio Pillsbury comes first and apart, in a card of its own; the light-hearted awards follow
+// The Trofeo Pillsbury comes first and apart, in a card of its own; the light-hearted awards follow
 export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[]; compact?: boolean }) {
   const nameOf = useNameOf();
   const winners = (a: SeasonAward) =>
@@ -46,7 +46,7 @@ export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[
         <span className="compact-emoji" aria-hidden="true">{awardEmoji(a)}</span>
         <span className="compact-body">
           <span>
-            <strong>{a.title}</strong>: <span className="award-winners">{winners(a)}</span>
+            <strong>{awardTitle(a)}</strong>: <span className="award-winners">{winners(a)}</span>
           </span>
           <span className="compact-sub">
             {a.detail}
@@ -68,7 +68,7 @@ export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[
         <div className="award-card award-main">
           <span className="award-emoji" aria-hidden="true">{main.emoji}</span>
           <div className="award-body">
-            <h3 className="award-title">{main.title}</h3>
+            <h3 className="award-title">{awardTitle(main)}</h3>
             <p className="award-winners">{winners(main)}</p>
             <p className="award-detail">{main.detail}</p>
             <p className="award-desc">
@@ -83,7 +83,7 @@ export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[
           <li key={a.id} className="award-card">
             <span className="award-emoji" aria-hidden="true">{awardEmoji(a)}</span>
             <div className="award-body">
-              <h3 className="award-title">{a.title}</h3>
+              <h3 className="award-title">{awardTitle(a)}</h3>
               <p className="award-winners">{winners(a)}</p>
               <p className="award-detail">
                 {a.detail}

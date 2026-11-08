@@ -70,7 +70,7 @@ export function WhatsAppTab({
   organizer: OrganizerStore;
   flash: Flash;
   triggerToast?: (msg: string) => void;
-  seasons?: SeasonArchive[]; // archived seasons, for the Premio Pillsbury
+  seasons?: SeasonArchive[]; // archived seasons, for the Trofeo Pillsbury
 }) {
   return (
     <div className="settings-stack">

@@ -7,7 +7,7 @@ import { SeasonArchive } from '../../types';
 const players = ['anna', 'bruno', 'carla', 'dario', 'elena'].map((h) => ({ handle: h, name: h }));
 const g = (white: string, black: string, result: '1-0' | '0-1' | '½-½', end: number) => ({ white, black, result, end, round: String(end) });
 
-describe('the race for the Premio Pillsbury', () => {
+describe('the race for the Trofeo Pillsbury', () => {
   // Last season Anna beat Bruno and Carla: this season Carla beats Anna, Bruno loses to Carla
   const report = computeElo([
     { key: 's1', players: ['anna', 'bruno', 'carla', 'elena'], games: [g('anna', 'bruno', '1-0', 1), g('anna', 'carla', '1-0', 2)] },
@@ -41,10 +41,10 @@ describe('the race for the Premio Pillsbury', () => {
   });
 });
 
-describe('the reigning Premio Pillsbury', () => {
+describe('the reigning Trofeo Pillsbury', () => {
   const season = (id: string, archivedAt: string, winner?: string): SeasonArchive => ({
     id, season: id, title: 'T', archivedAt, standings: [], gamesPlayed: 0,
-    awards: winner ? [{ id: 'pillsbury', emoji: '🌱', title: 'Premio Pillsbury', description: '', winners: [{ handle: winner, name: winner }], detail: '' }] : [],
+    awards: winner ? [{ id: 'pillsbury', emoji: '🌱', title: 'Trofeo Pillsbury', description: '', winners: [{ handle: winner, name: winner }], detail: '' }] : [],
   });
   const seasons = [season('s1', '2026-01-01'), season('s2', '2027-01-01', 'Carla'), season('s3', '2028-01-01', 'bruno'), season('s4', '2029-01-01')];
 

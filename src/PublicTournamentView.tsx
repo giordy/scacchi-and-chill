@@ -139,7 +139,7 @@ export function PublicTournamentView({
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
   const started = seasonStarted(standings);
   const champions = reigningChampions(tournamentMeta.winners);
-  // Who won the Premio Pillsbury last: a 🌱 next to the name, as the crown for the champion
+  // Who won the Trofeo Pillsbury last: a 🌱 next to the name, as the crown for the champion
   const pillsburyHolder = reigningPillsbury(seasons);
   // All seasons added up (only once a season has been archived: before, it is just this one)
   const allTime = useMemo(() => {
@@ -326,8 +326,8 @@ export function PublicTournamentView({
                             <a
                               href={ALBO_HREF}
                               className="champion-badge"
-                              title={`Premio Pillsbury in carica · ${pillsburyHolder.season}`}
-                              aria-label={`Premio Pillsbury in carica, ${pillsburyHolder.season}: vai all'Albo d'Oro`}
+                              title={`Trofeo Pillsbury in carica · ${pillsburyHolder.season}`}
+                              aria-label={`Trofeo Pillsbury in carica, ${pillsburyHolder.season}: vai all'Albo d'Oro`}
                             >
                               {PILLSBURY_EMOJI}
                             </a>
