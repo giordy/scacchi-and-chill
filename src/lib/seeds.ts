@@ -70,18 +70,30 @@ export function reliableRatingsAt(history: unknown, date: string): Partial<Recor
 // lower case (the player's and the regulars')
 export function computeSeed(handle: string, date: string, regulars: Map<string, number>, histories: Map<string, unknown>): EloSeed {
   const mine = reliableRatingsAt(histories.get(lower(handle)), date);
+  // Why each kind of the player's was skipped: too few regulars to set its scale
+  const skipped: string[] = [];
   for (const perf of SEED_PERFS) {
     const lichess = mine[perf];
     if (lichess === undefined) continue;
     const pairs = [...regulars]
       .map(([h, elo]) => ({ elo, lichess: reliableRatingsAt(histories.get(h), date)[perf] }))
       .filter((p): p is { elo: number; lichess: number } => p.lichess !== undefined);
-    if (pairs.length < SEED_MIN_REGULARS) continue;
+    if (pairs.length < SEED_MIN_REGULARS) {
+      const n = pairs.length;
+      skipped.push(
+        `Elo ${SEED_PERF_LABEL[perf]} ${lichess} affidabile, ma ${n === 0 ? 'nessun veterano' : `solo ${n} ${n === 1 ? 'veterano' : 'veterani'}`} con l'Elo ${SEED_PERF_LABEL[perf]} affidabile a quella data (ne servono ${SEED_MIN_REGULARS})`
+      );
+      continue;
+    }
     const mean = (ns: number[]) => ns.reduce((a, b) => a + b, 0) / ns.length;
     const offset = Math.round(mean(pairs.map((p) => p.elo)) - mean(pairs.map((p) => p.lichess)));
     return { handle, rating: lichess + offset, date, perf, lichess, offset };
   }
-  return { handle, rating: null, date };
+  const reason =
+    skipped.length > 0
+      ? skipped.join('; ')
+      : `nessun Elo Lichess affidabile (servono almeno ${RELIABLE_DAYS} giorni con partite valutate dello stesso tipo, l'ultima entro un anno; il bullet non conta)`;
+  return { handle, rating: null, date, reason };
 }
 
 // When each player's first game of the season was created (the Lichess challenge; the link saved

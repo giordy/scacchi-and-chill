@@ -82,9 +82,18 @@ describe('computeSeed', () => {
       ['dario', [kind('Rapid', 1850), kind('Blitz', 1700)]],
       ['elena', [kind('Rapid', 1850, 5)]],
     ]);
-    expect(computeSeed('dario', date, regulars, histories)).toEqual({ handle: 'dario', rating: null, date });
-    expect(computeSeed('elena', date, regulars, histories)).toEqual({ handle: 'elena', rating: null, date });
-    expect(computeSeed('nobody', date, regulars, histories)).toEqual({ handle: 'nobody', rating: null, date });
+    // Says why, for the organizer: each kind of the player's that was skipped, and how many regulars had it
+    expect(computeSeed('dario', date, regulars, histories)).toEqual({
+      handle: 'dario',
+      rating: null,
+      date,
+      reason:
+        "Elo rapid 1850 affidabile, ma solo 2 veterani con l'Elo rapid affidabile a quella data (ne servono 3); " +
+        "Elo blitz 1700 affidabile, ma nessun veterano con l'Elo blitz affidabile a quella data (ne servono 3)",
+    });
+    const none = "nessun Elo Lichess affidabile (servono almeno 10 giorni con partite valutate dello stesso tipo, l'ultima entro un anno; il bullet non conta)";
+    expect(computeSeed('elena', date, regulars, histories)).toEqual({ handle: 'elena', rating: null, date, reason: none });
+    expect(computeSeed('nobody', date, regulars, histories)).toEqual({ handle: 'nobody', rating: null, date, reason: none });
   });
 });
 

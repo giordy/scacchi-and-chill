@@ -10,7 +10,8 @@ type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) =>
 // Organizer area: fixes the seed of each player in their first season (see lib/seeds.ts) as soon as
 // their first game exists, reading the Lichess rating histories of the season's players. A seed with
 // a rating is saved once and never computed again; one without is tried again, on its own day, each
-// time the organizer area opens, and saved (and told) only when it gets a rating. When Lichess does
+// time the organizer area opens, and saved (and told, with the reason) when the result changes: a
+// rating, or a different reason. The reason stays in Stagioni > Elo di partenza. When Lichess does
 // not answer, nothing is saved and it is tried again the next time the organizer area opens.
 export function useEloSeeds({
   enabled,
@@ -52,22 +53,25 @@ export function useEloSeeds({
     (async () => {
       const histories = new Map<string, unknown>();
       for (const h of needed) histories.set(h, await fetchRatingHistory(h));
-      // A retry that still finds no rating changes nothing: not saved, not told
-      const fresh: EloSeed[] = toFix
-        .map((t) => ({ t, seed: computeSeed(t.handle, t.date, regulars, histories) }))
-        .filter(({ t, seed }) => !t.retry || seed.rating !== null)
-        .map(({ seed }) => seed);
-      if (fresh.length === 0) return;
       const { config: now, onUpdateTournamentMeta: save, flash: say } = latest.current;
       const same = (a: EloSeed, b: EloSeed) => a.handle.toLowerCase() === b.handle.toLowerCase();
+      // A retry that finds the same as last time (no rating, same reason) is not saved again nor told
+      const fresh: EloSeed[] = toFix
+        .map((t) => computeSeed(t.handle, t.date, regulars, histories))
+        .filter((seed) => {
+          const before = (now.tournament?.seeds ?? []).find((s) => same(s, seed));
+          return !before || seed.rating !== null || seed.reason !== before.reason;
+        });
+      if (fresh.length === 0) return;
       const kept = (now.tournament?.seeds ?? []).filter((s) => !fresh.some((f) => same(f, s)));
       save({ seeds: [...kept, ...fresh] });
+      const anyRating = fresh.some((s) => s.rating !== null);
       say(
-        'ok',
-        'Elo di partenza fissati per chi gioca la prima stagione.',
+        anyRating ? 'ok' : 'warning',
+        anyRating ? 'Elo di partenza fissati per chi gioca la prima stagione.' : 'Elo di partenza: nessun nuovo Elo fissato.',
         fresh.map((s) =>
           s.rating === null
-            ? `${nameOf(s.handle)}: nessun Elo Lichess affidabile, resta esordiente`
+            ? `${nameOf(s.handle)} resta esordiente: ${s.reason}`
             : `${nameOf(s.handle)}: ${s.rating} (Lichess ${SEED_PERF_LABEL[s.perf!]} ${s.lichess} al ${s.date}, correzione ${s.offset! >= 0 ? '+' : '−'}${Math.abs(s.offset!)})`
         )
       );

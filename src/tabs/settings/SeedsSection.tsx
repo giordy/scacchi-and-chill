@@ -38,7 +38,10 @@ export function SeedsSection({
         note: `Lichess ${SEED_PERF_LABEL[seed.perf!]} ${seed.lichess} del ${seedDayLabel(seed.date)}, correzione ${sign}${Math.abs(seed.offset!)}`,
       };
     }
-    if (seed) return { value: 'esordiente', note: `nessun Elo Lichess affidabile al ${seedDayLabel(seed.date)}` };
+    if (seed) {
+      const why = seed.reason ?? 'nessun Elo Lichess affidabile';
+      return { value: 'esordiente', note: `al ${seedDayLabel(seed.date)}: ${why}. Si ricontrolla a ogni apertura.` };
+    }
     const at = first.get(handle.toLowerCase());
     return at === undefined
       ? { value: 'in attesa', note: 'si fissa alla sua prima partita' }

@@ -144,6 +144,7 @@ export interface EloSeed {
   perf?: 'correspondence' | 'classical' | 'rapid' | 'blitz'; // the kind of Lichess rating used
   lichess?: number; // that Lichess rating
   offset?: number; // the correction of scale, from the regulars (rating = lichess + offset)
+  reason?: string; // without a rating: why, in words for the organizer
 }
 
 export interface AppConfig {

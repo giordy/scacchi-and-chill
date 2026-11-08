@@ -184,7 +184,7 @@ describe('Elo di partenza in Stagioni', () => {
       ...config.tournament,
       seeds: [
         { handle: 'carla', rating: 1620, date: '2026-09-08', perf: 'rapid', lichess: 1900, offset: -280 },
-        { handle: 'dario', rating: null, date: '2026-09-08' },
+        { handle: 'dario', rating: null, date: '2026-09-08', reason: 'Elo blitz 1700 affidabile, ma solo 2 veterani con l\'Elo blitz affidabile a quella data (ne servono 3)' },
       ],
     },
   } as any;
@@ -195,6 +195,8 @@ describe('Elo di partenza in Stagioni', () => {
     expect(html).toContain('<strong>carla</strong> · 1620');
     expect(html).toContain('Lichess rapid 1900 del 8 set 2026, correzione −280');
     expect(html).toContain('<strong>dario</strong> · esordiente');
+    expect(html).toContain('al 8 set 2026: Elo blitz 1700 affidabile, ma solo 2 veterani'); // why, from the seed
+    expect(html).toContain('Si ricontrolla a ogni apertura.');
     expect(html).toContain('<strong>elena</strong> · in calcolo'); // first game there, seed not fixed yet
     expect(html).toContain('<strong>fabio</strong> · in attesa');
     expect(html).not.toContain('<strong>anna</strong>'); // played Stagione 1
