@@ -13,10 +13,10 @@ import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampion
 import { PointsChart } from '../components/PointsChart';
 import { PresenceMeta } from '../components/PresenceDot';
 import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
-import { boardCalendar, currentSeason as eloSeasonNow, eloSeasonFromCurrent, isNewcomer, pronosticoPoints, ratingOf, seasonForecast, tournamentElo } from '../lib/tournamentElo';
+import { boardCalendar, currentSeason as eloSeasonNow, isNewcomer, pronosticoPoints, ratingOf, tournamentElo } from '../lib/tournamentElo';
 import { withScheduledGames } from '../lib/publicGames';
 import { Trend, TrendKind } from '../components/Trend';
-import { PILLSBURY_MIN_PLAYERS, pillsburyWins } from '../lib/pillsbury';
+import { pillsburyRace, pillsburyWins, raceCalendar } from '../lib/pillsbury';
 import { PillsburyIcon } from '../components/PillsburyIcon';
 import { SEED_PERF_LABEL, seedDayLabel } from '../lib/seeds';
 
@@ -210,20 +210,18 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
     : undefined;
   const eloStart = eloSeason.start.get(player.handle.toLowerCase());
   const eloMove = eloNow !== undefined && eloStart !== undefined ? eloNow - Math.round(eloStart) : 0;
-  // Pronostico: points expected in the season from the Elo del torneo at its start
-  const calendar = boardCalendar(withScheduledGames(history, config.schedule ?? []), gameStates, config.players.map((p) => p.handle));
-  const forecast = seasonForecast(
-    player.handle,
-    eloSeason,
-    calendar,
-    eloSeasonFromCurrent(config.players.map((p) => p.handle), history, gameStates).games
-  );
+  // Pronostico: points expected in the season from the Elo del torneo at its start, as the race of the
+  // Trofeo Pillsbury has it (the same games, the same players: who left is not in it)
+  const seasonCalendar = raceCalendar(withScheduledGames(history, config.schedule ?? []), gameStates);
+  const race = pillsburyRace(config.players, elo, seasonCalendar, history, gameStates, config.tournament?.withdrawals);
+  const forecast = race.forecasts[player.handle];
   // All the player's games of the season, those against esordienti included: "10 delle 14"
+  const calendar = boardCalendar(seasonCalendar, gameStates, config.players.map((p) => p.handle));
   const seasonGames = calendar.filter((g) => [g.white, g.black].some((h) => h.toLowerCase() === player.handle.toLowerCase())).length;
   const countedOf = forecast && forecast.games < seasonGames ? `${forecast.games} delle ${seasonGames}` : String(forecast?.games ?? 0);
   const pronostico = forecast ? pronosticoPoints(forecast) : 0;
   // The objective is the Trofeo Pillsbury's: none when the award is suspended (too few in the race)
-  const pillsburySuspended = config.players.filter((p) => !isNewcomer(eloSeason, p.handle)).length < PILLSBURY_MIN_PLAYERS;
+  const pillsburySuspended = race.suspended;
   const eloTrend: TrendKind = eloMove > 0 ? "up" : eloMove < 0 ? "down" : "same";
 
   return (

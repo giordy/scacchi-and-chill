@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { AppConfig, EloSeed, HistoryGame, LichessExportGame, SeasonArchive, TournamentMeta } from '../types';
 import { currentSeason, tournamentElo } from '../lib/tournamentElo';
 import { computeSeed, firstGames, seedsToFix, SEED_PERF_LABEL } from '../lib/seeds';
@@ -39,12 +39,16 @@ export function useEloSeeds({
   latest.current = { config, onUpdateTournamentMeta, flash };
   const running = useRef(false);
 
-  const handles = config.players.map((p) => p.handle);
+  const players = config.players;
   const seeds = config.tournament?.seeds;
-  // The first season of the tournament has no regulars to set a scale from
-  const report = seasons.length > 0 ? tournamentElo(seasons, handles, history, gameStates, seeds) : null;
-  const season = report ? currentSeason(report) : null;
-  const toFix = season ? seedsToFix(season.firstSeason, seeds, firstGames(history, gameStates, handles)) : [];
+  // Computed again only when the data changes: the organizer area renders at every key typed
+  const { season, toFix } = useMemo(() => {
+    const handles = players.map((p) => p.handle);
+    // The first season of the tournament has no regulars to set a scale from
+    if (seasons.length === 0) return { season: null, toFix: [] };
+    const season = currentSeason(tournamentElo(seasons, handles, history, gameStates, seeds));
+    return { season, toFix: seedsToFix(season.firstSeason, seeds, firstGames(history, gameStates, handles)) };
+  }, [players, seasons, history, gameStates, seeds]);
   const key = toFix.map((t) => `${t.handle}@${t.date}`).join(',');
 
   useEffect(() => {

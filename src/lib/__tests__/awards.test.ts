@@ -203,6 +203,20 @@ describe('Trofeo Pillsbury', () => {
     expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'pillsbury')).toBe(false);
   });
 
+  it('goes to nobody when the best is only in line with their objective (= in the table, not ▲)', async () => {
+    const { computeSeasonAwards } = await import('../awards');
+    const { pillsburyRace } = await import('../pillsbury');
+    const { tournamentElo } = await import('../tournamentElo');
+    // Anna, far ahead of Carla, beats her again: a few tenths above the objective
+    const g1 = game('aaaaaaaa', 'anna', 'carla', 'white', 10);
+    const states = { aaaaaaaa: g1.s };
+    const race = pillsburyRace(players, tournamentElo([past], players.map((p) => p.handle), [g1.h], states), [g1.h], [g1.h], states);
+    expect(race.rows[0].handle).toBe('anna');
+    expect(race.rows[0].over).toBeGreaterThan(0);
+    expect(race.rows[0].trend).toBe('same');
+    expect(computeSeasonAwards(players, [g1.h], states, [past]).some((a) => a.id === 'pillsbury')).toBe(false);
+  });
+
   it('is suspended with fewer than 4 players in the race', async () => {
     const { computeSeasonAwards } = await import('../awards');
     const { pillsburyRace } = await import('../pillsbury');

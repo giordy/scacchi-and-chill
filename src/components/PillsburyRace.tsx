@@ -1,5 +1,5 @@
-import React from 'react';
-import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types';
+import React, { useMemo } from 'react';
+import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
 import { EloReport } from '../lib/tournamentElo';
 import { PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
 import { playerHref } from '../lib/routes';
@@ -36,6 +36,7 @@ export function PillsburyRace({
   calendar,
   history,
   gameStates,
+  withdrawals,
   seasons,
   nameOf,
 }: {
@@ -44,10 +45,11 @@ export function PillsburyRace({
   calendar: HistoryGame[]; // the season's games, created and still to create
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
+  withdrawals?: Withdrawal[]; // who left the season: out of the race
   seasons: SeasonArchive[];
   nameOf: (handle: string) => string;
 }) {
-  const race = pillsburyRace(players, elo, calendar, history, gameStates);
+  const race = useMemo(() => pillsburyRace(players, elo, calendar, history, gameStates, withdrawals), [players, elo, calendar, history, gameStates, withdrawals]);
   const reigning = reigningPillsbury(seasons);
   // The Elo is left out: it is the level, and the race is about going beyond it
   const row = (handle: string, rank: string, status: React.ReactNode, className = '') => (

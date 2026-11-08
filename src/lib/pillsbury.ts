@@ -1,9 +1,11 @@
 // Trofeo Pillsbury: to who beat their pronostico by most in the season, that is made the most
 // points beyond those expected from the Elo del torneo at its start (see seasonForecast). Named
 // after Harry Nelson Pillsbury, who in 1895, aged 22 and almost unknown, won Hastings ahead of
-// Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out.
-import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types';
+// Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out;
+// so is a player who left the season, and the games won or lost at the table.
+import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
 import { boardCalendar, currentSeason, eloSeasonFromCurrent, EloReport, Forecast, seasonForecast } from './tournamentElo';
+import { isVoid, stateOf } from './games';
 
 export const PILLSBURY_ID = 'pillsbury';
 // In text (WhatsApp, tooltips); on the site the trophy is drawn by components/PillsburyIcon
@@ -14,11 +16,22 @@ export const PILLSBURY_ORIGIN =
 
 export type Trend = 'up' | 'same' | 'down';
 
-// Above, in line or below the pronostico so far: a gap of a few tenths of a point says nothing
+// Above, in line or below the pronostico so far: a gap of a few tenths of a point says nothing. The
+// trophy goes only to who is above it, as the table shows them (▲), not to the first of those "in line"
+export const PILLSBURY_MIN_OVER = 0.5;
 export const trendOf = (f: Forecast): Trend => {
   const over = f.points - f.expectedSoFar;
-  return over >= 0.5 ? 'up' : over <= -0.5 ? 'down' : 'same';
+  return over >= PILLSBURY_MIN_OVER ? 'up' : over <= -PILLSBURY_MIN_OVER ? 'down' : 'same';
 };
+
+// The games of the calendar an objective is made of: not those decided at the table (forfeits after a
+// withdrawal: points in the standings, not games played) nor those aborted
+export function raceCalendar(calendar: HistoryGame[], gameStates: Record<string, LichessExportGame>): HistoryGame[] {
+  return calendar.filter((g) => {
+    const s = stateOf(g, gameStates);
+    return !s || (s.status !== 'forfeit' && !isVoid(s));
+  });
+}
 
 export interface PillsburyRow {
   handle: string;
@@ -35,6 +48,7 @@ export interface PillsburyRace {
   rows: PillsburyRow[]; // who is in the race and has played a game that counts, best first
   waiting: string[]; // in the race, no game that counts yet
   counted: Record<string, { played: number; games: number }>; // games that count: played, in all
+  forecasts: Record<string, Forecast>; // the objective of each player in the race
   newcomers: string[]; // esordienti: out of the race this season
 }
 
@@ -44,22 +58,27 @@ export function pillsburyRace(
   report: EloReport,
   calendar: HistoryGame[], // the season's games, created and still to create
   history: HistoryGame[],
-  gameStates: Record<string, LichessExportGame>
+  gameStates: Record<string, LichessExportGame>,
+  withdrawals?: Withdrawal[] // who left the season: out of the race (with forfeits they stay in the list)
 ): PillsburyRace {
   const season = currentSeason(report);
   const handles = players.map((p) => p.handle);
   const finished = eloSeasonFromCurrent(handles, history, gameStates).games;
-  const board = boardCalendar(calendar, gameStates, handles);
+  const board = boardCalendar(raceCalendar(calendar, gameStates), gameStates, handles);
+  const left = new Set((withdrawals ?? []).filter((w) => w.mode !== 'replaced').map((w) => w.handle.toLowerCase()));
   const rows: PillsburyRow[] = [];
   const waiting: string[] = [];
   const counted: PillsburyRace['counted'] = {};
+  const forecasts: PillsburyRace['forecasts'] = {};
   const newcomers: string[] = [];
   players.forEach((p) => {
+    if (left.has(p.handle.toLowerCase())) return;
     const f = seasonForecast(p.handle, season, board, finished);
     if (!f) {
       newcomers.push(p.handle);
       return;
     }
+    forecasts[p.handle] = f;
     counted[p.handle] = { played: f.played, games: f.games };
     if (f.played === 0) {
       waiting.push(p.handle);
@@ -69,7 +88,7 @@ export function pillsburyRace(
   });
   rows.sort((a, b) => b.over - a.over);
   const suspended = rows.length + waiting.length < PILLSBURY_MIN_PLAYERS;
-  return { suspended, rows, waiting, newcomers, counted };
+  return { suspended, rows, waiting, newcomers, counted, forecasts };
 }
 
 // Who won the Trofeo Pillsbury of the latest archived season that gave it

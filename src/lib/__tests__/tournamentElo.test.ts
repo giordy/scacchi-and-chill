@@ -112,6 +112,14 @@ describe('Elo del torneo', () => {
       expect(seeded.ratings.get('dario')).toBeGreaterThan(1600);
     });
 
+    it('is what a performance on few games leans on, instead of 1500', () => {
+      // A substitute with one draw against Bruno: their performance is pulled towards what was known of them
+      const season = (seeds?: Record<string, number>) =>
+        computeElo([s1, { key: 's2', players: ['anna', 'bruno', 'carla', 'dario'], seeds, games: [g('dario', 'bruno', '½-½', 5)] }]).ratings.get('dario')!;
+      expect(season({ dario: 1800 })).toBeGreaterThan(season() + 100);
+      expect(season({ dario: 1800 })).toBeLessThan(1800); // the draw against a weaker player still counts
+    });
+
     it('is read back from an archived season, without the seeds that have no rating', () => {
       const archive: SeasonArchive = {
         id: 's2', season: 's2', title: 'T', archivedAt: '2027-01-01', gamesPlayed: 0, standings: [],

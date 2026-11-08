@@ -124,7 +124,7 @@ export function PublicTournamentView({
       crosstable,
       progress,
       concluded,
-      awards: concluded ? computeSeasonAwards(players, history, gameStates, seasons, tournamentMeta.seeds) : [],
+      awards: concluded ? computeSeasonAwards(players, history, gameStates, seasons, tournamentMeta.seeds, tournamentMeta.withdrawals) : [],
       allGames,
       rounds: [...new Set(allGames.map((g) => g.round))].sort(byRound),
       summits: summitGames(players, allGames, gameStates),
@@ -378,6 +378,7 @@ export function PublicTournamentView({
           calendar={allGames}
           history={history}
           gameStates={gameStates}
+          withdrawals={tournamentMeta.withdrawals}
           seasons={seasons}
           nameOf={nameOf}
         />

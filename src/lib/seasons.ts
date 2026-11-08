@@ -47,7 +47,7 @@ export function buildSeasonArchive(
   archive.end = period.end ?? monthKey(now.getTime());
   // No champion until at least one game has been scored
   if (top && top.points > 0) archive.champion = { handle: top.handle, name: top.name, points: top.points };
-  const awards = computeSeasonAwards(players, history, gameStates, seasons.filter((s) => s.id !== seasonId(meta.season)), meta.seeds);
+  const awards = computeSeasonAwards(players, history, gameStates, seasons.filter((s) => s.id !== seasonId(meta.season)), meta.seeds, meta.withdrawals);
   if (awards.length > 0) archive.awards = awards;
   // Where the esordienti started: the Elo del torneo of the next seasons is computed again from the archives
   if (meta.seeds && meta.seeds.length > 0) archive.seeds = meta.seeds;

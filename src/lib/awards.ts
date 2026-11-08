@@ -1,6 +1,6 @@
-import { ArchivedGame, EloSeed, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonAward } from '../types';
+import { ArchivedGame, EloSeed, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonAward, Withdrawal } from '../types';
 import { roundHalf, tournamentElo } from './tournamentElo';
-import { PILLSBURY_EMOJI, PILLSBURY_ID, PILLSBURY_TITLE, pillsburyRace } from './pillsbury';
+import { PILLSBURY_EMOJI, PILLSBURY_ID, PILLSBURY_MIN_OVER, PILLSBURY_TITLE, pillsburyRace } from './pillsbury';
 
 // 5.5 -> "5½", 0.5 -> "½"
 const halves = (n: number) => String(Math.round(n * 2) / 2).replace(".5", "½").replace(/^0½/, "½");
@@ -47,7 +47,8 @@ export function computeSeasonAwards(
   history: HistoryGame[],
   gameStates: Record<string, LichessExportGame>,
   seasons: SeasonArchive[] = [], // archived seasons, for the Elo del torneo of the Trofeo Pillsbury
-  seeds?: EloSeed[] // where this season's esordienti started (TournamentMeta.seeds)
+  seeds?: EloSeed[], // where this season's esordienti started (TournamentMeta.seeds)
+  withdrawals?: Withdrawal[] // who left: out of the race for the Trofeo Pillsbury
 ): SeasonAward[] {
   const nameOf = (h: string) => players.find((p) => p.handle === h)?.name ?? h;
   const who = (handles: string[]) => handles.map((handle) => ({ handle, name: nameOf(handle) }));
@@ -56,11 +57,12 @@ export function computeSeasonAwards(
   const awards: SeasonAward[] = [];
 
   // Trofeo Pillsbury: who beat their pronostico by most (see lib/pillsbury). First, apart from
-  // the light-hearted awards. One winner, unless two beat it by exactly the same.
-  const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates, seeds), history, history, gameStates);
+  // the light-hearted awards. One winner, unless two beat it by the same (to a millionth of a point),
+  // and only above the objective as the race table shows it (▲): not the first of those in line.
+  const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates, seeds), history, history, gameStates, withdrawals);
   const best = race.rows[0];
-  if (!race.suspended && best && best.over > 0) {
-    const top = race.rows.filter((r) => r.over === best.over);
+  if (!race.suspended && best && best.over >= PILLSBURY_MIN_OVER) {
+    const top = race.rows.filter((r) => Math.abs(r.over - best.over) < 1e-6);
     const f = best.forecast;
     awards.push({
       id: PILLSBURY_ID,

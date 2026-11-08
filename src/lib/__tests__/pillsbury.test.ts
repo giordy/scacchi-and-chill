@@ -41,6 +41,39 @@ describe('the race for the Trofeo Pillsbury', () => {
   });
 });
 
+describe('the race, with who left and the games won at the table', () => {
+  const report = computeElo([
+    { key: 's1', players: ['anna', 'bruno', 'carla', 'elena'], games: [g('anna', 'bruno', '1-0', 1), g('carla', 'elena', '1-0', 2)] },
+    { key: 'current', players: ['anna', 'bruno', 'carla', 'elena'], games: [] },
+  ]);
+  const four = players.filter((p) => p.handle !== 'dario');
+  // Bruno beat Anna, then left: his game against Carla is a forfeit (a win for Carla at the table)
+  const history = [
+    { round: '1', white: 'bruno', black: 'anna', url: 'https://lichess.org/aaaaaaaa' },
+    { round: '2', white: 'carla', black: 'bruno', url: '', lichess: { id: '', status: 'forfeit', winner: 'white' as const } },
+    { round: '2', white: 'anna', black: 'elena', url: 'https://lichess.org/bbbbbbbb' },
+  ];
+  const states = {
+    aaaaaaaa: { id: 'aaaaaaaa', status: 'resign', winner: 'white' as const, lastMoveAt: 10 },
+    bbbbbbbb: { id: 'bbbbbbbb', status: 'aborted' },
+  };
+  const withdrawals = [{ handle: 'bruno', name: 'bruno', mode: 'forfeit' as const, played: 1, total: 3, at: '2026-11-01' }];
+  const race = pillsburyRace(four, report, history, history, states as never, withdrawals as never);
+
+  it('leaves out who left the season, though their name stays in the list (forfeits)', () => {
+    expect([...race.rows, ...race.waiting.map((handle) => ({ handle }))].map((r) => r.handle)).not.toContain('bruno');
+    expect(race.forecasts.bruno).toBeUndefined();
+    // Without the withdrawal Bruno would lead the race with his win
+    expect(pillsburyRace(four, report, history, history, states as never).rows[0].handle).toBe('bruno');
+  });
+
+  it('makes no objective of a forfeit or an aborted game', () => {
+    // Carla's only game is a forfeit, Anna's second was aborted: no game that counts for either
+    expect(race.counted.carla).toEqual({ played: 0, games: 0 });
+    expect(race.counted.anna).toEqual({ played: 1, games: 1 }); // the game lost to Bruno, played
+  });
+});
+
 describe('the reigning Trofeo Pillsbury', () => {
   const season = (id: string, archivedAt: string, winner?: string): SeasonArchive => ({
     id, season: id, title: 'T', archivedAt, standings: [], gamesPlayed: 0,
