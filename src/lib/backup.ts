@@ -8,7 +8,7 @@ export interface BackupSummary {
   scheduled: number;
   games: number;
   seasons: number;
-  privateData: boolean; // anecdotes, ratings, settings or message texts
+  privateData: boolean; // anecdotes, settings or message texts
 }
 
 const isText = (v: unknown): v is string => typeof v === 'string' && v.trim() !== '';
@@ -53,7 +53,7 @@ export function parseBackup(text: string): { data: BackupData; summary: BackupSu
       scheduled: data.schedule!.length,
       games: data.history!.length,
       seasons: data.seasons!.length,
-      privateData: !!(d.anecdotes || d.ratings || d.settings || d.templates || d.statusPhrases),
+      privateData: !!(d.anecdotes || d.settings || d.templates || d.statusPhrases),
     },
   };
 }

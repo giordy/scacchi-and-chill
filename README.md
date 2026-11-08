@@ -69,7 +69,7 @@ L'email dell'organizzatore **non è nel codice** (né nel sito pubblicato): l'or
 | `tournaments/<id>/games/*` | pubblica | partite e stato Lichess |
 | `tournaments/<id>/seasons/*` | pubblica | classifiche finali delle stagioni archiviate |
 | `tournaments/<id>/media/*` | pubblica | foto del maestro caricate dall'area organizzatore, una per stagione (JPEG ridotto, scritto solo dall'organizzatore, sotto i 900 KB) |
-| `tournaments/<id>/private/organizer` | solo admin | aneddoti sui giocatori, Elo Lichess scaricati in passato (non più usati), token Lichess (permesso Challenge), opzioni delle sfide e testi dei messaggi |
+| `tournaments/<id>/private/organizer` | solo admin | aneddoti sui giocatori, token Lichess (permesso Challenge), opzioni delle sfide e testi dei messaggi |
 | `admins/<email>` | solo il proprio | un documento vuoto per ogni organizzatore, creato a mano dalla console Firebase |
 
 Gli aneddoti e il token sono privati di proposito: non vanno mai nella parte pubblica. Le regole Firestore permettono di leggere `private/*` solo all'account dell'organizzatore.

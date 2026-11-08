@@ -62,7 +62,6 @@ export function BackupSection({
       templates,
       statusPhrases: organizer.statusPhrases ?? null,
       anecdotes: organizer.anecdotes,
-      ratings: organizer.ratings,
     };
     // Uploaded photos: a failure to read them must not block the copy of everything else
     try {
@@ -126,7 +125,6 @@ export function BackupSection({
       if (summary.privateData) {
         organizer.replaceAll({
           ...(data.anecdotes ? { anecdotes: data.anecdotes } : {}),
-          ...(data.ratings ? { ratings: data.ratings } : {}),
           ...(data.settings ? { settings: { ...data.settings, token: organizer.settings?.token ?? settings.token } } : {}),
           ...(data.templates ? { templates: data.templates } : {}),
           ...(data.statusPhrases !== undefined ? { statusPhrases: data.statusPhrases } : {}),

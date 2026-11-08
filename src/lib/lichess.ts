@@ -100,7 +100,7 @@ export async function fetchGameStates(ids: string[]): Promise<Record<string, Lic
 // Lichess takes up to 300 names per call
 const MAX_USERS = 300;
 
-// The public profiles of many players in one call (ratings, flair, seenAt...), instead of one call
+// The public profiles of many players in one call (flair, seenAt...), instead of one call
 // per player; players Lichess does not know are left out
 export async function fetchUsers(handles: string[]): Promise<unknown[]> {
   const out: unknown[] = [];

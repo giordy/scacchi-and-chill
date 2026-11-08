@@ -1,7 +1,7 @@
 // Nightly backup (GitHub Action "Backup"): reads the public tournament data from Firestore and
 // writes it as one JSON file, in the same format as "Scarica copia JSON" in the organizer area,
 // so "Ripristina da file" can restore either. Games still on the board keep only link and status.
-// The private organizer document (token, anecdotes, ratings, message texts) is readable only by
+// The private organizer document (token, anecdotes, message texts) is readable only by
 // the organizer and is not included.
 // Usage: node scripts/backup.mjs <output file>
 import fs from 'node:fs';

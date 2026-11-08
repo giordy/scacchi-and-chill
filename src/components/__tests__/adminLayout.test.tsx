@@ -15,7 +15,7 @@ const config = {
   players: [{ handle: 'anna', name: 'Anna' }, { handle: 'bruno', name: 'Bruno' }],
   tournament: { ...(defaultConfig.tournament as any), winners: [] },
 } as any;
-const organizer = { anecdotes: {}, ratings: {}, setAnecdote: noop, setRatings: noop, statusPhrases: null, setStatusPhrases: noop } as any;
+const organizer = { anecdotes: {}, setAnecdote: noop, statusPhrases: null, setStatusPhrases: noop } as any;
 const summaries = (html: string) => [...html.matchAll(/<summary>([^<]+)<\/summary>/g)].map((m) => m[1]);
 
 describe('admin layout', () => {

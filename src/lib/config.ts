@@ -181,18 +181,6 @@ export function normalizeSchedule(raw: unknown[]): ScheduledMatch[] {
     }));
 }
 
-export function initialStoredSettings(): Partial<Settings> {
-  for (const key of ["pairings.settings.v2", "pairings.settings"]) {
-    try {
-      const old = JSON.parse(localStorage.getItem(key) || "{}");
-      if (old?.token) return { token: old.token };
-    } catch {
-      // ignore
-    }
-  }
-  return {};
-}
-
 // The Firestore tournament document over a config: what it has (meta, players, schedule) wins
 export function withTournamentDoc(cfg: AppConfig, doc: TournamentDocData | null): AppConfig {
   if (!doc) return cfg;

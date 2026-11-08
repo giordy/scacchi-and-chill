@@ -214,25 +214,9 @@ export interface BackupData {
   templates?: MessageTemplates;
   statusPhrases?: Partial<StatusPhrases> | null;
   anecdotes?: Record<string, string>;
-  ratings?: Record<string, string | number | null>;
   media?: Record<string, string>; // uploaded photos by id (see lib/media.ts): compressed JPEG data URLs
 }
 
-
-// Subset of the Lichess /api/user/{name} response used to read ratings
-export interface LichessPerf {
-  rating?: number;
-  games?: number;
-  prov?: boolean;
-}
-
-export interface LichessUserProfile {
-  perfs?: {
-    correspondence?: LichessPerf;
-    rapid?: LichessPerf;
-    classical?: LichessPerf;
-  };
-}
 
 // Final snapshot of a finished season, saved in tournaments/{id}/seasons/{seasonId}
 export interface SeasonArchiveStanding {
