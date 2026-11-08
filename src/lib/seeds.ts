@@ -65,6 +65,25 @@ export function reliableRatingsAt(history: unknown, date: string): Partial<Recor
   return out;
 }
 
+// What a rating history holds up to a day, in words for the organizer: for each kind, the days with
+// rated games and the last one; or what was read instead, when it is not a history
+export function historySummary(history: unknown, date: string): string {
+  if (!Array.isArray(history)) return `storico Lichess non leggibile (${history === null ? 'null' : typeof history})`;
+  if (history.length === 0) return 'storico Lichess vuoto';
+  const names = history.map((h) => (h && typeof h === 'object' ? String((h as { name?: unknown }).name) : typeof h));
+  const kinds = SEED_PERFS.map((perf) => {
+    const entry = history.find((h) => h && typeof h === 'object' && (h as { name?: unknown }).name === HISTORY_NAME[perf]) as { points?: unknown } | undefined;
+    if (!entry) return null;
+    const days = (Array.isArray(entry.points) ? entry.points : [])
+      .filter((p): p is number[] => Array.isArray(p) && p.length >= 4 && p.every((n) => typeof n === 'number'))
+      .map(([y, m, d]) => isoDay(Date.UTC(y, m, d)))
+      .filter((day) => day <= date)
+      .sort();
+    return `${SEED_PERF_LABEL[perf]} ${days.length} giorni${days.length > 0 ? `, ultimo ${days[days.length - 1]}` : ''}`;
+  }).filter(Boolean);
+  return kinds.length > 0 ? `nello storico: ${kinds.join('; ')}` : `nello storico solo: ${names.join(', ')}`;
+}
+
 // The seed of a player in their first season. regulars: the Elo del torneo of the regulars of the
 // season at its start, by handle in lower case; histories: the Lichess rating histories, by handle in
 // lower case (the player's and the regulars')
@@ -92,7 +111,7 @@ export function computeSeed(handle: string, date: string, regulars: Map<string, 
   const reason =
     skipped.length > 0
       ? skipped.join('; ')
-      : `nessun Elo Lichess affidabile (servono almeno ${RELIABLE_DAYS} giorni con partite valutate dello stesso tipo, l'ultima entro un anno; il bullet non conta)`;
+      : `nessun Elo Lichess affidabile (servono almeno ${RELIABLE_DAYS} giorni con partite valutate dello stesso tipo, l'ultima entro un anno; il bullet non conta); ${historySummary(histories.get(lower(handle)), date)}`;
   return { handle, rating: null, date, reason };
 }
 

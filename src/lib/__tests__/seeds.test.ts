@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeSeed, firstGames, reliableRatingsAt, seedDate, seedsToFix } from '../seeds';
+import { computeSeed, firstGames, historySummary, reliableRatingsAt, seedDate, seedsToFix } from '../seeds';
 import { HistoryGame, LichessExportGame } from '../../types';
 
 // A Lichess rating history: `days` days of rated games of a kind, one a day up to `last`, ending at `rating`
@@ -91,9 +91,16 @@ describe('computeSeed', () => {
         "Elo rapid 1850 affidabile, ma solo 2 veterani con l'Elo rapid affidabile a quella data (ne servono 3); " +
         "Elo blitz 1700 affidabile, ma nessun veterano con l'Elo blitz affidabile a quella data (ne servono 3)",
     });
-    const none = "nessun Elo Lichess affidabile (servono almeno 10 giorni con partite valutate dello stesso tipo, l'ultima entro un anno; il bullet non conta)";
-    expect(computeSeed('elena', date, regulars, histories)).toEqual({ handle: 'elena', rating: null, date, reason: none });
-    expect(computeSeed('nobody', date, regulars, histories)).toEqual({ handle: 'nobody', rating: null, date, reason: none });
+    const none = "nessun Elo Lichess affidabile (servono almeno 10 giorni con partite valutate dello stesso tipo, l'ultima entro un anno; il bullet non conta); ";
+    // ...and what the history held, to see why
+    expect(computeSeed('elena', date, regulars, histories)).toEqual({ handle: 'elena', rating: null, date, reason: none + 'nello storico: rapid 5 giorni, ultimo 2026-09-01' });
+    expect(computeSeed('nobody', date, regulars, histories)).toEqual({ handle: 'nobody', rating: null, date, reason: none + 'storico Lichess non leggibile (undefined)' });
+  });
+
+  it('says what a history held when it has none of the kinds, or is not one', () => {
+    expect(historySummary([{ name: 'Bullet', points: [] }, { name: 'Puzzles', points: [] }], date)).toBe('nello storico solo: Bullet, Puzzles');
+    expect(historySummary([], date)).toBe('storico Lichess vuoto');
+    expect(historySummary({ error: 'x' }, date)).toBe('storico Lichess non leggibile (object)');
   });
 });
 
