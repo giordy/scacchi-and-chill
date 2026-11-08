@@ -76,12 +76,10 @@ export function useEloSeeds({
         )
       );
     })()
-      .catch((e) => {
-        // Only retries pending: nothing new is waiting, no need to say it
-        if (toFix.some((t) => !t.retry)) {
-          latest.current.flash('warning', 'Elo di partenza non fissati, Lichess non risponde: si riprova alla prossima apertura. ' + errorMessage(e));
-        }
-      })
+      .catch((e) =>
+        // Always said, retries included: otherwise nothing shows whether the check ran
+        latest.current.flash('warning', 'Elo di partenza non controllati, Lichess non risponde: si riprova alla prossima apertura. ' + errorMessage(e))
+      )
       .finally(() => {
         running.current = false;
       });
