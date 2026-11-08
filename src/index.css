@@ -2054,22 +2054,13 @@ a.champion-badge {
   position: relative;
 }
 
-/* On a phone the name takes the width: the Elo goes to the top right corner of the card */
+/* On a phone the side goes under the name, as one row: the Elo, then the trophies. Kept in the
+   flow, so no line of the header (name, handle, last seen) can end up under it */
 @media (max-width: 600px) {
-  .player-elo-corner {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-  }
   .player-hero-side {
-    align-items: flex-start;
-  }
-}
-
-/* Room for the badge next to the name, on a phone */
-@media (max-width: 600px) {
-  .player-hero .hero-title {
-    padding-right: 96px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
   }
 }
 
@@ -2829,3 +2820,11 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 
 /* Under the Stato of the Pillsbury table: "2 di 10", the games that count played of all */
 .counted-games { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: var(--muted); white-space: nowrap; }
+
+/* On a phone the Elo is at the left of its row: its explanation opens from its left edge */
+@media (max-width: 600px) {
+  .player-elo-corner .infotip-bubble {
+    left: 0;
+    right: auto;
+  }
+}
