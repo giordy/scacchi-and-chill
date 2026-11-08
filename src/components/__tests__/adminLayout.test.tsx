@@ -6,6 +6,7 @@ import { SeasonsTab } from '../../tabs/SeasonsTab';
 import { PlayersTab } from '../../tabs/PlayersTab';
 import { SettingsTab } from '../../tabs/SettingsTab';
 import { ReviewsTab } from '../../ReviewsTab';
+import { SeedsSection } from '../../tabs/settings/SeedsSection';
 import { defaultConfig } from '../../lib/config';
 
 const noop = () => {};
@@ -32,7 +33,7 @@ describe('admin layout', () => {
     const html = renderToStaticMarkup(
       <SeasonsTab config={config} settings={settings} setSettings={noop as any} history={[]} setHistory={noop as any} onSeasonReset={noop} gameStates={{}} seasons={[]} flash={noop} onUpdateTournamentMeta={noop} onUpdateSchedule={noop} />
     );
-    expect(summaries(html)).toEqual(['Stagione corrente', 'Regolamento', 'Calendario', 'Fine stagione e storico (0)']);
+    expect(summaries(html)).toEqual(['Stagione corrente', 'Regolamento', 'Elo di partenza', 'Calendario', 'Fine stagione e storico (0)']);
     expect(html).toContain('Genera');
     expect(html).not.toContain('Ricostruisci');
     const rules = html.slice(html.indexOf('<summary>Regolamento'));
@@ -167,5 +168,39 @@ describe('players register', () => {
     expect(html.match(/nome doppio/g)).toHaveLength(2);
     // Only the one who never played can be deleted
     expect(html.match(/>Elimina</g)).toHaveLength(1);
+  });
+});
+
+describe('Elo di partenza in Stagioni', () => {
+  const season1 = {
+    id: 's1', season: 'Stagione 1', title: 'T', archivedAt: '2026-01-01', gamesPlayed: 1,
+    standings: [{ handle: 'anna', name: 'Anna', played: 1, won: 1, drawn: 0, lost: 0, points: 1, sb: 0 }],
+    games: [],
+  } as any;
+  const cfg = {
+    ...config,
+    players: ['anna', 'carla', 'dario', 'elena', 'fabio'].map((handle) => ({ handle, name: handle })),
+    tournament: {
+      ...config.tournament,
+      seeds: [
+        { handle: 'carla', rating: 1620, date: '2026-09-08', perf: 'rapid', lichess: 1900, offset: -280 },
+        { handle: 'dario', rating: null, date: '2026-09-08' },
+      ],
+    },
+  } as any;
+  const history = [{ round: '1', white: 'elena', black: 'anna', url: 'https://lichess.org/aaaaaaaa', createdAt: Date.parse('2026-10-08T10:00:00Z') }];
+
+  it('lists who plays their first season, with where each starts', () => {
+    const html = renderToStaticMarkup(<SeedsSection config={cfg} history={history} gameStates={{}} seasons={[season1]} />);
+    expect(html).toContain('<strong>carla</strong> · 1620');
+    expect(html).toContain('Lichess rapid 1900 del 8 set 2026, correzione −280');
+    expect(html).toContain('<strong>dario</strong> · esordiente');
+    expect(html).toContain('<strong>elena</strong> · in calcolo'); // first game there, seed not fixed yet
+    expect(html).toContain('<strong>fabio</strong> · in attesa');
+    expect(html).not.toContain('<strong>anna</strong>'); // played Stagione 1
+  });
+
+  it('has nothing to list in the first season of the tournament', () => {
+    expect(renderToStaticMarkup(<SeedsSection config={cfg} history={history} gameStates={{}} seasons={[]} />)).toContain('sono tutti esordienti');
   });
 });

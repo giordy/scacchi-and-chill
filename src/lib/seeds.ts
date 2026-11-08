@@ -31,6 +31,10 @@ const DAY = 86400000;
 const lower = (h: string) => h.toLowerCase();
 const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
+// "2026-09-08" -> "8 set 2026", as the site shows the day of a seed
+export const seedDayLabel = (day: string) =>
+  new Date(`${day}T12:00:00Z`).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+
 // The day a player's Lichess rating is taken from: 30 days before their first game of the season
 export const seedDate = (firstGameMs: number) => isoDay(firstGameMs - SEED_DAYS_BEFORE * DAY);
 

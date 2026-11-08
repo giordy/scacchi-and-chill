@@ -18,10 +18,7 @@ import { withScheduledGames } from '../lib/publicGames';
 import { Trend, TrendKind } from '../components/Trend';
 import { PILLSBURY_MIN_PLAYERS, pillsburyWins } from '../lib/pillsbury';
 import { PillsburyIcon } from '../components/PillsburyIcon';
-import { SEED_PERF_LABEL } from '../lib/seeds';
-
-// "2026-09-08" -> "8 set 2026"
-const shortDate = (day: string) => new Date(`${day}T12:00:00Z`).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+import { SEED_PERF_LABEL, seedDayLabel } from '../lib/seeds';
 
 interface PlayerPageProps {
   handle: string;
@@ -259,7 +256,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                 text={
                   "Elo del torneo, calcolato solo dalle nostre partite." +
                   (seed
-                    ? ` Al primo anno: parte da ${seed.rating}, il suo Elo Lichess ${SEED_PERF_LABEL[seed.perf!]} del ${shortDate(seed.date)} (${seed.lichess}) riportato sulla scala del torneo.`
+                    ? ` Al primo anno: parte da ${seed.rating}, il suo Elo Lichess ${SEED_PERF_LABEL[seed.perf!]} del ${seedDayLabel(seed.date)} (${seed.lichess}) riportato sulla scala del torneo.`
                     : "") +
                   (newcomer
                     ? " Esordiente: nelle sue partite si muove solo il suo Elo."

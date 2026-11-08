@@ -16,11 +16,12 @@ import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
 import { HallOfFameSection } from './settings/HallOfFameSection';
 import { GeneratorSection } from './rounds/GeneratorSection';
 import { ChallengeSection } from './settings/ChallengeSection';
+import { SeedsSection } from './settings/SeedsSection';
 import { applyWithdrawals } from '../lib/withdrawals';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
-// The seasons: the current one (name, master, anecdotes, rules), closing it, the history and the
+// The seasons: the current one (name, master, anecdotes, rules, Elo di partenza), closing it, the history and the
 // hall of fame. Players and withdrawals are in PlayersTab; set-and-forget settings (token, message
 // texts, backup) in SettingsTab. Sections are native <details>, only "Stagione corrente" is open.
 export function SeasonsTab({
@@ -67,6 +68,10 @@ export function SeasonsTab({
         >
           <ChallengeSection settings={settings} setSettings={setSettings} />
         </RulesSection>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Elo di partenza">
+        <SeedsSection config={config} history={history} gameStates={gameStates} seasons={seasons} />
       </CollapsibleSection>
 
       {/* At the start of a season: the round robin, or the rounds still missing (open while there are none) */}
