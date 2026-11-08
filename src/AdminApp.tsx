@@ -129,7 +129,8 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
 
   // Where the esordienti start in the Elo del torneo: fixed from Lichess at their first game
   useEloSeeds({
-    enabled: canAutoSync,
+    // After the organizer's settings: the Lichess token is asked with
+    enabled: canAutoSync && organizer.loaded,
     config,
     history,
     gameStates: lichess.gameStates,
@@ -137,6 +138,7 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
     onUpdateTournamentMeta: updateTournamentMeta,
     flash,
     nameOf,
+    token: settings.token || undefined,
   });
 
   const setOpenRound = (r: string) => {

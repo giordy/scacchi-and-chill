@@ -22,6 +22,7 @@ export function useEloSeeds({
   onUpdateTournamentMeta,
   flash,
   nameOf,
+  token,
 }: {
   enabled: boolean;
   config: AppConfig;
@@ -31,6 +32,7 @@ export function useEloSeeds({
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
   flash: Flash;
   nameOf: (handle: string) => string;
+  token?: string; // the organizer's Lichess token (see fetchRatingHistory)
 }) {
   // The latest values, for when the answers from Lichess arrive
   const latest = useRef({ config, onUpdateTournamentMeta, flash });
@@ -52,7 +54,14 @@ export function useEloSeeds({
     const needed = [...new Set([...regulars.keys(), ...toFix.map((t) => t.handle)])];
     (async () => {
       const histories = new Map<string, unknown>();
-      for (const h of needed) histories.set(h, await fetchRatingHistory(h));
+      for (const h of needed) histories.set(h, await fetchRatingHistory(h, token));
+      // Nobody of a whole season has an empty history: Lichess did not give them, nothing is saved
+      if ([...histories.values()].every((h) => Array.isArray(h) && h.length === 0)) {
+        throw new Error(
+          `Lichess ha mandato uno storico vuoto per tutti i ${histories.size} giocatori` +
+            (token ? '' : ' (senza token Lichess: inseriscilo in Impostazioni)')
+        );
+      }
       const { config: now, onUpdateTournamentMeta: save, flash: say } = latest.current;
       const same = (a: EloSeed, b: EloSeed) => a.handle.toLowerCase() === b.handle.toLowerCase();
       // A retry that finds the same as last time (no rating, same reason) is not saved again nor told

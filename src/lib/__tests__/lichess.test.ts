@@ -89,6 +89,18 @@ describe('fetchRatingHistory', () => {
   const answer = (status: number, body: string) => vi.stubGlobal('fetch', vi.fn(async () => new Response(body, { status })));
   afterEach(() => vi.unstubAllGlobals());
 
+  it('is asked with the organizer\'s token when there is one', async () => {
+    const { fetchRatingHistory } = await import('../lichess');
+    answer(200, '[]');
+    await fetchRatingHistory('drake097', 'lip_abc');
+    const [url, init] = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(url).toBe('https://lichess.org/api/user/drake097/rating-history');
+    expect(init).toEqual({ headers: { Authorization: 'Bearer lip_abc' } });
+    answer(200, '[]');
+    await fetchRatingHistory('drake097');
+    expect((fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0][1]).toBeUndefined();
+  });
+
   it('takes an empty list as a history: an account without rated games', async () => {
     const { fetchRatingHistory } = await import('../lichess');
     answer(200, '[]');

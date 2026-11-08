@@ -120,10 +120,11 @@ export async function fetchUsers(handles: string[]): Promise<unknown[]> {
 // A player's Lichess rating history, every kind (see lib/seeds.ts). An empty list is a history: an
 // account without rated games has one (a regular of ours, at least). Any other answer that is not a
 // list is an error that says what came back (status, the start of the body).
-export async function fetchRatingHistory(handle: string): Promise<unknown> {
+// Asked with the organizer's token when there is one: asked anonymously from the site, Lichess answered
+// an empty history for everyone, while the same page opened by a signed-in user lists every rating.
+export async function fetchRatingHistory(handle: string, token?: string): Promise<unknown> {
   const url = `https://lichess.org/api/user/${encodeURIComponent(handle)}/rating-history`;
-  // A plain GET, as when the page is opened in a browser (which answers with the history)
-  const res = await fetch(url);
+  const res = await fetch(url, token ? { headers: { Authorization: "Bearer " + token } } : undefined);
   const body = await res.text();
   const start = body.slice(0, 120).replace(/\s+/g, " ");
   if (!res.ok) throw new Error(`storico di ${handle}: Lichess ha risposto ${res.status} (${start || "senza testo"})`);
