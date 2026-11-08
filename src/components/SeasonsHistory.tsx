@@ -8,7 +8,7 @@ import { isTied, seasonStarted, sharedRanks } from '../lib/standings';
 import { departureText } from '../lib/departures';
 import { fullPodium, MEDAL_EMOJI, podiumFromStandings, shortSeason } from '../lib/honours';
 import { useNameOf } from './Names';
-import { withAwardGames } from '../lib/awards';
+import { shownAwards, withAwardGames } from '../lib/awards';
 
 interface PastSeason {
   season: string;
@@ -91,10 +91,10 @@ function SeasonDetails({ archive }: { archive: SeasonArchive }) {
       {archive.departures?.map((d) => (
         <p key={d.handle} className="note note-sm season-departure">{departureText(d, nameOf)}</p>
       ))}
-      {archive.awards && archive.awards.length > 0 && (
+      {shownAwards(archive.awards ?? []).length > 0 && (
         <>
           <h3 className="rules-heading">Premi</h3>
-          <SeasonAwards awards={withAwardGames(archive.awards, archive.games)} compact />
+          <SeasonAwards awards={withAwardGames(shownAwards(archive.awards!), archive.games)} compact />
         </>
       )}
     </div>

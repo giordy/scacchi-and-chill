@@ -185,6 +185,16 @@ describe('awards of a past season', () => {
     expect(html).toContain('href="https://lichess.org/cccccccc"');
     expect(html).toContain('vedi su Lichess');
   });
+
+  it('leave out Re del matto, no longer given', () => {
+    const award = (id: string, title: string) => ({ id, emoji: '', title, description: '', winners: [{ handle: 'anna', name: 'Anna' }], detail: '' });
+    const html = publicPage('#/albo', [{ ...season1, awards: [award('mate', 'Re del matto'), award('fastest', 'Fulmine')] }]);
+    expect(html).not.toContain('Re del matto');
+    expect(html).toContain('Fulmine');
+    expect(html).toContain('>Premi<');
+    // A season with only Re del matto has no Premi at all
+    expect(publicPage('#/albo', [{ ...season1, awards: [award('mate', 'Re del matto')] }])).not.toContain('>Premi<');
+  });
 });
 
 describe('the reigning Trofeo Pillsbury', () => {

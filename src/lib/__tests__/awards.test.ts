@@ -156,12 +156,11 @@ describe('games linked from the awards', () => {
     const old = [
       { id: 'fastest', emoji: '', title: '', description: '', winners: w, detail: '' },
       { id: 'longest', emoji: '', title: '', description: '', winners: w, detail: '' },
-      { id: 'mate', emoji: '', title: '', description: '', winners: w, detail: '' },
       { id: 'upsets', emoji: '', title: '', description: '', winners: w, detail: '' },
       { id: 'draws', emoji: '', title: '', description: '', winners: w, detail: '' },
     ];
     const out = withAwardGames(old, games);
-    expect(out.map((a) => a.games)).toEqual([['quick001'], ['long0001'], ['quick001'], ['upset001'], undefined]);
+    expect(out.map((a) => a.games)).toEqual([['quick001'], ['long0001'], ['upset001'], undefined]);
     // Without archived games, or with games already linked, nothing changes
     expect(withAwardGames(old, undefined)).toBe(old);
     expect(withAwardGames([{ ...old[0], games: ['x'] }], games)[0].games).toEqual(['x']);
@@ -229,11 +228,11 @@ describe('Trofeo Pillsbury', () => {
   });
 });
 
-describe('Re del matto of past seasons', () => {
-  it('shows ⚔️, also for a season archived with the crown', async () => {
-    const { awardEmoji } = await import('../awards');
-    expect(awardEmoji({ id: 'mate', emoji: '👑', title: '', description: '', winners: [], detail: '' })).toBe('⚔️');
-    expect(awardEmoji({ id: 'draws', emoji: '🧱', title: '', description: '', winners: [], detail: '' })).toBe('🧱');
+describe('Re del matto', () => {
+  it('is hidden in the archived seasons too', async () => {
+    const { shownAwards } = await import('../awards');
+    const award = (id: string) => ({ id, emoji: '', title: '', description: '', winners: [], detail: '' });
+    expect(shownAwards([award('mate'), award('fastest'), award('draws')]).map((a) => a.id)).toEqual(['fastest', 'draws']);
   });
 });
 

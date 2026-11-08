@@ -10,9 +10,7 @@ import { formatPace } from './playerProfile';
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { plural } from './games';
 // L'ammazzagiganti (most colpacci) was given until the Trofeo Pillsbury took its place: past
-// seasons keep it, with the Lichess ratings and the gap it used then. Re del matto (most wins by
-// checkmate) was given until the Stagione 2: with most games won by mate here it went to who won
-// most, the champion again; past seasons keep it too.
+// seasons keep it, with the Lichess ratings and the gap it used then.
 const LEGACY_UPSET_GAP = 150;
 
 
@@ -27,11 +25,14 @@ function leaders(counts: Map<string, number>, players: Player[]): { handles: str
 // given away makes the others worth less
 const MIN_COUNT = 2;
 
-// Re del matto of past seasons: ⚔️, not the crown, which next to a name means the reigning champion. Seasons
-// archived before keep 👑 in their data: awardEmoji shows them with the new one. The same for the
-// Trofeo Pillsbury, archived with 🌱 before it became a medal.
-const MATE_EMOJI = "⚔️";
-export const awardEmoji = (a: SeasonAward) => (a.id === "mate" ? MATE_EMOJI : a.id === PILLSBURY_ID ? PILLSBURY_EMOJI : a.emoji);
+// The Trofeo Pillsbury, archived with 🌱 before it became a medal, shows the medal
+export const awardEmoji = (a: SeasonAward) => (a.id === PILLSBURY_ID ? PILLSBURY_EMOJI : a.emoji);
+
+// Awards no longer given, hidden in the archived seasons too: Re del matto (most wins by mate),
+// added to the Stagione 1 after it ended; with most games won by mate here it went to who won most,
+// the champion again
+const RETIRED_AWARDS = new Set(["mate"]);
+export const shownAwards = (awards: SeasonAward[]) => awards.filter((a) => !RETIRED_AWARDS.has(a.id));
 // The name of the Pillsbury from the code, as for the emoji: an archive saved as "Premio Pillsbury" shows the new name
 export const awardTitle = (a: SeasonAward) => (a.id === PILLSBURY_ID ? PILLSBURY_TITLE : a.title);
 
@@ -185,7 +186,6 @@ export function withAwardGames(awards: SeasonAward[], games: ArchivedGame[] | un
     let found: ArchivedGame[] = [];
     if (a.id === 'fastest' && decisive.length) found = decisive.filter((g) => moves(g) === Math.min(...decisive.map(moves)));
     else if (a.id === 'longest' && decisive.length) found = decisive.filter((g) => moves(g) === Math.max(...decisive.map(moves)));
-    else if (a.id === 'mate') found = decisive.filter((g) => g.status === 'mate' && won(g));
     else if (a.id === 'upsets') {
       found = decisive.filter((g) => {
         if (!won(g) || g.provisional || g.whiteRating === undefined || g.blackRating === undefined) return false;
