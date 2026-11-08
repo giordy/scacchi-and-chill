@@ -11,9 +11,45 @@ const pawn = (stroke: number) => (
   </>
 );
 
-export type PillsburyIconVariant = 'arrow' | 'medal';
+export type PillsburyIconVariant = 'arrow' | 'medal' | 'ribbon' | 'cup';
 
 export function PillsburyIcon({ variant = 'arrow', size = 20 }: { variant?: PillsburyIconVariant; size?: number }) {
+  // Flat shapes drawn for 20 px: what makes a medal or a cup is its outline, not its details
+  const brass = { fill: 'var(--brass)' };
+  const deep = { fill: 'color-mix(in srgb, var(--brass) 62%, #000)' };
+  // A plain white pawn: head, body, base
+  const flatPawn = (x: number, y: number, k: number) => (
+    <g transform={`translate(${x} ${y}) scale(${k})`} fill="#fff">
+      <circle cx="0" cy="-2.6" r="1.75" />
+      <path d="M-1.35 -0.9h2.7l1.2 3.9h-5.1z" />
+      <rect x="-2.75" y="3.2" width="5.5" height="1.45" rx="0.45" />
+    </g>
+  );
+  if (variant === 'ribbon') {
+    // A medal: two ribbon tails in a V above a brass disc with the pawn
+    return (
+      <svg className="pillsbury-icon" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M3.6 0.8h5.2l4.4 9.4H8z" style={{ fill: 'var(--accent)' }} />
+        <path d="M15.2 0.8h5.2L16 10.2h-5.2z" style={{ fill: 'color-mix(in srgb, var(--accent) 75%, #000)' }} />
+        <circle cx="12" cy="15.4" r="8" style={deep} />
+        <circle cx="12" cy="15.4" r="6.6" style={brass} />
+        {flatPawn(12, 15.6, 1)}
+      </svg>
+    );
+  }
+  if (variant === 'cup') {
+    // A cup with two handles on a base, the pawn on its front
+    return (
+      <svg className="pillsbury-icon" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M6 4.2H3.4a3.2 3.2 0 0 0 3.6 5.6M18 4.2h2.6a3.2 3.2 0 0 1-3.6 5.6" fill="none" style={{ stroke: 'var(--brass)' }} strokeWidth="1.9" strokeLinecap="round" />
+        <path d="M5.4 1.2h13.2v6.2a6.6 6.6 0 0 1-13.2 0z" style={brass} />
+        <rect x="10.7" y="13.6" width="2.6" height="3.6" style={brass} />
+        <rect x="7.2" y="17" width="9.6" height="2.4" rx="0.6" style={brass} />
+        <rect x="5.8" y="19.4" width="12.4" height="3.4" rx="0.7" style={deep} />
+        {flatPawn(12, 7.3, 0.82)}
+      </svg>
+    );
+  }
   if (variant === 'medal') {
     // On a brass disc, the arrow in the colour of the page behind it
     return (
