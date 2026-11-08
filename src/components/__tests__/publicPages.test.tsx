@@ -192,3 +192,24 @@ describe('the objective on the player page', () => {
     expect(playerPage('anna', [season1])).not.toContain('Obiettivo');
   });
 });
+
+describe('the Elo di partenza from Lichess', () => {
+  const seeded: AppConfig = {
+    ...config,
+    tournament: { ...config.tournament!, seeds: [{ handle: 'carla', rating: 1620, date: '2026-09-08', perf: 'rapid', lichess: 1900, offset: -280 }] },
+  };
+  const page = (cfg: AppConfig, handle: string) =>
+    renderToStaticMarkup(<PlayerPage handle={handle} config={cfg} history={history} gameStates={gameStates} nameOf={nameOf} seasons={[season1]} />);
+
+  it('says where a player in their first season started', () => {
+    const html = page(seeded, 'carla');
+    expect(html).toContain('Al primo anno: parte da 1620, il suo Elo Lichess rapid del 8 set 2026 (1900) riportato sulla scala del torneo.');
+    expect(html).not.toContain('Esordiente: nelle sue partite');
+  });
+
+  it('leaves a player without one an esordiente', () => {
+    const html = page(config, 'carla');
+    expect(html).not.toContain('Al primo anno');
+    expect(html).toContain('Esordiente: nelle sue partite si muove solo il suo Elo.');
+  });
+});

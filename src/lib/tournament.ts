@@ -56,6 +56,7 @@ export function tournamentFromDoc(doc: TournamentDocData): TournamentMeta | null
     rated: typeof doc.rated === "boolean" ? doc.rated : undefined,
     winners: doc.winners || [],
     ...(Array.isArray(doc.roster) ? { roster: doc.roster } : {}),
+    ...(Array.isArray(doc.seeds) ? { seeds: doc.seeds } : {}),
   };
 }
 
@@ -81,5 +82,6 @@ export function mergeTournamentMeta(
     rated: patch.rated ?? current?.rated,
     winners: patch.winners ?? current?.winners ?? d.winners,
     ...((patch.roster ?? current?.roster) ? { roster: patch.roster ?? current?.roster } : {}),
+    ...((patch.seeds ?? current?.seeds) ? { seeds: patch.seeds ?? current?.seeds } : {}),
   };
 }

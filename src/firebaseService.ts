@@ -23,6 +23,7 @@ import {
   MasterAnecdote,
   LichessExportGame,
   SeasonArchive,
+  EloSeed,
 } from "./types";
 
 const firebaseConfig = {
@@ -62,6 +63,7 @@ export interface TournamentDocData {
   rated?: boolean;
   winners?: SeasonWinner[];
   roster?: Player[];
+  seeds?: EloSeed[];
   players?: Player[];
   schedule?: ScheduledMatch[];
   updatedAt?: string;
@@ -94,6 +96,8 @@ export async function saveTournamentFullToFirebase(data: {
     // Firestore rejects undefined values (e.g. a winner without notes): the JSON round trip drops them
     if (data.meta.winners !== undefined) payload.winners = JSON.parse(JSON.stringify(data.meta.winners));
     if (data.meta.roster !== undefined) payload.roster = data.meta.roster.map(({ handle, name }) => ({ handle, name }));
+    // Firestore rejects undefined values (a seed without a Lichess rating): the JSON round trip drops them
+    if (data.meta.seeds !== undefined) payload.seeds = JSON.parse(JSON.stringify(data.meta.seeds));
   }
   if (data.players) {
     payload.players = data.players;

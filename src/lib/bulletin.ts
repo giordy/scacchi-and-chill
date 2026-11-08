@@ -115,7 +115,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
   // Scontro al vertice: same rule as the badge on the site
   const summits = summitGames(config.players, history, allStates);
   // Colpaccio: same rule as the badge on the site, on the Elo del torneo
-  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, allStates);
+  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, allStates, config.tournament?.seeds);
 
   const blocks = games.map((g, i) => {
     const id = extractGameId(g.url);

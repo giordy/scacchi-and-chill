@@ -42,6 +42,7 @@ export async function closeSeason(input: SeasonCloseInput, io: SeasonCloseIO): P
     winners: withChampion(meta.winners, snapshot),
     withdrawals: [],
     masterAnecdotes: [],
+    seeds: [], // the next season's esordienti get theirs at their first game (see lib/seeds.ts)
   });
   if (input.clearSchedule) io.onUpdateSchedule([]);
   return snapshot;

@@ -13,6 +13,7 @@ import { usePersistentState } from './hooks/usePersistentState';
 import { useAdminAuth } from './hooks/useAdminAuth';
 import { useOrganizerData } from './hooks/useOrganizerData';
 import { useLichessSync } from './hooks/useLichessSync';
+import { useEloSeeds } from './hooks/useEloSeeds';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Notice } from './components/Notice';
 import { RoundsTab } from './tabs/RoundsTab';
@@ -125,6 +126,18 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
     autoSynced.current = true;
     lichess.sync({ quiet: true });
   }, [canAutoSync]);
+
+  // Where the esordienti start in the Elo del torneo: fixed from Lichess at their first game
+  useEloSeeds({
+    enabled: canAutoSync,
+    config,
+    history,
+    gameStates: lichess.gameStates,
+    seasons,
+    onUpdateTournamentMeta: updateTournamentMeta,
+    flash,
+    nameOf,
+  });
 
   const setOpenRound = (r: string) => {
     setNotice(null);

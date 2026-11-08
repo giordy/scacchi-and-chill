@@ -131,6 +131,19 @@ export interface TournamentMeta {
   winners?: SeasonWinner[];
   // Every player who ever took part, with the name shown on the site (see lib/roster.ts)
   roster?: Player[];
+  // Where the esordienti of this season start in the Elo del torneo (see lib/seeds.ts): fixed once each
+  seeds?: EloSeed[];
+}
+
+// The starting rating of an esordiente in the Elo del torneo, from their Lichess rating 30 days before
+// their first game of the season, moved onto the tournament's scale (see lib/seeds.ts). Fixed once.
+export interface EloSeed {
+  handle: string;
+  rating: number | null; // on the tournament's scale; null: no reliable Lichess rating (an esordiente as before)
+  date: string; // "2026-09-08": the day the Lichess rating is taken from
+  perf?: 'correspondence' | 'classical' | 'rapid'; // the kind of Lichess rating used
+  lichess?: number; // that Lichess rating
+  offset?: number; // the correction of scale, from the regulars (rating = lichess + offset)
 }
 
 export interface AppConfig {
@@ -248,6 +261,8 @@ export interface SeasonArchive {
   // The scored games, kept for all-time head-to-heads and records (missing on seasons closed
   // before they were saved)
   games?: ArchivedGame[];
+  // Where its esordienti started in the Elo del torneo (missing on seasons closed before seeds existed)
+  seeds?: EloSeed[];
 }
 
 // A player who left an archived season: shown as a note under its table, and as "al posto di"

@@ -32,6 +32,12 @@ describe('buildSeasonArchive', () => {
     expect(a).not.toHaveProperty('imageUrl');
   });
 
+  it('keeps where the esordienti started, for the Elo del torneo of the next seasons', () => {
+    const seeds = [{ handle: 'bruno', rating: 1580, date: '2026-09-08', perf: 'rapid' as const, lichess: 1880, offset: -300 }];
+    expect(buildSeasonArchive({ ...meta, seeds }, players, [game('aaaaaaaa')], {}, now).seeds).toEqual(seeds);
+    expect(buildSeasonArchive(meta, players, [game('aaaaaaaa')], {}, now)).not.toHaveProperty('seeds');
+  });
+
   it('has no champion when nothing has been scored', () => {
     const a = buildSeasonArchive(meta, players, [game('aaaaaaaa')], { aaaaaaaa: st('aaaaaaaa', 'started') }, now);
     expect(a.champion).toBeUndefined();

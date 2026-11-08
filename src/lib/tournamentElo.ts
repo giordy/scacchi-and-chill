@@ -3,14 +3,19 @@
 // season to the current one. Everyone starts at 1500; at the end of a player's first season their
 // rating becomes their performance in it (see performanceRatings), as FIDE does for a first rating.
 //
-// Esordiente: a player in their first season, or back after skipping at least one season. In the
-// games of an esordiente only the esordiente's rating moves: the others neither lose nor gain
-// against someone whose level is not known yet. An esordiente cannot win the Trofeo Pillsbury.
-// A player back from a break starts again from the rating they had.
+// First season: a player who never played a season before (a player back from a break is a
+// regular, with the rating they had). Their first rating is set as follows:
+// - with a seed (see lib/seeds.ts: their Lichess rating, 30 days before their first game, moved
+//   onto the tournament's scale) they start from it and count as a regular from the first game:
+//   both ratings move, their games count for objectives, the Trofeo Pillsbury and colpacci;
+// - without one they are an esordiente: they start at 1500, in their games only their own rating
+//   moves (the others neither lose nor gain against someone whose level is not known yet), and
+//   they are out of the race for the Trofeo Pillsbury.
+// Either way, at the end of their first season their rating becomes their performance in it.
 //
-// Lichess ratings are not used: for correspondence they are provisional for almost everyone here
-// and jump by hundreds of points, and they also depend on games played outside the tournament.
-import { HistoryGame, LichessExportGame, SeasonArchive, SeasonDeparture } from '../types';
+// Lichess ratings are used only for that first step: for correspondence they are provisional for
+// almost everyone here, and they also depend on games played outside the tournament.
+import { EloSeed, HistoryGame, LichessExportGame, SeasonArchive, SeasonDeparture } from '../types';
 import { byRound, stateOf, isVoid } from './games';
 import { scoredResult } from './standings';
 import { extractGameId } from './utils';
@@ -34,15 +39,18 @@ export interface EloSeasonInput {
   players: string[]; // who played the season (games or standings)
   games: EloGame[];
   // Players whose rating of this season is not only theirs (a substitute whose first round is not
-  // known): esordienti again in the next season
+  // known): in their first season again in the next one
   doubtful?: string[];
+  // Starting ratings of players in their first season, by handle (see lib/seeds.ts)
+  seeds?: Record<string, number>;
 }
 
 export interface EloSeason {
   key: string;
   start: Map<string, number>; // ratings at the start of the season, of the players of the season
   end: Map<string, number>; // ratings at the end (or now, for the current season)
-  newcomers: Set<string>; // esordienti of the season
+  newcomers: Set<string>; // esordienti of the season: in their first season, without a seed
+  firstSeason: Set<string>; // everyone in their first season, seeded or not
 }
 
 export interface EloReport {
@@ -54,6 +62,10 @@ export interface EloReport {
 }
 
 export const CURRENT = 'current';
+
+// The seeds with a rating, by handle, as computeElo takes them (a seed without one leaves an esordiente)
+export const seedRatings = (seeds: EloSeed[] | undefined): Record<string, number> =>
+  Object.fromEntries((seeds ?? []).filter((s) => typeof s.rating === 'number').map((s) => [s.handle.toLowerCase(), s.rating as number]));
 
 // Expected score of a player rated `a` against one rated `b`
 export const expectedScore = (a: number, b: number) => 1 / (1 + 10 ** ((b - a) / 400));
@@ -126,13 +138,19 @@ export function computeElo(inputs: EloSeasonInput[]): EloReport {
   const ratings = new Map<string, number>();
   const before = new Map<string, { white: number; black: number; newcomer: boolean }>();
   const seasons: EloSeason[] = [];
-  let previous = new Set<string>();
+  // Who played a season before (a doubtful rating does not count, see EloSeasonInput)
+  const known = new Set<string>();
 
   inputs.forEach((input, i) => {
     const present = new Set([...input.players, ...input.games.flatMap((g) => [g.white, g.black])].map(lower));
     // The very first season has no one to compare with: everyone is an esordiente, so all
     // ratings move as in plain Elo
-    const newcomers = new Set([...present].filter((h) => i === 0 || !previous.has(h)));
+    const firstSeason = new Set([...present].filter((h) => i === 0 || !known.has(h)));
+    const seeds = new Map(Object.entries(input.seeds ?? {}).map(([h, r]) => [lower(h), r]));
+    const newcomers = new Set([...firstSeason].filter((h) => i === 0 || !seeds.has(h)));
+    firstSeason.forEach((h) => {
+      if (!newcomers.has(h)) ratings.set(h, seeds.get(h)!);
+    });
     present.forEach((h) => ratings.has(h) || ratings.set(h, ELO_START));
     const start = new Map([...present].map((h) => [h, ratings.get(h)!]));
 
@@ -154,17 +172,17 @@ export function computeElo(inputs: EloSeasonInput[]): EloReport {
       if (!wNew || bNew) ratings.set(b, rb - delta);
     });
 
-    // At the end of an esordiente's first (archived) season, their rating becomes their
-    // performance: 14 games one at a time from 1500 are too few to reach their level
+    // At the end of a first (archived) season, the rating becomes the performance: 14 games one
+    // at a time are too few to reach a level from 1500, or from a Lichess rating that was wrong
     if (input.key !== CURRENT) {
-      const fitted = performanceRatings(ordered, newcomers, (g) => before.get(gameKey(g, input.key))!);
+      const fitted = performanceRatings(ordered, firstSeason, (g) => before.get(gameKey(g, input.key))!);
       fitted.forEach((r, h) => ratings.set(h, r));
     }
 
-    seasons.push({ key: input.key, start, end: new Map([...present].map((h) => [h, ratings.get(h)!])), newcomers });
+    seasons.push({ key: input.key, start, end: new Map([...present].map((h) => [h, ratings.get(h)!])), newcomers, firstSeason });
     // A doubtful rating (see EloSeasonInput) does not count as a season played
     const doubtful = new Set((input.doubtful ?? []).map(lower));
-    previous = new Set([...present].filter((h) => !doubtful.has(h)));
+    present.forEach((h) => doubtful.has(h) || known.add(h));
   });
 
   return { seasons, ratings, before };
@@ -193,6 +211,7 @@ export function eloSeasonFromArchive(archive: SeasonArchive): EloSeasonInput {
       .filter((g) => g.status !== 'forfeit')
       .map((g) => ({ white: playedBy(g.white, g.round, g.end), black: playedBy(g.black, g.round, g.end), result: g.result, end: g.end, round: g.round, id: g.id })),
     doubtful: replaced.filter((d) => !known(d)).map((d) => d.replacedBy!.handle),
+    seeds: seedRatings(archive.seeds),
   };
 }
 
@@ -209,7 +228,8 @@ export function playersOnBoard(g: HistoryGame, s: LichessExportGame | undefined,
 export function eloSeasonFromCurrent(
   players: string[],
   history: HistoryGame[],
-  gameStates: Record<string, LichessExportGame>
+  gameStates: Record<string, LichessExportGame>,
+  seeds?: EloSeed[] // of the current season, from the tournament
 ): EloSeasonInput {
   const games: EloGame[] = [];
   history.forEach((g) => {
@@ -218,7 +238,7 @@ export function eloSeasonFromCurrent(
     if (!s || !result || isVoid(s) || s.status === 'forfeit') return;
     games.push({ ...playersOnBoard(g, s, players), result, end: s.lastMoveAt, round: g.round, id: extractGameId(g.url) || undefined });
   });
-  return { key: CURRENT, players, games };
+  return { key: CURRENT, players, games, seeds: seedRatings(seeds) };
 }
 
 // The whole tournament: archived seasons in the order they were closed, then the current one
@@ -226,10 +246,11 @@ export function tournamentElo(
   archives: SeasonArchive[],
   players: string[],
   history: HistoryGame[],
-  gameStates: Record<string, LichessExportGame>
+  gameStates: Record<string, LichessExportGame>,
+  seeds?: EloSeed[] // of the current season (TournamentMeta.seeds)
 ): EloReport {
   const past = [...archives].sort((a, b) => a.archivedAt.localeCompare(b.archivedAt)).map(eloSeasonFromArchive);
-  return computeElo([...past, eloSeasonFromCurrent(players, history, gameStates)]);
+  return computeElo([...past, eloSeasonFromCurrent(players, history, gameStates, seeds)]);
 }
 
 // The current season of a report

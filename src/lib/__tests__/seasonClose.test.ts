@@ -80,6 +80,7 @@ describe('closeSeason', () => {
       subtitle: '',
       withdrawals: [],
       masterAnecdotes: [],
+      seeds: [],
     });
     expect(patch.winners?.map((w: { season: string; handle?: string }) => [w.season, w.handle])).toEqual([
       ['Stagione 1', 'bruno'],

@@ -116,3 +116,14 @@ export async function fetchUsers(handles: string[]): Promise<unknown[]> {
   }
   return out;
 }
+
+// A player's Lichess rating history, every kind (see lib/seeds.ts); empty for a player Lichess does
+// not know
+export async function fetchRatingHistory(handle: string): Promise<unknown> {
+  const res = await fetch(`https://lichess.org/api/user/${encodeURIComponent(handle)}/rating-history`, {
+    headers: { Accept: "application/json" },
+  });
+  if (res.status === 404) return [];
+  if (!res.ok) throw new Error(`Lichess ha risposto ${res.status}`);
+  return res.json();
+}

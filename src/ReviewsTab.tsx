@@ -28,7 +28,7 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
   // Anecdotes live in the private Firestore document (see useOrganizerData); the ratings are the
   // Elo del torneo, computed from the games
   const { anecdotes, setAnecdote } = organizer;
-  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, gameStates);
+  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, gameStates, config.tournament?.seeds);
   const eloSeason = currentSeason(elo);
 
   const [generatedReview, setGeneratedReview] = useState("");

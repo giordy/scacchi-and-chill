@@ -112,7 +112,7 @@ export function PublicTournamentView({
   // The whole season at once, recomputed only when the games or their results change
   // (not when the visitor switches tab or round filter)
   // Elo del torneo, from the archived seasons and the games of this one (colpacci, awards)
-  const elo = useMemo(() => tournamentElo(seasons, players.map((p) => p.handle), history, gameStates), [seasons, players, history, gameStates]);
+  const elo = useMemo(() => tournamentElo(seasons, players.map((p) => p.handle), history, gameStates, tournamentMeta.seeds), [seasons, players, history, gameStates, tournamentMeta.seeds]);
   const season = useMemo(() => {
     const { standings, crosstable } = computeStandings(players, history, gameStates);
     const progress = computeSeasonProgress(history, gameStates, schedule);
@@ -124,7 +124,7 @@ export function PublicTournamentView({
       crosstable,
       progress,
       concluded,
-      awards: concluded ? computeSeasonAwards(players, history, gameStates, seasons) : [],
+      awards: concluded ? computeSeasonAwards(players, history, gameStates, seasons, tournamentMeta.seeds) : [],
       allGames,
       rounds: [...new Set(allGames.map((g) => g.round))].sort(byRound),
       summits: summitGames(players, allGames, gameStates),

@@ -1,4 +1,4 @@
-import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonAward } from '../types';
+import { ArchivedGame, EloSeed, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonAward } from '../types';
 import { roundHalf, tournamentElo } from './tournamentElo';
 import { PILLSBURY_EMOJI, PILLSBURY_ID, PILLSBURY_TITLE, pillsburyRace } from './pillsbury';
 
@@ -46,7 +46,8 @@ export function computeSeasonAwards(
   players: Player[],
   history: HistoryGame[],
   gameStates: Record<string, LichessExportGame>,
-  seasons: SeasonArchive[] = [] // archived seasons, for the Elo del torneo of the Trofeo Pillsbury
+  seasons: SeasonArchive[] = [], // archived seasons, for the Elo del torneo of the Trofeo Pillsbury
+  seeds?: EloSeed[] // where this season's esordienti started (TournamentMeta.seeds)
 ): SeasonAward[] {
   const nameOf = (h: string) => players.find((p) => p.handle === h)?.name ?? h;
   const who = (handles: string[]) => handles.map((handle) => ({ handle, name: nameOf(handle) }));
@@ -56,7 +57,7 @@ export function computeSeasonAwards(
 
   // Trofeo Pillsbury: who beat their pronostico by most (see lib/pillsbury). First, apart from
   // the light-hearted awards. One winner, unless two beat it by exactly the same.
-  const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates), history, history, gameStates);
+  const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates, seeds), history, history, gameStates);
   const best = race.rows[0];
   if (!race.suspended && best && best.over > 0) {
     const top = race.rows.filter((r) => r.over === best.over);

@@ -18,6 +18,10 @@ import { withScheduledGames } from '../lib/publicGames';
 import { Trend, TrendKind } from '../components/Trend';
 import { PILLSBURY_MIN_PLAYERS, pillsburyWins } from '../lib/pillsbury';
 import { PillsburyIcon } from '../components/PillsburyIcon';
+import { SEED_PERF_LABEL } from '../lib/seeds';
+
+// "2026-09-08" -> "8 set 2026"
+const shortDate = (day: string) => new Date(`${day}T12:00:00Z`).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
 
 interface PlayerPageProps {
   handle: string;
@@ -199,10 +203,14 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const isChampion = !!champions?.handles.includes(player.handle.toLowerCase());
   const medals = medalsOf(player.handle, winners);
   // Elo del torneo (see lib/tournamentElo): now, and how much it moved in this season
-  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, gameStates);
+  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, gameStates, config.tournament?.seeds);
   const eloNow = ratingOf(elo, player.handle);
   const eloSeason = eloSeasonNow(elo);
   const newcomer = isNewcomer(eloSeason, player.handle);
+  // First season with a Lichess seed: where it started, said next to the Elo (see lib/seeds.ts)
+  const seed = eloSeason.firstSeason.has(player.handle.toLowerCase())
+    ? config.tournament?.seeds?.find((s) => s.handle.toLowerCase() === player.handle.toLowerCase() && s.rating !== null)
+    : undefined;
   const eloStart = eloSeason.start.get(player.handle.toLowerCase());
   const eloMove = eloNow !== undefined && eloStart !== undefined ? eloNow - Math.round(eloStart) : 0;
   // Pronostico: points expected in the season from the Elo del torneo at its start
@@ -250,6 +258,9 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                 className="player-elo-badge"
                 text={
                   "Elo del torneo, calcolato solo dalle nostre partite." +
+                  (seed
+                    ? ` Al primo anno: parte da ${seed.rating}, il suo Elo Lichess ${SEED_PERF_LABEL[seed.perf!]} del ${shortDate(seed.date)} (${seed.lichess}) riportato sulla scala del torneo.`
+                    : "") +
                   (newcomer
                     ? " Esordiente: nelle sue partite si muove solo il suo Elo."
                     : eloMove === 0

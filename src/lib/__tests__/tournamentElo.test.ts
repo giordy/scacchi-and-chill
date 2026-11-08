@@ -66,17 +66,65 @@ describe('Elo del torneo', () => {
     expect(rep.ratings.get('bruno')).toBeCloseTo(b0 + 32 * (0.5 - expectedScore(b0, a0)), 6);
   });
 
-  it('a player back after skipping a season is an esordiente again, from the rating they had', () => {
+  it('a player back after skipping a season is a regular, from the rating they had', () => {
     const rep = computeElo([
       { key: 's1', players: ['anna', 'bruno'], games: [g('anna', 'bruno', '1-0', 1)] },
       { key: 's2', players: ['bruno', 'carla'], games: [] },
       { key: CURRENT, players: ['anna', 'bruno', 'carla'], games: [g('anna', 'bruno', '1-0', 3)] },
     ]);
     const s3 = rep.seasons[2];
-    expect(isNewcomer(s3, 'Anna')).toBe(true);
+    expect(isNewcomer(s3, 'Anna')).toBe(false);
+    expect(s3.firstSeason.has('anna')).toBe(false);
     expect(isNewcomer(s3, 'carla')).toBe(false);
     expect(s3.start.get('anna')).toBe(rep.seasons[0].end.get('anna'));
-    expect(s3.end.get('bruno')).toBe(s3.start.get('bruno')); // lost to an esordiente: unchanged
+    expect(s3.end.get('bruno')).toBeLessThan(s3.start.get('bruno')!); // lost to a regular: it moves
+  });
+
+  describe('a seed (the Lichess rating of an esordiente, on the tournament scale)', () => {
+    const s1 = { key: 's1', players: ['anna', 'bruno', 'carla'], games: [g('anna', 'bruno', '1-0', 1), g('bruno', 'carla', '½-½', 2), g('carla', 'anna', '0-1', 3)] };
+
+    it('makes a newcomer start from it and count as a regular from the first game', () => {
+      const rep = computeElo([s1, { key: CURRENT, players: ['anna', 'bruno', 'carla', 'dario'], seeds: { Dario: 1650 }, games: [{ ...g('dario', 'bruno', '1-0', 5), id: 'd1' }] }]);
+      const now = rep.seasons[1];
+      expect(now.start.get('dario')).toBe(1650);
+      expect(isNewcomer(now, 'dario')).toBe(false); // in the race, games against him count
+      expect(now.firstSeason.has('dario')).toBe(true);
+      expect(rep.before.get('d1')).toEqual({ white: 1650, black: now.start.get('bruno'), newcomer: false }); // can be a colpaccio
+      expect(now.end.get('bruno')).toBeLessThan(now.start.get('bruno')!); // both move
+      expect(now.end.get('dario')).toBeGreaterThan(1650);
+    });
+
+    it('leaves a newcomer without one an esordiente, as before', () => {
+      const rep = computeElo([s1, { key: CURRENT, players: ['anna', 'bruno', 'carla', 'dario', 'elena'], seeds: { dario: 1650 }, games: [g('elena', 'bruno', '1-0', 5)] }]);
+      const now = rep.seasons[1];
+      expect(isNewcomer(now, 'elena')).toBe(true);
+      expect(now.start.get('elena')).toBe(ELO_START);
+      expect(now.end.get('bruno')).toBe(now.start.get('bruno')); // lost to an esordiente: unchanged
+    });
+
+    it('is replaced by the performance at the end of the first season, as a 1500 start is', () => {
+      const season = (seeds?: Record<string, number>) =>
+        computeElo([s1, { key: 's2', players: ['anna', 'bruno', 'carla', 'dario'], seeds, games: [g('dario', 'bruno', '1-0', 5), g('anna', 'dario', '½-½', 6), g('dario', 'carla', '1-0', 7)] }]);
+      const seeded = season({ dario: 1400 });
+      expect(seeded.seasons[1].start.get('dario')).toBe(1400);
+      // The performance is solved against the opponents' ratings in each game: close, whatever the start
+      expect(Math.abs(seeded.ratings.get('dario')! - season().ratings.get('dario')!)).toBeLessThan(25);
+      expect(seeded.ratings.get('dario')).toBeGreaterThan(1600);
+    });
+
+    it('is read back from an archived season, without the seeds that have no rating', () => {
+      const archive: SeasonArchive = {
+        id: 's2', season: 's2', title: 'T', archivedAt: '2027-01-01', gamesPlayed: 0, standings: [],
+        seeds: [{ handle: 'Dario', rating: 1650, date: '2026-09-08' }, { handle: 'elena', rating: null, date: '2026-09-08' }],
+      };
+      expect(eloSeasonFromArchive(archive).seeds).toEqual({ dario: 1650 });
+    });
+
+    it('is ignored in the very first season, where everyone is an esordiente', () => {
+      const rep = computeElo([{ ...s1, seeds: { anna: 1900 } }]);
+      expect(rep.seasons[0].start.get('anna')).toBe(ELO_START);
+      expect(isNewcomer(rep.seasons[0], 'anna')).toBe(true);
+    });
   });
 
   it('reads archived seasons in the order they were closed, forfeits left out, then the current one', () => {
