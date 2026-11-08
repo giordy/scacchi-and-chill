@@ -1,4 +1,6 @@
-import { BackupData, HistoryGame, Player, ScheduledMatch } from '../types';
+import { BackupData, HistoryGame, Player, ScheduledMatch, SeasonArchive, TournamentMeta } from '../types';
+import type { OrganizerData } from '../firebaseService';
+import { isStorableImage } from './media';
 
 export interface BackupSummary {
   season?: string;
@@ -56,4 +58,42 @@ export function parseBackup(text: string): { data: BackupData; summary: BackupSu
       privateData: !!(d.anecdotes || d.settings || d.templates || d.statusPhrases),
     },
   };
+}
+
+// What a restore writes, passed in so the order of the steps can be tested without Firestore
+export interface RestoreIO {
+  exportCurrent: () => Promise<void>; // a copy of the data as it is now, downloaded first
+  replaceAllGames: (games: HistoryGame[]) => Promise<void>;
+  setHistory: (games: HistoryGame[]) => void;
+  onUpdatePlayers: (players: Player[]) => void;
+  onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
+  onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
+  saveSeasonArchive: (archive: SeasonArchive) => Promise<void>;
+  saveMediaImage: (id: string, dataUrl: string) => Promise<void>;
+  replaceOrganizerData: (data: Partial<OrganizerData>) => void;
+}
+
+// Restores a backup read by parseBackup. The data as it is now is downloaded before anything is
+// replaced; the Lichess token is never in a file, so the current one is kept.
+export async function restoreBackup(data: BackupData, summary: BackupSummary, currentToken: string, io: RestoreIO): Promise<void> {
+  await io.exportCurrent();
+  const games = data.history ?? [];
+  await io.replaceAllGames(games);
+  io.setHistory(games);
+  io.onUpdatePlayers(data.players ?? []);
+  io.onUpdateSchedule(data.schedule ?? []);
+  // A file from before the withdrawals had none: the current ones must not survive the restore
+  io.onUpdateTournamentMeta({ ...data.tournament, withdrawals: data.tournament?.withdrawals ?? [] });
+  for (const s of data.seasons ?? []) await io.saveSeasonArchive(s);
+  for (const [id, dataUrl] of Object.entries(data.media ?? {})) {
+    if (isStorableImage(dataUrl)) await io.saveMediaImage(id, dataUrl);
+  }
+  if (summary.privateData) {
+    io.replaceOrganizerData({
+      ...(data.anecdotes ? { anecdotes: data.anecdotes } : {}),
+      ...(data.settings ? { settings: { ...data.settings, token: currentToken } } : {}),
+      ...(data.templates ? { templates: data.templates } : {}),
+      ...(data.statusPhrases !== undefined ? { statusPhrases: data.statusPhrases } : {}),
+    });
+  }
 }

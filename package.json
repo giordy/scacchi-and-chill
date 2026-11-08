@@ -8,7 +8,7 @@
     "build": "tsc && vite build && node scripts/meta-tags.mjs",
     "lint": "tsc --noEmit",
     "test": "vitest run",
-    "test:rules": "npx -y firebase-tools@15.35.0 emulators:exec --only firestore --project demo-scacchi \"vitest run tests/firestore.rules.test.ts\"",
+    "test:rules": "npx -y firebase-tools@15.35.0 emulators:exec --only firestore --project demo-scacchi \"vitest run tests/ --no-file-parallelism\"",
     "preview": "vite preview --host 0.0.0.0 --port 3000"
   },
   "dependencies": {

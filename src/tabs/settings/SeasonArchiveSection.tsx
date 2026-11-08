@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchive, TournamentMeta } from '../../types';
-import { buildSeasonArchive, seasonId, standingsCsv, validateNewSeasonName, withChampion } from '../../lib/seasons';
+import { buildSeasonArchive, seasonId, standingsCsv, validateNewSeasonName } from '../../lib/seasons';
+import { closeSeason } from '../../lib/seasonClose';
 import { deleteAllGames, saveSeasonArchive } from '../../firebaseService';
 import { errorMessage } from '../../lib/utils';
 import { pastSeasonPeriod } from '../../lib/period';
@@ -71,24 +72,10 @@ export function SeasonArchiveSection({
 
     setBusy(true);
     try {
-      // 1. Archive first: if this fails nothing is deleted
-      const snapshot = buildSeasonArchive(meta, config.players, history, gameStates, undefined, seasons);
-      await saveSeasonArchive(snapshot);
-      // 2. Remove the old season's games from Firestore and from this device
-      await deleteAllGames();
-      setHistory([]);
-      onSeasonReset();
-      // 3. New season details (the champion goes to the hall of fame)
-      onUpdateTournamentMeta({
-        season: nextSeason.trim(),
-        masterName: nextMaster.trim(),
-        imageUrl: "",
-        subtitle: "",
-        winners: withChampion(meta.winners, snapshot),
-        withdrawals: [],
-        masterAnecdotes: [],
-      });
-      if (clearSchedule) onUpdateSchedule([]);
+      const snapshot = await closeSeason(
+        { meta, players: config.players, history, gameStates, seasons, nextSeason, nextMaster, clearSchedule },
+        { saveSeasonArchive, deleteAllGames, clearHistory: () => setHistory([]), onSeasonReset, onUpdateTournamentMeta, onUpdateSchedule }
+      );
       setNextSeason("");
       setNextMaster("");
       flash("ok", `Stagione «${snapshot.season}» archiviata. Iniziata «${nextSeason.trim()}».`);

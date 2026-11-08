@@ -57,7 +57,7 @@ Da *Stagioni → Fine stagione e storico*:
 1. **Authentication → Sign-in method**: attiva Google.
 2. **Authentication → Settings → Authorized domains**: aggiungi il dominio di GitHub Pages (`<utente>.github.io`) e `localhost`.
    **App installata (PWA)**: lì il popup di Google di Firebase non funziona (resta bianco, poi «missing initial state»), quindi l'app va direttamente da Google e torna sul sito con il token. Serve una volta: in Google Cloud, *APIs & Services → Credentials*, apri il client OAuth «Web client (auto created by Google Service)» (lo stesso indicato in *Authentication → Sign-in method → Google → Web SDK configuration*, e in `oAuthClientId` di `firebase-applet-config.json`) e aggiungi l'indirizzo del sito, con la barra finale, sia in *Authorized JavaScript origins* (solo `https://<utente>.github.io`) sia in *Authorized redirect URIs* (`https://<utente>.github.io/<repository>/`; per provare in locale anche `http://localhost:3000/`).
-3. **Firestore → Rules**: pubblica il contenuto di [`firestore.rules`](firestore.rules). Ripubblicalo ogni volta che il file cambia. Le regole sono provate da `tests/firestore.rules.test.ts` sull'emulatore Firestore (`npm run test:rules`, anche nel deploy): chi non è l'organizzatore legge solo i dati pubblici e non scrive nulla, i dati privati restano privati, le partite accettano solo link Lichess, le foto solo immagini piccole.
+3. **Firestore → Rules**: pubblica il contenuto di [`firestore.rules`](firestore.rules). Ripubblicalo ogni volta che il file cambia. Le regole sono provate da `tests/firestore.rules.test.ts` sull'emulatore Firestore (`npm run test:rules`, anche nel deploy): chi non è l'organizzatore legge solo i dati pubblici e non scrive nulla, i dati privati restano privati, le partite accettano solo link Lichess, le foto solo immagini piccole. Sullo stesso emulatore `tests/firebaseService.emulator.test.ts` prova, come organizzatore, la cancellazione delle partite a fine stagione e la loro sostituzione dal backup.
 4. La chiave web in `firebase-applet-config.json` è pubblica per natura. Limitala in Google Cloud ai referrer `<utente>.github.io/*` e `localhost`.
 
 L'email dell'organizzatore **non è nel codice** (né nel sito pubblicato): l'organizzatore è chi ha un documento nella collezione `admins` di Firestore, con l'email come ID. Per crearlo, **prima** di pubblicare le regole: *Firestore → Data → Start collection* `admins`, *Document ID* l'email dell'account Google (come appare nel login, in minuscolo), nessun campo. Per aggiungere o togliere un organizzatore si aggiunge o si cancella un documento, sempre dalla console: le regole non permettono di elencare la collezione né di scriverla dal sito, e ogni account può leggere solo il proprio documento (così l'area admin sa se mostrarsi).
@@ -80,7 +80,7 @@ Gli aneddoti e il token sono privati di proposito: non vanno mai nella parte pub
 npm install
 npm run dev      # server di sviluppo su http://localhost:3000
 npm test         # test con vitest
-npm run test:rules  # test di firestore.rules sull'emulatore Firestore (serve Java 21)
+npm run test:rules  # sull'emulatore Firestore (serve Java 21): firestore.rules e le scritture di chiusura stagione e ripristino
 npm run lint     # controllo dei tipi (tsc --noEmit)
 npm run build    # build di produzione in dist/, con i meta tag dell'anteprima
 ```

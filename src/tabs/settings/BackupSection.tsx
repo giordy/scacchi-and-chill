@@ -12,8 +12,7 @@ import {
   TournamentMeta,
 } from '../../types';
 import { loadAllMediaImages, replaceAllGames, saveMediaImage, saveSeasonArchive } from '../../firebaseService';
-import { isStorableImage } from '../../lib/media';
-import { BackupSummary, parseBackup } from '../../lib/backup';
+import { BackupSummary, parseBackup, restoreBackup } from '../../lib/backup';
 import { errorMessage } from '../../lib/utils';
 
 const BACKUPS_URL = 'https://github.com/giordy/scacchi-and-chill/commits/backups/backup.json';
@@ -110,26 +109,17 @@ export function BackupSection({
     }
     setBusy(true);
     try {
-      await handleExport(true);
-      const games = data.history ?? [];
-      await replaceAllGames(games);
-      setHistory(games);
-      onUpdatePlayers(data.players ?? []);
-      onUpdateSchedule(data.schedule ?? []);
-      // A file from before the withdrawals had none: the current ones must not survive the restore
-      onUpdateTournamentMeta({ ...data.tournament, withdrawals: data.tournament?.withdrawals ?? [] });
-      for (const s of data.seasons ?? []) await saveSeasonArchive(s);
-      for (const [id, dataUrl] of Object.entries(data.media ?? {})) {
-        if (isStorableImage(dataUrl)) await saveMediaImage(id, dataUrl);
-      }
-      if (summary.privateData) {
-        organizer.replaceAll({
-          ...(data.anecdotes ? { anecdotes: data.anecdotes } : {}),
-          ...(data.settings ? { settings: { ...data.settings, token: organizer.settings?.token ?? settings.token } } : {}),
-          ...(data.templates ? { templates: data.templates } : {}),
-          ...(data.statusPhrases !== undefined ? { statusPhrases: data.statusPhrases } : {}),
-        });
-      }
+      await restoreBackup(data, summary, organizer.settings?.token ?? settings.token, {
+        exportCurrent: () => handleExport(true),
+        replaceAllGames,
+        setHistory,
+        onUpdatePlayers,
+        onUpdateSchedule,
+        onUpdateTournamentMeta,
+        saveSeasonArchive,
+        saveMediaImage,
+        replaceOrganizerData: organizer.replaceAll,
+      });
       flash("ok", `Ripristinata «${summary.season}»: ${summary.games} partite, ${summary.players} giocatori.`);
       setPending(null);
     } catch (e) {
@@ -143,7 +133,7 @@ export function BackupSection({
     <div>
       <p className="note note-flush">
         I dati del torneo sono salvati su Firestore. Qui puoi scaricarne una copia in JSON (torneo, giocatori,
-        calendario, partite, stagioni, foto caricate, aneddoti ed Elo). Il token Lichess non viene incluso.
+        calendario, partite, stagioni, foto caricate, aneddoti e testi dei messaggi). Il token Lichess non viene incluso.
       </p>
       <button className="secondary btn-block" type="button" onClick={() => handleExport()}>
         Scarica copia JSON
@@ -175,8 +165,8 @@ export function BackupSection({
           partite registrate, {pending.summary.seasons} stagioni archiviate.
           <br />
           {pending.summary.privateData
-            ? "Contiene anche aneddoti, Elo e testi dei messaggi: vengono ripristinati (il token Lichess resta quello attuale)."
-            : "Backup automatico: aneddoti, Elo, impostazioni e testi dei messaggi restano quelli attuali."}
+            ? "Contiene anche aneddoti, impostazioni e testi dei messaggi: vengono ripristinati (il token Lichess resta quello attuale)."
+            : "Backup automatico: aneddoti, impostazioni e testi dei messaggi restano quelli attuali."}
           <div className="actions two mt-8">
             <button type="button" className="danger" disabled={busy} onClick={restore}>
               {busy ? "Ripristino in corso…" : "Ripristina"}
