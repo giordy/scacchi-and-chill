@@ -24,8 +24,13 @@ import { playersOnBoard } from './tournamentElo';
 export type SeedPerf = NonNullable<EloSeed['perf']>;
 export const SEED_PERFS: SeedPerf[] = ['correspondence', 'classical', 'rapid', 'blitz'];
 export const SEED_PERF_LABEL: Record<SeedPerf, string> = { correspondence: 'per corrispondenza', classical: 'classical', rapid: 'rapid', blitz: 'blitz' };
-// Names of the kinds in Lichess's rating history
-const HISTORY_NAME: Record<SeedPerf, string> = { correspondence: 'Correspondence', classical: 'Classical', rapid: 'Rapid', blitz: 'Blitz' };
+// The entry of a kind in a Lichess rating history. Lichess names them "blitz", "rapid"... (it used
+// "Blitz", "Rapid"...): compared without case
+const entryOf = (history: unknown[], perf: SeedPerf) =>
+  history.find((h) => {
+    const name = h && typeof h === 'object' ? (h as { name?: unknown }).name : undefined;
+    return typeof name === 'string' && name.toLowerCase() === perf;
+  }) as { points?: unknown } | undefined;
 
 export const SEED_DAYS_BEFORE = 30;
 export const SEED_MIN_REGULARS = 3;
@@ -44,16 +49,14 @@ export const seedDayLabel = (day: string) =>
 export const seedDate = (firstGameMs: number) => isoDay(firstGameMs - SEED_DAYS_BEFORE * DAY);
 
 // The reliable Lichess ratings of a player on a day, by kind, from their rating history
-// (GET /api/user/<name>/rating-history: [{ name: "Rapid", points: [[2026, 8, 30, 1720], ...] }],
+// (GET /api/user/<name>/rating-history: [{ name: "rapid", points: [[2026, 8, 30, 1720], ...] }],
 // months from 0, one point per day with rated games)
 export function reliableRatingsAt(history: unknown, date: string): Partial<Record<SeedPerf, number>> {
   const out: Partial<Record<SeedPerf, number>> = {};
   if (!Array.isArray(history)) return out;
   const oldest = isoDay(Date.parse(date) - RELIABLE_WITHIN_DAYS * DAY);
   SEED_PERFS.forEach((perf) => {
-    const entry = history.find((h) => h && typeof h === 'object' && (h as { name?: unknown }).name === HISTORY_NAME[perf]) as
-      | { points?: unknown }
-      | undefined;
+    const entry = entryOf(history, perf);
     const points = (Array.isArray(entry?.points) ? entry!.points : [])
       .filter((p): p is number[] => Array.isArray(p) && p.length >= 4 && p.every((n) => typeof n === 'number'))
       .map(([y, m, d, rating]) => ({ day: isoDay(Date.UTC(y, m, d)), rating }))
@@ -72,7 +75,7 @@ export function historySummary(history: unknown, date: string): string {
   if (history.length === 0) return 'storico Lichess vuoto';
   const names = history.map((h) => (h && typeof h === 'object' ? String((h as { name?: unknown }).name) : typeof h));
   const kinds = SEED_PERFS.map((perf) => {
-    const entry = history.find((h) => h && typeof h === 'object' && (h as { name?: unknown }).name === HISTORY_NAME[perf]) as { points?: unknown } | undefined;
+    const entry = entryOf(history, perf);
     if (!entry) return null;
     const days = (Array.isArray(entry.points) ? entry.points : [])
       .filter((p): p is number[] => Array.isArray(p) && p.length >= 4 && p.every((n) => typeof n === 'number'))

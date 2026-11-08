@@ -122,7 +122,8 @@ export async function fetchUsers(handles: string[]): Promise<unknown[]> {
 // an empty one would silently leave the player an esordiente.
 export async function fetchRatingHistory(handle: string): Promise<unknown> {
   const url = `https://lichess.org/api/user/${encodeURIComponent(handle)}/rating-history`;
-  const res = await fetch(url, { headers: { Accept: "application/json" } });
+  // A plain GET, as when the page is opened in a browser (which answers with the history)
+  const res = await fetch(url);
   const body = await res.text();
   const start = body.slice(0, 120).replace(/\s+/g, " ");
   if (!res.ok) throw new Error(`storico di ${handle}: Lichess ha risposto ${res.status} (${start || "senza testo"})`);
