@@ -1,10 +1,11 @@
 import React from 'react';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types';
 import { EloReport } from '../lib/tournamentElo';
-import { PILLSBURY_EMOJI, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
+import { PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
 import { playerHref } from '../lib/routes';
 import { Trend, TrendKind } from './Trend';
 import { InfoTip } from './InfoTip';
+import { PillsburyIcon } from './PillsburyIcon';
 import { roundHalf } from '../lib/tournamentElo';
 
 const TREND_LABEL: Record<TrendKind, string> = { up: "sopra l'obiettivo", same: "in linea con l'obiettivo", down: "sotto l'obiettivo" };
@@ -106,7 +107,7 @@ export function PillsburyRace({
       )}
       <div className="pillsbury-about">
         <p className="note note-top-xs">
-          Il <strong>{PILLSBURY_TITLE}</strong> {PILLSBURY_EMOJI} va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti (lo trovate nel vostro profilo).
+          Il <strong>{PILLSBURY_TITLE}</strong> <PillsburyIcon /> va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti (lo trovate nel vostro profilo).
           {reigning && <> Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).</>}
         </p>
         <p className="note note-top-xs">

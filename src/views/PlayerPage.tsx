@@ -16,7 +16,8 @@ import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
 import { boardCalendar, currentSeason as eloSeasonNow, eloSeasonFromCurrent, isNewcomer, pronosticoPoints, ratingOf, seasonForecast, tournamentElo } from '../lib/tournamentElo';
 import { withScheduledGames } from '../lib/publicGames';
 import { Trend, TrendKind } from '../components/Trend';
-import { PILLSBURY_EMOJI, PILLSBURY_MIN_PLAYERS, pillsburyWins } from '../lib/pillsbury';
+import { PILLSBURY_MIN_PLAYERS, pillsburyWins } from '../lib/pillsbury';
+import { PillsburyIcon } from '../components/PillsburyIcon';
 
 interface PlayerPageProps {
   handle: string;
@@ -72,7 +73,7 @@ function TrophyShelf({ medals, champion, title, pillsbury = [] }: { medals: Play
   const newestFirst = [...medals].reverse();
   const grouped = medals.length + (champion ? 1 : 0) > SHELF_MAX;
   const seasonsOf = (m: Medal) => newestFirst.filter((x) => x.place === m).map((x) => shortSeason(x.season, title));
-  const trophy = (key: string | number, icon: string, text: string, className = "", count?: number) => (
+  const trophy = (key: string | number, icon: React.ReactNode, text: string, className = "", count?: number) => (
     <li key={key}>
       <InfoTip className={`trophy ${className}`} text={text}>
         <span className="trophy-icon" aria-hidden="true">{icon}</span>
@@ -85,7 +86,7 @@ function TrophyShelf({ medals, champion, title, pillsbury = [] }: { medals: Play
     <ul className="trophy-shelf" aria-label="Trofei">
       {champion && trophy("crown", "👑", `Campione in carica · ${champion}`, "is-crown")}
       {pillsbury.length > 0 &&
-        trophy("pillsbury", PILLSBURY_EMOJI, `Trofeo Pillsbury · ${[...pillsbury].reverse().join(", ")}`, "is-pillsbury", pillsbury.length > 1 ? pillsbury.length : undefined)}
+        trophy("pillsbury", <PillsburyIcon />, `Trofeo Pillsbury · ${[...pillsbury].reverse().join(", ")}`, "is-pillsbury", pillsbury.length > 1 ? pillsbury.length : undefined)}
       {grouped
         ? ([1, 2, 3] as Medal[])
             .filter((m) => seasonsOf(m).length > 0)

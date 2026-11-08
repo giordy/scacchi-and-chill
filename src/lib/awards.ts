@@ -26,9 +26,10 @@ function leaders(counts: Map<string, number>, players: Player[]): { handles: str
 const MIN_COUNT = 2;
 
 // Re del matto: ⚔️, not the crown, which next to a name means the reigning champion. Seasons
-// archived before keep 👑 in their data: awardEmoji shows them with the new one.
+// archived before keep 👑 in their data: awardEmoji shows them with the new one. The same for the
+// Trofeo Pillsbury, archived with 🌱 before it became a medal.
 const MATE_EMOJI = "⚔️";
-export const awardEmoji = (a: SeasonAward) => (a.id === "mate" ? MATE_EMOJI : a.emoji);
+export const awardEmoji = (a: SeasonAward) => (a.id === "mate" ? MATE_EMOJI : a.id === PILLSBURY_ID ? PILLSBURY_EMOJI : a.emoji);
 // The name of the Pillsbury from the code, as for the emoji: an archive saved as "Premio Pillsbury" shows the new name
 export const awardTitle = (a: SeasonAward) => (a.id === PILLSBURY_ID ? PILLSBURY_TITLE : a.title);
 

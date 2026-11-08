@@ -175,11 +175,14 @@ describe('the reigning Trofeo Pillsbury', () => {
     ...season1,
     awards: [{ id: 'pillsbury', emoji: '🌱', title: 'Trofeo Pillsbury', description: '', winners: [{ handle: 'bruno', name: 'Bruno' }], detail: '' }],
   };
-  it('has a 🌱 next to the name in the standings and on the shelf of the player page', () => {
+  it('has its medal next to the name in the standings and on the shelf of the player page', () => {
     const html = publicPage('', [won]);
     expect(html).toContain('Trofeo Pillsbury in carica · Stagione 1');
+    expect(html).toContain('class="pillsbury-icon"');
+    expect(html).not.toContain('🌱'); // archived with the sprout, shown with the medal
     expect(publicPage('', [season1])).not.toContain('Trofeo Pillsbury in carica');
     expect(playerPage('bruno', [won])).toContain('Trofeo Pillsbury · Stagione 1');
+    expect(playerPage('bruno', [won])).toContain('class="pillsbury-icon"');
   });
 });
 

@@ -3,7 +3,11 @@ import { SeasonAward } from '../types';
 import { playerHref, publicViewHref } from '../lib/routes';
 import { PILLSBURY_ID } from '../lib/pillsbury';
 import { awardEmoji, awardTitle } from '../lib/awards';
+import { PillsburyIcon } from './PillsburyIcon';
 import { useNameOf } from './Names';
+
+// The Trofeo Pillsbury has its own drawn medal; the other awards their emoji
+const AwardMark = ({ award }: { award: SeasonAward }) => (award.id === PILLSBURY_ID ? <PillsburyIcon /> : <>{awardEmoji(award)}</>);
 
 // Grid of the end-of-season awards, each winner linking to their player page
 // Links to the games of an award: "vedi su Lichess", or "su Lichess: 1 · 2" when there are more (the
@@ -43,7 +47,7 @@ export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[
   if (compact) {
     const row = (a: SeasonAward, className = "") => (
       <li key={a.id} className={className}>
-        <span className="compact-emoji" aria-hidden="true">{awardEmoji(a)}</span>
+        <span className="compact-emoji" aria-hidden="true"><AwardMark award={a} /></span>
         <span className="compact-body">
           <span>
             <strong>{awardTitle(a)}</strong>: <span className="award-winners">{winners(a)}</span>
@@ -66,7 +70,7 @@ export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[
     <>
       {main && (
         <div className="award-card award-main">
-          <span className="award-emoji" aria-hidden="true">{main.emoji}</span>
+          <span className="award-emoji" aria-hidden="true"><AwardMark award={main} /></span>
           <div className="award-body">
             <h3 className="award-title">{awardTitle(main)}</h3>
             <p className="award-winners">{winners(main)}</p>
@@ -81,7 +85,7 @@ export function SeasonAwards({ awards, compact = false }: { awards: SeasonAward[
       <ul className="awards-grid">
         {others.map((a) => (
           <li key={a.id} className="award-card">
-            <span className="award-emoji" aria-hidden="true">{awardEmoji(a)}</span>
+            <span className="award-emoji" aria-hidden="true"><AwardMark award={a} /></span>
             <div className="award-body">
               <h3 className="award-title">{awardTitle(a)}</h3>
               <p className="award-winners">{winners(a)}</p>

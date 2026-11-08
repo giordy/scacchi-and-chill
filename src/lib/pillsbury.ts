@@ -6,7 +6,8 @@ import { HistoryGame, LichessExportGame, Player, SeasonArchive } from '../types'
 import { boardCalendar, currentSeason, eloSeasonFromCurrent, EloReport, Forecast, seasonForecast } from './tournamentElo';
 
 export const PILLSBURY_ID = 'pillsbury';
-export const PILLSBURY_EMOJI = '🌱';
+// In text (WhatsApp, tooltips); on the site the trophy is drawn by components/PillsburyIcon
+export const PILLSBURY_EMOJI = '🏅';
 export const PILLSBURY_TITLE = 'Trofeo Pillsbury';
 export const PILLSBURY_ORIGIN =
   "Nel 1895, a Hastings, Harry Nelson Pillsbury era un ventiduenne americano quasi sconosciuto, al suo primo grande torneo: lo vinse davanti a Lasker, Steinitz, Tarrasch e Čigorin, i più forti del mondo. È la sorpresa più famosa della storia degli scacchi.";

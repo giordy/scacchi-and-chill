@@ -2828,4 +2828,5 @@ button.btn-mini.is-active { background: var(--brass-soft); }
     right: auto;
   }
 }
-.pillsbury-icon { display: inline-block; vertical-align: -3px; }
+/* The Trofeo Pillsbury medal (components/PillsburyIcon), on the line of the text as an emoji */
+.pillsbury-icon { display: inline-block; vertical-align: -0.25em; }

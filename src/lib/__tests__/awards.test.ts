@@ -197,7 +197,7 @@ describe('Trofeo Pillsbury', () => {
     const history = games.map((g) => g.h);
     const states = Object.fromEntries(games.map((g) => [g.s.id, g.s]));
     const award = computeSeasonAwards(players, history, states, [past]).find((a) => a.id === 'pillsbury');
-    expect(award).toMatchObject({ title: 'Trofeo Pillsbury', emoji: '🌱', winners: [{ handle: 'carla', name: 'Carla' }] });
+    expect(award).toMatchObject({ title: 'Trofeo Pillsbury', emoji: '🏅', winners: [{ handle: 'carla', name: 'Carla' }] });
     expect(award!.detail).toBe('1 punto su 1 partita, obiettivo 0'); // her one game counted: the win over Anna
     // With no archived season everyone is an esordiente: no award yet
     expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'pillsbury')).toBe(false);
@@ -228,8 +228,9 @@ describe('Re del matto', () => {
 });
 
 describe('Trofeo Pillsbury', () => {
-  it('has its name from the code, also for a season archived as "Premio Pillsbury"', async () => {
-    const { awardTitle } = await import('../awards');
+  it('has its name and emoji from the code, also for a season archived as "Premio Pillsbury" with 🌱', async () => {
+    const { awardEmoji, awardTitle } = await import('../awards');
+    expect(awardEmoji({ id: 'pillsbury', emoji: '🌱', title: 'Premio Pillsbury', description: '', winners: [], detail: '' })).toBe('🏅');
     expect(awardTitle({ id: 'pillsbury', emoji: '🌱', title: 'Premio Pillsbury', description: '', winners: [], detail: '' })).toBe('Trofeo Pillsbury');
     expect(awardTitle({ id: 'draws', emoji: '🧱', title: 'Il muro', description: '', winners: [], detail: '' })).toBe('Il muro');
   });
