@@ -84,3 +84,24 @@ describe('fetchGameStates in batches', () => {
     expect(Object.keys(states)).toHaveLength(650);
   });
 });
+
+describe('fetchRatingHistory', () => {
+  const answer = (status: number, body: string) => vi.stubGlobal('fetch', vi.fn(async () => new Response(body, { status })));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('returns the history Lichess sends', async () => {
+    const { fetchRatingHistory } = await import('../lichess');
+    answer(200, JSON.stringify([{ name: 'Blitz', points: [[2026, 8, 8, 1803]] }]));
+    await expect(fetchRatingHistory('drake097')).resolves.toEqual([{ name: 'Blitz', points: [[2026, 8, 8, 1803]] }]);
+  });
+
+  it('says what came back instead, never an empty history', async () => {
+    const { fetchRatingHistory } = await import('../lichess');
+    answer(404, '{"error":"Not found"}');
+    await expect(fetchRatingHistory('drake097')).rejects.toThrow('storico di drake097: Lichess ha risposto 404 ({"error":"Not found"})');
+    answer(200, '[]');
+    await expect(fetchRatingHistory('drake097')).rejects.toThrow('storico di drake097: risposta inattesa ([])');
+    answer(200, '<html>');
+    await expect(fetchRatingHistory('drake097')).rejects.toThrow('risposta non JSON (<html>)');
+  });
+});

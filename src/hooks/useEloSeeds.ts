@@ -78,7 +78,7 @@ export function useEloSeeds({
     })()
       .catch((e) =>
         // Always said, retries included: otherwise nothing shows whether the check ran
-        latest.current.flash('warning', 'Elo di partenza non controllati, Lichess non risponde: si riprova alla prossima apertura. ' + errorMessage(e))
+        latest.current.flash('warning', `Elo di partenza non controllati, ${errorMessage(e)}. Si riprova alla prossima apertura.`)
       )
       .finally(() => {
         running.current = false;

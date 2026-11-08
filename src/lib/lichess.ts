@@ -117,13 +117,21 @@ export async function fetchUsers(handles: string[]): Promise<unknown[]> {
   return out;
 }
 
-// A player's Lichess rating history, every kind (see lib/seeds.ts); empty for a player Lichess does
-// not know
+// A player's Lichess rating history, every kind (see lib/seeds.ts). Any answer that is not a history
+// is an error that says what came back (status, the start of the body), never an empty history:
+// an empty one would silently leave the player an esordiente.
 export async function fetchRatingHistory(handle: string): Promise<unknown> {
-  const res = await fetch(`https://lichess.org/api/user/${encodeURIComponent(handle)}/rating-history`, {
-    headers: { Accept: "application/json" },
-  });
-  if (res.status === 404) return [];
-  if (!res.ok) throw new Error(`Lichess ha risposto ${res.status}`);
-  return res.json();
+  const url = `https://lichess.org/api/user/${encodeURIComponent(handle)}/rating-history`;
+  const res = await fetch(url, { headers: { Accept: "application/json" } });
+  const body = await res.text();
+  const start = body.slice(0, 120).replace(/\s+/g, " ");
+  if (!res.ok) throw new Error(`storico di ${handle}: Lichess ha risposto ${res.status} (${start || "senza testo"})`);
+  let data: unknown;
+  try {
+    data = JSON.parse(body);
+  } catch {
+    throw new Error(`storico di ${handle}: risposta non JSON (${start || "vuota"})`);
+  }
+  if (!Array.isArray(data) || data.length === 0) throw new Error(`storico di ${handle}: risposta inattesa (${start || "vuota"})`);
+  return data;
 }
