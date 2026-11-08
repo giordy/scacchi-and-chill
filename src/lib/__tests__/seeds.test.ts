@@ -61,9 +61,9 @@ describe('computeSeed', () => {
       ['carla', [kind('Rapid', 1700)]],
       ['dario', [kind('Rapid', 1850)]],
     ]);
-    // Regulars: 1500 on average here, 1800 on Lichess: −300
+    // Regulars: 1500 on average here, 1800 on Lichess: −300, so 1550; halfway to their mean 1500: 1525
     expect(computeSeed('Dario', date, regulars, histories)).toEqual({
-      handle: 'Dario', rating: 1550, date, perf: 'rapid', lichess: 1850, offset: -300,
+      handle: 'Dario', rating: 1525, date, perf: 'rapid', lichess: 1850, offset: -300, mean: 1500, rule: 2,
       // What it came from, kept to check it
       ratings: { rapid: 1850 },
       regulars: [
@@ -81,7 +81,7 @@ describe('computeSeed', () => {
       ['carla', [kind('Blitz', 1600)]],
       ['dario', [kind('Rapid', 1880, 12, '2018-03-01'), kind('Blitz', 1803), kind('Bullet', 1782)]],
     ]);
-    expect(computeSeed('dario', date, regulars, histories)).toMatchObject({ perf: 'blitz', lichess: 1803, offset: -200, rating: 1603 });
+    expect(computeSeed('dario', date, regulars, histories)).toMatchObject({ perf: 'blitz', lichess: 1803, offset: -200, rating: 1552 }); // 1603, halfway to 1500
   });
 
   it('takes the first kind that is reliable for the player and for at least 3 regulars', () => {
@@ -92,7 +92,37 @@ describe('computeSeed', () => {
       ['carla', [kind('Classical', 1600)]],
       ['dario', [kind('Correspondence', 2100), kind('Classical', 1750), kind('Rapid', 1500)]],
     ]);
-    expect(computeSeed('dario', date, regulars, histories)).toMatchObject({ perf: 'classical', lichess: 1750, offset: -150, rating: 1600 });
+    expect(computeSeed('dario', date, regulars, histories)).toMatchObject({ perf: 'classical', lichess: 1750, offset: -150, rating: 1550 }); // 1600, halfway to 1500
+  });
+
+  it('keeps a seed between the weakest and the strongest regular', () => {
+    const histories = new Map<string, unknown>([
+      ['anna', [kind('Rapid', 1700)]],
+      ['bruno', [kind('Rapid', 1600)]],
+      ['carla', [kind('Rapid', 1500)]],
+      ['dario', [kind('Rapid', 2900)]], // 2700 on the scale, 2100 halfway: the strongest regular is 1600
+      ['elena', [kind('Rapid', 300)]],
+    ]);
+    expect(computeSeed('dario', date, regulars, histories).rating).toBe(1600);
+    expect(computeSeed('elena', date, regulars, histories).rating).toBe(1400);
+  });
+
+  it('gives the Stagione 2 the starting ratings the organizer judged right', () => {
+    // Elo del torneo at the start of the Stagione 2, Lichess ratings on 2026-09-09 (from the site)
+    const s2 = new Map([['battimat', 1721], ['fsgach', 2022], ['giords', 1721], ['luca_sgarbossa', 1378], ['matepaco', 1648], ['scarsoforteh', 1486]]);
+    const histories = new Map<string, unknown>([
+      ['battimat', [kind('rapid', 1502), kind('blitz', 1122)]],
+      ['fsgach', [kind('rapid', 1752), kind('blitz', 1759)]],
+      ['giords', [kind('correspondence', 1712), kind('blitz', 1049)]],
+      ['luca_sgarbossa', [kind('correspondence', 1568)]],
+      ['matepaco', []],
+      ['scarsoforteh', []],
+      ['drake097', [kind('rapid', 1903), kind('blitz', 1822)]],
+      ['frasal', [kind('rapid', 1752), kind('blitz', 1486)]],
+    ]);
+    // Rapid: only 2 regulars; blitz: 3, +511 on average (2333 and 1997), then halfway to their mean 1663
+    expect(computeSeed('drake097', '2026-09-09', s2, histories)).toMatchObject({ perf: 'blitz', lichess: 1822, offset: 511, mean: 1663, rating: 1998 }); // Fabio: 2022
+    expect(computeSeed('frasal', '2026-09-09', s2, histories)).toMatchObject({ perf: 'blitz', lichess: 1486, offset: 511, rating: 1830 }); // Matteo: 1721
   });
 
   it('gives no rating without a reliable one, or with fewer than 3 regulars to set the scale', () => {
@@ -151,10 +181,10 @@ describe('which seeds to fix', () => {
       { handle: 'elena', date: '2026-09-22', retry: false },
     ]);
     // A seed with a rating is fixed once
-    const fixed = { handle: 'Dario', rating: 1600, date: '2026-09-08', regulars: [] };
+    const fixed = { handle: 'Dario', rating: 1600, date: '2026-09-08', rule: 2 };
     expect(seedsToFix(firstSeason, [fixed], first)).toEqual([{ handle: 'elena', date: '2026-09-22', retry: false }]);
-    // ...but computed once more when saved before its regulars were kept, to keep them
-    expect(seedsToFix(firstSeason, [{ ...fixed, regulars: undefined }], first)).toEqual([
+    // ...but computed once more when it comes from an older rule
+    expect(seedsToFix(firstSeason, [{ ...fixed, rule: undefined }], first)).toEqual([
       { handle: 'dario', date: '2026-09-08', retry: true },
       { handle: 'elena', date: '2026-09-22', retry: false },
     ]);

@@ -143,7 +143,9 @@ export interface EloSeed {
   date: string; // "2026-09-08": the day the Lichess rating is taken from
   perf?: 'correspondence' | 'classical' | 'rapid' | 'blitz'; // the kind of Lichess rating used
   lichess?: number; // that Lichess rating
-  offset?: number; // the correction of scale, from the regulars (rating = lichess + offset)
+  offset?: number; // the correction of scale, from the regulars
+  mean?: number; // the regulars' mean Elo del torneo: rating = mean + (lichess + offset - mean) / 2, within the regulars
+  rule?: number; // the rule it was computed with (see SEED_RULE in lib/seeds.ts)
   reason?: string; // without a rating: why, in words for the organizer
   // What it was computed from, to check it: the player's reliable Lichess ratings on that day, and each
   // regular's Elo del torneo at the start of the season with their reliable Lichess ratings that day

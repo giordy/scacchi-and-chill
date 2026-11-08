@@ -41,6 +41,7 @@ export function SeedsSection({
         value: String(seed.rating),
         note:
           `Lichess ${SEED_PERF_LABEL[seed.perf!]} ${seed.lichess} del ${seedDayLabel(seed.date)}, correzione ${sign}${Math.abs(seed.offset!)}` +
+          (seed.mean !== undefined ? ` (${seed.lichess! + seed.offset!}), poi a metà strada verso la media dei veterani (${seed.mean})` : '') +
           (used.length > 0 ? `. Veterani usati (Elo del torneo/Lichess): ${used.join(', ')}` : ''),
       };
     }

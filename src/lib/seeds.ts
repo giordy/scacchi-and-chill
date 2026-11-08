@@ -12,7 +12,13 @@
 //   the last one within a year;
 // - moved onto the tournament's scale: the regulars of the season have both ratings, and the mean
 //   difference between their Elo del torneo and their Lichess rating of the same kind, on the same
-//   day, is added (at least 3 regulars with a reliable rating of that kind, or that kind is skipped).
+//   day, is added (at least 3 regulars with a reliable rating of that kind, or that kind is skipped);
+// - then taken halfway towards the mean Elo del torneo of all the regulars: knowing nothing else, a
+//   newcomer is an average player, and a Lichess rating says only part of their level by
+//   correspondence (on the Stagione 2 the regulars' blitz was 263 to 672 points under their level
+//   here); and kept between the weakest and the strongest regular.
+//   Checked on the Stagione 2 against the organizer's judgement: Alessandro 1998 (Fabio 2022),
+//   Francesco Sal 1830 (Matteo 1721, "maybe a little stronger"); the full Lichess step gave 2333/1997.
 // Without any, the player is an esordiente as before (a seed with rating null). A seed with a rating
 // is fixed once; one without is tried again, with the same day, whenever the organizer area opens
 // (a rule changed since, or a regular joined): the histories up to a past day do not change, so
@@ -34,6 +40,10 @@ const entryOf = (history: unknown[], perf: SeedPerf) =>
 
 export const SEED_DAYS_BEFORE = 30;
 export const SEED_MIN_REGULARS = 3;
+// How much of the distance from the regulars' mean the Lichess rating keeps
+export const SEED_WEIGHT = 0.5;
+// The rule a seed was computed with: a seed with a rating from an older rule is computed once more
+export const SEED_RULE = 2;
 export const RELIABLE_DAYS = 10;
 export const RELIABLE_WITHIN_DAYS = 365;
 
@@ -112,7 +122,11 @@ export function computeSeed(handle: string, date: string, regulars: Map<string, 
     }
     const mean = (ns: number[]) => ns.reduce((a, b) => a + b, 0) / ns.length;
     const offset = Math.round(mean(pairs.map((p) => p.elo)) - mean(pairs.map((p) => p.lichess)));
-    return { handle, rating: lichess + offset, date, perf, lichess, offset, ...basis };
+    // Halfway towards the regulars' mean, between the weakest and the strongest
+    const all = [...regulars.values()];
+    const avg = mean(all);
+    const rating = Math.round(Math.min(Math.max(avg + SEED_WEIGHT * (lichess + offset - avg), Math.min(...all)), Math.max(...all)));
+    return { handle, rating, date, perf, lichess, offset, mean: Math.round(avg), rule: SEED_RULE, ...basis };
   }
   const reason =
     skipped.length > 0
@@ -138,8 +152,8 @@ export function firstGames(history: HistoryGame[], gameStates: Record<string, Li
 }
 
 // Players in their first season who need a seed now: no seed yet and a first game to date it from,
-// or a seed without a rating, tried again on its own day (retry: true); also, once, a seed saved
-// before the regulars it came from were kept (no `regulars`), to keep them
+// or a seed without a rating, tried again on its own day (retry: true); also, once, a seed with a
+// rating from an older rule (see SEED_RULE)
 export function seedsToFix(
   firstSeason: Set<string>,
   seeds: EloSeed[] | undefined,
@@ -150,7 +164,7 @@ export function seedsToFix(
     .sort()
     .flatMap((handle): { handle: string; date: string; retry: boolean }[] => {
       const seed = seedOf.get(handle);
-      if (seed) return seed.rating === null || !seed.regulars ? [{ handle, date: seed.date, retry: true }] : [];
+      if (seed) return seed.rating === null || seed.rule !== SEED_RULE ? [{ handle, date: seed.date, retry: true }] : [];
       return first.has(handle) ? [{ handle, date: seedDate(first.get(handle)!), retry: false }] : [];
     });
 }

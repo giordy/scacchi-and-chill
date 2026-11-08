@@ -195,6 +195,10 @@ describe('Elo di partenza in Stagioni', () => {
     expect(html).toContain('<strong>carla</strong> · 1620');
     expect(html).toContain('Lichess rapid 1900 del 8 set 2026, correzione −280. Veterani usati (Elo del torneo/Lichess): anna 1700/1980');
     expect(html).not.toContain('bruno 1600'); // no rapid: not used
+    const halfway = renderToStaticMarkup(
+      <SeedsSection config={{ ...cfg, tournament: { ...cfg.tournament, seeds: [{ handle: 'carla', rating: 1610, date: '2026-09-08', perf: 'blitz', lichess: 1500, offset: 120, mean: 1600, rule: 2 }] } }} history={history} gameStates={{}} seasons={[season1]} />
+    );
+    expect(halfway).toContain('Lichess blitz 1500 del 8 set 2026, correzione +120 (1620), poi a metà strada verso la media dei veterani (1600)');
     expect(html).toContain('<strong>dario</strong> · esordiente');
     expect(html).toContain('al 8 set 2026: Elo blitz 1700 affidabile, ma solo 2 veterani'); // why, from the seed
     expect(html).toContain('Si ricontrolla a ogni apertura.');
