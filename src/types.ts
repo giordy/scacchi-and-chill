@@ -141,7 +141,7 @@ export interface EloSeed {
   handle: string;
   rating: number | null; // on the tournament's scale; null: no reliable Lichess rating (an esordiente as before)
   date: string; // "2026-09-08": the day the Lichess rating is taken from
-  perf?: 'correspondence' | 'classical' | 'rapid'; // the kind of Lichess rating used
+  perf?: 'correspondence' | 'classical' | 'rapid' | 'blitz'; // the kind of Lichess rating used
   lichess?: number; // that Lichess rating
   offset?: number; // the correction of scale, from the regulars (rating = lichess + offset)
 }

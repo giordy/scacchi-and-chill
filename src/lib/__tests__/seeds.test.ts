@@ -20,9 +20,15 @@ describe('seedDate', () => {
 
 describe('reliableRatingsAt', () => {
   it('takes the last rating up to the day, of the kinds with at least 10 days of rated games', () => {
-    const history = [kind('Rapid', 1720), kind('Classical', 1800, 9), kind('Blitz', 1500), kind('Correspondence', 1900, 60, '2026-10-20')];
-    // Correspondence: the days after 2026-09-08 do not count
-    expect(reliableRatingsAt(history, '2026-09-08')).toEqual({ rapid: 1720, correspondence: 1850 });
+    const history = [kind('Rapid', 1720), kind('Classical', 1800, 9), kind('Blitz', 1500), kind('Bullet', 1450), kind('Correspondence', 1900, 60, '2026-10-20')];
+    // Correspondence: the days after 2026-09-08 do not count; bullet is never taken
+    expect(reliableRatingsAt(history, '2026-09-08')).toEqual({ rapid: 1720, blitz: 1500, correspondence: 1850 });
+  });
+
+  it('leaves out a rating that stayed flat for years, as Lichess draws one without games', () => {
+    // A rapid rating from 2021 and a blitz played every day: as Francesco Sal and Alessandro
+    const history = [kind('Rapid', 1780, 12, '2021-05-01'), kind('Blitz', 1490, 200, '2026-09-07')];
+    expect(reliableRatingsAt(history, '2026-09-08')).toEqual({ blitz: 1490 });
   });
 
   it('leaves out a rating whose last game is more than a year old, and anything unreadable', () => {
@@ -46,6 +52,16 @@ describe('computeSeed', () => {
     ]);
     // Regulars: 1500 on average here, 1800 on Lichess: −300
     expect(computeSeed('Dario', date, regulars, histories)).toEqual({ handle: 'Dario', rating: 1550, date, perf: 'rapid', lichess: 1850, offset: -300 });
+  });
+
+  it('falls back on blitz, set on the blitz of the regulars', () => {
+    const histories = new Map<string, unknown>([
+      ['anna', [kind('Blitz', 1800)]],
+      ['bruno', [kind('Blitz', 1700)]],
+      ['carla', [kind('Blitz', 1600)]],
+      ['dario', [kind('Rapid', 1880, 12, '2018-03-01'), kind('Blitz', 1803), kind('Bullet', 1782)]],
+    ]);
+    expect(computeSeed('dario', date, regulars, histories)).toMatchObject({ perf: 'blitz', lichess: 1803, offset: -200, rating: 1603 });
   });
 
   it('takes the first kind that is reliable for the player and for at least 3 regulars', () => {
@@ -95,10 +111,16 @@ describe('which seeds to fix', () => {
     const first = firstGames(history, states, players);
     const firstSeason = new Set(['dario', 'elena', 'fabio']);
     expect(seedsToFix(firstSeason, undefined, first)).toEqual([
-      { handle: 'dario', date: '2026-09-08' },
-      { handle: 'elena', date: '2026-09-22' },
+      { handle: 'dario', date: '2026-09-08', retry: false },
+      { handle: 'elena', date: '2026-09-22', retry: false },
     ]);
-    // A seed without a rating is fixed too: never computed again
-    expect(seedsToFix(firstSeason, [{ handle: 'Dario', rating: null, date: '2026-09-08' }], first)).toEqual([{ handle: 'elena', date: '2026-09-22' }]);
+    // A seed with a rating is fixed once
+    expect(seedsToFix(firstSeason, [{ handle: 'Dario', rating: 1600, date: '2026-09-08' }], first)).toEqual([{ handle: 'elena', date: '2026-09-22', retry: false }]);
+  });
+
+  it('tries a seed without a rating again, on the day it was dated', () => {
+    const first = firstGames(history, states, players);
+    const seeds = [{ handle: 'Dario', rating: null, date: '2026-09-01' }];
+    expect(seedsToFix(new Set(['dario']), seeds, first)).toEqual([{ handle: 'dario', date: '2026-09-01', retry: true }]);
   });
 });

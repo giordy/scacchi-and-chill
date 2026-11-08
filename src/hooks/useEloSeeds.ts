@@ -8,9 +8,10 @@ import { errorMessage } from '../lib/utils';
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
 
 // Organizer area: fixes the seed of each player in their first season (see lib/seeds.ts) as soon as
-// their first game exists, reading the Lichess rating histories of the season's players. Each seed
-// is saved once in the tournament and never computed again. When Lichess does not answer, nothing
-// is saved and it is tried again the next time the organizer area opens.
+// their first game exists, reading the Lichess rating histories of the season's players. A seed with
+// a rating is saved once and never computed again; one without is tried again, on its own day, each
+// time the organizer area opens, and saved (and told) only when it gets a rating. When Lichess does
+// not answer, nothing is saved and it is tried again the next time the organizer area opens.
 export function useEloSeeds({
   enabled,
   config,
@@ -51,9 +52,15 @@ export function useEloSeeds({
     (async () => {
       const histories = new Map<string, unknown>();
       for (const h of needed) histories.set(h, await fetchRatingHistory(h));
-      const fresh: EloSeed[] = toFix.map((t) => computeSeed(t.handle, t.date, regulars, histories));
+      // A retry that still finds no rating changes nothing: not saved, not told
+      const fresh: EloSeed[] = toFix
+        .map((t) => ({ t, seed: computeSeed(t.handle, t.date, regulars, histories) }))
+        .filter(({ t, seed }) => !t.retry || seed.rating !== null)
+        .map(({ seed }) => seed);
+      if (fresh.length === 0) return;
       const { config: now, onUpdateTournamentMeta: save, flash: say } = latest.current;
-      const kept = (now.tournament?.seeds ?? []).filter((s) => !fresh.some((f) => f.handle === s.handle));
+      const same = (a: EloSeed, b: EloSeed) => a.handle.toLowerCase() === b.handle.toLowerCase();
+      const kept = (now.tournament?.seeds ?? []).filter((s) => !fresh.some((f) => same(f, s)));
       save({ seeds: [...kept, ...fresh] });
       say(
         'ok',
@@ -65,7 +72,12 @@ export function useEloSeeds({
         )
       );
     })()
-      .catch((e) => latest.current.flash('warning', 'Elo di partenza non fissati, Lichess non risponde: si riprova alla prossima apertura. ' + errorMessage(e)))
+      .catch((e) => {
+        // Only retries pending: nothing new is waiting, no need to say it
+        if (toFix.some((t) => !t.retry)) {
+          latest.current.flash('warning', 'Elo di partenza non fissati, Lichess non risponde: si riprova alla prossima apertura. ' + errorMessage(e));
+        }
+      })
       .finally(() => {
         running.current = false;
       });

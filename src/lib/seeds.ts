@@ -4,23 +4,28 @@
 // Pillsbury from their first game (see lib/tournamentElo.ts). The rating is taken:
 // - 30 days before their first game of the season, from their Lichess rating history: losing on
 //   purpose online just before the season would have to be planned a month ahead;
-// - of the first kind that is reliable, in this order: correspondence, classical, rapid (blitz and
-//   bullet measure another game). Lichess says whether a rating is provisional only for today, so
+// - of the first kind that is reliable, in this order: correspondence, classical, rapid, blitz
+//   (bullet is left out: too far from our game; for friends who play online, blitz is often the only
+//   rating still alive, and the scale below is set on the same kind). Lichess says whether a rating
+//   is provisional only for today, so
 //   for a past day a rating is reliable with at least 10 days of rated games of that kind up to it,
 //   the last one within a year;
 // - moved onto the tournament's scale: the regulars of the season have both ratings, and the mean
 //   difference between their Elo del torneo and their Lichess rating of the same kind, on the same
 //   day, is added (at least 3 regulars with a reliable rating of that kind, or that kind is skipped).
-// Without any, the player is an esordiente as before (a seed with rating null). A seed is fixed once.
+// Without any, the player is an esordiente as before (a seed with rating null). A seed with a rating
+// is fixed once; one without is tried again, with the same day, whenever the organizer area opens
+// (a rule changed since, or a regular joined): the histories up to a past day do not change, so
+// playing online now cannot move it.
 import { EloSeed, HistoryGame, LichessExportGame } from '../types';
 import { stateOf } from './games';
 import { playersOnBoard } from './tournamentElo';
 
 export type SeedPerf = NonNullable<EloSeed['perf']>;
-export const SEED_PERFS: SeedPerf[] = ['correspondence', 'classical', 'rapid'];
-export const SEED_PERF_LABEL: Record<SeedPerf, string> = { correspondence: 'per corrispondenza', classical: 'classical', rapid: 'rapid' };
+export const SEED_PERFS: SeedPerf[] = ['correspondence', 'classical', 'rapid', 'blitz'];
+export const SEED_PERF_LABEL: Record<SeedPerf, string> = { correspondence: 'per corrispondenza', classical: 'classical', rapid: 'rapid', blitz: 'blitz' };
 // Names of the kinds in Lichess's rating history
-const HISTORY_NAME: Record<SeedPerf, string> = { correspondence: 'Correspondence', classical: 'Classical', rapid: 'Rapid' };
+const HISTORY_NAME: Record<SeedPerf, string> = { correspondence: 'Correspondence', classical: 'Classical', rapid: 'Rapid', blitz: 'Blitz' };
 
 export const SEED_DAYS_BEFORE = 30;
 export const SEED_MIN_REGULARS = 3;
@@ -95,11 +100,19 @@ export function firstGames(history: HistoryGame[], gameStates: Record<string, Li
   return first;
 }
 
-// Players in their first season who need a seed now: no seed yet, and a first game to date it from
-export function seedsToFix(firstSeason: Set<string>, seeds: EloSeed[] | undefined, first: Map<string, number>): { handle: string; date: string }[] {
-  const fixed = new Set((seeds ?? []).map((s) => lower(s.handle)));
+// Players in their first season who need a seed now: no seed yet and a first game to date it from,
+// or a seed without a rating, tried again on its own day (retry: true)
+export function seedsToFix(
+  firstSeason: Set<string>,
+  seeds: EloSeed[] | undefined,
+  first: Map<string, number>
+): { handle: string; date: string; retry: boolean }[] {
+  const seedOf = new Map((seeds ?? []).map((s) => [lower(s.handle), s]));
   return [...firstSeason]
-    .filter((h) => !fixed.has(h) && first.has(h))
     .sort()
-    .map((handle) => ({ handle, date: seedDate(first.get(handle)!) }));
+    .flatMap((handle): { handle: string; date: string; retry: boolean }[] => {
+      const seed = seedOf.get(handle);
+      if (seed) return seed.rating === null ? [{ handle, date: seed.date, retry: true }] : [];
+      return first.has(handle) ? [{ handle, date: seedDate(first.get(handle)!), retry: false }] : [];
+    });
 }
