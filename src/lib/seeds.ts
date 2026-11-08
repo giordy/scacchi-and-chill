@@ -92,6 +92,9 @@ export function historySummary(history: unknown, date: string): string {
 // lower case (the player's and the regulars')
 export function computeSeed(handle: string, date: string, regulars: Map<string, number>, histories: Map<string, unknown>): EloSeed {
   const mine = reliableRatingsAt(histories.get(lower(handle)), date);
+  // Kept in the seed, to check it (see EloSeed.regulars)
+  const used = [...regulars].sort(([a], [b]) => a.localeCompare(b)).map(([h, elo]) => ({ handle: h, elo: Math.round(elo), ratings: reliableRatingsAt(histories.get(h), date) }));
+  const basis = { ratings: mine, regulars: used };
   // Why each kind of the player's was skipped: too few regulars to set its scale
   const skipped: string[] = [];
   for (const perf of SEED_PERFS) {
@@ -109,13 +112,13 @@ export function computeSeed(handle: string, date: string, regulars: Map<string, 
     }
     const mean = (ns: number[]) => ns.reduce((a, b) => a + b, 0) / ns.length;
     const offset = Math.round(mean(pairs.map((p) => p.elo)) - mean(pairs.map((p) => p.lichess)));
-    return { handle, rating: lichess + offset, date, perf, lichess, offset };
+    return { handle, rating: lichess + offset, date, perf, lichess, offset, ...basis };
   }
   const reason =
     skipped.length > 0
       ? skipped.join('; ')
       : `nessun Elo Lichess affidabile (servono almeno ${RELIABLE_DAYS} giorni con partite valutate dello stesso tipo, l'ultima entro un anno; il bullet non conta); ${historySummary(histories.get(lower(handle)), date)}`;
-  return { handle, rating: null, date, reason };
+  return { handle, rating: null, date, reason, ...basis };
 }
 
 // When each player's first game of the season was created (the Lichess challenge; the link saved
@@ -135,7 +138,8 @@ export function firstGames(history: HistoryGame[], gameStates: Record<string, Li
 }
 
 // Players in their first season who need a seed now: no seed yet and a first game to date it from,
-// or a seed without a rating, tried again on its own day (retry: true)
+// or a seed without a rating, tried again on its own day (retry: true); also, once, a seed saved
+// before the regulars it came from were kept (no `regulars`), to keep them
 export function seedsToFix(
   firstSeason: Set<string>,
   seeds: EloSeed[] | undefined,
@@ -146,7 +150,7 @@ export function seedsToFix(
     .sort()
     .flatMap((handle): { handle: string; date: string; retry: boolean }[] => {
       const seed = seedOf.get(handle);
-      if (seed) return seed.rating === null ? [{ handle, date: seed.date, retry: true }] : [];
+      if (seed) return seed.rating === null || !seed.regulars ? [{ handle, date: seed.date, retry: true }] : [];
       return first.has(handle) ? [{ handle, date: seedDate(first.get(handle)!), retry: false }] : [];
     });
 }

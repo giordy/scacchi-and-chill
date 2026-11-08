@@ -145,6 +145,10 @@ export interface EloSeed {
   lichess?: number; // that Lichess rating
   offset?: number; // the correction of scale, from the regulars (rating = lichess + offset)
   reason?: string; // without a rating: why, in words for the organizer
+  // What it was computed from, to check it: the player's reliable Lichess ratings on that day, and each
+  // regular's Elo del torneo at the start of the season with their reliable Lichess ratings that day
+  ratings?: Partial<Record<NonNullable<EloSeed['perf']>, number>>;
+  regulars?: { handle: string; elo: number; ratings: Partial<Record<NonNullable<EloSeed['perf']>, number>> }[];
 }
 
 export interface AppConfig {

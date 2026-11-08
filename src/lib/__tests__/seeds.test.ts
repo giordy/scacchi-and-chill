@@ -62,7 +62,16 @@ describe('computeSeed', () => {
       ['dario', [kind('Rapid', 1850)]],
     ]);
     // Regulars: 1500 on average here, 1800 on Lichess: −300
-    expect(computeSeed('Dario', date, regulars, histories)).toEqual({ handle: 'Dario', rating: 1550, date, perf: 'rapid', lichess: 1850, offset: -300 });
+    expect(computeSeed('Dario', date, regulars, histories)).toEqual({
+      handle: 'Dario', rating: 1550, date, perf: 'rapid', lichess: 1850, offset: -300,
+      // What it came from, kept to check it
+      ratings: { rapid: 1850 },
+      regulars: [
+        { handle: 'anna', elo: 1600, ratings: { rapid: 1900 } },
+        { handle: 'bruno', elo: 1500, ratings: { rapid: 1800 } },
+        { handle: 'carla', elo: 1400, ratings: { rapid: 1700 } },
+      ],
+    });
   });
 
   it('falls back on blitz, set on the blitz of the regulars', () => {
@@ -94,7 +103,7 @@ describe('computeSeed', () => {
       ['elena', [kind('Rapid', 1850, 5)]],
     ]);
     // Says why, for the organizer: each kind of the player's that was skipped, and how many regulars had it
-    expect(computeSeed('dario', date, regulars, histories)).toEqual({
+    expect(computeSeed('dario', date, regulars, histories)).toMatchObject({
       handle: 'dario',
       rating: null,
       date,
@@ -104,8 +113,8 @@ describe('computeSeed', () => {
     });
     const none = "nessun Elo Lichess affidabile (servono almeno 10 giorni con partite valutate dello stesso tipo, l'ultima entro un anno; il bullet non conta); ";
     // ...and what the history held, to see why
-    expect(computeSeed('elena', date, regulars, histories)).toEqual({ handle: 'elena', rating: null, date, reason: none + 'nello storico: rapid 5 giorni, ultimo 2026-09-01' });
-    expect(computeSeed('nobody', date, regulars, histories)).toEqual({ handle: 'nobody', rating: null, date, reason: none + 'storico Lichess non leggibile (undefined)' });
+    expect(computeSeed('elena', date, regulars, histories)).toMatchObject({ handle: 'elena', rating: null, date, reason: none + 'nello storico: rapid 5 giorni, ultimo 2026-09-01', ratings: {} });
+    expect(computeSeed('nobody', date, regulars, histories)).toMatchObject({ handle: 'nobody', rating: null, date, reason: none + 'storico Lichess non leggibile (undefined)' });
   });
 
   it('says what a history held when it has none of the kinds, or is not one', () => {
@@ -142,7 +151,13 @@ describe('which seeds to fix', () => {
       { handle: 'elena', date: '2026-09-22', retry: false },
     ]);
     // A seed with a rating is fixed once
-    expect(seedsToFix(firstSeason, [{ handle: 'Dario', rating: 1600, date: '2026-09-08' }], first)).toEqual([{ handle: 'elena', date: '2026-09-22', retry: false }]);
+    const fixed = { handle: 'Dario', rating: 1600, date: '2026-09-08', regulars: [] };
+    expect(seedsToFix(firstSeason, [fixed], first)).toEqual([{ handle: 'elena', date: '2026-09-22', retry: false }]);
+    // ...but computed once more when saved before its regulars were kept, to keep them
+    expect(seedsToFix(firstSeason, [{ ...fixed, regulars: undefined }], first)).toEqual([
+      { handle: 'dario', date: '2026-09-08', retry: true },
+      { handle: 'elena', date: '2026-09-22', retry: false },
+    ]);
   });
 
   it('tries a seed without a rating again, on the day it was dated', () => {
