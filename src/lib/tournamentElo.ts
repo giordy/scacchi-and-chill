@@ -59,6 +59,11 @@ export interface EloReport {
   // Ratings of the two players when the game started (before its result), by gameKey, and
   // whether either was an esordiente (then the game is no colpaccio)
   before: Map<string, { white: number; black: number; newcomer: boolean }>;
+  // Every game, in the order the ratings moved, with the key of its season
+  played: { season: string; game: EloGame }[];
+  // Highest rating of each player, and the key of the season it was reached in. Only once their
+  // level is known: from the rating fixed at the end of their first season, then after every game
+  peaks: Map<string, { rating: number; season: string }>;
 }
 
 export const CURRENT = 'current';
@@ -146,6 +151,13 @@ export function computeElo(inputs: EloSeasonInput[]): EloReport {
   const ratings = new Map<string, number>();
   const before = new Map<string, { white: number; black: number; newcomer: boolean }>();
   const seasons: EloSeason[] = [];
+  const played: EloReport['played'] = [];
+  const peaks: EloReport['peaks'] = new Map();
+  const reach = (h: string, season: string) => {
+    const r = ratings.get(h)!;
+    const p = peaks.get(h);
+    if (!p || r > p.rating) peaks.set(h, { rating: r, season });
+  };
   // Who played a season before (a doubtful rating does not count, see EloSeasonInput)
   const known = new Set<string>();
 
@@ -178,6 +190,10 @@ export function computeElo(inputs: EloSeasonInput[]): EloReport {
       // Against an esordiente only the esordiente moves; two esordienti (or two regulars) both move
       if (!bNew || wNew) ratings.set(w, rw + delta);
       if (!wNew || bNew) ratings.set(b, rb - delta);
+      played.push({ season: input.key, game: g });
+      // In a first season the rating is not yet their level (at the end it becomes the performance)
+      if (!firstSeason.has(w)) reach(w, input.key);
+      if (!firstSeason.has(b)) reach(b, input.key);
     });
 
     // At the end of a first (archived) season, the rating becomes the performance: 14 games one
@@ -186,14 +202,15 @@ export function computeElo(inputs: EloSeasonInput[]): EloReport {
       const fitted = performanceRatings(ordered, firstSeason, (g) => before.get(gameKey(g, input.key))!, seeds);
       fitted.forEach((r, h) => ratings.set(h, r));
     }
-
-    seasons.push({ key: input.key, start, end: new Map([...present].map((h) => [h, ratings.get(h)!])), newcomers, firstSeason });
     // A doubtful rating (see EloSeasonInput) does not count as a season played
     const doubtful = new Set((input.doubtful ?? []).map(lower));
+    if (input.key !== CURRENT) firstSeason.forEach((h) => doubtful.has(h) || reach(h, input.key));
+
+    seasons.push({ key: input.key, start, end: new Map([...present].map((h) => [h, ratings.get(h)!])), newcomers, firstSeason });
     present.forEach((h) => doubtful.has(h) || known.add(h));
   });
 
-  return { seasons, ratings, before };
+  return { seasons, ratings, before, played, peaks };
 }
 
 // An archived season, the games decided at the table left out (see decidedAtTable)
@@ -268,6 +285,12 @@ export const currentSeason = (report: EloReport): EloSeason => report.seasons[re
 export function ratingOf(report: EloReport, handle: string): number | undefined {
   const r = report.ratings.get(lower(handle));
   return r === undefined ? undefined : Math.round(r);
+}
+
+// Highest rating a player reached, rounded, and the key of its season (see EloReport.peaks)
+export function peakOf(report: EloReport, handle: string): { rating: number; season: string } | undefined {
+  const p = report.peaks.get(lower(handle));
+  return p && { rating: Math.round(p.rating), season: p.season };
 }
 
 export const isNewcomer = (season: EloSeason, handle: string) => season.newcomers.has(lower(handle));

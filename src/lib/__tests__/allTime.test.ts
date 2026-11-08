@@ -195,7 +195,7 @@ describe('allTimeRecords', () => {
       },
     ];
     // The Elo del torneo the two players had when the upset started
-    const elo = { seasons: [], ratings: new Map(), before: new Map([['upset001', { white: 1800, black: 1500, newcomer: false }]]) };
+    const elo = { seasons: [], ratings: new Map(), played: [], peaks: new Map(), before: new Map([['upset001', { white: 1800, black: 1500, newcomer: false }]]) };
     const records = allTimeRecords(list, nameOf, elo);
     expect(records.map((r) => r.id)).toEqual(['win-streak', 'unbeaten', 'longest', 'quickest', 'upset']);
     expect(records[0]).toMatchObject({ detail: '3 vittorie consecutive di Anna', season: 'Stagione 1 → Stagione 2' });
@@ -220,7 +220,7 @@ describe('allTimeRecords', () => {
         ],
       },
     ];
-    const elo = { seasons: [], ratings: new Map(), before: new Map([['stagione-1|1|bruno|carla', { white: 1800, black: 1500, newcomer: false }]]) };
+    const elo = { seasons: [], ratings: new Map(), played: [], peaks: new Map(), before: new Map([['stagione-1|1|bruno|carla', { white: 1800, black: 1500, newcomer: false }]]) };
     expect(allTimeRecords(list, nameOf, elo).filter((r) => r.id !== 'upset')).toEqual([]);
   });
 });

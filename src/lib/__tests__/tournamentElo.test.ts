@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeElo, CURRENT, currentSeason, ELO_START, eloSeasonFromArchive, eloSeasonFromCurrent, expectedScore, gameKey, isNewcomer, ratingOf, tournamentElo } from '../tournamentElo';
+import { computeElo, CURRENT, currentSeason, ELO_START, eloSeasonFromArchive, eloSeasonFromCurrent, expectedScore, gameKey, isNewcomer, peakOf, ratingOf, tournamentElo } from '../tournamentElo';
 import { HistoryGame, LichessExportGame, SeasonArchive } from '../../types';
 
 const g = (white: string, black: string, result: '1-0' | '0-1' | '½-½', end: number) => ({ white, black, result, end });
@@ -246,5 +246,30 @@ describe('substitutes', () => {
     expect(playersOnBoard(g, s, ['sub', 'anna'])).toEqual({ white: 'greta', black: 'anna' });
     expect(playersOnBoard(g, undefined, ['sub', 'anna'])).toEqual({ white: 'sub', black: 'anna' });
     expect(eloSeasonFromCurrent(['sub', 'anna'], [g], { aaaaaaaa: s }).games[0]).toMatchObject({ white: 'greta', black: 'anna' });
+  });
+});
+
+describe('Elo massimo', () => {
+  it('starts from the rating fixed at the end of the first season, then follows every game', () => {
+    const s1 = [1, 2, 3].map((n) => ({ ...g('anna', 'bruno', '1-0', n), round: String(n) }));
+    const rep = computeElo([
+      { key: 's1', players: ['anna', 'bruno'], games: s1 },
+      { key: CURRENT, players: ['anna', 'bruno', 'carla'], games: [{ ...g('bruno', 'anna', '1-0', 10), round: '1' }, { ...g('carla', 'anna', '1-0', 11), round: '2' }] },
+    ]);
+    const s1End = currentSeason(rep).start;
+    // Anna lost since: her best is the end of the first season
+    expect(peakOf(rep, 'Anna')).toEqual({ rating: Math.round(s1End.get('anna')!), season: 's1' });
+    // Bruno won: his best is now
+    expect(peakOf(rep, 'bruno')).toEqual({ rating: ratingOf(rep, 'bruno'), season: CURRENT });
+    // Carla is in her first season: her level is not known yet
+    expect(peakOf(rep, 'carla')).toBeUndefined();
+  });
+
+  it('is not set by a doubtful first season', () => {
+    const rep = computeElo([
+      { key: 's1', players: ['anna', 'bruno'], games: [{ ...g('anna', 'bruno', '1-0', 1), round: '1' }], doubtful: ['bruno'] },
+    ]);
+    expect(peakOf(rep, 'anna')).toBeDefined();
+    expect(peakOf(rep, 'bruno')).toBeUndefined();
   });
 });

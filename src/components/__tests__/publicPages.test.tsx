@@ -132,6 +132,21 @@ describe('player page', () => {
     expect(playerPage('zeno')).toContain('Giocatore «zeno» non trovato.');
   });
 
+  it('shows the highest Elo and the best colpaccio, from the second season on', () => {
+    // Bruno, far below Anna after the first season, beats her
+    const upsetHistory: HistoryGame[] = [{ round: '1', white: 'bruno', black: 'anna', url: 'https://lichess.org/dddddddd' }];
+    const states = { dddddddd: { id: 'dddddddd', status: 'resign', winner: 'white' as const, createdAt: 1, lastMoveAt: 2 } };
+    const html = renderToStaticMarkup(<PlayerPage handle="bruno" config={config} history={upsetHistory} gameStates={states} nameOf={nameOf} seasons={[season1]} />);
+    expect(html).toContain('Elo massimo');
+    expect(html).toContain('Colpaccio migliore');
+    expect(html).toContain('href="https://lichess.org/dddddddd"');
+    expect(playerPage('anna')).not.toContain('Colpaccio migliore');
+    // In the first season no level is known yet
+    const first = playerPage('anna', []);
+    expect(first).not.toContain('Elo massimo');
+    expect(first).not.toContain('Colpaccio migliore');
+  });
+
   it('has no sections across seasons without an archive', () => {
     const html = playerPage('anna', []);
     expect(html).not.toContain('Carriera');

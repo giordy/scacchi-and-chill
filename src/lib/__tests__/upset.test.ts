@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { upsetFrom, upsetOf, upsetSentence, UPSET_DRAW_GAP, UPSET_WIN_GAP } from '../upset';
-import { computeElo, CURRENT } from '../tournamentElo';
+import { bestUpset, upsetFrom, upsetOf, upsetSentence, UPSET_DRAW_GAP, UPSET_WIN_GAP } from '../upset';
+import { computeElo, CURRENT, EloReport, gameKey } from '../tournamentElo';
 import { computeSeasonAwards } from '../awards';
 import { HistoryGame, LichessExportGame } from '../../types';
 
@@ -58,5 +58,48 @@ describe('season awards', () => {
     const history: HistoryGame[] = [{ round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa' }];
     const states = { aaaaaaaa: { id: 'aaaaaaaa', status: 'resign', winner: 'white' as const } };
     expect(computeSeasonAwards(players, history, states).some((a) => a.id === 'upsets')).toBe(false);
+  });
+});
+
+describe('best colpaccio of a player', () => {
+  const game = (white: string, black: string, result: '1-0' | '0-1' | '½-½', round: string) => ({ white, black, result, round, id: `g${round}` });
+  const report = (games: { season: string; game: ReturnType<typeof game>; ratings: { white: number; black: number } }[]) =>
+    ({
+      seasons: [],
+      ratings: new Map(),
+      peaks: new Map(),
+      played: games.map(({ season, game }) => ({ season, game })),
+      before: new Map(games.map(({ season, game, ratings }) => [gameKey(game, season), { ...ratings, newcomer: false }])),
+    }) as EloReport;
+
+  it('is a win before any draw, then the largest gap, then the earliest', () => {
+    const rep = report([
+      { season: 's1', game: game('anna', 'bruno', '½-½', '1'), ratings: { white: 1400, black: 1800 } }, // draw, 400
+      { season: 's1', game: game('carla', 'anna', '0-1', '2'), ratings: { white: 1550, black: 1400 } }, // win, 150
+      { season: CURRENT, game: game('anna', 'dario', '1-0', '3'), ratings: { white: 1450, black: 1600 } }, // win, 150: later
+      { season: CURRENT, game: game('anna', 'bruno', '1-0', '4'), ratings: { white: 1700, black: 1500 } }, // the favourite won
+    ]);
+    expect(bestUpset(rep, 'Anna')).toMatchObject({ season: 's1', opponent: 'carla', upset: { kind: 'win', gap: 150 } });
+    // A draw when there is no win
+    expect(bestUpset(report([{ season: 's1', game: game('anna', 'bruno', '½-½', '1'), ratings: { white: 1400, black: 1800 } }]), 'anna')).toMatchObject({
+      opponent: 'bruno',
+      upset: { kind: 'draw' },
+    });
+  });
+
+  it('is only of who pulled it off', () => {
+    const rep = report([{ season: 's1', game: game('anna', 'bruno', '0-1', '1'), ratings: { white: 1800, black: 1500 } }]);
+    expect(bestUpset(rep, 'bruno')?.opponent).toBe('anna');
+    expect(bestUpset(rep, 'anna')).toBeUndefined();
+  });
+
+  it('reads the games of every season from the Elo del torneo', () => {
+    const games = [1, 2, 3, 4, 5].map((n) => ({ white: 'anna', black: 'bruno', result: '1-0' as const, end: n, round: String(n) }));
+    const rep = computeElo([
+      { key: 's1', players: [], games },
+      { key: CURRENT, players: ['anna', 'bruno'], games: [{ white: 'bruno', black: 'anna', result: '1-0', end: 9, round: '6', id: 'last' }] },
+    ]);
+    expect(bestUpset(rep, 'bruno')).toMatchObject({ season: CURRENT, opponent: 'anna', game: { id: 'last' } });
+    expect(bestUpset(rep, 'anna')).toBeUndefined(); // the first season had only esordienti
   });
 });

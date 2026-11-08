@@ -13,7 +13,8 @@ import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampion
 import { PointsChart } from '../components/PointsChart';
 import { PresenceMeta } from '../components/PresenceDot';
 import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
-import { boardCalendar, currentSeason as eloSeasonNow, isNewcomer, pronosticoPoints, ratingOf, tournamentElo } from '../lib/tournamentElo';
+import { boardCalendar, CURRENT, currentSeason as eloSeasonNow, EloReport, isNewcomer, peakOf, pronosticoPoints, ratingOf, tournamentElo } from '../lib/tournamentElo';
+import { bestUpset, upsetSentence } from '../lib/upset';
 import { withScheduledGames } from '../lib/publicGames';
 import { Trend, TrendKind } from '../components/Trend';
 import { pillsburyRace, pillsburyWins, raceCalendar } from '../lib/pillsbury';
@@ -97,6 +98,53 @@ function TrophyShelf({ medals, champion, title, pillsbury = [] }: { medals: Play
   );
 }
 
+// Two career highs, good news only: the highest Elo del torneo reached and the best colpaccio.
+// Nothing when there is neither (in a player's first season, or without any colpaccio).
+function CareerHighs({ handle, elo, seasonName, nameOf, title }: {
+  handle: string;
+  elo: EloReport;
+  seasonName: (key: string) => string;
+  nameOf: (handle: string) => string;
+  title?: string;
+}) {
+  const peak = peakOf(elo, handle);
+  const upset = bestUpset(elo, handle);
+  if (!peak && !upset) return null;
+  const now = ratingOf(elo, handle);
+  const season = (key: string) => shortSeason(seasonName(key), title);
+  return (
+    <>
+      {peak && (
+        <div className="stat-pill">
+          <InfoTip className="stat-pill-label" text="Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione).">
+            Elo massimo <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+          </InfoTip>
+          <span className="stat-pill-val">{peak.rating}</span>
+          <span className="stat-pill-note">{peak.season === CURRENT && peak.rating === now ? "adesso" : season(peak.season)}</span>
+        </div>
+      )}
+      {upset && (
+        <div className="stat-pill">
+          <InfoTip className="stat-pill-label" text={`Il suo colpaccio più grosso: ${upsetSentence(upset.upset, nameOf(handle))}.`}>
+            Colpaccio migliore <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+          </InfoTip>
+          <span className="stat-pill-val">
+            {upset.upset.kind === "win" ? "vs " : "½ vs "}
+            <a href={playerHref(upset.opponent)}>{nameOf(upset.opponent)}</a>
+          </span>
+          <span className="stat-pill-note">
+            {upset.game.id ? (
+              <a href={`https://lichess.org/${upset.game.id}`} target="_blank" rel="noopener noreferrer">{season(upset.season)}</a>
+            ) : (
+              season(upset.season)
+            )}
+          </span>
+        </div>
+      )}
+    </>
+  );
+}
+
 // The player's Lichess flair after their username, as Lichess shows it. From the games when they
 // played one, otherwise from their Lichess profile (read with the others' by usePresence); nothing
 // when they have none or the image does not load.
@@ -153,6 +201,13 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
     </>
   );
 
+  // Elo del torneo (see lib/tournamentElo), for the career highs and, in the season, the Elo badge
+  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, gameStates, config.tournament?.seeds);
+  const seasonName = (key: string) => (key === CURRENT ? currentSeason : seasons.find((x) => x.id === key)?.season ?? key);
+  const careerHighs = (h: string) => (
+    <CareerHighs handle={h} elo={elo} seasonName={seasonName} nameOf={longNameOf} title={config.tournament?.title} />
+  );
+
   useEffect(() => {
     const previous = document.title;
     if (shownName) document.title = `${shownName} – ${config.tournament?.title ?? "Scacchi and Chill"}`;
@@ -176,6 +231,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
             <TrophyShelf medals={medalsOf(pastName.handle, winners)} title={config.tournament?.title} pillsbury={pillsburyWins(pastName.handle, seasons)} />
           </div>
           <p className="note">Non partecipa alla stagione in corso.</p>
+          {(peakOf(elo, pastName.handle) || bestUpset(elo, pastName.handle)) && <div className="stat-pills">{careerHighs(pastName.handle)}</div>}
         </section>
         {acrossSeasons}
       </main>
@@ -199,8 +255,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const champions = reigningChampions(winners);
   const isChampion = !!champions?.handles.includes(player.handle.toLowerCase());
   const medals = medalsOf(player.handle, winners);
-  // Elo del torneo (see lib/tournamentElo): now, and how much it moved in this season
-  const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, gameStates, config.tournament?.seeds);
+  // Elo del torneo: now, and how much it moved in this season
   const eloNow = ratingOf(elo, player.handle);
   const eloSeason = eloSeasonNow(elo);
   const newcomer = isNewcomer(eloSeason, player.handle);
@@ -307,6 +362,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               <span className="stat-pill-note">su {countedOf} partite</span>
             </div>
           )}
+          {careerHighs(player.handle)}
           {pace && (
             <div className="stat-pill">
               <span className="stat-pill-label">Tempo a mossa</span>

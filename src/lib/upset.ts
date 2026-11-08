@@ -1,5 +1,5 @@
 import { LichessExportGame } from '../types';
-import { CURRENT, EloReport, gameKey } from './tournamentElo';
+import { CURRENT, EloGame, EloReport, gameKey } from './tournamentElo';
 import { scoredResult } from './standings';
 
 // Colpaccio: a result against someone much stronger, by the Elo del torneo at the start of the
@@ -56,4 +56,31 @@ export function upsetSentence(u: Upset, name: string): string {
   return u.kind === 'win'
     ? `${name} ha battuto un avversario molto più forte, secondo l'Elo del torneo`
     : `${name} ha pareggiato con un avversario molto più forte, secondo l'Elo del torneo`;
+}
+
+// The best colpaccio of a player, over all the seasons: a win before any draw, then the largest
+// gap, then the earliest (as the all-time record). Games as the Elo del torneo has them: who
+// actually played them, those decided at the table left out.
+export interface BestUpset {
+  upset: Upset;
+  game: EloGame;
+  season: string; // key of the season: an archive id, or CURRENT
+  opponent: string;
+}
+
+export function bestUpset(report: EloReport, handle: string): BestUpset | undefined {
+  const me = handle.toLowerCase();
+  let best: BestUpset | undefined;
+  report.played.forEach(({ season, game }) => {
+    const side = game.white.toLowerCase() === me ? 'white' : game.black.toLowerCase() === me ? 'black' : null;
+    if (!side) return;
+    const upset = upsetFrom(game.result, report.before.get(gameKey(game, season)));
+    if (!upset || upset.player !== side) return;
+    const better =
+      !best ||
+      (upset.kind === 'win' && best.upset.kind === 'draw') ||
+      (upset.kind === best.upset.kind && upset.gap > best.upset.gap);
+    if (better) best = { upset, game, season, opponent: side === 'white' ? game.black : game.white };
+  });
+  return best;
 }
