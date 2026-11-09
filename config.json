@@ -99,18 +99,18 @@
     ],
     "summit": [
       "🔝 Scontro al vertice: {positions} in classifica",
-      "🔥 Big match: {positions} della classifica",
-      "⚔️ Sfida d'alta quota: {positions} in classifica"
+      "🔝 Partita di vertice: {positions} in classifica",
+      "🔝 Sfida tra le prime posizioni: {positions} in classifica"
     ],
     "upset": [
-      "💥 Colpaccio di {winner}: {loser} aveva {gap} punti Elo in più",
-      "💥 Colpaccio di {winner}, contro un avversario più quotato di {gap} punti",
+      "💥 Colpaccio di {winner}, contro un avversario sulla carta più forte",
+      "💥 Colpaccio di {winner}: {loser} era sulla carta più forte",
       "💥 Colpaccio: {winner} batte {loser}, sulla carta più forte"
     ],
     "upsetDraw": [
       "🛡️ Colpaccio di patta: {player} ferma {opponent}",
-      "🛡️ Colpaccio di patta per {player}: {opponent} aveva {gap} punti Elo in più",
-      "🛡️ Patta preziosa per {player}, contro un avversario più quotato di {gap} punti"
+      "🛡️ Colpaccio di patta per {player}, contro un avversario sulla carta più forte",
+      "🛡️ Patta preziosa per {player}: {opponent} era sulla carta più forte"
     ],
     "roundEndHeader": [
       "🏁 *Turno {round} concluso!* Ecco i risultati finali:",

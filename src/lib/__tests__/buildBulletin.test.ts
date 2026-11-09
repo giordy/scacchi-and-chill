@@ -54,7 +54,7 @@ describe('buildBulletin', () => {
     const end = games.slice(2); // the round with only Elena–Fabio: finished
     const e = buildBulletin({ round: '2', games: end, states, history: end, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(4)] });
     expect(e.isComplete).toBe(true);
-    expect(e.text).toContain('🎉\n♟️ Apertura: Caro-Kann Defense: Campomanes Attack\n💥 Colpaccio di Elena: Fabio aveva 447 punti Elo in più');
+    expect(e.text).toContain('🎉\n♟️ Apertura: Caro-Kann Defense: Campomanes Attack\n💥 Colpaccio di Elena, contro un avversario sulla carta più forte');
     // A draw against him, once he is 400 points ahead, is a colpaccio too
     const draw = { ...states, ffffffff: { ...states.ffffffff, status: 'draw', winner: undefined } };
     const d = buildBulletin({ round: '2', games: end, states: draw, history: end, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(12)] });
