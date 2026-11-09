@@ -920,6 +920,7 @@ button.btn-sm { font-size: 12px; padding: 3px 8px; }
 button.btn-compact { padding: 4px 10px; font-size: 13px; min-height: 32px; }
 button.btn-compact.xs { padding: 4px 8px; font-size: 12px; min-height: 30px; }
 button.link-muted { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
+button.link-inline { min-height: 0; background: none; border: none; padding: 0; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
 textarea.ta-xl { min-height: 220px; font-family: inherit; }
 
 /* Public hero and story modal */

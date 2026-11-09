@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { AppConfig, HistoryGame, SeasonArchive } from '../../types';
 import { errorMessage, extractGameId } from '../../lib/utils';
 import { buildBulletin } from '../../lib/bulletin';
@@ -6,8 +6,14 @@ import { fetchGameStates } from '../../lib/lichess';
 import { applyWithdrawals } from '../../lib/withdrawals';
 import { gameProgress } from '../../lib/progress';
 import { WhatsAppPreview } from '../../WhatsAppPreview';
+import { useVisiblePolling } from '../../hooks/useVisiblePolling';
 
-// Round bulletin: state of the round's games on Lichess and the WhatsApp update message
+const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+
+// Round bulletin: state of the round's games on Lichess and the WhatsApp update message. It keeps
+// itself up to date, with no button: built when the round opens, again as soon as the stored results
+// change (the sync at the top of the area, a new game), and every 5 minutes from Lichess while the page
+// is visible (as the public page). A text edited by hand is not overwritten.
 export function BulletinSection({
   round,
   history: rawHistory,
@@ -31,13 +37,33 @@ export function BulletinSection({
   const [details, setDetails] = useState<string[]>([]);
   const [isRoundComplete, setIsRoundComplete] = useState(false);
   const [status, setStatus] = useState({ busy: false, error: "", info: "" });
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  // The round whose text was changed by hand: later updates do not overwrite it, until the organizer
+  // asks (a ref, read by the update that is running when the round changes)
+  const editedRound = useRef<string | null>(null);
+  // The fresh text, while the edited one is kept, with its round
+  const [newer, setNewer] = useState<{ round: string; text: string } | null>(null);
 
-  const loadStatusForRound = async (targetRound: string) => {
+  // What the bulletin is built from: when the stored results of the round change, it is built again at once
+  const roundKey = useMemo(
+    () =>
+      round +
+      "|" +
+      rawHistory
+        .filter((g) => g.round === round)
+        .map((g) => `${g.url}:${g.lichess?.status ?? ""}:${g.lichess?.moves?.length ?? 0}`)
+        .join(",") +
+      "|" +
+      rawHistory.length,
+    [round, rawHistory]
+  );
+
+  const loadStatusForRound = async (targetRound: string): Promise<boolean> => {
     let games = history.filter((g) => g.round === targetRound);
     if (games.length === 0) {
       setText("");
       setIsRoundComplete(false);
-      return;
+      return true;
     }
 
     // Sort games in the exact order defined in the tournament schedule
@@ -64,28 +90,37 @@ export function BulletinSection({
         .filter((id): id is string => Boolean(id));
       const states = ids.length > 0 ? await fetchGameStates(ids) : {};
       const built = buildBulletin({ round, games, states, history, config, expiryDays, seasons });
-      setText(built.text);
+      if (editedRound.current === targetRound) setNewer(built.text === text ? null : { round: targetRound, text: built.text });
+      else {
+        editedRound.current = null;
+        setNewer(null);
+        setText(built.text);
+      }
       setDetails(built.details);
       setIsRoundComplete(built.isComplete);
-      setStatus({ busy: false, error: "", info: "" });
+      setUpdatedAt(new Date());
+      setStatus((st) => ({ ...st, busy: false, error: "" }));
+      return true;
     } catch (e) {
-      setStatus({
+      setStatus((st) => ({
+        ...st,
         busy: false,
-        info: "",
         error:
           e instanceof TypeError
             ? "Errore di connessione di rete verso Lichess."
             : errorMessage(e),
-      });
+      }));
+      return false;
     }
   };
 
-  // Automatically update status whenever round is chosen or games change
-  useEffect(() => {
-    if (round) {
-      loadStatusForRound(round);
-    }
-  }, [round, history.length]);
+  useVisiblePolling(() => loadStatusForRound(round), roundKey, Boolean(round));
+
+  const useNewer = () => {
+    if (newer) setText(newer.text);
+    setNewer(null);
+    editedRound.current = null;
+  };
 
   const copy = async () => {
     try {
@@ -101,18 +136,17 @@ export function BulletinSection({
 
   return (
     <section>
-      <button
-        className="secondary btn-block"
-        type="button"
-        disabled={status.busy}
-        onClick={() => loadStatusForRound(round)}
-      >
-        {status.busy ? "Verifica in corso…" : "🔄 Aggiorna da Lichess"}
-      </button>
+      {status.error && (
+        <div className="notice err">
+          {status.error}{" "}
+          <button type="button" className="link-inline" disabled={status.busy} onClick={() => loadStatusForRound(round)}>
+            Riprova
+          </button>
+        </div>
+      )}
 
-      {status.error && <div className="notice err">{status.error}</div>}
-
-      {status.busy && (
+      {/* Only the first time: later updates happen quietly, under the text already shown */}
+      {status.busy && !text && (
         <div className="notice ok mb-14">
           ⏳ Recupero stati, aperture e mosse delle partite da Lichess…
         </div>
@@ -123,6 +157,21 @@ export function BulletinSection({
           {isRoundComplete && (
             <div className="notice ok my-10-12">
               🏁 <strong>Turno {round} completato!</strong> Tutte le partite sono terminate. Il messaggio contiene i risultati finali.
+            </div>
+          )}
+
+          {updatedAt && (
+            <p className="note note-13">
+              {status.busy ? "Aggiornamento da Lichess…" : `Aggiornato da Lichess alle ${hhmm(updatedAt)}`}
+            </p>
+          )}
+
+          {newer?.round === round && (
+            <div className="notice ok mb-12">
+              Ci sono risultati nuovi, ma hai modificato il testo a mano: non l'ho toccato.{" "}
+              <button type="button" className="link-inline" onClick={useNewer}>
+                Usa il testo aggiornato
+              </button>
             </div>
           )}
 
@@ -153,7 +202,10 @@ export function BulletinSection({
               <textarea
                 aria-label="Messaggio di aggiornamento"
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => {
+                  setText(e.target.value);
+                  editedRound.current = round;
+                }}
                 className="ta-lg"
               />
             </div>
