@@ -275,7 +275,7 @@ export function PublicTournamentView({
               onClick={() => show("pillsbury")}
             >
               <span className="trophy-card-name"><PillsburyIcon /> Trofeo Pillsbury</span>
-              <span className="trophy-card-desc">Chi supera di più il proprio obiettivo</span>
+              <span className="trophy-card-desc">Chi batte le attese</span>
             </button>
           </div>
           {/* Then, for the championship only, how to look at its standings */}
