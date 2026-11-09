@@ -257,25 +257,36 @@ export function PublicTournamentView({
 
       {activeTab === "standings" && (
         <section role="tabpanel" id="pub-panel-standings" aria-labelledby="pub-tab-standings">
-          {view === "pillsbury" ? (
-            // The Trofeo Pillsbury is another trophy, not a view of the standings: a heading and a way back
-            <div className="standings-bar">
-              <a href={publicViewHref("standings")} className="back-link">← Classifica</a>
-              <h2 className="pillsbury-heading"><PillsburyIcon /> Trofeo Pillsbury</h2>
-            </div>
-          ) : (
-            <div className="standings-bar">
-              <div className="view-switch" role="group" aria-label="Vista della classifica">
-                <button type="button" className={view === "standings" ? "active" : ""} aria-pressed={view === "standings"} onClick={() => show("standings")}>
-                  Elenco
-                </button>
-                <button type="button" className={view === "crosstable" ? "active" : ""} aria-pressed={view === "crosstable"} onClick={() => show("crosstable")}>
-                  Tabellone
-                </button>
-              </div>
-              <a href={publicViewHref("pillsbury")} className="pillsbury-chip">
-                <PillsburyIcon /> Trofeo Pillsbury <span aria-hidden="true">›</span>
-              </a>
+          {/* First the trophy, each with its own card: the championship first, the Trofeo Pillsbury next to it */}
+          <div className="trophy-switch" role="group" aria-label="Trofeo">
+            <button
+              type="button"
+              className={`trophy-card ${view !== "pillsbury" ? "active" : ""}`}
+              aria-pressed={view !== "pillsbury"}
+              onClick={() => show("standings")}
+            >
+              <span className="trophy-card-name"><span aria-hidden="true">🏆</span> Campionato</span>
+              <span className="trophy-card-desc">Chi fa più punti</span>
+            </button>
+            <button
+              type="button"
+              className={`trophy-card trophy-card-pillsbury ${view === "pillsbury" ? "active" : ""}`}
+              aria-pressed={view === "pillsbury"}
+              onClick={() => show("pillsbury")}
+            >
+              <span className="trophy-card-name"><PillsburyIcon /> Trofeo Pillsbury</span>
+              <span className="trophy-card-desc">Chi supera di più il proprio obiettivo</span>
+            </button>
+          </div>
+          {/* Then, for the championship only, how to look at its standings */}
+          {view !== "pillsbury" && (
+            <div className="view-switch" role="group" aria-label="Vista della classifica">
+              <button type="button" className={view === "standings" ? "active" : ""} aria-pressed={view === "standings"} onClick={() => show("standings")}>
+                Elenco
+              </button>
+              <button type="button" className={view === "crosstable" ? "active" : ""} aria-pressed={view === "crosstable"} onClick={() => show("crosstable")}>
+                Tabellone
+              </button>
             </div>
           )}
         </section>
