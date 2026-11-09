@@ -49,13 +49,18 @@ describe('buildBulletin', () => {
     expect(b.text).toContain(defaultConfig.statusPhrases.infoLine!);
     expect(b.text).toContain('In corso ♟️ (più di 20 mosse, nel mediogioco)');
     expect(b.text).toContain('Finita! Ha vinto Elena col bianco per abbandono in 30 mosse *(1-0)* 🎉\n♟️ Apertura: Caro-Kann Defense: Campomanes Attack');
-    expect(b.text).toContain('💥 Colpaccio di Elena: Fabio aveva 447 punti Elo in più');
-    // A draw against him, once he is 200 points ahead, is a colpaccio too
+    // The colpaccio waits for the bulletin of the round's end: not in the updates
+    expect(b.text).not.toContain('Colpaccio');
+    const end = games.slice(2); // the round with only Elena–Fabio: finished
+    const e = buildBulletin({ round: '2', games: end, states, history: end, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(4)] });
+    expect(e.isComplete).toBe(true);
+    expect(e.text).toContain('🎉\n♟️ Apertura: Caro-Kann Defense: Campomanes Attack\n💥 Colpaccio di Elena: Fabio aveva 447 punti Elo in più');
+    // A draw against him, once he is 400 points ahead, is a colpaccio too
     const draw = { ...states, ffffffff: { ...states.ffffffff, status: 'draw', winner: undefined } };
-    const d = buildBulletin({ round: '2', games, states: draw, history: games, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(12)] });
+    const d = buildBulletin({ round: '2', games: end, states: draw, history: end, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(12)] });
     expect(d.text).toContain('🛡️ Colpaccio di patta: Elena ferma Fabio');
     // Without past seasons everyone is at 1500: no colpaccio
-    expect(buildBulletin({ round: '2', games, states, history: games, config, expiryDays: 2, now: NOW, random: first }).text).not.toContain('Colpaccio');
+    expect(buildBulletin({ round: '2', games: end, states, history: end, config, expiryDays: 2, now: NOW, random: first }).text).not.toContain('Colpaccio');
     expect(b.text).toContain('📊 *1 finita · 1 in corso · 1 da avviare*');
     expect(b.details).toHaveLength(3);
     expect(b.details[1]).toContain('fase Lichess=middlegame');

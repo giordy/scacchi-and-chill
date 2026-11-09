@@ -117,6 +117,9 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
   // Colpaccio: same rule as the badge on the site, on the Elo del torneo
   const elo = tournamentElo(seasons, config.players.map((p) => p.handle), history, allStates, config.tournament?.seeds);
 
+  // The colpaccio line of each game: written only in the bulletin of the round's end, so that it is
+  // news once instead of a headline repeated in every update while the round goes on
+  const upsetLines: string[] = [];
   const blocks = games.map((g, i) => {
     const id = extractGameId(g.url);
     // Fresh state for the open games; a finished game keeps its stored (final) result, and a game
@@ -126,6 +129,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     const black = idToHandle(s?.players?.black?.user?.id) ?? g.black;
     const head = `${config.numberEmojis[i] ?? i + 1 + "."} *${nameOf(white)}* ⚪ vs *${nameOf(black)}* ⚫`;
     let body: string;
+    let upsetLine = "";
     const summit = summits.get(summitKey(g));
 
     if (!s) {
@@ -212,11 +216,10 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
       if (upset) {
         const player = upset.player === "white" ? white : black;
         const opponent = upset.player === "white" ? black : white;
-        const line =
+        upsetLine =
           upset.kind === "win"
             ? fill(pickFor("upset") || "💥 Colpaccio di {winner}", { winner: nameOf(player), loser: nameOf(opponent), gap: upset.gap })
             : fill(pickFor("upsetDraw") || "🛡️ Colpaccio di patta: {player} ferma {opponent}", { player: nameOf(player), opponent: nameOf(opponent), gap: upset.gap });
-        body = `${body}\n${line}`;
       }
 
       detailsList.push(
@@ -228,10 +231,12 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     const summitLine = summit
       ? fill(pickFor("summit") || "🔝 Scontro al vertice: {positions} in classifica", { positions: summit })
       : "";
+    upsetLines.push(upsetLine);
     return [head, summitLine, body].filter(Boolean).join("\n");
   });
 
   const isRoundComplete = games.length > 0 && count.finished === games.length;
+  const gameBlocks = isRoundComplete ? blocks.map((b, i) => [b, upsetLines[i]].filter(Boolean).join("\n")) : blocks;
 
   const headerTemplate =
     isRoundComplete && config.statusPhrases.roundEndHeader && config.statusPhrases.roundEndHeader.length > 0
@@ -267,7 +272,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
   const vars = { round, ...count, summary: roundSummary(count) };
   const textResult = [
     fill(headerTemplate, vars),
-    ...blocks,
+    ...gameBlocks,
     reminder,
     footerTemplate ? fill(footerTemplate, vars) : "",
     leader,
