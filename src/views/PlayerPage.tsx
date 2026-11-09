@@ -346,21 +346,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
             <span className="stat-pill-val">{standing.won} / {standing.drawn} / {standing.lost}</span>
           </div>
         </div>
-        {/* The objective is not a statistic: it is the player's mark for the Trofeo Pillsbury, in a band of
-            its own with the trophy's medal and brass, as compact as the pills above; it leads to the race,
-            where how it is going and what the trophy rewards are told */}
-        {forecast && forecast.games > 0 && !pillsburySuspended && (
-          <a href={publicViewHref("pillsbury")} className="pillsbury-goal">
-            <PillsburyIcon size="1.6em" />
-            <span className="pillsbury-goal-text">
-              <span className="pillsbury-goal-label">Obiettivo per il Trofeo Pillsbury</span>
-              <span className="pillsbury-goal-val">
-                {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"} <small>su {countedOf} partite</small>
-              </span>
-            </span>
-            <span className="pillsbury-goal-go" aria-hidden="true">›</span>
-          </a>
-        )}
         {/* The season beyond the standings: colours, time per move */}
         {(byColor.white.played + byColor.black.played > 0 || pace) && (
         <div className="stat-pills stat-pills-minor">
@@ -389,6 +374,22 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
             </div>
           )}
         </div>
+        )}
+        {/* The objective is not a statistic: it is the player's mark for the Trofeo Pillsbury, in a band of
+            its own with the trophy's medal and brass, as compact as the pills. Last in the card, after all the
+            statistics (the championship's first, as on the home page). It leads to the race, where how it is
+            going and what the trophy rewards are told */}
+        {forecast && forecast.games > 0 && !pillsburySuspended && (
+          <a href={publicViewHref("pillsbury")} className="pillsbury-goal">
+            <PillsburyIcon size="1.6em" />
+            <span className="pillsbury-goal-text">
+              <span className="pillsbury-goal-label">Obiettivo per il Trofeo Pillsbury</span>
+              <span className="pillsbury-goal-val">
+                {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"} <small>su {countedOf} partite</small>
+              </span>
+            </span>
+            <span className="pillsbury-goal-go" aria-hidden="true">›</span>
+          </a>
         )}
       </section>
 

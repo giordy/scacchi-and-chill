@@ -2918,4 +2918,3 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .pillsbury-goal-val { font-size: 18px; font-weight: 700; line-height: 1.3; }
 .pillsbury-goal-val small { font-size: 13px; font-weight: 500; color: var(--muted); }
 .pillsbury-goal-go { font-size: 22px; color: var(--brass); }
-.pillsbury-goal + .stat-pills { margin-top: 12px; }
