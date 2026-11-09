@@ -194,5 +194,18 @@ describe('buildBulletin: deadlines and phrases', () => {
     expect(end.text).toContain('. Bruno 👑 – 0 punti');
     expect(end.text).not.toMatch(/\*Bruno\* 👑/);
   });
-});
 
+  it('tells the race for the Trofeo Pillsbury under the standings, only at the end of the round', () => {
+    // Elena, well below Fabio in the Elo del torneo, beats him: above her objective
+    const games: HistoryGame[] = [{ round: '1', white: 'elena', black: 'fabio', url: url('pppppppp') }];
+    const states = { pppppppp: finished('pppppppp', 'white') };
+    const end = buildBulletin({ round: '1', games, states, history: games, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(4)] });
+    expect(end.text).toContain('📈 *Classifica dopo il Turno 1*');
+    expect(end.text).toContain('🏅 *Trofeo Pillsbury:* in testa Elena');
+    expect(end.text.indexOf('🏅 *Trofeo Pillsbury')).toBeGreaterThan(end.text.indexOf('📈 *Classifica'));
+    // Not during the round, nor in the first season (everyone an esordiente)
+    const open: HistoryGame[] = [...games, { round: '1', white: 'anna', black: 'bruno', url: url('qqqqqqqq') }];
+    expect(buildBulletin({ round: '1', games: open, states, history: open, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(4)] }).text).not.toContain('Pillsbury');
+    expect(buildBulletin({ round: '1', games, states, history: games, config, expiryDays: 2, now: NOW, random: first }).text).not.toContain('Pillsbury');
+  });
+});

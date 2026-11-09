@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { leaderLine, roundDeadline, roundSummary, standingsBlock, studySearchUrl } from '../bulletin';
+import { leaderLine, pillsburyLine, roundDeadline, roundSummary, standingsBlock, studySearchUrl } from '../bulletin';
+import { PillsburyRace, Trend } from '../pillsbury';
 import { PlayerStanding } from '../standings';
 
 const DAY = 86400000;
@@ -83,6 +84,34 @@ describe('standingsBlock', () => {
   it('crowns the reigning champions (co-champions too)', () => {
     const out = standingsBlock([s('Carla', 2, 2, 1, 2), s('Anna', 1, 2), s('Bruno', 0, 2)], '3', ['anna', 'carla']).split('\n');
     expect(out.slice(1)).toEqual(['1. Carla 👑 – 2 punti', '2. Anna 👑 – 1 punto', '3. Bruno – 0 punti']);
+  });
+
+  it('puts the medal by who holds the Trofeo Pillsbury, after the crown', () => {
+    const out = standingsBlock([s('Carla', 2, 2, 1, 2), s('Anna', 1, 2), s('Bruno', 0, 2)], '3', ['carla'], ['carla', 'bruno']).split('\n');
+    expect(out.slice(1)).toEqual(['1. Carla 👑 🏅 – 2 punti', '2. Anna – 1 punto', '3. Bruno 🏅 – 0 punti']);
+  });
+});
+
+describe('pillsburyLine', () => {
+  const name = (h: string) => h[0].toUpperCase() + h.slice(1);
+  const row = (handle: string, over: number, trend: Trend) => ({ handle, over, trend, forecast: { expected: 0, games: 0, expectedSoFar: 0, points: 0, played: 1 } });
+  const race = (rows: ReturnType<typeof row>[], suspended = false): PillsburyRace => ({ suspended, rows, waiting: [], counted: {}, forecasts: {}, newcomers: [] });
+
+  it('names who is above the objective, at most three, and never who is in line or below', () => {
+    const r = race([row('carla', 2, 'up'), row('anna', 1, 'up'), row('bruno', 0.5, 'up'), row('dario', 0.5, 'up'), row('elena', 0, 'same'), row('fabio', -1, 'down')]);
+    expect(pillsburyLine(r, name)).toBe('🏅 *Trofeo Pillsbury:* in testa Carla, poi Anna e Bruno');
+    expect(pillsburyLine(race([row('carla', 1, 'up'), row('elena', 0, 'same'), row('fabio', -1, 'down')]), name)).toBe('🏅 *Trofeo Pillsbury:* in testa Carla');
+  });
+
+  it('names who share the lead together', () => {
+    const r = race([row('carla', 1, 'up'), row('anna', 1, 'up'), row('bruno', 0.5, 'up'), row('dario', 0.5, 'up')]);
+    expect(pillsburyLine(r, name)).toBe('🏅 *Trofeo Pillsbury:* in testa Carla e Anna, poi Bruno');
+  });
+
+  it('says the race is open while nobody is above, and is silent when suspended or before any game', () => {
+    expect(pillsburyLine(race([row('elena', 0, 'same'), row('fabio', -1, 'down')]), name)).toBe('🏅 *Trofeo Pillsbury:* corsa ancora aperta, nessuno finora sopra le attese');
+    expect(pillsburyLine(race([row('carla', 1, 'up')], true), name)).toBe('');
+    expect(pillsburyLine(race([]), name)).toBe('');
   });
 });
 

@@ -8,6 +8,7 @@ import { fullMovesOf, isVoid, movesText, nameFrom, pliesOf, storedStates } from 
 import { summitGames, summitKey } from './summit';
 import { gameProgress } from './progress';
 import { reigningChampions } from './honours';
+import { PILLSBURY_EMOJI, PILLSBURY_TITLE, PillsburyRace, pillsburyRace, reigningPillsbury } from './pillsbury';
 
 const DAY_MS = 86400000;
 
@@ -39,14 +40,34 @@ export function leaderLine(standings: PlayerStanding[]): string {
 //   📈 *Classifica dopo il Turno 2*
 //   1. Carla – 2 punti
 //   2. Anna 👑 – 1½ punti
-// The crown marks the reigning champion(s) (lower-case handles), as in the site's table: only
-// here, once per round, not on every game line
-export function standingsBlock(standings: PlayerStanding[], round: string, champions: string[] = []): string {
+// The crown marks the reigning champion(s), the medal who holds the Trofeo Pillsbury (lower-case
+// handles), as in the site's table: only here, once per round, not on every game line
+export function standingsBlock(standings: PlayerStanding[], round: string, champions: string[] = [], pillsbury: string[] = []): string {
   if (!seasonStarted(standings)) return '';
   const ranks = sharedRanks(standings);
-  const crown = (s: PlayerStanding) => (champions.includes(s.handle.toLowerCase()) ? ' 👑' : '');
-  const rows = standings.map((s, i) => `${ranks[i]}. ${s.name}${crown(s)} – ${pointsText(s.points)}`);
+  const marks = (s: PlayerStanding) =>
+    (champions.includes(s.handle.toLowerCase()) ? ' 👑' : '') + (pillsbury.includes(s.handle.toLowerCase()) ? ` ${PILLSBURY_EMOJI}` : '');
+  const rows = standings.map((s, i) => `${ranks[i]}. ${s.name}${marks(s)} – ${pointsText(s.points)}`);
   return [`📈 *Classifica dopo il Turno ${round}*`, ...rows].join('\n');
+}
+
+// "Anna", "Anna e Bruno", "Anna, Bruno e Carla"
+const namesList = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}` : names[0] ?? '');
+
+// At the end of a round, under the standings: the race for the Trofeo Pillsbury in one line. Good news
+// only, as on the site: who is above the objective (▲), at most three, never who is in line or below
+// (in a small group, naming those in line would point at the others). Nobody above yet: the race is open.
+//   🏅 *Trofeo Pillsbury:* in testa Carla, poi Anna e Bruno
+export function pillsburyLine(race: PillsburyRace, nameOf: (handle: string) => string): string {
+  if (race.suspended || race.rows.length === 0) return '';
+  const head = `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}:*`;
+  const up = race.rows.filter((r) => r.trend === 'up');
+  if (up.length === 0) return `${head} corsa ancora aperta, nessuno finora sopra le attese`;
+  // Who share the lead are named together
+  const leaders = up.filter((r) => Math.abs(r.over - up[0].over) < 1e-6);
+  const others = up.slice(leaders.length, Math.max(3, leaders.length));
+  const name = (r: { handle: string }) => nameOf(r.handle);
+  return `${head} in testa ${namesList(leaders.map(name))}${others.length > 0 ? `, poi ${namesList(others.map(name))}` : ''}`;
 }
 
 // Lichess study search for an opening, readable in a chat ("+" instead of "%20")
@@ -259,10 +280,15 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
   // the fresh ones
   let leader = "";
   let table = "";
+  let pillsbury = "";
   if (isRoundComplete) {
     const { standings } = computeStandings(config.players, history, allStates);
     leader = leaderLine(standings);
-    table = standingsBlock(standings, round, reigningChampions(config.tournament?.winners)?.handles);
+    table = standingsBlock(standings, round, reigningChampions(config.tournament?.winners)?.handles, reigningPillsbury(seasons)?.handles);
+    // The second trophy, after the championship; from the second season (in the first all are esordienti)
+    if (seasons.length > 0) {
+      pillsbury = pillsburyLine(pillsburyRace(config.players, elo, history, history, allStates, config.tournament?.withdrawals), nameOf);
+    }
   }
 
   // The challenges still to accept, with their one deadline
@@ -277,6 +303,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     footerTemplate ? fill(footerTemplate, vars) : "",
     leader,
     table,
+    pillsbury,
     config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
     studiesAppendix,
     // The site, where results update between two bulletins

@@ -4,6 +4,7 @@ import { WhatsAppPreview } from "./WhatsAppPreview";
 import { fullMovesOf, isVoid, stateOf } from "./lib/games";
 import { computeStandings, sharedRanks } from "./lib/standings";
 import { currentSeason, isNewcomer, ratingOf, tournamentElo } from "./lib/tournamentElo";
+import { pillsburyRace, reigningPillsbury } from "./lib/pillsbury";
 import type { OrganizerStore } from "./hooks/useOrganizerData";
 
 interface ReviewsTabProps {
@@ -164,6 +165,34 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
         `- In fondo, se i dati lo permettono, al massimo 2 o 3 menzioni per tutto il gruppo (per esempio la partita più lunga o la patta più combattuta), preferibilmente non per i primi tre.`,
         `- Chiudi con un grazie a tutti, in una frase.`,
       );
+    }
+
+    // The second trophy: a sentence or two, after the championship. Good news only, as on the site: the
+    // model is told who is above or in line with the objective, never who is below
+    const race = pillsburyRace(config.players, elo, history, history, gameStates, config.tournament?.withdrawals);
+    if (seasons.length > 0 && !race.suspended && race.rows.length > 0) {
+      const up = race.rows.filter((r) => r.trend === "up");
+      const inLine = race.rows.filter((r) => r.trend === "same");
+      const holder = reigningPillsbury(seasons);
+      add(
+        ``,
+        `TROFEO PILLSBURY`,
+        `- È il secondo trofeo della stagione, meno importante del campionato: va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti, calcolato dal suo livello di inizio stagione. Gli esordienti non sono in corsa.`,
+        `- Dagli al massimo una o due frasi, sempre dopo il campionato. Puoi anche farlo capire dentro il pezzo di un giocatore (per esempio "una stagione sopra le attese").`,
+        `- Nomina solo chi è sopra le attese. Non dire mai chi è sotto, non fare elenchi di chi è in linea, niente numeri, e non sottolineare che gli esordienti sono esclusi.`,
+      );
+      if (reviewType === "finale") {
+        add(up.length > 0 ? `- Il vincitore in una frase semplice, subito dopo il campione.` : `- Nessuno è andato sopra le attese: il trofeo quest'anno non viene assegnato. Dillo in mezza frase o non citarlo.`);
+      } else if (reviewType === "volata") {
+        add(`- Una frase sola, e solo se la corsa è ancora aperta (più di un giocatore sopra le attese).`);
+      } else {
+        add(`- Una frase su chi sta battendo le attese${up.length === 0 ? ": finora nessuno, la corsa è aperta" : ""}.`);
+      }
+      add(`Situazione della corsa (solo contesto per te, non riportarla così):`);
+      if (up.length > 0) add(`- Sopra le attese, dal primo: ${up.map((r) => nameOf(r.handle)).join(", ")}`);
+      if (inLine.length > 0) add(`- In linea con le attese: ${inLine.map((r) => nameOf(r.handle)).join(", ")} (solo dentro il loro pezzo, mai in un elenco)`);
+      add(`- Per tutti gli altri giocatori non citare il trofeo.`);
+      if (holder) add(`- L'ha vinto la stagione scorsa (${holder.season}): ${holder.handles.map((h) => config.players.find((p) => p.handle.toLowerCase() === h)?.name ?? h).join(", ")}.`);
     }
 
     if (generalNotes.trim()) add(``, `NOTE DELL'ORGANIZZATORE`, generalNotes.trim());
