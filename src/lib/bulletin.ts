@@ -3,7 +3,7 @@ import { computeStandings, leaderText, PlayerStanding, pointsText, seasonStarted
 import { extractGameId, fill, formatDeadline, getApproxMoves, HOW_DRAW, HOW_WIN, tidy } from './utils';
 import { gamePhase, GamePhase } from './phase';
 import { upsetOf } from './upset';
-import { tournamentElo } from './tournamentElo';
+import { roundHalf, tournamentElo } from './tournamentElo';
 import { fullMovesOf, isVoid, movesText, nameFrom, pliesOf, storedStates } from './games';
 import { summitGames, summitKey } from './summit';
 import { gameProgress } from './progress';
@@ -51,23 +51,18 @@ export function standingsBlock(standings: PlayerStanding[], round: string, champ
   return [`📈 *Classifica dopo il Turno ${round}*`, ...rows].join('\n');
 }
 
-// "Anna", "Anna e Bruno", "Anna, Bruno e Carla"
-const namesList = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}` : names[0] ?? '');
-
 // At the end of a round, under the standings: the race for the Trofeo Pillsbury in one line. Good news
-// only, as on the site: who is above the objective (▲), at most three, never who is in line or below
-// (in a small group, naming those in line would point at the others). Nobody above yet: the race is open.
-//   🏅 *Trofeo Pillsbury:* in testa Carla, poi Anna e Bruno
+// only, as on the site: who is above the objective (▲), at most three, each with the half points beyond
+// it as in the site's table; never who is in line or below (in a small group, naming those in line would
+// point at the others). Nobody above yet: the race is open.
+//   🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +1, Anna +½, Bruno +½
 export function pillsburyLine(race: PillsburyRace, nameOf: (handle: string) => string): string {
   if (race.suspended || race.rows.length === 0) return '';
-  const head = `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}:*`;
   const up = race.rows.filter((r) => r.trend === 'up');
-  if (up.length === 0) return `${head} corsa ancora aperta, nessuno finora sopra le attese`;
-  // Who share the lead are named together
-  const leaders = up.filter((r) => Math.abs(r.over - up[0].over) < 1e-6);
-  const others = up.slice(leaders.length, Math.max(3, leaders.length));
-  const name = (r: { handle: string }) => nameOf(r.handle);
-  return `${head} in testa ${namesList(leaders.map(name))}${others.length > 0 ? `, poi ${namesList(others.map(name))}` : ''}`;
+  if (up.length === 0) return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}:* corsa ancora aperta, nessuno finora sopra le attese`;
+  const over = (n: number) => `+${String(roundHalf(n)).replace('.5', '½').replace(/^0½/, '½')}`;
+  const names = up.slice(0, 3).map((r) => `${nameOf(r.handle)} ${over(r.over)}`);
+  return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}* (punti oltre le attese): ${names.join(', ')}`;
 }
 
 // Lichess study search for an opening, readable in a chat ("+" instead of "%20")

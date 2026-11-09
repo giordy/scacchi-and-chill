@@ -97,15 +97,15 @@ describe('pillsburyLine', () => {
   const row = (handle: string, over: number, trend: Trend) => ({ handle, over, trend, forecast: { expected: 0, games: 0, expectedSoFar: 0, points: 0, played: 1 } });
   const race = (rows: ReturnType<typeof row>[], suspended = false): PillsburyRace => ({ suspended, rows, waiting: [], counted: {}, forecasts: {}, newcomers: [] });
 
-  it('names who is above the objective, at most three, and never who is in line or below', () => {
-    const r = race([row('carla', 2, 'up'), row('anna', 1, 'up'), row('bruno', 0.5, 'up'), row('dario', 0.5, 'up'), row('elena', 0, 'same'), row('fabio', -1, 'down')]);
-    expect(pillsburyLine(r, name)).toBe('🏅 *Trofeo Pillsbury:* in testa Carla, poi Anna e Bruno');
-    expect(pillsburyLine(race([row('carla', 1, 'up'), row('elena', 0, 'same'), row('fabio', -1, 'down')]), name)).toBe('🏅 *Trofeo Pillsbury:* in testa Carla');
+  it('names who is above the objective, at most three, with the half points beyond it', () => {
+    const r = race([row('carla', 2, 'up'), row('anna', 1.1, 'up'), row('bruno', 0.6, 'up'), row('dario', 0.5, 'up'), row('elena', 0, 'same'), row('fabio', -1, 'down')]);
+    expect(pillsburyLine(r, name)).toBe('🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2, Anna +1, Bruno +½');
   });
 
-  it('names who share the lead together', () => {
-    const r = race([row('carla', 1, 'up'), row('anna', 1, 'up'), row('bruno', 0.5, 'up'), row('dario', 0.5, 'up')]);
-    expect(pillsburyLine(r, name)).toBe('🏅 *Trofeo Pillsbury:* in testa Carla e Anna, poi Bruno');
+  it('names fewer when fewer are above, never who is in line or below', () => {
+    expect(pillsburyLine(race([row('carla', 1.5, 'up'), row('elena', 0.2, 'same'), row('fabio', -1, 'down')]), name)).toBe(
+      '🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +1½'
+    );
   });
 
   it('says the race is open while nobody is above, and is silent when suspended or before any game', () => {

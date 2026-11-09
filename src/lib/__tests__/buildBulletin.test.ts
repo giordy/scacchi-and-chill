@@ -201,7 +201,7 @@ describe('buildBulletin: deadlines and phrases', () => {
     const states = { pppppppp: finished('pppppppp', 'white') };
     const end = buildBulletin({ round: '1', games, states, history: games, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(4)] });
     expect(end.text).toContain('📈 *Classifica dopo il Turno 1*');
-    expect(end.text).toContain('🏅 *Trofeo Pillsbury:* in testa Elena');
+    expect(end.text).toContain('🏅 *Trofeo Pillsbury* (punti oltre le attese): Elena +1');
     expect(end.text.indexOf('🏅 *Trofeo Pillsbury')).toBeGreaterThan(end.text.indexOf('📈 *Classifica'));
     // Not during the round, nor in the first season (everyone an esordiente)
     const open: HistoryGame[] = [...games, { round: '1', white: 'anna', black: 'bruno', url: url('qqqqqqqq') }];
