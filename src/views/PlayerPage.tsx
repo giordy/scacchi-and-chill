@@ -347,16 +347,16 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           </div>
         </div>
         {/* The objective is not a statistic: it is the player's mark for the Trofeo Pillsbury, in a band of
-            its own with the trophy's medal and brass; it leads to the race (how it is going is there) */}
+            its own with the trophy's medal and brass, as compact as the pills above; it leads to the race,
+            where how it is going and what the trophy rewards are told */}
         {forecast && forecast.games > 0 && !pillsburySuspended && (
           <a href={publicViewHref("pillsbury")} className="pillsbury-goal">
-            <PillsburyIcon size="1.9em" />
+            <PillsburyIcon size="1.6em" />
             <span className="pillsbury-goal-text">
               <span className="pillsbury-goal-label">Obiettivo per il Trofeo Pillsbury</span>
               <span className="pillsbury-goal-val">
                 {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"} <small>su {countedOf} partite</small>
               </span>
-              <span className="pillsbury-goal-note">Punti previsti in base all'Elo: chi li supera di più vince il trofeo.</span>
             </span>
             <span className="pillsbury-goal-go" aria-hidden="true">›</span>
           </a>
