@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { MessageTemplates, Settings, StatusPhrases } from '../types';
+import { Settings } from '../types';
 import { OrganizerData, saveOrganizerData, subscribeToOrganizerData } from '../firebaseService';
 
 const SAVE_DELAY_MS = 800;
 
-const EMPTY: OrganizerData = { anecdotes: {}, settings: {}, templates: null, statusPhrases: null };
+const EMPTY: OrganizerData = { anecdotes: {}, settings: {} };
 
-// Player anecdotes, settings and message texts, synced with the private Firestore document (admin only).
+// Player anecdotes and settings, synced with the private Firestore document (admin only).
 export function useOrganizerData(enabled: boolean, onError?: (msg: string) => void) {
   const [data, setData] = useState<OrganizerData>(EMPTY);
   const [loaded, setLoaded] = useState(false);
@@ -66,14 +66,8 @@ export function useOrganizerData(enabled: boolean, onError?: (msg: string) => vo
     const prev = dataRef.current.settings ?? {};
     update({ ...dataRef.current, settings: typeof action === "function" ? action(prev) : action });
   };
-  const setTemplates: React.Dispatch<React.SetStateAction<Partial<MessageTemplates> | null>> = (action) => {
-    const prev = dataRef.current.templates ?? null;
-    update({ ...dataRef.current, templates: typeof action === "function" ? action(prev) : action });
-  };
 
-  const setStatusPhrases = (statusPhrases: Partial<StatusPhrases> | null) => update({ ...dataRef.current, statusPhrases });
-
-  return { ...data, loaded, setAnecdote, replaceAll, setSettings, setTemplates, setStatusPhrases };
+  return { ...data, loaded, setAnecdote, replaceAll, setSettings };
 }
 
 export type OrganizerStore = ReturnType<typeof useOrganizerData>;

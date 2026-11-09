@@ -107,11 +107,8 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
   // Days per move and rated belong to the tournament (shown in the public rules): they win over the organizer settings
   if (config.tournament?.daysPerMove) settings.days = config.tournament.daysPerMove;
   if (typeof config.tournament?.rated === 'boolean') settings.rated = config.tournament.rated;
-  const tpl: MessageTemplates = { ...config.messageTemplates, ...(organizer.templates ?? {}) };
-  // Bulletin phrases: config.json defaults, overridden by the ones edited in the organizer area
-  const adminConfig = organizer.statusPhrases
-    ? { ...config, statusPhrases: { ...config.statusPhrases, ...organizer.statusPhrases } }
-    : config;
+  // Message texts and bulletin phrases: in config.json only (changed with a redeploy)
+  const tpl: MessageTemplates = config.messageTemplates;
 
   // Results as the standings see them: games annulled or won by forfeit after a withdrawal
   const seasonHistory = applyWithdrawals(history, config.tournament?.withdrawals);
@@ -182,7 +179,7 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
           <RoundsTab
             openRound={openRound}
             setOpenRound={setOpenRound}
-            config={adminConfig}
+            config={config}
             settings={settings}
             templates={tpl}
             history={history}
@@ -207,8 +204,6 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             history={seasonHistory}
             gameStates={lichess.gameStates}
             nameOf={nameOf}
-            templates={tpl}
-            setTemplates={organizer.setTemplates}
             organizer={organizer}
             flash={flash}
             triggerToast={triggerToast}
@@ -260,8 +255,6 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             config={config}
             settings={settings}
             setSettings={organizer.setSettings}
-            templates={tpl}
-            setTemplates={organizer.setTemplates}
             history={history}
             setHistory={setHistory}
             seasons={seasons}

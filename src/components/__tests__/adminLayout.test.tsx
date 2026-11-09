@@ -16,7 +16,7 @@ const config = {
   players: [{ handle: 'anna', name: 'Anna' }, { handle: 'bruno', name: 'Bruno' }],
   tournament: { ...(defaultConfig.tournament as any), winners: [] },
 } as any;
-const organizer = { anecdotes: {}, setAnecdote: noop, statusPhrases: null, setStatusPhrases: noop } as any;
+const organizer = { anecdotes: {}, setAnecdote: noop } as any;
 const summaries = (html: string) => [...html.matchAll(/<summary>([^<]+)<\/summary>/g)].map((m) => m[1]);
 
 describe('admin layout', () => {
@@ -61,7 +61,7 @@ describe('admin layout', () => {
 
   it('puts the set-and-forget settings in Impostazioni, the token open while missing', () => {
     const html = renderToStaticMarkup(
-      <SettingsTab config={config} settings={settings} setSettings={noop as any} templates={config.messageTemplates} setTemplates={noop as any} history={[]} setHistory={noop as any} seasons={[]} organizer={organizer} flash={noop} onUpdateTournamentMeta={noop} onUpdatePlayers={noop} onUpdateSchedule={noop} />
+      <SettingsTab config={config} settings={settings} setSettings={noop as any} history={[]} setHistory={noop as any} seasons={[]} organizer={organizer} flash={noop} onUpdateTournamentMeta={noop} onUpdatePlayers={noop} onUpdateSchedule={noop} />
     );
     expect(summaries(html)).toEqual(['Token Lichess', 'Copia dei dati']);
     expect(html).toMatch(/<details class="settings-section" open="">\s*<summary>Token Lichess/);
@@ -77,17 +77,16 @@ describe('admin layout', () => {
     expect(html).not.toContain('Genera i turni in automatico');
   });
 
-  it('gathers the review, the awards and the message texts in WhatsApp', async () => {
+  it('gathers the review and the awards in WhatsApp', async () => {
     const { WhatsAppTab } = await import('../../tabs/WhatsAppTab');
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
     const html = renderToStaticMarkup(
-      <WhatsAppTab config={config} history={[]} gameStates={{}} nameOf={(h) => h} templates={config.messageTemplates} setTemplates={noop as any} organizer={organizer} flash={noop} />
+      <WhatsAppTab config={config} history={[]} gameStates={{}} nameOf={(h) => h} organizer={organizer} flash={noop} />
     );
     vi.unstubAllGlobals();
-    expect(summaries(html)).toEqual(['✨ Il racconto della stagione', '🏆 Premi della stagione', 'Testi dei messaggi']);
-    expect(html).toContain('Messaggio con i link del turno');
-    expect(html).toContain('Frasi del bollettino');
+    expect(summaries(html)).toEqual(['✨ Il racconto della stagione', '🏆 Premi della stagione']);
+    expect(html).not.toContain('Frasi del bollettino');
     expect(html).toContain('I premi compaiono quando ci sono partite concluse.');
     expect(fetchMock).not.toHaveBeenCalled();
   });

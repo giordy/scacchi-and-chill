@@ -55,7 +55,7 @@ export function parseBackup(text: string): { data: BackupData; summary: BackupSu
       scheduled: data.schedule!.length,
       games: data.history!.length,
       seasons: data.seasons!.length,
-      privateData: !!(d.anecdotes || d.settings || d.templates || d.statusPhrases),
+      privateData: !!(d.anecdotes || d.settings),
     },
   };
 }
@@ -92,8 +92,6 @@ export async function restoreBackup(data: BackupData, summary: BackupSummary, cu
     io.replaceOrganizerData({
       ...(data.anecdotes ? { anecdotes: data.anecdotes } : {}),
       ...(data.settings ? { settings: { ...data.settings, token: currentToken } } : {}),
-      ...(data.templates ? { templates: data.templates } : {}),
-      ...(data.statusPhrases !== undefined ? { statusPhrases: data.statusPhrases } : {}),
     });
   }
 }

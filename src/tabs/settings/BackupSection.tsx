@@ -4,7 +4,6 @@ import {
   AppConfig,
   BackupData,
   HistoryGame,
-  MessageTemplates,
   Player,
   ScheduledMatch,
   SeasonArchive,
@@ -23,7 +22,6 @@ export function BackupSection({
   history,
   seasons,
   settings,
-  templates,
   organizer,
   flash,
   setHistory,
@@ -35,7 +33,6 @@ export function BackupSection({
   history: HistoryGame[];
   seasons: SeasonArchive[];
   settings: Settings;
-  templates: MessageTemplates;
   organizer: OrganizerStore;
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
@@ -58,8 +55,6 @@ export function BackupSection({
       history,
       seasons,
       settings: safeSettings,
-      templates,
-      statusPhrases: organizer.statusPhrases ?? null,
       anecdotes: organizer.anecdotes,
     };
     // Uploaded photos: a failure to read them must not block the copy of everything else
@@ -133,7 +128,7 @@ export function BackupSection({
     <div>
       <p className="note note-flush">
         I dati del torneo sono salvati su Firestore. Qui puoi scaricarne una copia in JSON (torneo, giocatori,
-        calendario, partite, stagioni, foto caricate, aneddoti e testi dei messaggi). Il token Lichess non viene incluso.
+        calendario, partite, stagioni, foto caricate, aneddoti e impostazioni). Il token Lichess non viene incluso.
       </p>
       <button className="secondary btn-block" type="button" onClick={() => handleExport()}>
         Scarica copia JSON
@@ -165,8 +160,8 @@ export function BackupSection({
           partite registrate, {pending.summary.seasons} stagioni archiviate.
           <br />
           {pending.summary.privateData
-            ? "Contiene anche aneddoti, impostazioni e testi dei messaggi: vengono ripristinati (il token Lichess resta quello attuale)."
-            : "Backup automatico: aneddoti, impostazioni e testi dei messaggi restano quelli attuali."}
+            ? "Contiene anche aneddoti e impostazioni: vengono ripristinati (il token Lichess resta quello attuale)."
+            : "Backup automatico: aneddoti e impostazioni restano quelli attuali."}
           <div className="actions two mt-8">
             <button type="button" className="danger" disabled={busy} onClick={restore}>
               {busy ? "Ripristino in corso…" : "Ripristina"}

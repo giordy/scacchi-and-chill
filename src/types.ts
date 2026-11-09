@@ -231,8 +231,6 @@ export interface BackupData {
   history?: HistoryGame[];
   seasons?: SeasonArchive[];
   settings?: Omit<Settings, "token">;
-  templates?: MessageTemplates;
-  statusPhrases?: Partial<StatusPhrases> | null;
   anecdotes?: Record<string, string>;
   media?: Record<string, string>; // uploaded photos by id (see lib/media.ts): compressed JPEG data URLs
 }

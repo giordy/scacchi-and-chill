@@ -1,10 +1,8 @@
 import React from 'react';
-import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, SeasonArchive } from '../types';
+import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
 import type { OrganizerStore } from '../hooks/useOrganizerData';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { ReviewsTab } from '../ReviewsTab';
-import { LaunchMessageSection } from './settings/LaunchMessageSection';
-import { StatusPhrasesSection } from './settings/StatusPhrasesSection';
 import { awardEmoji, awardsMessage, awardWinnersLine, computeSeasonAwards } from '../lib/awards';
 import { errorMessage } from '../lib/utils';
 
@@ -47,15 +45,13 @@ function AwardsSection({ season, config, history, gameStates, flash, seasons }: 
 }
 
 // Everything written for the WhatsApp group that is not tied to a single round (the link message
-// and the bulletin of a round are in Turni, inside the round): the season's review, the awards, and
-// the texts of the messages.
+// and the bulletin of a round are in Turni, inside the round): the season's review and the awards;
+// nothing else: the message texts are in config.json.
 export function WhatsAppTab({
   config,
   history,
   gameStates,
   nameOf,
-  templates,
-  setTemplates,
   organizer,
   flash,
   triggerToast,
@@ -65,8 +61,6 @@ export function WhatsAppTab({
   history: HistoryGame[]; // as the standings see it (withdrawals applied)
   gameStates: Record<string, LichessExportGame>;
   nameOf: (handle: string) => string;
-  templates: MessageTemplates;
-  setTemplates: React.Dispatch<React.SetStateAction<Partial<MessageTemplates> | null>>;
   organizer: OrganizerStore;
   flash: Flash;
   triggerToast?: (msg: string) => void;
@@ -80,20 +74,6 @@ export function WhatsAppTab({
 
       <CollapsibleSection title="🏆 Premi della stagione">
         <AwardsSection season={config.tournament?.season ?? ''} config={config} history={history} gameStates={gameStates} flash={flash} seasons={seasons} />
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Testi dei messaggi">
-        <p className="note note-flush">
-          Le frasi usate nel messaggio con i link e nel bollettino di ogni turno (in ♞ Turni, dentro il turno).
-        </p>
-        <LaunchMessageSection templates={templates} setTemplates={setTemplates} flash={flash} />
-        <hr className="divider" />
-        <StatusPhrasesSection
-          defaults={config.statusPhrases}
-          overrides={organizer.statusPhrases ?? null}
-          setOverrides={organizer.setStatusPhrases}
-          flash={flash}
-        />
       </CollapsibleSection>
     </div>
   );

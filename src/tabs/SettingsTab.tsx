@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppConfig, HistoryGame, MessageTemplates, Player, ScheduledMatch, SeasonArchive, Settings, TournamentMeta } from '../types';
+import { AppConfig, HistoryGame, Player, ScheduledMatch, SeasonArchive, Settings, TournamentMeta } from '../types';
 import type { OrganizerStore } from '../hooks/useOrganizerData';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { TokenSection } from './settings/TokenSection';
@@ -13,8 +13,6 @@ export function SettingsTab({
   config,
   settings,
   setSettings,
-  templates,
-  setTemplates,
   history,
   setHistory,
   seasons,
@@ -27,8 +25,6 @@ export function SettingsTab({
   config: AppConfig;
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Partial<Settings>>>;
-  templates: MessageTemplates;
-  setTemplates: React.Dispatch<React.SetStateAction<Partial<MessageTemplates> | null>>;
   history: HistoryGame[];
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
   seasons: SeasonArchive[];
@@ -50,7 +46,6 @@ export function SettingsTab({
           history={history}
           seasons={seasons}
           settings={settings}
-          templates={templates}
           organizer={organizer}
           flash={flash}
           setHistory={setHistory}

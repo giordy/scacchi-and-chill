@@ -12,7 +12,7 @@ Sito di un torneo di scacchi per corrispondenza tra amici: sfide su Lichess, dat
 ## Area organizzatore (`#admin`)
 Login Google; organizzatore è chi ha un documento in `admins/<email>`. Ogni azione distruttiva chiede conferma. All'apertura sincronizza i risultati da Lichess su Firestore.
 - **Turni**: crea le sfide su Lichess, ricrea o sostituisce un link, prepara messaggio e bollettino per WhatsApp.
-- **WhatsApp**: prompt per il racconto della stagione, premi, testi dei messaggi.
+- **WhatsApp**: prompt per il racconto della stagione, premi. I testi dei messaggi e le frasi del bollettino stanno in `config.json`: si cambiano lì, con un nuovo deploy.
 - **Giocatori**: registro (il nome vale anche per le stagioni passate), chi gioca la stagione, ritiri (regola della metà o sostituto).
 - **Stagioni**: stagione corrente e foto del maestro, regolamento, Elo di partenza, calendario (girone all'italiana), chiusura della stagione e Albo d'Oro.
 - **Impostazioni**: token Lichess (serve per le sfide e gli Elo di partenza), copia e ripristino dei dati.
@@ -40,7 +40,7 @@ Chiudere la stagione archivia classifica, premi e partite in forma compatta, agg
 | `tournaments/<id>/games/*` | pubblica | partite e stato Lichess |
 | `tournaments/<id>/seasons/*` | pubblica | stagioni archiviate |
 | `tournaments/<id>/media/*` | pubblica | foto del maestro (sotto 900 KB) |
-| `tournaments/<id>/private/organizer` | organizzatore | aneddoti, token Lichess, impostazioni, testi |
+| `tournaments/<id>/private/organizer` | organizzatore | aneddoti, token Lichess, impostazioni |
 | `admins/<email>` | il proprio | un documento vuoto per organizzatore |
 
 ## Sviluppo

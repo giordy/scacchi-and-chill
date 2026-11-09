@@ -17,8 +17,6 @@ import {
   ScheduledMatch,
   SeasonWinner,
   Settings,
-  MessageTemplates,
-  StatusPhrases,
   Withdrawal,
   MasterAnecdote,
   LichessExportGame,
@@ -127,14 +125,11 @@ export function subscribeToTournamentDoc(
 // Organizer-only notes (player anecdotes).
 // Stored in a private document: Firestore rules allow only the admin to read it,
 // because the anecdotes are personal and must not be exposed on the public page.
-// The same document holds the organizer settings (Lichess token, challenge options, message texts),
+// The same document holds the organizer settings (Lichess token, challenge options),
 // so they are the same on every device of the organizer.
 export interface OrganizerData {
   anecdotes: Record<string, string>;
   settings?: Partial<Settings>;
-  templates?: Partial<MessageTemplates> | null;
-  // Bulletin phrases edited by the organizer (config.json has the defaults)
-  statusPhrases?: Partial<StatusPhrases> | null;
   // Lichess ids of the cheating cases the organizer already acknowledged
   fairPlaySeen?: string[];
 }
@@ -165,8 +160,6 @@ export function subscribeToOrganizerData(
       onUpdate({
         anecdotes: d.anecdotes ?? {},
         settings: d.settings,
-        templates: d.templates ?? null,
-        statusPhrases: d.statusPhrases ?? null,
         fairPlaySeen: d.fairPlaySeen ?? [],
       });
     },

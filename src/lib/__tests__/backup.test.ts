@@ -44,6 +44,7 @@ describe('restoreBackup', () => {
     media: { 'stagione-2': photo, broken: 'data:text/html;base64,AAAA' },
     anecdotes: { anna: 'Apre sempre e4' },
     settings: { days: 3, expiry: 2, rated: true, rules: {} },
+    // From the time the texts could be edited in the organizer area: now ignored
     templates: { launch: 'Si parte!' },
     statusPhrases: null,
   };
@@ -102,8 +103,6 @@ describe('restoreBackup', () => {
     expect(io.replaceOrganizerData).toHaveBeenCalledWith({
       anecdotes: manual.anecdotes,
       settings: { ...manual.settings, token: 'token-attuale' },
-      templates: manual.templates,
-      statusPhrases: null,
     });
   });
 
