@@ -23,6 +23,15 @@
   <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
+  <!-- Firefox for Android paints an installed app's navigation bar black or white from the
+       manifest background_color, which has no light/dark variants: pick the manifest that
+       matches the theme. It must run during parsing, before the browser reads the manifest. -->
+  <script>
+    if (window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches) {
+      var m = document.querySelector('link[rel="manifest"]');
+      m.href = m.href.replace("manifest.webmanifest", "manifest-light.webmanifest");
+    }
+  </script>
 </head>
 <body>
   <div id="root"></div>
