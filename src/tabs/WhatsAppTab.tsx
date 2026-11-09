@@ -37,6 +37,9 @@ function AwardsSection({ season, config, history, gameStates, flash, seasons }: 
           </li>
         ))}
       </ul>
+      <p className="note note-sm">
+        È un'anteprima: finché la stagione non è conclusa i premi possono cambiare, il Trofeo Pillsbury più di tutti.
+      </p>
       <button type="button" className="secondary" onClick={copy}>
         Copia il messaggio per WhatsApp
       </button>
