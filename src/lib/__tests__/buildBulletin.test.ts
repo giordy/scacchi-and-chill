@@ -49,7 +49,7 @@ describe('buildBulletin', () => {
     expect(b.text).toContain(defaultConfig.statusPhrases.infoLine!);
     expect(b.text).toContain('In corso ♟️ (più di 20 mosse, nel mediogioco)');
     expect(b.text).toContain('Finita! Ha vinto Elena col bianco per abbandono in 30 mosse *(1-0)* 🎉\n♟️ Apertura: Caro-Kann Defense: Campomanes Attack');
-    expect(b.text).toContain('💥 Colpaccio! Elena batte un avversario molto più forte');
+    expect(b.text).toContain('💥 Colpaccio di Elena: Fabio aveva 447 punti Elo in più');
     // A draw against him, once he is 200 points ahead, is a colpaccio too
     const draw = { ...states, ffffffff: { ...states.ffffffff, status: 'draw', winner: undefined } };
     const d = buildBulletin({ round: '2', games, states: draw, history: games, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(12)] });

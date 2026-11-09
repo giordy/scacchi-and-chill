@@ -103,15 +103,14 @@
       "⚔️ Sfida d'alta quota: {positions} in classifica"
     ],
     "upset": [
-      "💥 Colpaccio! {winner} batte un avversario molto più forte",
-      "💥 Pronostico ribaltato: vince {winner}!",
-      "🎯 Colpaccio di {winner}!",
-      "💥 Davide contro Golia: e vince Davide!"
+      "💥 Colpaccio di {winner}: {loser} aveva {gap} punti Elo in più",
+      "💥 Colpaccio di {winner}, contro un avversario più quotato di {gap} punti",
+      "💥 Colpaccio: {winner} batte {loser}, sulla carta più forte"
     ],
     "upsetDraw": [
       "🛡️ Colpaccio di patta: {player} ferma {opponent}",
-      "🛡️ Golia fermato: è patta!",
-      "🛡️ Mezzo punto che vale doppio per {player}"
+      "🛡️ Colpaccio di patta per {player}: {opponent} aveva {gap} punti Elo in più",
+      "🛡️ Patta preziosa per {player}, contro un avversario più quotato di {gap} punti"
     ],
     "roundEndHeader": [
       "🏁 *Turno {round} concluso!* Ecco i risultati finali:",
