@@ -46,7 +46,7 @@ interface PublicTournamentViewProps {
 }
 
 const TABS: { key: PublicTab; label: string }[] = [
-  { key: "standings", label: "Classifica" },
+  { key: "standings", label: "Competizioni" },
   { key: "matches", label: "Partite" },
   { key: "season", label: "Stagione" },
   { key: "hall", label: "Albo" },
@@ -282,7 +282,7 @@ export function PublicTournamentView({
           {view !== "pillsbury" && (
             <div className="view-switch" role="group" aria-label="Vista della classifica">
               <button type="button" className={view === "standings" ? "active" : ""} aria-pressed={view === "standings"} onClick={() => show("standings")}>
-                Elenco
+                Classifica
               </button>
               <button type="button" className={view === "crosstable" ? "active" : ""} aria-pressed={view === "crosstable"} onClick={() => show("crosstable")}>
                 Tabellone
