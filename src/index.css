@@ -2897,3 +2897,26 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   .hero:not(.is-compact) .season-squares .sq { width: 14px; height: 14px; }
   .hero:not(.is-compact) .season-legend { margin-top: 6px; font-size: 13px; }
 }
+
+/* Player page: the objective for the Trofeo Pillsbury, a band of its own (not a statistic) */
+.pillsbury-goal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--brass) 45%, var(--line));
+  border-radius: 10px;
+  box-shadow: inset 3px 0 0 var(--brass);
+  background: var(--brass-soft);
+  color: var(--ink);
+  text-decoration: none;
+}
+.pillsbury-goal:hover { border-color: var(--brass); }
+.pillsbury-goal-text { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.pillsbury-goal-label { font-size: 13px; font-weight: 700; color: var(--muted); }
+.pillsbury-goal-val { font-size: 20px; font-weight: 700; }
+.pillsbury-goal-val small { font-size: 13px; font-weight: 500; color: var(--muted); }
+.pillsbury-goal-note { font-size: 12px; line-height: 1.35; color: var(--muted); }
+.pillsbury-goal-go { font-size: 22px; color: var(--brass); }
+.pillsbury-goal + .stat-pills { margin-top: 12px; }

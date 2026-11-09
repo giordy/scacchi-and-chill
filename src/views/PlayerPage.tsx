@@ -6,7 +6,7 @@ import { departuresOf } from '../lib/departures';
 import { NameOf } from '../lib/roster';
 import { CareerSection, AllTimeHeadToHeadSection } from '../components/CareerSections';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
-import { playerHref } from '../lib/routes';
+import { playerHref, publicViewHref } from '../lib/routes';
 import { flairFromGames, flairUrl } from '../lib/flair';
 import { InfoTip } from '../components/InfoTip';
 import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampions, shortSeason } from '../lib/honours';
@@ -346,21 +346,24 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
             <span className="stat-pill-val">{standing.won} / {standing.drawn} / {standing.lost}</span>
           </div>
         </div>
-        {/* The season beyond the standings: objective, colours, time per move */}
-        {((forecast && forecast.games > 0 && !pillsburySuspended) || byColor.white.played + byColor.black.played > 0 || pace) && (
-        <div className="stat-pills stat-pills-minor">
-          {forecast && forecast.games > 0 && !pillsburySuspended && (
-            <div className="stat-pill">
-              <InfoTip className="stat-pill-label" text={"Punti previsti in base all'Elo, senza le partite con gli esordienti. Chi lo supera di più vince il Trofeo Pillsbury."}>
-                Obiettivo <span className="infotip-mark" aria-hidden="true">ⓘ</span>
-              </InfoTip>
-              <span className="stat-pill-val">
-                {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"}
+        {/* The objective is not a statistic: it is the player's mark for the Trofeo Pillsbury, in a band of
+            its own with the trophy's medal and brass; it leads to the race (how it is going is there) */}
+        {forecast && forecast.games > 0 && !pillsburySuspended && (
+          <a href={publicViewHref("pillsbury")} className="pillsbury-goal">
+            <PillsburyIcon size="1.9em" />
+            <span className="pillsbury-goal-text">
+              <span className="pillsbury-goal-label">Obiettivo per il Trofeo Pillsbury</span>
+              <span className="pillsbury-goal-val">
+                {fmt(pronostico)} {pronostico === 1 ? "punto" : "punti"} <small>su {countedOf} partite</small>
               </span>
-              {/* Which games the objective is on; how it is going is in the Pillsbury table */}
-              <span className="stat-pill-note">su {countedOf} partite</span>
-            </div>
-          )}
+              <span className="pillsbury-goal-note">Punti previsti in base all'Elo: chi li supera di più vince il trofeo.</span>
+            </span>
+            <span className="pillsbury-goal-go" aria-hidden="true">›</span>
+          </a>
+        )}
+        {/* The season beyond the standings: colours, time per move */}
+        {(byColor.white.played + byColor.black.played > 0 || pace) && (
+        <div className="stat-pills stat-pills-minor">
           {byColor.white.played + byColor.black.played > 0 && (
             <div className="stat-pill">
               <span className="stat-pill-label">Colori</span>
