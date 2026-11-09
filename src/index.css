@@ -2884,3 +2884,15 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .trophy-card.active { border-color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); color: var(--ink); }
 .trophy-card-pillsbury.active { border-color: var(--brass); box-shadow: inset 0 -2px 0 var(--brass); background: var(--brass-soft); }
 .trophy-card:not(.active):hover { border-color: color-mix(in srgb, var(--ink) 30%, var(--line)); }
+
+/* Phones: a slightly tighter hero on the standings, so more of the table is in the first screen */
+@media (max-width: 600px) {
+  .hero:not(.is-compact) { padding: 14px 16px; }
+  .hero:not(.is-compact) .hero-identity { gap: 14px; }
+  .hero:not(.is-compact) .hero-portrait { width: 64px; height: 78px; }
+  .hero:not(.is-compact) .hero-season { margin-top: 4px; font-size: 16px; }
+  .hero:not(.is-compact) .hero-status { margin: 12px 0 10px; font-size: 17px; line-height: 1.35; text-wrap: pretty; }
+  .hero:not(.is-compact) .season-squares { gap: 2px; padding: 5px; }
+  .hero:not(.is-compact) .season-squares .sq { width: 14px; height: 14px; }
+  .hero:not(.is-compact) .season-legend { margin-top: 6px; font-size: 13px; }
+}
