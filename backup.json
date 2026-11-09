@@ -676,19 +676,6 @@
       "archivedAt": "2026-10-06T15:48:08.490Z",
       "awards": [
         {
-          "description": "Più vittorie chiuse con lo scacco matto",
-          "detail": "9 vittorie col matto",
-          "emoji": "👑",
-          "id": "mate",
-          "title": "Re del matto",
-          "winners": [
-            {
-              "handle": "fsgach",
-              "name": "Fabio"
-            }
-          ]
-        },
-        {
           "description": "La vittoria più rapida della stagione",
           "detail": "in 4 mosse",
           "emoji": "⚡",
@@ -724,31 +711,6 @@
             {
               "handle": "ma_pi",
               "name": "Matteo \"Piero\""
-            }
-          ]
-        },
-        {
-          "description": "Più partite chiuse in parità",
-          "detail": "1 patta",
-          "emoji": "🧱",
-          "id": "draws",
-          "title": "Il muro",
-          "winners": [
-            {
-              "handle": "fsgach",
-              "name": "Fabio"
-            },
-            {
-              "handle": "luca_sgarbossa",
-              "name": "Luca"
-            },
-            {
-              "handle": "ma_pi",
-              "name": "Matteo \"Piero\""
-            },
-            {
-              "handle": "scarsoforteh",
-              "name": "Stefano"
             }
           ]
         }
@@ -1716,12 +1678,116 @@
       {
         "date": "2026-09-09",
         "handle": "drake097",
-        "rating": null
+        "lichess": 1822,
+        "mean": 1663,
+        "offset": 511,
+        "perf": "blitz",
+        "rating": 1998,
+        "ratings": {
+          "blitz": 1822,
+          "rapid": 1903
+        },
+        "regulars": [
+          {
+            "elo": 1721,
+            "handle": "battimat",
+            "ratings": {
+              "blitz": 1122,
+              "rapid": 1502
+            }
+          },
+          {
+            "elo": 2022,
+            "handle": "fsgach",
+            "ratings": {
+              "blitz": 1759,
+              "rapid": 1752
+            }
+          },
+          {
+            "elo": 1721,
+            "handle": "giords",
+            "ratings": {
+              "blitz": 1049,
+              "correspondence": 1712
+            }
+          },
+          {
+            "elo": 1378,
+            "handle": "luca_sgarbossa",
+            "ratings": {
+              "correspondence": 1568
+            }
+          },
+          {
+            "elo": 1648,
+            "handle": "matepaco",
+            "ratings": {}
+          },
+          {
+            "elo": 1486,
+            "handle": "scarsoforteh",
+            "ratings": {}
+          }
+        ],
+        "rule": 2
       },
       {
         "date": "2026-09-08",
         "handle": "frasal",
-        "rating": null
+        "lichess": 1486,
+        "mean": 1663,
+        "offset": 511,
+        "perf": "blitz",
+        "rating": 1830,
+        "ratings": {
+          "blitz": 1486,
+          "rapid": 1752
+        },
+        "regulars": [
+          {
+            "elo": 1721,
+            "handle": "battimat",
+            "ratings": {
+              "blitz": 1122,
+              "rapid": 1502
+            }
+          },
+          {
+            "elo": 2022,
+            "handle": "fsgach",
+            "ratings": {
+              "blitz": 1759,
+              "rapid": 1760
+            }
+          },
+          {
+            "elo": 1721,
+            "handle": "giords",
+            "ratings": {
+              "blitz": 1049,
+              "correspondence": 1712
+            }
+          },
+          {
+            "elo": 1378,
+            "handle": "luca_sgarbossa",
+            "ratings": {
+              "correspondence": 1591
+            }
+          },
+          {
+            "elo": 1648,
+            "handle": "matepaco",
+            "ratings": {}
+          },
+          {
+            "elo": 1486,
+            "handle": "scarsoforteh",
+            "ratings": {}
+          }
+        ],
+        "rule": 2
       }
     ],
     "subtitle": "La macchina degli scacchi",
