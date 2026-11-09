@@ -108,6 +108,16 @@ describe('pillsburyLine', () => {
     );
   });
 
+  it('at the end of the season names the winner, or says the trophy is not given', () => {
+    expect(pillsburyLine(race([row('carla', 2.1, 'up'), row('anna', 1, 'up')]), name, true)).toBe('🏅 *Trofeo Pillsbury* a Carla, +2 punti oltre le attese');
+    expect(pillsburyLine(race([row('carla', 1, 'up'), row('anna', 1, 'up'), row('bruno', 0.5, 'up')]), name, true)).toBe(
+      '🏅 *Trofeo Pillsbury* a Carla e Anna, +1 punto oltre le attese'
+    );
+    expect(pillsburyLine(race([row('elena', 0.3, 'same'), row('fabio', -0.3, 'same')]), name, true)).toBe(
+      "🏅 *Trofeo Pillsbury:* nessuno è andato oltre le attese, quest'anno non viene assegnato"
+    );
+  });
+
   it('says the race is open while nobody is above, and is silent when suspended or before any game', () => {
     expect(pillsburyLine(race([row('elena', 0, 'same'), row('fabio', -1, 'down')]), name)).toBe('🏅 *Trofeo Pillsbury:* corsa ancora aperta, nessuno finora sopra le attese');
     expect(pillsburyLine(race([row('carla', 1, 'up')], true), name)).toBe('');

@@ -6,7 +6,7 @@ import { upsetOf } from './upset';
 import { roundHalf, tournamentElo } from './tournamentElo';
 import { fullMovesOf, isVoid, movesText, nameFrom, pliesOf, storedStates } from './games';
 import { summitGames, summitKey } from './summit';
-import { gameProgress } from './progress';
+import { computeSeasonProgress, gameProgress } from './progress';
 import { reigningChampions } from './honours';
 import { PILLSBURY_EMOJI, PILLSBURY_TITLE, PillsburyRace, pillsburyRace, reigningPillsbury } from './pillsbury';
 
@@ -51,17 +51,30 @@ export function standingsBlock(standings: PlayerStanding[], round: string, champ
   return [`📈 *Classifica dopo il Turno ${round}*`, ...rows].join('\n');
 }
 
+// "Anna", "Anna e Bruno", "Anna, Bruno e Carla"
+const namesList = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}` : names[0] ?? '');
+// Half points beyond the objective, as in the site's table: 1.5 -> "+1½", 0.5 -> "+½"
+const overText = (n: number) => `+${String(roundHalf(n)).replace('.5', '½').replace(/^0½/, '½')}`;
+
 // At the end of a round, under the standings: the race for the Trofeo Pillsbury in one line. Good news
 // only, as on the site: who is above the objective (▲), at most three, each with the half points beyond
-// it as in the site's table; never who is in line or below (in a small group, naming those in line would
-// point at the others). Nobody above yet: the race is open.
+// it; never who is in line or below (in a small group, naming those in line would point at the others).
+// Nobody above yet: the race is open.
 //   🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +1, Anna +½, Bruno +½
-export function pillsburyLine(race: PillsburyRace, nameOf: (handle: string) => string): string {
+// At the end of the season the winner instead, by the same rule as the season's awards (who share the
+// best are named together), or that nobody went beyond the objective and the trophy is not given.
+//   🏅 *Trofeo Pillsbury* a Carla, +2 punti oltre le attese
+export function pillsburyLine(race: PillsburyRace, nameOf: (handle: string) => string, seasonOver = false): string {
   if (race.suspended || race.rows.length === 0) return '';
   const up = race.rows.filter((r) => r.trend === 'up');
+  if (seasonOver) {
+    if (up.length === 0) return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}:* nessuno è andato oltre le attese, quest'anno non viene assegnato`;
+    const best = up[0].over;
+    const winners = up.filter((r) => Math.abs(r.over - best) < 1e-6).map((r) => nameOf(r.handle));
+    return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}* a ${namesList(winners)}, ${overText(best)} ${roundHalf(best) <= 1 ? 'punto' : 'punti'} oltre le attese`;
+  }
   if (up.length === 0) return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}:* corsa ancora aperta, nessuno finora sopra le attese`;
-  const over = (n: number) => `+${String(roundHalf(n)).replace('.5', '½').replace(/^0½/, '½')}`;
-  const names = up.slice(0, 3).map((r) => `${nameOf(r.handle)} ${over(r.over)}`);
+  const names = up.slice(0, 3).map((r) => `${nameOf(r.handle)} ${overText(r.over)}`);
   return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}* (punti oltre le attese): ${names.join(', ')}`;
 }
 
@@ -282,7 +295,10 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     table = standingsBlock(standings, round, reigningChampions(config.tournament?.winners)?.handles, reigningPillsbury(seasons)?.handles);
     // The second trophy, after the championship; from the second season (in the first all are esordienti)
     if (seasons.length > 0) {
-      pillsbury = pillsburyLine(pillsburyRace(config.players, elo, history, history, allStates, config.tournament?.withdrawals), nameOf);
+      // The season is over when every game of the calendar is, as for the awards on the site
+      const progress = computeSeasonProgress(history, allStates, config.schedule ?? []);
+      const seasonOver = progress.total > 0 && progress.finished === progress.total;
+      pillsbury = pillsburyLine(pillsburyRace(config.players, elo, history, history, allStates, config.tournament?.withdrawals), nameOf, seasonOver);
     }
   }
 
