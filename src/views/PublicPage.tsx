@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
 import { DEFAULT_TOURNAMENT } from '../lib/tournament';
 import { useHash } from '../hooks/useHash';
@@ -8,7 +8,6 @@ import { LoadingScreen } from '../components/LoadingScreen';
 import { PublicTournamentView } from '../PublicTournamentView';
 import { PresenceInfo } from '../lib/presence';
 import { NameOf } from '../lib/roster';
-import { countView } from '../lib/analytics';
 
 interface PublicPageProps {
   seasons: SeasonArchive[];
@@ -26,8 +25,6 @@ interface PublicPageProps {
 // Public tournament page, with a discreet link to the organizer area
 export function PublicPage({ seasons, ready, config, history, gameStates, liveUpdatedAt, nameOf, presence }: PublicPageProps) {
   const hash = useHash();
-  // Each view opened is a visit (GoatCounter, see lib/analytics); the organizer area is another page
-  useEffect(() => countView(hash), [hash]);
   if (!ready) return <LoadingScreen label="Caricamento torneo…" />;
 
   const playerHandle = parsePlayerHash(hash);

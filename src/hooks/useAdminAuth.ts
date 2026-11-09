@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { errorMessage } from '../lib/utils';
 import { subscribeToAuth, signInAdminWithGoogle, signInAdminWithIdToken, signOutAdmin, isAdminUser, startGoogleSignInRedirect } from '../firebaseAuth';
 import { isInstalledApp, takeGoogleAnswer } from '../lib/googleRedirect';
-import { excludeThisBrowser } from '../lib/analytics';
 
 // Sign-in state of the organizer (used only inside the organizer area)
 export function useAdminAuth() {
@@ -22,8 +21,6 @@ export function useAdminAuth() {
       setAuthReady(true);
       setIsAuthenticated(ok);
       setEmail(ok && user?.email ? user.email : "");
-      // The organizer checks the site often: from a browser signed in here once, no visit is counted
-      if (ok) excludeThisBrowser();
       if (user && !ok) {
         setError(`L'account ${user.email} non è autorizzato come organizzatore.`);
         signOutAdmin().catch(() => {});
