@@ -257,17 +257,27 @@ export function PublicTournamentView({
 
       {activeTab === "standings" && (
         <section role="tabpanel" id="pub-panel-standings" aria-labelledby="pub-tab-standings">
-          <div className="view-switch" role="group" aria-label="Vista della classifica">
-            <button type="button" className={view === "standings" ? "active" : ""} aria-pressed={view === "standings"} onClick={() => show("standings")}>
-              Classifica
-            </button>
-            <button type="button" className={view === "crosstable" ? "active" : ""} aria-pressed={view === "crosstable"} onClick={() => show("crosstable")}>
-              Tabellone
-            </button>
-            <button type="button" className={view === "pillsbury" ? "active" : ""} aria-pressed={view === "pillsbury"} onClick={() => show("pillsbury")}>
-              Pillsbury
-            </button>
-          </div>
+          {view === "pillsbury" ? (
+            // The Trofeo Pillsbury is another trophy, not a view of the standings: a heading and a way back
+            <div className="standings-bar">
+              <a href={publicViewHref("standings")} className="back-link">← Classifica</a>
+              <h2 className="pillsbury-heading"><PillsburyIcon /> Trofeo Pillsbury</h2>
+            </div>
+          ) : (
+            <div className="standings-bar">
+              <div className="view-switch" role="group" aria-label="Vista della classifica">
+                <button type="button" className={view === "standings" ? "active" : ""} aria-pressed={view === "standings"} onClick={() => show("standings")}>
+                  Elenco
+                </button>
+                <button type="button" className={view === "crosstable" ? "active" : ""} aria-pressed={view === "crosstable"} onClick={() => show("crosstable")}>
+                  Tabellone
+                </button>
+              </div>
+              <a href={publicViewHref("pillsbury")} className="pillsbury-chip">
+                <PillsburyIcon /> Trofeo Pillsbury <span aria-hidden="true">›</span>
+              </a>
+            </div>
+          )}
         </section>
       )}
 
