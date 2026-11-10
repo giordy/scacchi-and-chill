@@ -4,14 +4,38 @@ import { shouldPoll, REFRESH_MS } from '../../hooks/useVisiblePolling';
 import { syncTargets } from '../games';
 
 describe('getApproxMoves', () => {
+  // Lichess hides up to 3 half-moves: 16 visible ones may be 16-19 real ones, i.e. 8-10 moves
   it.each([
-    [0, '< 10 mosse', 'in apertura'],
-    [18, '> 10 mosse', 'nel mediogioco'],
-    [40, '> 20 mosse', 'nel vivo del gioco'],
-    [60, '> 30 mosse', 'fase avanzata'],
-    [100, '> 40 mosse', 'in pieno finale'],
-  ])('%i half-moves: %s, %s', (plies, band, phase) => {
-    expect(getApproxMoves(plies)).toMatchObject({ movesBand: band, phase });
+    [0, 'meno di 10 mosse', '< 10 mosse', 'in apertura'],
+    [15, 'meno di 10 mosse', '< 10 mosse', 'in apertura'],
+    [16, 'una decina di mosse', '~10 mosse', 'in apertura'],
+    [18, 'una decina di mosse', '~10 mosse', 'in apertura'],
+    [20, 'una decina di mosse', '~10 mosse', 'in apertura'],
+    [21, 'più di 10 mosse', '> 10 mosse', 'nel mediogioco'],
+    [35, 'più di 10 mosse', '> 10 mosse', 'nel mediogioco'],
+    [36, 'una ventina di mosse', '~20 mosse', 'nel mediogioco'],
+    [40, 'una ventina di mosse', '~20 mosse', 'nel mediogioco'],
+    [41, 'più di 20 mosse', '> 20 mosse', 'nel vivo del gioco'],
+    [60, 'una trentina di mosse', '~30 mosse', 'nel vivo del gioco'],
+    [61, 'più di 30 mosse', '> 30 mosse', 'fase avanzata'],
+    [80, 'una quarantina di mosse', '~40 mosse', 'fase avanzata'],
+    [81, 'più di 40 mosse', '> 40 mosse', 'in pieno finale'],
+    [100, 'più di 40 mosse', '> 40 mosse', 'in pieno finale'],
+  ])('%i visible half-moves: %s', (plies, approxMoves, movesBand, phase) => {
+    expect(getApproxMoves(plies)).toEqual({ approxMoves, movesBand, phase });
+  });
+
+  it('never says something the hidden half-moves could make false', () => {
+    for (let plies = 0; plies <= 120; plies++) {
+      const { approxMoves } = getApproxMoves(plies);
+      for (let real = plies; real <= plies + 3; real++) {
+        const moves = Math.ceil(real / 2);
+        const less = approxMoves.match(/meno di (\d+)/);
+        const more = approxMoves.match(/più di (\d+)/);
+        if (less) expect(moves).toBeLessThan(Number(less[1]));
+        if (more) expect(moves).toBeGreaterThan(Number(more[1]));
+      }
+    }
   });
 });
 

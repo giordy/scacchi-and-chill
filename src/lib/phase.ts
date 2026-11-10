@@ -21,7 +21,7 @@ export function gamePhase(state?: LichessExportGame): GamePhase | undefined {
   return 'opening';
 }
 
-// "34 mosse" for finished games, "più di 20 mosse" for ongoing ones (same bands as the bulletin)
+// "34 mosse" for finished games, "più di 20 mosse" or "una ventina di mosse" for ongoing ones (same bands as the bulletin)
 export function movesLabel(state: LichessExportGame | undefined, finished: boolean): string {
   const plies = pliesOf(state);
   if (plies === 0) return '';

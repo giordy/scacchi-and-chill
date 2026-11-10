@@ -1,6 +1,6 @@
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
 import { computeStandings, leaderText, PlayerStanding, pointsText, seasonStarted, sharedRanks } from './standings';
-import { extractGameId, fill, formatDeadline, getApproxMoves, HOW_DRAW, HOW_WIN, tidy } from './utils';
+import { extractGameId, fill, formatDeadline, getApproxMoves, HIDDEN_PLIES, HOW_DRAW, HOW_WIN, tidy } from './utils';
 import { gamePhase, GamePhase } from './phase';
 import { upsetOf } from './upset';
 import { roundHalf, tournamentElo } from './tournamentElo';
@@ -190,7 +190,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
 
       detailsList.push(
         `${i + 1}. ${id}: bianco=${s.players?.white?.user?.name ?? "?"}, nero=${s.players?.black?.user?.name ?? "?"}, ` +
-          `semimosse visibili via API=${plies} (Lichess ne nasconde fino a 3), ~${approx.approxMoves}, fase Lichess=${lichessPhase ?? "n/d"}`
+          `semimosse visibili via API=${plies} (Lichess ne nasconde fino a ${HIDDEN_PLIES}), ~${approx.approxMoves}, fase Lichess=${lichessPhase ?? "n/d"}`
       );
     } else if (isVoid(s)) {
       body = pickFor("aborted");

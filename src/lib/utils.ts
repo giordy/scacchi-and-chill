@@ -51,42 +51,30 @@ export const tidy = (t: string) =>
     .replace(/\n+/g, "\n")
     .trim();
 
-// Estimates the moves threshold for ongoing games (single thresholds: meno di 10, più di 10/20/30/40)
+// Lichess hides up to this many of the latest half-moves of an ongoing game (anti-cheat)
+export const HIDDEN_PLIES = 3;
+
+const MOVE_THRESHOLDS = [10, 20, 30, 40];
+const AROUND = ["una decina", "una ventina", "una trentina", "una quarantina"];
+const PHASES = ["in apertura", "nel mediogioco", "nel vivo del gioco", "fase avanzata", "in pieno finale"];
+
+// Moves band of an ongoing game from the half-moves Lichess shows. The real moves (as players count
+// them) are between the visible ones and the visible ones plus the hidden half-moves, so the band
+// only says what holds for all of them: "meno di 10", "più di 10/20/30/40", or "una decina/
+// ventina/..." when the real count may sit on either side of a threshold.
 export function getApproxMoves(plies: number): { approxMoves: string; movesBand: string; phase: string } {
-  const estimatedMoves = Math.max(1, Math.floor(plies / 2) + 1);
-  if (estimatedMoves < 10) {
-    return {
-      approxMoves: "meno di 10 mosse",
-      movesBand: "< 10 mosse",
-      phase: "in apertura",
-    };
+  const fewest = Math.ceil(plies / 2);
+  const most = Math.ceil((plies + HIDDEN_PLIES) / 2);
+  const passed = MOVE_THRESHOLDS.filter((n) => fewest > n).length; // thresholds surely passed
+  const phase = PHASES[passed];
+  const around = MOVE_THRESHOLDS.findIndex((n) => fewest <= n && n <= most);
+  if (around >= 0) {
+    const n = MOVE_THRESHOLDS[around];
+    return { approxMoves: `${AROUND[around]} di mosse`, movesBand: `~${n} mosse`, phase };
   }
-  if (estimatedMoves < 20) {
-    return {
-      approxMoves: "più di 10 mosse",
-      movesBand: "> 10 mosse",
-      phase: "nel mediogioco",
-    };
-  }
-  if (estimatedMoves < 30) {
-    return {
-      approxMoves: "più di 20 mosse",
-      movesBand: "> 20 mosse",
-      phase: "nel vivo del gioco",
-    };
-  }
-  if (estimatedMoves < 40) {
-    return {
-      approxMoves: "più di 30 mosse",
-      movesBand: "> 30 mosse",
-      phase: "fase avanzata",
-    };
-  }
-  return {
-    approxMoves: "più di 40 mosse",
-    movesBand: "> 40 mosse",
-    phase: "in pieno finale",
-  };
+  if (passed === 0) return { approxMoves: "meno di 10 mosse", movesBand: "< 10 mosse", phase };
+  const n = MOVE_THRESHOLDS[passed - 1];
+  return { approxMoves: `più di ${n} mosse`, movesBand: `> ${n} mosse`, phase };
 }
 
 // Readable message from anything thrown in a catch block
