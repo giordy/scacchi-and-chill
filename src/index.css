@@ -2928,19 +2928,21 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   z-index: -1;
   pointer-events: none;
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.5) 0 2px, transparent 3.5px),
-    radial-gradient(circle, rgba(255, 255, 255, 0.35) 0 1.5px, transparent 3px),
-    radial-gradient(circle, rgba(255, 255, 255, 0.22) 0 3.5px, transparent 5.5px);
-  background-size: 131px 127px, 89px 97px, 197px 181px;
-  background-position: 13px 7px, 41px 29px, 83px 61px;
+    radial-gradient(circle, rgba(255, 255, 255, 0.6) 0 2px, transparent 3.5px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.45) 0 1.5px, transparent 3px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.3) 0 3.5px, transparent 5.5px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.5) 0 1.2px, transparent 2.4px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.35) 0 2.5px, transparent 4px);
+  background-size: 83px 79px, 59px 67px, 137px 127px, 43px 53px, 109px 101px;
+  background-position: 13px 7px, 41px 29px, 83px 61px, 7px 17px, 57px 43px;
   /* Thicker towards the top-right corner, thin over the text */
-  -webkit-mask-image: linear-gradient(200deg, #000 15%, rgba(0, 0, 0, 0.45) 75%);
-  mask-image: linear-gradient(200deg, #000 15%, rgba(0, 0, 0, 0.45) 75%);
+  -webkit-mask-image: linear-gradient(200deg, #000 20%, rgba(0, 0, 0, 0.6) 80%);
+  mask-image: linear-gradient(200deg, #000 20%, rgba(0, 0, 0, 0.6) 80%);
   animation: festa-snow 22s linear infinite;
 }
 
 @keyframes festa-snow {
-  to { background-position: 13px 515px, 41px 417px, 83px 423px; }
+  to { background-position: 13px 323px, 41px 297px, 83px 315px, 7px 229px, 57px 447px; }
 }
 
 :root[data-festa="natale"] .season-squares .sq-finished {
@@ -2964,4 +2966,44 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   :root[data-festa="natale"] .season-squares .sq-ongoing {
     animation: none;
   }
+}
+
+/* More Christmas: santa hat on the master's portrait, holly after the title, a snowbank at the bottom */
+:root[data-festa="natale"] .hero-portrait {
+  position: relative;
+  overflow: visible;
+}
+:root[data-festa="natale"] .hero-portrait img {
+  border-radius: 6px;
+}
+:root[data-festa="natale"] .hero-portrait::after {
+  content: "";
+  position: absolute;
+  top: -13px;
+  left: -14px;
+  width: 50px;
+  height: 38px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 90'%3E%3Cg stroke='%231d2f29' stroke-width='5' stroke-linejoin='round'%3E%3Cpath d='M100 66C102 40 88 14 62 10C40 7 20 16 10 40C24 32 34 40 36 66Z' fill='%23b7372f'/%3E%3Ccircle cx='11' cy='43' r='10' fill='%23fbf7ea'/%3E%3Crect x='26' y='58' width='84' height='24' rx='12' fill='%23fbf7ea'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
+  transform: rotate(-18deg);
+}
+:root[data-festa="natale"] .hero-title::after {
+  content: "";
+  display: inline-block;
+  width: 0.9em;
+  height: 0.62em;
+  margin-left: 0.12em;
+  vertical-align: 0.05em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44'%3E%3Cg stroke='%231d2f29' stroke-width='2.5' stroke-linejoin='round'%3E%3Cpath d='M30 26C24 22 16 26 10 20C14 18 12 12 6 10C14 6 24 8 30 26Z' fill='%233d7a52'/%3E%3Cpath d='M34 26C40 22 48 26 54 20C50 18 52 12 58 10C50 6 40 8 34 26Z' fill='%232f6646'/%3E%3Ccircle cx='27' cy='31' r='6' fill='%23c0392b'/%3E%3Ccircle cx='38' cy='31' r='6' fill='%23c0392b'/%3E%3Ccircle cx='32.5' cy='23' r='6' fill='%23d14a3b'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
+}
+.festa-snowbank {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 14px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.9;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M0 14C30 6 55 12 80 9S130 2 160 8S215 15 245 7S300 3 330 9S380 13 400 8V24H0Z' fill='%23f4f1e8'/%3E%3C/svg%3E") no-repeat bottom / 100% 100%;
 }
