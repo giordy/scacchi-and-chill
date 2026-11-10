@@ -2931,10 +2931,9 @@ button.btn-mini.is-active { background: var(--brass-soft); }
     radial-gradient(circle, rgba(255, 255, 255, 0.6) 0 2px, transparent 3.5px),
     radial-gradient(circle, rgba(255, 255, 255, 0.45) 0 1.5px, transparent 3px),
     radial-gradient(circle, rgba(255, 255, 255, 0.3) 0 3.5px, transparent 5.5px),
-    radial-gradient(circle, rgba(255, 255, 255, 0.5) 0 1.2px, transparent 2.4px),
     radial-gradient(circle, rgba(255, 255, 255, 0.35) 0 2.5px, transparent 4px);
-  background-size: 83px 79px, 59px 67px, 137px 127px, 43px 53px, 109px 101px;
-  background-position: 13px 7px, 41px 29px, 83px 61px, 7px 17px, 57px 43px;
+  background-size: 83px 79px, 67px 73px, 137px 127px, 109px 101px;
+  background-position: 13px 7px, 41px 29px, 83px 61px, 57px 43px;
   /* Thicker towards the top-right corner, thin over the text */
   -webkit-mask-image: linear-gradient(200deg, #000 20%, rgba(0, 0, 0, 0.6) 80%);
   mask-image: linear-gradient(200deg, #000 20%, rgba(0, 0, 0, 0.6) 80%);
@@ -2942,7 +2941,7 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 }
 
 @keyframes holiday-snow {
-  to { background-position: 13px 323px, 41px 297px, 83px 315px, 7px 229px, 57px 447px; }
+  to { background-position: 13px 323px, 41px 321px, 83px 315px, 57px 447px; }
 }
 
 :root[data-holiday="christmas"] .season-squares .sq-finished {
