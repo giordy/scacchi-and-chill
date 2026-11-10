@@ -236,7 +236,7 @@ export function PublicTournamentView({
             </figcaption>
           </figure>
         )}
-        {holiday === "christmas" && <span className="holiday-snowbank" aria-hidden="true" />}
+        {holiday && <span className="holiday-ground" aria-hidden="true" />}
       </header>
 
       <nav ref={navRef} className="public-subnav" role="tablist" aria-label="Sezioni del torneo" onKeyDown={onTabListKeyDown}>

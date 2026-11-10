@@ -2919,23 +2919,57 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .pillsbury-goal-val small { font-size: 13px; font-weight: 500; color: var(--muted); }
 .pillsbury-goal-go { font-size: 22px; color: var(--brass); }
 
-/* Christmas (1 December - 6 January, see lib/holiday.ts): snow on the felt band and the season's
-   squares lit like a string of lights. Colors keep their meaning: ivory = finished, brass = ongoing. */
-:root[data-holiday="christmas"] .hero::before {
+/* Holidays (see lib/holiday.ts): decorations on the felt band only, never on standings or boards.
+   Square colors keep their meaning: ivory = finished, brass = ongoing.
+   ::before of the hero is the falling layer, ::after of the title a small ornament,
+   .holiday-ground the strip at the bottom of the band. */
+:root[data-holiday] .hero::before {
   content: "";
   position: absolute;
   inset: -40px 0 0;
   z-index: -1;
   pointer-events: none;
+  /* Thicker towards the top-right corner, thin over the text */
+  -webkit-mask-image: linear-gradient(200deg, #000 15%, rgba(0, 0, 0, 0.45) 75%);
+  mask-image: linear-gradient(200deg, #000 15%, rgba(0, 0, 0, 0.45) 75%);
+}
+
+:root[data-holiday] .hero-title::after {
+  content: "";
+  display: inline-block;
+  width: 0.9em;
+  height: 0.62em;
+  margin-left: 0.12em;
+  vertical-align: 0.05em;
+  background: no-repeat center / contain;
+}
+
+.holiday-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 14px;
+  z-index: -1;
+  pointer-events: none;
+  background: no-repeat bottom / 100% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-holiday] .hero::before,
+  :root[data-holiday] .season-squares .sq-ongoing {
+    animation: none;
+  }
+}
+
+/* Christmas: snow, the squares lit like a string of lights, holly, a snowbank */
+:root[data-holiday="christmas"] .hero::before {
   background-image:
     radial-gradient(circle, rgba(255, 255, 255, 0.5) 0 2px, transparent 3.5px),
     radial-gradient(circle, rgba(255, 255, 255, 0.35) 0 1.5px, transparent 3px),
     radial-gradient(circle, rgba(255, 255, 255, 0.22) 0 3.5px, transparent 5.5px);
   background-size: 131px 127px, 89px 97px, 197px 181px;
   background-position: 13px 7px, 41px 29px, 83px 61px;
-  /* Thicker towards the top-right corner, thin over the text */
-  -webkit-mask-image: linear-gradient(200deg, #000 15%, rgba(0, 0, 0, 0.45) 75%);
-  mask-image: linear-gradient(200deg, #000 15%, rgba(0, 0, 0, 0.45) 75%);
   animation: holiday-snow 22s linear infinite;
 }
 
@@ -2959,31 +2993,93 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   45% { opacity: 0.35; box-shadow: none; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  :root[data-holiday="christmas"] .hero::before,
-  :root[data-holiday="christmas"] .season-squares .sq-ongoing {
-    animation: none;
-  }
+:root[data-holiday="christmas"] .hero-title::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44'%3E%3Cg stroke='%231d2f29' stroke-width='2.5' stroke-linejoin='round'%3E%3Cpath d='M30 26C24 22 16 26 10 20C14 18 12 12 6 10C14 6 24 8 30 26Z' fill='%233d7a52'/%3E%3Cpath d='M34 26C40 22 48 26 54 20C50 18 52 12 58 10C50 6 40 8 34 26Z' fill='%232f6646'/%3E%3Ccircle cx='27' cy='31' r='6' fill='%23c0392b'/%3E%3Ccircle cx='38' cy='31' r='6' fill='%23c0392b'/%3E%3Ccircle cx='32.5' cy='23' r='6' fill='%23d14a3b'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* More Christmas: holly after the title, a snowbank at the bottom of the felt band */
-:root[data-holiday="christmas"] .hero-title::after {
-  content: "";
-  display: inline-block;
-  width: 0.9em;
-  height: 0.62em;
-  margin-left: 0.12em;
-  vertical-align: 0.05em;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44'%3E%3Cg stroke='%231d2f29' stroke-width='2.5' stroke-linejoin='round'%3E%3Cpath d='M30 26C24 22 16 26 10 20C14 18 12 12 6 10C14 6 24 8 30 26Z' fill='%233d7a52'/%3E%3Cpath d='M34 26C40 22 48 26 54 20C50 18 52 12 58 10C50 6 40 8 34 26Z' fill='%232f6646'/%3E%3Ccircle cx='27' cy='31' r='6' fill='%23c0392b'/%3E%3Ccircle cx='38' cy='31' r='6' fill='%23c0392b'/%3E%3Ccircle cx='32.5' cy='23' r='6' fill='%23d14a3b'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
-}
-.holiday-snowbank {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 14px;
-  z-index: -1;
-  pointer-events: none;
+:root[data-holiday="christmas"] .holiday-ground {
   opacity: 0.9;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M0 14C30 6 55 12 80 9S130 2 160 8S215 15 245 7S300 3 330 9S380 13 400 8V24H0Z' fill='%23f4f1e8'/%3E%3C/svg%3E") no-repeat bottom / 100% 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M0 14C30 6 55 12 80 9S130 2 160 8S215 15 245 7S300 3 330 9S380 13 400 8V24H0Z' fill='%23f4f1e8'/%3E%3C/svg%3E");
+}
+
+/* Halloween: a few bats crossing the band, moon and cobweb in the corner, candle-lit squares,
+   a pumpkin, gravestones and a fence */
+:root[data-holiday="halloween"] .hero::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 18'%3E%3Cpath d='M20 6c1-3 2-4 2-4l1 3c3-1 6-1 9-4 0 3 2 6 8 8-4 0-6 2-7 5-2-2-5-2-7 0-1-2-2-3-6-3s-5 1-6 3c-2-2-5-2-7 0-1-3-3-5-7-5 6-2 8-5 8-8 3 3 6 3 9 4l1-3s1 1 2 4z' fill='%230a1310'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 18'%3E%3Cpath d='M20 6c1-3 2-4 2-4l1 3c3-1 6-1 9-4 0 3 2 6 8 8-4 0-6 2-7 5-2-2-5-2-7 0-1-2-2-3-6-3s-5 1-6 3c-2-2-5-2-7 0-1-3-3-5-7-5 6-2 8-5 8-8 3 3 6 3 9 4l1-3s1 1 2 4z' fill='%230a1310'/%3E%3C/svg%3E");
+  background-size: 32px 14px, 22px 10px;
+  background-repeat: no-repeat;
+  background-position: -30px 60px, -30px 120px;
+  -webkit-mask-image: none;
+  mask-image: none;
+  opacity: 0.75;
+  animation: holiday-bats 26s linear infinite;
+}
+
+@keyframes holiday-bats {
+  0% { background-position: -30px 90px, -30px 150px; }
+  25% { background-position: 30% 60px, 20% 170px; }
+  50% { background-position: 60% 80px, 45% 140px; }
+  75% { background-position: 85% 50px, 75% 165px; }
+  100% { background-position: calc(100% + 30px) 70px, calc(100% + 30px) 135px; }
+}
+
+:root[data-holiday="halloween"] .hero::after {
+  background:
+    radial-gradient(circle at calc(100% - 34px) 74px, #f3dca8 0 12px, rgba(243, 220, 168, 0.16) 13px, transparent 28px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='0.22' stroke-width='1.2'%3E%3Cpath d='M120 0L20 100M120 0L0 60M120 0L60 120M120 0L0 10M120 0L110 120'/%3E%3Cpath d='M95 2Q90 18 104 22Q112 28 118 25M70 4Q62 30 86 38Q100 48 116 50M45 6Q34 42 68 54Q90 68 113 76'/%3E%3C/g%3E%3C/svg%3E") top right / 92px 92px no-repeat;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+:root[data-holiday="halloween"] .season-squares .sq-ongoing {
+  box-shadow: 0 0 8px 2px rgba(240, 150, 60, 0.55);
+  animation: holiday-candle 3.1s ease-in-out infinite;
+}
+:root[data-holiday="halloween"] .season-squares .sq-ongoing:nth-child(2n) { animation-delay: -1.3s; }
+
+@keyframes holiday-candle {
+  0%, 100% { opacity: 1; }
+  20% { opacity: 0.8; }
+  24% { opacity: 0.95; }
+  55% { opacity: 0.7; box-shadow: 0 0 5px 1px rgba(240, 150, 60, 0.4); }
+  60% { opacity: 0.9; }
+}
+
+:root[data-holiday="halloween"] .hero-title::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cg stroke='%231d2f29' stroke-width='2.5' stroke-linejoin='round'%3E%3Cpath d='M22 10c0-4 2-7 5-8l2 3c-2 1-3 3-3 5z' fill='%233d7a52'/%3E%3Cellipse cx='24' cy='26' rx='21' ry='15' fill='%23e07a1f'/%3E%3Cpath d='M24 11c-6 4-6 26 0 30M24 11c6 4 6 26 0 30' fill='none'/%3E%3C/g%3E%3Cpath d='M13 22l4-4 3 4zM28 22l4-4 3 4zM15 30q9 6 18 0l-3 1-2-2-2 2-2-2-2 2-2-2-2 2z' fill='%233a1d05'/%3E%3C/svg%3E");
+}
+
+:root[data-holiday="halloween"] .holiday-ground {
+  height: 18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M0 24V18Q60 14 120 18T240 17T400 18V24ZM30 19V9Q36 3 42 9V19ZM300 19V7Q308 0 316 7V19ZM330 19V12Q335 8 340 12V19ZM160 19V10H164V6H168V10H172V14H168V19Z' fill='%230c1814'/%3E%3Cpath d='M200 18V9M210 18V9M220 18V9M230 18V9M240 18V9M196 12H244' stroke='%230c1814' stroke-width='2.5'/%3E%3C/svg%3E");
+}
+
+/* Easter: pastel petals, a pastel glow on the finished squares, a decorated egg, grass with eggs */
+:root[data-holiday="easter"] .hero::before {
+  background-image:
+    radial-gradient(4px 2.5px, rgba(244, 194, 207, 0.75) 60%, transparent),
+    radial-gradient(3.5px 2.5px, rgba(246, 227, 161, 0.7) 60%, transparent),
+    radial-gradient(4px 3px, rgba(217, 200, 240, 0.6) 60%, transparent);
+  background-size: 131px 127px, 107px 113px, 193px 179px;
+  background-position: 13px 7px, 61px 37px, 97px 71px;
+  animation: holiday-petals 30s linear infinite;
+}
+
+@keyframes holiday-petals {
+  to { background-position: 144px 515px, -46px 489px, 290px 429px; }
+}
+
+:root[data-holiday="easter"] .season-squares .sq-finished {
+  box-shadow: 0 0 6px 1px rgba(246, 227, 161, 0.5);
+}
+
+:root[data-holiday="easter"] .hero-title::after {
+  width: 0.6em;
+  height: 0.75em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 44'%3E%3Cg stroke='%231d2f29' stroke-width='2.5'%3E%3Cpath d='M17 3C8 3 3 18 3 27s6 14 14 14 14-5 14-14S26 3 17 3z' fill='%23a9d4ef'/%3E%3Cpath d='M4 22l5-4 5 4 5-4 5 4 5-4 3 2' fill='none' stroke='%23fbf7ea' stroke-width='3'/%3E%3Cpath d='M4 30h26' fill='none' stroke='%23f1a9b4' stroke-width='3.5'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+:root[data-holiday="easter"] .holiday-ground {
+  height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M0 24V14l6-6 4 6 6-8 5 8 7-7 4 7 6-6 5 6 8-8 4 8 7-6 5 6 6-7 5 7 8-8 4 8 6-6 5 6 7-8 4 8 6-6 5 6 8-7 4 7 6-8 5 8 7-6 4 6 6-7 5 7 8-8 4 8 6-6 5 6 7-7 5 7 6-8 4 8 8-6 4 6 6-7 5 7 7-8 4 8 6-6 5 6 8-7 4 7 6-8 5 8 7-6 4 6 6-7 5 7 8-8 4 8 6-6 5 6 7-7 4 7 6-8 5 8 5-6V24Z' fill='%235f8f4e'/%3E%3Cellipse cx='70' cy='16' rx='2.6' ry='7' fill='%23f1a9b4'/%3E%3Cellipse cx='185' cy='17' rx='2.4' ry='6.5' fill='%23f6e3a1'/%3E%3Cellipse cx='305' cy='16' rx='2.6' ry='7' fill='%23a9d4ef'/%3E%3Cellipse cx='355' cy='17' rx='2.2' ry='6' fill='%23d9c8f0'/%3E%3C/svg%3E");
 }
