@@ -2968,25 +2968,7 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   }
 }
 
-/* More Christmas: santa hat on the master's portrait, holly after the title, a snowbank at the bottom */
-:root[data-festa="natale"] .hero-portrait {
-  position: relative;
-  overflow: visible;
-}
-:root[data-festa="natale"] .hero-portrait img {
-  border-radius: 6px;
-}
-:root[data-festa="natale"] .hero-portrait::after {
-  content: "";
-  position: absolute;
-  top: -13px;
-  left: -14px;
-  width: 50px;
-  height: 38px;
-  pointer-events: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 90'%3E%3Cg stroke='%231d2f29' stroke-width='5' stroke-linejoin='round'%3E%3Cpath d='M100 66C102 40 88 14 62 10C40 7 20 16 10 40C24 32 34 40 36 66Z' fill='%23b7372f'/%3E%3Ccircle cx='11' cy='43' r='10' fill='%23fbf7ea'/%3E%3Crect x='26' y='58' width='84' height='24' rx='12' fill='%23fbf7ea'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
-  transform: rotate(-18deg);
-}
+/* More Christmas: holly after the title, a snowbank at the bottom of the felt band */
 :root[data-festa="natale"] .hero-title::after {
   content: "";
   display: inline-block;
