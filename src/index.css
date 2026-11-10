@@ -3085,3 +3085,95 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   height: 16px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M0 24V14l6-6 4 6 6-8 5 8 7-7 4 7 6-6 5 6 8-8 4 8 7-6 5 6 6-7 5 7 8-8 4 8 6-6 5 6 7-8 4 8 6-6 5 6 8-7 4 7 6-8 5 8 7-6 4 6 6-7 5 7 8-8 4 8 6-6 5 6 7-7 5 7 6-8 4 8 8-6 4 6 6-7 5 7 7-8 4 8 6-6 5 6 8-7 4 7 6-8 5 8 7-6 4 6 6-7 5 7 8-8 4 8 6-6 5 6 7-7 4 7 6-8 5 8 5-6V24Z' fill='%235f8f4e'/%3E%3Cellipse cx='70' cy='16' rx='2.6' ry='7' fill='%23f1a9b4'/%3E%3Cellipse cx='185' cy='17' rx='2.4' ry='6.5' fill='%23f6e3a1'/%3E%3Cellipse cx='305' cy='16' rx='2.6' ry='7' fill='%23a9d4ef'/%3E%3Cellipse cx='355' cy='17' rx='2.2' ry='6' fill='%23d9c8f0'/%3E%3C/svg%3E");
 }
+
+/* World Chess Day: pieces falling, a gold glow on the finished squares, a crown, a strip of board */
+:root[data-holiday="chess-day"] .hero::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 150'%3E%3Cpath transform='translate(40 30) scale(1)' d='M10 2a4 4 0 0 0-2.5 7.1C6 10 5.5 12 6 14h2l-1.5 6H4v4h12v-4h-2.5L12 14h2c.5-2 0-4-1.5-4.9A4 4 0 0 0 10 2z' fill='%23f4f1e8'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 170'%3E%3Cpath transform='translate(120 90) scale(1.1)' d='M8 2l1 3C4 7 3 12 4 15l4-2c0 3-2 5-3 7H3v4h15v-4c0-8-2-14-8-16L8 2z' fill='%23f4f1e8'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 200'%3E%3Cpath transform='translate(60 140) scale(0.95)' d='M3 2h3v3h2V2h4v3h2V2h3v6l-3 2 1 10h2v4H3v-4h2l1-10-3-2z' fill='%23f4f1e8'/%3E%3C/svg%3E");
+  background-size: 160px 150px, 190px 170px, 230px 200px;
+  background-position: 20px 10px, 90px 60px, 150px 110px;
+  opacity: 0.5;
+  animation: holiday-pieces 34s linear infinite;
+}
+@keyframes holiday-pieces {
+  to { background-position: 20px 610px, 90px 740px, 150px 710px; }
+}
+
+:root[data-holiday="chess-day"] .season-squares .sq-finished {
+  box-shadow: 0 0 6px 1px color-mix(in srgb, var(--felt-brass) 60%, transparent);
+}
+
+:root[data-holiday="chess-day"] .hero-title::after {
+  width: 0.85em;
+  height: 0.65em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 36'%3E%3Cg stroke='%231d2f29' stroke-width='2.5' stroke-linejoin='round'%3E%3Cpath d='M5 30L3 9l11 9 10-14 10 14 11-9-2 21z' fill='%23e3b54e'/%3E%3Cpath d='M5 30h38v-5H5z' fill='%23c9952f'/%3E%3Ccircle cx='24' cy='18' r='3' fill='%235aa6d6' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+:root[data-holiday="chess-day"] .holiday-ground {
+  height: 12px;
+  opacity: 0.8;
+  background: repeating-conic-gradient(#f4f1e8 0 25%, #10201a 0 50%) 0 0 / 12px 12px;
+}
+
+/* Carnival: confetti, streamers in the corner, a mask, confetti on the ground */
+:root[data-holiday="carnival"] .hero::before {
+  background-image:
+    radial-gradient(circle, #f0c45a 0 2px, transparent 2.5px),
+    radial-gradient(circle, #5aa6d6 0 2px, transparent 2.5px),
+    radial-gradient(circle, #e98fa0 0 1.8px, transparent 2.3px),
+    radial-gradient(circle, #8fd0ad 0 1.8px, transparent 2.3px),
+    radial-gradient(circle, #b79be0 0 2px, transparent 2.5px);
+  background-size: 113px 109px, 137px 127px, 97px 103px, 151px 139px, 173px 157px;
+  background-position: 13px 7px, 61px 37px, 37px 71px, 97px 23px, 141px 53px;
+  opacity: 0.8;
+  animation: holiday-confetti 26s linear infinite;
+}
+
+@keyframes holiday-confetti {
+  to { background-position: 126px 443px, -76px 545px, 134px 483px, -54px 579px, 314px 367px; }
+}
+
+:root[data-holiday="carnival"] .hero::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 120' fill='none' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M140 6C120 14 126 30 108 34S92 54 76 56 62 76 48 80' stroke='%23f0c45a'/%3E%3Cpath d='M140 30C126 40 130 54 116 60S104 78 92 84' stroke='%235aa6d6'/%3E%3Cpath d='M118 0C112 16 98 14 94 28S78 38 70 52' stroke='%23e98fa0'/%3E%3Cpath d='M140 60C130 68 134 82 122 88' stroke='%238fd0ad'/%3E%3C/svg%3E") top right / 140px 120px no-repeat;
+  -webkit-mask-image: none;
+  mask-image: none;
+  opacity: 0.75;
+}
+
+:root[data-holiday="carnival"] .hero-title::after {
+  width: 1em;
+  height: 0.72em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 40'%3E%3Cg stroke='%231d2f29' stroke-width='2.5' stroke-linejoin='round'%3E%3Cpath d='M14 16C10 8 12 3 16 1c1 5 3 9 6 13z' fill='%234fa3a5'/%3E%3Cpath d='M4 16c6-6 14-4 24-2s18-4 24 2c-1 9-6 15-14 15-5 0-7-4-10-4s-5 4-10 4C10 31 5 25 4 16z' fill='%237a55b0'/%3E%3Cpath d='M12 19c2-4 8-4 10 0-2 3-8 3-10 0zM34 19c2-4 8-4 10 0-2 3-8 3-10 0z' fill='%231d2f29' stroke='%23e3b54e' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+:root[data-holiday="carnival"] .holiday-ground {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M0 24V18Q100 13 200 17T400 16V24Z' fill='%23f4f1e8' fill-opacity='0.85'/%3E%3Cg%3E%3Crect x='20' y='15' width='4' height='3' fill='%23f0c45a'/%3E%3Crect x='58' y='13' width='3' height='4' fill='%235aa6d6'/%3E%3Crect x='95' y='16' width='4' height='3' fill='%23e98fa0'/%3E%3Crect x='140' y='14' width='3' height='4' fill='%238fd0ad'/%3E%3Crect x='182' y='15' width='4' height='3' fill='%23b79be0'/%3E%3Crect x='226' y='13' width='3' height='4' fill='%23f0c45a'/%3E%3Crect x='268' y='15' width='4' height='3' fill='%235aa6d6'/%3E%3Crect x='310' y='13' width='3' height='4' fill='%23e98fa0'/%3E%3Crect x='352' y='15' width='4' height='3' fill='%238fd0ad'/%3E%3Crect x='384' y='12' width='3' height='4' fill='%23b79be0'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Season end: gold confetti, every finished square glowing, a trophy, gold on the ground */
+:root[data-holiday="season-end"] .hero::before {
+  background-image:
+    radial-gradient(circle, rgba(246, 220, 148, 0.85) 0 2px, transparent 2.6px),
+    radial-gradient(circle, rgba(227, 181, 78, 0.8) 0 1.6px, transparent 2.2px),
+    radial-gradient(circle, rgba(244, 241, 232, 0.6) 0 1.4px, transparent 2px);
+  background-size: 97px 101px, 131px 119px, 67px 73px;
+  background-position: 13px 7px, 61px 37px, 29px 51px;
+  animation: holiday-gold 20s linear infinite;
+}
+
+@keyframes holiday-gold {
+  to { background-position: 13px 411px, 61px 513px, 29px 343px; }
+}
+
+:root[data-holiday="season-end"] .season-squares .sq-finished {
+  box-shadow: 0 0 7px 1px color-mix(in srgb, var(--felt-brass) 70%, transparent);
+}
+
+:root[data-holiday="season-end"] .hero-title::after {
+  width: 0.75em;
+  height: 0.75em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Cg stroke='%231d2f29' stroke-width='2.5' stroke-linejoin='round'%3E%3Cpath d='M10 6h24v6c0 9-5 15-12 15S10 21 10 12z' fill='%23e3b54e'/%3E%3Cpath d='M10 9H4c0 7 3 11 8 12M34 9h6c0 7-3 11-8 12' fill='none'/%3E%3Cpath d='M19 27h6v6h-6z' fill='%23c9952f'/%3E%3Cpath d='M13 33h18v6H13z' fill='%23c9952f'/%3E%3C/g%3E%3Cpath d='M16 9v6c0 3 1 6 3 8' fill='none' stroke='%23f6dc94' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+:root[data-holiday="season-end"] .holiday-ground {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M0 24V18Q100 12 200 17T400 15V24Z' fill='%23e3b54e' fill-opacity='0.85'/%3E%3Cg fill='%23f6dc94'%3E%3Crect x='30' y='13' width='4' height='3'/%3E%3Crect x='90' y='11' width='3' height='4'/%3E%3Crect x='150' y='14' width='4' height='3'/%3E%3Crect x='215' y='12' width='3' height='4'/%3E%3Crect x='280' y='13' width='4' height='3'/%3E%3Crect x='345' y='11' width='3' height='4'/%3E%3C/g%3E%3C/svg%3E");
+}

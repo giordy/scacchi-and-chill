@@ -15,3 +15,12 @@ Da usare fuori dal sito (gruppo WhatsApp, condivisioni). Il sito usa le sue copi
 | `logo-easter-1024.png` | logo con le orecchie da coniglio, alta risoluzione |
 | `logo-easter-whatsapp-1200x630.png` | logo di Pasqua con il nome, per WhatsApp |
 | `logo-easter-group-640.jpg` | logo di Pasqua per la foto del gruppo |
+| `logo-chess-day-1024.png` | logo con la corona (Giornata mondiale degli scacchi), alta risoluzione |
+| `logo-chess-day-whatsapp-1200x630.png` | logo con la corona e il nome, per WhatsApp |
+| `logo-chess-day-group-640.jpg` | logo con la corona per la foto del gruppo |
+| `logo-carnival-1024.png` | logo con la maschera di Carnevale, alta risoluzione |
+| `logo-carnival-whatsapp-1200x630.png` | logo di Carnevale con il nome, per WhatsApp |
+| `logo-carnival-group-640.jpg` | logo di Carnevale per la foto del gruppo |
+| `logo-season-end-1024.png` | logo con la medaglia (fine stagione), alta risoluzione |
+| `logo-season-end-whatsapp-1200x630.png` | logo con la medaglia e il nome, per WhatsApp |
+| `logo-season-end-group-640.jpg` | logo con la medaglia per la foto del gruppo |

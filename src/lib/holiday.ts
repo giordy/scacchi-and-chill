@@ -1,11 +1,14 @@
-// Seasonal look, by the date in Italy. "?christmas", "?halloween" or "?easter" in the address
-// forces one on, to preview it in any month.
-//   christmas: 1 December - 6 January (Epiphany)
-//   halloween: 20 October - 1 November
-//   easter:    Palm Sunday - Easter Monday
-export type Holiday = 'christmas' | 'halloween' | 'easter' | null;
+// Seasonal look, by the date in Italy. "?christmas", "?halloween", "?easter", "?chess-day",
+// "?carnival" or "?season-end" in the address forces one on, to preview it in any month.
+//   christmas:  1 December - 6 January (Epiphany)
+//   carnival:   Fat Thursday - Shrove Tuesday (52 to 47 days before Easter)
+//   easter:     Palm Sunday - Easter Monday
+//   chess-day:  18 - 21 July (World Chess Day is 20 July, when FIDE was founded in 1924)
+//   halloween:  20 October - 1 November
+//   season-end: not from the calendar, the public page turns it on when the season is over
+export type Holiday = 'christmas' | 'carnival' | 'easter' | 'chess-day' | 'halloween' | 'season-end' | null;
 
-const HOLIDAYS = ['christmas', 'halloween', 'easter'] as const;
+const HOLIDAYS = ['christmas', 'carnival', 'easter', 'chess-day', 'halloween', 'season-end'] as const;
 const DAY_MS = 86_400_000;
 
 // Gregorian Easter Sunday (anonymous Gregorian algorithm), as a UTC midnight
@@ -42,11 +45,37 @@ export function holidayOn(now: Date, search = ''): Holiday {
 
   if (month === 12 || (month === 1 && day <= 6)) return 'christmas';
   if ((month === 10 && day >= 20) || (month === 11 && day === 1)) return 'halloween';
+  if (month === 7 && day >= 18 && day <= 21) return 'chess-day';
   const today = Date.UTC(year, month - 1, day);
   const easter = easterSunday(year).getTime();
-  if (today >= easter - 7 * DAY_MS && today <= easter + DAY_MS) return 'easter';
+  const fromEaster = (today - easter) / DAY_MS;
+  if (fromEaster >= -7 && fromEaster <= 1) return 'easter';
+  if (fromEaster >= -52 && fromEaster <= -47) return 'carnival';
   return null;
 }
 
 export const holiday: Holiday =
   typeof window === 'undefined' ? null : holidayOn(new Date(), window.location.search);
+
+// Days the season-end celebration lasts after the organizer closes the season
+export const SEASON_END_DAYS = 14;
+
+// The season is over: every game played, or closed less than SEASON_END_DAYS ago with the new
+// season not yet under way
+export function seasonEndOn(
+  now: Date,
+  progress: { finished: number; ongoing: number; total: number },
+  lastArchivedAt?: string
+): boolean {
+  if (progress.total > 0 && progress.finished === progress.total) return true;
+  if (!lastArchivedAt || progress.finished > 0 || progress.ongoing > 0) return false;
+  const since = now.getTime() - Date.parse(lastArchivedAt);
+  return since >= 0 && since <= SEASON_END_DAYS * DAY_MS;
+}
+
+// The holiday whose decorations are on the page: CSS reads it from <html data-holiday>
+export function showHoliday(h: Holiday) {
+  if (typeof document === 'undefined') return;
+  if (h) document.documentElement.dataset.holiday = h;
+  else delete document.documentElement.dataset.holiday;
+}

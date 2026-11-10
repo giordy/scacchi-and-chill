@@ -34,7 +34,7 @@ import { byRound } from "./lib/games";
 import { PresenceInfo } from "./lib/presence";
 import { AllTimeSection } from "./components/AllTimeSection";
 import { allTimeNameOf, allTimeRecords, allTimeTable, seasonsWithGames } from "./lib/allTime";
-import { holiday } from "./lib/holiday";
+import { holiday, seasonEndOn, showHoliday } from "./lib/holiday";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -136,6 +136,17 @@ export function PublicTournamentView({
     };
   }, [players, history, gameStates, schedule, seasons]);
   const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits, race, stats, currentPeriod } = season;
+
+  // The season-end celebration takes the place of a calendar holiday while the season is over
+  const lastArchivedAt = useMemo(
+    () => seasons.reduce<string | undefined>((last, a) => (!last || a.archivedAt > last ? a.archivedAt : last), undefined),
+    [seasons]
+  );
+  const shownHoliday = seasonEndOn(new Date(), progress, lastArchivedAt) ? "season-end" : holiday;
+  useEffect(() => {
+    showHoliday(shownHoliday);
+    return () => showHoliday(holiday);
+  }, [shownHoliday]);
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
   // Places shared on a full tie (points, Sonneborn-Berger, wins); none before the first game
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
@@ -236,7 +247,7 @@ export function PublicTournamentView({
             </figcaption>
           </figure>
         )}
-        {holiday && <span className="holiday-ground" aria-hidden="true" />}
+        {shownHoliday && <span className="holiday-ground" aria-hidden="true" />}
       </header>
 
       <nav ref={navRef} className="public-subnav" role="tablist" aria-label="Sezioni del torneo" onKeyDown={onTabListKeyDown}>
