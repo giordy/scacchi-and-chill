@@ -3140,9 +3140,9 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 }
 
 :root[data-holiday="carnival"] .hero-title::after {
-  width: 1em;
-  height: 0.72em;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 40'%3E%3Cg stroke='%231d2f29' stroke-width='2.5' stroke-linejoin='round'%3E%3Cpath d='M14 16C10 8 12 3 16 1c1 5 3 9 6 13z' fill='%234fa3a5'/%3E%3Cpath d='M4 16c6-6 14-4 24-2s18-4 24 2c-1 9-6 15-14 15-5 0-7-4-10-4s-5 4-10 4C10 31 5 25 4 16z' fill='%237a55b0'/%3E%3Cpath d='M12 19c2-4 8-4 10 0-2 3-8 3-10 0zM34 19c2-4 8-4 10 0-2 3-8 3-10 0z' fill='%231d2f29' stroke='%23e3b54e' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E");
+  width: 1.05em;
+  height: 0.63em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 36'%3E%3Cg stroke='%231d2f29' stroke-width='2.4' stroke-linejoin='round'%3E%3Cpath d='M30 8c-6-4-15-6-22-3C3 7 2 12 3 16c2 9 9 14 16 13 5-1 8-4 11-4s6 3 11 4c7 1 14-4 16-13 1-4 0-9-5-11-7-3-16-1-22 3z' fill='%237a55b0'/%3E%3Cpath d='M11 15c3-5 10-5 13 0-3 4-10 4-13 0zM36 15c3-5 10-5 13 0-3 4-10 4-13 0z' fill='%231d2f29'/%3E%3Cpath d='M3 16c2 9 9 14 16 13 5-1 8-4 11-4s6 3 11 4c7 1 14-4 16-13' fill='none' stroke='%23e3b54e' stroke-width='2.2'/%3E%3Cpath d='M30 8v6' stroke='%23e3b54e' stroke-width='2.2'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 :root[data-holiday="carnival"] .holiday-ground {
