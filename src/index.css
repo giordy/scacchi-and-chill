@@ -2918,3 +2918,50 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .pillsbury-goal-val { font-size: 18px; font-weight: 700; line-height: 1.3; }
 .pillsbury-goal-val small { font-size: 13px; font-weight: 500; color: var(--muted); }
 .pillsbury-goal-go { font-size: 22px; color: var(--brass); }
+
+/* Christmas (1 December - 6 January, see lib/festive.ts): snow on the felt band and the season's
+   squares lit like a string of lights. Colors keep their meaning: ivory = finished, brass = ongoing. */
+:root[data-festa="natale"] .hero::before {
+  content: "";
+  position: absolute;
+  inset: -40px 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.5) 0 2px, transparent 3.5px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.35) 0 1.5px, transparent 3px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.22) 0 3.5px, transparent 5.5px);
+  background-size: 131px 127px, 89px 97px, 197px 181px;
+  background-position: 13px 7px, 41px 29px, 83px 61px;
+  /* Thicker towards the top-right corner, thin over the text */
+  -webkit-mask-image: linear-gradient(200deg, #000 15%, rgba(0, 0, 0, 0.45) 75%);
+  mask-image: linear-gradient(200deg, #000 15%, rgba(0, 0, 0, 0.45) 75%);
+  animation: festa-snow 22s linear infinite;
+}
+
+@keyframes festa-snow {
+  to { background-position: 13px 515px, 41px 417px, 83px 423px; }
+}
+
+:root[data-festa="natale"] .season-squares .sq-finished {
+  box-shadow: 0 0 6px 1px rgba(255, 236, 190, 0.55);
+}
+
+:root[data-festa="natale"] .season-squares .sq-ongoing {
+  box-shadow: 0 0 8px 2px color-mix(in srgb, var(--felt-brass) 70%, transparent);
+  animation: festa-twinkle 2.4s ease-in-out infinite;
+}
+:root[data-festa="natale"] .season-squares .sq-ongoing:nth-child(3n + 1) { animation-delay: -0.8s; }
+:root[data-festa="natale"] .season-squares .sq-ongoing:nth-child(3n + 2) { animation-delay: -1.6s; }
+
+@keyframes festa-twinkle {
+  0%, 100% { opacity: 1; }
+  45% { opacity: 0.35; box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-festa="natale"] .hero::before,
+  :root[data-festa="natale"] .season-squares .sq-ongoing {
+    animation: none;
+  }
+}
