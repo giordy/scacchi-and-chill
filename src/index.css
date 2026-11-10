@@ -2919,9 +2919,9 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .pillsbury-goal-val small { font-size: 13px; font-weight: 500; color: var(--muted); }
 .pillsbury-goal-go { font-size: 22px; color: var(--brass); }
 
-/* Christmas (1 December - 6 January, see lib/festive.ts): snow on the felt band and the season's
+/* Christmas (1 December - 6 January, see lib/holiday.ts): snow on the felt band and the season's
    squares lit like a string of lights. Colors keep their meaning: ivory = finished, brass = ongoing. */
-:root[data-festa="natale"] .hero::before {
+:root[data-holiday="christmas"] .hero::before {
   content: "";
   position: absolute;
   inset: -40px 0 0;
@@ -2938,38 +2938,38 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   /* Thicker towards the top-right corner, thin over the text */
   -webkit-mask-image: linear-gradient(200deg, #000 20%, rgba(0, 0, 0, 0.6) 80%);
   mask-image: linear-gradient(200deg, #000 20%, rgba(0, 0, 0, 0.6) 80%);
-  animation: festa-snow 22s linear infinite;
+  animation: holiday-snow 22s linear infinite;
 }
 
-@keyframes festa-snow {
+@keyframes holiday-snow {
   to { background-position: 13px 323px, 41px 297px, 83px 315px, 7px 229px, 57px 447px; }
 }
 
-:root[data-festa="natale"] .season-squares .sq-finished {
+:root[data-holiday="christmas"] .season-squares .sq-finished {
   box-shadow: 0 0 6px 1px rgba(255, 236, 190, 0.55);
 }
 
-:root[data-festa="natale"] .season-squares .sq-ongoing {
+:root[data-holiday="christmas"] .season-squares .sq-ongoing {
   box-shadow: 0 0 8px 2px color-mix(in srgb, var(--felt-brass) 70%, transparent);
-  animation: festa-twinkle 2.4s ease-in-out infinite;
+  animation: holiday-twinkle 2.4s ease-in-out infinite;
 }
-:root[data-festa="natale"] .season-squares .sq-ongoing:nth-child(3n + 1) { animation-delay: -0.8s; }
-:root[data-festa="natale"] .season-squares .sq-ongoing:nth-child(3n + 2) { animation-delay: -1.6s; }
+:root[data-holiday="christmas"] .season-squares .sq-ongoing:nth-child(3n + 1) { animation-delay: -0.8s; }
+:root[data-holiday="christmas"] .season-squares .sq-ongoing:nth-child(3n + 2) { animation-delay: -1.6s; }
 
-@keyframes festa-twinkle {
+@keyframes holiday-twinkle {
   0%, 100% { opacity: 1; }
   45% { opacity: 0.35; box-shadow: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root[data-festa="natale"] .hero::before,
-  :root[data-festa="natale"] .season-squares .sq-ongoing {
+  :root[data-holiday="christmas"] .hero::before,
+  :root[data-holiday="christmas"] .season-squares .sq-ongoing {
     animation: none;
   }
 }
 
 /* More Christmas: holly after the title, a snowbank at the bottom of the felt band */
-:root[data-festa="natale"] .hero-title::after {
+:root[data-holiday="christmas"] .hero-title::after {
   content: "";
   display: inline-block;
   width: 0.9em;
@@ -2978,7 +2978,7 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   vertical-align: 0.05em;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44'%3E%3Cg stroke='%231d2f29' stroke-width='2.5' stroke-linejoin='round'%3E%3Cpath d='M30 26C24 22 16 26 10 20C14 18 12 12 6 10C14 6 24 8 30 26Z' fill='%233d7a52'/%3E%3Cpath d='M34 26C40 22 48 26 54 20C50 18 52 12 58 10C50 6 40 8 34 26Z' fill='%232f6646'/%3E%3Ccircle cx='27' cy='31' r='6' fill='%23c0392b'/%3E%3Ccircle cx='38' cy='31' r='6' fill='%23c0392b'/%3E%3Ccircle cx='32.5' cy='23' r='6' fill='%23d14a3b'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
 }
-.festa-snowbank {
+.holiday-snowbank {
   position: absolute;
   left: 0;
   right: 0;

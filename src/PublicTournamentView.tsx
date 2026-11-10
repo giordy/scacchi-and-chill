@@ -34,7 +34,7 @@ import { byRound } from "./lib/games";
 import { PresenceInfo } from "./lib/presence";
 import { AllTimeSection } from "./components/AllTimeSection";
 import { allTimeNameOf, allTimeRecords, allTimeTable, seasonsWithGames } from "./lib/allTime";
-import { festivity } from "./lib/festive";
+import { holiday } from "./lib/holiday";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -236,7 +236,7 @@ export function PublicTournamentView({
             </figcaption>
           </figure>
         )}
-        {festivity === "natale" && <span className="festa-snowbank" aria-hidden="true" />}
+        {holiday === "christmas" && <span className="holiday-snowbank" aria-hidden="true" />}
       </header>
 
       <nav ref={navRef} className="public-subnav" role="tablist" aria-label="Sezioni del torneo" onKeyDown={onTabListKeyDown}>
