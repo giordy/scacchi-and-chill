@@ -1,3 +1,5 @@
+import type { SeasonColor } from './lib/seasonColor';
+
 export interface Player {
   handle: string;
   name: string;
@@ -116,6 +118,7 @@ export interface Withdrawal {
 export interface TournamentMeta {
   title: string;
   season: string;
+  color?: SeasonColor; // of the felt band at the top of the public page (see lib/seasonColor.ts)
   subtitle?: string;
   imageUrl?: string;
   masterName?: string;
@@ -254,6 +257,7 @@ export interface SeasonArchive {
   title: string;
   masterName?: string;
   imageUrl?: string;
+  color?: SeasonColor;
   archivedAt: string; // ISO date
   start?: string; // first month of the season, "2026-11"
   end?: string; // last month

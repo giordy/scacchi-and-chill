@@ -204,7 +204,7 @@ export function PublicTournamentView({
   return (
     <div className={`public-tournament${slide === 1 ? " slide-next" : slide === -1 ? " slide-prev" : ""}`}>
       {/* Full header on the standings, the overview; a compact one on the other views */}
-      <header className={`hero${activeTab === "standings" ? "" : " is-compact"}`}>
+      <header className={`hero${activeTab === "standings" ? "" : " is-compact"}`} data-color={tournamentMeta.color}>
         <div className="hero-identity">
           {masterPhoto && (
             <button

@@ -1,3 +1,4 @@
+import { isSeasonColor } from './seasonColor';
 import { TournamentMeta } from '../types';
 import type { TournamentDocData } from '../firebaseService';
 
@@ -44,6 +45,7 @@ export function tournamentFromDoc(doc: TournamentDocData): TournamentMeta | null
     season: doc.season,
     subtitle: doc.subtitle || DEFAULT_TOURNAMENT.subtitle,
     masterName: doc.masterName || DEFAULT_TOURNAMENT.masterName,
+    ...(isSeasonColor(doc.color) ? { color: doc.color } : {}),
     imageUrl: doc.imageUrl || DEFAULT_TOURNAMENT.imageUrl,
     description: doc.description || DEFAULT_TOURNAMENT.description,
     howItWorks: doc.howItWorks || "",
@@ -71,6 +73,7 @@ export function mergeTournamentMeta(
     season: patch.season ?? current?.season ?? d.season,
     subtitle: patch.subtitle ?? current?.subtitle ?? d.subtitle,
     masterName: patch.masterName ?? current?.masterName ?? d.masterName,
+    ...((patch.color ?? current?.color) ? { color: patch.color ?? current?.color } : {}),
     imageUrl: patch.imageUrl ?? current?.imageUrl ?? d.imageUrl,
     description: patch.description ?? current?.description ?? d.description,
     howItWorks: patch.howItWorks ?? current?.howItWorks ?? d.howItWorks,

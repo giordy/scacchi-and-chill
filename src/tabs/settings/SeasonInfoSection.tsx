@@ -3,6 +3,7 @@ import { TournamentMeta } from '../../types';
 import { DEFAULT_TOURNAMENT } from '../../lib/tournament';
 import { compressImage, isMediaRef, mediaRef } from '../../lib/media';
 import { seasonId } from '../../lib/seasons';
+import { DEFAULT_SEASON_COLOR, SEASON_COLORS, SeasonColor } from '../../lib/seasonColor';
 import { saveMediaImage } from '../../firebaseService';
 import { primeImage, useImageSrc } from '../../hooks/useImageSrc';
 
@@ -25,12 +26,13 @@ export function SeasonInfoSection({
     subtitle: meta?.subtitle ?? "",
     imageUrl: meta?.imageUrl ?? "",
     description: meta?.description || DEFAULT_TOURNAMENT.description,
+    color: (meta?.color ?? DEFAULT_SEASON_COLOR) as SeasonColor,
   });
   const [form, setForm] = useState(fromMeta);
   // A new season (started from "Fine stagione") changes these fields from outside
-  useEffect(() => setForm(fromMeta()), [meta?.title, meta?.season, meta?.masterName, meta?.subtitle, meta?.imageUrl, meta?.description]);
+  useEffect(() => setForm(fromMeta()), [meta?.title, meta?.season, meta?.masterName, meta?.subtitle, meta?.imageUrl, meta?.description, meta?.color]);
 
-  const field = (key: keyof typeof form) => ({
+  const field = (key: Exclude<keyof typeof form, 'color'>) => ({
     value: form[key],
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((f) => ({ ...f, [key]: e.target.value })),
@@ -77,6 +79,7 @@ export function SeasonInfoSection({
       subtitle: form.subtitle.trim(),
       imageUrl: form.imageUrl.trim(),
       description: form.description.trim(),
+      color: form.color,
     });
     flash("ok", "Stagione aggiornata.");
   };
@@ -133,6 +136,25 @@ export function SeasonInfoSection({
         </div>
         <p className="note">La foto viene ridotta e salvata nel database del torneo: non serve modificare il codice.</p>
       </div>
+      <fieldset className="color-field">
+        <legend>Colore della stagione</legend>
+        <div className="color-options">
+          {SEASON_COLORS.map((c) => (
+            <label key={c.key} className={`color-option${form.color === c.key ? " is-selected" : ""}`}>
+              <input
+                type="radio"
+                name="cfg-color"
+                value={c.key}
+                checked={form.color === c.key}
+                onChange={() => setForm((f) => ({ ...f, color: c.key }))}
+              />
+              <span className="color-swatch" data-color={c.key} aria-hidden="true" />
+              {c.label}
+            </label>
+          ))}
+        </div>
+        <p className="note">La fascia in alto nella pagina pubblica. Il verde panno è il colore del logo.</p>
+      </fieldset>
       <div>
         <label htmlFor="cfg-desc">Presentazione della stagione</label>
         <textarea id="cfg-desc" rows={4} className="ta-md" {...field("description")} />
