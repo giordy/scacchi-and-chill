@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
-import { allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, seasonsWithGames } from '../lib/allTime';
+import { AllTimeHeadToHead, allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, seasonsWithGames } from '../lib/allTime';
 import { computeStandings } from '../lib/standings';
 import { archivedGames, seasonDepartures } from '../lib/seasons';
 import { NameOf } from '../lib/roster';
@@ -150,6 +150,17 @@ function CareerHighs({ handle, elo, seasonName, nameOf, title }: {
 // The player's Lichess flair after their username, as Lichess shows it. From the games when they
 // played one, otherwise from their Lichess profile (read with the others' by usePresence); nothing
 // when they have none or the image does not load.
+const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
+
+// Under a head-to-head of the season: the record across every season
+function EverLine({ ever }: { ever: AllTimeHeadToHead }) {
+  return (
+    <span className="h2h-ever">
+      Di sempre: {ever.won} V · {ever.drawn} N · {ever.lost} P, {fmt(ever.scored)} – {fmt(ever.conceded)}
+    </span>
+  );
+}
+
 function Flair({ flair }: { flair?: string }) {
   const [broken, setBroken] = useState(false);
   useEffect(() => setBroken(false), [flair]);
@@ -211,12 +222,14 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   // is then shown for it, with only the season in progress
   const hasHighs = !!peakOf(elo, shownHandle) || !!bestUpset(elo, shownHandle);
   const highs = <CareerHighs handle={shownHandle} elo={elo} seasonName={seasonName} nameOf={longNameOf} title={config.tournament?.title} />;
-  const acrossSeasons = (
+  // For who plays the season the all-time record goes in the season's head-to-heads (one list)
+  const acrossSeasons = (withAllTime: boolean) => (
     <>
       {(showCareer || hasHighs) && <CareerSection career={career} highs={highs} />}
-      {pastGames && allTimeRows.length > 0 && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
+      {withAllTime && pastGames && allTimeRows.length > 0 && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
     </>
   );
+  const everOf = (opponent: string) => (pastGames ? allTimeRows.find((r) => r.opponent.toLowerCase() === opponent.toLowerCase()) : undefined);
 
 
   useEffect(() => {
@@ -243,7 +256,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           </div>
           <p className="note">Non partecipa alla stagione in corso.</p>
         </section>
-        {acrossSeasons}
+        {acrossSeasons(true)}
       </main>
     );
   }
@@ -258,10 +271,11 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   }
 
   const { player, rank, tied, standing, games, pointsByRound, headToHead, pace, byColor, endings } = profile;
+  // Opponents met only in past seasons: under this season's
+  const pastOnly = pastGames ? allTimeRows.filter((r) => !headToHead.some((h) => h.opponent.toLowerCase() === r.opponent.toLowerCase())) : [];
   const sum = (counts: Record<EndReason, number>) => END_ORDER.reduce((n, r) => n + counts[r], 0);
   const wins = sum(endings.wins);
   const losses = sum(endings.losses);
-  const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
   const champions = reigningChampions(winners);
   const isChampion = !!champions?.handles.includes(player.handle.toLowerCase());
   const medals = medalsOf(player.handle, winners);
@@ -457,12 +471,37 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               <span className="h2h-score" aria-label={`Punteggio ${fmt(h.scored)} a ${fmt(h.conceded)}`}>
                 {h.scored + h.conceded > 0 ? `${fmt(h.scored)} – ${fmt(h.conceded)}` : "–"}
               </span>
+              {(() => {
+                const ever = everOf(h.opponent);
+                // Only when the past seasons add something to this season's games
+                if (!ever || ever.seasons < 2 && ever.won + ever.drawn + ever.lost <= h.outcomes.length) return null;
+                return <EverLine ever={ever} />;
+              })()}
             </li>
           ))}
         </ul>
+        {pastOnly.length > 0 && (
+          <>
+            <h3 className="h2h-subheading">Nelle stagioni passate</h3>
+            <ul className="h2h-list">
+              {pastOnly.map((h) => (
+                <li key={h.opponent} className="h2h-row">
+                  <a href={playerHref(h.opponent)} className="h2h-name">{longNameOf(h.opponent)}</a>
+                  <span className="h2h-games">
+                    <span className="status-badge win">{h.won} V</span>
+                    <span className="status-badge draw">{h.drawn} N</span>
+                    <span className="status-badge loss">{h.lost} P</span>
+                  </span>
+                  <span className="h2h-score">{fmt(h.scored)} – {fmt(h.conceded)}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {pastGames && since && <p className="note note-sm">Gli scontri di sempre partono dalle partite registrate da {since}.</p>}
       </section>
 
-      {acrossSeasons}
+      {acrossSeasons(false)}
 
       <section className="dossier-card">
         <h2 className="section-heading">Partite ({games.length})</h2>

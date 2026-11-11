@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { objectiveReached, PillsburyRace, pillsburyRace, pillsburyWinners, pillsburyWins, reigningPillsbury } from '../pillsbury';
+import { objectiveReached, projectedPoints, raceRanked, PillsburyRace, pillsburyRace, pillsburyWinners, pillsburyWins, reigningPillsbury } from '../pillsbury';
 import { computeElo, currentSeason } from '../tournamentElo';
 import { parsePublicView, publicViewHref, tabOfView } from '../routes';
 import { SeasonArchive } from '../../types';
@@ -93,6 +93,24 @@ describe('the Pillsbury view', () => {
     expect(publicViewHref('pillsbury')).toBe('#/pillsbury');
     expect(parsePublicView('#/pillsbury')).toBe('pillsbury');
     expect(tabOfView('pillsbury')).toBe('standings');
+  });
+});
+
+describe('projectedPoints and raceRanked', () => {
+  it('adds to the points made those expected from the games still to play', () => {
+    expect(projectedPoints({ expected: 8.2, games: 14, expectedSoFar: 1.2, points: 2, played: 2, spread: 1 })).toBe(9);
+  });
+  it('ranks the race once half the players have played 4 games that count, or the season is over', () => {
+    const race = (played: number[]) => ({
+      rows: played.map((_, i) => ({ handle: `p${i}` })) as never,
+      waiting: [],
+      counted: Object.fromEntries(played.map((n, i) => [`p${i}`, { played: n, games: 14 }])),
+    });
+    expect(raceRanked(race([2, 2, 3, 3]))).toBe(false);
+    expect(raceRanked(race([3, 3, 4, 4]))).toBe(true);
+    expect(raceRanked(race([3, 3, 3, 4]))).toBe(false);
+    expect(raceRanked(race([1, 1, 1, 1]), true)).toBe(true);
+    expect(raceRanked(race([]))).toBe(false);
   });
 });
 

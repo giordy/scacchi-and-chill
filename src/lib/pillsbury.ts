@@ -8,7 +8,7 @@
 // Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out;
 // so is a player who left the season, and the games won or lost at the table.
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
-import { boardCalendar, currentSeason, decidedAtTable, eloSeasonFromCurrent, EloReport, Forecast, pronosticoPoints, seasonForecast } from './tournamentElo';
+import { boardCalendar, currentSeason, decidedAtTable, eloSeasonFromCurrent, EloReport, Forecast, pronosticoPoints, roundHalf, seasonForecast } from './tournamentElo';
 import { isVoid, stateOf } from './games';
 
 export const PILLSBURY_ID = 'pillsbury';
@@ -43,6 +43,20 @@ export const objectiveReached = (f: Forecast) => {
   const target = pronosticoPoints(f);
   return target > 0 && f.points >= target;
 };
+
+// The points at the end of the season if from here on each game goes as the Elo expects: those
+// made, plus those expected from the games still to play. The "ritmo" of the race table.
+export const projectedPoints = (f: Forecast) => roundHalf(f.points + Math.max(0, f.expected - f.expectedSoFar));
+
+// After a couple of games the order of the race is mostly luck: the table ranks players only once
+// half of them have played this many games that count (or the season is over)
+export const PILLSBURY_RANKED_FROM = 4;
+export function raceRanked(race: Pick<PillsburyRace, 'rows' | 'waiting' | 'counted'>, concluded = false): boolean {
+  if (concluded) return true;
+  const played = [...race.rows.map((r) => r.handle), ...race.waiting].map((h) => race.counted[h]?.played ?? 0).sort((a, b) => a - b);
+  if (played.length === 0) return false;
+  return played[Math.floor(played.length / 2)] >= PILLSBURY_RANKED_FROM;
+}
 
 export interface PillsburyRow {
   handle: string;

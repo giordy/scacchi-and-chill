@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
 import { EloReport } from '../lib/tournamentElo';
-import { objectiveReached, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, pillsburyWinners, reigningPillsbury } from '../lib/pillsbury';
+import { objectiveReached, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_RANKED_FROM, PILLSBURY_TITLE, pillsburyRace, pillsburyWinners, projectedPoints, raceRanked, reigningPillsbury } from '../lib/pillsbury';
 import { playerHref } from '../lib/routes';
 import { Trend, TrendKind } from './Trend';
 import { InfoTip } from './InfoTip';
 import { PillsburyIcon } from './PillsburyIcon';
-import { roundHalf } from '../lib/tournamentElo';
+import { pronosticoPoints } from '../lib/tournamentElo';
 
 const TREND_LABEL: Record<TrendKind, string> = { up: "sopra l'obiettivo", same: "in linea con l'obiettivo", down: "sotto l'obiettivo" };
 
@@ -16,21 +16,19 @@ const halves = (n: number) => String(n).replace('.5', '½').replace(/^0½/, '½'
 // "Anna, Bruno e Carla"
 const namesList = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}` : names[0] ?? '');
 
-// Above the objective: by how much, in half points (good news only); in line or below: the arrow
-// alone, no gap that would only discourage
-function Progress({ trend, over }: { trend: TrendKind; over: number }) {
-  const label = TREND_LABEL[trend];
-  if (trend !== 'up') return <Trend kind={trend} label={label} />;
+// The ritmo: the points at the end of the season at this pace, with the arrow against the objective
+function Pace({ trend, points }: { trend: TrendKind; points: number }) {
   return (
-    <span className="progress-up">
-      <Trend kind="up" label={label} /> +{halves(roundHalf(over))}
+    <span className={`pace pace-${trend}`}>
+      <Trend kind={trend} label={TREND_LABEL[trend]} /> {halves(points)}
     </span>
   );
 }
 
-// Public view next to Classifica and Tabellone: the race for the Trofeo Pillsbury. Ordered by the
-// points beyond those expected, weighed by how sure each objective is (PillsburyRow.score), but shown
-// only with arrows and, above the objective, the half points: the gap below would only discourage.
+// Public view next to Classifica and Tabellone: the race for the Trofeo Pillsbury. For each player
+// the points made, the objective and the ritmo (the points at the end at this pace); ordered by the
+// points beyond those expected, weighed by how sure each objective is (PillsburyRow.score). In the
+// first rounds the order is mostly luck: the table waits to rank anyone (raceRanked).
 export function PillsburyRace({
   players,
   elo,
@@ -56,38 +54,45 @@ export function PillsburyRace({
   const reigning = reigningPillsbury(seasons);
   // Once the last game is over, who wins it (the same rule as the awards under the standings)
   const winners = concluded ? pillsburyWinners(race).map((r) => r.handle) : [];
+  const ranked = raceRanked(race, concluded);
   // The Elo is left out: it is the level, and the race is about going beyond it
-  const row = (handle: string, rank: string, status: React.ReactNode, className = '') => (
-    <tr key={handle} className={className}>
-      <td className="col-rank"><span className="rank">{rank}</span></td>
-      <td className="sticky-col">
-        <div className="player-cell">
-          <a href={playerHref(handle)} className="player-name player-page-link">{nameOf(handle)}</a>
-          <span className="player-link">@{handle}</span>
-          {/* Good news only, as the rest of the table: who already made the points of their objective */}
-          {winners.includes(handle) && (
-            <span className="pillsbury-winner">
-              <PillsburyIcon /> {winners.length === 1 ? 'Vince il trofeo' : 'Vince il trofeo, a pari merito'}
+  const row = (handle: string, rank: string, className = '') => {
+    const f = race.forecasts[handle];
+    const counted = race.counted[handle];
+    const r = race.rows.find((x) => x.handle === handle);
+    return (
+      <tr key={handle} className={className}>
+        <td className="col-rank"><span className="rank">{rank}</span></td>
+        <td className="sticky-col">
+          <div className="player-cell">
+            <a href={playerHref(handle)} className="player-name player-page-link">{nameOf(handle)}</a>
+            {winners.includes(handle) && (
+              <span className="pillsbury-winner">
+                <PillsburyIcon /> {winners.length === 1 ? 'Vince il trofeo' : 'Vince il trofeo, a pari merito'}
+              </span>
+            )}
+            {!winners.includes(handle) && f && objectiveReached(f) && (
+              <span className="objective-reached">
+                <span aria-hidden="true">🎯</span> Obiettivo raggiunto
+              </span>
+            )}
+          </div>
+        </td>
+        <td className="col-center">
+          <span className="pillsbury-points">{f ? halves(f.points) : '–'}</span>
+          {counted && (
+            <span className="counted-games">
+              {counted.played} di {counted.games}
             </span>
           )}
-          {!winners.includes(handle) && race.forecasts[handle] && objectiveReached(race.forecasts[handle]) && (
-            <span className="objective-reached">
-              <span aria-hidden="true">🎯</span> Obiettivo raggiunto
-            </span>
-          )}
-        </div>
-      </td>
-      <td className="col-center">
-        {status}
-        {/* How far the race is for them: the games that count, played of all */}
-        {race.counted[handle] && (
-          <span className="counted-games">
-            {race.counted[handle].played} di {race.counted[handle].games}
-          </span>
-        )}
-      </td>
-    </tr>
-  );
+        </td>
+        <td className="col-center">{f ? halves(pronosticoPoints(f)) : '–'}</td>
+        {ranked && <td className="col-center">{r && f ? <Pace trend={r.trend} points={projectedPoints(f)} /> : <span className="muted">–</span>}</td>}
+      </tr>
+    );
+  };
+  // Before the race is ranked: the players by name, no order to read into
+  const unranked = [...race.rows.map((r) => r.handle), ...race.waiting].sort((a, b) => nameOf(a).localeCompare(nameOf(b), 'it'));
   const firstSeason = seasons.length === 0;
 
   return (
@@ -113,18 +118,35 @@ export function PillsburyRace({
               )}
             </p>
           )}
+          {!ranked && !race.suspended && (
+            <p className="note note-flush pillsbury-wait">
+              ⏳ La graduatoria parte quando metà dei giocatori ha giocato {PILLSBURY_RANKED_FROM} partite: dopo poche partite conta soprattutto la fortuna.
+            </p>
+          )}
           <div className="table-responsive">
             <table className="standings-table pillsbury-table">
               <thead>
                 <tr>
                   <th className="col-rank" scope="col"><span className="sr-only">Posizione</span></th>
                   <th className="sticky-col" scope="col">Giocatore</th>
-                  <th className="col-center" scope="col">Stato</th>
+                  <th className="col-center" scope="col">
+                    <InfoTip className="cell-tip th-tip" text="I punti fatti nelle partite che contano per il trofeo, e quante ne ha giocate">Punti</InfoTip>
+                  </th>
+                  <th className="col-center" scope="col">
+                    <InfoTip className="cell-tip th-tip" text="I punti previsti dall'Elo del torneo a inizio stagione, contro il suo calendario">Obiettivo</InfoTip>
+                  </th>
+                  {ranked && <th className="col-center" scope="col">
+                    <InfoTip className="cell-tip th-tip" text="I punti a fine stagione se da qui in poi ogni partita va come prevede l'Elo. ▲ sopra l'obiettivo, ▼ sotto">Ritmo</InfoTip>
+                  </th>}
                 </tr>
               </thead>
               <tbody>
-                {race.rows.map((r, i) => row(r.handle, String(i + 1), <Progress trend={r.trend} over={r.over} />, winners.includes(r.handle) ? 'row-leader' : ''))}
-                {race.waiting.map((h) => row(h, '–', <InfoTip className="cell-tip" text="Nessuna partita che conta, finora"><span aria-hidden="true">⏳</span><span className="sr-only">In attesa</span></InfoTip>))}
+                {ranked
+                  ? [
+                      ...race.rows.map((r, i) => row(r.handle, String(i + 1), winners.includes(r.handle) ? 'row-leader' : '')),
+                      ...race.waiting.map((h) => row(h, '–')),
+                    ]
+                  : unranked.map((h) => row(h, '–'))}
               </tbody>
             </table>
           </div>
@@ -136,16 +158,19 @@ export function PillsburyRace({
           )}
         </>
       )}
-      <div className="pillsbury-about">
+      <p className="note note-top-xs">
+        Il <strong>{PILLSBURY_TITLE}</strong> <PillsburyIcon /> va a chi chiude la stagione più sopra il proprio obiettivo, di almeno mezzo punto.
+        {reigning && <> Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).</>}
+      </p>
+      <details className="pillsbury-about">
+        <summary>Come funziona</summary>
         <p className="note note-top-xs">
-          Il <strong>{PILLSBURY_TITLE}</strong> <PillsburyIcon /> va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti (lo trovate nel vostro profilo).
-          {' '}Lo scarto si pesa con quanto è sicuro l'obiettivo: chi ha un Elo ancora incerto, come chi gioca la prima stagione, deve superarlo di più, perché una parte dello scarto può venire dall'Elo e non dalla sua stagione.
-          {reigning && <> Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).</>}
+          L'obiettivo è fisso per la stagione e lo trovate anche nel vostro profilo. La graduatoria pesa lo scarto con quanto è sicuro l'obiettivo: chi ha un Elo ancora incerto, come chi gioca la prima stagione, deve superarlo di più, perché una parte dello scarto può venire dall'Elo e non dalla sua stagione. Le partite con gli esordienti e quelle decise a tavolino non contano.
         </p>
         <p className="note note-top-xs">
           <strong>Perché Pillsbury.</strong> {PILLSBURY_ORIGIN}
         </p>
-      </div>
+      </details>
     </section>
   );
 }
