@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeStandings, isTied, leadersOf, leaderText, podiumPlace, seasonStarted, sharedRanks } from '../standings';
+import { championText, computeStandings, isTied, leadersOf, leaderText, podiumPlace, seasonStarted, sharedRanks } from '../standings';
 import { HistoryGame, LichessExportGame, Player } from '../../types';
 
 const players: Player[] = [
@@ -209,6 +209,18 @@ describe('shared places from real games', () => {
       ['dario', 0, 0],
     ]);
     expect(sharedRanks(standings)).toEqual([1, 2, 2, 4]);
+  });
+});
+
+describe('championText', () => {
+  const r = (name: string, points: number, sb = 0, won = 0) => ({ name, points, sb, won });
+  it('names who won, or who won together', () => {
+    expect(championText([r('Anna', 13.5, 40, 12), r('Bruno', 11)])).toBe('Stagione conclusa: vince Anna con 13½ punti! 🏆');
+    expect(championText([r('Anna', 2, 1, 2), r('Bruno', 2, 1, 2), r('Carla', 1)])).toBe('Stagione conclusa: vincono a pari merito Anna e Bruno, con 2 punti! 🏆');
+    expect(championText(['A', 'B', 'C', 'D'].map((n) => r(n, 1, 0, 1)))).toBe('Stagione conclusa: vincono a pari merito 4 giocatori, con 1 punto! 🏆');
+  });
+  it('says only that the season is over when nobody has points', () => {
+    expect(championText([r('Anna', 0), r('Bruno', 0)])).toBe('Stagione conclusa.');
   });
 });
 

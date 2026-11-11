@@ -98,6 +98,15 @@ export function pillsburyRace(
   return { suspended, rows, waiting, newcomers, counted, forecasts };
 }
 
+// Who wins the trophy, once the season is over: who beat their objective by most (to a millionth of a
+// point: a tie wins together), only above it as the table shows them (▲), and not when suspended.
+// The same for the awards (lib/awards.ts), the cronaca and the race table.
+export function pillsburyWinners(race: PillsburyRace): PillsburyRow[] {
+  const best = race.rows[0];
+  if (race.suspended || !best || best.over < PILLSBURY_MIN_OVER) return [];
+  return race.rows.filter((r) => Math.abs(r.over - best.over) < 1e-6);
+}
+
 // Who won the Trofeo Pillsbury of the latest archived season that gave it
 export function reigningPillsbury(seasons: SeasonArchive[]): { season: string; handles: string[] } | undefined {
   const latest = [...seasons]

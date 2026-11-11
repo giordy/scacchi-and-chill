@@ -17,7 +17,7 @@ import {
   roundHalf,
   seasonForecast,
 } from './tournamentElo';
-import { PILLSBURY_EMOJI, PILLSBURY_ID, PILLSBURY_MIN_OVER, pillsburyRace, raceCalendar } from './pillsbury';
+import { PILLSBURY_EMOJI, PILLSBURY_ID, pillsburyRace, pillsburyWinners, raceCalendar } from './pillsbury';
 import { upsetFrom, upsetOf } from './upset';
 import { masterSurname, openingFamily, playsFamily } from './masterOpening';
 import { HOW_DRAW, HOW_WIN, extractGameId } from './utils';
@@ -526,9 +526,9 @@ function objectiveEvents(input: CurrentSeasonInput, elo: EloReport, calendar: Hi
 
   if (seasonEnd !== undefined) {
     const race = pillsburyRace(players, elo, calendar, history, gameStates, input.withdrawals);
-    const best = race.rows[0];
-    if (!race.suspended && best && best.over >= PILLSBURY_MIN_OVER) {
-      const top = race.rows.filter((r) => Math.abs(r.over - best.over) < 1e-6);
+    const top = pillsburyWinners(race);
+    const best = top[0];
+    if (best) {
       events.push({
         key: `${CURRENT}:p`,
         kind: 'pillsbury',

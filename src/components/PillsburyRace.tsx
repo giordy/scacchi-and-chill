@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
 import { EloReport } from '../lib/tournamentElo';
-import { objectiveReached, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
+import { objectiveReached, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, pillsburyWinners, reigningPillsbury } from '../lib/pillsbury';
 import { playerHref } from '../lib/routes';
 import { Trend, TrendKind } from './Trend';
 import { InfoTip } from './InfoTip';
@@ -39,6 +39,7 @@ export function PillsburyRace({
   withdrawals,
   seasons,
   nameOf,
+  concluded = false,
 }: {
   players: Player[];
   elo: EloReport;
@@ -48,9 +49,12 @@ export function PillsburyRace({
   withdrawals?: Withdrawal[]; // who left the season: out of the race
   seasons: SeasonArchive[];
   nameOf: (handle: string) => string;
+  concluded?: boolean; // every game of the season played: the trophy is decided
 }) {
   const race = useMemo(() => pillsburyRace(players, elo, calendar, history, gameStates, withdrawals), [players, elo, calendar, history, gameStates, withdrawals]);
   const reigning = reigningPillsbury(seasons);
+  // Once the last game is over, who wins it (the same rule as the awards under the standings)
+  const winners = concluded ? pillsburyWinners(race).map((r) => r.handle) : [];
   // The Elo is left out: it is the level, and the race is about going beyond it
   const row = (handle: string, rank: string, status: React.ReactNode, className = '') => (
     <tr key={handle} className={className}>
@@ -60,7 +64,12 @@ export function PillsburyRace({
           <a href={playerHref(handle)} className="player-name player-page-link">{nameOf(handle)}</a>
           <span className="player-link">@{handle}</span>
           {/* Good news only, as the rest of the table: who already made the points of their objective */}
-          {race.forecasts[handle] && objectiveReached(race.forecasts[handle]) && (
+          {winners.includes(handle) && (
+            <span className="pillsbury-winner">
+              <PillsburyIcon /> {winners.length === 1 ? 'Vince il trofeo' : 'Vince il trofeo, a pari merito'}
+            </span>
+          )}
+          {!winners.includes(handle) && race.forecasts[handle] && objectiveReached(race.forecasts[handle]) && (
             <span className="objective-reached">
               <span aria-hidden="true">🎯</span> Obiettivo raggiunto
             </span>
@@ -90,6 +99,19 @@ export function PillsburyRace({
         </p>
       ) : (
         <>
+          {concluded && (
+            <p className="title-race" role="status">
+              {winners.length > 0 ? (
+                <>
+                  🏁 <strong>Stagione conclusa:</strong> il {PILLSBURY_TITLE} va a {namesList(winners.map(nameOf))}.
+                </>
+              ) : (
+                <>
+                  🏁 <strong>Stagione conclusa:</strong> nessuno ha superato il proprio obiettivo di almeno mezzo punto, il trofeo non si assegna.
+                </>
+              )}
+            </p>
+          )}
           <div className="table-responsive">
             <table className="standings-table pillsbury-table">
               <thead>
@@ -100,7 +122,7 @@ export function PillsburyRace({
                 </tr>
               </thead>
               <tbody>
-                {race.rows.map((r, i) => row(r.handle, String(i + 1), <Progress trend={r.trend} over={r.over} />))}
+                {race.rows.map((r, i) => row(r.handle, String(i + 1), <Progress trend={r.trend} over={r.over} />, winners.includes(r.handle) ? 'row-leader' : ''))}
                 {race.waiting.map((h) => row(h, '–', <InfoTip className="cell-tip" text="Nessuna partita che conta, finora"><span aria-hidden="true">⏳</span><span className="sr-only">In attesa</span></InfoTip>))}
               </tbody>
             </table>
