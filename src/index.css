@@ -3543,3 +3543,4 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .wrapped-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 15px; }
 .wrapped-list li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; align-items: baseline; }
 .wrapped-emoji { text-align: center; }
+.points-mark { margin-left: 1px; color: var(--muted); font-weight: 700; }

@@ -7,6 +7,7 @@ import { Trend, TrendKind } from './Trend';
 import { InfoTip } from './InfoTip';
 import { PillsburyIcon } from './PillsburyIcon';
 import { pronosticoPoints } from '../lib/tournamentElo';
+import { computeStandings } from '../lib/standings';
 
 const TREND_LABEL: Record<TrendKind, string> = { up: "sopra l'obiettivo", same: "in linea con l'obiettivo", down: "sotto l'obiettivo" };
 
@@ -16,11 +17,13 @@ const halves = (n: number) => String(n).replace('.5', '½').replace(/^0½/, '½'
 // "Anna, Bruno e Carla"
 const namesList = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}` : names[0] ?? '');
 
-// The ritmo: the points at the end of the season at this pace, with the arrow against the objective
+// The ritmo: the points at the end of the season at this pace, with the arrow against the objective.
+// Below the objective the arrow alone: how far behind would only discourage
 function Pace({ trend, points }: { trend: TrendKind; points: number }) {
   return (
     <span className={`pace pace-${trend}`}>
-      <Trend kind={trend} label={TREND_LABEL[trend]} /> {halves(points)}
+      <Trend kind={trend} label={TREND_LABEL[trend]} />
+      {trend !== 'down' && <> {halves(points)}</>}
     </span>
   );
 }
@@ -57,6 +60,17 @@ export function PillsburyRace({
   // Once the last game is over, who wins it (the same rule as the awards under the standings)
   const winners = concluded ? pillsburyWinners(race).map((r) => r.handle) : [];
   const ranked = raceRanked(race, concluded);
+  // The points of the standings, to mark who has a different count here (games that do not count)
+  const standingPoints = useMemo(
+    () => new Map(computeStandings(players, history, gameStates).standings.map((r) => [r.handle.toLowerCase(), r.points])),
+    [players, history, gameStates]
+  );
+  const differs = (handle: string) => {
+    const f = race.forecasts[handle];
+    const p = standingPoints.get(handle.toLowerCase());
+    return !!f && p !== undefined && p !== f.points;
+  };
+  const anyDiffers = [...race.rows.map((r) => r.handle), ...race.waiting].some(differs);
   // The Elo is left out: it is the level, and the race is about going beyond it
   const row = (handle: string, rank: string, className = '') => {
     const f = race.forecasts[handle];
@@ -81,7 +95,10 @@ export function PillsburyRace({
           </div>
         </td>
         <td className="col-center">
-          <span className="pillsbury-points">{f ? halves(f.points) : '–'}</span>
+          <span className="pillsbury-points">
+            {f ? halves(f.points) : '–'}
+            {differs(handle) && <span className="points-mark" aria-label=", diversi dalla classifica">*</span>}
+          </span>
           {counted && (
             <span className="counted-games">
               {counted.played} di {counted.games}
@@ -152,6 +169,12 @@ export function PillsburyRace({
               </tbody>
             </table>
           </div>
+          {anyDiffers && (
+            <p className="note note-top-xs">
+              * Punti diversi dalla classifica: per il trofeo non contano le partite decise a tavolino (ritiri, chiusure per scorrettezza) né quelle con gli esordienti.
+            </p>
+          )}
+          {ranked && race.rows.length > 1 && <p className="note note-top-xs">A parità di scarto, è davanti chi ha l'obiettivo più sicuro.</p>}
           {race.rows.length === 0 && <p className="note note-top-xs">La corsa parte con le prime partite concluse.</p>}
           {race.newcomers.length > 0 && (
             <p className="note note-top-xs">
