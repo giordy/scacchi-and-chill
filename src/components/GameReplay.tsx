@@ -49,7 +49,8 @@ export function GameReplay({ url, title, onClose }: { url: string; title: string
           </button>
         </div>
         {gif && state !== 'error' && (
-          <div className="replay-frame">
+          // A game GIF has the players above and below the board, a study chapter GIF only the board
+          <div className={`replay-frame${studyChapterOf(url) ? " is-square" : ""}`}>
             {state === 'loading' && <span className="replay-loading">Caricamento della partita…</span>}
             <img
               src={gif}

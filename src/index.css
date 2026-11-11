@@ -2233,10 +2233,16 @@ button.replay-close {
   background: var(--bg);
 }
 
+.replay-frame.is-square {
+  aspect-ratio: 1;
+}
+
 .replay-frame img {
   width: 100%;
   height: 100%;
   display: block;
+  /* Never stretched, whatever the shape Lichess sends */
+  object-fit: contain;
   opacity: 0;
 }
 
