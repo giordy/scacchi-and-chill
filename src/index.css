@@ -2444,10 +2444,25 @@ details.anecdote > summary::-webkit-details-marker {
   background: var(--brass-soft);
 }
 
+/* The emoji of a moment worth telling sits on the line, in place of the dot: the text of every
+   event starts at the same place */
 .timeline-emoji {
-  flex: none;
-  font-size: 18px;
-  line-height: 1.4;
+  position: absolute;
+  top: 10px;
+  left: -26px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--brass);
+  border-radius: 50%;
+  background: var(--panel);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.timeline-item.is-highlight::before {
+  display: none;
 }
 
 .timeline-body {
