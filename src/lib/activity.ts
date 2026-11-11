@@ -498,6 +498,7 @@ function objectiveEvents(input: CurrentSeasonInput, elo: EloReport, calendar: Hi
     if (left.has(me)) return;
     const f = seasonForecast(p.handle, season, board, finished);
     if (!f) return;
+    // The moment objectiveReached (lib/pillsbury.ts) became true: the same target, the same points
     const target = pronosticoPoints(f);
     if (target <= 0) return;
     let points = 0;

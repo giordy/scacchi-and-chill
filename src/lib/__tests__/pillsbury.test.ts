@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pillsburyRace, pillsburyWins, reigningPillsbury } from '../pillsbury';
+import { objectiveReached, pillsburyRace, pillsburyWins, reigningPillsbury } from '../pillsbury';
 import { computeElo } from '../tournamentElo';
 import { parsePublicView, publicViewHref, tabOfView } from '../routes';
 import { SeasonArchive } from '../../types';
@@ -93,5 +93,17 @@ describe('the Pillsbury view', () => {
     expect(publicViewHref('pillsbury')).toBe('#/pillsbury');
     expect(parsePublicView('#/pillsbury')).toBe('pillsbury');
     expect(tabOfView('pillsbury')).toBe('standings');
+  });
+});
+
+describe('objectiveReached', () => {
+  const f = (expected: number, points: number) => ({ expected, games: 6, expectedSoFar: 0, points, played: 3 });
+  it('compares the points with the objective as shown, to the half point', () => {
+    expect(objectiveReached(f(2.3, 2.5))).toBe(true); // objective 2½
+    expect(objectiveReached(f(2.3, 2))).toBe(false);
+    expect(objectiveReached(f(1.1, 1))).toBe(true); // objective 1
+  });
+  it('never counts an objective of zero as reached', () => {
+    expect(objectiveReached(f(0.2, 0))).toBe(false);
   });
 });
