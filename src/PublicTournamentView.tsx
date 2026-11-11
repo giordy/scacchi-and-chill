@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive, TournamentMeta } from "./types";
 import { SeasonsHistory } from "./components/SeasonsHistory";
 import { playerHref } from "./lib/routes";
-import { computeStandings, isTied, leaderText, seasonStarted, sharedRanks } from "./lib/standings";
+import { championText, computeStandings, isTied, leaderText, seasonStarted, sharedRanks } from "./lib/standings";
 import { RankCell } from "./components/RankCell";
 import { computeSeasonProgress } from "./lib/progress";
 import { DEFAULT_TOURNAMENT } from "./lib/tournament";
@@ -234,12 +234,13 @@ export function PublicTournamentView({
   const days = tournamentMeta.daysPerMove ?? config.defaults.days;
   const rated = tournamentMeta.rated ?? config.defaults.rated;
 
-  const roundLine = progress.currentRound
-    ? progress.finished === progress.total && progress.total > 0
-      ? "Stagione conclusa."
-      : `Turno ${progress.currentRound} in corso.`
+  // Once the last game is over the hero tells who won; until then the round and who leads
+  const roundLine = concluded
+    ? championText(standings)
+    : progress.currentRound
+    ? `Turno ${progress.currentRound} in corso.`
     : "La stagione sta per cominciare.";
-  const leaderLine = leaderText(standings);
+  const leaderLine = concluded ? "" : leaderText(standings);
 
   return (
     <div className={`public-tournament${slide === 1 ? " slide-next" : slide === -1 ? " slide-prev" : ""}`}>
@@ -480,6 +481,7 @@ export function PublicTournamentView({
           withdrawals={tournamentMeta.withdrawals}
           seasons={seasons}
           nameOf={nameOf}
+          concluded={concluded}
         />
       )}
 

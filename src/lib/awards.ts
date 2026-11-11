@@ -1,6 +1,6 @@
 import { ArchivedGame, EloSeed, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonAward, Withdrawal } from '../types';
 import { roundHalf, tournamentElo } from './tournamentElo';
-import { PILLSBURY_EMOJI, PILLSBURY_ID, PILLSBURY_MIN_OVER, PILLSBURY_TITLE, pillsburyRace } from './pillsbury';
+import { PILLSBURY_EMOJI, PILLSBURY_ID, PILLSBURY_TITLE, pillsburyRace, pillsburyWinners } from './pillsbury';
 
 // 5.5 -> "5½", 0.5 -> "½"
 const halves = (n: number) => String(Math.round(n * 2) / 2).replace(".5", "½").replace(/^0½/, "½");
@@ -65,9 +65,9 @@ export function computeSeasonAwards(
   // the light-hearted awards. One winner, unless two beat it by the same (to a millionth of a point),
   // and only above the objective as the race table shows it (▲): not the first of those in line.
   const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates, seeds), history, history, gameStates, withdrawals);
-  const best = race.rows[0];
-  if (!race.suspended && best && best.over >= PILLSBURY_MIN_OVER) {
-    const top = race.rows.filter((r) => Math.abs(r.over - best.over) < 1e-6);
+  const top = pillsburyWinners(race);
+  if (top.length > 0) {
+    const best = top[0];
     const f = best.forecast;
     awards.push({
       id: PILLSBURY_ID,

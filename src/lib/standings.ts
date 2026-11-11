@@ -152,6 +152,18 @@ export const pointsText = (n: number) => {
   return `${s} ${n === 1 || n === 0.5 ? "punto" : "punti"}`;
 };
 
+// The hero line once the last game is over: who won, before the organizer closes the season (the
+// title is then written in the Albo d'Oro). Tied winners named together, more than three counted.
+export function championText(standings: Array<RankKey & { name: string }>): string {
+  const leaders = leadersOf(standings);
+  if (leaders.length === 0) return "Stagione conclusa.";
+  const pts = pointsText(leaders[0].points);
+  if (leaders.length === 1) return `Stagione conclusa: vince ${leaders[0].name} con ${pts}! 🏆`;
+  if (leaders.length > 3) return `Stagione conclusa: vincono a pari merito ${leaders.length} giocatori, con ${pts}! 🏆`;
+  const names = leaders.map((l) => l.name);
+  return `Stagione conclusa: vincono a pari merito ${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}, con ${pts}! 🏆`;
+}
+
 // The hero line: " In testa Anna con 3 punti.", tied leaders named together, more than three
 // only counted. Empty while nobody has points.
 export function leaderText(standings: Array<RankKey & { name: string }>): string {
