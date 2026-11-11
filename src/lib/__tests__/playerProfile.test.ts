@@ -191,7 +191,7 @@ describe('color record, endings and openings', () => {
 
 describe('public views in the hash', () => {
   it('round-trips every view and falls back to the standings', () => {
-    (['standings', 'crosstable', 'matches', 'season', 'hall', 'rules'] as const).forEach((v) =>
+    (['standings', 'crosstable', 'matches', 'timeline', 'season', 'hall', 'rules'] as const).forEach((v) =>
       expect(parsePublicView(publicViewHref(v))).toBe(v)
     );
     expect(publicViewHref('hall')).toBe('#/albo');
@@ -207,6 +207,7 @@ describe('public views in the hash', () => {
   });
   it('maps each view to its tab', () => {
     expect(tabOfView('crosstable')).toBe('standings');
+    expect(tabOfView('timeline')).toBe('matches');
     expect(tabOfView('season')).toBe('season');
     expect(tabOfView('rules')).toBeUndefined();
   });

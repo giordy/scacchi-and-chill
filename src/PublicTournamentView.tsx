@@ -37,6 +37,7 @@ import { PresenceInfo } from "./lib/presence";
 import { AllTimeSection } from "./components/AllTimeSection";
 import { allTimeNameOf, allTimeRecords, allTimeTable, seasonsWithGames } from "./lib/allTime";
 import { holiday, seasonEndOn, showHoliday } from "./lib/holiday";
+import { Timeline } from "./components/Timeline";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -321,7 +322,7 @@ export function PublicTournamentView({
             <p className="title-race" role="status">
               {race.champion ? (
                 <>
-                  🏆 <strong>{race.champion.name}</strong> è campione matematico: nessuno può più raggiungerlo, con{" "}
+                  🏆 <strong>{race.champion.name}</strong> vince matematicamente la stagione: nessuno può più arrivare in testa, con{" "}
                   {race.roundsLeft === 1 ? "un turno" : `${race.roundsLeft} turni`} d'anticipo.
                 </>
               ) : (
@@ -469,9 +470,36 @@ export function PublicTournamentView({
         </section>
       )}
 
-      {view === "matches" && (
+      {activeTab === "matches" && (
         <section role="tabpanel" id="pub-panel-matches" aria-labelledby="pub-tab-matches">
-          {rounds.length > 0 && (
+          {/* Two views of the games: by round, or what happened in order */}
+          <div className="view-switch" role="group" aria-label="Vista delle partite">
+            <button type="button" className={view === "matches" ? "active" : ""} aria-pressed={view === "matches"} onClick={() => show("matches")}>
+              Per turno
+            </button>
+            <button type="button" className={view === "timeline" ? "active" : ""} aria-pressed={view === "timeline"} onClick={() => show("timeline")}>
+              Cronaca
+            </button>
+          </div>
+
+          {view === "timeline" && (
+            <Timeline
+              season={tournamentMeta.season}
+              masterName={tournamentMeta.masterName}
+              masterOpening={tournamentMeta.masterOpening}
+              masterAnecdotes={tournamentMeta.masterAnecdotes}
+              players={players}
+              history={history}
+              gameStates={gameStates}
+              schedule={schedule}
+              withdrawals={tournamentMeta.withdrawals}
+              seasons={seasons}
+              elo={elo}
+              nameOf={nameOf}
+            />
+          )}
+
+          {view === "matches" && rounds.length > 0 && (
             <div className="filter-row">
               <label htmlFor="filter-round">Turno</label>
               <select
@@ -491,7 +519,7 @@ export function PublicTournamentView({
             </div>
           )}
 
-          {filteredGames.length === 0 ? (
+          {view !== "matches" ? null : filteredGames.length === 0 ? (
             <p className="note">Le partite compariranno qui quando l'organizzatore pubblica il calendario.</p>
           ) : (
             <MatchesByRound

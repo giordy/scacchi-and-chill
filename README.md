@@ -4,6 +4,7 @@ Sito di un torneo di scacchi per corrispondenza tra amici: sfide su Lichess, dat
 
 ## Parte pubblica
 - **Classifica** (punti, poi Sonneborn-Berger, poi vittorie; a pari su tutti e tre la posizione è condivisa), **Tabellone**, **Partite** per turno con mini scacchiera, **Pillsbury** (la corsa al trofeo).
+- **Cronaca** (`#/cronaca`, nel tab Partite): cosa è successo, giorno per giorno: inizio e fine dei turni (con l'aneddoto del maestro e chi è in testa), risultati (con scontri al vertice, colpacci e apertura del maestro), la prima vittoria della stagione (dopo partite senza) o nel torneo, serie di vittorie dalla terza, cambi di capolista, ritiri e sostituti, la vittoria matematica e chi vince la stagione. Si ricava dai dati che il sito ha già, senza salvare nulla; per le stagioni archiviate restano risultati, capolista e campione. Le novità dall'ultima visita sono evidenziate (data salvata nel browser).
 - **Stagione**: maestro, regolamento, numeri. **Albo**: Albo d'Oro, classifica di sempre, record.
 - **Pagina giocatore** (`#/giocatore/<handle>`): posizione, punti turno per turno, scontri diretti, carriera, Elo del torneo, obiettivo, trofei.
 - **Risultati live**: le partite non concluse si leggono da Lichess all'apertura e ogni 5 minuti a pagina visibile (al massimo due chiamate: partite e profili).

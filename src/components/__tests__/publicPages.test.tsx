@@ -74,7 +74,7 @@ const playerPage = (handle: string, seasons: SeasonArchive[] = [season1]) =>
 describe('public tournament page', () => {
   it('renders every section of a new tournament, with no players and no games yet', () => {
     const empty: AppConfig = { ...defaultConfig, players: [], schedule: [], tournament: { title: 'Nuovo torneo', season: 'Stagione 1', description: '' } };
-    for (const hash of ['', '#/partite', '#/tabellone', '#/pillsbury', '#/stagione', '#/albo', '#/regolamento']) {
+    for (const hash of ['', '#/partite', '#/cronaca', '#/tabellone', '#/pillsbury', '#/stagione', '#/albo', '#/regolamento']) {
       at(hash);
       const html = renderToStaticMarkup(
         <PublicTournamentView config={empty} tournamentMeta={empty.tournament!} history={[]} gameStates={{}} nameOf={(h) => h} seasons={[]} />
@@ -85,7 +85,7 @@ describe('public tournament page', () => {
   });
 
   it('renders every section', () => {
-    for (const hash of ['', '#/partite', '#/tabellone', '#/pillsbury', '#/stagione', '#/albo', '#/regolamento']) {
+    for (const hash of ['', '#/partite', '#/cronaca', '#/tabellone', '#/pillsbury', '#/stagione', '#/albo', '#/regolamento']) {
       expect(publicPage(hash)).toContain('Scacchi &amp; Chill');
     }
   });
@@ -96,6 +96,15 @@ describe('public tournament page', () => {
     expect(html).toContain('Record');
     expect(html).toContain('Greta ha lasciato il torneo; al suo posto ha giocato Dario.');
     expect(html).toContain('4 vittorie consecutive di Anna');
+  });
+
+  it('tells what happened in the cronaca, as a view of the games', () => {
+    const html = publicPage('#/cronaca');
+    expect(html).toContain('Cronaca');
+    expect(html).toContain('Per turno');
+    expect(html).toContain('con il matto');
+    expect(html).toContain('passa in testa alla classifica');
+    expect(html).toContain('Comincia la Stagione 2');
   });
 
   it('has no all-time sections before the first archived season', () => {
