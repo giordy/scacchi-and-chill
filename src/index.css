@@ -2359,50 +2359,34 @@ details.anecdote > summary::-webkit-details-marker {
   vertical-align: 2px;
 }
 
-/* Under the standings: the latest from the cronaca */
+/* Under the standings: the latest from the cronaca, as a short stretch of its line */
 .cronaca-teaser {
-  margin: 18px 0 0;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--panel);
+  margin: 28px 0 0;
 }
 
-.cronaca-teaser-title {
-  margin: 0 0 6px;
-  font-size: 17px;
-}
-
-.cronaca-teaser-list {
-  margin: 0 0 8px;
-  padding: 0;
-  list-style: none;
-}
-
-.cronaca-teaser-list li {
+.cronaca-teaser-head {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 10px;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 15px;
-  line-height: 1.35;
-}
-
-.cronaca-teaser-list a {
-  font-weight: 700;
-}
-
-.cronaca-teaser-date {
-  flex: none;
-  font-size: 13px;
-  color: var(--muted);
+  gap: 12px;
 }
 
 .cronaca-teaser-link {
-  font-size: 14px;
+  flex: none;
+  font-size: 15px;
   font-weight: 700;
+}
+
+.cronaca-teaser-list .timeline-item {
+  padding: 8px 12px;
+}
+
+.cronaca-teaser-list .timeline-item::before {
+  top: 15px;
+}
+
+.cronaca-teaser-list .timeline-emoji {
+  top: 6px;
 }
 
 /* Cronaca: what happened, by day, newest first */

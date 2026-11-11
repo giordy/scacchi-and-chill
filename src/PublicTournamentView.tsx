@@ -38,7 +38,7 @@ import { AllTimeSection } from "./components/AllTimeSection";
 import { allTimeNameOf, allTimeRecords, allTimeTable, seasonsWithGames } from "./lib/allTime";
 import { holiday, seasonEndOn, showHoliday } from "./lib/holiday";
 import { Timeline } from "./components/Timeline";
-import { currentSeasonActivity, FRAME_KINDS, newsSince } from "./lib/activity";
+import { currentSeasonActivity, FRAME_KINDS, HIGHLIGHT_KINDS, newsSince } from "./lib/activity";
 import { ActivityText } from "./components/Timeline";
 import { useLastVisit } from "./hooks/useLastVisit";
 
@@ -437,24 +437,29 @@ export function PublicTournamentView({
             numero di vittorie; chi è pari anche lì condivide la posizione. Tocca un nome per vedere le partite del giocatore.
           </p>
           {latest.length > 0 && (
-            <aside className="cronaca-teaser" aria-label="Dalla cronaca">
-              <h2 className="cronaca-teaser-title">Dalla cronaca</h2>
-              <ul className="cronaca-teaser-list">
+            <section className="cronaca-teaser" aria-labelledby="cronaca-teaser-title">
+              <div className="cronaca-teaser-head">
+                <h2 id="cronaca-teaser-title" className="section-heading">Dalla cronaca</h2>
+                <a href={publicViewHref("timeline")} className="cronaca-teaser-link">
+                  Tutta la cronaca →
+                </a>
+              </div>
+              {/* A short stretch of the cronaca's own line: the moments worth telling keep their emoji */}
+              <ol className="timeline-list cronaca-teaser-list">
                 {latest.map((e) => (
-                  <li key={e.key}>
-                    <span>
+                  <li key={e.key} className={`timeline-item ${HIGHLIGHT_KINDS.has(e.kind) ? "is-highlight" : "is-card"}`}>
+                    {HIGHLIGHT_KINDS.has(e.kind) && <span className="timeline-emoji" aria-hidden="true">{e.emoji}</span>}
+                    <p className="timeline-text">
                       <ActivityText event={e} nameOf={nameOf} />
-                    </span>
-                    <span className="cronaca-teaser-date">
-                      {new Date(e.at).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
+                    </p>
+                    <span className="timeline-meta">
+                      {e.score && <span className="timeline-score">{e.score}</span>}
+                      <span>{new Date(e.at).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}</span>
                     </span>
                   </li>
                 ))}
-              </ul>
-              <a href={publicViewHref("timeline")} className="cronaca-teaser-link">
-                Tutta la cronaca →
-              </a>
-            </aside>
+              </ol>
+            </section>
           )}
           {awards.length > 0 && (
             <div className="awards-section">
