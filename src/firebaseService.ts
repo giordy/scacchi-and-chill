@@ -1,5 +1,3 @@
-import type { SeasonColor } from './lib/seasonColor';
-
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -50,7 +48,6 @@ export const TOURNAMENT_DOC_ID = "scacchi-and-chill-official";
 export interface TournamentDocData {
   title?: string;
   season?: string;
-  color?: SeasonColor;
   subtitle?: string;
   imageUrl?: string;
   masterName?: string;
@@ -86,7 +83,6 @@ export async function saveTournamentFullToFirebase(data: {
     if (data.meta.subtitle !== undefined) payload.subtitle = data.meta.subtitle;
     if (data.meta.imageUrl !== undefined) payload.imageUrl = data.meta.imageUrl;
     if (data.meta.masterName !== undefined) payload.masterName = data.meta.masterName;
-    if (data.meta.color !== undefined) payload.color = data.meta.color;
     payload.description = data.meta.description;
     if (data.meta.howItWorks !== undefined) payload.howItWorks = data.meta.howItWorks;
     if (data.meta.fairPlayText !== undefined) payload.fairPlayText = data.meta.fairPlayText;

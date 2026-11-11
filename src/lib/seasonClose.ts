@@ -1,4 +1,3 @@
-import { DEFAULT_SEASON_COLOR } from './seasonColor';
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch, SeasonArchive, TournamentMeta } from '../types';
 import { buildSeasonArchive, withChampion } from './seasons';
 
@@ -40,7 +39,6 @@ export async function closeSeason(input: SeasonCloseInput, io: SeasonCloseIO): P
     masterName: input.nextMaster.trim(),
     imageUrl: '',
     subtitle: '',
-    color: DEFAULT_SEASON_COLOR, // the new season starts on green felt, until one is chosen
     winners: withChampion(meta.winners, snapshot),
     withdrawals: [],
     masterAnecdotes: [],
