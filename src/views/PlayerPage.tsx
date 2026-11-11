@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
 import { allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, seasonsWithGames } from '../lib/allTime';
 import { computeStandings } from '../lib/standings';
-import { departuresOf } from '../lib/departures';
+import { archivedGames, seasonDepartures } from '../lib/seasons';
 import { NameOf } from '../lib/roster';
 import { CareerSection, AllTimeHeadToHeadSection } from '../components/CareerSections';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
@@ -179,18 +179,25 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
     ? undefined
     : (winners ?? []).flatMap(fullPodium).find((p) => p.handle.toLowerCase() === handle.toLowerCase());
   const pastRow = profile ? undefined : seasons.flatMap((x) => x.standings).find((r) => r.handle.toLowerCase() === handle.toLowerCase());
-  const pastName = podiumEntry ?? (pastRow && { handle: pastRow.handle, name: archivedName(handle, seasons) ?? pastRow.name });
+  // Or who left a season and was replaced: not in its table, still with their own games
+  const pastDeparture = profile || pastRow ? undefined : seasons.flatMap((x) => x.departures ?? []).find((d) => d.replacedBy && d.handle.toLowerCase() === handle.toLowerCase());
+  const pastName =
+    podiumEntry ??
+    (pastRow && { handle: pastRow.handle, name: archivedName(handle, seasons) ?? pastRow.name }) ??
+    (pastDeparture && { handle: pastDeparture.handle, name: pastDeparture.name });
   const shownName = profile?.player.name ?? (pastName && nameOf(pastName.handle, pastName.name));
 
   // Across seasons: the career needs an archived season, the all-time head-to-heads archived games
   const currentSeason = config.tournament?.season ?? "";
+  const departures = seasonDepartures(config.tournament?.withdrawals, config.players, history, gameStates);
   const career = careerOf(handle, seasons, {
     season: currentSeason,
     standings: computeStandings(config.players, history, gameStates).standings,
-    departures: departuresOf(config.tournament?.withdrawals),
+    departures,
+    games: archivedGames(history, gameStates),
   });
   const showCareer = career.some((c) => !c.current);
-  const withGames = seasonsWithGames(seasons, { season: currentSeason, history, gameStates });
+  const withGames = seasonsWithGames(seasons, { season: currentSeason, history, gameStates, departures });
   const allTimeRows = allTimeHeadToHead(handle, withGames);
   const pastGames = withGames.some((s) => !s.current && s.games.some((g) => [g.white, g.black].some((h) => h.toLowerCase() === handle.toLowerCase())));
   const archivedWithGames = withGames.filter((s) => !s.current);

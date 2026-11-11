@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { departuresOf, departureText, replacedIn } from '../departures';
+import { departuresOf, departureText, ownRows, replacedIn } from '../departures';
 import { buildSeasonArchive } from '../seasons';
-import { careerOf } from '../allTime';
-import { Withdrawal } from '../../types';
+import { allTimeTable, careerOf } from '../allTime';
+import { ArchivedGame, SeasonArchive, SeasonDeparture, Withdrawal } from '../../types';
 
 const replaced: Withdrawal = {
   handle: 'gredip',
@@ -51,5 +51,47 @@ describe('departures', () => {
     expect(careerOf('matepaco', [archive])[0].replacing).toEqual({ handle: 'gredip', name: 'Greta' });
     expect(careerOf('fsgach', [archive])[0]).not.toHaveProperty('replacing');
     expect(buildSeasonArchive({ ...meta, withdrawals: [] }, players, [], {})).not.toHaveProperty('departures');
+  });
+});
+
+describe('games of a replaced place, by who played them', () => {
+  const standings = [
+    { handle: 'fsgach', name: 'Fabio', played: 3, won: 2, drawn: 1, lost: 0, points: 2.5, sb: 0 },
+    { handle: 'matepaco', name: 'Francesco', played: 3, won: 1, drawn: 0, lost: 2, points: 1, sb: 0 },
+  ];
+  const games: ArchivedGame[] = [
+    { round: '1', white: 'matepaco', black: 'fsgach', result: '0-1', end: Date.parse('2026-01-10') },
+    { round: '2', white: 'fsgach', black: 'matepaco', result: '1-0', end: Date.parse('2026-02-10') },
+    { round: '3', white: 'matepaco', black: 'fsgach', result: '1-0', end: Date.parse('2026-04-10') },
+  ];
+  const departure = (d: Partial<SeasonDeparture>): SeasonDeparture[] => [
+    { handle: 'gredip', name: 'Greta', mode: 'replaced', replacedBy: { handle: 'matepaco', name: 'Francesco' }, ...d },
+  ];
+  const own = (d: SeasonDeparture[], g: ArchivedGame[] = games) =>
+    Object.fromEntries(ownRows(standings, d, g).map((r) => [r.handle, [r.played, r.won, r.drawn, r.lost, r.points]]));
+
+  it('gives the games before the substitute took over back to who left, by round', () => {
+    expect(own(departure({ fromRound: '3' }))).toEqual({ fsgach: [3, 2, 1, 0, 2.5], matepaco: [1, 1, 0, 0, 1], gredip: [2, 0, 0, 2, 0] });
+  });
+
+  it('by day, for seasons archived without the rounds', () => {
+    const noRounds = games.map((g) => ({ ...g, round: '–' }));
+    expect(own(departure({ fromDate: '2026-03-20' }), noRounds)).toEqual({ fsgach: [3, 2, 1, 0, 2.5], matepaco: [1, 1, 0, 0, 1], gredip: [2, 0, 0, 2, 0] });
+  });
+
+  it('leaves the table as it is without the start, or without the games', () => {
+    expect(ownRows(standings, departure({}), games)).toBe(standings);
+    expect(ownRows(standings, departure({ fromRound: '3' }), undefined)).toBe(standings);
+  });
+
+  it('counts in the all-time table and in both careers', () => {
+    const archive: SeasonArchive = {
+      id: 'stagione-1', season: 'Stagione 1', title: '', archivedAt: '2026-05-01', gamesPlayed: 3,
+      standings, games, departures: departure({ fromRound: '3' }),
+    };
+    const rows = Object.fromEntries(allTimeTable([archive], []).map((r) => [r.handle, [r.played, r.points]]));
+    expect(rows).toEqual({ fsgach: [3, 2.5], matepaco: [1, 1], gredip: [2, 0] });
+    expect(careerOf('matepaco', [archive])[0]).toMatchObject({ place: 2, played: 1, points: 1, replacing: { handle: 'gredip' } });
+    expect(careerOf('gredip', [archive])[0]).toMatchObject({ place: null, played: 2, points: 0, replacedBy: { handle: 'matepaco' } });
   });
 });
