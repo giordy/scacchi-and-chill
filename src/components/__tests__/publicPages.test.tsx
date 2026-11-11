@@ -137,6 +137,19 @@ describe('player page', () => {
     expect(html).not.toContain('Carriera');
   });
 
+  it('gives a page to who left and was replaced, with the games they played', () => {
+    const withStart = { ...season1, departures: [{ ...season1.departures![0], fromRound: '2' }] };
+    const html = playerPage('gredip', [withStart]);
+    expect(html).toContain('Greta');
+    expect(html).toContain('Carriera');
+    expect(html).toContain('poi al suo posto Dario');
+    expect(html).toContain('Scontri diretti di sempre');
+    // Dario keeps only the games from round 2, Greta played the one against Anna in round 1
+    const dario = playerPage('dario', [withStart]);
+    expect(dario).toContain('1 stagione · 2 partite · 1 punto');
+    expect(dario).toContain('aria-label="Punteggio 0 a 1"');
+  });
+
   it('says when a player is unknown', () => {
     expect(playerPage('zeno')).toContain('Giocatore «zeno» non trovato.');
   });

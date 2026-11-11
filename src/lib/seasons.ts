@@ -1,4 +1,4 @@
-import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonWinner, TournamentMeta } from '../types';
+import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonDeparture, SeasonWinner, TournamentMeta } from '../types';
 import { computeStandings, scoredResult, seasonStarted, sharedRanks } from './standings';
 import { byRound, pliesOf, stateOf } from './games';
 import { extractGameId } from './utils';
@@ -53,10 +53,24 @@ export function buildSeasonArchive(
   if (awards.length > 0) archive.awards = awards;
   // Where the esordienti started: the Elo del torneo of the next seasons is computed again from the archives
   if (meta.seeds && meta.seeds.length > 0) archive.seeds = meta.seeds;
-  // A substitute's first round, from who played on Lichess: the Elo del torneo gives the games
-  // before it back to who left (see eloSeasonFromArchive)
+  const departures = seasonDepartures(meta.withdrawals, players, history, gameStates);
+  if (departures.length > 0) archive.departures = departures;
+  const games = archivedGames(history, gameStates);
+  if (games.length > 0) archive.games = games;
+  return archive;
+}
+
+// The withdrawals of the season as the archive keeps them, with a substitute's first round taken
+// from who played on Lichess: the games before it go back to who left (Elo del torneo, all-time
+// table, careers; see ownRows)
+export function seasonDepartures(
+  withdrawals: TournamentMeta['withdrawals'],
+  players: Player[],
+  history: HistoryGame[],
+  gameStates: Record<string, LichessExportGame>
+): SeasonDeparture[] {
   const handles = players.map((p) => p.handle);
-  const departures = departuresOf(meta.withdrawals).map((d) => {
+  return departuresOf(withdrawals).map((d) => {
     if (d.mode !== 'replaced' || !d.replacedBy) return d;
     const sub = d.replacedBy.handle.toLowerCase();
     const rounds = history
@@ -68,10 +82,6 @@ export function buildSeasonArchive(
       .sort(byRound);
     return rounds.length > 0 ? { ...d, fromRound: rounds[0] } : d;
   });
-  if (departures.length > 0) archive.departures = departures;
-  const games = archivedGames(history, gameStates);
-  if (games.length > 0) archive.games = games;
-  return archive;
 }
 
 // The scored games of the season in a compact form (no moves, no positions), in round order.

@@ -7,7 +7,7 @@ import { RankKey, seasonStarted, sharedRanks } from './standings';
 import { fullPodium } from './honours';
 import { upsetFrom } from './upset';
 import { CURRENT, EloReport, gameKey } from './tournamentElo';
-import { replacedIn } from './departures';
+import { gamesByWhoPlayed, OwnRow, ownRows, replacedIn } from './departures';
 import { pillsburyWins } from './pillsbury';
 import { SeasonDeparture } from '../types';
 
@@ -23,6 +23,7 @@ export interface CurrentSeason {
   season: string;
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
+  departures?: SeasonDeparture[]; // with the substitutes' first round (see seasonDepartures)
 }
 
 // Oldest first (the archive list comes newest first)
@@ -30,13 +31,14 @@ const oldestFirst = (seasons: SeasonArchive[]) => [...seasons].sort((a, b) => a.
 
 // Seasons with their games, in the order they were played, the current one last. Seasons archived
 // without games are left out; the current season is left out if an archive has its name already.
+// Each game with who actually played it, after a replacement too.
 export function seasonsWithGames(seasons: SeasonArchive[], current?: CurrentSeason): SeasonGames[] {
   const list: SeasonGames[] = oldestFirst(seasons)
     .filter((s) => s.games && s.games.length > 0)
-    .map((s) => ({ season: s.season, games: s.games!, current: false }));
+    .map((s) => ({ season: s.season, games: gamesByWhoPlayed(s.games!, s.departures), current: false }));
   if (current && !seasons.some((s) => s.id === seasonId(current.season))) {
     const games = archivedGames(current.history, current.gameStates);
-    if (games.length > 0) list.push({ season: current.season, games, current: true });
+    if (games.length > 0) list.push({ season: current.season, games: gamesByWhoPlayed(games, current.departures), current: true });
   }
   return list;
 }
@@ -97,6 +99,7 @@ export interface CurrentStandings {
   season: string;
   standings: StandingRow[];
   departures?: SeasonDeparture[];
+  games?: ArchivedGame[]; // to give the games played before a substitute took over back to who left
 }
 
 export interface CareerSeason {
@@ -111,41 +114,48 @@ export interface CareerSeason {
   lost: number;
   current: boolean;
   replacing?: { handle: string; name: string }; // the player whose place they took
+  replacedBy?: { handle: string; name: string }; // who took their place: their own games only, no place
 }
 
-// Every season a player took part in, newest first: the one in progress, then the archived ones
+// Every season a player took part in, newest first: the one in progress, then the archived ones.
+// The place is the official one; points and games are the player's own (see ownRows): a
+// substitute counts only the games they played, who left the ones played before.
 export function careerOf(handle: string, seasons: SeasonArchive[], current?: CurrentStandings): CareerSeason[] {
-  const entry = (season: string, standings: StandingRow[], isCurrent: boolean, departures?: SeasonDeparture[]): CareerSeason | null => {
+  const entry = (season: string, standings: StandingRow[], isCurrent: boolean, departures?: SeasonDeparture[], games?: ArchivedGame[]): CareerSeason | null => {
+    const own = ownRows(standings, departures, games).find((s) => same(s.handle, handle));
+    if (!own) return null;
     const i = standings.findIndex((s) => same(s.handle, handle));
-    if (i === -1) return null;
     const ranks = sharedRanks(standings);
     const started = seasonStarted(standings);
-    const s = standings[i];
     const replacing = replacedIn(departures, handle);
+    const left = departures?.find((d) => same(d.handle, handle) && d.replacedBy);
     return {
       ...(replacing ? { replacing } : {}),
+      ...(i === -1 && left ? { replacedBy: { handle: left.replacedBy!.handle, name: left.replacedBy!.name } } : {}),
       season,
-      place: started ? ranks[i] : null,
-      tied: started && ranks.filter((r) => r === ranks[i]).length > 1,
+      place: started && i !== -1 ? ranks[i] : null,
+      tied: started && i !== -1 && ranks.filter((r) => r === ranks[i]).length > 1,
       of: standings.length,
-      points: s.points,
-      played: s.played,
-      won: s.won,
-      drawn: s.drawn,
-      lost: s.lost,
+      points: own.points,
+      played: own.played,
+      won: own.won,
+      drawn: own.drawn,
+      lost: own.lost,
       current: isCurrent,
     };
   };
-  const archived = [...oldestFirst(seasons)].reverse().map((s) => entry(s.season, s.standings, false, s.departures));
+  const archived = [...oldestFirst(seasons)].reverse().map((s) => entry(s.season, s.standings, false, s.departures, s.games));
   const live =
-    current && !seasons.some((s) => s.id === seasonId(current.season)) ? entry(current.season, current.standings, true, current.departures) : null;
+    current && !seasons.some((s) => s.id === seasonId(current.season))
+      ? entry(current.season, current.standings, true, current.departures, current.games)
+      : null;
   return [live, ...archived].filter((c): c is CareerSeason => c !== null);
 }
 
-// The name a player had in the latest table they appear in
+// The name a player had in the latest table they appear in (or left, after a replacement)
 export function archivedName(handle: string, seasons: SeasonArchive[]): string | undefined {
   for (const s of [...oldestFirst(seasons)].reverse()) {
-    const row = s.standings.find((r) => same(r.handle, handle));
+    const row = s.standings.find((r) => same(r.handle, handle)) ?? s.departures?.find((d) => same(d.handle, handle));
     if (row) return row.name;
   }
   return undefined;
@@ -167,7 +177,7 @@ export interface AllTimeRow {
 // Totals over every season, archived and current: most points first, then the better average
 export function allTimeTable(seasons: SeasonArchive[], winners: SeasonWinner[] | undefined, current?: CurrentStandings): AllTimeRow[] {
   const rows = new Map<string, AllTimeRow>();
-  const add = (standings: StandingRow[]) =>
+  const add = (standings: OwnRow[]) =>
     standings.forEach((s) => {
       if (s.played === 0) return;
       const key = s.handle.toLowerCase();
@@ -182,8 +192,9 @@ export function allTimeTable(seasons: SeasonArchive[], winners: SeasonWinner[] |
       rows.set(key, row);
     });
   // Oldest first, so the newest name wins
-  oldestFirst(seasons).forEach((s) => add(s.standings));
-  if (current && !seasons.some((s) => s.id === seasonId(current.season))) add(current.standings);
+  // By who actually played: after a replacement, who left keeps the games played before it
+  oldestFirst(seasons).forEach((s) => add(ownRows(s.standings, s.departures, s.games)));
+  if (current && !seasons.some((s) => s.id === seasonId(current.season))) add(ownRows(current.standings, current.departures, current.games));
   (winners ?? []).forEach((w) =>
     fullPodium(w)
       .filter((p) => p.place === 1)
