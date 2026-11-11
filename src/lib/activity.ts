@@ -4,7 +4,20 @@
 import { HistoryGame, LichessExportGame, MasterAnecdote, Player, ScheduledMatch, SeasonArchive, Withdrawal } from '../types';
 import { byRound, isVoid, movesText, stateOf } from './games';
 import { leadersOf, pointsText, scoredResult } from './standings';
-import { CURRENT, decidedAtTable, EloReport, gameKey, playersOnBoard } from './tournamentElo';
+import {
+  boardCalendar,
+  CURRENT,
+  currentSeason,
+  decidedAtTable,
+  EloReport,
+  eloSeasonFromCurrent,
+  gameKey,
+  playersOnBoard,
+  pronosticoPoints,
+  roundHalf,
+  seasonForecast,
+} from './tournamentElo';
+import { PILLSBURY_EMOJI, PILLSBURY_ID, PILLSBURY_MIN_OVER, pillsburyRace, raceCalendar } from './pillsbury';
 import { upsetFrom, upsetOf } from './upset';
 import { masterSurname, openingFamily, playsFamily } from './masterOpening';
 import { HOW_DRAW, HOW_WIN, extractGameId } from './utils';
@@ -30,7 +43,9 @@ export type ActivityKind =
   | 'leader' // someone goes alone at the top
   | 'champion' // nobody can reach the leader any more
   | 'roundEnd' // the last game of a round is over
-  | 'end'; // the last game of the season is over
+  | 'objective' // someone reaches their objective of the season (see lib/pillsbury.ts)
+  | 'end' // the last game of the season is over
+  | 'pillsbury'; // who wins the Trofeo Pillsbury, with the end of the season
 
 export interface ActivityEvent {
   key: string; // stable, for React
@@ -365,6 +380,7 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
     const end = endParts(finalTable(games), season);
     if (end) events.push({ key: `${CURRENT}:e`, kind: 'end', at: seasonEnd, emoji: '🏆', ...end });
   }
+  if (elo) events.push(...objectiveEvents(input, elo, calendar, seasonEnd));
 
   // Rounds over: with their last game, and who leads then. The last one is the end of the season.
   const byRoundGames = new Map<string, HistoryGame[]>();
@@ -414,6 +430,83 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
     break;
   }
   return sortEvents(events);
+}
+
+// "Anna vince il Trofeo Pillsbury", "Anna e Bruno vincono il Trofeo Pillsbury"
+function pillsburyParts(handles: string[]): ActivityPart[] {
+  const parts: ActivityPart[] = [];
+  handles.forEach((h, i) => {
+    if (i > 0) parts.push(i === handles.length - 1 ? ' e ' : ', ');
+    parts.push({ handle: h });
+  });
+  parts.push(handles.length === 1 ? ' vince il Trofeo Pillsbury' : ' vincono il Trofeo Pillsbury');
+  return parts;
+}
+
+// "+1½ punti", "+1 punto"
+const morePoints = (n: number) => `+${pointsText(roundHalf(n))}`;
+
+// The objectives of the season (the pronostico, as the Pillsbury table shows it) and the Trofeo
+// Pillsbury. An objective is reached when the points on the games that count for it (not those at
+// the table, nor those against an esordiente) come to it: a moment for everyone, strong or not,
+// since it is measured on what was expected of each. Esordienti have none; nor has who left.
+// The trophy is told with the end of the season, as the awards give it (lib/awards.ts).
+function objectiveEvents(input: CurrentSeasonInput, elo: EloReport, calendar: HistoryGame[], seasonEnd: number | undefined): ActivityEvent[] {
+  const events: ActivityEvent[] = [];
+  const { players, history, gameStates } = input;
+  const handles = players.map((p) => p.handle);
+  const season = currentSeason(elo);
+  const board = boardCalendar(raceCalendar(calendar, gameStates), gameStates, handles);
+  const finished = [...eloSeasonFromCurrent(handles, history, gameStates).games]
+    .filter((g) => typeof g.end === 'number')
+    .sort((a, b) => a.end! - b.end!);
+  const left = new Set((input.withdrawals ?? []).filter((w) => w.mode !== 'replaced').map((w) => lower(w.handle)));
+  players.forEach((p) => {
+    const me = lower(p.handle);
+    if (left.has(me)) return;
+    const f = seasonForecast(p.handle, season, board, finished);
+    if (!f) return;
+    const target = pronosticoPoints(f);
+    if (target <= 0) return;
+    let points = 0;
+    for (const g of finished) {
+      const side = lower(g.white) === me ? 'white' : lower(g.black) === me ? 'black' : null;
+      if (!side) continue;
+      const opp = lower(side === 'white' ? g.black : g.white);
+      if (season.newcomers.has(opp)) continue;
+      const s = g.result === '1-0' ? 1 : g.result === '0-1' ? 0 : 0.5;
+      points += side === 'white' ? s : 1 - s;
+      if (points >= target) {
+        events.push({
+          key: `${CURRENT}:o:${me}`,
+          kind: 'objective',
+          at: g.end!,
+          emoji: '🎯',
+          parts: [{ handle: p.handle }, ' raggiunge il suo obiettivo della stagione'],
+          detail: `Obiettivo: ${pointsText(target)}`,
+          link: { href: publicViewHref('pillsbury'), label: 'Pillsbury' },
+        });
+        break;
+      }
+    }
+  });
+
+  if (seasonEnd !== undefined) {
+    const race = pillsburyRace(players, elo, calendar, history, gameStates, input.withdrawals);
+    const best = race.rows[0];
+    if (!race.suspended && best && best.over >= PILLSBURY_MIN_OVER) {
+      const top = race.rows.filter((r) => Math.abs(r.over - best.over) < 1e-6);
+      events.push({
+        key: `${CURRENT}:p`,
+        kind: 'pillsbury',
+        at: seasonEnd,
+        emoji: PILLSBURY_EMOJI,
+        parts: pillsburyParts(top.map((r) => r.handle)),
+        detail: top.length === 1 ? `${morePoints(best.over)} sul suo obiettivo` : `${morePoints(best.over)} sull'obiettivo`,
+      });
+    }
+  }
+  return events;
 }
 
 // Points, Sonneborn-Berger and wins of the scored games, as the standings
@@ -485,6 +578,17 @@ export function archivedSeasonActivity(archive: SeasonArchive, elo?: EloReport):
   const at = games.length > 0 ? Math.max(...games.map((g) => g.at)) : Date.parse(archive.archivedAt);
   const end = endParts(archive.standings, seasonLabel(archive));
   if (end && Number.isFinite(at)) events.push({ key: `${archive.id}:e`, kind: 'end', at, emoji: '🏆', ...end });
+  const award = archive.awards?.find((a) => a.id === PILLSBURY_ID);
+  if (award && award.winners.length > 0 && Number.isFinite(at)) {
+    events.push({
+      key: `${archive.id}:p`,
+      kind: 'pillsbury',
+      at,
+      emoji: PILLSBURY_EMOJI,
+      parts: pillsburyParts(award.winners.map((w) => w.handle)),
+      detail: award.detail || undefined,
+    });
+  }
   return sortEvents(events);
 }
 
@@ -499,8 +603,10 @@ const ORDER: Record<ActivityKind, number> = {
   streak: 5,
   leader: 6,
   champion: 7,
+  objective: 6,
   roundEnd: 8,
   end: 9,
+  pillsbury: 10,
 };
 export function sortEvents(events: ActivityEvent[]): ActivityEvent[] {
   return events
@@ -515,7 +621,7 @@ export const isNewSince = (e: ActivityEvent, lastVisit: number | undefined) => l
 // The frame of the season (rounds and anecdotes) and the moments worth telling: the three weights
 // of the cronaca. Only what is not frame counts as news.
 export const FRAME_KINDS = new Set<ActivityKind>(['season', 'round', 'roundEnd', 'anecdote']);
-export const HIGHLIGHT_KINDS = new Set<ActivityKind>(['leader', 'firstWin', 'streak', 'champion', 'end']);
+export const HIGHLIGHT_KINDS = new Set<ActivityKind>(['leader', 'firstWin', 'streak', 'objective', 'champion', 'end', 'pillsbury']);
 
 // The events since the last visit worth calling news, newest first
 export const newsSince = (events: ActivityEvent[], lastVisit: number | undefined) =>
