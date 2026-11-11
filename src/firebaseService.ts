@@ -44,7 +44,8 @@ export const db = getFirestore(
 );
 
 // Default tournament ID for the tournament
-export const TOURNAMENT_DOC_ID = "scacchi-and-chill-official";
+export { TOURNAMENT_DOC_ID } from "./lib/firestoreRest";
+import { TOURNAMENT_DOC_ID } from "./lib/firestoreRest";
 
 export interface TournamentDocData {
   title?: string;

@@ -1,9 +1,6 @@
-import React, { lazy, Suspense, useMemo, useState } from 'react';
-import { AppConfig, HistoryGame } from './types';
-import { defaultConfig } from './lib/config';
+import React, { lazy, Suspense, useMemo } from 'react';
 import { useAdminRoute } from './hooks/useAdminRoute';
-import { useTournamentSync } from './hooks/useTournamentSync';
-import { useSeasons } from './hooks/useSeasons';
+import { usePublicData } from './hooks/usePublicData';
 import { useLiveGameStates } from './hooks/useLiveGameStates';
 import { usePresence } from './hooks/usePresence';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -13,16 +10,13 @@ import { storedStates } from './lib/games';
 import { fullRoster, rosterNameOf } from './lib/roster';
 import { NamesContext } from './components/Names';
 
-// The organizer area is a separate chunk: downloaded only when #admin is opened
-const AdminApp = lazy(() => import('./AdminApp'));
+// The organizer area is a separate chunk, with the Firebase SDK: downloaded only when #admin is opened
+const AdminRoot = lazy(() => import('./AdminRoot'));
 
 export function App() {
-  const [config, setConfig] = useState<AppConfig>(defaultConfig);
-  // Mirror of the games on Firestore (see useTournamentSync): never kept in this browser
-  const [history, setHistory] = useState<HistoryGame[]>([]);
   const isAdminRoute = useAdminRoute();
-  const { ready, gamesLoaded } = useTournamentSync(setConfig, setHistory);
-  const seasons = useSeasons();
+  // Public page: Firestore read with plain requests (see lib/firestoreRest), no SDK
+  const { config, history, seasons, ready, gamesLoaded } = usePublicData(!isAdminRoute);
 
   // Public page: results read live from Lichess on top of the saved ones
   const saved = useMemo(() => storedStates(history), [history]);
@@ -41,33 +35,24 @@ export function App() {
 
   if (isAdminRoute) {
     return (
-      <NamesContext.Provider value={nameOf}>
       <Suspense fallback={<LoadingScreen label="Apertura area organizzatore…" />}>
-        <AdminApp
-          config={config}
-          setConfig={setConfig}
-          history={history}
-          setHistory={setHistory}
-          gamesLoaded={gamesLoaded}
-          seasons={seasons}
-        />
+        <AdminRoot />
       </Suspense>
-      </NamesContext.Provider>
     );
   }
 
   return (
     <NamesContext.Provider value={nameOf}>
-    <PublicPage
-      seasons={seasons}
-      ready={ready}
-      config={config}
-      history={seasonHistory}
-      gameStates={live.gameStates}
-      liveUpdatedAt={live.updatedAt}
-      presence={presence}
-      nameOf={nameOf}
-    />
+      <PublicPage
+        seasons={seasons}
+        ready={ready}
+        config={config}
+        history={seasonHistory}
+        gameStates={live.gameStates}
+        liveUpdatedAt={live.updatedAt}
+        presence={presence}
+        nameOf={nameOf}
+      />
     </NamesContext.Provider>
   );
 }

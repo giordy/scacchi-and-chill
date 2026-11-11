@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { isMediaRef, mediaIdOf } from '../lib/media';
-import { loadMediaImage } from '../firebaseService';
+import { readMediaImage } from '../lib/firestoreRest';
 
 // Photos read once per page: switching tabs or seasons does not download them again
 const cache = new Map<string, Promise<string | null>>();
@@ -22,7 +22,7 @@ export function useImageSrc(url: string | undefined): string {
     if (!cache.has(id)) {
       cache.set(
         id,
-        loadMediaImage(id).catch((e) => {
+        readMediaImage(id).catch((e) => {
           console.warn('Foto non letta da Firestore:', e);
           cache.delete(id);
           return null;
