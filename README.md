@@ -9,7 +9,6 @@ Sito di un torneo di scacchi per corrispondenza tra amici: sfide su Lichess, dat
 - **Stagione**: maestro, regolamento, numeri. **Albo**: Albo d'Oro, classifica di sempre, record.
 - **Pagina giocatore** (`#/giocatore/<handle>`): posizione, punti turno per turno, scontri diretti (della stagione e di sempre), carriera, Elo del torneo, obiettivo, trofei.
 - **La stagione in breve**: a fine stagione, nella pagina giocatore, il suo riepilogo: posto e punti, premi, serie, colpacci, l'avversario preferito e quello più duro, la vittoria più rapida, la partita più lunga, l'apertura più giocata e l'Elo del torneo. Resta visibile, per l'ultima stagione archiviata, finché il giocatore non chiude una partita della nuova.
-- **Io sono…**: un giocatore si sceglie dal menu sopra la classifica, o tocca «Sono io» nella propria pagina (salvato nel browser): la sua riga resta evidenziata e in cima alla classifica trova posto, partita da giocare e, rispetto all'obiettivo, se al ritmo attuale è sopra, sotto o in linea.
 - **Risultati live**: le partite non concluse si leggono da Lichess all'apertura e ogni 5 minuti a pagina visibile (al massimo due chiamate: partite e profili).
 - **Leggera**: la pagina pubblica legge Firestore con semplici richieste HTTP (`src/lib/firestoreRest.ts`), senza l'SDK Firebase, e ogni 5 minuti a pagina visibile rilegge torneo e partite (le stagioni archiviate solo all'apertura e quando cambia la stagione). Se la lettura non riesce lo dice, senza mostrare un torneo vuoto, e riprova da sé dopo pochi secondi. L'SDK si scarica solo con l'area organizzatore.
 - Su telefono si cambia sezione con uno swipe.
@@ -31,7 +30,7 @@ Ogni ora il workflow `sync-results.yml` legge da Lichess le partite non ancora c
 3. GitHub, repository → **Settings → Secrets and variables → Actions** → nuovo secret `FIREBASE_SERVICE_ACCOUNT` con tutto il contenuto del file. Poi il file va cancellato dal computer.
 4. **Actions → Sincronizza risultati → Run workflow** per provarlo: nel log, quante partite ha aggiornato.
 
-L'account scrive solo i campi `lichess` e `syncedAt` delle partite che esistono già. GitHub sospende i workflow programmati dopo 60 giorni senza commit: in quel caso si riattivano dalla pagina Actions.
+L'account scrive solo i campi `lichess` e `syncedAt` delle partite che esistono già. GitHub sospende i workflow programmati dopo 60 giorni senza attività nel repository: per evitarlo, ogni notte il backup chiede di tenere attivi sé stesso e la sincronizzazione (senza commit). Se fossero sospesi lo stesso, si riattivano dalla pagina Actions.
 
 ## Elo del torneo e Trofeo Pillsbury
 - **Elo del torneo**: formula Elo (K = 32) sulle sole partite del torneo, nell'ordine in cui sono finite. A fine prima stagione l'Elo di un giocatore diventa la sua prestazione, con 2 patte virtuali contro il suo Elo di partenza (o contro la media dei veterani, o 1500 nella prima stagione del torneo): con 14 partite la sola prestazione esagera le distanze. Ogni Elo ha anche un'incertezza (±), dalla prestazione o dall'Elo di partenza, che si riduce partita dopo partita. Le partite decise a tavolino (forfeit, «cheat detected») contano per la classifica ma non per l'Elo.

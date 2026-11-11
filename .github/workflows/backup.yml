@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write # to keep the scheduled workflows active (step below)
 
 concurrency:
   group: "backup"
@@ -21,6 +22,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      # GitHub suspends scheduled workflows after 60 days without activity in the repository, and
+      # between seasons nothing changes: asking every night to enable them keeps them running,
+      # with no commit. A failure here does not stop the backup.
+      - name: Keep the scheduled workflows active
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for wf in backup.yml sync-results.yml; do
+            gh api -X PUT "repos/${{ github.repository }}/actions/workflows/$wf/enable" \
+              && echo "$wf attivo" || echo "::warning::Non riesco a tenere attivo $wf"
+          done
 
       - name: Set up Node.js
         uses: actions/setup-node@v7

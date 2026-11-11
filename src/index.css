@@ -3519,27 +3519,11 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   .pub-tab-btn { font-size: 13px; }
 }
 
-/* «Io sono…»: the visitor's own row, and their card at the top of the standings */
-.row-me .sticky-col, .row-me td { box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--accent) 9%, transparent); }
-.row-me .player-name::after { content: " · tu"; font-family: var(--font-body, inherit); font-size: 12px; font-weight: 700; color: var(--accent); }
-.my-card { display: grid; gap: 6px; margin: 0 0 14px; padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; background: var(--panel, var(--bg)); }
-.my-card-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
-.my-card-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--ink); }
-.my-card-rank { font-weight: 700; color: var(--muted); }
-.my-card-forget { margin-left: auto; font-size: 12px; }
-.my-card-line { margin: 0; font-size: 14px; }
-.my-card-line a { font-weight: 700; }
-.link-button { padding: 0; border: 0; background: none; font: inherit; color: var(--muted); text-decoration: underline; cursor: pointer; }
-.me-toggle { margin-top: 8px; }
-.me-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 0 14px; padding: 10px 14px; border: 1px dashed var(--line); border-radius: 10px; }
-.me-picker label { margin: 0; font-size: 14px; font-weight: 700; white-space: nowrap; }
-.me-picker-note { flex-basis: 100%; font-size: 12px; color: var(--muted); }
 
 /* Last rounds: what each contender needs to win the season */
 .title-needs { margin: 0 0 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
 .title-needs-heading { margin: 0 0 6px; font-size: 16px; }
 .title-needs ul { margin: 0 0 6px; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
-.title-needs li.is-me { font-weight: 700; }
 .title-needs .note { margin: 0; }
 
 /* Player page: «La stagione in breve» */

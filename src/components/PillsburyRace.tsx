@@ -42,7 +42,6 @@ export function PillsburyRace({
   seasons,
   nameOf,
   concluded = false,
-  me,
 }: {
   players: Player[];
   elo: EloReport;
@@ -53,7 +52,6 @@ export function PillsburyRace({
   seasons: SeasonArchive[];
   nameOf: (handle: string) => string;
   concluded?: boolean; // every game of the season played: the trophy is decided
-  me?: string; // the visitor's own player («Io sono…»): their row marked
 }) {
   const race = useMemo(() => pillsburyRace(players, elo, calendar, history, gameStates, withdrawals), [players, elo, calendar, history, gameStates, withdrawals]);
   const reigning = reigningPillsbury(seasons);
@@ -77,7 +75,7 @@ export function PillsburyRace({
     const counted = race.counted[handle];
     const r = race.rows.find((x) => x.handle === handle);
     return (
-      <tr key={handle} className={[className, me && me.toLowerCase() === handle.toLowerCase() ? 'row-me' : ''].filter(Boolean).join(' ')}>
+      <tr key={handle} className={className}>
         <td className="col-rank"><span className="rank">{rank}</span></td>
         <td className="sticky-col">
           <div className="player-cell">

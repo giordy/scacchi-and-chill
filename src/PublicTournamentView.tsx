@@ -27,11 +27,7 @@ import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { tournamentElo } from "./lib/tournamentElo";
 import { PillsburyRace } from "./components/PillsburyRace";
-import { pillsburyRace, projectedPoints, reigningPillsbury } from "./lib/pillsbury";
-import { pronosticoPoints } from "./lib/tournamentElo";
-import { myCurrentGame } from "./lib/me";
-import { useMe } from "./hooks/useMe";
-import { MyCard } from "./components/MyCard";
+import { reigningPillsbury } from "./lib/pillsbury";
 import { PillsburyIcon } from "./components/PillsburyIcon";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound, stateOf } from "./lib/games";
@@ -188,24 +184,6 @@ export function PublicTournamentView({
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
   // Places shared on a full tie (points, Sonneborn-Berger, wins); none before the first game
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
-  // «Io sono…»: the visitor's own row and card, once they said who they are (here, or on their player page)
-  const [meHandle, setMe] = useMe();
-  const me = players.find((p) => p.handle.toLowerCase() === meHandle.toLowerCase())?.handle;
-  const isMe = (handle: string) => !!me && handle.toLowerCase() === me.toLowerCase();
-  const mine = useMemo(() => {
-    if (!me) return null;
-    const idx = standings.findIndex((p) => p.handle.toLowerCase() === me.toLowerCase());
-    const race = pillsburyRace(players, elo, allGames, history, gameStates, tournamentMeta.withdrawals);
-    const forecast = race.suspended ? undefined : race.forecasts[me];
-    return {
-      idx,
-      game: myCurrentGame(me, allGames, gameStates),
-      objective: forecast ? pronosticoPoints(forecast) : undefined,
-      pillsburyPoints: forecast?.points,
-      // The pace says something only after a game that counts for the trophy
-      projected: forecast && forecast.played > 0 ? projectedPoints(forecast) : undefined,
-    };
-  }, [me, standings, players, elo, allGames, history, gameStates, tournamentMeta.withdrawals]);
   const started = seasonStarted(standings);
   const champions = reigningChampions(tournamentMeta.winners);
   // Who won the Trofeo Pillsbury last: its medal next to the name, as the crown for the champion
@@ -342,36 +320,6 @@ export function PublicTournamentView({
 
       {activeTab === "standings" && (
         <section role="tabpanel" id="pub-panel-standings" aria-labelledby="pub-tab-standings">
-          {me && mine && mine.idx >= 0 && (
-            <MyCard
-              handle={me}
-              name={standings[mine.idx].name}
-              rank={started ? ranks[mine.idx] : null}
-              points={standings[mine.idx].points}
-              game={mine.game}
-              objective={mine.objective}
-              pillsburyPoints={mine.pillsburyPoints}
-              projected={mine.projected}
-              nameOf={nameOf}
-              onForget={() => setMe("")}
-            />
-          )}
-          {!me && players.length > 0 && (
-            <div className="me-picker">
-              <label htmlFor="me-picker">⭐ Giochi anche tu?</label>
-              <select id="me-picker" className="filter-select" value="" onChange={(e) => setMe(e.target.value)}>
-                <option value="">Io sono…</option>
-                {[...players]
-                  .sort((a, b) => nameOf(a.handle).localeCompare(nameOf(b.handle), "it"))
-                  .map((p) => (
-                    <option key={p.handle} value={p.handle}>
-                      {nameOf(p.handle)}
-                    </option>
-                  ))}
-              </select>
-              <span className="me-picker-note">La tua riga resta evidenziata e la tua partita in cima.</span>
-            </div>
-          )}
           {/* First the trophy, each with its own card: the championship first, the Trofeo Pillsbury next to it */}
           <div className="trophy-switch" role="group" aria-label="Trofeo">
             <button
@@ -430,7 +378,7 @@ export function PublicTournamentView({
               <h2 className="title-needs-heading">Cosa serve per vincere</h2>
               <ul>
                 {race.needs.map((n) => (
-                  <li key={n.handle} className={isMe(n.handle) ? "is-me" : ""}>
+                  <li key={n.handle}>
                     <strong>{nameOf(n.handle)}</strong>: {needText(n)}.
                   </li>
                 ))}
@@ -454,7 +402,7 @@ export function PublicTournamentView({
               </thead>
               <tbody>
                 {standings.map((p, idx) => (
-                  <tr key={p.handle} className={[leader && ranks[idx] === 1 ? "row-leader" : "", isMe(p.handle) ? "row-me" : ""].filter(Boolean).join(" ")}>
+                  <tr key={p.handle} className={leader && ranks[idx] === 1 ? "row-leader" : ""}>
                     <td className="col-rank">
                       <RankCell rank={started ? ranks[idx] : null} points={p.points} tied={started && isTied(ranks, idx)} />
                     </td>
@@ -556,7 +504,6 @@ export function PublicTournamentView({
           seasons={seasons}
           nameOf={nameOf}
           concluded={concluded}
-          me={me}
         />
       )}
 
