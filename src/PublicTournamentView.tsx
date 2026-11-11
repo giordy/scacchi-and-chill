@@ -38,6 +38,8 @@ import { AllTimeSection } from "./components/AllTimeSection";
 import { allTimeNameOf, allTimeRecords, allTimeTable, seasonsWithGames } from "./lib/allTime";
 import { holiday, seasonEndOn, showHoliday } from "./lib/holiday";
 import { Timeline } from "./components/Timeline";
+import { currentSeasonActivity, newsSince, plainText } from "./lib/activity";
+import { useLastVisit } from "./hooks/useLastVisit";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -150,6 +152,30 @@ export function PublicTournamentView({
     showHoliday(shownHoliday);
     return () => showHoliday(holiday);
   }, [shownHoliday]);
+  // Cronaca: what happened this season, and what is new since the visitor last opened it
+  const activity = useMemo(
+    () =>
+      currentSeasonActivity({
+        season: tournamentMeta.season,
+        masterName: tournamentMeta.masterName,
+        masterOpening: tournamentMeta.masterOpening,
+        masterAnecdotes: tournamentMeta.masterAnecdotes,
+        players,
+        history,
+        gameStates,
+        schedule,
+        withdrawals: tournamentMeta.withdrawals,
+        archives: seasons,
+        elo,
+      }),
+    [tournamentMeta.season, tournamentMeta.masterName, tournamentMeta.masterOpening, tournamentMeta.masterAnecdotes, players, history, gameStates, schedule, tournamentMeta.withdrawals, seasons, elo]
+  );
+  const { lastVisit, seen, markSeen } = useLastVisit();
+  useEffect(() => {
+    if (view === "timeline") markSeen();
+  }, [view, markSeen]);
+  const news = seen ? [] : newsSince(activity, lastVisit);
+
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
   // Places shared on a full tie (points, Sonneborn-Berger, wins); none before the first game
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
@@ -238,6 +264,15 @@ export function PublicTournamentView({
           {leaderLine}
         </p>
 
+        {/* The latest news since the last visit, on one line: the cronaca tells the rest */}
+        {news.length > 0 && activeTab !== "matches" && (
+          <a href={publicViewHref("timeline")} className="hero-news">
+            <span className="hero-news-label">{news.length === 1 ? "Novità" : `${news.length} novità`}</span>
+            <span className="hero-news-text">{plainText(news[0], nameOf)}</span>
+            <span aria-hidden="true">→</span>
+          </a>
+        )}
+
         {progress.total > 0 && (
           <figure className="season-board">
             <div
@@ -272,9 +307,15 @@ export function PublicTournamentView({
             aria-selected={activeTab === t.key}
             tabIndex={activeTab === t.key || (!activeTab && t.key === "standings") ? 0 : -1}
             aria-controls={`pub-panel-${t.key}`}
-            onClick={() => show(t.key)}
+            // With news, the Partite tab opens the cronaca
+            onClick={() => show(t.key === "matches" && news.length > 0 ? "timeline" : t.key)}
           >
             {t.label}
+            {t.key === "matches" && news.length > 0 && (
+              <span className="tab-badge" aria-label={news.length === 1 ? ", 1 novità" : `, ${news.length} novità`}>
+                {news.length}
+              </span>
+            )}
           </button>
         ))}
       </nav>
@@ -485,14 +526,8 @@ export function PublicTournamentView({
           {view === "timeline" && (
             <Timeline
               season={tournamentMeta.season}
-              masterName={tournamentMeta.masterName}
-              masterOpening={tournamentMeta.masterOpening}
-              masterAnecdotes={tournamentMeta.masterAnecdotes}
-              players={players}
-              history={history}
-              gameStates={gameStates}
-              schedule={schedule}
-              withdrawals={tournamentMeta.withdrawals}
+              events={activity}
+              lastVisit={lastVisit}
               seasons={seasons}
               elo={elo}
               nameOf={nameOf}

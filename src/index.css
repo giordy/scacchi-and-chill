@@ -1188,6 +1188,59 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
   border-bottom-color: var(--brass);
 }
 
+/* News since the last visit, on the Partite tab: it opens the cronaca */
+.tab-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 5px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--brass);
+  color: var(--panel);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: 2px;
+}
+
+/* The latest news in the hero, one line: the rest is in the cronaca */
+.hero-news {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: -4px 0 12px;
+  color: var(--felt-ink);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.hero-news-label {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--felt-brass);
+  color: var(--felt-deep);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hero-news-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-news:hover .hero-news-text {
+  text-decoration: underline;
+}
+
+.hero.is-compact .hero-news {
+  margin: 6px 0 0;
+}
+
 /* Tables */
 .table-responsive {
   width: 100%;
