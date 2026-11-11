@@ -64,7 +64,7 @@ describe('currentSeasonActivity', () => {
     expect(all[0].detail).toBe('con 1½ punti');
     // A shared first place is no new leader
     expect(all.filter((e) => e.kind === 'leader')).toHaveLength(1);
-    expect(all.find((e) => e.gameId === 'aaaaaaaa')!.tags).toEqual(["♞ L'apertura di Capablanca"]);
+    expect(all.find((e) => e.gameId === 'aaaaaaaa')!.tags).toEqual(["L'apertura di Capablanca"]);
   });
 
   it('tells withdrawals and replacements, and counts forfeits from their date without an event each', () => {
@@ -188,7 +188,7 @@ describe('more of the season', () => {
     // With Bruno alone in second place, Bruno – Anna is one
     const second = { ...late, g0000003: { id: 'g0000003', status: 'resign', winner: 'white' as const, lastMoveAt: T0 + 14 * DAY } };
     const out2 = currentSeasonActivity({ season: 'S', players: four, history: games, gameStates: second });
-    expect(out2.find((e) => e.gameId === 'g0000006')!.tags).toEqual(['🔝 Scontro al vertice']);
+    expect(out2.find((e) => e.gameId === 'g0000006')!.tags).toEqual(['Scontro al vertice']);
   });
 });
 

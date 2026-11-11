@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { HistoryGame, LichessExportGame, MasterAnecdote, Player, ScheduledMatch, SeasonArchive, Withdrawal } from '../types';
-import { ActivityEvent, archivedSeasonActivity, currentSeasonActivity, isNewSince } from '../lib/activity';
+import { ActivityEvent, ActivityKind, archivedSeasonActivity, currentSeasonActivity, isNewSince } from '../lib/activity';
 import { EloReport } from '../lib/tournamentElo';
 import { playerHref } from '../lib/routes';
 
@@ -58,6 +58,12 @@ function dayLabel(ms: number, now = new Date()): string {
   });
   return text[0].toUpperCase() + text.slice(1);
 }
+
+// Three weights, so the eye finds what matters: the frame of the season (rounds, anecdotes) as a
+// light line, results and withdrawals as cards, the moments worth telling as cards with their emoji
+const FRAME = new Set<ActivityKind>(['season', 'round', 'roundEnd', 'anecdote']);
+const HIGHLIGHT = new Set<ActivityKind>(['leader', 'firstWin', 'streak', 'champion', 'end']);
+const levelOf = (kind: ActivityKind) => (FRAME.has(kind) ? 'is-frame' : HIGHLIGHT.has(kind) ? 'is-highlight' : 'is-card');
 
 const timeLabel = (ms: number) => new Date(ms).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
 
@@ -131,8 +137,8 @@ export function Timeline(props: TimelineProps) {
             <h3 className="timeline-day-title">{dayLabel(day.at)}</h3>
             <ol className="timeline-list">
               {day.events.map((e) => (
-                <li key={e.key} className={`timeline-item is-${e.kind}${!archive && isNewSince(e, lastVisit) ? ' is-new' : ''}`}>
-                  <span className="timeline-emoji" aria-hidden="true">{e.emoji}</span>
+                <li key={e.key} className={`timeline-item ${levelOf(e.kind)} is-${e.kind}${!archive && isNewSince(e, lastVisit) ? ' is-new' : ''}`}>
+                  {HIGHLIGHT.has(e.kind) && <span className="timeline-emoji" aria-hidden="true">{e.emoji}</span>}
                   <div className="timeline-body">
                     <p className="timeline-text">
                       {e.parts.map((p, i) =>
@@ -155,6 +161,7 @@ export function Timeline(props: TimelineProps) {
                     )}
                   </div>
                   <span className="timeline-meta">
+                    {e.score && <span className="timeline-score">{e.score}</span>}
                     <time dateTime={new Date(e.at).toISOString()}>{timeLabel(e.at)}</time>
                     {e.link && (
                       <a href={e.link.href} className="timeline-game-link">

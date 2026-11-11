@@ -2397,9 +2397,46 @@ details.anecdote > summary::-webkit-details-marker {
 }
 
 .timeline-item.is-new::before,
-.timeline-item.is-end::before,
-.timeline-item.is-champion::before {
+.timeline-item.is-highlight::before {
   background: var(--brass);
+}
+
+/* Moments worth telling: a brass edge */
+.timeline-item.is-highlight {
+  border-color: color-mix(in srgb, var(--brass) 55%, var(--line));
+}
+
+/* The frame of the season (rounds, anecdotes): a light line, no card */
+.timeline-item.is-frame {
+  padding: 4px 12px;
+  border-color: transparent;
+  background: none;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.timeline-item.is-frame::before {
+  top: 11px;
+  width: 8px;
+  height: 8px;
+  left: -18px;
+}
+
+.timeline-item.is-frame .timeline-detail {
+  font-size: 13px;
+}
+
+.timeline-item.is-frame.is-new {
+  border-color: transparent;
+  background: none;
+  color: var(--ink);
+}
+
+.timeline-score {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+  white-space: nowrap;
 }
 
 .timeline-item.is-new {
