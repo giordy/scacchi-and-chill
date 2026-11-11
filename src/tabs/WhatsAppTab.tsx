@@ -17,7 +17,7 @@ function AwardsSection({ season, config, history, gameStates, flash, seasons }: 
   gameStates: Record<string, LichessExportGame>;
   flash: Flash;
 }) {
-  const awards = computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals);
+  const awards = computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening });
   if (awards.length === 0) return <p className="note note-flush">I premi compaiono quando ci sono partite concluse.</p>;
   const copy = async () => {
     try {

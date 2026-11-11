@@ -22,6 +22,7 @@ import {
   LichessExportGame,
   SeasonArchive,
   EloSeed,
+  FamousGame,
 } from "./types";
 
 const firebaseConfig = {
@@ -51,6 +52,8 @@ export interface TournamentDocData {
   subtitle?: string;
   imageUrl?: string;
   masterName?: string;
+  masterOpening?: string;
+  famousGame?: FamousGame;
   description?: string;
   howItWorks?: string;
   fairPlayText?: string;
@@ -83,6 +86,9 @@ export async function saveTournamentFullToFirebase(data: {
     if (data.meta.subtitle !== undefined) payload.subtitle = data.meta.subtitle;
     if (data.meta.imageUrl !== undefined) payload.imageUrl = data.meta.imageUrl;
     if (data.meta.masterName !== undefined) payload.masterName = data.meta.masterName;
+    if (data.meta.masterOpening !== undefined) payload.masterOpening = data.meta.masterOpening;
+    // Firestore rejects undefined values (a game without a note): the JSON round trip drops them
+    if (data.meta.famousGame !== undefined) payload.famousGame = JSON.parse(JSON.stringify(data.meta.famousGame));
     payload.description = data.meta.description;
     if (data.meta.howItWorks !== undefined) payload.howItWorks = data.meta.howItWorks;
     if (data.meta.fairPlayText !== undefined) payload.fairPlayText = data.meta.fairPlayText;

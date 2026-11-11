@@ -9,6 +9,7 @@ export type { TimedGame } from './moveTimes';
 import { formatPace } from './playerProfile';
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { plural } from './games';
+import { masterSurname, openingFamily, playsFamily } from './masterOpening';
 // L'ammazzagiganti (most colpacci) was given until the Trofeo Pillsbury took its place: past
 // seasons keep it, with the Lichess ratings and the gap it used then.
 const LEGACY_UPSET_GAP = 150;
@@ -51,7 +52,8 @@ export function computeSeasonAwards(
   gameStates: Record<string, LichessExportGame>,
   seasons: SeasonArchive[] = [], // archived seasons, for the Elo del torneo of the Trofeo Pillsbury
   seeds?: EloSeed[], // where this season's esordienti started (TournamentMeta.seeds)
-  withdrawals?: Withdrawal[] // who left: out of the race for the Trofeo Pillsbury
+  withdrawals?: Withdrawal[], // who left: out of the race for the Trofeo Pillsbury
+  master?: { name?: string; opening?: string } // the season's master and their opening family
 ): SeasonAward[] {
   const nameOf = (h: string) => players.find((p) => p.handle === h)?.name ?? h;
   const who = (handles: string[]) => handles.map((handle) => ({ handle, name: nameOf(handle) }));
@@ -146,6 +148,31 @@ export function computeSeasonAwards(
       winners: who(wall.handles),
       detail: plural(wall.best, "patta", "patte"),
     });
+  }
+
+  // Premio <maestro>: who played the master's opening most, from the side that chooses it (White
+  // for an opening or a gambit, Black for a defense). No game in it, no award.
+  const family = openingFamily(master?.opening);
+  if (family) {
+    const counts = new Map<string, number>();
+    const played = games.filter((g) => playsFamily(g.state.opening?.name, family));
+    played.forEach((g) => {
+      const h = family.side === 'white' ? g.white : g.black;
+      counts.set(h, (counts.get(h) ?? 0) + 1);
+    });
+    const top = leaders(counts, players);
+    if (top.handles.length > 0) {
+      const surname = masterSurname(master?.name);
+      awards.push({
+        id: "master-opening",
+        emoji: "♞",
+        title: surname ? `Premio ${surname}` : "Premio del maestro",
+        description: `A chi ha giocato più volte l'apertura ${surname ? `di ${surname}` : "del maestro"}, ${family.label}, ${family.side === "white" ? "con il bianco" : "con il nero"}`,
+        winners: who(top.handles),
+        detail: `${family.label}: ${plural(top.best, "partita", "partite")}`,
+        ...linked(played.filter((g) => top.handles.includes(family.side === "white" ? g.white : g.black)).map((g) => g.state.id)),
+      });
+    }
   }
 
   return awards;

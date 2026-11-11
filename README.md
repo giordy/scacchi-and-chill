@@ -14,7 +14,7 @@ Login Google; organizzatore è chi ha un documento in `admins/<email>`. Ogni azi
 - **Turni**: crea le sfide su Lichess, ricrea o sostituisce un link, prepara messaggio e bollettino per WhatsApp.
 - **WhatsApp**: prompt per il racconto della stagione, premi. I testi dei messaggi e le frasi del bollettino stanno in `config.json`: si cambiano lì, con un nuovo deploy.
 - **Giocatori**: registro (il nome vale anche per le stagioni passate), chi gioca la stagione, ritiri (regola della metà o sostituto).
-- **Stagioni**: stagione corrente e foto del maestro, regolamento, Elo di partenza, calendario (girone all'italiana), chiusura della stagione e Albo d'Oro.
+- **Stagioni**: stagione corrente, foto del maestro, la sua apertura e la sua partita celebre, regolamento, Elo di partenza, calendario (girone all'italiana), chiusura della stagione e Albo d'Oro.
 - **Impostazioni**: token Lichess (serve per le sfide e gli Elo di partenza), copia e ripristino dei dati.
 
 Chiudere la stagione archivia classifica, premi e partite in forma compatta, aggiorna l'Albo d'Oro e poi cancella le partite: se l'archiviazione fallisce non cancella nulla. Ogni notte il workflow `backup.yml` salva i dati pubblici sul branch `backups`.
@@ -26,6 +26,7 @@ Chiudere la stagione archivia classifica, premi e partite in forma compatta, agg
 - **Colpaccio**: vittoria contro chi aveva almeno 200 punti di Elo in più, o patta con almeno 400.
 - **Obiettivo**: i punti previsti dall'Elo a inizio stagione contro il calendario, fisso per la stagione.
 - **Trofeo Pillsbury**: a chi supera di più il proprio obiettivo, di almeno mezzo punto. Fuori dalla corsa esordienti e ritirati; sospeso con meno di 4 giocatori in corsa.
+- **Apertura del maestro**: una famiglia di aperture scelta per la stagione (nomi di Lichess, `src/lib/masterOpening.ts`). Le partite che la giocano hanno un'etichetta; il **Premio <maestro>** va a chi l'ha giocata di più dal lato che la sceglie (bianco per aperture e gambetti, nero per le difese). Nessuna partita, nessun premio.
 - **Premi divertenti**: Fulmine (la vittoria più rapida), Il maratoneta (la più lunga), Il bradipo (il più lento a muovere), Il muro (più patte, almeno 2).
 
 ## Configurazione Firebase

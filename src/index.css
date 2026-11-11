@@ -1729,11 +1729,17 @@ a.champion-badge {
 .winner-season {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 2px 10px;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--line);
+}
+
+.winner-season-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .winner-season-name {
@@ -3179,4 +3185,48 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 
 :root[data-holiday="season-end"] .holiday-ground {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M0 24V18Q100 12 200 17T400 15V24Z' fill='%23e3b54e' fill-opacity='0.85'/%3E%3Cg fill='%23f6dc94'%3E%3Crect x='30' y='13' width='4' height='3'/%3E%3Crect x='90' y='11' width='3' height='4'/%3E%3Crect x='150' y='14' width='4' height='3'/%3E%3Crect x='215' y='12' width='3' height='4'/%3E%3Crect x='280' y='13' width='4' height='3'/%3E%3Crect x='345' y='11' width='3' height='4'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* The master's opening: a brass tag on the games that play it, a line in the Stagione tab */
+.master-opening-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--brass-soft);
+  color: var(--brass);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dossier-opening {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+.dossier-opening strong {
+  color: var(--ink);
+}
+
+/* The master's famous game, replayed from Lichess */
+.famous-game-title {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+}
+.famous-game-play {
+  margin-top: 10px;
+}
+
+/* Albo d'Oro: the master of each season, a small round photo before the season's name */
+.winner-master {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: grayscale(0.35);
+  box-shadow: 0 0 0 2px var(--brass-soft);
 }

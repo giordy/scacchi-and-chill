@@ -41,13 +41,15 @@ export function buildSeasonArchive(
   };
   if (meta.masterName) archive.masterName = meta.masterName;
   if (meta.imageUrl) archive.imageUrl = meta.imageUrl;
+  if (meta.masterOpening) archive.masterOpening = meta.masterOpening;
+  if (meta.famousGame?.url) archive.famousGame = meta.famousGame;
   // When it was played: from the games, ending at the archive date if games were left unfinished
   const period = periodOfGames(history, gameStates);
   if (period.start) archive.start = period.start;
   archive.end = period.end ?? monthKey(now.getTime());
   // No champion until at least one game has been scored
   if (top && top.points > 0) archive.champion = { handle: top.handle, name: top.name, points: top.points };
-  const awards = computeSeasonAwards(players, history, gameStates, seasons.filter((s) => s.id !== seasonId(meta.season)), meta.seeds, meta.withdrawals);
+  const awards = computeSeasonAwards(players, history, gameStates, seasons.filter((s) => s.id !== seasonId(meta.season)), meta.seeds, meta.withdrawals, { name: meta.masterName, opening: meta.masterOpening });
   if (awards.length > 0) archive.awards = awards;
   // Where the esordienti started: the Elo del torneo of the next seasons is computed again from the archives
   if (meta.seeds && meta.seeds.length > 0) archive.seeds = meta.seeds;

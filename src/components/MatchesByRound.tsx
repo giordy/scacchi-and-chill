@@ -15,6 +15,12 @@ import { stateOf } from '../lib/games';
 import { playerHref } from '../lib/routes';
 import { PresenceInfo, seenAtOf } from '../lib/presence';
 import { ColorDot } from './PresenceDot';
+import { OpeningFamily, playsFamily } from '../lib/masterOpening';
+
+export interface MasterTag {
+  family: OpeningFamily;
+  surname: string;
+}
 
 interface MatchesByRoundProps {
   games: HistoryGame[]; // already filtered and sorted by round
@@ -24,11 +30,12 @@ interface MatchesByRoundProps {
   summits?: Map<string, string>; // scontro al vertice: positions text by summitKey
   presence?: PresenceInfo; // when each player was last on Lichess, for the ongoing games
   elo?: EloReport; // Elo del torneo, for the colpacci
+  masterTag?: MasterTag; // the master's opening, tagged on the games that play it
 }
 
 // Public "Partite": the current round first, then the unfinished games of earlier rounds,
 // the upcoming rounds and finally the played rounds, newest first; both collapsed
-export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence, elo }: MatchesByRoundProps) {
+export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence, elo, masterTag }: MatchesByRoundProps) {
   const stateOfGame = (g: HistoryGame) => stateOf(g, gameStates);
   const progressOf = (g: HistoryGame) => gameProgress(stateOfGame(g));
   const legOf = (round: string) =>
@@ -62,6 +69,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
           summit={summits?.get(summitKey(g))}
           presence={presence}
           elo={elo}
+          masterTag={masterTag}
         />
       ))}
     </div>
@@ -163,6 +171,7 @@ function MatchCard({
   summit,
   presence,
   elo,
+  masterTag,
 }: {
   game: HistoryGame;
   state?: LichessExportGame;
@@ -171,6 +180,7 @@ function MatchCard({
   summit?: string; // e.g. "1° contro 2°"
   presence?: PresenceInfo;
   elo?: EloReport;
+  masterTag?: MasterTag;
 }) {
   // Scheduled game not created on Lichess yet
   let badge = game.url
@@ -188,6 +198,7 @@ function MatchCard({
   const phase = progress === 'ongoing' ? gamePhase(s) : undefined;
   const progressText = [moves, phase && PHASE_LABEL[phase]].filter(Boolean).join(' · ');
   const opening = s?.opening?.name ?? '';
+  const inMasterOpening = !!masterTag && playsFamily(opening, masterTag.family);
   const upset = progress === 'finished' ? upsetOf(s, elo, { ...game, id: extractGameId(game.url) || undefined }) : null;
 
   // Final position only: during the game Lichess hides the latest moves
@@ -250,6 +261,11 @@ function MatchCard({
               {showRound && <span className="match-round">Turno {game.round}</span>}
               {showRound && opening ? " · " : ""}
               {opening}
+            </span>
+          )}
+          {inMasterOpening && (
+            <span className="master-opening-tag">
+              <span aria-hidden="true">♞</span> L'apertura {masterTag!.surname ? `di ${masterTag!.surname}` : "del maestro"}
             </span>
           )}
           {(progressText || upset || summit) && (

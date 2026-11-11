@@ -30,7 +30,9 @@ import { PillsburyRace } from "./components/PillsburyRace";
 import { reigningPillsbury } from "./lib/pillsbury";
 import { PillsburyIcon } from "./components/PillsburyIcon";
 import { SeasonAwards } from "./components/SeasonAwards";
-import { byRound } from "./lib/games";
+import { byRound, stateOf } from "./lib/games";
+import { masterSurname, openingFamily, playsFamily } from "./lib/masterOpening";
+import { GameReplay } from "./components/GameReplay";
 import { PresenceInfo } from "./lib/presence";
 import { AllTimeSection } from "./components/AllTimeSection";
 import { allTimeNameOf, allTimeRecords, allTimeTable, seasonsWithGames } from "./lib/allTime";
@@ -125,7 +127,7 @@ export function PublicTournamentView({
       crosstable,
       progress,
       concluded,
-      awards: concluded ? computeSeasonAwards(players, history, gameStates, seasons, tournamentMeta.seeds, tournamentMeta.withdrawals) : [],
+      awards: concluded ? computeSeasonAwards(players, history, gameStates, seasons, tournamentMeta.seeds, tournamentMeta.withdrawals, { name: tournamentMeta.masterName, opening: tournamentMeta.masterOpening }) : [],
       allGames,
       rounds: [...new Set(allGames.map((g) => g.round))].sort(byRound),
       summits: summitGames(players, allGames, gameStates),
@@ -134,7 +136,7 @@ export function PublicTournamentView({
       // When the current season is being played: "da novembre 2026", both months once it is over
       currentPeriod: periodLabel(periodOfGames(history, gameStates), true),
     };
-  }, [players, history, gameStates, schedule, seasons]);
+  }, [players, history, gameStates, schedule, seasons, tournamentMeta.masterName, tournamentMeta.masterOpening]);
   const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits, race, stats, currentPeriod } = season;
 
   // The season-end celebration takes the place of a calendar holiday while the season is over
@@ -191,6 +193,14 @@ export function PublicTournamentView({
   const masterPhoto = useImageSrc(
     tournamentMeta.imageUrl || (!masterName || /capablanca/i.test(masterName) ? "assets/capablanca.jpg" : "")
   );
+  // The master's opening: a tag on the games that play it, and how many do so far
+  const masterFamily = openingFamily(tournamentMeta.masterOpening);
+  const masterTag = masterFamily ? { family: masterFamily, surname: masterSurname(masterName) } : undefined;
+  const masterOpeningGames = masterFamily
+    ? history.filter((g) => playsFamily(stateOf(g, gameStates)?.opening?.name, masterFamily)).length
+    : 0;
+  const famousGame = tournamentMeta.famousGame?.url ? tournamentMeta.famousGame : undefined;
+  const [famousReplay, setFamousReplay] = useState(false);
   const days = tournamentMeta.daysPerMove ?? config.defaults.days;
   const rated = tournamentMeta.rated ?? config.defaults.rated;
 
@@ -492,6 +502,7 @@ export function PublicTournamentView({
               summits={summits}
               presence={presence}
               elo={elo}
+              masterTag={masterTag}
             />
           )}
         </section>
@@ -512,9 +523,34 @@ export function PublicTournamentView({
                 {tournamentMeta.subtitle && <p className="dossier-subtitle">«{tournamentMeta.subtitle}»</p>}
                 <div className="story-text">{formatWhatsAppMarkup(tournamentMeta.description || DEFAULT_TOURNAMENT.description)}</div>
                 {currentPeriod && <p className="dossier-period">📅 {currentPeriod[0].toUpperCase() + currentPeriod.slice(1)}</p>}
+                {masterTag && (
+                  <p className="dossier-opening">
+                    <span aria-hidden="true">♞</span> L'apertura {masterTag.surname ? `di ${masterTag.surname}` : "del maestro"}:{" "}
+                    <strong>{masterTag.family.label}</strong>
+                    {masterOpeningGames > 0
+                      ? `, giocata in ${masterOpeningGames === 1 ? "una partita" : `${masterOpeningGames} partite`} finora`
+                      : ", ancora nessuno l'ha giocata"}
+                    . A fine stagione, il Premio {masterTag.surname || "del maestro"} a chi l'ha giocata di più{" "}
+                    {masterTag.family.side === "white" ? "con il bianco" : "con il nero"}.
+                  </p>
+                )}
               </div>
             </div>
           </article>
+
+          {famousGame && (
+            <article className="dossier-card famous-game">
+              <h2 className="section-heading">La partita di {masterTag?.surname || masterSurname(masterName) || "del maestro"}</h2>
+              <p className="famous-game-title">{famousGame.title}</p>
+              {famousGame.note && <div className="story-text">{formatWhatsAppMarkup(famousGame.note)}</div>}
+              <button type="button" className="secondary famous-game-play" onClick={() => setFamousReplay(true)}>
+                ▶ Rivedi la partita
+              </button>
+              {famousReplay && (
+                <GameReplay url={famousGame.url} title={famousGame.title} onClose={() => setFamousReplay(false)} />
+              )}
+            </article>
+          )}
 
           {anecdotes.length > 0 && (
             <article className="dossier-card">

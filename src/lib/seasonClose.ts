@@ -39,6 +39,8 @@ export async function closeSeason(input: SeasonCloseInput, io: SeasonCloseIO): P
     masterName: input.nextMaster.trim(),
     imageUrl: '',
     subtitle: '',
+    masterOpening: '', // chosen again with the new master
+    famousGame: { url: '', title: '' },
     winners: withChampion(meta.winners, snapshot),
     withdrawals: [],
     masterAnecdotes: [],

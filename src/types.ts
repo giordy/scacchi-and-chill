@@ -113,12 +113,23 @@ export interface Withdrawal {
   undo?: { players: Player[]; schedule: ScheduledMatch[] };
 }
 
+export interface FamousGame {
+  url: string;
+  title: string;
+  note?: string;
+}
+
 export interface TournamentMeta {
   title: string;
   season: string;
   subtitle?: string;
   imageUrl?: string;
   masterName?: string;
+  // Key of the master's opening family (lib/masterOpening.ts), '' or missing when none is chosen
+  masterOpening?: string;
+  // A famous game of the master, replayed in the Stagione tab: a Lichess game (imported or from its
+  // masters database), with a title such as "Capablanca – Marshall, New York 1918"; url '' when none
+  famousGame?: FamousGame;
   description: string;
   howItWorks?: string;
   fairPlayText?: string;
@@ -254,6 +265,8 @@ export interface SeasonArchive {
   title: string;
   masterName?: string;
   imageUrl?: string;
+  masterOpening?: string; // key of the master's opening family, when one was chosen
+  famousGame?: FamousGame;
   archivedAt: string; // ISO date
   start?: string; // first month of the season, "2026-11"
   end?: string; // last month

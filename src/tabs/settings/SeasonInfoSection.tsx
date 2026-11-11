@@ -3,6 +3,8 @@ import { TournamentMeta } from '../../types';
 import { DEFAULT_TOURNAMENT } from '../../lib/tournament';
 import { compressImage, isMediaRef, mediaRef } from '../../lib/media';
 import { seasonId } from '../../lib/seasons';
+import { OPENING_FAMILIES } from '../../lib/masterOpening';
+import { extractGameId } from '../../lib/utils';
 import { saveMediaImage } from '../../firebaseService';
 import { primeImage, useImageSrc } from '../../hooks/useImageSrc';
 
@@ -25,14 +27,18 @@ export function SeasonInfoSection({
     subtitle: meta?.subtitle ?? "",
     imageUrl: meta?.imageUrl ?? "",
     description: meta?.description || DEFAULT_TOURNAMENT.description,
+    masterOpening: meta?.masterOpening ?? "",
+    famousUrl: meta?.famousGame?.url ?? "",
+    famousTitle: meta?.famousGame?.title ?? "",
+    famousNote: meta?.famousGame?.note ?? "",
   });
   const [form, setForm] = useState(fromMeta);
   // A new season (started from "Fine stagione") changes these fields from outside
-  useEffect(() => setForm(fromMeta()), [meta?.title, meta?.season, meta?.masterName, meta?.subtitle, meta?.imageUrl, meta?.description]);
+  useEffect(() => setForm(fromMeta()), [meta?.title, meta?.season, meta?.masterName, meta?.subtitle, meta?.imageUrl, meta?.description, meta?.masterOpening, meta?.famousGame]);
 
   const field = (key: keyof typeof form) => ({
     value: form[key],
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setForm((f) => ({ ...f, [key]: e.target.value })),
   });
 
@@ -70,6 +76,15 @@ export function SeasonInfoSection({
       flash("err", "Nome del torneo e stagione sono obbligatori.");
       return;
     }
+    const famousUrl = form.famousUrl.trim();
+    if (famousUrl && !(famousUrl.startsWith("https://lichess.org/") && extractGameId(famousUrl))) {
+      flash("err", "La partita del maestro va indicata con il link di una partita su Lichess (https://lichess.org/…).");
+      return;
+    }
+    if (famousUrl && !form.famousTitle.trim()) {
+      flash("err", "Dai un titolo alla partita del maestro, es. «Capablanca – Marshall, New York 1918».");
+      return;
+    }
     onUpdateTournamentMeta({
       title: form.title.trim(),
       season: form.season.trim(),
@@ -77,6 +92,10 @@ export function SeasonInfoSection({
       subtitle: form.subtitle.trim(),
       imageUrl: form.imageUrl.trim(),
       description: form.description.trim(),
+      masterOpening: form.masterOpening,
+      famousGame: famousUrl
+        ? { url: famousUrl, title: form.famousTitle.trim(), ...(form.famousNote.trim() ? { note: form.famousNote.trim() } : {}) }
+        : { url: "", title: "" },
     });
     flash("ok", "Stagione aggiornata.");
   };
@@ -136,6 +155,39 @@ export function SeasonInfoSection({
       <div>
         <label htmlFor="cfg-desc">Presentazione della stagione</label>
         <textarea id="cfg-desc" rows={4} className="ta-md" {...field("description")} />
+      </div>
+      <div>
+        <label htmlFor="cfg-opening">Apertura del maestro</label>
+        <select id="cfg-opening" {...field("masterOpening")}>
+          <option value="">Nessuna</option>
+          {OPENING_FAMILIES.map((f) => (
+            <option key={f.key} value={f.key}>
+              {f.label} ({f.side === "white" ? "bianco" : "nero"})
+            </option>
+          ))}
+        </select>
+        <p className="note">
+          Le partite che la giocano hanno un'etichetta, e a fine stagione il Premio del maestro va a chi l'ha giocata di
+          più, dal lato indicato. Conta tutta la famiglia: per la Siciliana, anche Najdorf, Dragone e le altre varianti.
+        </p>
+      </div>
+      <div className="grid2">
+        <div>
+          <label htmlFor="cfg-famous-url">Partita celebre del maestro</label>
+          <input id="cfg-famous-url" type="url" placeholder="https://lichess.org/…" {...field("famousUrl")} />
+        </div>
+        <div>
+          <label htmlFor="cfg-famous-title">Titolo della partita</label>
+          <input id="cfg-famous-title" type="text" placeholder="es. Capablanca – Marshall, New York 1918" {...field("famousTitle")} />
+        </div>
+      </div>
+      <div>
+        <label htmlFor="cfg-famous-note">Due righe sulla partita (facoltative)</label>
+        <textarea id="cfg-famous-note" rows={2} {...field("famousNote")} />
+        <p className="note">
+          Una partita su Lichess: cercala nel database dei maestri, oppure incolla la sua notazione (PGN) in
+          lichess.org/paste e copia qui il link che ottieni. Nella sezione Stagione si rivede mossa per mossa.
+        </p>
       </div>
       <button className="primary" type="button" onClick={save}>
         Salva stagione

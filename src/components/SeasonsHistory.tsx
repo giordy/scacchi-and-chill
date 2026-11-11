@@ -9,6 +9,13 @@ import { departureText } from '../lib/departures';
 import { fullPodium, MEDAL_EMOJI, podiumFromStandings, shortSeason } from '../lib/honours';
 import { useNameOf } from './Names';
 import { shownAwards, withAwardGames } from '../lib/awards';
+import { useImageSrc } from '../hooks/useImageSrc';
+
+// The season's master, a small round photo before its name (archived seasons with a photo only)
+function MasterThumb({ url, name }: { url?: string; name?: string }) {
+  const src = useImageSrc(url);
+  return src ? <img className="winner-master" src={src} alt={name ? `${name}, il maestro della stagione` : ''} loading="lazy" /> : null;
+}
 
 interface PastSeason {
   season: string;
@@ -114,7 +121,10 @@ export function SeasonsHistory({ seasons, winners = [], title }: { seasons: Seas
           <>
             {/* The season is the heading of its entry; the tournament's name is already the page's */}
             <span className="winner-season">
-              <span className="winner-season-name">{shortSeason(p.season, title)}</span>
+              <span className="winner-season-head">
+                <MasterThumb url={p.archive?.imageUrl} name={p.archive?.masterName} />
+                <span className="winner-season-name">{shortSeason(p.season, title)}</span>
+              </span>
               {period && <span className="winner-period">{period}</span>}
             </span>
             <span className="winner-podium">
