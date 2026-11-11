@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { extractGameId } from '../lib/utils';
+import { ColorDot } from './PresenceDot';
 
 // Animated replay of a finished game, as Lichess renders it (Staunty pieces, as on this site)
 export const replayGifUrl = (gameId: string) =>
@@ -20,11 +21,20 @@ export function replayGifFor(url?: string): string | undefined {
   return id ? replayGifUrl(id) : undefined;
 }
 
+// The players of a game from its title, White first: "Capablanca – Marshall, New York 1918"
+export function playersFromTitle(title: string): { white: string; black: string } | undefined {
+  const m = title.match(/^\s*(.+?)\s+[–—-]\s+(.+?)\s*(?:[,(]|$)/);
+  return m ? { white: m[1], black: m[2] } : undefined;
+}
+
 // Modal with the game replayed move by move; the GIF is downloaded only when it opens
 export function GameReplay({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const gif = replayGifFor(url);
+  // A study chapter GIF has no names around the board: they come from the title
+  const study = !!studyChapterOf(url);
+  const players = study ? playersFromTitle(title) : undefined;
 
   useEffect(() => {
     const d = dialog.current;
@@ -50,7 +60,7 @@ export function GameReplay({ url, title, onClose }: { url: string; title: string
         </div>
         {gif && state !== 'error' && (
           // A game GIF has the players above and below the board, a study chapter GIF only the board
-          <div className={`replay-frame${studyChapterOf(url) ? " is-square" : ""}`}>
+          <div className={`replay-frame${study ? " is-square" : ""}`}>
             {state === 'loading' && <span className="replay-loading">Caricamento della partita…</span>}
             <img
               src={gif}
@@ -60,6 +70,13 @@ export function GameReplay({ url, title, onClose }: { url: string; title: string
               onError={() => setState('error')}
             />
           </div>
+        )}
+        {players && state !== 'error' && (
+          <p className="replay-players">
+            {/* The same discs as the match cards */}
+            <span><ColorDot color="w" now={0} name={players.white} /> {players.white}</span>
+            <span><ColorDot color="b" now={0} name={players.black} /> {players.black}</span>
+          </p>
         )}
         {(!gif || state === 'error') && <p className="note">Non riesco a caricare l'animazione della partita.</p>}
         <a href={url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn replay-link">

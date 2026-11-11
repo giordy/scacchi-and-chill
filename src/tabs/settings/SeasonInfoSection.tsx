@@ -179,6 +179,7 @@ export function SeasonInfoSection({
         <div>
           <label htmlFor="cfg-famous-title">Titolo della partita</label>
           <input id="cfg-famous-title" type="text" placeholder="es. Capablanca – Marshall, New York 1918" {...field("famousTitle")} />
+          <p className="note">Prima il bianco, poi il nero: i nomi compaiono sotto la scacchiera.</p>
         </div>
       </div>
       <div>
