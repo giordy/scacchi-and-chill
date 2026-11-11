@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { ActivityEvent, archivedSeasonActivity, currentSeasonActivity, isNewSince, sortEvents } from '../activity';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { ActivityEvent, archivedSeasonActivity, currentSeasonActivity, isNewSince, sortEvents, specialDays } from '../activity';
 import { tournamentElo } from '../tournamentElo';
 import { HistoryGame, LichessExportGame, SeasonArchive } from '../../types';
 
@@ -12,6 +12,13 @@ const DAY = 24 * 3600 * 1000;
 const T0 = Date.UTC(2026, 10, 2, 9);
 
 // The sentence of an event, players as their handles
+// Today is fixed: the special days told depend on it
+beforeAll(() => {
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(new Date('2026-11-11T12:00:00Z'));
+});
+afterAll(() => vi.useRealTimers());
+
 const sentence = (e: ActivityEvent) => e.parts.map((p) => (typeof p === 'string' ? p : `@${p.handle}`)).join('');
 
 const history: HistoryGame[] = [
@@ -335,6 +342,31 @@ describe('archivedSeasonActivity', () => {
   it('names co-champions together', () => {
     const tied = { ...archive, standings: archive.standings.map((s) => ({ ...s, points: 2, sb: 1, won: 2 })) };
     expect(sentence(archivedSeasonActivity(tied)[0])).toBe('@anna e @bruno chiudono la Stagione 1 a pari merito in testa');
+  });
+});
+
+describe('special days', () => {
+  it('tells each special day once, on its day, between the two dates', () => {
+    const days = specialDays(Date.UTC(2026, 9, 1), Date.UTC(2027, 3, 30), 'x');
+    expect(days.map((e) => [e.parts[0], new Date(e.at).toISOString().slice(0, 10)])).toEqual([
+      ['Buon Halloween', '2026-10-31'],
+      ['Buon Natale a tutti i giocatori', '2026-12-25'],
+      ['Buon anno a tutti i giocatori', '2027-01-01'],
+      ['Martedì grasso: buon Carnevale', '2027-02-09'],
+      ['Buona Pasqua', '2027-03-28'],
+    ]);
+    expect(days.every((e) => e.kind === 'day')).toBe(true);
+    expect(specialDays(Date.UTC(2026, 6, 1), Date.UTC(2026, 6, 31), 'x').map((e) => e.parts[0])).toEqual([
+      'Oggi è la Giornata mondiale degli scacchi: la FIDE nacque il 20 luglio 1924',
+    ]);
+  });
+
+  it('shows in the season only from its start to today, not ahead', () => {
+    const events = currentSeasonActivity({ season: 'S', players, history, gameStates: states, now: Date.UTC(2026, 11, 26) });
+    // The season starts on 2 November: Halloween is before it, Christmas has come
+    expect(events.filter((e) => e.kind === 'day').map((e) => e.parts[0])).toEqual(['Buon Natale a tutti i giocatori']);
+    const before = currentSeasonActivity({ season: 'S', players, history, gameStates: states, now: Date.UTC(2026, 11, 20) });
+    expect(before.some((e) => e.kind === 'day')).toBe(false);
   });
 });
 

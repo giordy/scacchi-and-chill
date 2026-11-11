@@ -28,11 +28,13 @@ import { summitGames, summitKey } from './summit';
 import { titleRace } from './titleRace';
 import { anecdoteForRound } from './masterAnecdotes';
 import { publicViewHref } from './routes';
+import { easterSunday } from './holiday';
 
 // A piece of an event's sentence: plain text, or a player (shown as a link to their page)
 export type ActivityPart = string | { handle: string };
 
 export type ActivityKind =
+  | 'day' // a special day of the calendar: Christmas, World Chess Day…
   | 'season' // the first round starts
   | 'round' // a round starts
   | 'anecdote' // the anecdote of the master of the round
@@ -239,6 +241,7 @@ export interface CurrentSeasonInput {
   elo?: EloReport;
   masterAnecdotes?: MasterAnecdote[];
   archives?: SeasonArchive[]; // the earlier seasons: who already won a game in the tournament
+  now?: number; // today, ms (tests)
 }
 
 // Who won at least one game in the archived seasons, by lower-case handle: from the games kept with
@@ -382,6 +385,10 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
   }
   if (elo) events.push(...objectiveEvents(input, elo, calendar, seasonEnd));
 
+  // Special days, from the start of the season to today (or its last game)
+  const seasonStart = rounds.length > 0 ? starts.get(rounds[0])!.at : undefined;
+  if (seasonStart !== undefined) events.push(...specialDays(seasonStart, Math.min(input.now ?? Date.now(), seasonEnd ?? Infinity), CURRENT));
+
   // Rounds over: with their last game, and who leads then. The last one is the end of the season.
   const byRoundGames = new Map<string, HistoryGame[]>();
   calendar.forEach((g) => byRoundGames.set(g.round, [...(byRoundGames.get(g.round) ?? []), g]));
@@ -430,6 +437,30 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
     break;
   }
   return sortEvents(events);
+}
+
+// Special days of the calendar, the same the site dresses up for (lib/holiday.ts), each on its day
+// only (Christmas lasts a month on the site, a day here). Told at midday, Italian time (10:00 UTC
+// is 11:00 or 12:00 in Italy), so they fall on the right day.
+const SPECIAL_DAYS: { text: string; day: (year: number) => number }[] = [
+  { text: 'Buon anno a tutti i giocatori', day: (y) => Date.UTC(y, 0, 1, 10) },
+  { text: 'Martedì grasso: buon Carnevale', day: (y) => easterSunday(y).getTime() - 47 * 86_400_000 + 10 * 3_600_000 },
+  { text: 'Buona Pasqua', day: (y) => easterSunday(y).getTime() + 10 * 3_600_000 },
+  { text: 'Oggi è la Giornata mondiale degli scacchi: la FIDE nacque il 20 luglio 1924', day: (y) => Date.UTC(y, 6, 20, 10) },
+  { text: 'Buon Halloween', day: (y) => Date.UTC(y, 9, 31, 10) },
+  { text: 'Buon Natale a tutti i giocatori', day: (y) => Date.UTC(y, 11, 25, 10) },
+];
+
+export function specialDays(from: number, to: number, seasonKey: string): ActivityEvent[] {
+  if (!(to >= from)) return [];
+  const events: ActivityEvent[] = [];
+  for (let y = new Date(from).getUTCFullYear(); y <= new Date(to).getUTCFullYear(); y++) {
+    SPECIAL_DAYS.forEach(({ text, day }, i) => {
+      const at = day(y);
+      if (at >= from && at <= to) events.push({ key: `${seasonKey}:d:${y}:${i}`, kind: 'day', at, emoji: '', parts: [text] });
+    });
+  }
+  return events;
 }
 
 // "Anna vince il Trofeo Pillsbury", "Anna e Bruno vincono il Trofeo Pillsbury"
@@ -575,6 +606,10 @@ export function archivedSeasonActivity(archive: SeasonArchive, elo?: EloReport):
     });
   });
   const events = gameEvents(games, archive.id, masterLabelOf(archive.masterName));
+  if (games.length > 0) {
+    const times = games.map((g) => g.at);
+    events.push(...specialDays(Math.min(...times), Math.max(...times), archive.id));
+  }
   const at = games.length > 0 ? Math.max(...games.map((g) => g.at)) : Date.parse(archive.archivedAt);
   const end = endParts(archive.standings, seasonLabel(archive));
   if (end && Number.isFinite(at)) events.push({ key: `${archive.id}:e`, kind: 'end', at, emoji: '🏆', ...end });
@@ -594,6 +629,7 @@ export function archivedSeasonActivity(archive: SeasonArchive, elo?: EloReport):
 
 // Newest first; at the same moment, the later event first (a leader after the result that made them)
 const ORDER: Record<ActivityKind, number> = {
+  day: -1,
   season: 0,
   round: 1,
   anecdote: 2,
@@ -620,7 +656,7 @@ export const isNewSince = (e: ActivityEvent, lastVisit: number | undefined) => l
 
 // The frame of the season (rounds and anecdotes) and the moments worth telling: the three weights
 // of the cronaca. Only what is not frame counts as news.
-export const FRAME_KINDS = new Set<ActivityKind>(['season', 'round', 'roundEnd', 'anecdote']);
+export const FRAME_KINDS = new Set<ActivityKind>(['day', 'season', 'round', 'roundEnd', 'anecdote']);
 export const HIGHLIGHT_KINDS = new Set<ActivityKind>(['leader', 'firstWin', 'streak', 'objective', 'champion', 'end', 'pillsbury']);
 
 // The events since the last visit worth calling news, newest first
