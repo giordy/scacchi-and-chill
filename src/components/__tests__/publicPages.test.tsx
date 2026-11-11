@@ -107,6 +107,23 @@ describe('public tournament page', () => {
     expect(html).toContain('Comincia la Stagione 2');
   });
 
+  it('tells what each contender needs in the last rounds', () => {
+    at('');
+    // Anna 2 and Bruno 0 with one game left each: Bruno is out; Carla, 0 with two left, can draw level
+    const late: HistoryGame[] = [
+      { round: '1', white: 'anna', black: 'bruno', url: '', lichess: { id: '', status: 'resign', winner: 'white' } },
+      { round: '2', white: 'anna', black: 'bruno', url: '', lichess: { id: '', status: 'resign', winner: 'white' } },
+      { round: '3', white: 'bruno', black: 'carla', url: '' },
+      { round: '4', white: 'carla', black: 'anna', url: '' },
+    ];
+    const html = renderToStaticMarkup(
+      <PublicTournamentView config={config} tournamentMeta={config.tournament!} history={late} gameStates={{}} nameOf={nameOf} seasons={[season1]} />
+    );
+    expect(html).toContain('Cosa serve per vincere');
+    expect(html).toContain("<strong>Anna</strong>: basta ½ punto nell&#x27;ultima partita.");
+    expect(html).toContain('<strong>Carla</strong>: con 2 punti nelle ultime 2 partite arriva almeno a pari punti');
+  });
+
   it('has no all-time sections before the first archived season', () => {
     const html = publicPage('#/albo', []);
     expect(html).not.toContain('Classifica di sempre');

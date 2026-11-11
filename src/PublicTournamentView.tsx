@@ -18,7 +18,7 @@ import { MatchesByRound } from "./components/MatchesByRound";
 import { summitGames } from "./lib/summit";
 import { reigningChampions } from "./lib/honours";
 import { withdrawalNote } from "./lib/withdrawals";
-import { titleRace } from "./lib/titleRace";
+import { needText, titleRace } from "./lib/titleRace";
 import { SeasonStatsPanel } from "./components/SeasonStatsPanel";
 import { seasonStats } from "./lib/seasonStats";
 import { publishedAnecdotes } from "./lib/masterAnecdotes";
@@ -405,6 +405,19 @@ export function PublicTournamentView({
                 </>
               )}
             </p>
+          )}
+          {race && race.needs.length > 0 && (
+            <div className="title-needs">
+              <h2 className="title-needs-heading">Cosa serve per vincere</h2>
+              <ul>
+                {race.needs.map((n) => (
+                  <li key={n.handle} className={isMe(n.handle) ? "is-me" : ""}>
+                    <strong>{nameOf(n.handle)}</strong>: {needText(n)}.
+                  </li>
+                ))}
+              </ul>
+              <p className="note note-sm">Calcolato su quello che può succedere nelle partite rimaste, senza contare lo spareggio.</p>
+            </div>
           )}
           <div className="table-responsive">
             <table className="standings-table">

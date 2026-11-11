@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { titleRace } from '../titleRace';
+import { needText, titleRace } from '../titleRace';
 import { HistoryGame } from '../../types';
 
 const players = ['anna', 'bruno', 'carla'].map((h) => ({ handle: h, name: h[0].toUpperCase() + h.slice(1) }));
@@ -25,6 +25,11 @@ describe('titleRace', () => {
     expect(race.contenders.map((c) => c.handle)).toEqual(['anna', 'carla']);
     expect(race.champion).toBeUndefined();
     expect(race.roundsLeft).toBe(2);
+    // Anna: half a point against Carla is enough; Carla: winning both only draws her level
+    expect(race.needs).toEqual([
+      { handle: 'anna', left: 1, alone: 0.5, level: 0 },
+      { handle: 'carla', left: 2, alone: null, level: 2 },
+    ]);
   });
 
   it('crowns the leader once nobody can reach them', () => {
@@ -45,5 +50,15 @@ describe('titleRace', () => {
     const games = [won('1', 'anna', 'bruno', 'white'), won('1', 'anna', 'carla', 'white'), aborted];
     expect(titleRace(players, games, {})?.contenders.map((c) => c.handle)).toEqual(['anna']);
     expect(titleRace(players, games.slice(0, 2), {})).toBeNull();
+  });
+});
+
+describe('needText', () => {
+  it('says what a contender needs', () => {
+    expect(needText({ handle: 'a', left: 3, alone: 2, level: 1.5 })).toBe('bastano 2 punti nelle ultime 3 partite');
+    expect(needText({ handle: 'a', left: 1, alone: 0.5, level: 0 })).toBe("basta ½ punto nell'ultima partita");
+    expect(needText({ handle: 'a', left: 2, alone: 2, level: 1.5 })).toBe('deve vincere tutte le ultime 2 partite');
+    expect(needText({ handle: 'a', left: 2, alone: null, level: 2 })).toBe('con 2 punti nelle ultime 2 partite arriva almeno a pari punti; per il primo posto servono passi falsi degli altri');
+    expect(needText({ handle: 'a', left: 2, alone: null, level: null })).toBe('non dipende solo dalle sue partite: servono passi falsi degli altri');
   });
 });

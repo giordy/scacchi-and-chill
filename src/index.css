@@ -3529,3 +3529,10 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .my-card-line a { font-weight: 700; }
 .link-button { padding: 0; border: 0; background: none; font: inherit; color: var(--muted); text-decoration: underline; cursor: pointer; }
 .me-toggle { margin-top: 8px; }
+
+/* Last rounds: what each contender needs to win the season */
+.title-needs { margin: 0 0 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.title-needs-heading { margin: 0 0 6px; font-size: 16px; }
+.title-needs ul { margin: 0 0 6px; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+.title-needs li.is-me { font-weight: 700; }
+.title-needs .note { margin: 0; }
