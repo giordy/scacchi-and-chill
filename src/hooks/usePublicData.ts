@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppConfig, HistoryGame, SeasonArchive } from '../types';
 import { errorMessage } from '../lib/utils';
 import { defaultConfig, validateAndNormalizeConfig, withTournamentDoc } from '../lib/config';
@@ -6,15 +6,30 @@ import { sortSeasons } from '../lib/seasons';
 import { readGames, readSeasons, readTournamentDoc } from '../lib/firestoreRest';
 import { useVisiblePolling } from './useVisiblePolling';
 
-// Public page: config.json, then the tournament, its games and the archived seasons from Firestore
-// with plain HTTP requests (lib/firestoreRest), read again every 5 minutes while the page is
-// visible. No live listener: the organizer area keeps those (useTournamentSync).
+// After a failed read the page asks again soon, not at the next 5 minutes: 3 s, then 8, 20, and
+// every 30 from there on
+const RETRY_MS = [3000, 8000, 20000, 30000];
+export const retryDelay = (failures: number) => RETRY_MS[Math.min(Math.max(failures, 1), RETRY_MS.length) - 1];
+
+// Public page: config.json, then the tournament and its games from Firestore with plain HTTP
+// requests (lib/firestoreRest), read again every 5 minutes while the page is visible. The archived
+// seasons, the heaviest answer, change only when a season is closed: they are read at the first
+// load and again when the tournament's season changes. No live listener: the organizer area keeps
+// those (useTournamentSync).
+// `ready` only once the tournament and its games were read: until then the page has nothing true to
+// show, and `failed` says the read did not work (it is tried again by itself, or with `retry`).
 export function usePublicData(enabled: boolean) {
   const [config, setConfig] = useState<AppConfig>(defaultConfig);
   const [history, setHistory] = useState<HistoryGame[]>([]);
   const [seasons, setSeasons] = useState<SeasonArchive[]>([]);
   const [ready, setReady] = useState(false);
-  const [gamesLoaded, setGamesLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  // Each new attempt after a failure restarts the polling at once
+  const [attempt, setAttempt] = useState(0);
+  const failures = useRef(0);
+  const timer = useRef<number | undefined>(undefined);
+  // The season the archives were last read for; undefined until they are read
+  const seasonsFor = useRef<string | undefined>(undefined);
   // config.json, read once: the tournament document is laid over it at every read
   const base = useRef<Promise<AppConfig> | null>(null);
 
@@ -32,28 +47,49 @@ export function usePublicData(enabled: boolean) {
       });
   }, [enabled]);
 
+  const retry = useCallback(() => {
+    window.clearTimeout(timer.current);
+    setAttempt((n) => n + 1);
+  }, []);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
   useVisiblePolling(
     async () => {
       const cfg = base.current ?? Promise.resolve(defaultConfig);
-      const [docResult, gamesResult, seasonsResult] = await Promise.allSettled([readTournamentDoc(), readGames(), readSeasons()]);
+      const [docResult, gamesResult] = await Promise.allSettled([readTournamentDoc(), readGames()]);
       const start = await cfg;
-      if (docResult.status === 'fulfilled') setConfig(withTournamentDoc(start, docResult.value));
-      else {
-        console.warn('Lettura del torneo non riuscita:', docResult.reason);
-        setConfig((prev) => (prev === defaultConfig ? start : prev));
+      if (docResult.status === 'rejected') console.warn('Lettura del torneo non riuscita:', docResult.reason);
+      if (gamesResult.status === 'rejected') console.warn('Lettura delle partite non riuscita:', gamesResult.reason);
+      const ok = docResult.status === 'fulfilled' && gamesResult.status === 'fulfilled';
+      if (!ok) {
+        // What was read before stays on the page; only a first load with nothing says so
+        failures.current++;
+        setFailed(true);
+        window.clearTimeout(timer.current);
+        timer.current = window.setTimeout(retry, retryDelay(failures.current));
+        return false;
       }
-      if (gamesResult.status === 'fulfilled') {
-        setHistory(gamesResult.value);
-        setGamesLoaded(true);
-      } else console.warn('Lettura delle partite non riuscita:', gamesResult.reason);
-      if (seasonsResult.status === 'fulfilled') setSeasons(sortSeasons(seasonsResult.value));
-      else console.warn('Lettura delle stagioni non riuscita:', seasonsResult.reason);
+      failures.current = 0;
+      const next = withTournamentDoc(start, docResult.value);
+      const season = next.tournament?.season ?? '';
+      if (seasonsFor.current !== season) {
+        try {
+          setSeasons(sortSeasons(await readSeasons()));
+          seasonsFor.current = season;
+        } catch (e) {
+          // The page works without the past seasons; they are asked again at the next read
+          console.warn('Lettura delle stagioni non riuscita:', e);
+        }
+      }
+      setConfig(next);
+      setHistory(gamesResult.value);
+      setFailed(false);
       setReady(true);
-      return docResult.status === 'fulfilled' && gamesResult.status === 'fulfilled';
+      return true;
     },
-    'firestore',
+    `firestore:${attempt}`,
     enabled
   );
 
-  return { config, history, seasons, ready, gamesLoaded };
+  return { config, history, seasons, ready, failed, retry, gamesLoaded: ready };
 }

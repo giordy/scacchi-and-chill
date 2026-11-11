@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fieldsOf, gameFromDoc } from '../firestoreRest';
+import { retryDelay } from '../../hooks/usePublicData';
 
 describe('firestoreRest', () => {
   it('turns REST values into plain JSON', () => {
@@ -16,5 +17,11 @@ describe('firestoreRest', () => {
   it('reads a game document as the site uses it, none when incomplete', () => {
     expect(gameFromDoc({ round: 1, white: 'anna', black: 'bruno', createdAt: 5 })).toEqual({ round: '1', white: 'anna', black: 'bruno', url: '', createdAt: 5, lichess: undefined });
     expect(gameFromDoc({ round: '1', white: 'anna' })).toBeNull();
+  });
+});
+
+describe('retryDelay (public page: a failed read is tried again soon)', () => {
+  it('waits a little longer each time, never more than 30 s', () => {
+    expect([1, 2, 3, 4, 9].map(retryDelay)).toEqual([3000, 8000, 20000, 30000, 30000]);
   });
 });

@@ -12,6 +12,9 @@ import { NameOf } from '../lib/roster';
 interface PublicPageProps {
   seasons: SeasonArchive[];
   ready: boolean;
+  // The tournament could not be read from Firestore (it is tried again by itself)
+  failed?: boolean;
+  onRetry?: () => void;
   config: AppConfig;
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
@@ -23,8 +26,18 @@ interface PublicPageProps {
 }
 
 // Public tournament page, with a discreet link to the organizer area
-export function PublicPage({ seasons, ready, config, history, gameStates, liveUpdatedAt, nameOf, presence }: PublicPageProps) {
+export function PublicPage({ seasons, ready, failed, onRetry, config, history, gameStates, liveUpdatedAt, nameOf, presence }: PublicPageProps) {
   const hash = useHash();
+  // Nothing read yet: never an empty tournament in its place
+  if (!ready && failed) {
+    return (
+      <LoadingScreen label="Non riesco a leggere i dati del torneo. Riprovo tra poco…">
+        <button type="button" className="secondary" onClick={onRetry}>
+          Riprova ora
+        </button>
+      </LoadingScreen>
+    );
+  }
   if (!ready) return <LoadingScreen label="Caricamento torneo…" />;
 
   const playerHandle = parsePlayerHash(hash);

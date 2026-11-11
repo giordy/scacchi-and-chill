@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { myCurrentGame, toObjectiveText } from '../me';
+import { myCurrentGame, paceText } from '../me';
 import { HistoryGame, LichessExportGame } from '../../types';
 
 const games: HistoryGame[] = [
@@ -25,12 +25,11 @@ describe('myCurrentGame', () => {
   });
 });
 
-describe('toObjectiveText', () => {
-  it('says how many points are missing, none once made', () => {
-    expect(toObjectiveText(11, 8)).toBe('ti mancano 3 punti');
-    expect(toObjectiveText(7, 6.5)).toBe('ti manca ½ punto');
-    expect(toObjectiveText(7, 6)).toBe('ti manca 1 punto');
-    expect(toObjectiveText(7, 7)).toBeNull();
-    expect(toObjectiveText(0, 0)).toBeNull();
+describe('paceText', () => {
+  it('says how far the pace is from the objective', () => {
+    expect(paceText(11, 11)).toBe('sei in linea');
+    expect(paceText(11, 11.5)).toBe('sei ½ punto sopra');
+    expect(paceText(7, 6)).toBe('sei 1 punto sotto');
+    expect(paceText(7, 4.5)).toBe('sei 2½ punti sotto');
   });
 });

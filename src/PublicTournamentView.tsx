@@ -27,7 +27,7 @@ import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { tournamentElo } from "./lib/tournamentElo";
 import { PillsburyRace } from "./components/PillsburyRace";
-import { pillsburyRace, reigningPillsbury } from "./lib/pillsbury";
+import { pillsburyRace, projectedPoints, reigningPillsbury } from "./lib/pillsbury";
 import { pronosticoPoints } from "./lib/tournamentElo";
 import { myCurrentGame } from "./lib/me";
 import { useMe } from "./hooks/useMe";
@@ -188,7 +188,7 @@ export function PublicTournamentView({
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
   // Places shared on a full tie (points, Sonneborn-Berger, wins); none before the first game
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
-  // «Io sono…»: the visitor's own row and card, once they said who they are (on their player page)
+  // «Io sono…»: the visitor's own row and card, once they said who they are (here, or on their player page)
   const [meHandle, setMe] = useMe();
   const me = players.find((p) => p.handle.toLowerCase() === meHandle.toLowerCase())?.handle;
   const isMe = (handle: string) => !!me && handle.toLowerCase() === me.toLowerCase();
@@ -202,6 +202,8 @@ export function PublicTournamentView({
       game: myCurrentGame(me, allGames, gameStates),
       objective: forecast ? pronosticoPoints(forecast) : undefined,
       pillsburyPoints: forecast?.points,
+      // The pace says something only after a game that counts for the trophy
+      projected: forecast && forecast.played > 0 ? projectedPoints(forecast) : undefined,
     };
   }, [me, standings, players, elo, allGames, history, gameStates, tournamentMeta.withdrawals]);
   const started = seasonStarted(standings);
@@ -349,9 +351,26 @@ export function PublicTournamentView({
               game={mine.game}
               objective={mine.objective}
               pillsburyPoints={mine.pillsburyPoints}
+              projected={mine.projected}
               nameOf={nameOf}
               onForget={() => setMe("")}
             />
+          )}
+          {!me && players.length > 0 && (
+            <div className="me-picker">
+              <label htmlFor="me-picker">⭐ Giochi anche tu?</label>
+              <select id="me-picker" className="filter-select" value="" onChange={(e) => setMe(e.target.value)}>
+                <option value="">Io sono…</option>
+                {[...players]
+                  .sort((a, b) => nameOf(a.handle).localeCompare(nameOf(b.handle), "it"))
+                  .map((p) => (
+                    <option key={p.handle} value={p.handle}>
+                      {nameOf(p.handle)}
+                    </option>
+                  ))}
+              </select>
+              <span className="me-picker-note">La tua riga resta evidenziata e la tua partita in cima.</span>
+            </div>
           )}
           {/* First the trophy, each with its own card: the championship first, the Trofeo Pillsbury next to it */}
           <div className="trophy-switch" role="group" aria-label="Trofeo">
@@ -491,7 +510,6 @@ export function PublicTournamentView({
           <p className="note note-top-xs">
             G giocate · V vinte · N patte · P perse. A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il
             numero di vittorie; chi è pari anche lì condivide la posizione. Tocca un nome per vedere le partite del giocatore.
-            {!me && " Giochi anche tu? Apri la tua pagina e tocca «Sono io»: la tua riga resta evidenziata e la tua partita in cima."}
           </p>
           {latest.length > 0 && (
             <section className="cronaca-teaser" aria-labelledby="cronaca-teaser-title">

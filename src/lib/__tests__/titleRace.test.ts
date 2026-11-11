@@ -61,4 +61,13 @@ describe('needText', () => {
     expect(needText({ handle: 'a', left: 2, alone: null, level: 2 })).toBe('con 2 punti nelle ultime 2 partite arriva almeno a pari punti; per il primo posto servono passi falsi degli altri');
     expect(needText({ handle: 'a', left: 2, alone: null, level: null })).toBe('non dipende solo dalle sue partite: servono passi falsi degli altri');
   });
+
+  it('has its own words for who has no games left', () => {
+    // Anna 2 and done; Bruno 1 with a game against Carla left: he can only draw level
+    const games = [won('1', 'anna', 'bruno', 'white'), won('2', 'anna', 'carla', 'white'), won('1', 'bruno', 'carla', 'white'), todo('3', 'carla', 'bruno')];
+    const anna = titleRace(players, games, {})!.needs[0];
+    expect(anna).toEqual({ handle: 'anna', left: 0, alone: null, level: 0 });
+    expect(needText(anna)).toBe('ha finito le sue partite: nessuno può superarlo, ma può ancora essere raggiunto a pari punti');
+    expect(needText({ handle: 'a', left: 0, alone: null, level: null })).toBe('ha finito le sue partite: servono passi falsi degli altri');
+  });
 });

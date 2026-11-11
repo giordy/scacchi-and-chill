@@ -1,5 +1,5 @@
 import React from 'react';
-import { MyGame, toObjectiveText } from '../lib/me';
+import { MyGame, paceText } from '../lib/me';
 import { playerHref } from '../lib/routes';
 
 const halves = (n: number) => String(n).replace('.5', '½').replace(/^0½/, '½');
@@ -14,6 +14,7 @@ export function MyCard({
   game,
   objective,
   pillsburyPoints,
+  projected,
   nameOf,
   onForget,
 }: {
@@ -24,10 +25,11 @@ export function MyCard({
   game: MyGame | null;
   objective?: number; // none for an esordiente or with the trophy suspended
   pillsburyPoints?: number; // the points that count for the trophy
+  projected?: number; // the points at the end of the season at this pace; none before the first game that counts
   nameOf: (handle: string) => string;
   onForget: () => void;
 }) {
-  const left = objective !== undefined && pillsburyPoints !== undefined ? toObjectiveText(objective, pillsburyPoints) : null;
+  const reached = objective !== undefined && pillsburyPoints !== undefined && pillsburyPoints >= objective;
   return (
     <section className="my-card" aria-label="La tua stagione">
       <div className="my-card-head">
@@ -61,7 +63,7 @@ export function MyCard({
       {objective !== undefined && objective > 0 && (
         <p className="my-card-line">
           <span aria-hidden="true">🎯</span> Obiettivo per il Trofeo Pillsbury: {halves(objective)} punti
-          {left ? `, ${left}` : ' · raggiunto!'}
+          {reached ? ' · raggiunto!' : projected !== undefined ? ` · al ritmo attuale ${paceText(objective, projected)}` : ''}
         </p>
       )}
     </section>

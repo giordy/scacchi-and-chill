@@ -16,7 +16,7 @@ const AdminRoot = lazy(() => import('./AdminRoot'));
 export function App() {
   const isAdminRoute = useAdminRoute();
   // Public page: Firestore read with plain requests (see lib/firestoreRest), no SDK
-  const { config, history, seasons, ready, gamesLoaded } = usePublicData(!isAdminRoute);
+  const { config, history, seasons, ready, failed, retry, gamesLoaded } = usePublicData(!isAdminRoute);
 
   // Public page: results read live from Lichess on top of the saved ones
   const saved = useMemo(() => storedStates(history), [history]);
@@ -46,6 +46,8 @@ export function App() {
       <PublicPage
         seasons={seasons}
         ready={ready}
+        failed={failed}
+        onRetry={retry}
         config={config}
         history={seasonHistory}
         gameStates={live.gameStates}

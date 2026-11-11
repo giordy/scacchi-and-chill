@@ -84,6 +84,12 @@ const gamesText = (n: number) => (n === 1 ? "nell'ultima partita" : `nelle ultim
 
 // What a contender needs, in words: "bastano 2 punti nelle ultime 3 partite"
 export function needText(need: TitleNeed): string {
+  // Games all played: nothing left to do but wait for the others
+  if (need.left === 0) {
+    return need.level !== null
+      ? 'ha finito le sue partite: nessuno può superarlo, ma può ancora essere raggiunto a pari punti'
+      : 'ha finito le sue partite: servono passi falsi degli altri';
+  }
   if (need.alone !== null) {
     return need.alone === need.left && need.left > 0
       ? `deve vincere ${need.left === 1 ? "l'ultima partita" : `tutte le ultime ${need.left} partite`}`

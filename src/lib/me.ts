@@ -37,10 +37,13 @@ export function myCurrentGame(handle: string, games: HistoryGame[], gameStates: 
   };
 }
 
-// "ti manca 1 punto", "ti mancano 2½ punti"; null once the objective is made (or there is none)
-export function toObjectiveText(objective: number, points: number): string | null {
-  const left = objective - points;
-  if (objective <= 0 || left <= 0) return null;
-  const n = String(left).replace('.5', '½').replace(/^0½/, '½');
-  return left <= 1 ? `ti manca ${n} punto` : `ti mancano ${n} punti`;
+// How the visitor stands against their objective, as the "ritmo" of the race table: the points at
+// the end of the season if the games left go as the Elo expects, against the objective. "sei in
+// linea", "sei ½ punto sopra", "sei 2 punti sotto". The points still missing say little after a
+// couple of rounds (10 of 11), the pace says the same thing at any moment of the season.
+export function paceText(objective: number, projected: number): string {
+  const gap = projected - objective;
+  if (gap === 0) return 'sei in linea';
+  const n = String(Math.abs(gap)).replace('.5', '½').replace(/^0½/, '½');
+  return `sei ${n} ${Math.abs(gap) <= 1 ? 'punto' : 'punti'} ${gap > 0 ? 'sopra' : 'sotto'}`;
 }
