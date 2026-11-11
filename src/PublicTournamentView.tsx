@@ -4,7 +4,7 @@ import { SeasonsHistory } from "./components/SeasonsHistory";
 import { playerHref } from "./lib/routes";
 import { championText, computeStandings, isTied, leaderText, seasonStarted, sharedRanks } from "./lib/standings";
 import { RankCell } from "./components/RankCell";
-import { computeSeasonProgress } from "./lib/progress";
+import { computeSeasonProgress, gameProgress } from "./lib/progress";
 import { DEFAULT_TOURNAMENT } from "./lib/tournament";
 import { onTabListKeyDown } from "./lib/tabKeys";
 import { parsePublicView, publicViewHref, PublicTab, PublicView, tabOfView } from "./lib/routes";
@@ -142,6 +142,16 @@ export function PublicTournamentView({
     };
   }, [players, history, gameStates, schedule, seasons, tournamentMeta.masterName, tournamentMeta.masterOpening]);
   const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits, race, stats, currentPeriod } = season;
+  // Who is at the board right now: their place in the standings is still provisional
+  const playing = useMemo(() => {
+    const set = new Set<string>();
+    history.forEach((g) => {
+      if (gameProgress(stateOf(g, gameStates)) !== "ongoing") return;
+      set.add(g.white.toLowerCase());
+      set.add(g.black.toLowerCase());
+    });
+    return set;
+  }, [history, gameStates]);
 
   // The season-end celebration takes the place of a calendar holiday while the season is over
   const lastArchivedAt = useMemo(
@@ -387,7 +397,14 @@ export function PublicTournamentView({
                     <td className="sticky-col">
                       <div className="player-cell">
                         <span className="player-name-line">
-                          <a href={playerHref(p.handle)} className="player-name player-page-link">{p.name}</a>
+                          <a
+                            href={playerHref(p.handle)}
+                            className={`player-name player-page-link${playing.has(p.handle.toLowerCase()) ? " is-playing" : ""}`}
+                            title={playing.has(p.handle.toLowerCase()) ? "Partita in corso: posizione provvisoria" : undefined}
+                          >
+                            {p.name}
+                            {playing.has(p.handle.toLowerCase()) && <span className="sr-only"> (partita in corso, posizione provvisoria)</span>}
+                          </a>
                           {champions?.handles.includes(p.handle.toLowerCase()) && (
                             <a
                               href={ALBO_HREF}
@@ -435,7 +452,8 @@ export function PublicTournamentView({
           </div>
           <p className="note note-top-xs">
             G giocate · V vinte · N patte · P perse. A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il
-            numero di vittorie; chi è pari anche lì condivide la posizione. Tocca un nome per vedere le partite del giocatore.
+            numero di vittorie; chi è pari anche lì condivide la posizione. Un nome che pulsa ha una partita in corso: la sua
+            posizione è provvisoria. Tocca un nome per vedere le partite del giocatore.
           </p>
           {latest.length > 0 && (
             <section className="cronaca-teaser" aria-labelledby="cronaca-teaser-title">
