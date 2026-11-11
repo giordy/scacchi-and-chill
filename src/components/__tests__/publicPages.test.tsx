@@ -150,6 +150,16 @@ describe('player page', () => {
     expect(dario).toContain('aria-label="Punteggio 0 a 1"');
   });
 
+  it('lists the games of the season newest round first', () => {
+    const games: HistoryGame[] = [
+      { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa' },
+      { round: '2', white: 'carla', black: 'anna', url: 'https://lichess.org/bbbbbbbb' },
+      { round: '10', white: 'anna', black: 'carla', url: '' },
+    ];
+    const html = renderToStaticMarkup(<PlayerPage handle="anna" config={config} history={games} gameStates={gameStates} nameOf={nameOf} seasons={[season1]} />);
+    expect([...html.matchAll(/class="match-round">Turno (\d+)/g)].map((m) => m[1])).toEqual(['10', '2', '1']);
+  });
+
   it('says when a player is unknown', () => {
     expect(playerPage('zeno')).toContain('Giocatore «zeno» non trovato.');
   });

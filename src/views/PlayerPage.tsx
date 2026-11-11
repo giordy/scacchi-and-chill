@@ -470,7 +470,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           <p className="note m-0">Nessuna partita ancora registrata.</p>
         ) : (
           <ul className="player-games">
-            {games.map((game) => (
+            {/* Newest round first: the latest games, the ongoing ones, on top */}
+            {[...games].reverse().map((game) => (
               <li key={game.url} className="player-game">
                 <span className="match-round">Turno {game.round}</span>
                 <span className="player-game-main">
