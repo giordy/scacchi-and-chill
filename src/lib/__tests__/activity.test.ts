@@ -192,6 +192,42 @@ describe('more of the season', () => {
   });
 });
 
+describe('first wins', () => {
+  const g = (i: number, white: string, black: string): HistoryGame => ({ round: String(i + 1), white, black, url: `https://lichess.org/w000000${i}`, createdAt: T0 });
+  const games = [g(0, 'anna', 'bruno'), g(1, 'carla', 'bruno'), g(2, 'bruno', 'anna'), g(3, 'carla', 'anna')];
+  // Anna wins her first game; Bruno loses twice and then wins; Carla's first win is her first game
+  const winners: ('white' | 'black')[] = ['white', 'white', 'white', 'white'];
+  const st: Record<string, LichessExportGame> = Object.fromEntries(
+    games.map((x, i) => [`w000000${i}`, { id: `w000000${i}`, status: 'resign', winner: winners[i], lastMoveAt: T0 + (i + 1) * DAY }])
+  );
+  const firsts = (archives?: SeasonArchive[]) =>
+    currentSeasonActivity({ season: 'S', players, history: games, gameStates: st, archives }).filter((e) => e.kind === 'firstWin').map(sentence);
+
+  it('tells a first win of the season after games without one, not a win at the first game', () => {
+    expect(firsts()).toEqual(['@bruno conquista la sua prima vittoria della stagione']);
+  });
+
+  it('tells the first win in the tournament, from the second season on, even at the first game', () => {
+    const past: SeasonArchive = {
+      id: 's1',
+      season: 'Stagione 1',
+      title: 'T',
+      archivedAt: '2026-06-01T00:00:00Z',
+      standings: [],
+      gamesPlayed: 1,
+      games: [{ round: '1', white: 'anna', black: 'bruno', result: '1-0' }],
+    };
+    // Newest first: Bruno (third game), then Carla (her first game); Anna had already won
+    expect(firsts([past])).toEqual([
+      '@bruno conquista la sua prima vittoria nel torneo',
+      '@carla conquista la sua prima vittoria nel torneo',
+    ]);
+    // A season archived without its games: its table says who won
+    const old = { ...past, games: undefined, standings: [{ handle: 'Carla', name: 'Carla', played: 1, won: 1, drawn: 0, lost: 0, points: 1, sb: 0 }] };
+    expect(firsts([old])).toEqual(['@bruno conquista la sua prima vittoria nel torneo', '@anna conquista la sua prima vittoria nel torneo']);
+  });
+});
+
 describe('archivedSeasonActivity', () => {
   const archive: SeasonArchive = {
     id: 'stagione-1',

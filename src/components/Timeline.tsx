@@ -80,9 +80,10 @@ export function Timeline(props: TimelineProps) {
         schedule: props.schedule,
         withdrawals: props.withdrawals,
         masterAnecdotes: props.masterAnecdotes,
+        archives: seasons,
         elo,
       }),
-    [season, props.masterName, props.masterOpening, props.masterAnecdotes, props.players, props.history, props.gameStates, props.schedule, props.withdrawals, elo]
+    [seasons, season, props.masterName, props.masterOpening, props.masterAnecdotes, props.players, props.history, props.gameStates, props.schedule, props.withdrawals, elo]
   );
   const archive = archives.find((a) => a.id === selected);
   const events = useMemo(() => (archive ? archivedSeasonActivity(archive, elo) : current), [archive, elo, current]);

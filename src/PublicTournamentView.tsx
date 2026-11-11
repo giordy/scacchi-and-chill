@@ -322,7 +322,7 @@ export function PublicTournamentView({
             <p className="title-race" role="status">
               {race.champion ? (
                 <>
-                  🏆 <strong>{race.champion.name}</strong> è campione matematico: nessuno può più raggiungerlo, con{" "}
+                  🏆 <strong>{race.champion.name}</strong> vince matematicamente la stagione: nessuno può più arrivare in testa, con{" "}
                   {race.roundsLeft === 1 ? "un turno" : `${race.roundsLeft} turni`} d'anticipo.
                 </>
               ) : (

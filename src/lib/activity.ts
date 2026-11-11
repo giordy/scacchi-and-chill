@@ -25,6 +25,7 @@ export type ActivityKind =
   | 'anecdote' // the anecdote of the master of the round
   | 'withdrawal'
   | 'result'
+  | 'firstWin' // a first win of the season after games without one, or the first in the tournament
   | 'streak' // a third win in a row, or more
   | 'leader' // someone goes alone at the top
   | 'champion' // nobody can reach the leader any more
@@ -88,10 +89,21 @@ const MIN_STREAK = 3;
 const ORDINALS = ['', 'prima', 'seconda', 'terza', 'quarta', 'quinta', 'sesta', 'settima', 'ottava', 'nona', 'decima'];
 const ordinal = (n: number) => ORDINALS[n] ?? `${n}ª`;
 
-// The events of the games: one per result, one for each win from the third in a row, and one each time someone goes alone at the top of the
-// standings (points, then Sonneborn-Berger, then wins, as the table). A shared first place gives
-// no event; going back alone on top after it does only for someone new.
-function gameEvents(games: ScoredGame[], seasonKey: string, masterLabel: string): ActivityEvent[] {
+// A first win worth telling: the very first in the tournament (from the second season on, for who
+// never won before), or the first of the season after at least one game without a win. A win in the
+// first game of the season is just a good start: the result says it already.
+function firstWinText(gamesPlayed: number, firstEver: boolean): string | undefined {
+  if (firstEver) return ' conquista la sua prima vittoria nel torneo';
+  return gamesPlayed > 1 ? ' conquista la sua prima vittoria della stagione' : undefined;
+}
+
+// The events of the games: one per result; a first win (see firstWinText); one for each win from the
+// third in a row; one each time someone goes alone at the top of the standings (points, then
+// Sonneborn-Berger, then wins, as the table). A shared first place gives no event; going back alone
+// on top after it does only for someone new.
+// pastWinners: who won a game in an earlier season, by lower-case handle; undefined when there is no
+// earlier season to tell a first win in the tournament from (the first season, or an archive)
+function gameEvents(games: ScoredGame[], seasonKey: string, masterLabel: string, pastWinners?: Set<string>): ActivityEvent[] {
   const events: ActivityEvent[] = [];
   const ordered = [...games].sort((a, b) => a.at - b.at || byRound(a.round, b.round));
   const points = new Map<string, number>();
@@ -99,6 +111,8 @@ function gameEvents(games: ScoredGame[], seasonKey: string, masterLabel: string)
   const done: ScoredGame[] = [];
   const shown = new Map<string, string>(); // the handle as written in the games, by lower case
   const runs = new Map<string, number>(); // wins in a row on the board, by lower-case handle
+  const played = new Map<string, number>(); // games on the board so far, by lower-case handle
+  const hasWon = new Set<string>(); // who already won a game this season
   let leader: string | undefined;
   ordered.forEach((g) => {
     if (!g.silent) {
@@ -107,6 +121,14 @@ function gameEvents(games: ScoredGame[], seasonKey: string, masterLabel: string)
         const k = lower(h);
         runs.set(k, h === winner ? (runs.get(k) ?? 0) + 1 : 0);
       });
+      [g.boardWhite, g.boardBlack].forEach((h) => played.set(lower(h), (played.get(lower(h)) ?? 0) + 1));
+      if (winner && !hasWon.has(lower(winner))) {
+        hasWon.add(lower(winner));
+        const text = firstWinText(played.get(lower(winner))!, pastWinners ? !pastWinners.has(lower(winner)) : false);
+        if (text) {
+          events.push({ key: `${seasonKey}:f:${g.key}`, kind: 'firstWin', at: g.at, emoji: '🎉', parts: [{ handle: winner }, text] });
+        }
+      }
       const run = winner ? runs.get(lower(winner))! : 0;
       if (winner && run >= MIN_STREAK) {
         events.push({
@@ -199,6 +221,24 @@ export interface CurrentSeasonInput {
   withdrawals?: Withdrawal[];
   elo?: EloReport;
   masterAnecdotes?: MasterAnecdote[];
+  archives?: SeasonArchive[]; // the earlier seasons: who already won a game in the tournament
+}
+
+// Who won at least one game in the archived seasons, by lower-case handle: from the games kept with
+// each season, or from its table for the seasons archived without them
+export function pastWinnersOf(archives: SeasonArchive[]): Set<string> {
+  const out = new Set<string>();
+  archives.forEach((a) => {
+    if (a.games && a.games.length > 0) {
+      a.games.forEach((g) => {
+        if (g.result === '1-0') out.add(lower(g.white));
+        if (g.result === '0-1') out.add(lower(g.black));
+      });
+    } else {
+      a.standings.forEach((s) => s.won > 0 && out.add(lower(s.handle)));
+    }
+  });
+  return out;
 }
 
 // The season being played: its start, the start and the end of each round with the master's
@@ -313,7 +353,7 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
       silent: forfeit,
     });
   });
-  events.push(...gameEvents(games, CURRENT, masterLabelOf(input.masterName)));
+  events.push(...gameEvents(games, CURRENT, masterLabelOf(input.masterName), input.archives?.length ? pastWinnersOf(input.archives) : undefined));
 
   // The end of the season, with the last game: who won it (the title is written at the closing)
   const progress = computeSeasonProgress(history, gameStates, schedule);
@@ -444,6 +484,7 @@ const ORDER: Record<ActivityKind, number> = {
   anecdote: 2,
   withdrawal: 3,
   result: 4,
+  firstWin: 5,
   streak: 5,
   leader: 6,
   champion: 7,
