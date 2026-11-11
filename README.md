@@ -9,6 +9,7 @@ Sito di un torneo di scacchi per corrispondenza tra amici: sfide su Lichess, dat
 - **Pagina giocatore** (`#/giocatore/<handle>`): posizione, punti turno per turno, scontri diretti (della stagione e di sempre), carriera, Elo del torneo, obiettivo, trofei.
 - **Io sono…**: dalla propria pagina un giocatore tocca «Sono io» (salvato nel browser): la sua riga resta evidenziata e in cima alla classifica trova posto, partita da giocare e quanto manca all'obiettivo.
 - **Risultati live**: le partite non concluse si leggono da Lichess all'apertura e ogni 5 minuti a pagina visibile (al massimo due chiamate: partite e profili).
+- **Leggera**: la pagina pubblica legge Firestore con semplici richieste HTTP (`src/lib/firestoreRest.ts`), senza l'SDK Firebase, e le ripete ogni 5 minuti a pagina visibile. L'SDK si scarica solo con l'area organizzatore.
 - Su telefono si cambia sezione con uno swipe.
 
 ## Area organizzatore (`#admin`)
@@ -20,6 +21,15 @@ Login Google; organizzatore è chi ha un documento in `admins/<email>`. Ogni azi
 - **Impostazioni**: token Lichess (serve per le sfide e gli Elo di partenza), copia e ripristino dei dati.
 
 Chiudere la stagione archivia classifica, premi e partite in forma compatta, aggiorna l'Albo d'Oro e poi cancella le partite: se l'archiviazione fallisce non cancella nulla. Ogni notte il workflow `backup.yml` salva i dati pubblici sul branch `backups`.
+
+## Sincronizzazione automatica dei risultati
+Ogni ora il workflow `sync-results.yml` legge da Lichess le partite non ancora concluse su Firestore e ne salva lo stato, come fa l'area organizzatore quando si apre. Per scrivere serve un account di servizio del progetto Firebase; senza, il workflow non fa nulla. Si configura una volta:
+1. Google Cloud Console, progetto di Firebase → **IAM e amministrazione → Account di servizio** → crea un account (per esempio `sync-risultati`) con il ruolo **Utente Cloud Datastore**.
+2. Nell'account → **Chiavi → Aggiungi chiave → JSON**: si scarica un file.
+3. GitHub, repository → **Settings → Secrets and variables → Actions** → nuovo secret `FIREBASE_SERVICE_ACCOUNT` con tutto il contenuto del file. Poi il file va cancellato dal computer.
+4. **Actions → Sincronizza risultati → Run workflow** per provarlo: nel log, quante partite ha aggiornato.
+
+L'account scrive solo i campi `lichess` e `syncedAt` delle partite che esistono già. GitHub sospende i workflow programmati dopo 60 giorni senza commit: in quel caso si riattivano dalla pagina Actions.
 
 ## Elo del torneo e Trofeo Pillsbury
 - **Elo del torneo**: formula Elo (K = 32) sulle sole partite del torneo, nell'ordine in cui sono finite. A fine prima stagione l'Elo di un giocatore diventa la sua prestazione, con 2 patte virtuali contro il suo Elo di partenza (o contro la media dei veterani, o 1500 nella prima stagione del torneo): con 14 partite la sola prestazione esagera le distanze. Ogni Elo ha anche un'incertezza (±), dalla prestazione o dall'Elo di partenza, che si riduce partita dopo partita. Le partite decise a tavolino (forfeit, «cheat detected») contano per la classifica ma non per l'Elo.

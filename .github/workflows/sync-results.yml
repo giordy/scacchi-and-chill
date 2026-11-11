@@ -1,0 +1,33 @@
+name: Sincronizza risultati
+
+# Every hour, the results of the games still open are read from Lichess and saved on Firestore, as
+# the organizer area does when it opens: the saved results no longer wait for the organizer.
+# Needs the secret FIREBASE_SERVICE_ACCOUNT (see the README); without it the run does nothing.
+on:
+  schedule:
+    - cron: "41 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "sync-results"
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Lichess -> Firestore
+        run: node scripts/sync-results.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
