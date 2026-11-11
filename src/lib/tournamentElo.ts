@@ -27,10 +27,11 @@ export const ELO_START = 1500;
 export const ELO_K = 32;
 // Virtual draws a first-season performance leans on, against what was known of the player before
 // it (see performanceRatings). One let a season of 14 games spread the ratings far wider than the
-// levels are (13½ of 14 is the best player, not by how much): three are what a prior as wide as
-// the spread of levels in a group like ours is worth, and on simulated seasons they gave both the
-// closest ratings and objectives that favour neither the strongest nor the weakest.
-export const PERF_VIRTUAL_DRAWS = 3;
+// levels are (13½ of 14 is the best player, not by how much); three drew them too close: on
+// simulated seasons with levels as far apart as the Stagione 1 showed ours are, 100 points of
+// rating were worth about 117 of level, so the strongest had objectives too low. Two gave the
+// closest ratings (about 109) whether the levels were closer or wider than ours.
+export const PERF_VIRTUAL_DRAWS = 2;
 // How sure a seed is, when the seed does not say it (see EloSeed.sigma): what the Stagione 2 gave
 export const SEED_SIGMA = 175;
 // Points of Elo per point of expected score, at an even game: the slope of expectedScore is LN·e(1-e)

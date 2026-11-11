@@ -32,7 +32,7 @@ describe('Elo del torneo', () => {
     expect(a).toBeGreaterThan(b);
     expect(b).toBeGreaterThan(c);
     expect((a + b + c) / 3).toBeCloseTo(1500, 6);
-    // Far wider than 4 games one at a time would reach (±32 each), though three virtual draws each
+    // Far wider than 4 games one at a time would reach (±32 each), though two virtual draws each
     // against 1500 keep a short season from stretching the scale
     expect(a - c).toBeGreaterThan(200);
     expect(a - c).toBeLessThan(300);
@@ -46,7 +46,7 @@ describe('Elo del torneo', () => {
     ]);
     const s2 = rep.seasons[1];
     expect([...s2.newcomers]).toEqual(['nuovo']);
-    // Performance: expected points (and three virtual draws against the regulars' mean) equal the points made
+    // Performance: expected points (and two virtual draws against the regulars' mean) equal the points made
     const nuovo = rep.ratings.get('nuovo')!;
     const mean = (s2.start.get('anna')! + s2.start.get('bruno')!) / 2;
     const expected = expectedScore(nuovo, s2.start.get('anna')!) + expectedScore(nuovo, s2.start.get('bruno')!) + PERF_VIRTUAL_DRAWS * expectedScore(nuovo, mean);
@@ -111,7 +111,7 @@ describe('Elo del torneo', () => {
       const seeded = season({ dario: 1400 });
       expect(seeded.seasons[1].start.get('dario')).toBe(1400);
       // The performance is solved against the opponents' ratings in each game, and leans on the seed
-      // (three virtual draws against it) as an esordiente's leans on the regulars' mean: 2½ of 3
+      // (two virtual draws against it) as an esordiente's leans on the regulars' mean: 2½ of 3
       // takes it well above the seed of 1400
       expect(Math.abs(seeded.ratings.get('dario')! - season().ratings.get('dario')!)).toBeLessThan(60);
       expect(seeded.ratings.get('dario')).toBeGreaterThan(1550);

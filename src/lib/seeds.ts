@@ -16,11 +16,12 @@
 // - then taken halfway towards the mean Elo del torneo of all the regulars: knowing nothing else, a
 //   newcomer is an average player, and a Lichess rating says only part of their level by
 //   correspondence (on the Stagione 2 the regulars' blitz was 263 to 672 points under their level
-//   here); and kept between the weakest and the strongest regular.
+//   here); and kept within SEED_CLAMP_MARGIN points of the weakest and the strongest regular.
 //   Checked on the Stagione 2 against the organizer's judgement: Alessandro 1998 (Fabio 2022),
 //   Francesco Sal 1830 (Matteo 1721, "maybe a little stronger"); the full Lichess step gave 2333/1997.
-//   (Rule 2, with the Elo del torneo of then: rule 3 is the same step on the ratings of three virtual
-//   draws, see PERF_VIRTUAL_DRAWS, and keeps how sure the seed is.)
+//   (Rule 2, with the Elo del torneo of then. Rule 3: the same step on the ratings of three virtual
+//   draws, see PERF_VIRTUAL_DRAWS, keeping how sure the seed is. Rule 4: on those of two, and no
+//   longer kept exactly between the weakest and the strongest regular.)
 // - how sure it is (sigma, see seedSigma): it is what the Trofeo Pillsbury measures a newcomer's gap
 //   from the objective against.
 // Without any, the player is an esordiente as before (a seed with rating null). A seed with a rating
@@ -48,8 +49,13 @@ export const SEED_MIN_REGULARS = 3;
 export const SEED_WEIGHT = 0.5;
 // The rule a seed was computed with: a seed with a rating from an older rule is computed once more
 // (with the same day: playing online since cannot move it). 3: on the Elo del torneo of three
-// virtual draws (see PERF_VIRTUAL_DRAWS in lib/tournamentElo.ts), with the seed's sigma
-export const SEED_RULE = 3;
+// virtual draws (see PERF_VIRTUAL_DRAWS in lib/tournamentElo.ts), with the seed's sigma; 4: on that
+// of two, with SEED_CLAMP_MARGIN
+export const SEED_RULE = 4;
+// How far beyond the weakest and the strongest regular a seed can be. With six regulars a newcomer
+// is outside them two times in seven: kept exactly between them, the seeds missed by a tenth more on
+// simulated seasons. The margin still stops a Lichess rating that is far off the group's.
+export const SEED_CLAMP_MARGIN = 200;
 // The spread of the regulars' gaps between the two ratings is measured on three or four of them: by
 // chance it can come out far too small. Never below this (on the Stagione 2 it was 218)
 export const SEED_MIN_GAP_SD = 150;
@@ -131,10 +137,11 @@ export function computeSeed(handle: string, date: string, regulars: Map<string, 
     }
     const mean = (ns: number[]) => ns.reduce((a, b) => a + b, 0) / ns.length;
     const offset = Math.round(mean(pairs.map((p) => p.elo)) - mean(pairs.map((p) => p.lichess)));
-    // Halfway towards the regulars' mean, between the weakest and the strongest
+    // Halfway towards the regulars' mean, not far beyond the weakest and the strongest
     const all = [...regulars.values()];
     const avg = mean(all);
-    const rating = Math.round(Math.min(Math.max(avg + SEED_WEIGHT * (lichess + offset - avg), Math.min(...all)), Math.max(...all)));
+    const [low, high] = [Math.min(...all) - SEED_CLAMP_MARGIN, Math.max(...all) + SEED_CLAMP_MARGIN];
+    const rating = Math.round(Math.min(Math.max(avg + SEED_WEIGHT * (lichess + offset - avg), low), high));
     const sigma = seedSigma(pairs.map((p) => p.elo - p.lichess), all);
     return { handle, rating, date, perf, lichess, offset, mean: Math.round(avg), rule: SEED_RULE, sigma, ...basis };
   }

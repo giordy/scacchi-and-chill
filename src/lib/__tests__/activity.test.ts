@@ -273,7 +273,7 @@ describe('objectives and the Trofeo Pillsbury', () => {
     const objectives = run(6).filter((e) => e.kind === 'objective');
     expect(objectives.map((e) => [sentence(e), e.detail, (e.at - T0) / DAY])).toEqual([
       ['@bruno raggiunge il suo obiettivo della stagione', 'Obiettivo: 1½ punti', 6],
-      ['@dario raggiunge il suo obiettivo della stagione', 'Obiettivo: 1 punto', 4],
+      ['@dario raggiunge il suo obiettivo della stagione', 'Obiettivo: ½ punto', 4],
       ['@carla raggiunge il suo obiettivo della stagione', 'Obiettivo: 1 punto', 2],
     ]);
     expect(objectives[0].link).toEqual({ href: '#/pillsbury', label: 'Pillsbury' });
@@ -284,7 +284,7 @@ describe('objectives and the Trofeo Pillsbury', () => {
     const events = run(6);
     expect(events[0].kind).toBe('pillsbury');
     expect(sentence(events[0])).toBe('@dario vince il Trofeo Pillsbury');
-    expect(events[0].detail).toBe('+1 punto sul suo obiettivo');
+    expect(events[0].detail).toBe('+1½ punti sul suo obiettivo');
     expect(events[1].kind).toBe('end');
   });
 

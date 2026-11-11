@@ -97,7 +97,7 @@ describe('computeSeed', () => {
     expect(computeSeed('dario', date, regulars, histories)).toMatchObject({ perf: 'classical', lichess: 1750, offset: -150, rating: 1550 }); // 1600, halfway to 1500
   });
 
-  it('keeps a seed between the weakest and the strongest regular', () => {
+  it('keeps a seed within 200 points of the weakest and the strongest regular', () => {
     const histories = new Map<string, unknown>([
       ['anna', [kind('Rapid', 1700)]],
       ['bruno', [kind('Rapid', 1600)]],
@@ -105,8 +105,8 @@ describe('computeSeed', () => {
       ['dario', [kind('Rapid', 2900)]], // 2700 on the scale, 2100 halfway: the strongest regular is 1600
       ['elena', [kind('Rapid', 300)]],
     ]);
-    expect(computeSeed('dario', date, regulars, histories).rating).toBe(1600);
-    expect(computeSeed('elena', date, regulars, histories).rating).toBe(1400);
+    expect(computeSeed('dario', date, regulars, histories).rating).toBe(1800);
+    expect(computeSeed('elena', date, regulars, histories).rating).toBe(1200);
   });
 
   it('gives the Stagione 2 the starting ratings the organizer judged right', () => {
