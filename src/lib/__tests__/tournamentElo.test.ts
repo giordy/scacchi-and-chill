@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeElo, CURRENT, currentSeason, ELO_START, eloSeasonFromArchive, eloSeasonFromCurrent, expectedScore, gameKey, isNewcomer, peakOf, ratingOf, tournamentElo } from '../tournamentElo';
+import { computeElo, CURRENT, currentSeason, ELO_START, eloSeasonFromArchive, eloSeasonFromCurrent, expectedScore, gameKey, isNewcomer, peakOf, PERF_VIRTUAL_DRAWS, ratingOf, SEED_SIGMA, seasonForecast, tournamentElo } from '../tournamentElo';
 import { HistoryGame, LichessExportGame, SeasonArchive } from '../../types';
 
 const g = (white: string, black: string, result: '1-0' | '0-1' | '½-½', end: number) => ({ white, black, result, end });
@@ -32,8 +32,10 @@ describe('Elo del torneo', () => {
     expect(a).toBeGreaterThan(b);
     expect(b).toBeGreaterThan(c);
     expect((a + b + c) / 3).toBeCloseTo(1500, 6);
-    // Far wider than 14 games one at a time would reach: Anna is well ahead
-    expect(a - c).toBeGreaterThan(300);
+    // Far wider than 4 games one at a time would reach (±32 each), though three virtual draws each
+    // against 1500 keep a short season from stretching the scale
+    expect(a - c).toBeGreaterThan(200);
+    expect(a - c).toBeLessThan(300);
     expect(rep.seasons[0].end.get('anna')).toBe(a);
   });
 
@@ -44,10 +46,11 @@ describe('Elo del torneo', () => {
     ]);
     const s2 = rep.seasons[1];
     expect([...s2.newcomers]).toEqual(['nuovo']);
-    // Performance: expected points (and the virtual draw against 1500) equal the points made
+    // Performance: expected points (and three virtual draws against the regulars' mean) equal the points made
     const nuovo = rep.ratings.get('nuovo')!;
-    const expected = expectedScore(nuovo, s2.start.get('anna')!) + expectedScore(nuovo, s2.start.get('bruno')!) + expectedScore(nuovo, 1500);
-    expect(expected).toBeCloseTo(1.5 + 0.5, 3);
+    const mean = (s2.start.get('anna')! + s2.start.get('bruno')!) / 2;
+    const expected = expectedScore(nuovo, s2.start.get('anna')!) + expectedScore(nuovo, s2.start.get('bruno')!) + PERF_VIRTUAL_DRAWS * expectedScore(nuovo, mean);
+    expect(expected).toBeCloseTo(1.5 + PERF_VIRTUAL_DRAWS * 0.5, 3);
     // Against the esordiente the others did not move
     expect(rep.ratings.get('anna')).toBe(s2.start.get('anna'));
     expect(rep.ratings.get('bruno')).toBe(s2.start.get('bruno'));
@@ -107,9 +110,11 @@ describe('Elo del torneo', () => {
         computeElo([s1, { key: 's2', players: ['anna', 'bruno', 'carla', 'dario'], seeds, games: [g('dario', 'bruno', '1-0', 5), g('anna', 'dario', '½-½', 6), g('dario', 'carla', '1-0', 7)] }]);
       const seeded = season({ dario: 1400 });
       expect(seeded.seasons[1].start.get('dario')).toBe(1400);
-      // The performance is solved against the opponents' ratings in each game: close, whatever the start
-      expect(Math.abs(seeded.ratings.get('dario')! - season().ratings.get('dario')!)).toBeLessThan(25);
-      expect(seeded.ratings.get('dario')).toBeGreaterThan(1600);
+      // The performance is solved against the opponents' ratings in each game, and leans on the seed
+      // (three virtual draws against it) as an esordiente's leans on the regulars' mean: 2½ of 3
+      // takes it well above the seed of 1400
+      expect(Math.abs(seeded.ratings.get('dario')! - season().ratings.get('dario')!)).toBeLessThan(60);
+      expect(seeded.ratings.get('dario')).toBeGreaterThan(1550);
     });
 
     it('is what a performance on few games leans on, instead of 1500', () => {
@@ -271,5 +276,55 @@ describe('Elo massimo', () => {
     ]);
     expect(peakOf(rep, 'anna')).toBeDefined();
     expect(peakOf(rep, 'bruno')).toBeUndefined();
+  });
+});
+
+describe('how sure each rating is (sigma)', () => {
+  // A double round robin of four: Anna wins all, Bruno and Carla share, Dario loses all
+  const s1Games = [
+    g('anna', 'bruno', '1-0', 1), g('anna', 'carla', '1-0', 2), g('anna', 'dario', '1-0', 3),
+    g('bruno', 'carla', '1-0', 4), g('bruno', 'dario', '1-0', 5), g('carla', 'dario', '1-0', 6),
+    g('bruno', 'anna', '0-1', 7), g('carla', 'anna', '0-1', 8), g('dario', 'anna', '0-1', 9),
+    g('carla', 'bruno', '1-0', 10), g('dario', 'bruno', '0-1', 11), g('dario', 'carla', '0-1', 12),
+  ];
+  const s1 = { key: 's1', players: ['anna', 'bruno', 'carla', 'dario'], games: s1Games };
+
+  it('comes from the performance at the end of the first season: less sure at the extremes', () => {
+    const rep = computeElo([s1, { key: CURRENT, players: ['anna', 'bruno', 'carla', 'dario'], games: [] }]);
+    const sigma = currentSeason(rep).sigma;
+    expect([...sigma.keys()].sort()).toEqual(['anna', 'bruno', 'carla', 'dario']);
+    // A perfect score says who is best, not by how much
+    expect(sigma.get('anna')!).toBeGreaterThan(sigma.get('bruno')!);
+    expect(sigma.get('dario')!).toBeGreaterThan(sigma.get('carla')!);
+    expect(sigma.get('bruno')!).toBeGreaterThan(80);
+    expect(sigma.get('bruno')!).toBeLessThan(300);
+    // Nobody's level is known yet in the first season
+    expect(rep.seasons[0].sigma.size).toBe(0);
+  });
+
+  it('starts from the seed for a seeded newcomer, and is none for an esordiente', () => {
+    const rep = computeElo([s1, { key: CURRENT, players: ['anna', 'bruno', 'carla', 'dario', 'elena', 'fabio'], seeds: { elena: 1600 }, seedSigmas: { elena: 140 }, games: [] }]);
+    const now = currentSeason(rep);
+    expect(now.sigma.get('elena')).toBe(140);
+    expect(now.sigma.has('fabio')).toBe(false);
+    const old = computeElo([s1, { key: CURRENT, players: ['anna', 'elena'], seeds: { elena: 1600 }, games: [] }]);
+    expect(currentSeason(old).sigma.get('elena')).toBe(SEED_SIGMA); // a seed from before sigmas were kept
+  });
+
+  it('gets surer with the games of the next season', () => {
+    const s2 = { key: 's2', players: ['anna', 'bruno', 'carla', 'dario'], games: s1Games.map((x) => ({ ...x, end: x.end + 100 })) };
+    const rep = computeElo([s1, s2, { key: CURRENT, players: ['anna', 'bruno', 'carla', 'dario'], games: [] }]);
+    expect(rep.seasons[2].sigma.get('bruno')!).toBeLessThan(rep.seasons[1].sigma.get('bruno')!);
+  });
+
+  it('widens the spread of a gap from the objective: wider for a less sure rating', () => {
+    const rep = computeElo([s1, { key: CURRENT, players: ['anna', 'bruno', 'carla', 'dario', 'elena'], seeds: { elena: 1500 }, seedSigmas: { elena: 300 }, games: [] }]);
+    const now = currentSeason(rep);
+    const games = [g('bruno', 'carla', '1-0', 20), g('elena', 'carla', '1-0', 21)];
+    const bruno = seasonForecast('bruno', now, games, games)!;
+    const elena = seasonForecast('elena', now, games, games)!;
+    const e = expectedScore(now.start.get('bruno')!, now.start.get('carla')!);
+    expect(bruno.spread).toBeGreaterThan(Math.sqrt(e * (1 - e))); // the luck of the game, and more
+    expect(elena.spread).toBeGreaterThan(bruno.spread);
   });
 });

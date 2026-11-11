@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeSeed, firstGames, historySummary, reliableRatingsAt, seedDate, seedsToFix } from '../seeds';
+import { computeSeed, firstGames, historySummary, reliableRatingsAt, SEED_RULE, seedDate, seedSigma, seedsToFix } from '../seeds';
 import { HistoryGame, LichessExportGame } from '../../types';
 
 // A Lichess rating history: `days` days of rated games of a kind, one a day up to `last`, ending at `rating`
@@ -61,9 +61,11 @@ describe('computeSeed', () => {
       ['carla', [kind('Rapid', 1700)]],
       ['dario', [kind('Rapid', 1850)]],
     ]);
-    // Regulars: 1500 on average here, 1800 on Lichess: −300, so 1550; halfway to their mean 1500: 1525
+    // Regulars: 1500 on average here, 1800 on Lichess: −300, so 1550; halfway to their mean 1500: 1525.
+    // Sure to ±100: the regulars' gaps are all −300, but taken as spread as SEED_MIN_GAP_SD (½·150·√(4/3)
+    // = 87), and their ratings are spread by 100 (½·100 = 50)
     expect(computeSeed('Dario', date, regulars, histories)).toEqual({
-      handle: 'Dario', rating: 1525, date, perf: 'rapid', lichess: 1850, offset: -300, mean: 1500, rule: 2,
+      handle: 'Dario', rating: 1525, date, perf: 'rapid', lichess: 1850, offset: -300, mean: 1500, rule: SEED_RULE, sigma: 100,
       // What it came from, kept to check it
       ratings: { rapid: 1850 },
       regulars: [
@@ -181,7 +183,7 @@ describe('which seeds to fix', () => {
       { handle: 'elena', date: '2026-09-22', retry: false },
     ]);
     // A seed with a rating is fixed once
-    const fixed = { handle: 'Dario', rating: 1600, date: '2026-09-08', rule: 2 };
+    const fixed = { handle: 'Dario', rating: 1600, date: '2026-09-08', rule: SEED_RULE };
     expect(seedsToFix(firstSeason, [fixed], first)).toEqual([{ handle: 'elena', date: '2026-09-22', retry: false }]);
     // ...but computed once more when it comes from an older rule
     expect(seedsToFix(firstSeason, [{ ...fixed, rule: undefined }], first)).toEqual([
@@ -194,5 +196,14 @@ describe('which seeds to fix', () => {
     const first = firstGames(history, states, players);
     const seeds = [{ handle: 'Dario', rating: null, date: '2026-09-01' }];
     expect(seedsToFix(new Set(['dario']), seeds, first)).toEqual([{ handle: 'dario', date: '2026-09-01', retry: true }]);
+  });
+});
+
+describe('seedSigma', () => {
+  it('is how far a seed may be: from the spread of the regulars\' gaps and of their ratings', () => {
+    // Stagione 2 (rule 2): gaps +599, +263, +672 (blitz); the six regulars from 1378 to 2022
+    expect(seedSigma([599, 263, 672], [1721, 2022, 1721, 1378, 1648, 1486])).toBe(168);
+    // Gaps that happen to agree are not taken as sure: never below SEED_MIN_GAP_SD
+    expect(seedSigma([500, 500, 500], [1500, 1500])).toBe(87);
   });
 });

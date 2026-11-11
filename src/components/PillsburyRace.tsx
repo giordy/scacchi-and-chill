@@ -29,7 +29,8 @@ function Progress({ trend, over }: { trend: TrendKind; over: number }) {
 }
 
 // Public view next to Classifica and Tabellone: the race for the Trofeo Pillsbury. Ordered by the
-// points beyond those expected, but shown only with arrows: the gap in points would only discourage.
+// points beyond those expected, weighed by how sure each objective is (PillsburyRow.score), but shown
+// only with arrows and, above the objective, the half points: the gap below would only discourage.
 export function PillsburyRace({
   players,
   elo,
@@ -138,6 +139,7 @@ export function PillsburyRace({
       <div className="pillsbury-about">
         <p className="note note-top-xs">
           Il <strong>{PILLSBURY_TITLE}</strong> <PillsburyIcon /> va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti (lo trovate nel vostro profilo).
+          {' '}Lo scarto si pesa con quanto è sicuro l'obiettivo: chi ha un Elo ancora incerto, come chi gioca la prima stagione, deve superarlo di più, perché una parte dello scarto può venire dall'Elo e non dalla sua stagione.
           {reigning && <> Detentore: {namesList(reigning.handles.map(nameOf))} ({reigning.season}).</>}
         </p>
         <p className="note note-top-xs">

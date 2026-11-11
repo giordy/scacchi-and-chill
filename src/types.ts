@@ -157,6 +157,7 @@ export interface EloSeed {
   offset?: number; // the correction of scale, from the regulars
   mean?: number; // the regulars' mean Elo del torneo: rating = mean + (lichess + offset - mean) / 2, within the regulars
   rule?: number; // the rule it was computed with (see SEED_RULE in lib/seeds.ts)
+  sigma?: number; // how sure the rating is: its standard deviation, in Elo points (see seedSigma in lib/seeds.ts)
   reason?: string; // without a rating: why, in words for the organizer
   // What it was computed from, to check it: the player's reliable Lichess ratings on that day, and each
   // regular's Elo del torneo at the start of the season with their reliable Lichess ratings that day

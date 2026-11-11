@@ -19,6 +19,10 @@
 //   here); and kept between the weakest and the strongest regular.
 //   Checked on the Stagione 2 against the organizer's judgement: Alessandro 1998 (Fabio 2022),
 //   Francesco Sal 1830 (Matteo 1721, "maybe a little stronger"); the full Lichess step gave 2333/1997.
+//   (Rule 2, with the Elo del torneo of then: rule 3 is the same step on the ratings of three virtual
+//   draws, see PERF_VIRTUAL_DRAWS, and keeps how sure the seed is.)
+// - how sure it is (sigma, see seedSigma): it is what the Trofeo Pillsbury measures a newcomer's gap
+//   from the objective against.
 // Without any, the player is an esordiente as before (a seed with rating null). A seed with a rating
 // is fixed once; one without is tried again, with the same day, whenever the organizer area opens
 // (a rule changed since, or a regular joined): the histories up to a past day do not change, so
@@ -43,7 +47,12 @@ export const SEED_MIN_REGULARS = 3;
 // How much of the distance from the regulars' mean the Lichess rating keeps
 export const SEED_WEIGHT = 0.5;
 // The rule a seed was computed with: a seed with a rating from an older rule is computed once more
-export const SEED_RULE = 2;
+// (with the same day: playing online since cannot move it). 3: on the Elo del torneo of three
+// virtual draws (see PERF_VIRTUAL_DRAWS in lib/tournamentElo.ts), with the seed's sigma
+export const SEED_RULE = 3;
+// The spread of the regulars' gaps between the two ratings is measured on three or four of them: by
+// chance it can come out far too small. Never below this (on the Stagione 2 it was 218)
+export const SEED_MIN_GAP_SD = 150;
 export const RELIABLE_DAYS = 10;
 export const RELIABLE_WITHIN_DAYS = 365;
 
@@ -126,13 +135,29 @@ export function computeSeed(handle: string, date: string, regulars: Map<string, 
     const all = [...regulars.values()];
     const avg = mean(all);
     const rating = Math.round(Math.min(Math.max(avg + SEED_WEIGHT * (lichess + offset - avg), Math.min(...all)), Math.max(...all)));
-    return { handle, rating, date, perf, lichess, offset, mean: Math.round(avg), rule: SEED_RULE, ...basis };
+    const sigma = seedSigma(pairs.map((p) => p.elo - p.lichess), all);
+    return { handle, rating, date, perf, lichess, offset, mean: Math.round(avg), rule: SEED_RULE, sigma, ...basis };
   }
   const reason =
     skipped.length > 0
       ? skipped.join('; ')
       : `nessun Elo Lichess affidabile (servono almeno ${RELIABLE_DAYS} giorni con partite valutate dello stesso tipo, l'ultima entro un anno; il bullet non conta); ${historySummary(histories.get(lower(handle)), date)}`;
   return { handle, rating: null, date, reason, ...basis };
+}
+
+// How sure a seed is: the standard deviation of its error, in Elo points, rounded. The seed is
+// mean + w·(lichess + offset - mean): it misses by w times the player's own gap between the two
+// ratings, which is as spread as the regulars' gaps (and their mean, the offset, is known only to
+// the spread / √n), and by (1 - w) times how far the player is from the mean, as spread as the
+// regulars' ratings. gaps: the regulars' Elo del torneo minus their Lichess rating; elos: all regulars'
+export function seedSigma(gaps: number[], elos: number[]): number {
+  const sd = (ns: number[]) => {
+    const m = ns.reduce((a, b) => a + b, 0) / ns.length;
+    return ns.length > 1 ? Math.sqrt(ns.reduce((a, b) => a + (b - m) ** 2, 0) / (ns.length - 1)) : 0;
+  };
+  const gap = Math.max(sd(gaps), SEED_MIN_GAP_SD);
+  const w = SEED_WEIGHT;
+  return Math.round(Math.sqrt(w ** 2 * gap ** 2 * (1 + 1 / gaps.length) + (1 - w) ** 2 * sd(elos) ** 2));
 }
 
 // When each player's first game of the season was created (the Lichess challenge; the link saved

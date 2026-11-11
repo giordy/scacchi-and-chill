@@ -8,7 +8,7 @@ import { fullMovesOf, isVoid, movesText, nameFrom, pliesOf, storedStates } from 
 import { summitGames, summitKey } from './summit';
 import { computeSeasonProgress, gameProgress } from './progress';
 import { reigningChampions } from './honours';
-import { PILLSBURY_EMOJI, PILLSBURY_TITLE, PillsburyRace, pillsburyRace, reigningPillsbury } from './pillsbury';
+import { PILLSBURY_EMOJI, PILLSBURY_TITLE, PillsburyRace, pillsburyRace, pillsburyWinners, reigningPillsbury } from './pillsbury';
 
 const DAY_MS = 86400000;
 
@@ -68,9 +68,10 @@ export function pillsburyLine(race: PillsburyRace, nameOf: (handle: string) => s
   if (race.suspended || race.rows.length === 0) return '';
   const up = race.rows.filter((r) => r.trend === 'up');
   if (seasonOver) {
-    if (up.length === 0) return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}:* nessuno è andato oltre le attese, quest'anno non viene assegnato`;
-    const best = up[0].over;
-    const winners = up.filter((r) => Math.abs(r.over - best) < 1e-6).map((r) => nameOf(r.handle));
+    const top = pillsburyWinners(race);
+    if (top.length === 0) return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}:* nessuno è andato oltre le attese, quest'anno non viene assegnato`;
+    const best = top[0].over;
+    const winners = top.map((r) => nameOf(r.handle));
     return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}* a ${namesList(winners)}, ${overText(best)} ${roundHalf(best) <= 1 ? 'punto' : 'punti'} oltre le attese`;
   }
   if (up.length === 0) return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}:* corsa ancora aperta, nessuno finora sopra le attese`;

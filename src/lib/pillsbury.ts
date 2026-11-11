@@ -1,5 +1,9 @@
 // Trofeo Pillsbury: to who beat their pronostico by most in the season, that is made the most
-// points beyond those expected from the Elo del torneo at its start (see seasonForecast). Named
+// points beyond those expected from the Elo del torneo at its start (see seasonForecast), measured
+// against how much they could be beyond it by chance (Forecast.spread): half a point beyond an
+// objective that is sure is worth more than half a point beyond one that is not (a seed from Lichess,
+// in a first season). Counted in points alone, the trophy went to the two newcomers of a season a
+// third of the time instead of a quarter, on simulated seasons. Named
 // after Harry Nelson Pillsbury, who in 1895, aged 22 and almost unknown, won Hastings ahead of
 // Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out;
 // so is a player who left the season, and the games won or lost at the table.
@@ -43,7 +47,8 @@ export const objectiveReached = (f: Forecast) => {
 export interface PillsburyRow {
   handle: string;
   forecast: Forecast;
-  over: number; // points beyond those expected so far: the order of the race
+  over: number; // points beyond those expected so far: what the table shows
+  score: number; // over measured against Forecast.spread: the order of the race
   trend: Trend;
 }
 
@@ -91,20 +96,22 @@ export function pillsburyRace(
       waiting.push(p.handle);
       return;
     }
-    rows.push({ handle: p.handle, forecast: f, over: f.points - f.expectedSoFar, trend: trendOf(f) });
+    const over = f.points - f.expectedSoFar;
+    rows.push({ handle: p.handle, forecast: f, over, score: f.spread > 0 ? over / f.spread : 0, trend: trendOf(f) });
   });
-  rows.sort((a, b) => b.over - a.over);
+  rows.sort((a, b) => b.score - a.score || b.over - a.over);
   const suspended = rows.length + waiting.length < PILLSBURY_MIN_PLAYERS;
   return { suspended, rows, waiting, newcomers, counted, forecasts };
 }
 
-// Who wins the trophy, once the season is over: who beat their objective by most (to a millionth of a
-// point: a tie wins together), only above it as the table shows them (▲), and not when suspended.
-// The same for the awards (lib/awards.ts), the cronaca and the race table.
+// Who wins the trophy, once the season is over: the first in the race (a tie, to a millionth, wins
+// together) of those above their objective as the table shows them (▲), and not when suspended.
+// The same for the awards (lib/awards.ts), the bulletin, the cronaca and the race table.
 export function pillsburyWinners(race: PillsburyRace): PillsburyRow[] {
-  const best = race.rows[0];
-  if (race.suspended || !best || best.over < PILLSBURY_MIN_OVER) return [];
-  return race.rows.filter((r) => Math.abs(r.over - best.over) < 1e-6);
+  const above = race.rows.filter((r) => r.over >= PILLSBURY_MIN_OVER);
+  const best = above[0];
+  if (race.suspended || !best) return [];
+  return above.filter((r) => Math.abs(r.score - best.score) < 1e-6);
 }
 
 // Who won the Trofeo Pillsbury of the latest archived season that gave it

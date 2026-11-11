@@ -38,7 +38,7 @@ export function SeedsSection({
         .filter((r) => r.ratings[seed.perf!] !== undefined)
         .map((r) => `${nameOf(r.handle)} ${r.elo}/${r.ratings[seed.perf!]}`);
       return {
-        value: String(seed.rating),
+        value: seed.sigma !== undefined ? `${seed.rating} ±${seed.sigma}` : String(seed.rating),
         note:
           `Lichess ${SEED_PERF_LABEL[seed.perf!]} ${seed.lichess} del ${seedDayLabel(seed.date)}, correzione ${sign}${Math.abs(seed.offset!)}` +
           (seed.mean !== undefined ? ` (${seed.lichess! + seed.offset!}), poi a metà strada verso la media dei veterani (${seed.mean})` : '') +
