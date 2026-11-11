@@ -30,6 +30,7 @@ describe('currentSeasonActivity', () => {
   it('lists the season start, rounds, results and leaders, newest first', () => {
     expect(events.map((e) => [e.kind, sentence(e)])).toEqual([
       ['round', 'Inizia il turno 2'],
+      ['roundEnd', 'Si chiude il turno 1: in testa @anna'],
       ['result', '@carla e @anna fanno patta'],
       ['leader', '@anna passa in testa alla classifica'],
       ['result', '@anna batte @bruno con il matto'],
@@ -113,6 +114,81 @@ describe('currentSeasonActivity', () => {
 
   it('is empty before the first round', () => {
     expect(currentSeasonActivity({ season: 'S', players, history: [], gameStates: {} })).toEqual([]);
+  });
+});
+
+describe('more of the season', () => {
+  // Four players, one game a day: Anna wins them all
+  const four = [...players, { handle: 'dario', name: 'Dario' }];
+  const pairs: [string, string, string][] = [
+    ['1', 'anna', 'bruno'],
+    ['1', 'carla', 'dario'],
+    ['2', 'anna', 'carla'],
+    ['2', 'bruno', 'dario'],
+    ['3', 'dario', 'anna'],
+    ['3', 'bruno', 'carla'],
+    ['4', 'bruno', 'anna'],
+    ['4', 'dario', 'carla'],
+  ];
+  const games: HistoryGame[] = pairs.map(([round, white, black], i) => ({
+    round,
+    white,
+    black,
+    url: `https://lichess.org/g000000${i}`,
+    createdAt: T0 + (Number(round) - 1) * 10 * DAY,
+  }));
+  // Games 0-5 over (Anna wins hers, the others are draws), 6-7 still to play
+  const st: Record<string, LichessExportGame> = {};
+  pairs.slice(0, 6).forEach(([, white, black], i) => {
+    const at = T0 + (i + 1) * DAY + Math.floor(i / 2) * 8 * DAY;
+    const id = `g000000${i}`;
+    st[id] = [white, black].includes('anna')
+      ? { id, status: 'resign', winner: white === 'anna' ? 'white' : 'black', lastMoveAt: at }
+      : { id, status: 'draw', lastMoveAt: at };
+  });
+  const anecdotes = [
+    { title: '*Il bambino prodigio*', text: '…' },
+    { title: 'Il campione del mondo', text: '…' },
+  ];
+  const events = currentSeasonActivity({ season: 'S', masterName: 'José Raúl Capablanca', masterAnecdotes: anecdotes, players: four, history: games, gameStates: st });
+  const of = (kind: ActivityEvent['kind']) => events.filter((e) => e.kind === kind);
+
+  it('tells a third win in a row and more', () => {
+    expect(of('streak').map(sentence)).toEqual(['@anna vince la terza partita di fila']);
+  });
+
+  it('tells the campione matematico once, when nobody can reach the leader', () => {
+    // Anna's third win (round 3) makes 3 points; nobody else can reach more than 2½, with rounds 3 and 4 still open
+    expect(of('champion').map(sentence)).toEqual(['@anna vince matematicamente la stagione: nessuno può più arrivare in testa']);
+    expect(of('champion')[0].detail).toBe("con 2 turni d'anticipo");
+  });
+
+  it('closes each round with who leads', () => {
+    expect(of('roundEnd').map(sentence)).toEqual([
+      'Si chiude il turno 3: in testa @anna',
+      'Si chiude il turno 2: in testa @anna',
+      'Si chiude il turno 1: in testa @anna',
+    ]);
+    expect(of('roundEnd')[0].detail).toBe('con 3 punti');
+  });
+
+  it('publishes the anecdote of each round with its start', () => {
+    expect(of('anecdote').map(sentence)).toEqual([
+      'Nuovo aneddoto su Capablanca: «Il campione del mondo»',
+      'Nuovo aneddoto su Capablanca: «Il bambino prodigio»',
+    ]);
+    expect(of('anecdote')[0].link).toEqual({ href: '#/stagione', label: 'Leggi' });
+  });
+
+  it('tags a scontro al vertice from the fourth round', () => {
+    const late = { ...st, g0000006: { id: 'g0000006', status: 'resign', winner: 'black' as const, lastMoveAt: T0 + 40 * DAY } };
+    const out = currentSeasonActivity({ season: 'S', players: four, history: games, gameStates: late });
+    // Before round 4: Anna 3, the other three 1 each. The top 3 places hold four players: no summit
+    expect(out.find((e) => e.gameId === 'g0000006')!.tags).toBeUndefined();
+    // With Bruno alone in second place, Bruno – Anna is one
+    const second = { ...late, g0000003: { id: 'g0000003', status: 'resign', winner: 'white' as const, lastMoveAt: T0 + 14 * DAY } };
+    const out2 = currentSeasonActivity({ season: 'S', players: four, history: games, gameStates: second });
+    expect(out2.find((e) => e.gameId === 'g0000006')!.tags).toEqual(['🔝 Scontro al vertice']);
   });
 });
 

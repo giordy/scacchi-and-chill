@@ -487,6 +487,7 @@ export function PublicTournamentView({
               season={tournamentMeta.season}
               masterName={tournamentMeta.masterName}
               masterOpening={tournamentMeta.masterOpening}
+              masterAnecdotes={tournamentMeta.masterAnecdotes}
               players={players}
               history={history}
               gameStates={gameStates}

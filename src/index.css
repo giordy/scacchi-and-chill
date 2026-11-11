@@ -2397,7 +2397,8 @@ details.anecdote > summary::-webkit-details-marker {
 }
 
 .timeline-item.is-new::before,
-.timeline-item.is-end::before {
+.timeline-item.is-end::before,
+.timeline-item.is-champion::before {
   background: var(--brass);
 }
 

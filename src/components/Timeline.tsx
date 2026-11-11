@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { HistoryGame, LichessExportGame, Player, ScheduledMatch, SeasonArchive, Withdrawal } from '../types';
+import { HistoryGame, LichessExportGame, MasterAnecdote, Player, ScheduledMatch, SeasonArchive, Withdrawal } from '../types';
 import { ActivityEvent, archivedSeasonActivity, currentSeasonActivity, isNewSince } from '../lib/activity';
 import { EloReport } from '../lib/tournamentElo';
 import { playerHref } from '../lib/routes';
@@ -8,6 +8,7 @@ interface TimelineProps {
   season: string;
   masterName?: string;
   masterOpening?: string;
+  masterAnecdotes?: MasterAnecdote[];
   players: Player[];
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
@@ -78,9 +79,10 @@ export function Timeline(props: TimelineProps) {
         gameStates: props.gameStates,
         schedule: props.schedule,
         withdrawals: props.withdrawals,
+        masterAnecdotes: props.masterAnecdotes,
         elo,
       }),
-    [season, props.masterName, props.masterOpening, props.players, props.history, props.gameStates, props.schedule, props.withdrawals, elo]
+    [season, props.masterName, props.masterOpening, props.masterAnecdotes, props.players, props.history, props.gameStates, props.schedule, props.withdrawals, elo]
   );
   const archive = archives.find((a) => a.id === selected);
   const events = useMemo(() => (archive ? archivedSeasonActivity(archive, elo) : current), [archive, elo, current]);
@@ -153,6 +155,11 @@ export function Timeline(props: TimelineProps) {
                   </div>
                   <span className="timeline-meta">
                     <time dateTime={new Date(e.at).toISOString()}>{timeLabel(e.at)}</time>
+                    {e.link && (
+                      <a href={e.link.href} className="timeline-game-link">
+                        {e.link.label}
+                      </a>
+                    )}
                     {e.gameId && (
                       <a href={`https://lichess.org/${e.gameId}`} target="_blank" rel="noopener noreferrer" className="timeline-game-link">
                         Partita
