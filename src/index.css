@@ -3252,3 +3252,16 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   filter: grayscale(0.35);
   box-shadow: 0 0 0 2px var(--brass-soft);
 }
+
+/* Organizer area: what the AI reply filled in, and what to check */
+.ai-result {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--brass-soft);
+}
+.ai-check {
+  margin: 0;
+  padding-left: 18px;
+}

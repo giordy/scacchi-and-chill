@@ -93,9 +93,8 @@ export function SeasonInfoSection({
       imageUrl: form.imageUrl.trim(),
       description: form.description.trim(),
       masterOpening: form.masterOpening,
-      famousGame: famousUrl
-        ? { url: famousUrl, title: form.famousTitle.trim(), ...(form.famousNote.trim() ? { note: form.famousNote.trim() } : {}) }
-        : { url: "", title: "" },
+      // Without a link the title and note are kept (e.g. from the AI reply), but nothing shows on the site
+      famousGame: { url: famousUrl, title: form.famousTitle.trim(), ...(form.famousNote.trim() ? { note: form.famousNote.trim() } : {}) },
     });
     flash("ok", "Stagione aggiornata.");
   };

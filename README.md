@@ -14,7 +14,7 @@ Login Google; organizzatore è chi ha un documento in `admins/<email>`. Ogni azi
 - **Turni**: crea le sfide su Lichess, ricrea o sostituisce un link, prepara messaggio e bollettino per WhatsApp.
 - **WhatsApp**: prompt per il racconto della stagione, premi. I testi dei messaggi e le frasi del bollettino stanno in `config.json`: si cambiano lì, con un nuovo deploy.
 - **Giocatori**: registro (il nome vale anche per le stagioni passate), chi gioca la stagione, ritiri (regola della metà o sostituto).
-- **Stagioni**: stagione corrente, foto del maestro, la sua apertura e la sua partita celebre, regolamento, Elo di partenza, calendario (girone all'italiana), chiusura della stagione e Albo d'Oro.
+- **Stagioni**: stagione corrente, foto del maestro, la sua apertura e la sua partita celebre (con un prompt per un'AI che prepara motto, presentazione, aneddoti, apertura e partita: si incolla la risposta e i campi si compilano), regolamento, Elo di partenza, calendario (girone all'italiana), chiusura della stagione e Albo d'Oro.
 - **Impostazioni**: token Lichess (serve per le sfide e gli Elo di partenza), copia e ripristino dei dati.
 
 Chiudere la stagione archivia classifica, premi e partite in forma compatta, aggiorna l'Albo d'Oro e poi cancella le partite: se l'archiviazione fallisce non cancella nulla. Ogni notte il workflow `backup.yml` salva i dati pubblici sul branch `backups`.

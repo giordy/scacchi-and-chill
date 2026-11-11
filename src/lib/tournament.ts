@@ -45,7 +45,8 @@ export function tournamentFromDoc(doc: TournamentDocData): TournamentMeta | null
     subtitle: doc.subtitle || DEFAULT_TOURNAMENT.subtitle,
     masterName: doc.masterName || DEFAULT_TOURNAMENT.masterName,
     ...(doc.masterOpening ? { masterOpening: doc.masterOpening } : {}),
-    ...(doc.famousGame?.url ? { famousGame: doc.famousGame } : {}),
+    // A title without a link yet (filled in from the AI reply) is kept for the organizer area
+    ...(doc.famousGame?.url || doc.famousGame?.title ? { famousGame: doc.famousGame } : {}),
     imageUrl: doc.imageUrl || DEFAULT_TOURNAMENT.imageUrl,
     description: doc.description || DEFAULT_TOURNAMENT.description,
     howItWorks: doc.howItWorks || "",

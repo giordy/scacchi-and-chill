@@ -11,6 +11,7 @@ import {
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { SeasonInfoSection } from './settings/SeasonInfoSection';
 import { MasterAnecdotesSection } from './settings/MasterAnecdotesSection';
+import { MasterAISection } from './settings/MasterAISection';
 import { RulesSection } from './settings/RulesSection';
 import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
 import { HallOfFameSection } from './settings/HallOfFameSection';
@@ -54,6 +55,13 @@ export function SeasonsTab({
   return (
     <div className="settings-stack">
       <CollapsibleSection title="Stagione corrente" defaultOpen>
+        <MasterAISection
+          meta={meta}
+          schedule={config.schedule ?? []}
+          players={config.players.length}
+          flash={flash}
+          onUpdateTournamentMeta={onUpdateTournamentMeta}
+        />
         <SeasonInfoSection meta={meta} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
         <MasterAnecdotesSection meta={meta} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
       </CollapsibleSection>
