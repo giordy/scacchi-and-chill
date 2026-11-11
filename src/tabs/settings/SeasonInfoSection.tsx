@@ -4,7 +4,7 @@ import { DEFAULT_TOURNAMENT } from '../../lib/tournament';
 import { compressImage, isMediaRef, mediaRef } from '../../lib/media';
 import { seasonId } from '../../lib/seasons';
 import { OPENING_FAMILIES } from '../../lib/masterOpening';
-import { extractGameId } from '../../lib/utils';
+import { replayGifFor } from '../../components/GameReplay';
 import { saveMediaImage } from '../../firebaseService';
 import { primeImage, useImageSrc } from '../../hooks/useImageSrc';
 
@@ -77,8 +77,8 @@ export function SeasonInfoSection({
       return;
     }
     const famousUrl = form.famousUrl.trim();
-    if (famousUrl && !(famousUrl.startsWith("https://lichess.org/") && extractGameId(famousUrl))) {
-      flash("err", "La partita del maestro va indicata con il link di una partita su Lichess (https://lichess.org/…).");
+    if (famousUrl && !(famousUrl.startsWith("https://lichess.org/") && replayGifFor(famousUrl))) {
+      flash("err", "La partita del maestro va indicata con il link di una partita o di un capitolo di studio su Lichess (https://lichess.org/…).");
       return;
     }
     if (famousUrl && !form.famousTitle.trim()) {
@@ -185,8 +185,9 @@ export function SeasonInfoSection({
         <label htmlFor="cfg-famous-note">Due righe sulla partita (facoltative)</label>
         <textarea id="cfg-famous-note" rows={2} {...field("famousNote")} />
         <p className="note">
-          Una partita su Lichess: cercala nel database dei maestri, oppure incolla la sua notazione (PGN) in
-          lichess.org/paste e copia qui il link che ottieni. Nella sezione Stagione si rivede mossa per mossa.
+          Una partita su Lichess, oppure il capitolo di uno studio pubblico (lichess.org/study/…/…). Se non la trovi,
+          incolla la sua notazione (PGN) in lichess.org/paste e copia qui il link che ottieni. Nella sezione Stagione si
+          rivede mossa per mossa.
         </p>
       </div>
       <button className="primary" type="button" onClick={save}>

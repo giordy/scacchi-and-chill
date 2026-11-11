@@ -5,11 +5,26 @@ import { extractGameId } from '../lib/utils';
 export const replayGifUrl = (gameId: string) =>
   `https://lichess1.org/game/export/gif/${gameId}.gif?piece=staunty&theme=green`;
 
+// A chapter of a Lichess study (lichess.org/study/<study>/<chapter>): the master's famous game is
+// often found as one. Lichess renders those as a GIF too, from the public or unlisted ones.
+export function studyChapterOf(url?: string): { study: string; chapter: string } | undefined {
+  const m = url?.match(/lichess\.org\/study\/([a-zA-Z0-9]{8})\/([a-zA-Z0-9]{8})/);
+  return m ? { study: m[1], chapter: m[2] } : undefined;
+}
+
+// The GIF of a game or of a study chapter; undefined for any other link
+export function replayGifFor(url?: string): string | undefined {
+  const chapter = studyChapterOf(url);
+  if (chapter) return `https://lichess.org/study/${chapter.study}/${chapter.chapter}.gif?piece=staunty&theme=green`;
+  const id = extractGameId(url);
+  return id ? replayGifUrl(id) : undefined;
+}
+
 // Modal with the game replayed move by move; the GIF is downloaded only when it opens
 export function GameReplay({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
-  const id = extractGameId(url);
+  const gif = replayGifFor(url);
 
   useEffect(() => {
     const d = dialog.current;
@@ -33,11 +48,11 @@ export function GameReplay({ url, title, onClose }: { url: string; title: string
             ✕
           </button>
         </div>
-        {id && state !== 'error' && (
+        {gif && state !== 'error' && (
           <div className="replay-frame">
             {state === 'loading' && <span className="replay-loading">Caricamento della partita…</span>}
             <img
-              src={replayGifUrl(id)}
+              src={gif}
               alt={`Partita ${title} mossa per mossa`}
               className={state === 'ready' ? 'is-ready' : ''}
               onLoad={() => setState('ready')}
@@ -45,7 +60,7 @@ export function GameReplay({ url, title, onClose }: { url: string; title: string
             />
           </div>
         )}
-        {(!id || state === 'error') && <p className="note">Non riesco a caricare l'animazione della partita.</p>}
+        {(!gif || state === 'error') && <p className="note">Non riesco a caricare l'animazione della partita.</p>}
         <a href={url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn replay-link">
           Apri su Lichess per l'analisi
         </a>
