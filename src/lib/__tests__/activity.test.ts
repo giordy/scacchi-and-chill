@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ActivityEvent, archivedSeasonActivity, currentSeasonActivity, isNewSince, sortEvents } from '../activity';
+import { tournamentElo } from '../tournamentElo';
 import { HistoryGame, LichessExportGame, SeasonArchive } from '../../types';
 
 const players = [
@@ -225,6 +226,75 @@ describe('first wins', () => {
     // A season archived without its games: its table says who won
     const old = { ...past, games: undefined, standings: [{ handle: 'Carla', name: 'Carla', played: 1, won: 1, drawn: 0, lost: 0, points: 1, sb: 0 }] };
     expect(firsts([old])).toEqual(['@bruno conquista la sua prima vittoria nel torneo', '@anna conquista la sua prima vittoria nel torneo']);
+  });
+});
+
+describe('objectives and the Trofeo Pillsbury', () => {
+  // A first season makes everyone's level known: Anna far ahead, Dario last
+  const four = ['anna', 'bruno', 'carla', 'dario'].map((h) => ({ handle: h, name: h }));
+  const first: SeasonArchive = {
+    id: 's1',
+    season: 'Stagione 1',
+    title: 'T',
+    archivedAt: '2026-06-01T00:00:00Z',
+    standings: [],
+    gamesPlayed: 12,
+    games: (
+      [
+        ['anna', 'bruno', '1-0'], ['anna', 'carla', '1-0'], ['anna', 'dario', '1-0'], ['bruno', 'carla', '½-½'], ['bruno', 'dario', '1-0'], ['carla', 'dario', '½-½'],
+        ['bruno', 'anna', '0-1'], ['carla', 'anna', '0-1'], ['dario', 'anna', '0-1'], ['carla', 'bruno', '½-½'], ['dario', 'bruno', '0-1'], ['dario', 'carla', '½-½'],
+      ] as const
+    ).map(([white, black, result], i) => ({ round: String(i + 1), white, black, result, end: Date.UTC(2026, 0, 1) + i * DAY })),
+  };
+  const pairs: [string, string, string][] = [
+    ['1', 'anna', 'bruno'], ['1', 'carla', 'dario'], ['2', 'anna', 'carla'], ['2', 'bruno', 'dario'], ['3', 'dario', 'anna'], ['3', 'bruno', 'carla'],
+  ];
+  const schedule = pairs.map(([round, white, black]) => ({ round, white, black }));
+  const games: HistoryGame[] = pairs.map(([round, white, black], i) => ({ round, white, black, url: `https://lichess.org/p000000${i}`, createdAt: T0 + i * DAY }));
+  // Bruno beats Anna, Carla Dario, Anna Carla, Dario Bruno, Dario Anna, Bruno Carla: one a day
+  const winners: ('white' | 'black')[] = ['black', 'white', 'white', 'black', 'white', 'white'];
+  const st = (upTo: number): Record<string, LichessExportGame> =>
+    Object.fromEntries(
+      games.slice(0, upTo).map((_, i) => [`p000000${i}`, { id: `p000000${i}`, status: 'resign', winner: winners[i], lastMoveAt: T0 + (i + 1) * DAY }])
+    );
+  const run = (upTo: number) => {
+    const elo = tournamentElo([first], four.map((p) => p.handle), games, st(upTo));
+    return currentSeasonActivity({ season: 'Stagione 2', players: four, history: games, gameStates: st(upTo), schedule, archives: [first], elo });
+  };
+
+  it('tells when each player reaches their objective, the weaker ones included', () => {
+    const objectives = run(6).filter((e) => e.kind === 'objective');
+    expect(objectives.map((e) => [sentence(e), e.detail, (e.at - T0) / DAY])).toEqual([
+      ['@bruno raggiunge il suo obiettivo della stagione', 'Obiettivo: 1½ punti', 6],
+      ['@dario raggiunge il suo obiettivo della stagione', 'Obiettivo: ½ punto', 4],
+      ['@carla raggiunge il suo obiettivo della stagione', 'Obiettivo: 1 punto', 2],
+    ]);
+    expect(objectives[0].link).toEqual({ href: '#/pillsbury', label: 'Pillsbury' });
+  });
+
+  it('gives the Trofeo Pillsbury with the end of the season, not before', () => {
+    expect(run(5).some((e) => e.kind === 'pillsbury')).toBe(false);
+    const events = run(6);
+    expect(events[0].kind).toBe('pillsbury');
+    expect(sentence(events[0])).toBe('@dario vince il Trofeo Pillsbury');
+    expect(events[0].detail).toBe('+1½ punti sul suo obiettivo');
+    expect(events[1].kind).toBe('end');
+  });
+
+  it('has no objectives in a first season, nor without the Elo del torneo', () => {
+    const elo = tournamentElo([], four.map((p) => p.handle), games, st(6));
+    expect(currentSeasonActivity({ season: 'S', players: four, history: games, gameStates: st(6), schedule, elo }).some((e) => e.kind === 'objective')).toBe(false);
+    expect(currentSeasonActivity({ season: 'S', players: four, history: games, gameStates: st(6), schedule }).some((e) => e.kind === 'objective')).toBe(false);
+  });
+
+  it('reads the Trofeo Pillsbury of an archived season from its awards', () => {
+    const withAward: SeasonArchive = {
+      ...first,
+      awards: [{ id: 'pillsbury', emoji: '🏅', title: 'Trofeo Pillsbury', description: '', winners: [{ handle: 'carla', name: 'Carla' }], detail: '3 punti su 6 partite, obiettivo 2' }],
+    };
+    const p = archivedSeasonActivity(withAward).find((e) => e.kind === 'pillsbury')!;
+    expect(sentence(p)).toBe('@carla vince il Trofeo Pillsbury');
+    expect(p.detail).toBe('3 punti su 6 partite, obiettivo 2');
   });
 });
 
