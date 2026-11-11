@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { objectiveReached, pillsburyRace, pillsburyWins, reigningPillsbury } from '../pillsbury';
-import { computeElo } from '../tournamentElo';
+import { objectiveReached, PillsburyRace, pillsburyRace, pillsburyWinners, pillsburyWins, reigningPillsbury } from '../pillsbury';
+import { computeElo, currentSeason } from '../tournamentElo';
 import { parsePublicView, publicViewHref, tabOfView } from '../routes';
 import { SeasonArchive } from '../../types';
 
@@ -97,7 +97,7 @@ describe('the Pillsbury view', () => {
 });
 
 describe('objectiveReached', () => {
-  const f = (expected: number, points: number) => ({ expected, games: 6, expectedSoFar: 0, points, played: 3 });
+  const f = (expected: number, points: number) => ({ expected, games: 6, expectedSoFar: 0, points, played: 3, spread: 1 });
   it('compares the points with the objective as shown, to the half point', () => {
     expect(objectiveReached(f(2.3, 2.5))).toBe(true); // objective 2½
     expect(objectiveReached(f(2.3, 2))).toBe(false);
@@ -105,5 +105,37 @@ describe('objectiveReached', () => {
   });
   it('never counts an objective of zero as reached', () => {
     expect(objectiveReached(f(0.2, 0))).toBe(false);
+  });
+});
+
+describe('the race weighs each gap by how sure the objective is', () => {
+  // Bruno and the newcomer Dario start from the same rating and both beat Anna: the same points
+  // beyond the objective, but Dario's objective comes from a Lichess seed, far less sure
+  const s1 = { key: 's1', players: ['anna', 'bruno', 'carla', 'elena'], games: [g('anna', 'bruno', '1-0', 1), g('carla', 'elena', '1-0', 2), g('bruno', 'carla', '½-½', 3)] };
+  const bruno = currentSeason(computeElo([s1, { key: 'current', players: ['anna', 'bruno', 'carla', 'elena'], games: [] }])).start.get('bruno')!;
+  const report = computeElo([s1, { key: 'current', players: ['anna', 'bruno', 'carla', 'dario', 'elena'], seeds: { dario: bruno }, seedSigmas: { dario: 300 }, games: [] }]);
+  const history = [
+    { round: '1', white: 'dario', black: 'anna', url: 'https://lichess.org/aaaaaaaa' },
+    { round: '2', white: 'bruno', black: 'anna', url: 'https://lichess.org/bbbbbbbb' },
+  ];
+  const states = {
+    aaaaaaaa: { id: 'aaaaaaaa', status: 'resign', winner: 'white' as const, lastMoveAt: 10 },
+    bbbbbbbb: { id: 'bbbbbbbb', status: 'resign', winner: 'white' as const, lastMoveAt: 11 },
+  };
+  const race = pillsburyRace(players, report, history, history, states);
+
+  it('puts first, of two equal gaps, the one from the surer objective', () => {
+    const [first, second] = race.rows;
+    expect([first.handle, second.handle]).toEqual(['bruno', 'dario']);
+    expect(first.over).toBeCloseTo(second.over, 9);
+    expect(second.forecast.spread).toBeGreaterThan(first.forecast.spread);
+    expect(first.score).toBeCloseTo(first.over / first.forecast.spread, 9);
+  });
+
+  it('gives the trophy to the first of those above the objective, not to one in line ahead of them', () => {
+    const row = (handle: string, over: number, score: number) => ({ handle, over, score, trend: (over >= 0.5 ? 'up' : 'same') as 'up' | 'same', forecast: race.rows[0].forecast });
+    const r = (rows: ReturnType<typeof row>[]): PillsburyRace => ({ suspended: false, rows, waiting: [], counted: {}, forecasts: {}, newcomers: [] });
+    expect(pillsburyWinners(r([row('carla', 0.4, 0.4), row('anna', 1, 0.3), row('bruno', 2, 0.3)])).map((x) => x.handle)).toEqual(['anna', 'bruno']);
+    expect(pillsburyWinners(r([row('carla', 0.4, 0.4)]))).toEqual([]);
   });
 });
