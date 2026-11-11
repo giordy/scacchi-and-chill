@@ -120,7 +120,9 @@ describe('player page', () => {
     expect(html).toContain('Carriera');
     expect(html).toContain('2 stagioni');
     expect(html).toContain('in corso');
-    expect(html).toContain('Scontri diretti di sempre');
+    // The all-time record is in the season's head-to-heads, not in a list of its own
+    expect(html).not.toContain('Scontri diretti di sempre');
+    expect(html).toMatch(/Di sempre: |Nelle stagioni passate/);
   });
 
   it('gives a page to a former player found in an archived table', () => {
