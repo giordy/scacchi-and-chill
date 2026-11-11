@@ -4,7 +4,7 @@
 // Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out;
 // so is a player who left the season, and the games won or lost at the table.
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
-import { boardCalendar, currentSeason, decidedAtTable, eloSeasonFromCurrent, EloReport, Forecast, seasonForecast } from './tournamentElo';
+import { boardCalendar, currentSeason, decidedAtTable, eloSeasonFromCurrent, EloReport, Forecast, pronosticoPoints, seasonForecast } from './tournamentElo';
 import { isVoid, stateOf } from './games';
 
 export const PILLSBURY_ID = 'pillsbury';
@@ -32,6 +32,13 @@ export function raceCalendar(calendar: HistoryGame[], gameStates: Record<string,
     return !s || (!decidedAtTable(s.status) && !isVoid(s));
   });
 }
+
+// Whether a player has already made the points of their objective (the pronostico as shown, to the
+// half point): a mark in the race table and a moment in the cronaca. Never with an objective of zero.
+export const objectiveReached = (f: Forecast) => {
+  const target = pronosticoPoints(f);
+  return target > 0 && f.points >= target;
+};
 
 export interface PillsburyRow {
   handle: string;

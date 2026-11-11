@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
 import { EloReport } from '../lib/tournamentElo';
-import { PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
+import { objectiveReached, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, reigningPillsbury } from '../lib/pillsbury';
 import { playerHref } from '../lib/routes';
 import { Trend, TrendKind } from './Trend';
 import { InfoTip } from './InfoTip';
@@ -59,6 +59,12 @@ export function PillsburyRace({
         <div className="player-cell">
           <a href={playerHref(handle)} className="player-name player-page-link">{nameOf(handle)}</a>
           <span className="player-link">@{handle}</span>
+          {/* Good news only, as the rest of the table: who already made the points of their objective */}
+          {race.forecasts[handle] && objectiveReached(race.forecasts[handle]) && (
+            <span className="objective-reached">
+              <span aria-hidden="true">🎯</span> Obiettivo raggiunto
+            </span>
+          )}
         </div>
       </td>
       <td className="col-center">
