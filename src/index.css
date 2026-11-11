@@ -1279,22 +1279,6 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
   font-size: 17px;
 }
 
-/* Standings: a game in progress, so the place is provisional. The name breathes in the
-   colour of the "In corso" badge; still, without motion, it keeps just the colour. */
-.player-name.is-playing {
-  color: var(--info);
-  animation: namePulse 2.4s ease-in-out infinite;
-}
-
-@keyframes namePulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.45; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .player-name.is-playing { animation: none; }
-}
-
 .player-link {
   font-size: 13px;
   color: var(--muted);

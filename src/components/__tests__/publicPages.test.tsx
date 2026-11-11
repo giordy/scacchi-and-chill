@@ -84,14 +84,6 @@ describe('public tournament page', () => {
     expect(renderToStaticMarkup(<PlayerPage handle="anna" config={empty} history={[]} gameStates={{}} nameOf={(h) => h} seasons={[]} />)).toBeTruthy();
   });
 
-  it('makes the names of who is playing pulse in the standings, as provisional places', () => {
-    const html = publicPage('');
-    const names = [...html.matchAll(/<a href="[^"]*" class="player-name player-page-link( is-playing)?"[^>]*>([^<]+)/g)]
-      .map((m) => [m[2], Boolean(m[1])]);
-    expect(Object.fromEntries(names)).toEqual({ Anna: true, Bruno: false, Carla: true });
-    expect(html).toContain('partita in corso, posizione provvisoria');
-  });
-
   it('renders every section', () => {
     for (const hash of ['', '#/partite', '#/cronaca', '#/tabellone', '#/pillsbury', '#/stagione', '#/albo', '#/regolamento']) {
       expect(publicPage(hash)).toContain('Scacchi &amp; Chill');
