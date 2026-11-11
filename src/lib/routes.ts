@@ -24,9 +24,9 @@ export function isAdminLocation(hash: string, search: string): boolean {
 // "#/tabellone", "#/pillsbury", "#/partite", "#/cronaca", "#/stagione", "#/albo" and "#/regolamento". Older addresses keep
 // working: "#/torneo" is the season, "#/torneo/albo" the hall of fame.
 export type PublicView = "standings" | "crosstable" | "pillsbury" | "matches" | "timeline" | "season" | "hall" | "rules";
-// The four tabs; the crosstable and the Trofeo Pillsbury are views of the standings tab, the cronaca
-// (what happened, in order) a view of the games tab; the rules have no tab
-export type PublicTab = "standings" | "matches" | "season" | "hall";
+// The five tabs; the crosstable and the Trofeo Pillsbury are views of the standings tab; the rules
+// have no tab
+export type PublicTab = "standings" | "matches" | "timeline" | "season" | "hall";
 
 const VIEW_SLUGS: Record<PublicView, string> = {
   standings: "classifica",
@@ -51,6 +51,5 @@ export function parsePublicView(hash: string): PublicView {
 
 export function tabOfView(view: PublicView): PublicTab | undefined {
   if (view === "crosstable" || view === "pillsbury") return "standings";
-  if (view === "timeline") return "matches";
   return view === "rules" ? undefined : view;
 }

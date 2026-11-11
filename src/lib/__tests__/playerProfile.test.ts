@@ -207,7 +207,7 @@ describe('public views in the hash', () => {
   });
   it('maps each view to its tab', () => {
     expect(tabOfView('crosstable')).toBe('standings');
-    expect(tabOfView('timeline')).toBe('matches');
+    expect(tabOfView('timeline')).toBe('timeline');
     expect(tabOfView('season')).toBe('season');
     expect(tabOfView('rules')).toBeUndefined();
   });

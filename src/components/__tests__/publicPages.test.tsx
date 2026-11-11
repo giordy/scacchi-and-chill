@@ -98,10 +98,10 @@ describe('public tournament page', () => {
     expect(html).toContain('4 vittorie consecutive di Anna');
   });
 
-  it('tells what happened in the cronaca, as a view of the games', () => {
+  it('tells what happened in the cronaca, a tab of its own', () => {
     const html = publicPage('#/cronaca');
-    expect(html).toContain('Cronaca');
-    expect(html).toContain('Per turno');
+    expect(html).toContain('id="pub-panel-timeline"');
+    expect(html).not.toContain('Per turno');
     expect(html).toContain('con il matto');
     expect(html).toContain('passa in testa alla classifica');
     expect(html).toContain('Comincia la Stagione 2');

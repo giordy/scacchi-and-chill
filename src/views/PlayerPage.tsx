@@ -11,6 +11,7 @@ import { flairFromGames, flairUrl } from '../lib/flair';
 import { InfoTip } from '../components/InfoTip';
 import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampions, shortSeason } from '../lib/honours';
 import { PointsChart } from '../components/PointsChart';
+import { useMe } from '../hooks/useMe';
 import { PresenceMeta } from '../components/PresenceDot';
 import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
 import { boardCalendar, CURRENT, currentSeason as eloSeasonNow, EloReport, isNewcomer, peakOf, pronosticoPoints, ratingOf, tournamentElo } from '../lib/tournamentElo';
@@ -179,6 +180,8 @@ function Flair({ flair }: { flair?: string }) {
 // Public page of a single player: results, games and opponents still to face
 export function PlayerPage({ handle, config, history, gameStates, nameOf, presence, seasons = [] }: PlayerPageProps) {
   const profile = computePlayerProfile(handle, config.players, history, gameStates, config.schedule ?? []);
+  // «Io sono…»: the visitor can say this is them (saved in the browser, see lib/me.ts)
+  const [me, setMe] = useMe();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -323,6 +326,16 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               </a>
               {presence && <PresenceMeta seenAt={seenAtOf(presence, player.handle)} now={presence.now} />}
             </p>
+            {me.toLowerCase() === player.handle.toLowerCase() ? (
+              <p className="me-toggle note-sm">
+                ⭐ Sei tu: la tua riga è evidenziata in classifica.{" "}
+                <button type="button" className="link-button" onClick={() => setMe("")}>Non sono io</button>
+              </p>
+            ) : (
+              <button type="button" className="chip-link me-toggle" onClick={() => setMe(player.handle)}>
+                ⭐ Sono io
+              </button>
+            )}
           </div>
           {/* Right side: the Elo above the trophies (on a phone the Elo goes to the corner, see CSS) */}
           <div className="player-hero-side">

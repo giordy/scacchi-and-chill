@@ -27,7 +27,11 @@ import { withScheduledGames } from "./lib/publicGames";
 import { computeSeasonAwards } from "./lib/awards";
 import { tournamentElo } from "./lib/tournamentElo";
 import { PillsburyRace } from "./components/PillsburyRace";
-import { reigningPillsbury } from "./lib/pillsbury";
+import { pillsburyRace, reigningPillsbury } from "./lib/pillsbury";
+import { pronosticoPoints } from "./lib/tournamentElo";
+import { myCurrentGame } from "./lib/me";
+import { useMe } from "./hooks/useMe";
+import { MyCard } from "./components/MyCard";
 import { PillsburyIcon } from "./components/PillsburyIcon";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound, stateOf } from "./lib/games";
@@ -54,8 +58,9 @@ interface PublicTournamentViewProps {
 }
 
 const TABS: { key: PublicTab; label: string }[] = [
-  { key: "standings", label: "Competizioni" },
+  { key: "standings", label: "Classifiche" },
   { key: "matches", label: "Partite" },
+  { key: "timeline", label: "Cronaca" },
   { key: "season", label: "Stagione" },
   { key: "hall", label: "Albo" },
 ];
@@ -183,6 +188,22 @@ export function PublicTournamentView({
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
   // Places shared on a full tie (points, Sonneborn-Berger, wins); none before the first game
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
+  // «Io sono…»: the visitor's own row and card, once they said who they are (on their player page)
+  const [meHandle, setMe] = useMe();
+  const me = players.find((p) => p.handle.toLowerCase() === meHandle.toLowerCase())?.handle;
+  const isMe = (handle: string) => !!me && handle.toLowerCase() === me.toLowerCase();
+  const mine = useMemo(() => {
+    if (!me) return null;
+    const idx = standings.findIndex((p) => p.handle.toLowerCase() === me.toLowerCase());
+    const race = pillsburyRace(players, elo, allGames, history, gameStates, tournamentMeta.withdrawals);
+    const forecast = race.suspended ? undefined : race.forecasts[me];
+    return {
+      idx,
+      game: myCurrentGame(me, allGames, gameStates),
+      objective: forecast ? pronosticoPoints(forecast) : undefined,
+      pillsburyPoints: forecast?.points,
+    };
+  }, [me, standings, players, elo, allGames, history, gameStates, tournamentMeta.withdrawals]);
   const started = seasonStarted(standings);
   const champions = reigningChampions(tournamentMeta.winners);
   // Who won the Trofeo Pillsbury last: its medal next to the name, as the crown for the champion
@@ -312,12 +333,26 @@ export function PublicTournamentView({
             onClick={() => show(t.key)}
           >
             {t.label}
+            {t.key === "timeline" && news.length > 0 && activeTab !== "timeline" && <span className="switch-dot" role="img" aria-label=", con novità" />}
           </button>
         ))}
       </nav>
 
       {activeTab === "standings" && (
         <section role="tabpanel" id="pub-panel-standings" aria-labelledby="pub-tab-standings">
+          {me && mine && mine.idx >= 0 && (
+            <MyCard
+              handle={me}
+              name={standings[mine.idx].name}
+              rank={started ? ranks[mine.idx] : null}
+              points={standings[mine.idx].points}
+              game={mine.game}
+              objective={mine.objective}
+              pillsburyPoints={mine.pillsburyPoints}
+              nameOf={nameOf}
+              onForget={() => setMe("")}
+            />
+          )}
           {/* First the trophy, each with its own card: the championship first, the Trofeo Pillsbury next to it */}
           <div className="trophy-switch" role="group" aria-label="Trofeo">
             <button
@@ -387,7 +422,7 @@ export function PublicTournamentView({
               </thead>
               <tbody>
                 {standings.map((p, idx) => (
-                  <tr key={p.handle} className={leader && ranks[idx] === 1 ? "row-leader" : ""}>
+                  <tr key={p.handle} className={[leader && ranks[idx] === 1 ? "row-leader" : "", isMe(p.handle) ? "row-me" : ""].filter(Boolean).join(" ")}>
                     <td className="col-rank">
                       <RankCell rank={started ? ranks[idx] : null} points={p.points} tied={started && isTied(ranks, idx)} />
                     </td>
@@ -443,6 +478,7 @@ export function PublicTournamentView({
           <p className="note note-top-xs">
             G giocate · V vinte · N patte · P perse. A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il
             numero di vittorie; chi è pari anche lì condivide la posizione. Tocca un nome per vedere le partite del giocatore.
+            {!me && " Giochi anche tu? Apri la tua pagina e tocca «Sono io»: la tua riga resta evidenziata e la tua partita in cima."}
           </p>
           {latest.length > 0 && (
             <section className="cronaca-teaser" aria-labelledby="cronaca-teaser-title">
@@ -489,6 +525,7 @@ export function PublicTournamentView({
           seasons={seasons}
           nameOf={nameOf}
           concluded={concluded}
+          me={me}
         />
       )}
 
@@ -535,28 +572,6 @@ export function PublicTournamentView({
 
       {activeTab === "matches" && (
         <section role="tabpanel" id="pub-panel-matches" aria-labelledby="pub-tab-matches">
-          {/* Two views of the games: by round, or what happened in order */}
-          <div className="view-switch" role="group" aria-label="Vista delle partite">
-            <button type="button" className={view === "matches" ? "active" : ""} aria-pressed={view === "matches"} onClick={() => show("matches")}>
-              Per turno
-            </button>
-            <button type="button" className={view === "timeline" ? "active" : ""} aria-pressed={view === "timeline"} onClick={() => show("timeline")}>
-              Cronaca
-              {news.length > 0 && view !== "timeline" && <span className="switch-dot" role="img" aria-label=", con novità" />}
-            </button>
-          </div>
-
-          {view === "timeline" && (
-            <Timeline
-              season={tournamentMeta.season}
-              events={activity}
-              lastVisit={lastVisit}
-              seasons={seasons}
-              elo={elo}
-              nameOf={nameOf}
-            />
-          )}
-
           {view === "matches" && rounds.length > 0 && (
             <div className="filter-row">
               <label htmlFor="filter-round">Turno</label>
@@ -591,6 +606,19 @@ export function PublicTournamentView({
               masterTag={masterTag}
             />
           )}
+        </section>
+      )}
+
+      {activeTab === "timeline" && (
+        <section role="tabpanel" id="pub-panel-timeline" aria-labelledby="pub-tab-timeline">
+          <Timeline
+            season={tournamentMeta.season}
+            events={activity}
+            lastVisit={lastVisit}
+            seasons={seasons}
+            elo={elo}
+            nameOf={nameOf}
+          />
         </section>
       )}
 

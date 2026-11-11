@@ -766,7 +766,7 @@ details .body {
 /* Table helpers (public view) */
 .col-cross { width: 36px; text-align: center; }
 .col-center { text-align: center; }
-.stat-sb { opacity: 0.8; font-size: 12px; }
+.stat-sb { color: color-mix(in srgb, currentColor 80%, transparent); font-size: 12px; }
 .nowrap { white-space: nowrap; }
 
 /* Keep the player column visible while scrolling horizontally */
@@ -1156,7 +1156,8 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
 /* Section tabs: one row, short labels */
 .public-subnav {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, auto);
+  justify-content: space-between;
   margin: 0 0 16px;
   border-bottom: 1px solid var(--line);
   position: sticky;
@@ -3506,3 +3507,25 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 /* Player page: under a head-to-head of the season, the record across every season */
 .h2h-ever { grid-column: 1 / -1; margin-top: -4px; font-size: 12px; color: var(--muted); }
 .h2h-subheading { margin: 16px 0 6px; font-size: 14px; color: var(--muted); }
+
+/* Five tabs on a phone: smaller labels, still on one line */
+.pub-tab-btn { white-space: nowrap; }
+@media (max-width: 480px) {
+  .pub-tab-btn { font-size: 14px; padding: 8px 2px; }
+}
+@media (max-width: 360px) {
+  .pub-tab-btn { font-size: 13px; }
+}
+
+/* «Io sono…»: the visitor's own row, and their card at the top of the standings */
+.row-me .sticky-col, .row-me td { box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--accent) 9%, transparent); }
+.row-me .player-name::after { content: " · tu"; font-family: var(--font-body, inherit); font-size: 12px; font-weight: 700; color: var(--accent); }
+.my-card { display: grid; gap: 6px; margin: 0 0 14px; padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; background: var(--panel, var(--bg)); }
+.my-card-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.my-card-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--ink); }
+.my-card-rank { font-weight: 700; color: var(--muted); }
+.my-card-forget { margin-left: auto; font-size: 12px; }
+.my-card-line { margin: 0; font-size: 14px; }
+.my-card-line a { font-weight: 700; }
+.link-button { padding: 0; border: 0; background: none; font: inherit; color: var(--muted); text-decoration: underline; cursor: pointer; }
+.me-toggle { margin-top: 8px; }
