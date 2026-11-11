@@ -3536,3 +3536,10 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .title-needs ul { margin: 0 0 6px; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
 .title-needs li.is-me { font-weight: 700; }
 .title-needs .note { margin: 0; }
+
+/* Player page: «La stagione in breve» */
+.wrapped-card { border-left: 4px solid var(--brass); }
+.wrapped-card .note { margin: -6px 0 8px; }
+.wrapped-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 15px; }
+.wrapped-list li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.wrapped-emoji { text-align: center; }

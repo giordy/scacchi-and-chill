@@ -142,6 +142,14 @@ describe('player page', () => {
     expect(html).toMatch(/Di sempre: |Nelle stagioni passate/);
   });
 
+  it('sums up the season on the player page once its last game is over, not before', () => {
+    expect(playerPage('anna')).not.toContain('La stagione in breve');
+    const over = { ...gameStates, bbbbbbbb: { id: 'bbbbbbbb', status: 'resign', winner: 'black' as const, moves: 'd4 d5', createdAt: 1, lastMoveAt: 3 } };
+    const html = renderToStaticMarkup(<PlayerPage handle="anna" config={config} history={history} gameStates={over} nameOf={nameOf} seasons={[season1]} />);
+    expect(html).toContain('La stagione in breve');
+    expect(html).toContain('2 vittorie di fila');
+  });
+
   it('gives a page to a former player found in an archived table', () => {
     const html = playerPage('dario');
     expect(html).toContain('Dario');

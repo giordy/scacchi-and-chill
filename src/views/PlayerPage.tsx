@@ -12,6 +12,10 @@ import { InfoTip } from '../components/InfoTip';
 import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampions, shortSeason } from '../lib/honours';
 import { PointsChart } from '../components/PointsChart';
 import { useMe } from '../hooks/useMe';
+import { WrappedCard } from '../components/WrappedCard';
+import { seasonWrapped } from '../lib/wrapped';
+import { computeSeasonProgress } from '../lib/progress';
+import { computeSeasonAwards, shownAwards } from '../lib/awards';
 import { PresenceMeta } from '../components/PresenceDot';
 import { PresenceInfo, profileFlairOf, seenAtOf } from '../lib/presence';
 import { boardCalendar, CURRENT, currentSeason as eloSeasonNow, EloReport, isNewcomer, peakOf, pronosticoPoints, ratingOf, tournamentElo } from '../lib/tournamentElo';
@@ -232,6 +236,35 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
       {withAllTime && pastGames && allTimeRows.length > 0 && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
     </>
   );
+  // «La stagione in breve»: the current season once its last game is over; while the player has no
+  // finished game in the current one, the latest archived season they played
+  const plays = (g: { white: string; black: string }) => [g.white, g.black].some((h) => h.toLowerCase() === shownHandle.toLowerCase());
+  const progress = computeSeasonProgress(history, gameStates, config.schedule ?? []);
+  const currentOver = progress.total > 0 && progress.finished === progress.total;
+  const currentGames = withGames.find((x) => x.current);
+  const wrappedOf = currentOver && currentGames?.games.some(plays)
+    ? currentGames
+    : currentGames?.games.some(plays)
+    ? undefined
+    : [...withGames].reverse().find((x) => !x.current && x.games.some(plays));
+  const wrappedArchive = wrappedOf && !wrappedOf.current ? seasons.find((x) => x.season === wrappedOf.season) : undefined;
+  const wrapped = wrappedOf ? seasonWrapped(shownHandle, wrappedOf.games, elo, wrappedOf.current ? CURRENT : wrappedArchive?.id) : null;
+  const wrappedAwards = !wrapped
+    ? []
+    : shownAwards(
+        wrappedOf!.current
+          ? computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening })
+          : wrappedArchive?.awards ?? []
+      ).filter((a) => a.winners.some((w) => w.handle.toLowerCase() === shownHandle.toLowerCase()));
+  const wrappedCard = wrapped && wrappedOf && (
+    <WrappedCard
+      season={wrappedOf.season}
+      wrapped={wrapped}
+      career={career.find((c) => c.season === wrappedOf.season)}
+      awards={wrappedAwards}
+      nameOf={longNameOf}
+    />
+  );
   const everOf = (opponent: string) => (pastGames ? allTimeRows.find((r) => r.opponent.toLowerCase() === opponent.toLowerCase()) : undefined);
 
 
@@ -259,6 +292,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           </div>
           <p className="note">Non partecipa alla stagione in corso.</p>
         </section>
+        {wrappedCard}
         {acrossSeasons(true)}
       </main>
     );
@@ -426,6 +460,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           </a>
         )}
       </section>
+
+      {wrappedCard}
 
       {pointsByRound.length > 0 && (
         <section className="dossier-card">

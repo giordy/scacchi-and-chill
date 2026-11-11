@@ -8,6 +8,7 @@ Sito di un torneo di scacchi per corrispondenza tra amici: sfide su Lichess, dat
 - **Cosa serve per vincere**: nelle ultime giornate, quando qualcuno è già fuori dalla corsa al titolo, sotto la classifica cosa serve a ognuno di quelli ancora in corsa (i punti che bastano nelle sue partite, oppure che servono passi falsi degli altri).
 - **Stagione**: maestro, regolamento, numeri. **Albo**: Albo d'Oro, classifica di sempre, record.
 - **Pagina giocatore** (`#/giocatore/<handle>`): posizione, punti turno per turno, scontri diretti (della stagione e di sempre), carriera, Elo del torneo, obiettivo, trofei.
+- **La stagione in breve**: a fine stagione, nella pagina giocatore, il suo riepilogo: posto e punti, premi, serie, colpacci, l'avversario preferito e quello più duro, la vittoria più rapida, la partita più lunga, l'apertura più giocata e l'Elo del torneo. Resta visibile, per l'ultima stagione archiviata, finché il giocatore non chiude una partita della nuova.
 - **Io sono…**: dalla propria pagina un giocatore tocca «Sono io» (salvato nel browser): la sua riga resta evidenziata e in cima alla classifica trova posto, partita da giocare e quanto manca all'obiettivo.
 - **Risultati live**: le partite non concluse si leggono da Lichess all'apertura e ogni 5 minuti a pagina visibile (al massimo due chiamate: partite e profili).
 - **Leggera**: la pagina pubblica legge Firestore con semplici richieste HTTP (`src/lib/firestoreRest.ts`), senza l'SDK Firebase, e le ripete ogni 5 minuti a pagina visibile. L'SDK si scarica solo con l'area organizzatore.
