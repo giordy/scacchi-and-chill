@@ -3480,3 +3480,15 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   margin: 0;
   padding-left: 18px;
 }
+
+/* The final table of a past season, inside its card: on a phone it fits the width, without the
+   games played (the same for everyone, written above the table) */
+@media (max-width: 600px) {
+  .season-final-table { font-size: 14px; }
+  .season-final-table th, .season-final-table td { padding: 8px 5px; }
+  .season-final-table .col-rank { width: 30px; }
+  .season-final-table .col-played { display: none; }
+  .all-time-table { font-size: 14px; }
+  .all-time-table th, .all-time-table td { padding: 8px 5px; }
+  .all-time-table .col-rank { width: 30px; }
+}

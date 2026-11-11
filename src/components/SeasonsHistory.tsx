@@ -62,13 +62,13 @@ function SeasonDetails({ archive }: { archive: SeasonArchive }) {
         {archive.masterName ? ` · dedicata a ${archive.masterName}` : ''} · {archive.gamesPlayed} partite
       </p>
       <div className="table-responsive is-flat">
-        <table className="standings-table">
+        <table className="standings-table season-final-table">
           <thead>
             <tr>
               <th className="col-rank" scope="col"><span className="sr-only">Posizione</span></th>
               <th className="sticky-col">Giocatore</th>
               <th className="col-center">Punti</th>
-              <th className="col-center">G</th>
+              <th className="col-center col-played">G</th>
               <th className="col-center">V</th>
               <th className="col-center">N</th>
               <th className="col-center">P</th>
@@ -84,8 +84,8 @@ function SeasonDetails({ archive }: { archive: SeasonArchive }) {
                 <td className="sticky-col">
                   <a href={playerHref(p.handle)} className="player-name player-page-link">{nameOf(p.handle, p.name)}</a>
                 </td>
-                <td className="col-points">{p.points}</td>
-                <td className="col-center">{p.played}</td>
+                <td className="col-points">{String(p.points).replace('.5', '½').replace(/^0½/, '½')}</td>
+                <td className="col-center col-played">{p.played}</td>
                 <td className="col-center">{p.won}</td>
                 <td className="col-center">{p.drawn}</td>
                 <td className="col-center">{p.lost}</td>

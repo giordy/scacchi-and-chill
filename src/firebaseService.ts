@@ -200,7 +200,7 @@ export async function replaceAllGames(games: HistoryGame[]): Promise<void> {
         white: g.white,
         black: g.black,
         url: g.url || "",
-        createdAt: g.createdAt || Date.now(),
+        createdAt: g.createdAt || g.lichess?.createdAt || Date.now(),
         updatedAt: new Date().toISOString(),
       };
       // Firestore rejects undefined values: the JSON round trip drops them

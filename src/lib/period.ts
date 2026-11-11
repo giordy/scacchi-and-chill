@@ -1,6 +1,6 @@
 import { HistoryGame, LichessExportGame } from '../types';
 import { gameProgress } from './progress';
-import { isVoid, stateOf } from './games';
+import { isVoid, startedAt, stateOf } from './games';
 
 // When a season was played, to the month: "2026-11" (month keys, in Italian time)
 export interface SeasonPeriod {
@@ -23,7 +23,7 @@ export function monthKey(ms: number): string {
 export function periodOfGames(history: HistoryGame[], gameStates: Record<string, LichessExportGame> = {}): SeasonPeriod {
   const states = history.map((g) => ({ g, s: stateOf(g, gameStates) }));
   const created = states
-    .map(({ g, s }) => g.createdAt ?? s?.createdAt)
+    .map(({ g, s }) => startedAt(g, s))
     .filter((t): t is number => typeof t === 'number' && t > 0);
   const played = states.filter(({ s }) => !isVoid(s));
   const finished = played.length > 0 && played.every(({ s }) => gameProgress(s) === 'finished');

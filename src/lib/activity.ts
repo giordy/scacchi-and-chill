@@ -2,7 +2,7 @@
 // is read from the data the site already has (games, their Lichess states, withdrawals, archived
 // seasons): nothing is stored for it. Ongoing games give no event, Lichess hides their last moves.
 import { HistoryGame, LichessExportGame, MasterAnecdote, Player, ScheduledMatch, SeasonArchive, Withdrawal } from '../types';
-import { byRound, isVoid, movesText, stateOf } from './games';
+import { byRound, isVoid, movesText, startedAt, stateOf } from './games';
 import { leadersOf, pointsText, scoredResult } from './standings';
 import {
   boardCalendar,
@@ -274,7 +274,7 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
   const starts = new Map<string, { at: number; games: number }>();
   history.forEach((g) => {
     if (!extractGameId(g.url)) return;
-    const at = g.createdAt ?? stateOf(g, gameStates)?.createdAt;
+    const at = startedAt(g, stateOf(g, gameStates));
     const prev = starts.get(g.round);
     const games = (prev?.games ?? 0) + 1;
     const first = typeof at === 'number' && at > 0 && (!prev || !prev.at || at < prev.at) ? at : prev?.at ?? 0;

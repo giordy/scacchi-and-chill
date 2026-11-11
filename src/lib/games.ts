@@ -16,6 +16,14 @@ export function stateOf(g: HistoryGame, gameStates: Record<string, LichessExport
   return (id && gameStates[id]) || g.lichess;
 }
 
+// When a game started: the earlier of the link's creation and the game's creation on Lichess. The
+// stored date alone is not enough: a restore from a backup writes the day of the restore on games
+// that lost it, and Lichess knows the real one.
+export function startedAt(g: HistoryGame, s?: LichessExportGame): number | undefined {
+  const times = [g.createdAt, s?.createdAt].filter((t): t is number => typeof t === 'number' && t > 0);
+  return times.length > 0 ? Math.min(...times) : undefined;
+}
+
 // Half-moves Lichess sent (for ongoing games the last ones are hidden, anti-cheat)
 export function pliesOf(s?: LichessExportGame): number {
   const moves = s?.moves?.trim();

@@ -54,6 +54,13 @@ describe('currentSeasonActivity', () => {
     expect(events.find((e) => e.kind === 'leader')!.detail).toBe('con 1 punto');
   });
 
+  it('dates a round from Lichess when the stored date is later (a restore from a backup)', () => {
+    const restored = history.map((g) => ({ ...g, createdAt: T0 + 30 * DAY }));
+    const all = currentSeasonActivity({ season: 'Stagione 2', players, history: restored, gameStates: states });
+    expect(all.find((e) => e.kind === 'season')!.at).toBe(T0);
+    expect(all.find((e) => e.kind === 'round')!.at).toBe(T0 + 10 * DAY);
+  });
+
   it('gives no event for an ongoing game, nor a new leader when the first place is only shared', () => {
     expect(events.some((e) => e.gameId === 'cccccccc')).toBe(false);
     // After the draw Anna still leads alone (1½): no second leader event
