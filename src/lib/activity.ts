@@ -446,6 +446,15 @@ function finalTable(games: ScoredGame[]) {
     .sort((x, y) => y.points - x.points || y.sb - x.sb || y.won - x.won);
 }
 
+// The season's name for a sentence: older archives carry the tournament's title before it
+// ("Scacchi & Chill - Stagione 1"), which reads oddly in "vince la …"
+export function seasonLabel(archive: Pick<SeasonArchive, 'season' | 'title'>): string {
+  const title = archive.title?.trim();
+  if (!title || !archive.season.startsWith(title)) return archive.season;
+  const rest = archive.season.slice(title.length).replace(/^\s*[-–—:·]\s*/, '').trim();
+  return rest || archive.season;
+}
+
 // An archived season: the results kept with it (those with the time of their last move), the
 // leaders, and who won it, from its final table. Rounds and withdrawals have no date in the archive.
 export function archivedSeasonActivity(archive: SeasonArchive, elo?: EloReport): ActivityEvent[] {
@@ -474,7 +483,7 @@ export function archivedSeasonActivity(archive: SeasonArchive, elo?: EloReport):
   });
   const events = gameEvents(games, archive.id, masterLabelOf(archive.masterName));
   const at = games.length > 0 ? Math.max(...games.map((g) => g.at)) : Date.parse(archive.archivedAt);
-  const end = endParts(archive.standings, archive.season);
+  const end = endParts(archive.standings, seasonLabel(archive));
   if (end && Number.isFinite(at)) events.push({ key: `${archive.id}:e`, kind: 'end', at, emoji: '🏆', ...end });
   return sortEvents(events);
 }

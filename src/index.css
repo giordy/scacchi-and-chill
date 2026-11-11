@@ -2365,8 +2365,10 @@ details.anecdote > summary::-webkit-details-marker {
   font-size: 17px;
 }
 
+/* The line sits inside the content (the page clips what goes past its left edge, see
+   .public-tournament): room for the dots and the emoji circles on it */
 .timeline-list {
-  margin: 0;
+  margin: 0 0 0 14px;
   padding: 0;
   list-style: none;
   border-left: 2px solid var(--line);

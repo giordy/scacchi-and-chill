@@ -257,6 +257,11 @@ describe('archivedSeasonActivity', () => {
     expect(events[1].detail).toBe('Turno 2 · 21 mosse');
   });
 
+  it('leaves the tournament title out of the season name', () => {
+    const named = { ...archive, season: 'Scacchi & Chill - Stagione 1' };
+    expect(sentence(archivedSeasonActivity(named)[0])).toBe('@anna vince la Stagione 1');
+  });
+
   it('names co-champions together', () => {
     const tied = { ...archive, standings: archive.standings.map((s) => ({ ...s, points: 2, sb: 1, won: 2 })) };
     expect(sentence(archivedSeasonActivity(tied)[0])).toBe('@anna e @bruno chiudono la Stagione 1 a pari merito in testa');
