@@ -349,22 +349,22 @@ describe('special days', () => {
   it('tells each special day once, on its day, between the two dates', () => {
     const days = specialDays(Date.UTC(2026, 9, 1), Date.UTC(2027, 3, 30), 'x');
     expect(days.map((e) => [e.parts[0], new Date(e.at).toISOString().slice(0, 10)])).toEqual([
-      ['Buon Halloween', '2026-10-31'],
-      ['Buon Natale a tutti i giocatori', '2026-12-25'],
-      ['Buon anno a tutti i giocatori', '2027-01-01'],
-      ['Martedì grasso: buon Carnevale', '2027-02-09'],
-      ['Buona Pasqua', '2027-03-28'],
+      ['🎃 Buon Halloween', '2026-10-31'],
+      ['🎄 Buon Natale a tutti i giocatori', '2026-12-25'],
+      ['🥂 Buon anno a tutti i giocatori', '2027-01-01'],
+      ['🎭 Martedì grasso: buon Carnevale', '2027-02-09'],
+      ['🐣 Buona Pasqua', '2027-03-28'],
     ]);
     expect(days.every((e) => e.kind === 'day')).toBe(true);
     expect(specialDays(Date.UTC(2026, 6, 1), Date.UTC(2026, 6, 31), 'x').map((e) => e.parts[0])).toEqual([
-      'Oggi è la Giornata mondiale degli scacchi: la FIDE nacque il 20 luglio 1924',
+      '♟️ Oggi è la Giornata mondiale degli scacchi: la FIDE nacque il 20 luglio 1924',
     ]);
   });
 
   it('shows in the season only from its start to today, not ahead', () => {
     const events = currentSeasonActivity({ season: 'S', players, history, gameStates: states, now: Date.UTC(2026, 11, 26) });
     // The season starts on 2 November: Halloween is before it, Christmas has come
-    expect(events.filter((e) => e.kind === 'day').map((e) => e.parts[0])).toEqual(['Buon Natale a tutti i giocatori']);
+    expect(events.filter((e) => e.kind === 'day').map((e) => e.parts[0])).toEqual(['🎄 Buon Natale a tutti i giocatori']);
     const before = currentSeasonActivity({ season: 'S', players, history, gameStates: states, now: Date.UTC(2026, 11, 20) });
     expect(before.some((e) => e.kind === 'day')).toBe(false);
   });

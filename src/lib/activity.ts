@@ -439,25 +439,26 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
   return sortEvents(events);
 }
 
-// Special days of the calendar, the same the site dresses up for (lib/holiday.ts), each on its day
+// Special days of the calendar, the same the site dresses up for (lib/holiday.ts), each on its day,
+// a line of the frame with its emoji before the words
 // only (Christmas lasts a month on the site, a day here). Told at midday, Italian time (10:00 UTC
 // is 11:00 or 12:00 in Italy), so they fall on the right day.
-const SPECIAL_DAYS: { text: string; day: (year: number) => number }[] = [
-  { text: 'Buon anno a tutti i giocatori', day: (y) => Date.UTC(y, 0, 1, 10) },
-  { text: 'Martedì grasso: buon Carnevale', day: (y) => easterSunday(y).getTime() - 47 * 86_400_000 + 10 * 3_600_000 },
-  { text: 'Buona Pasqua', day: (y) => easterSunday(y).getTime() + 10 * 3_600_000 },
-  { text: 'Oggi è la Giornata mondiale degli scacchi: la FIDE nacque il 20 luglio 1924', day: (y) => Date.UTC(y, 6, 20, 10) },
-  { text: 'Buon Halloween', day: (y) => Date.UTC(y, 9, 31, 10) },
-  { text: 'Buon Natale a tutti i giocatori', day: (y) => Date.UTC(y, 11, 25, 10) },
+const SPECIAL_DAYS: { emoji: string; text: string; day: (year: number) => number }[] = [
+  { emoji: '🥂', text: 'Buon anno a tutti i giocatori', day: (y) => Date.UTC(y, 0, 1, 10) },
+  { emoji: '🎭', text: 'Martedì grasso: buon Carnevale', day: (y) => easterSunday(y).getTime() - 47 * 86_400_000 + 10 * 3_600_000 },
+  { emoji: '🐣', text: 'Buona Pasqua', day: (y) => easterSunday(y).getTime() + 10 * 3_600_000 },
+  { emoji: '♟️', text: 'Oggi è la Giornata mondiale degli scacchi: la FIDE nacque il 20 luglio 1924', day: (y) => Date.UTC(y, 6, 20, 10) },
+  { emoji: '🎃', text: 'Buon Halloween', day: (y) => Date.UTC(y, 9, 31, 10) },
+  { emoji: '🎄', text: 'Buon Natale a tutti i giocatori', day: (y) => Date.UTC(y, 11, 25, 10) },
 ];
 
 export function specialDays(from: number, to: number, seasonKey: string): ActivityEvent[] {
   if (!(to >= from)) return [];
   const events: ActivityEvent[] = [];
   for (let y = new Date(from).getUTCFullYear(); y <= new Date(to).getUTCFullYear(); y++) {
-    SPECIAL_DAYS.forEach(({ text, day }, i) => {
+    SPECIAL_DAYS.forEach(({ emoji, text, day }, i) => {
       const at = day(y);
-      if (at >= from && at <= to) events.push({ key: `${seasonKey}:d:${y}:${i}`, kind: 'day', at, emoji: '', parts: [text] });
+      if (at >= from && at <= to) events.push({ key: `${seasonKey}:d:${y}:${i}`, kind: 'day', at, emoji, parts: [`${emoji} ${text}`] });
     });
   }
   return events;
