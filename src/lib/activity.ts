@@ -512,3 +512,13 @@ export function sortEvents(events: ActivityEvent[]): ActivityEvent[] {
 // Whether an event happened after the last visit (none on a first visit)
 export const isNewSince = (e: ActivityEvent, lastVisit: number | undefined) => lastVisit !== undefined && e.at > lastVisit;
 
+// The frame of the season (rounds and anecdotes) and the moments worth telling: the three weights
+// of the cronaca. Only what is not frame counts as news.
+export const FRAME_KINDS = new Set<ActivityKind>(['season', 'round', 'roundEnd', 'anecdote']);
+export const HIGHLIGHT_KINDS = new Set<ActivityKind>(['leader', 'firstWin', 'streak', 'champion', 'end']);
+
+// The events since the last visit worth calling news, newest first
+export const newsSince = (events: ActivityEvent[], lastVisit: number | undefined) =>
+  events.filter((e) => !FRAME_KINDS.has(e.kind) && isNewSince(e, lastVisit));
+
+

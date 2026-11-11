@@ -38,6 +38,9 @@ import { AllTimeSection } from "./components/AllTimeSection";
 import { allTimeNameOf, allTimeRecords, allTimeTable, seasonsWithGames } from "./lib/allTime";
 import { holiday, seasonEndOn, showHoliday } from "./lib/holiday";
 import { Timeline } from "./components/Timeline";
+import { currentSeasonActivity, FRAME_KINDS, newsSince } from "./lib/activity";
+import { ActivityText } from "./components/Timeline";
+import { useLastVisit } from "./hooks/useLastVisit";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -150,6 +153,32 @@ export function PublicTournamentView({
     showHoliday(shownHoliday);
     return () => showHoliday(holiday);
   }, [shownHoliday]);
+  // Cronaca: what happened this season, and what is new since the visitor last opened it
+  const activity = useMemo(
+    () =>
+      currentSeasonActivity({
+        season: tournamentMeta.season,
+        masterName: tournamentMeta.masterName,
+        masterOpening: tournamentMeta.masterOpening,
+        masterAnecdotes: tournamentMeta.masterAnecdotes,
+        players,
+        history,
+        gameStates,
+        schedule,
+        withdrawals: tournamentMeta.withdrawals,
+        archives: seasons,
+        elo,
+      }),
+    [tournamentMeta.season, tournamentMeta.masterName, tournamentMeta.masterOpening, tournamentMeta.masterAnecdotes, players, history, gameStates, schedule, tournamentMeta.withdrawals, seasons, elo]
+  );
+  const { lastVisit, seen, markSeen } = useLastVisit();
+  useEffect(() => {
+    if (view === "timeline") markSeen();
+  }, [view, markSeen]);
+  const news = seen ? [] : newsSince(activity, lastVisit);
+  // Under the standings: the latest results and moments, a door to the cronaca
+  const latest = activity.filter((e) => !FRAME_KINDS.has(e.kind)).slice(0, 3);
+
   const leader = standings[0] && standings[0].points > 0 ? standings[0] : undefined;
   // Places shared on a full tie (points, Sonneborn-Berger, wins); none before the first game
   const ranks = useMemo(() => sharedRanks(standings), [standings]);
@@ -407,6 +436,26 @@ export function PublicTournamentView({
             G giocate · V vinte · N patte · P perse. A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il
             numero di vittorie; chi è pari anche lì condivide la posizione. Tocca un nome per vedere le partite del giocatore.
           </p>
+          {latest.length > 0 && (
+            <aside className="cronaca-teaser" aria-label="Dalla cronaca">
+              <h2 className="cronaca-teaser-title">Dalla cronaca</h2>
+              <ul className="cronaca-teaser-list">
+                {latest.map((e) => (
+                  <li key={e.key}>
+                    <span>
+                      <ActivityText event={e} nameOf={nameOf} />
+                    </span>
+                    <span className="cronaca-teaser-date">
+                      {new Date(e.at).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <a href={publicViewHref("timeline")} className="cronaca-teaser-link">
+                Tutta la cronaca →
+              </a>
+            </aside>
+          )}
           {awards.length > 0 && (
             <div className="awards-section">
               <h2 className="section-heading">I premi della stagione</h2>
@@ -479,20 +528,15 @@ export function PublicTournamentView({
             </button>
             <button type="button" className={view === "timeline" ? "active" : ""} aria-pressed={view === "timeline"} onClick={() => show("timeline")}>
               Cronaca
+              {news.length > 0 && view !== "timeline" && <span className="switch-dot" role="img" aria-label=", con novità" />}
             </button>
           </div>
 
           {view === "timeline" && (
             <Timeline
               season={tournamentMeta.season}
-              masterName={tournamentMeta.masterName}
-              masterOpening={tournamentMeta.masterOpening}
-              masterAnecdotes={tournamentMeta.masterAnecdotes}
-              players={players}
-              history={history}
-              gameStates={gameStates}
-              schedule={schedule}
-              withdrawals={tournamentMeta.withdrawals}
+              events={activity}
+              lastVisit={lastVisit}
               seasons={seasons}
               elo={elo}
               nameOf={nameOf}
