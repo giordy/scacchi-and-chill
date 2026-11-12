@@ -3255,7 +3255,10 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   text-align: left;
   cursor: pointer;
 }
-.trophy-card-name { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; }
+/* A long master's surname goes to a new line (and, longer than the card, is broken anywhere) while the
+   icon keeps its size */
+.trophy-card-name { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+.trophy-card-name > svg { flex-shrink: 0; }
 .trophy-card-desc { font-size: 12px; line-height: 1.3; font-weight: 400; }
 .trophy-card.active { border-color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); color: var(--ink); }
 .trophy-card-pillsbury.active { border-color: var(--brass); box-shadow: inset 0 -2px 0 var(--brass); background: var(--brass-soft); }
