@@ -2694,7 +2694,7 @@ button.infotip-trigger.trophy:hover,
 }
 
 .trophy.is-crown .trophy-icon {
-  font-size: 34px;
+  font-size: 30px;
 }
 
 /* The scudetto is a drawn shield (components/ScudettoIcon.tsx): a block, so it sits on the baseline as the emoji */
@@ -2702,9 +2702,10 @@ button.infotip-trigger.trophy:hover,
   display: block;
 }
 
-/* A shield is narrower than an emoji drawn at the same size: a little larger, to weigh as the medals */
+/* A shield is narrower than an emoji drawn at the same size: larger, to weigh as the medals; the crown,
+   wide and bright, a little smaller than them */
 .trophy.is-scudetto .trophy-icon {
-  font-size: 37px;
+  font-size: 42px;
 }
 
 /* Grouped shelf: how many of that medal, as a badge on its lower right */
@@ -2989,11 +2990,11 @@ button.infotip-trigger.presence-trigger {
   }
 
   .trophy.is-crown .trophy-icon {
-    font-size: 29px;
+    font-size: 25px;
   }
 
   .trophy.is-scudetto .trophy-icon {
-    font-size: 32px;
+    font-size: 36px;
   }
 }
 
