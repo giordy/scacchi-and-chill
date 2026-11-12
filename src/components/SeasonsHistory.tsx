@@ -10,6 +10,7 @@ import { fullPodium, MEDAL_EMOJI, podiumFromStandings, shortSeason } from '../li
 import { useNameOf } from './Names';
 import { shownAwards, withAwardGames } from '../lib/awards';
 import { useImageSrc } from '../hooks/useImageSrc';
+import { scudettoTitle } from '../lib/masterOpening';
 
 // The season's master, a small round photo before its name (archived seasons with a photo only)
 function MasterThumb({ url, name }: { url?: string; name?: string }) {
@@ -123,7 +124,11 @@ export function SeasonsHistory({ seasons, winners = [], title }: { seasons: Seas
             <span className="winner-season">
               <span className="winner-season-head">
                 <MasterThumb url={p.archive?.imageUrl} name={p.archive?.masterName} />
-                <span className="winner-season-name">{shortSeason(p.season, title)}</span>
+                <span className="winner-season-title">
+                  <span className="winner-season-name">{shortSeason(p.season, title)}</span>
+                  {/* Its Scudetto, from the master kept with the archive (not known for a hall of fame entry alone) */}
+                  {p.archive && <span className="winner-trophy"><span aria-hidden="true">🏆</span> {scudettoTitle(p.archive.masterName)}</span>}
+                </span>
               </span>
               {period && <span className="winner-period">{period}</span>}
             </span>

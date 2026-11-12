@@ -221,6 +221,8 @@ describe('championText', () => {
   });
   it('says only that the season is over when nobody has points', () => {
     expect(championText([r('Anna', 0), r('Bruno', 0)])).toBe('Stagione conclusa.');
+    expect(championText([r('Anna', 13.5, 40, 12), r('Bruno', 11)], 'Scudetto Tal')).toBe('Stagione conclusa: Anna vince lo Scudetto Tal con 13½ punti! 🏆');
+    expect(championText([r('Anna', 2, 1, 2), r('Bruno', 2, 1, 2), r('Carla', 1)], 'Scudetto Tal')).toBe('Stagione conclusa: Anna e Bruno vincono a pari merito lo Scudetto Tal, con 2 punti! 🏆');
   });
 });
 

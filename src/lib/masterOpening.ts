@@ -61,3 +61,15 @@ export function playsFamily(openingName: string | undefined, family: OpeningFami
 
 // "José Raúl Capablanca" -> "Capablanca": the award and the tag use the surname
 export const masterSurname = (masterName: string | undefined) => masterName?.trim().split(/\s+/).pop() ?? '';
+
+// The main trophy, the first place of the season: named after its master, so every season has its
+// own ("Scudetto Capablanca"); a season without a master keeps the site's name
+export const SCUDETTO_FALLBACK = 'Scudetto Chill';
+export const scudettoTitle = (masterName: string | undefined) => {
+  const surname = masterSurname(masterName);
+  return surname ? `Scudetto ${surname}` : SCUDETTO_FALLBACK;
+};
+
+// The light-hearted award of the master's opening: who played it most is the master's pupil
+export const MASTER_OPENING_ID = 'master-opening';
+export const MASTER_OPENING_TITLE = "L'allievo";

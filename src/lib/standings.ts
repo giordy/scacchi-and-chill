@@ -154,14 +154,23 @@ export const pointsText = (n: number) => {
 
 // The hero line once the last game is over: who won, before the organizer closes the season (the
 // title is then written in the Albo d'Oro). Tied winners named together, more than three counted.
-export function championText(standings: Array<RankKey & { name: string }>): string {
+// With the trophy's name ("Scudetto Capablanca") the line says what they win.
+export function championText(standings: Array<RankKey & { name: string }>, trophy?: string): string {
   const leaders = leadersOf(standings);
   if (leaders.length === 0) return "Stagione conclusa.";
   const pts = pointsText(leaders[0].points);
-  if (leaders.length === 1) return `Stagione conclusa: vince ${leaders[0].name} con ${pts}! 🏆`;
-  if (leaders.length > 3) return `Stagione conclusa: vincono a pari merito ${leaders.length} giocatori, con ${pts}! 🏆`;
+  const what = trophy ? ` lo ${trophy}` : "";
+  if (leaders.length === 1) return trophy
+    ? `Stagione conclusa: ${leaders[0].name} vince${what} con ${pts}! 🏆`
+    : `Stagione conclusa: vince ${leaders[0].name} con ${pts}! 🏆`;
+  if (leaders.length > 3) return trophy
+    ? `Stagione conclusa: ${leaders.length} giocatori vincono a pari merito${what}, con ${pts}! 🏆`
+    : `Stagione conclusa: vincono a pari merito ${leaders.length} giocatori, con ${pts}! 🏆`;
   const names = leaders.map((l) => l.name);
-  return `Stagione conclusa: vincono a pari merito ${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}, con ${pts}! 🏆`;
+  const list = `${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}`;
+  return trophy
+    ? `Stagione conclusa: ${list} vincono a pari merito${what}, con ${pts}! 🏆`
+    : `Stagione conclusa: vincono a pari merito ${list}, con ${pts}! 🏆`;
 }
 
 // The hero line: " In testa Anna con 3 punti.", tied leaders named together, more than three

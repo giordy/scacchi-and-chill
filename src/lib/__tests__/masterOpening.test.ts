@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { masterSurname, openingFamily, OPENING_FAMILIES, playsFamily } from '../masterOpening';
-import { computeSeasonAwards } from '../awards';
+import { masterSurname, openingFamily, OPENING_FAMILIES, playsFamily, scudettoTitle } from '../masterOpening';
+import { awardTitle, computeSeasonAwards } from '../awards';
 import { HistoryGame, LichessExportGame, Player } from '../../types';
 
 const fam = (key: string) => openingFamily(key)!;
@@ -47,7 +47,15 @@ describe('masterSurname', () => {
   });
 });
 
-describe('Premio del maestro', () => {
+describe('scudettoTitle', () => {
+  it("is named after the season's master, the site's name without one", () => {
+    expect(scudettoTitle('José Raúl Capablanca')).toBe('Scudetto Capablanca');
+    expect(scudettoTitle('  ')).toBe('Scudetto Chill');
+    expect(scudettoTitle(undefined)).toBe('Scudetto Chill');
+  });
+});
+
+describe("L'allievo", () => {
   const players: Player[] = [
     { name: 'Anna', handle: 'anna' },
     { name: 'Bruno', handle: 'bruno' },
@@ -69,9 +77,14 @@ describe('Premio del maestro', () => {
 
   it('goes to who played it most from its side', () => {
     const a = award('queens-gambit')!;
-    expect(a.title).toBe('Premio Capablanca');
+    expect(a.title).toBe("L'allievo");
     expect(a.winners.map((w) => w.handle)).toEqual(['anna']); // twice with White; Bruno once
     expect(a.detail).toBe('Gambetto di Donna: 2 partite');
+  });
+
+  it('shows the new name on seasons archived as "Premio Capablanca"', () => {
+    const old = { ...award('queens-gambit')!, title: 'Premio Capablanca' };
+    expect(awardTitle(old)).toBe("L'allievo");
   });
 
   it('counts Black for a defense, and is not given when nobody played it', () => {

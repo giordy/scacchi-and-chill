@@ -73,6 +73,13 @@ describe('computeSeasonAwards', () => {
       '',
       '⚡ *Fulmine*: Carla (in 15 mosse)',
     ]);
+    // The Scudetto first, when given
+    expect(awardsMessage('Stagione 2', awards, { title: 'Scudetto Tal', names: ['Anna', 'Bruno'], points: 2.5 }).split('\n').slice(0, 4)).toEqual([
+      '🏆 *I premi di Stagione 2*',
+      '',
+      '🏆 *Scudetto Tal*: Anna e Bruno (2½ punti, a pari merito)',
+      '',
+    ]);
     const archive = buildSeasonArchive({ title: 'T', season: 'S', description: '' }, players, history, gs);
     expect(archive.awards).toEqual(awards);
   });

@@ -19,7 +19,7 @@ import {
 } from './tournamentElo';
 import { PILLSBURY_EMOJI, PILLSBURY_ID, pillsburyRace, pillsburyWinners, raceCalendar } from './pillsbury';
 import { upsetFrom, upsetOf } from './upset';
-import { masterSurname, openingFamily, playsFamily } from './masterOpening';
+import { masterSurname, openingFamily, playsFamily, scudettoTitle } from './masterOpening';
 import { HOW_DRAW, HOW_WIN, extractGameId } from './utils';
 import { isReturnLeg, returnLegStart } from './legs';
 import { computeSeasonProgress } from './progress';
@@ -207,19 +207,20 @@ function gameEvents(games: ScoredGame[], seasonKey: string, masterLabel: string,
   return events;
 }
 
-// The champions of a table: everyone sharing the first place
-function endParts(standings: { handle: string; points: number; sb: number; won?: number }[], season: string): { parts: ActivityPart[]; detail?: string } | null {
+// The champions of a table, everyone sharing the first place, and the trophy they win
+// ("Scudetto Capablanca"); the season in the detail
+function endParts(standings: { handle: string; points: number; sb: number; won?: number }[], season: string, trophy: string): { parts: ActivityPart[]; detail?: string } | null {
   const leaders = leadersOf(standings);
   if (leaders.length === 0) return null;
-  const detail = `con ${pointsText(leaders[0].points)}`;
-  if (leaders.length === 1) return { parts: [{ handle: leaders[0].handle }, ` vince la ${season}`], detail };
+  const pts = pointsText(leaders[0].points);
+  if (leaders.length === 1) return { parts: [{ handle: leaders[0].handle }, ` vince lo ${trophy}`], detail: `${season}, con ${pts}` };
   const parts: ActivityPart[] = [];
   leaders.forEach((l, i) => {
     if (i > 0) parts.push(i === leaders.length - 1 ? ' e ' : ', ');
     parts.push({ handle: l.handle });
   });
-  parts.push(` chiudono la ${season} a pari merito in testa`);
-  return { parts, detail };
+  parts.push(` si dividono lo ${trophy}`);
+  return { parts, detail: `${season}, a pari merito con ${pts}` };
 }
 
 const masterLabelOf = (masterName: string | undefined) => {
@@ -377,7 +378,7 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
   let seasonEnd: number | undefined;
   if (progress.total > 0 && progress.finished === progress.total && games.length > 0) {
     seasonEnd = Math.max(...games.map((g) => g.at));
-    const end = endParts(finalTable(games), season);
+    const end = endParts(finalTable(games), season, scudettoTitle(input.masterName));
     if (end) events.push({ key: `${CURRENT}:e`, kind: 'end', at: seasonEnd, emoji: '🏆', ...end });
   }
   if (elo) events.push(...objectiveEvents(input, elo, calendar, seasonEnd));
@@ -424,7 +425,7 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
       kind: 'champion',
       at: t,
       emoji: '👑',
-      parts: [{ handle: race.champion.handle }, ' vince matematicamente la stagione: nessuno può più arrivare in testa'],
+      parts: [{ handle: race.champion.handle }, ` vince matematicamente lo ${scudettoTitle(input.masterName)}: nessuno può più arrivare in testa`],
       detail: ahead,
     });
     break;
@@ -577,7 +578,7 @@ export function archivedSeasonActivity(archive: SeasonArchive, elo?: EloReport):
   });
   const events = gameEvents(games, archive.id, masterLabelOf(archive.masterName));
   const at = games.length > 0 ? Math.max(...games.map((g) => g.at)) : Date.parse(archive.archivedAt);
-  const end = endParts(archive.standings, seasonLabel(archive));
+  const end = endParts(archive.standings, seasonLabel(archive), scudettoTitle(archive.masterName));
   if (end && Number.isFinite(at)) events.push({ key: `${archive.id}:e`, kind: 'end', at, emoji: '🏆', ...end });
   const award = archive.awards?.find((a) => a.id === PILLSBURY_ID);
   if (award && award.winners.length > 0 && Number.isFinite(at)) {

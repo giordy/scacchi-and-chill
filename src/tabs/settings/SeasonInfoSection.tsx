@@ -3,7 +3,7 @@ import { TournamentMeta } from '../../types';
 import { DEFAULT_TOURNAMENT } from '../../lib/tournament';
 import { compressImage, isMediaRef, mediaRef } from '../../lib/media';
 import { seasonId } from '../../lib/seasons';
-import { OPENING_FAMILIES } from '../../lib/masterOpening';
+import { MASTER_OPENING_TITLE, masterSurname, OPENING_FAMILIES, scudettoTitle } from '../../lib/masterOpening';
 import { replayGifFor } from '../../components/GameReplay';
 import { saveMediaImage } from '../../firebaseService';
 import { primeImage, useImageSrc } from '../../hooks/useImageSrc';
@@ -113,6 +113,11 @@ export function SeasonInfoSection({
         <div>
           <label htmlFor="cfg-master">Maestro della stagione</label>
           <input id="cfg-master" type="text" placeholder="es. José Raúl Capablanca" {...field("masterName")} />
+          {/* The master names the main trophy; Pillsbury would make two trophies with one name */}
+          <p className="note">
+            Dà il nome al trofeo: <strong>{scudettoTitle(form.masterName)}</strong>.
+            {/pillsbury/i.test(masterSurname(form.masterName)) && " Attenzione: c'è già il Trofeo Pillsbury, i due trofei avrebbero lo stesso nome."}
+          </p>
         </div>
         <div>
           <label htmlFor="cfg-sub">Motto</label>
@@ -166,8 +171,8 @@ export function SeasonInfoSection({
           ))}
         </select>
         <p className="note">
-          Le partite che la giocano hanno un'etichetta, e a fine stagione il Premio del maestro va a chi l'ha giocata di
-          più, dal lato indicato. Conta tutta la famiglia: per la Siciliana, anche Najdorf, Dragone e le altre varianti.
+          Le partite che la giocano hanno un'etichetta, e a fine stagione il premio «{MASTER_OPENING_TITLE}» va a chi l'ha
+          giocata di più, dal lato indicato. Conta tutta la famiglia: per la Siciliana, anche Najdorf, Dragone e le altre varianti.
         </p>
       </div>
       <div className="grid2">

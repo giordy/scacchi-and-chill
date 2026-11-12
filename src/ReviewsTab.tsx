@@ -5,6 +5,7 @@ import { fullMovesOf, isVoid, stateOf } from "./lib/games";
 import { computeStandings, sharedRanks } from "./lib/standings";
 import { currentSeason, isNewcomer, ratingOf, tournamentElo } from "./lib/tournamentElo";
 import { pillsburyRace, reigningPillsbury } from "./lib/pillsbury";
+import { scudettoTitle } from "./lib/masterOpening";
 import type { OrganizerStore } from "./hooks/useOrganizerData";
 
 interface ReviewsTabProps {
@@ -24,6 +25,8 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
   // null: the moment detected from the games, until the organizer picks one
   const [pickedType, setReviewType] = useState<ReviewMoment | null>(null);
   const tournamentTitle = config.tournament?.title || "Scacchi & Chill";
+  // The main trophy, named after the season's master ("Scudetto Capablanca")
+  const scudetto = scudettoTitle(config.tournament?.masterName);
   const [generalNotes, setGeneralNotes] = useState("");
   
   // Anecdotes live in the private Firestore document (see useOrganizerData); the ratings are the
@@ -152,7 +155,7 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
       add(
         ``,
         `MOMENTO: ultime partite della stagione (${ongoingMatches.length || "poche"} ancora da finire).`,
-        `- Niente schede per giocatore: racconta in pochi paragrafi cosa è ancora in gioco in testa, per il podio e nel resto della classifica.`,
+        `- Niente schede per giocatore: racconta in pochi paragrafi cosa è ancora in gioco in testa (lo ${scudetto}), per il podio e nel resto della classifica.`,
         `- Cita le partite ancora aperte qui sotto e i giocatori coinvolti, senza caricare le attese su chi le gioca.`,
         `- Chiudi con un augurio di buon gioco, in una frase.`,
       );
@@ -160,14 +163,14 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
       add(
         ``,
         `MOMENTO: fine della stagione, tutte le partite concluse.`,
-        `- Apri con una riga di titolo e una o due frasi sulla stagione, poi il campione in una frase semplice.`,
+        `- Apri con una riga di titolo e una o due frasi sulla stagione, poi il campione in una frase semplice: vince lo ${scudetto}.`,
         `- Poi i giocatori, come sopra.`,
         `- In fondo, se i dati lo permettono, al massimo 2 o 3 menzioni per tutto il gruppo (per esempio la partita più lunga o la patta più combattuta), preferibilmente non per i primi tre.`,
         `- Chiudi con un grazie a tutti, in una frase.`,
       );
     }
 
-    // The second trophy: a sentence or two, after the championship. Good news only, as on the site: the
+    // The second trophy: a sentence or two, after the Scudetto. Good news only, as on the site: the
     // model is told who is above or in line with the objective, never who is below
     const race = pillsburyRace(config.players, elo, history, history, gameStates, config.tournament?.withdrawals);
     if (seasons.length > 0 && !race.suspended && race.rows.length > 0) {
@@ -177,8 +180,8 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
       add(
         ``,
         `TROFEO PILLSBURY`,
-        `- È il secondo trofeo della stagione, meno importante del campionato: va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti, calcolato dal suo livello di inizio stagione. Gli esordienti non sono in corsa.`,
-        `- Dagli al massimo una o due frasi, sempre dopo il campionato. Puoi anche farlo capire dentro il pezzo di un giocatore (per esempio "una stagione sopra le attese").`,
+        `- È il secondo trofeo della stagione, meno importante dello ${scudetto}: va a chi, a fine stagione, ha superato di più il proprio obiettivo di punti, calcolato dal suo livello di inizio stagione. Gli esordienti non sono in corsa.`,
+        `- Dagli al massimo una o due frasi, sempre dopo lo ${scudetto}. Puoi anche farlo capire dentro il pezzo di un giocatore (per esempio "una stagione sopra le attese").`,
         `- Nomina solo chi è sopra le attese. Non dire mai chi è sotto, non fare elenchi di chi è in linea, niente numeri, e non sottolineare che gli esordienti sono esclusi.`,
       );
       if (reviewType === "finale") {

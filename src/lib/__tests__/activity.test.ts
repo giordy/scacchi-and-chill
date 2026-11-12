@@ -74,9 +74,9 @@ describe('currentSeasonActivity', () => {
     };
     const all = currentSeasonActivity({ season: 'Stagione 2', masterName: 'Capablanca', masterOpening: 'italian', players, history, gameStates: done });
     // Carla beat Bruno: Carla and Anna level on points, Sonneborn-Berger and wins
-    expect(sentence(all[0])).toBe('@anna e @carla chiudono la Stagione 2 a pari merito in testa');
+    expect(sentence(all[0])).toBe('@anna e @carla si dividono lo Scudetto Capablanca');
     expect(all[0].kind).toBe('end');
-    expect(all[0].detail).toBe('con 1½ punti');
+    expect(all[0].detail).toBe('Stagione 2, a pari merito con 1½ punti');
     // A shared first place is no new leader
     expect(all.filter((e) => e.kind === 'leader')).toHaveLength(1);
     expect(all.find((e) => e.gameId === 'aaaaaaaa')!.tags).toEqual(["L'apertura di Capablanca"]);
@@ -174,7 +174,7 @@ describe('more of the season', () => {
 
   it('tells the campione matematico once, when nobody can reach the leader', () => {
     // Anna's third win (round 3) makes 3 points; nobody else can reach more than 2½, with rounds 3 and 4 still open
-    expect(of('champion').map(sentence)).toEqual(['@anna vince matematicamente la stagione: nessuno può più arrivare in testa']);
+    expect(of('champion').map(sentence)).toEqual(['@anna vince matematicamente lo Scudetto Capablanca: nessuno può più arrivare in testa']);
     expect(of('champion')[0].detail).toBe("con 2 turni d'anticipo");
   });
 
@@ -333,22 +333,28 @@ describe('archivedSeasonActivity', () => {
   it('lists the results with a time, the leaders and the champion', () => {
     const events = archivedSeasonActivity(archive);
     expect(events.map(sentence)).toEqual([
-      '@anna vince la Stagione 1',
+      '@anna vince lo Scudetto Chill',
       '@anna batte @bruno per tempo scaduto',
       '@anna passa in testa alla classifica',
       '@anna batte @bruno per abbandono',
     ]);
+    expect(events[0].detail).toBe('Stagione 1, con 2 punti');
     expect(events[1].detail).toBe('Turno 2 · 21 mosse');
+  });
+
+  it("names the Scudetto after the season's master", () => {
+    const withMaster = { ...archive, masterName: 'José Raúl Capablanca' };
+    expect(sentence(archivedSeasonActivity(withMaster)[0])).toBe('@anna vince lo Scudetto Capablanca');
   });
 
   it('leaves the tournament title out of the season name', () => {
     const named = { ...archive, season: 'Scacchi & Chill - Stagione 1' };
-    expect(sentence(archivedSeasonActivity(named)[0])).toBe('@anna vince la Stagione 1');
+    expect(archivedSeasonActivity(named)[0].detail).toBe('Stagione 1, con 2 punti');
   });
 
   it('names co-champions together', () => {
     const tied = { ...archive, standings: archive.standings.map((s) => ({ ...s, points: 2, sb: 1, won: 2 })) };
-    expect(sentence(archivedSeasonActivity(tied)[0])).toBe('@anna e @bruno chiudono la Stagione 1 a pari merito in testa');
+    expect(sentence(archivedSeasonActivity(tied)[0])).toBe('@anna e @bruno si dividono lo Scudetto Chill');
   });
 });
 

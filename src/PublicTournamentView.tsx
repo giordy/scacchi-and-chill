@@ -31,7 +31,7 @@ import { reigningPillsbury } from "./lib/pillsbury";
 import { PillsburyIcon } from "./components/PillsburyIcon";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound, stateOf } from "./lib/games";
-import { masterSurname, openingFamily, playsFamily } from "./lib/masterOpening";
+import { MASTER_OPENING_TITLE, masterSurname, openingFamily, playsFamily, scudettoTitle } from "./lib/masterOpening";
 import { GameReplay } from "./components/GameReplay";
 import { PresenceInfo } from "./lib/presence";
 import { AllTimeSection } from "./components/AllTimeSection";
@@ -227,6 +227,8 @@ export function PublicTournamentView({
 
   // Default photo only for the original Capablanca season: a new master without a photo shows none
   const masterName = tournamentMeta.masterName ?? "";
+  // The main trophy, named after the master ("Scudetto Capablanca")
+  const scudetto = scudettoTitle(masterName);
   // A link, a path in the code, or a photo uploaded from the organizer area (read from Firestore)
   const masterPhoto = useImageSrc(
     tournamentMeta.imageUrl || (!masterName || /capablanca/i.test(masterName) ? "assets/capablanca.jpg" : "")
@@ -244,7 +246,7 @@ export function PublicTournamentView({
 
   // Once the last game is over the hero tells who won; until then the round and who leads
   const roundLine = concluded
-    ? championText(standings)
+    ? championText(standings, scudetto)
     : progress.currentRound
     ? `Turno ${progress.currentRound} in corso.`
     : "La stagione sta per cominciare.";
@@ -328,7 +330,7 @@ export function PublicTournamentView({
               aria-pressed={view !== "pillsbury"}
               onClick={() => show("standings")}
             >
-              <span className="trophy-card-name"><span aria-hidden="true">🏆</span> Campionato</span>
+              <span className="trophy-card-name"><span aria-hidden="true">🏆</span> {scudetto}</span>
               <span className="trophy-card-desc">Chi fa più punti</span>
             </button>
             <button
@@ -361,12 +363,12 @@ export function PublicTournamentView({
             <p className="title-race" role="status">
               {race.champion ? (
                 <>
-                  🏆 <strong>{race.champion.name}</strong> vince matematicamente la stagione: nessuno può più arrivare in testa, con{" "}
+                  🏆 <strong>{race.champion.name}</strong> vince matematicamente lo {scudetto}: nessuno può più arrivare in testa, con{" "}
                   {race.roundsLeft === 1 ? "un turno" : `${race.roundsLeft} turni`} d'anticipo.
                 </>
               ) : (
                 <>
-                  🏁 <strong>Corsa al titolo:</strong> possono ancora vincere {namesList(race.contenders.map((c) => c.name))}
+                  🏁 <strong>Corsa allo {scudetto}:</strong> possono ancora vincere {namesList(race.contenders.map((c) => c.name))}
                   {" · "}
                   {race.roundsLeft === 1 ? "manca un turno" : `mancano ${race.roundsLeft} turni`}.
                 </>
@@ -622,7 +624,7 @@ export function PublicTournamentView({
                     {masterOpeningGames > 0
                       ? `, giocata in ${masterOpeningGames === 1 ? "una partita" : `${masterOpeningGames} partite`} finora`
                       : ", ancora nessuno l'ha giocata"}
-                    . A fine stagione, il Premio {masterTag.surname || "del maestro"} a chi l'ha giocata di più{" "}
+                    . A fine stagione, il premio <strong>{MASTER_OPENING_TITLE}</strong> va a chi l'ha giocata di più{" "}
                     {masterTag.family.side === "white" ? "con il bianco" : "con il nero"}.
                   </p>
                 )}
@@ -696,6 +698,30 @@ export function PublicTournamentView({
             <details className="rules-section" open>
               <summary className="rules-heading">Come funziona</summary>
               <div className="rules-text">{tournamentMeta.howItWorks || DEFAULT_TOURNAMENT.howItWorks}</div>
+            </details>
+
+            {/* What is at stake: the two trophies and, with a master's opening, L'allievo; the other
+                awards stay a surprise for the end of the season */}
+            <details className="rules-section" open>
+              <summary className="rules-heading">Trofei</summary>
+              <ul className="rules-list">
+                <li>
+                  <span aria-hidden="true">🏆</span> <strong>{scudetto}:</strong> a chi fa più punti a fine stagione; a
+                  pari punti decide lo spareggio Sonneborn-Berger. Ogni stagione lo Scudetto prende il nome del suo maestro.
+                </li>
+                <li>
+                  <PillsburyIcon /> <strong>Trofeo Pillsbury:</strong> a chi batte di più le proprie attese.{" "}
+                  <a href={publicViewHref("pillsbury")}>Come funziona</a>.
+                </li>
+                {masterTag && (
+                  <li>
+                    <span aria-hidden="true">♞</span> <strong>{MASTER_OPENING_TITLE}:</strong> a chi gioca più volte
+                    l'apertura {masterTag.surname ? `di ${masterTag.surname}` : "del maestro"}, {masterTag.family.label},{" "}
+                    {masterTag.family.side === "white" ? "con il bianco" : "con il nero"}.
+                  </li>
+                )}
+              </ul>
+              <p className="note">E a fine stagione qualche premio per sorridere, a sorpresa.</p>
             </details>
 
             <details className="rules-section" open>

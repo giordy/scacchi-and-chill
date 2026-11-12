@@ -3,8 +3,10 @@ import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../typ
 import type { OrganizerStore } from '../hooks/useOrganizerData';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { ReviewsTab } from '../ReviewsTab';
-import { awardEmoji, awardsMessage, awardWinnersLine, computeSeasonAwards } from '../lib/awards';
+import { awardEmoji, awardsMessage, awardTitle, awardWinnersLine, computeSeasonAwards } from '../lib/awards';
 import { errorMessage } from '../lib/utils';
+import { computeStandings, leadersOf, pointsText } from '../lib/standings';
+import { scudettoTitle } from '../lib/masterOpening';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
@@ -19,9 +21,12 @@ function AwardsSection({ season, config, history, gameStates, flash, seasons }: 
 }) {
   const awards = computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening });
   if (awards.length === 0) return <p className="note note-flush">I premi compaiono quando ci sono partite concluse.</p>;
+  // The Scudetto first: who leads the table now, the first place shared on a full tie
+  const leaders = leadersOf(computeStandings(config.players, history, gameStates).standings);
+  const scudetto = { title: scudettoTitle(config.tournament?.masterName), names: leaders.map((l) => l.name), points: leaders[0]?.points ?? 0 };
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(awardsMessage(season, awards));
+      await navigator.clipboard.writeText(awardsMessage(season, awards, scudetto));
       flash('ok', 'Premi copiati: incollali nel gruppo WhatsApp.');
     } catch (e) {
       flash('err', 'Copia non riuscita: ' + errorMessage(e));
@@ -31,9 +36,14 @@ function AwardsSection({ season, config, history, gameStates, flash, seasons }: 
     <div>
       <p className="note note-flush">Calcolati sulle partite concluse finora. Sul sito compaiono sotto la classifica a stagione conclusa.</p>
       <ul className="note note-sm season-steps">
+        {leaders.length > 0 && (
+          <li>
+            🏆 <strong>{scudetto.title}</strong>: {scudetto.names.join(", ")} ({pointsText(scudetto.points)})
+          </li>
+        )}
         {awards.map((a) => (
           <li key={a.id}>
-            {awardEmoji(a)} <strong>{a.title}</strong>: {awardWinnersLine(a)}
+            {awardEmoji(a)} <strong>{awardTitle(a)}</strong>: {awardWinnersLine(a)}
           </li>
         ))}
       </ul>

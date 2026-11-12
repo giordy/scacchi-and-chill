@@ -9,7 +9,8 @@ export type { TimedGame } from './moveTimes';
 import { formatPace } from './playerProfile';
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { plural } from './games';
-import { masterSurname, openingFamily, playsFamily } from './masterOpening';
+import { pointsText } from './standings';
+import { MASTER_OPENING_ID, MASTER_OPENING_TITLE, masterSurname, openingFamily, playsFamily } from './masterOpening';
 // L'ammazzagiganti (most colpacci) was given until the Trofeo Pillsbury took its place: past
 // seasons keep it, with the Lichess ratings and the gap it used then.
 const LEGACY_UPSET_GAP = 150;
@@ -34,8 +35,10 @@ export const awardEmoji = (a: SeasonAward) => (a.id === PILLSBURY_ID ? PILLSBURY
 // the champion again
 const RETIRED_AWARDS = new Set(["mate"]);
 export const shownAwards = (awards: SeasonAward[]) => awards.filter((a) => !RETIRED_AWARDS.has(a.id));
-// The name of the Pillsbury from the code, as for the emoji: an archive saved as "Premio Pillsbury" shows the new name
-export const awardTitle = (a: SeasonAward) => (a.id === PILLSBURY_ID ? PILLSBURY_TITLE : a.title);
+// The names from the code, as for the emoji: an archive saved as "Premio Pillsbury" or
+// "Premio Capablanca" shows the new name
+export const awardTitle = (a: SeasonAward) =>
+  a.id === PILLSBURY_ID ? PILLSBURY_TITLE : a.id === MASTER_OPENING_ID ? MASTER_OPENING_TITLE : a.title;
 
 // At most this many games are linked from an award: beyond, a list of links says little
 const MAX_LINKED = 3;
@@ -150,7 +153,7 @@ export function computeSeasonAwards(
     });
   }
 
-  // Premio <maestro>: who played the master's opening most, from the side that chooses it (White
+  // L'allievo: who played the master's opening most, from the side that chooses it (White
   // for an opening or a gambit, Black for a defense). No game in it, no award.
   const family = openingFamily(master?.opening);
   if (family) {
@@ -164,9 +167,9 @@ export function computeSeasonAwards(
     if (top.handles.length > 0) {
       const surname = masterSurname(master?.name);
       awards.push({
-        id: "master-opening",
+        id: MASTER_OPENING_ID,
         emoji: "♞",
-        title: surname ? `Premio ${surname}` : "Premio del maestro",
+        title: MASTER_OPENING_TITLE,
         description: `A chi ha giocato più volte l'apertura ${surname ? `di ${surname}` : "del maestro"}, ${family.label}, ${family.side === "white" ? "con il bianco" : "con il nero"}`,
         winners: who(top.handles),
         detail: `${family.label}: ${plural(top.best, "partita", "partite")}`,
@@ -186,14 +189,25 @@ const names = (award: SeasonAward) => {
 // One line per award, e.g. "Anna (in 12 mosse)"
 export const awardWinnersLine = (award: SeasonAward) => `${names(award)} (${award.detail})`;
 
-// Message for the WhatsApp group
-export function awardsMessage(season: string, awards: SeasonAward[]): string {
+// The main trophy at the top of the message: its name and who leads the table
+export interface ScudettoLine {
+  title: string; // "Scudetto Capablanca"
+  names: string[]; // the first place, shared on a full tie
+  points: number;
+}
+
+// Message for the WhatsApp group: the Scudetto first, then the Trofeo Pillsbury, then the rest
+export function awardsMessage(season: string, awards: SeasonAward[], scudetto?: ScudettoLine): string {
   const main = awards.find((a) => a.id === PILLSBURY_ID);
   const others = awards.filter((a) => a !== main);
   const line = (a: SeasonAward) => `${awardEmoji(a)} *${awardTitle(a)}*: ${awardWinnersLine(a)}`;
+  const joined = (list: string[]) => (list.length > 1 ? `${list.slice(0, -1).join(", ")} e ${list[list.length - 1]}` : list[0] ?? "");
   return [
     `🏆 *I premi di ${season}*`,
     "",
+    ...(scudetto && scudetto.names.length > 0
+      ? [`🏆 *${scudetto.title}*: ${joined(scudetto.names)} (${pointsText(scudetto.points)}${scudetto.names.length > 1 ? ", a pari merito" : ""})`, ""]
+      : []),
     // The Trofeo Pillsbury first and apart, with what it rewards
     ...(main ? [line(main), `_${main.description}_`, ...(others.length > 0 ? ["", "E poi, per sorridere:"] : [])] : []),
     ...others.map(line),

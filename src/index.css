@@ -3024,6 +3024,13 @@ button.infotip-trigger.presence-trigger {
   font-size: 13px;
   color: var(--muted);
 }
+/* The season's Scudetto, named after its master, under the season's name */
+.winner-season-title { display: flex; flex-direction: column; min-width: 0; }
+.winner-trophy {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
 
 /* Player page: career across seasons */
 .career-summary { margin: 0 0 10px; }
