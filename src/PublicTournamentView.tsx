@@ -717,8 +717,8 @@ export function PublicTournamentView({
               <div className="rules-text">{tournamentMeta.howItWorks || DEFAULT_TOURNAMENT.howItWorks}</div>
             </details>
 
-            {/* What is at stake: the two trophies and, with a master's opening, L'allievo; the other
-                awards stay a surprise for the end of the season */}
+            {/* What is at stake: the two trophies. The other awards are for fun: L'allievo is told on the
+                season tab, next to the master's opening, and the rest stay a surprise */}
             <details className="rules-section" open>
               <summary className="rules-heading">Trofei</summary>
               <ul className="rules-list">
@@ -730,13 +730,6 @@ export function PublicTournamentView({
                   <PillsburyIcon /> <strong>Trofeo Pillsbury:</strong> a chi batte di più le proprie attese.{" "}
                   <a href={publicViewHref("pillsbury")}>Come funziona</a>.
                 </li>
-                {masterTag && (
-                  <li>
-                    <span aria-hidden="true">♞</span> <strong>{MASTER_OPENING_TITLE}:</strong> a chi gioca più volte
-                    l'apertura {masterTag.surname ? `di ${masterTag.surname}` : "del maestro"}, {masterTag.family.label},{" "}
-                    {masterTag.family.side === "white" ? "con il bianco" : "con il nero"}.
-                  </li>
-                )}
               </ul>
               <p className="note">E a fine stagione qualche premio per sorridere, a sorpresa.</p>
             </details>
