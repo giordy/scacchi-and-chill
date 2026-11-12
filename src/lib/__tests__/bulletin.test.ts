@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { leaderLine, pillsburyLine, roundDeadline, roundSummary, standingsBlock, studySearchUrl } from '../bulletin';
+import { leaderLine, pillsburyLine, scudettoLine, roundDeadline, roundSummary, standingsBlock, studySearchUrl } from '../bulletin';
 import { PillsburyRace, Trend } from '../pillsbury';
 import { PlayerStanding } from '../standings';
 
@@ -39,6 +39,12 @@ describe('leaderLine', () => {
     expect(leaderLine([s('Anna', 3), s('Bruno', 2)])).toBe('🥇 In testa Anna con 3 punti.');
     expect(leaderLine([s('Anna', 1), s('Bruno', 0)])).toBe('🥇 In testa Anna con 1 punto.');
     expect(leaderLine([s('Anna', 0.5), s('Bruno', 0)])).toBe('🥇 In testa Anna con ½ punto.');
+  });
+
+  it('gives the Scudetto by name at the end of the season', () => {
+    expect(scudettoLine([s('Anna', 13.5), s('Bruno', 2)], 'Scudetto Tal')).toBe('🏆 *Scudetto Tal* a Anna, con 13½ punti');
+    expect(scudettoLine([s('Anna', 2, 1, 2), s('Bruno', 2, 1, 2)], 'Scudetto Tal')).toBe('🏆 *Scudetto Tal* a Anna e Bruno, a pari merito con 2 punti');
+    expect(scudettoLine([s('Anna', 0)], 'Scudetto Tal')).toBe('');
   });
 
   it('names tied leaders together, as the site does', () => {

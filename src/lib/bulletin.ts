@@ -1,5 +1,6 @@
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
-import { computeStandings, leaderText, PlayerStanding, pointsText, seasonStarted, sharedRanks } from './standings';
+import { computeStandings, leadersOf, leaderText, PlayerStanding, pointsText, seasonStarted, sharedRanks } from './standings';
+import { scudettoTitle } from './masterOpening';
 import { extractGameId, fill, formatDeadline, getApproxMoves, HIDDEN_PLIES, HOW_DRAW, HOW_WIN, tidy } from './utils';
 import { gamePhase, GamePhase } from './phase';
 import { upsetOf } from './upset';
@@ -34,6 +35,16 @@ export function roundSummary(count: { finished: number; ongoing: number; pending
 export function leaderLine(standings: PlayerStanding[]): string {
   const text = leaderText(standings).trim();
   return text ? `🥇 ${text}` : '';
+}
+
+// At the end of the season, in place of who leads: who wins the Scudetto, tied winners together
+//   🏆 *Scudetto Capablanca* a Anna, con 13½ punti
+export function scudettoLine(standings: PlayerStanding[], trophy: string): string {
+  const leaders = leadersOf(standings);
+  if (leaders.length === 0) return '';
+  const names = leaders.map((l) => l.name);
+  const who = names.length > 1 ? `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}` : names[0];
+  return `🏆 *${trophy}* a ${who}, ${names.length > 1 ? 'a pari merito ' : ''}con ${pointsText(leaders[0].points)}`;
 }
 
 // At the end of a round: the whole table, compact, with the places shared as on the site
@@ -292,13 +303,15 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
   let pillsbury = "";
   if (isRoundComplete) {
     const { standings } = computeStandings(config.players, history, allStates);
-    leader = leaderLine(standings);
+    // The season is over when every game of the calendar is, as for the awards on the site
+    const progress = computeSeasonProgress(history, allStates, config.schedule ?? []);
+    const seasonOver = progress.total > 0 && progress.finished === progress.total;
+    // At the end of the season who leads wins the Scudetto: said with its name. Only with the
+    // official calendar: without it any complete round would look like the last
+    leader = seasonOver && (config.schedule?.length ?? 0) > 0 ? scudettoLine(standings, scudettoTitle(config.tournament?.masterName)) : leaderLine(standings);
     table = standingsBlock(standings, round, reigningChampions(config.tournament?.winners)?.handles, reigningPillsbury(seasons)?.handles);
-    // The second trophy, after the championship; from the second season (in the first all are esordienti)
+    // The second trophy, after the Scudetto; from the second season (in the first all are esordienti)
     if (seasons.length > 0) {
-      // The season is over when every game of the calendar is, as for the awards on the site
-      const progress = computeSeasonProgress(history, allStates, config.schedule ?? []);
-      const seasonOver = progress.total > 0 && progress.finished === progress.total;
       pillsbury = pillsburyLine(pillsburyRace(config.players, elo, history, history, allStates, config.tournament?.withdrawals), nameOf, seasonOver);
     }
   }
