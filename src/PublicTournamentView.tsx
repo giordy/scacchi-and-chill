@@ -232,7 +232,8 @@ export function PublicTournamentView({
   // The main trophy, named after the master ("Scudetto Capablanca")
   const scudetto = scudettoTitle(masterName);
   // The shield of this season's scudetto, in place of the 🏆 on the page
-  const shield = <ScudettoIcon scudetto={currentScudetto(tournamentMeta.season, masterName, tournamentMeta.masterColor, seasons)} inline />;
+  const seasonScudetto = currentScudetto(tournamentMeta.season, masterName, tournamentMeta.masterColor, seasons);
+  const shield = <ScudettoIcon scudetto={seasonScudetto} inline />;
   // A link, a path in the code, or a photo uploaded from the organizer area (read from Firestore)
   const masterPhoto = useImageSrc(
     tournamentMeta.imageUrl || (!masterName || /capablanca/i.test(masterName) ? "assets/capablanca.jpg" : "")
@@ -334,7 +335,8 @@ export function PublicTournamentView({
               aria-pressed={view !== "pillsbury"}
               onClick={() => show("standings")}
             >
-              <span className="trophy-card-name">{shield} {scudetto}</span>
+              <span className="trophy-card-icon"><ScudettoIcon scudetto={seasonScudetto} /></span>
+              <span className="trophy-card-name">{scudetto}</span>
               <span className="trophy-card-desc">Chi fa più punti</span>
             </button>
             <button
@@ -343,7 +345,8 @@ export function PublicTournamentView({
               aria-pressed={view === "pillsbury"}
               onClick={() => show("pillsbury")}
             >
-              <span className="trophy-card-name"><PillsburyIcon /> Trofeo Pillsbury</span>
+              <span className="trophy-card-icon"><PillsburyIcon size="1em" /></span>
+              <span className="trophy-card-name">Trofeo Pillsbury</span>
               <span className="trophy-card-desc">Chi batte le attese</span>
             </button>
           </div>

@@ -311,10 +311,12 @@ describe('the Elo di partenza from Lichess', () => {
 
 describe('the scudetto shield in place of the 🏆', () => {
   it('stands next to the scudetto in the standings, the rules and the hall of fame', () => {
-    for (const hash of ['', '#/regolamento', '#/albo']) {
+    for (const hash of ['#/regolamento', '#/albo']) {
       const html = publicPage(hash);
       expect(html).toContain('scudetto-icon is-inline');
       expect(html).not.toMatch(/🏆<\/span> (<strong>)?Scudetto/);
     }
+    // In the standings, the card of the trophy has the shield as its large icon, on two lines
+    expect(publicPage('')).toMatch(/<span class="trophy-card-icon"><svg class="scudetto-icon"/);
   });
 });
