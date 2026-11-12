@@ -12,6 +12,8 @@ Sito di un torneo di scacchi per corrispondenza tra amici: sfide su Lichess, dat
 - **Risultati live**: le partite non concluse si leggono da Lichess all'apertura e ogni 5 minuti a pagina visibile (al massimo due chiamate: partite e profili).
 - **Leggera**: la pagina pubblica legge Firestore con semplici richieste HTTP (`src/lib/firestoreRest.ts`), senza l'SDK Firebase, e ogni 5 minuti a pagina visibile rilegge torneo e partite (le stagioni archiviate solo all'apertura e quando cambia la stagione). Se la lettura non riesce lo dice, senza mostrare un torneo vuoto, e riprova da sé dopo pochi secondi. L'SDK si scarica solo con l'area organizzatore.
 - Su telefono si cambia sezione con uno swipe.
+- **Senza rete**: i file del sito restano nel browser (`public/sw.js`), così la pagina e l'app installata si aprono lo stesso; al posto dei dati mostra l'ultimo torneo letto da quel browser, dicendo di quando è (`src/lib/publicCache.ts`), e riprova da sé.
+- I caratteri (Alegreya e Alegreya Sans) sono serviti dal sito, senza richieste a Google Fonts (`src/fonts.css`).
 
 ## Area organizzatore (`#admin`)
 Login Google; organizzatore è chi ha un documento in `admins/<email>`. Ogni azione distruttiva chiede conferma. All'apertura sincronizza i risultati da Lichess su Firestore.

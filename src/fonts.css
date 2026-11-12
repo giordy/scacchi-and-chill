@@ -1,0 +1,10 @@
+/* Alegreya and Alegreya Sans served by the site itself (no request to Google Fonts): only the
+   weights the pages use. The files come from the @fontsource packages, split by alphabet as
+   Google does: the browser downloads only those the text needs (Latin, here). */
+@import "@fontsource/alegreya/500.css";
+@import "@fontsource/alegreya/700.css";
+@import "@fontsource/alegreya/500-italic.css";
+@import "@fontsource/alegreya-sans/400.css";
+@import "@fontsource/alegreya-sans/500.css";
+@import "@fontsource/alegreya-sans/700.css";
+@import "@fontsource/alegreya-sans/800.css";

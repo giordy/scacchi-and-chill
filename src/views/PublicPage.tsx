@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
 import { DEFAULT_TOURNAMENT } from '../lib/tournament';
 import { useHash } from '../hooks/useHash';
 import { parsePlayerHash, publicViewHref } from '../lib/routes';
-import { PlayerPage } from './PlayerPage';
+
 import { LoadingScreen } from '../components/LoadingScreen';
 import { PublicTournamentView } from '../PublicTournamentView';
 import { PresenceInfo } from '../lib/presence';
 import { NameOf } from '../lib/roster';
+
+// The player page is a chunk of its own: downloaded when a player is opened
+const PlayerPage = lazy(() => import('./PlayerPage').then((m) => ({ default: m.PlayerPage })));
 
 interface PublicPageProps {
   seasons: SeasonArchive[];
@@ -15,6 +18,8 @@ interface PublicPageProps {
   // The tournament could not be read from Firestore (it is tried again by itself)
   failed?: boolean;
   onRetry?: () => void;
+  // No network at the first read: the page shows the tournament as this browser last read it, then
+  staleAt?: number;
   config: AppConfig;
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
@@ -26,7 +31,7 @@ interface PublicPageProps {
 }
 
 // Public tournament page, with a discreet link to the organizer area
-export function PublicPage({ seasons, ready, failed, onRetry, config, history, gameStates, liveUpdatedAt, nameOf, presence }: PublicPageProps) {
+export function PublicPage({ seasons, ready, failed, staleAt, onRetry, config, history, gameStates, liveUpdatedAt, nameOf, presence }: PublicPageProps) {
   const hash = useHash();
   // Nothing read yet: never an empty tournament in its place
   if (!ready && failed) {
@@ -40,13 +45,26 @@ export function PublicPage({ seasons, ready, failed, onRetry, config, history, g
   }
   if (!ready) return <LoadingScreen label="Caricamento torneo…" />;
 
+  const stale = staleAt !== undefined && (
+    <p className="stale-note" role="status">
+      Senza rete: questi sono i dati del{" "}
+      {new Date(staleAt).toLocaleString("it-IT", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}. Riprovo da solo.{" "}
+      <button type="button" className="link-button" onClick={onRetry}>Riprova ora</button>
+    </p>
+  );
   const playerHandle = parsePlayerHash(hash);
   if (playerHandle) {
-    return <PlayerPage handle={playerHandle} config={config} history={history} gameStates={gameStates} nameOf={nameOf} presence={presence} seasons={seasons} />;
+    return (
+      <Suspense fallback={<LoadingScreen label="Caricamento…" />}>
+        {stale}
+        <PlayerPage handle={playerHandle} config={config} history={history} gameStates={gameStates} nameOf={nameOf} presence={presence} seasons={seasons} />
+      </Suspense>
+    );
   }
 
   return (
     <main className="public-main">
+      {stale}
       <PublicTournamentView
         config={config}
         tournamentMeta={config.tournament || DEFAULT_TOURNAMENT}

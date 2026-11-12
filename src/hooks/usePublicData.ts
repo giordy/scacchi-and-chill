@@ -5,6 +5,7 @@ import { defaultConfig, validateAndNormalizeConfig, withTournamentDoc } from '..
 import { sortSeasons } from '../lib/seasons';
 import { readGames, readSeasons, readTournamentDoc } from '../lib/firestoreRest';
 import { useVisiblePolling } from './useVisiblePolling';
+import { loadSnapshot, saveSnapshot } from '../lib/publicCache';
 
 // After a failed read the page asks again soon, not at the next 5 minutes: 3 s, then 8, 20, and
 // every 30 from there on
@@ -18,12 +19,17 @@ export const retryDelay = (failures: number) => RETRY_MS[Math.min(Math.max(failu
 // those (useTournamentSync).
 // `ready` only once the tournament and its games were read: until then the page has nothing true to
 // show, and `failed` says the read did not work (it is tried again by itself, or with `retry`).
+// When the very first read fails (no network) the page shows the last tournament this browser
+// read (lib/publicCache): `staleAt` is when that was, until a read succeeds.
 export function usePublicData(enabled: boolean) {
   const [config, setConfig] = useState<AppConfig>(defaultConfig);
   const [history, setHistory] = useState<HistoryGame[]>([]);
   const [seasons, setSeasons] = useState<SeasonArchive[]>([]);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [staleAt, setStaleAt] = useState<number | undefined>(undefined);
+  const isReady = useRef(false);
+  const seasonsNow = useRef<SeasonArchive[]>([]);
   // Each new attempt after a failure restarts the polling at once
   const [attempt, setAttempt] = useState(0);
   const failures = useRef(0);
@@ -65,6 +71,17 @@ export function usePublicData(enabled: boolean) {
         // What was read before stays on the page; only a first load with nothing says so
         failures.current++;
         setFailed(true);
+        if (!isReady.current) {
+          const saved = loadSnapshot();
+          if (saved) {
+            setConfig(withTournamentDoc(start, saved.doc));
+            setHistory(saved.games);
+            setSeasons(saved.seasons);
+            setStaleAt(saved.at);
+            setReady(true);
+            isReady.current = true;
+          }
+        }
         window.clearTimeout(timer.current);
         timer.current = window.setTimeout(retry, retryDelay(failures.current));
         return false;
@@ -74,7 +91,8 @@ export function usePublicData(enabled: boolean) {
       const season = next.tournament?.season ?? '';
       if (seasonsFor.current !== season) {
         try {
-          setSeasons(sortSeasons(await readSeasons()));
+          seasonsNow.current = sortSeasons(await readSeasons());
+          setSeasons(seasonsNow.current);
           seasonsFor.current = season;
         } catch (e) {
           // The page works without the past seasons; they are asked again at the next read
@@ -84,12 +102,16 @@ export function usePublicData(enabled: boolean) {
       setConfig(next);
       setHistory(gamesResult.value);
       setFailed(false);
+      setStaleAt(undefined);
       setReady(true);
+      isReady.current = true;
+      // Only with the past seasons read: a snapshot never replaces them with none
+      if (seasonsFor.current === season) saveSnapshot({ at: Date.now(), doc: docResult.value, games: gamesResult.value, seasons: seasonsNow.current });
       return true;
     },
     `firestore:${attempt}`,
     enabled
   );
 
-  return { config, history, seasons, ready, failed, retry, gamesLoaded: ready };
+  return { config, history, seasons, ready, failed, staleAt, retry, gamesLoaded: ready };
 }

@@ -455,6 +455,40 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
 
       {wrappedCard}
 
+      {/* Right under the numbers: the game in progress is what one opens the page for */}
+      <section className="dossier-card">
+        <h2 className="section-heading">Partite ({games.length})</h2>
+        {games.length === 0 ? (
+          <p className="note m-0">Nessuna partita ancora registrata.</p>
+        ) : (
+          <ul className="player-games">
+            {/* Newest round first: the latest games, the ongoing ones, on top */}
+            {[...games].reverse().map((game) => (
+              <li key={game.url} className="player-game">
+                <span className="match-round">Turno {game.round}</span>
+                <span className="player-game-main">
+                  <span className="player-game-opp">
+                    <span className={`dot ${game.color === "white" ? "w" : "b"}`} aria-label={game.color === "white" ? "Bianco" : "Nero"} />
+                    <a href={playerHref(game.opponent)}>{nameOf(game.opponent)}</a>
+                  </span>
+                  {game.opening && (
+                    <span className="opening-label" title={game.opening}>{game.opening}</span>
+                  )}
+                </span>
+                <span className={`status-badge ${OUTCOME_CLASS[game.outcome]}`}>{OUTCOME_LABEL[game.outcome]}</span>
+                {game.url ? (
+                  <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
+                    Lichess
+                  </a>
+                ) : (
+                  <span className="opening-label">{game.status === "forfeit" ? "A tavolino" : ""}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       {pointsByRound.length > 0 && (
         <section className="dossier-card">
           <h2 className="section-heading">Andamento</h2>
@@ -488,7 +522,15 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
       )}
 
       <section className="dossier-card">
-        <h2 className="section-heading">Scontri diretti</h2>
+        <h2 className="section-heading">
+          Scontri diretti
+          {headToHead.some((h) => h.upcoming.some((u) => u.color)) && (
+            <InfoTip className="heading-tip" text="Nelle partite ancora da giocare il pallino dice con che colore giocherà: bianco o nero.">
+              <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+              <span className="sr-only">Cosa indicano i pallini</span>
+            </InfoTip>
+          )}
+        </h2>
         <ul className="h2h-list">
           {headToHead.map((h) => (
             <li key={h.opponent} className="h2h-row">
@@ -537,39 +579,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
       </section>
 
       {acrossSeasons(false)}
-
-      <section className="dossier-card">
-        <h2 className="section-heading">Partite ({games.length})</h2>
-        {games.length === 0 ? (
-          <p className="note m-0">Nessuna partita ancora registrata.</p>
-        ) : (
-          <ul className="player-games">
-            {/* Newest round first: the latest games, the ongoing ones, on top */}
-            {[...games].reverse().map((game) => (
-              <li key={game.url} className="player-game">
-                <span className="match-round">Turno {game.round}</span>
-                <span className="player-game-main">
-                  <span className="player-game-opp">
-                    <span className={`dot ${game.color === "white" ? "w" : "b"}`} aria-label={game.color === "white" ? "Bianco" : "Nero"} />
-                    <a href={playerHref(game.opponent)}>{nameOf(game.opponent)}</a>
-                  </span>
-                  {game.opening && (
-                    <span className="opening-label" title={game.opening}>{game.opening}</span>
-                  )}
-                </span>
-                <span className={`status-badge ${OUTCOME_CLASS[game.outcome]}`}>{OUTCOME_LABEL[game.outcome]}</span>
-                {game.url ? (
-                  <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
-                    Lichess
-                  </a>
-                ) : (
-                  <span className="opening-label">{game.status === "forfeit" ? "A tavolino" : ""}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
     </main>
   );
 }

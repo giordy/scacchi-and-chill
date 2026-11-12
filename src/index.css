@@ -3691,3 +3691,66 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .wrapped-list li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; align-items: baseline; }
 .wrapped-emoji { text-align: center; }
 .points-mark { margin-left: 1px; color: var(--muted); font-weight: 700; }
+
+/* Cronaca teaser on the home page: the text takes the row, score and date stay on the right
+   (on a wide screen they ended up right after the text) */
+.cronaca-teaser-list .timeline-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* No pill alone on a row: the season's numbers fill their last row, the player's minor pills
+   (one or two) share the width */
+.season-stats .stat-pills {
+  display: flex;
+  flex-wrap: wrap;
+}
+.season-stats .stat-pill {
+  flex: 1 1 30%;
+}
+.player-hero .stat-pills-minor {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+}
+
+/* An explanation beside a section heading: the bubble opens under the heading, across the card */
+.section-heading:has(.heading-tip) {
+  position: relative;
+}
+button.infotip-trigger.heading-tip {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  vertical-align: middle;
+}
+
+/* No network at the first read: the page shows the tournament as last read, and says of when */
+.stale-note {
+  box-sizing: border-box;
+  max-width: 760px;
+  margin: 12px auto 0;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--brass) 45%, var(--line));
+  border-radius: 8px;
+  background: var(--brass-soft);
+  font-size: 14px;
+  color: var(--ink);
+}
+main.public-main > .stale-note {
+  margin: 0 0 12px;
+}
+button.link-button {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
