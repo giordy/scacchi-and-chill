@@ -3251,11 +3251,11 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .trophy-card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 9px;
+  column-gap: 11px;
   row-gap: 1px;
   align-content: center;
   min-height: 0;
-  padding: 7px 12px 8px;
+  padding: 11px 14px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
