@@ -51,13 +51,9 @@ export function CareerSection({ career, highs }: { career: CareerSeason[]; highs
   );
 }
 
-// Won / drawn / lost against one opponent, in words and without the zeros: "3 vinte · 1 persa"
+// Won / drawn / lost against one opponent, short and without the zeros: "3V 1P"
 export function recordWords({ won, drawn, lost }: { won: number; drawn: number; lost: number }) {
-  return [
-    won > 0 ? `${won} ${won === 1 ? "vinta" : "vinte"}` : "",
-    drawn > 0 ? `${drawn} ${drawn === 1 ? "patta" : "patte"}` : "",
-    lost > 0 ? `${lost} ${lost === 1 ? "persa" : "perse"}` : "",
-  ].filter(Boolean).join(" · ");
+  return [won > 0 ? `${won}V` : "", drawn > 0 ? `${drawn}N` : "", lost > 0 ? `${lost}P` : ""].filter(Boolean).join(" ");
 }
 
 // Player page: the record against every opponent ever met, across seasons

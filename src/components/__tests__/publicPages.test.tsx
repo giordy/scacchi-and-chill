@@ -174,7 +174,7 @@ describe('player page', () => {
     // Dario keeps only the games from round 2, Greta played the one against Anna in round 1
     const dario = playerPage('dario', [withStart]);
     expect(dario).toContain('1 stagione · 2 partite · 1 punto');
-    expect(dario).toContain('1 persa');
+    expect(dario).toContain('1P');
   });
 
   it('lists the games of the season newest round first', () => {
