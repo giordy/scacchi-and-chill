@@ -350,3 +350,21 @@ describe('the scudetto on the season tab', () => {
     expect(html).toMatch(/dossier-scudetto"><svg class="scudetto-icon is-inline"[\s\S]*?Chi vince la stagione conquista lo <strong>Scudetto/);
   });
 });
+
+describe('the live dot, once seen', () => {
+  const t = Date.now();
+  const liveStates: Record<string, LichessExportGame> = { ...gameStates, bbbbbbbb: { id: 'bbbbbbbb', status: 'started', createdAt: 1, lastMoveAt: t - 60_000 } };
+  const presence = { seenAt: { carla: t - 60_000, anna: t - 60_000 }, flair: {}, now: t };
+  afterEach(() => localStorage.clear());
+
+  it('stays off for a live game already seen on the Partite tab, as the cronaca dot does', () => {
+    vi.stubGlobal('localStorage', (() => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), clear: () => m.clear() }; })());
+    at('');
+    const render = () => renderToStaticMarkup(
+      <PublicTournamentView config={config} tournamentMeta={config.tournament!} history={history} gameStates={liveStates} nameOf={nameOf} seasons={[season1]} presence={presence} />
+    );
+    expect(render()).toContain('switch-dot is-live');
+    localStorage.setItem('scacchi-partite-live-viste', JSON.stringify(['bbbbbbbb']));
+    expect(render()).not.toContain('switch-dot is-live');
+  });
+});
