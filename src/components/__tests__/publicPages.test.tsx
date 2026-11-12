@@ -331,13 +331,11 @@ describe('a live game', () => {
     );
   };
 
-  it('puts a green dot on the Partite tab and a Live badge on the game, with both players there', () => {
-    expect(page('', { carla: t - 60_000, anna: t - 60_000 })).toContain('switch-dot is-live');
+  it('has a Live badge, with both players there', () => {
     expect(page('#/partite', { carla: t - 60_000, anna: t - 60_000 })).toContain('status-badge live');
   });
 
   it('is only in progress when one of the two is not on Lichess', () => {
-    expect(page('', { carla: t - 60_000 })).not.toContain('switch-dot is-live');
     const matches = page('#/partite', { carla: t - 60_000 });
     expect(matches).not.toContain('status-badge live');
     expect(matches).toContain('status-badge ongoing');
@@ -351,23 +349,31 @@ describe('the scudetto on the season tab', () => {
   });
 });
 
-describe('the live dot, once seen', () => {
+describe('the dot on the Partite tab', () => {
   const t = Date.now();
-  const liveStates: Record<string, LichessExportGame> = { ...gameStates, bbbbbbbb: { id: 'bbbbbbbb', status: 'started', createdAt: 1, lastMoveAt: t - 60_000 } };
-  const presence = { seenAt: { carla: t - 60_000, anna: t - 60_000 }, flair: {}, now: t };
-  afterEach(() => localStorage.clear());
-
-  it('stays off once the last move of a live game was seen on the Partite tab, and lights at the next one', () => {
-    vi.stubGlobal('localStorage', (() => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), clear: () => m.clear() }; })());
+  const states: Record<string, LichessExportGame> = { ...gameStates, bbbbbbbb: { id: 'bbbbbbbb', status: 'started', createdAt: 1, lastMoveAt: t - 60_000 } };
+  const store = () => {
+    const m = new Map<string, string>();
+    vi.stubGlobal('localStorage', { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v) });
+  };
+  const render = () => {
     at('');
-    const render = () => renderToStaticMarkup(
-      <PublicTournamentView config={config} tournamentMeta={config.tournament!} history={history} gameStates={liveStates} nameOf={nameOf} seasons={[season1]} presence={presence} />
+    return renderToStaticMarkup(
+      <PublicTournamentView config={config} tournamentMeta={config.tournament!} history={history} gameStates={states} nameOf={nameOf} seasons={[season1]} movesRead />
     );
-    expect(render()).toContain('switch-dot is-live');
-    localStorage.setItem('scacchi-partite-mosse-viste', JSON.stringify({ bbbbbbbb: t - 60_000 }));
-    expect(render()).not.toContain('switch-dot is-live');
-    // A move seen before the last one: the last one is news
-    localStorage.setItem('scacchi-partite-mosse-viste', JSON.stringify({ bbbbbbbb: t - 120_000 }));
-    expect(render()).toContain('switch-dot is-live');
+  };
+  const dot = /pub-tab-matches[^>]*>Partite<span class="switch-dot"/;
+
+  it('is off on a first visit', () => {
+    store();
+    expect(render()).not.toMatch(dot);
+  });
+
+  it('lights at a move made after the last one seen on the tab, and only then', () => {
+    store();
+    localStorage.setItem('scacchi-partite-mosse-viste', JSON.stringify({ aaaaaaaa: 2, bbbbbbbb: t - 120_000 }));
+    expect(render()).toMatch(dot);
+    localStorage.setItem('scacchi-partite-mosse-viste', JSON.stringify({ aaaaaaaa: 2, bbbbbbbb: t - 60_000 }));
+    expect(render()).not.toMatch(dot);
   });
 });

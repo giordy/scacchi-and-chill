@@ -55,6 +55,7 @@ export function PublicPage({ seasons, ready, failed, onRetry, config, history, g
         nameOf={nameOf}
         seasons={seasons}
         presence={presence}
+        movesRead={!!liveUpdatedAt}
       />
 
       <footer className="public-footer">

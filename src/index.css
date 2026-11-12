@@ -644,8 +644,7 @@ details .body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .status-badge.live::before,
-  .switch-dot.is-live {
+  .status-badge.live::before {
     animation: none;
   }
 }
@@ -2394,13 +2393,6 @@ details.anecdote > summary::-webkit-details-marker {
   border-radius: 50%;
   background: var(--brass);
   vertical-align: 2px;
-}
-
-/* On the Partite tab: a game is live now, green and pulsing as its badge */
-.switch-dot.is-live {
-  background: var(--ok);
-  color: var(--ok);
-  animation: livePulse 1.6s ease-out infinite;
 }
 
 /* Under the standings: the latest from the cronaca, as a short stretch of its line */

@@ -31,8 +31,8 @@ import { reigningPillsbury } from "./lib/pillsbury";
 import { PillsburyIcon } from "./components/PillsburyIcon";
 import { ScudettoIcon } from "./components/ScudettoIcon";
 import { currentScudetto } from "./lib/scudetto";
-import { liveGameIds } from "./lib/live";
-import { SeenMoves, useSeenLive } from "./hooks/useSeenLive";
+import { extractGameId } from "./lib/utils";
+import { SeenMoves, useSeenMoves } from "./hooks/useSeenMoves";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound, stateOf } from "./lib/games";
 import { MASTER_OPENING_TITLE, masterSurname, openingFamily, playsFamily, scudettoTitle } from "./lib/masterOpening";
@@ -55,6 +55,7 @@ interface PublicTournamentViewProps {
   nameOf: (handle: string) => string;
   seasons?: SeasonArchive[];
   presence?: PresenceInfo; // when each player was last on Lichess
+  movesRead?: boolean; // the games in progress have been read from Lichess at least once
 }
 
 const TABS: { key: PublicTab; label: string }[] = [
@@ -78,6 +79,7 @@ export function PublicTournamentView({
   nameOf,
   seasons = [],
   presence,
+  movesRead = false,
 }: PublicTournamentViewProps) {
   // The open section lives in the URL hash, so a refresh or a shared link keeps it
   const view = parsePublicView(useHash());
@@ -182,21 +184,23 @@ export function PublicTournamentView({
     if (view === "timeline") markSeen();
   }, [view, markSeen]);
   const news = seen ? [] : newsSince(activity, lastVisit);
-  // Partite: the games being played right now, both players there (see lib/live.ts), with the time of
-  // their last move. Its dot works as the cronaca's: it lights at every move of a live game made while
-  // the visitor is elsewhere, and goes off once the tab is opened
-  const liveMoves = useMemo(() => {
+  // Partite: the time of the last move of every game of the season. Its dot works as the cronaca's: it
+  // lights at every move made while the visitor is elsewhere, and goes off once the tab is opened. On a
+  // first visit nothing is news: the moves are taken as seen once read from Lichess
+  const lastMoves = useMemo(() => {
     const moves: SeenMoves = {};
-    liveGameIds(history, gameStates, presence, Date.now()).forEach((id) => {
-      moves[id] = gameStates[id]?.lastMoveAt ?? 0;
+    history.forEach((g) => {
+      const id = extractGameId(g.url);
+      const at = id ? gameStates[id]?.lastMoveAt : undefined;
+      if (id && typeof at === "number" && at > 0) moves[id] = at;
     });
     return moves;
-  }, [history, gameStates, presence]);
-  const { seenMoves, markMovesSeen } = useSeenLive();
+  }, [history, gameStates]);
+  const { seenMoves, markMovesSeen } = useSeenMoves();
   useEffect(() => {
-    if (view === "matches") markMovesSeen(liveMoves);
-  }, [view, liveMoves, markMovesSeen]);
-  const newLive = Object.entries(liveMoves).filter(([id, at]) => at > (seenMoves[id] ?? 0)).length;
+    if (movesRead && (view === "matches" || seenMoves === null)) markMovesSeen(lastMoves);
+  }, [view, movesRead, lastMoves, seenMoves, markMovesSeen]);
+  const newMoves = seenMoves ? Object.entries(lastMoves).filter(([id, at]) => at > (seenMoves[id] ?? 0)).length : 0;
   // Under the standings: the latest results and moments, a door to the cronaca
   const latest = activity.filter((e) => !FRAME_KINDS.has(e.kind)).slice(0, 3);
 
@@ -338,8 +342,8 @@ export function PublicTournamentView({
           >
             {t.label}
             {t.key === "timeline" && news.length > 0 && activeTab !== "timeline" && <span className="switch-dot" role="img" aria-label=", con novità" />}
-            {t.key === "matches" && newLive > 0 && activeTab !== "matches" && (
-              <span className="switch-dot is-live" role="img" aria-label={newLive === 1 ? ", una mossa nuova in una partita live" : `, mosse nuove in ${newLive} partite live`} />
+            {t.key === "matches" && newMoves > 0 && activeTab !== "matches" && (
+              <span className="switch-dot" role="img" aria-label={newMoves === 1 ? ", con una mossa nuova" : `, con mosse nuove in ${newMoves} partite`} />
             )}
           </button>
         ))}
