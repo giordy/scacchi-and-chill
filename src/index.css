@@ -2007,6 +2007,8 @@ a.champion-badge {
   gap: 4px;
 }
 
+.h2h-past-record b { margin-left: 8px; font-weight: 800; color: var(--ink); }
+
 .h2h-past-record {
   text-align: right;
   font-size: 14px;
@@ -3527,6 +3529,7 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 /* "Di sempre" under the opponent's name */
 .h2h-who { display: flex; flex-direction: column; min-width: 0; }
 .h2h-ever { font-size: 12px; color: var(--muted); }
+.h2h-ever b { font-weight: 700; color: var(--ink); }
 .h2h-subheading { margin: 16px 0 6px; font-size: 14px; color: var(--muted); }
 
 /* Five tabs on a phone: smaller labels, still on one line */

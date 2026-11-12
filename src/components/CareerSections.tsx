@@ -70,7 +70,7 @@ export function AllTimeHeadToHeadSection({ rows, nameOf, since }: { rows: AllTim
         {rows.map((h) => (
           <li key={h.opponent} className="h2h-row">
             <a href={playerHref(h.opponent)} className="h2h-name">{nameOf(h.opponent)}</a>
-            <span className="h2h-past-record">{recordWords(h)}</span>
+            <span className="h2h-past-record">{recordWords(h)} <b>{fmt(h.scored)}–{fmt(h.conceded)}</b></span>
           </li>
         ))}
       </ul>

@@ -139,7 +139,7 @@ describe('player page', () => {
     expect(html).toContain('in corso');
     // The all-time record is in the season's head-to-heads, not in a list of its own
     expect(html).not.toContain('Scontri diretti di sempre');
-    expect(html).toMatch(/Di sempre: |Nelle stagioni passate/);
+    expect(html).toMatch(/Di sempre |Nelle stagioni passate/);
   });
 
   it('sums up the season on the player page once its last game is over, not before', () => {

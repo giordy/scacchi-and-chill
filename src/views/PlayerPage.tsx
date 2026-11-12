@@ -485,7 +485,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                   const ever = everOf(h.opponent);
                   // Only when the past seasons add something to this season's games
                   if (!ever || ever.seasons < 2 && ever.won + ever.drawn + ever.lost <= h.outcomes.length) return null;
-                  return <span className="h2h-ever">Di sempre: {recordWords(ever)}</span>;
+                  return <span className="h2h-ever">Di sempre <b>{fmt(ever.scored)}–{fmt(ever.conceded)}</b> · {recordWords(ever)}</span>;
                 })()}
               </span>
               <span className="h2h-games">
@@ -514,7 +514,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               {pastOnly.map((h) => (
                 <li key={h.opponent} className="h2h-row">
                   <a href={playerHref(h.opponent)} className="h2h-name">{longNameOf(h.opponent)}</a>
-                  <span className="h2h-past-record">{recordWords(h)}</span>
+                  <span className="h2h-past-record">{recordWords(h)} <b>{fmt(h.scored)}–{fmt(h.conceded)}</b></span>
                 </li>
               ))}
             </ul>
