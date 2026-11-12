@@ -343,3 +343,10 @@ describe('a live game', () => {
     expect(matches).toContain('status-badge ongoing');
   });
 });
+
+describe('the scudetto on the season tab', () => {
+  it('is named under the master, with its shield', () => {
+    const html = publicPage('#/stagione');
+    expect(html).toMatch(/dossier-scudetto"><svg class="scudetto-icon is-inline"[\s\S]*?Chi vince la stagione conquista lo <strong>Scudetto/);
+  });
+});

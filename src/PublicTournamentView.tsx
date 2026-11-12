@@ -630,6 +630,10 @@ export function PublicTournamentView({
                 {tournamentMeta.subtitle && <p className="dossier-subtitle">«{tournamentMeta.subtitle}»</p>}
                 <div className="story-text">{formatWhatsAppMarkup(tournamentMeta.description || DEFAULT_TOURNAMENT.description)}</div>
                 {currentPeriod && <p className="dossier-period">📅 {currentPeriod[0].toUpperCase() + currentPeriod.slice(1)}</p>}
+                {/* The trophy takes the master's name, initial and colour: said here, where the master is */}
+                <p className="dossier-opening dossier-scudetto">
+                  {shield} Chi vince la stagione conquista lo <strong>{scudetto}</strong>.
+                </p>
                 {masterTag && (
                   <p className="dossier-opening">
                     <span aria-hidden="true">♞</span> L'apertura {masterTag.surname ? `di ${masterTag.surname}` : "del maestro"}:{" "}

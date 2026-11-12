@@ -3617,6 +3617,11 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   color: var(--ink);
 }
 
+/* The scudetto of the season, under the master: the line of the master's opening, without its glyph */
+.dossier-scudetto + .dossier-opening {
+  margin-top: 6px;
+}
+
 /* The master's famous game, replayed from Lichess */
 .famous-game-title {
   margin: 0 0 6px;
