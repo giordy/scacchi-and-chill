@@ -504,7 +504,7 @@ function objectiveEvents(input: CurrentSeasonInput, elo: EloReport, calendar: Hi
         at: seasonEnd,
         emoji: PILLSBURY_EMOJI,
         parts: pillsburyParts(top.map((r) => r.handle)),
-        detail: top.length === 1 ? `${morePoints(best.over)} sul suo obiettivo` : `${morePoints(best.over)} sull'obiettivo`,
+        detail: top.length === 1 ? `${morePoints(best.gap)} sul suo obiettivo` : `${morePoints(best.gap)} sull'obiettivo`,
       });
     }
   }

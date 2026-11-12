@@ -100,7 +100,8 @@ describe('standingsBlock', () => {
 
 describe('pillsburyLine', () => {
   const name = (h: string) => h[0].toUpperCase() + h.slice(1);
-  const row = (handle: string, over: number, trend: Trend) => ({ handle, over, score: over, trend, forecast: { expected: 0, games: 0, expectedSoFar: 0, points: 0, played: 1, spread: 1 } });
+  // over is also the gap shown, to the half point
+  const row = (handle: string, over: number, trend: Trend) => ({ handle, over, gap: Math.round(over * 2) / 2, score: over, trend, forecast: { expected: 0, games: 0, expectedSoFar: 0, points: 0, played: 1, spread: 1 } });
   const race = (rows: ReturnType<typeof row>[], suspended = false): PillsburyRace => ({ suspended, rows, waiting: [], counted: {}, forecasts: {}, newcomers: [] });
 
   it('names who is above the objective, at most three, with the half points beyond it', () => {

@@ -81,12 +81,12 @@ export function pillsburyLine(race: PillsburyRace, nameOf: (handle: string) => s
   if (seasonOver) {
     const top = pillsburyWinners(race);
     if (top.length === 0) return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}:* nessuno è andato oltre le attese, quest'anno non viene assegnato`;
-    const best = top[0].over;
+    const best = top[0].gap;
     const winners = top.map((r) => nameOf(r.handle));
     return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}* a ${namesList(winners)}, ${overText(best)} ${roundHalf(best) <= 1 ? 'punto' : 'punti'} oltre le attese`;
   }
   if (up.length === 0) return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}:* corsa ancora aperta, nessuno finora sopra le attese`;
-  const names = up.slice(0, 3).map((r) => `${nameOf(r.handle)} ${overText(r.over)}`);
+  const names = up.slice(0, 3).map((r) => `${nameOf(r.handle)} ${overText(r.gap)}`);
   return `${PILLSBURY_EMOJI} *${PILLSBURY_TITLE}* (punti oltre le attese): ${names.join(', ')}`;
 }
 

@@ -20,13 +20,6 @@ export const PILLSBURY_ORIGIN =
 
 export type Trend = 'up' | 'same' | 'down';
 
-// Above, in line or below the pronostico so far: a gap of a few tenths of a point says nothing. The
-// trophy goes only to who is above it, as the table shows them (▲), not to the first of those "in line"
-export const PILLSBURY_MIN_OVER = 0.5;
-export const trendOf = (f: Forecast): Trend => {
-  const over = f.points - f.expectedSoFar;
-  return over >= PILLSBURY_MIN_OVER ? 'up' : over <= -PILLSBURY_MIN_OVER ? 'down' : 'same';
-};
 
 // The games of the calendar an objective is made of: not those decided at the table (forfeits after a
 // withdrawal, games closed for cheating: points in the standings, see decidedAtTable) nor those aborted
@@ -48,11 +41,22 @@ export const objectiveReached = (f: Forecast) => {
 // made, plus those expected from the games still to play. The "ritmo" of the race table.
 export const projectedPoints = (f: Forecast) => roundHalf(f.points + Math.max(0, f.expected - f.expectedSoFar));
 
+// Above, in line or below the objective, read from the numbers the table shows (the ritmo and the
+// objective, both to the half point), so that the arrow never contradicts them: 7 and 6½ is ▼. At the
+// end of the season the ritmo is the points made: the trophy goes to who is above (▲), that is at
+// least half a point beyond the objective as shown.
+export const shownGap = (f: Forecast) => projectedPoints(f) - pronosticoPoints(f);
+export const trendOf = (f: Forecast): Trend => {
+  const gap = shownGap(f);
+  return gap > 0 ? 'up' : gap < 0 ? 'down' : 'same';
+};
+
 
 export interface PillsburyRow {
   handle: string;
   forecast: Forecast;
-  over: number; // points beyond those expected so far: what the table shows
+  over: number; // points beyond those expected so far, exact: with score, the order of the race
+  gap: number; // the same as the table shows it, to the half point (shownGap): what the texts say
   score: number; // over measured against Forecast.spread: the order of the race
   trend: Trend;
 }
@@ -102,7 +106,7 @@ export function pillsburyRace(
       return;
     }
     const over = f.points - f.expectedSoFar;
-    rows.push({ handle: p.handle, forecast: f, over, score: f.spread > 0 ? over / f.spread : 0, trend: trendOf(f) });
+    rows.push({ handle: p.handle, forecast: f, over, gap: shownGap(f), score: f.spread > 0 ? over / f.spread : 0, trend: trendOf(f) });
   });
   rows.sort((a, b) => b.score - a.score || b.over - a.over);
   const suspended = rows.length + waiting.length < PILLSBURY_MIN_PLAYERS;
@@ -113,7 +117,7 @@ export function pillsburyRace(
 // together) of those above their objective as the table shows them (▲), and not when suspended.
 // The same for the awards (lib/awards.ts), the bulletin, the cronaca and the race table.
 export function pillsburyWinners(race: PillsburyRace): PillsburyRow[] {
-  const above = race.rows.filter((r) => r.over >= PILLSBURY_MIN_OVER);
+  const above = race.rows.filter((r) => r.trend === 'up');
   const best = above[0];
   if (race.suspended || !best) return [];
   return above.filter((r) => Math.abs(r.score - best.score) < 1e-6);

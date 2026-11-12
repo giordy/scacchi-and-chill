@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { objectiveReached, projectedPoints, PillsburyRace, pillsburyRace, pillsburyWinners, pillsburyWins, reigningPillsbury } from '../pillsbury';
+import { objectiveReached, projectedPoints, shownGap, trendOf, PillsburyRace, pillsburyRace, pillsburyWinners, pillsburyWins, reigningPillsbury } from '../pillsbury';
 import { computeElo, currentSeason } from '../tournamentElo';
 import { parsePublicView, publicViewHref, tabOfView } from '../routes';
 import { SeasonArchive } from '../../types';
@@ -139,9 +139,21 @@ describe('the race weighs each gap by how sure the objective is', () => {
   });
 
   it('gives the trophy to the first of those above the objective, not to one in line ahead of them', () => {
-    const row = (handle: string, over: number, score: number) => ({ handle, over, score, trend: (over >= 0.5 ? 'up' : 'same') as 'up' | 'same', forecast: race.rows[0].forecast });
+    const row = (handle: string, over: number, score: number) => ({ handle, over, gap: Math.round(over * 2) / 2, score, trend: (over >= 0.5 ? 'up' : 'same') as 'up' | 'same', forecast: race.rows[0].forecast });
     const r = (rows: ReturnType<typeof row>[]): PillsburyRace => ({ suspended: false, rows, waiting: [], counted: {}, forecasts: {}, newcomers: [] });
     expect(pillsburyWinners(r([row('carla', 0.4, 0.4), row('anna', 1, 0.3), row('bruno', 2, 0.3)])).map((x) => x.handle)).toEqual(['anna', 'bruno']);
     expect(pillsburyWinners(r([row('carla', 0.4, 0.4)]))).toEqual([]);
+  });
+
+  it('reads the arrow from the numbers shown, so that it never contradicts them', () => {
+    const f = (expected: number, expectedSoFar: number, points: number) => ({ expected, games: 14, expectedSoFar, points, played: 2, spread: 1 });
+    // Objective 6.8 shown as 7, ritmo 6.6 shown as 6½: below, though only by 0.2
+    expect(trendOf(f(6.8, 1.2, 1))).toBe('down');
+    expect(shownGap(f(6.8, 1.2, 1))).toBe(-0.5);
+    // Shown equal: in line
+    expect(trendOf(f(2, 1, 1))).toBe('same');
+    // At the end the ritmo is the points: 7½ against an objective of 7.2 shown as 7 is above
+    expect(trendOf(f(7.2, 7.2, 7.5))).toBe('up');
+    expect(trendOf(f(7.3, 7.3, 7.5))).toBe('same'); // 7.3 is shown as 7½
   });
 });

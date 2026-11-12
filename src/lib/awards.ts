@@ -80,7 +80,7 @@ export function computeSeasonAwards(
       winners: who(top.map((r) => r.handle)),
       detail: top.length === 1
         ? `${halves(f.points)} ${f.points === 1 ? "punto" : "punti"} su ${plural(f.played, "partita", "partite")}, obiettivo ${halves(roundHalf(f.expectedSoFar))}`
-        : `${halves(best.over)} punti più dell'obiettivo`,
+        : `${halves(best.gap)} punti più dell'obiettivo`,
     });
   }
 
