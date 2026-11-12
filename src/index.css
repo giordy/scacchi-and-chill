@@ -2669,6 +2669,12 @@ details.anecdote > summary::-webkit-details-marker {
   gap: 2px;
 }
 
+/* Each trophy as a flex box: a drawn icon (the scudetto) has no text baseline, and on the line of an
+   emoji it would leave its slot taller and sit higher than the others */
+.trophy-shelf > li {
+  display: flex;
+}
+
 button.infotip-trigger.trophy {
   position: relative;
   display: grid;
