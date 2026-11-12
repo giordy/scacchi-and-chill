@@ -16,6 +16,15 @@ function Marker({ outcome, cx, cy, r }: { outcome: "win" | "draw" | "loss"; cx: 
   return <circle className={`pc-dot ${outcome}`} cx={cx} cy={cy} r={r} />;
 }
 
+// Legend swatch drawn with the same marker as the chart, so the three symbols share one size
+function LegendIcon({ outcome }: { outcome: "win" | "draw" | "loss" }) {
+  return (
+    <svg className="pc-legend-icon" viewBox="0 0 14 14" aria-hidden="true">
+      <Marker outcome={outcome} cx={7} cy={7} r={outcome === "draw" ? 4.2 : 4.5} />
+    </svg>
+  );
+}
+
 const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
 // Cumulative points round by round: one line, one marker per round colored by the result
@@ -46,7 +55,11 @@ export function PointsChart({ data, nameOf }: { data: RoundPoints[]; nameOf: (ha
   return (
     <figure className="points-chart">
       <div className="points-chart-tip" aria-live="polite">
-        {current ? describe(current) : "● vittoria · ◆ patta · ○ sconfitta. Tocca un punto per i dettagli."}
+        {current ? describe(current) : (
+          <>
+            <LegendIcon outcome="win" /> vittoria · <LegendIcon outcome="draw" /> patta · <LegendIcon outcome="loss" /> sconfitta. Tocca un punto per i dettagli.
+          </>
+        )}
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Punti dopo ogni turno: ${data.map((d) => `turno ${d.round} ${fmt(d.points)}`).join(", ")}`}>
         {ticks.map((t) => (

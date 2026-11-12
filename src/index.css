@@ -1943,6 +1943,16 @@ a.champion-badge {
   color: var(--muted);
 }
 
+.pc-legend-icon {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  vertical-align: -0.08em;
+  overflow: visible;
+}
+.pc-legend-icon .pc-dot { stroke-width: 1.5; }
+.pc-legend-icon .pc-dot.loss { stroke-width: 1.8; }
+
 .pc-grid { stroke: var(--line); stroke-width: 1; }
 .pc-axis { fill: var(--muted); font-size: 12px; font-family: var(--font-ui); }
 .pc-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
