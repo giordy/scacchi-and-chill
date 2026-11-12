@@ -615,19 +615,39 @@ details .body {
   color: var(--info);
 }
 
-/* Live dot */
-.status-badge.ongoing::before {
+/* A game in progress has a still dot: in a correspondence tournament there are some almost always.
+   Only a live game (see lib/live.ts), with both players there and moving, has a green pulsing one. */
+.status-badge.ongoing::before,
+.status-badge.live::before {
   content: "";
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: currentColor;
+}
+
+.status-badge.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: color-mix(in srgb, var(--ok) 16%, transparent);
+  color: var(--ok);
+}
+
+.status-badge.live::before {
   animation: livePulse 1.6s ease-out infinite;
 }
 
 @keyframes livePulse {
   0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 55%, transparent); }
   100% { box-shadow: 0 0 0 6px transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-badge.live::before,
+  .switch-dot.is-live {
+    animation: none;
+  }
 }
 
 .status-badge.win {
@@ -2374,6 +2394,13 @@ details.anecdote > summary::-webkit-details-marker {
   border-radius: 50%;
   background: var(--brass);
   vertical-align: 2px;
+}
+
+/* On the Partite tab: a game is live now, green and pulsing as its badge */
+.switch-dot.is-live {
+  background: var(--ok);
+  color: var(--ok);
+  animation: livePulse 1.6s ease-out infinite;
 }
 
 /* Under the standings: the latest from the cronaca, as a short stretch of its line */

@@ -11,7 +11,8 @@ import { useVisiblePolling } from './useVisiblePolling';
 export function useLiveGameStates(
   history: HistoryGame[],
   storedStates: Record<string, LichessExportGame>,
-  enabled: boolean
+  enabled: boolean,
+  interval?: number // how often to ask Lichess again (see useVisiblePolling)
 ) {
   const [live, setLive] = useState<Record<string, LichessExportGame>>({});
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
@@ -46,7 +47,8 @@ export function useLiveGameStates(
           return false;
         }),
     openIds,
-    enabled
+    enabled,
+    interval
   );
 
   const gameStates = useMemo(() => mergeGameStates(storedStates, live), [storedStates, live]);

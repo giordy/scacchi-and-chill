@@ -1,8 +1,10 @@
-import React, { lazy, Suspense, useMemo } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useAdminRoute } from './hooks/useAdminRoute';
 import { usePublicData } from './hooks/usePublicData';
 import { useLiveGameStates } from './hooks/useLiveGameStates';
 import { usePresence } from './hooks/usePresence';
+import { LIVE_REFRESH_MS, PUBLIC_REFRESH_MS } from './hooks/useVisiblePolling';
+import { liveGameIds } from './lib/live';
 import { LoadingScreen } from './components/LoadingScreen';
 import { PublicPage } from './views/PublicPage';
 import { applyWithdrawals } from './lib/withdrawals';
@@ -18,12 +20,17 @@ export function App() {
   // Public page: Firestore read with plain requests (see lib/firestoreRest), no SDK
   const { config, history, seasons, ready, failed, retry, gamesLoaded } = usePublicData(!isAdminRoute);
 
-  // Public page: results read live from Lichess on top of the saved ones
+  // Public page: results read live from Lichess on top of the saved ones, and when each player was
+  // last on Lichess. Every 10 minutes, every 90 seconds while a game is live (see lib/live.ts)
+  const [anyLive, setAnyLive] = useState(false);
+  const interval = anyLive ? LIVE_REFRESH_MS : PUBLIC_REFRESH_MS;
   const saved = useMemo(() => storedStates(history), [history]);
-  const live = useLiveGameStates(history, saved, !isAdminRoute && gamesLoaded);
-  // Public page: when each player was last on Lichess
+  const live = useLiveGameStates(history, saved, !isAdminRoute && gamesLoaded, interval);
   const handles = useMemo(() => config.players.map((p) => p.handle), [config.players]);
-  const presence = usePresence(handles, !isAdminRoute && ready);
+  const presence = usePresence(handles, !isAdminRoute && ready, interval);
+  useEffect(() => {
+    setAnyLive(liveGameIds(history, live.gameStates, presence, Date.now()).size > 0);
+  }, [history, live.gameStates, presence]);
   // Results as the standings see them: games annulled or won by forfeit after a withdrawal
   const withdrawals = config.tournament?.withdrawals;
   const seasonHistory = useMemo(() => applyWithdrawals(history, withdrawals), [history, withdrawals]);

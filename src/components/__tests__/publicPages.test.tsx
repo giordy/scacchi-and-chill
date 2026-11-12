@@ -320,3 +320,26 @@ describe('the scudetto shield in place of the 🏆', () => {
     expect(publicPage('')).toMatch(/<span class="trophy-card-icon"><svg class="scudetto-icon"/);
   });
 });
+
+describe('a live game', () => {
+  const t = Date.now();
+  const liveStates: Record<string, LichessExportGame> = { ...gameStates, bbbbbbbb: { id: 'bbbbbbbb', status: 'started', createdAt: 1, lastMoveAt: t - 2 * 60 * 1000 } };
+  const page = (hash: string, seenAt: Record<string, number>) => {
+    at(hash);
+    return renderToStaticMarkup(
+      <PublicTournamentView config={config} tournamentMeta={config.tournament!} history={history} gameStates={liveStates} nameOf={nameOf} seasons={[season1]} presence={{ seenAt, flair: {}, now: t }} />
+    );
+  };
+
+  it('puts a green dot on the Partite tab and a Live badge on the game, with both players there', () => {
+    expect(page('', { carla: t - 60_000, anna: t - 60_000 })).toContain('switch-dot is-live');
+    expect(page('#/partite', { carla: t - 60_000, anna: t - 60_000 })).toContain('status-badge live');
+  });
+
+  it('is only in progress when one of the two is not on Lichess', () => {
+    expect(page('', { carla: t - 60_000 })).not.toContain('switch-dot is-live');
+    const matches = page('#/partite', { carla: t - 60_000 });
+    expect(matches).not.toContain('status-badge live');
+    expect(matches).toContain('status-badge ongoing');
+  });
+});

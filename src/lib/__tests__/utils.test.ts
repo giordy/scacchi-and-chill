@@ -69,6 +69,9 @@ describe('shouldPoll (public page: at most one call every 5 minutes, only when v
     expect(shouldPoll({ ...base, last: now - 60_000 })).toBe(false);
     expect(shouldPoll({ ...base, hidden: true, force: true, last: 0 })).toBe(false);
     expect(shouldPoll({ ...base, busy: true, force: true, last: 0 })).toBe(false);
+    // With another interval: every 90 seconds while a game is live
+    expect(shouldPoll({ ...base, last: now - 90_000, interval: 90_000 })).toBe(true);
+    expect(shouldPoll({ ...base, last: now - 60_000, interval: 90_000 })).toBe(false);
   });
 });
 

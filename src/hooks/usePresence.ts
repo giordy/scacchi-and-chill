@@ -4,9 +4,9 @@ import { PresenceInfo, presenceFrom } from '../lib/presence';
 import { useVisiblePolling } from './useVisiblePolling';
 
 // Public page only: from the players' Lichess profiles, when each was last on Lichess and their
-// flair. One call for all the players, again every 5 minutes while the page stays open and
+// flair. One call for all the players, again at every interval while the page stays open and
 // visible. Empty when Lichess does not answer, so no dot is shown rather than a misleading grey one.
-export function usePresence(handles: string[], enabled: boolean): PresenceInfo {
+export function usePresence(handles: string[], enabled: boolean, interval?: number): PresenceInfo {
   const [state, setState] = useState<PresenceInfo>(() => ({ seenAt: {}, flair: {}, now: Date.now() }));
   const key = Array.from(new Set(handles.map((h) => h.toLowerCase()).filter(Boolean))).sort().join(',');
   const alive = useRef(true);
@@ -29,7 +29,8 @@ export function usePresence(handles: string[], enabled: boolean): PresenceInfo {
           return false;
         }),
     key,
-    enabled
+    enabled,
+    interval
   );
 
   return state;

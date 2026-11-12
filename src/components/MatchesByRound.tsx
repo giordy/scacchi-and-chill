@@ -15,6 +15,7 @@ import { stateOf } from '../lib/games';
 import { playerHref } from '../lib/routes';
 import { PresenceInfo, seenAtOf } from '../lib/presence';
 import { ColorDot } from './PresenceDot';
+import { isLiveGame } from '../lib/live';
 import { OpeningFamily, playsFamily } from '../lib/masterOpening';
 
 export interface MasterTag {
@@ -186,7 +187,9 @@ function MatchCard({
   let badge = game.url
     ? <span className="status-badge pending">Da giocare</span>
     : <span className="status-badge pending">In programma</span>;
-  if (s?.status === "started") badge = <span className="status-badge ongoing">In corso</span>;
+  // A live game: both players on Lichess and a move in the last minutes (see lib/live.ts)
+  if (s?.status === "started" && isLiveGame(game, s, presence, Date.now())) badge = <span className="status-badge live">Live</span>;
+  else if (s?.status === "started") badge = <span className="status-badge ongoing">In corso</span>;
   // Neutral result: here 0-1 is a win for Black, not a "loss"
   else if (s?.winner === "white") badge = <span className="status-badge result">1 – 0</span>;
   else if (s?.winner === "black") badge = <span className="status-badge result">0 – 1</span>;

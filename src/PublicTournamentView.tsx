@@ -31,6 +31,7 @@ import { reigningPillsbury } from "./lib/pillsbury";
 import { PillsburyIcon } from "./components/PillsburyIcon";
 import { ScudettoIcon } from "./components/ScudettoIcon";
 import { currentScudetto } from "./lib/scudetto";
+import { liveGameIds } from "./lib/live";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound, stateOf } from "./lib/games";
 import { MASTER_OPENING_TITLE, masterSurname, openingFamily, playsFamily, scudettoTitle } from "./lib/masterOpening";
@@ -180,6 +181,8 @@ export function PublicTournamentView({
     if (view === "timeline") markSeen();
   }, [view, markSeen]);
   const news = seen ? [] : newsSince(activity, lastVisit);
+  // Partite: the games being played right now, both players there (see lib/live.ts)
+  const liveCount = useMemo(() => liveGameIds(history, gameStates, presence, Date.now()).size, [history, gameStates, presence]);
   // Under the standings: the latest results and moments, a door to the cronaca
   const latest = activity.filter((e) => !FRAME_KINDS.has(e.kind)).slice(0, 3);
 
@@ -321,6 +324,9 @@ export function PublicTournamentView({
           >
             {t.label}
             {t.key === "timeline" && news.length > 0 && activeTab !== "timeline" && <span className="switch-dot" role="img" aria-label=", con novità" />}
+            {t.key === "matches" && liveCount > 0 && activeTab !== "matches" && (
+              <span className="switch-dot is-live" role="img" aria-label={liveCount === 1 ? ", una partita live" : `, ${liveCount} partite live`} />
+            )}
           </button>
         ))}
       </nav>
