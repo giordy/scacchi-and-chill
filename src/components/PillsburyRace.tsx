@@ -160,7 +160,6 @@ export function PillsburyRace({
               * Punti diversi dalla classifica: per il trofeo non contano le partite decise a tavolino (ritiri, chiusure per scorrettezza) né quelle con gli esordienti.
             </p>
           )}
-          {race.rows.length > 1 && <p className="note note-top-xs">A parità di scarto, è davanti chi ha l'obiettivo più sicuro.</p>}
           {race.rows.length === 0 && <p className="note note-top-xs">La corsa parte con le prime partite concluse.</p>}
           {race.newcomers.length > 0 && (
             <p className="note note-top-xs">
