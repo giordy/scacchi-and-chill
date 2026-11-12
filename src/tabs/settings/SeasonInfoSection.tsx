@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { TournamentMeta } from '../../types';
+import { SeasonArchive, TournamentMeta } from '../../types';
 import { DEFAULT_TOURNAMENT } from '../../lib/tournament';
 import { compressImage, isMediaRef, mediaRef } from '../../lib/media';
 import { seasonId } from '../../lib/seasons';
@@ -7,16 +7,20 @@ import { MASTER_OPENING_TITLE, masterSurname, OPENING_FAMILIES, scudettoTitle } 
 import { replayGifFor } from '../../components/GameReplay';
 import { saveMediaImage } from '../../firebaseService';
 import { primeImage, useImageSrc } from '../../hooks/useImageSrc';
+import { currentScudetto, SCUDETTO_COLORS, scudettoColorName, scudettoTwins } from '../../lib/scudetto';
+import { ScudettoIcon } from '../../components/ScudettoIcon';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
 // Name of the tournament and of the current season, with the master it is dedicated to
 export function SeasonInfoSection({
   meta,
+  seasons = [],
   flash,
   onUpdateTournamentMeta,
 }: {
   meta?: TournamentMeta;
+  seasons?: SeasonArchive[]; // archived seasons, to keep the scudetto apart from the earlier ones
   flash: Flash;
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
 }) {
@@ -28,13 +32,14 @@ export function SeasonInfoSection({
     imageUrl: meta?.imageUrl ?? "",
     description: meta?.description || DEFAULT_TOURNAMENT.description,
     masterOpening: meta?.masterOpening ?? "",
+    masterColor: meta?.masterColor ?? "",
     famousUrl: meta?.famousGame?.url ?? "",
     famousTitle: meta?.famousGame?.title ?? "",
     famousNote: meta?.famousGame?.note ?? "",
   });
   const [form, setForm] = useState(fromMeta);
   // A new season (started from "Fine stagione") changes these fields from outside
-  useEffect(() => setForm(fromMeta()), [meta?.title, meta?.season, meta?.masterName, meta?.subtitle, meta?.imageUrl, meta?.description, meta?.masterOpening, meta?.famousGame]);
+  useEffect(() => setForm(fromMeta()), [meta?.title, meta?.season, meta?.masterName, meta?.subtitle, meta?.imageUrl, meta?.description, meta?.masterOpening, meta?.masterColor, meta?.famousGame]);
 
   const field = (key: keyof typeof form) => ({
     value: form[key],
@@ -71,6 +76,13 @@ export function SeasonInfoSection({
     flash("ok", "Foto tolta.");
   };
 
+  // The scudetto of the season as it will be once archived, and the earlier ones it would look the same as
+  const seasonName = form.season.trim() || meta?.season || DEFAULT_TOURNAMENT.season;
+  const scudetto = currentScudetto(seasonName, form.masterName, form.masterColor, seasons);
+  const twinsOf = (color: string) => scudettoTwins(seasonName, form.masterName, color, seasons);
+  const twins = twinsOf(scudetto.color);
+  const seasonsOfTwins = (list: typeof twins) => list.map((t) => `${t.title} (${t.season})`).join(", ");
+
   const save = () => {
     if (!form.title.trim() || !form.season.trim()) {
       flash("err", "Nome del torneo e stagione sono obbligatori.");
@@ -93,6 +105,7 @@ export function SeasonInfoSection({
       imageUrl: form.imageUrl.trim(),
       description: form.description.trim(),
       masterOpening: form.masterOpening,
+      masterColor: form.masterColor,
       // Without a link the title and note are kept (e.g. from the AI reply), but nothing shows on the site
       famousGame: { url: famousUrl, title: form.famousTitle.trim(), ...(form.famousNote.trim() ? { note: form.famousNote.trim() } : {}) },
     });
@@ -124,6 +137,67 @@ export function SeasonInfoSection({
           <input id="cfg-sub" type="text" placeholder="es. La macchina degli scacchi" {...field("subtitle")} />
         </div>
       </div>
+      <fieldset className="scudetto-field">
+        <legend>Colore dello scudetto</legend>
+        <div className="scudetto-field-body">
+          <span className="scudetto-preview">
+            <ScudettoIcon scudetto={scudetto} size={56} />
+          </span>
+          {scudetto.letter ? (
+            <div className="scudetto-swatches">
+              <input
+                type="radio"
+                name="cfg-color"
+                id="cfg-color-auto"
+                className="sr-only"
+                checked={form.masterColor === ""}
+                onChange={() => setForm((f) => ({ ...f, masterColor: "" }))}
+              />
+              <label htmlFor="cfg-color-auto" className="scudetto-swatch is-auto" title="Lo sceglie il sito">
+                Auto
+              </label>
+              {SCUDETTO_COLORS.map((c, i) => {
+                const taken = twinsOf(c.color);
+                const tip = taken.length > 0 ? `${c.name}: già usato con la «${scudetto.letter}» (${seasonsOfTwins(taken)})` : c.name;
+                return (
+                  <React.Fragment key={c.color}>
+                    <input
+                      type="radio"
+                      name="cfg-color"
+                      id={`cfg-color-${i}`}
+                      className="sr-only"
+                      checked={form.masterColor === c.color}
+                      onChange={() => setForm((f) => ({ ...f, masterColor: c.color }))}
+                    />
+                    <label
+                      htmlFor={`cfg-color-${i}`}
+                      className={`scudetto-swatch${taken.length > 0 ? " is-taken" : ""}`}
+                      style={{ background: c.color }}
+                      title={tip}
+                    >
+                      <span className="sr-only">{tip}</span>
+                    </label>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+        <p className="note">
+          {!scudetto.letter
+            ? "Senza maestro la stagione vale lo Scudetto Chill: verde, con il cavallo."
+            : scudetto.auto
+            ? `Lo sceglie il sito: ${scudettoColorName(scudetto.color)}, mai usato prima con la «${scudetto.letter}». `
+            : `Lo scudo che riceve il campione: la «${scudetto.letter}» del maestro su questo colore. `}
+          {scudetto.letter && !scudetto.auto && twins.length > 0 && (
+            <strong className="scudetto-warning">
+              Attenzione: {twins.length === 1 ? "c'è già" : "ci sono già"} {seasonsOfTwins(twins)} con la stessa iniziale e lo stesso colore, e
+              gli scudetti sarebbero uguali.
+            </strong>
+          )}
+          {scudetto.letter && SCUDETTO_COLORS.some((c) => twinsOf(c.color).length > 0) && " I colori con il punto bianco sono già stati usati con questa iniziale."}
+        </p>
+      </fieldset>
       <div>
         <label htmlFor={isMediaRef(form.imageUrl) ? "cfg-img-file" : "cfg-img"}>Foto del maestro</label>
         <div className="photo-field">

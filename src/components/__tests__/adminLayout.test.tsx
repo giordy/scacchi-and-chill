@@ -210,3 +210,39 @@ describe('Elo di partenza in Stagioni', () => {
     expect(renderToStaticMarkup(<SeedsSection config={cfg} history={history} gameStates={{}} seasons={[]} />)).toContain('sono tutti esordienti');
   });
 });
+
+describe('scudetto colour field', () => {
+  const archive = (season: string, masterName: string, masterColor?: string) =>
+    ({ id: season, season, title: 'T', masterName, masterColor, archivedAt: '2027-04-01T00:00:00Z', standings: [], gamesPlayed: 0 });
+  const render = async (masterName: string, masterColor: string) => {
+    const { SeasonInfoSection } = await import('../../tabs/settings/SeasonInfoSection');
+    return renderToStaticMarkup(
+      <SeasonInfoSection
+        meta={{ title: 'T', season: 'Stagione 3', description: '', masterName, masterColor }}
+        seasons={[archive('Stagione 2', 'José Raúl Capablanca', '#5b3f86')]}
+        flash={noop}
+        onUpdateTournamentMeta={noop}
+      />
+    );
+  };
+
+  it('warns when the chosen colour is the one of an earlier scudetto with the same initial', async () => {
+    const html = await render('Magnus Carlsen', '#5b3f86');
+    expect(html).toContain('Attenzione');
+    expect(html).toContain('Scudetto Capablanca (Stagione 2)');
+    expect(html).toContain('is-taken');
+  });
+
+  it('does not warn for another initial, and lets the site choose by default', async () => {
+    expect(await render('Mikhail Tal', '#5b3f86')).not.toContain('Attenzione');
+    const auto = await render('Magnus Carlsen', '');
+    expect(auto).not.toContain('Attenzione');
+    expect(auto).toContain('Lo sceglie il sito: blu');
+  });
+
+  it('offers no colours without a master: the season is the Scudetto Chill', async () => {
+    const html = await render('', '');
+    expect(html).toContain('Scudetto Chill');
+    expect(html).not.toContain('cfg-color-auto');
+  });
+});

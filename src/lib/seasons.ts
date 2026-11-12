@@ -42,6 +42,7 @@ export function buildSeasonArchive(
   if (meta.masterName) archive.masterName = meta.masterName;
   if (meta.imageUrl) archive.imageUrl = meta.imageUrl;
   if (meta.masterOpening) archive.masterOpening = meta.masterOpening;
+  if (meta.masterName && meta.masterColor) archive.masterColor = meta.masterColor;
   if (meta.famousGame?.url) archive.famousGame = meta.famousGame;
   // When it was played: from the games, ending at the archive date if games were left unfinished
   const period = periodOfGames(history, gameStates);

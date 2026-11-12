@@ -45,6 +45,7 @@ export function tournamentFromDoc(doc: TournamentDocData): TournamentMeta | null
     subtitle: doc.subtitle || DEFAULT_TOURNAMENT.subtitle,
     masterName: doc.masterName || DEFAULT_TOURNAMENT.masterName,
     ...(doc.masterOpening ? { masterOpening: doc.masterOpening } : {}),
+    ...(doc.masterColor ? { masterColor: doc.masterColor } : {}),
     // A title without a link yet (filled in from the AI reply) is kept for the organizer area
     ...(doc.famousGame?.url || doc.famousGame?.title ? { famousGame: doc.famousGame } : {}),
     imageUrl: doc.imageUrl || DEFAULT_TOURNAMENT.imageUrl,
@@ -75,6 +76,7 @@ export function mergeTournamentMeta(
     subtitle: patch.subtitle ?? current?.subtitle ?? d.subtitle,
     masterName: patch.masterName ?? current?.masterName ?? d.masterName,
     masterOpening: patch.masterOpening ?? current?.masterOpening ?? '',
+    masterColor: patch.masterColor ?? current?.masterColor ?? '',
     ...((patch.famousGame ?? current?.famousGame) ? { famousGame: patch.famousGame ?? current?.famousGame } : {}),
     imageUrl: patch.imageUrl ?? current?.imageUrl ?? d.imageUrl,
     description: patch.description ?? current?.description ?? d.description,

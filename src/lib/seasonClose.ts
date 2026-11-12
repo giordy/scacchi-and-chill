@@ -40,6 +40,7 @@ export async function closeSeason(input: SeasonCloseInput, io: SeasonCloseIO): P
     imageUrl: '',
     subtitle: '',
     masterOpening: '', // chosen again with the new master
+    masterColor: '', // as the colour of the scudetto
     famousGame: { url: '', title: '' },
     winners: withChampion(meta.winners, snapshot),
     withdrawals: [],

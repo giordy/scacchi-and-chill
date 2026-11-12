@@ -127,6 +127,8 @@ export interface TournamentMeta {
   masterName?: string;
   // Key of the master's opening family (lib/masterOpening.ts), '' or missing when none is chosen
   masterOpening?: string;
+  // Colour of the season's scudetto (lib/scudetto.ts), '' or missing to let the site choose it
+  masterColor?: string;
   // A famous game of the master, replayed in the Stagione tab: a Lichess game (imported or from its
   // masters database), with a title such as "Capablanca – Marshall, New York 1918"; url '' when none
   famousGame?: FamousGame;
@@ -267,6 +269,7 @@ export interface SeasonArchive {
   masterName?: string;
   imageUrl?: string;
   masterOpening?: string; // key of the master's opening family, when one was chosen
+  masterColor?: string; // colour of the scudetto, when the organizer chose one (see lib/scudetto.ts)
   famousGame?: FamousGame;
   archivedAt: string; // ISO date
   start?: string; // first month of the season, "2026-11"

@@ -54,6 +54,7 @@ export interface TournamentDocData {
   imageUrl?: string;
   masterName?: string;
   masterOpening?: string;
+  masterColor?: string;
   famousGame?: FamousGame;
   description?: string;
   howItWorks?: string;
@@ -88,6 +89,7 @@ export async function saveTournamentFullToFirebase(data: {
     if (data.meta.imageUrl !== undefined) payload.imageUrl = data.meta.imageUrl;
     if (data.meta.masterName !== undefined) payload.masterName = data.meta.masterName;
     if (data.meta.masterOpening !== undefined) payload.masterOpening = data.meta.masterOpening;
+    if (data.meta.masterColor !== undefined) payload.masterColor = data.meta.masterColor;
     // Firestore rejects undefined values (a game without a note): the JSON round trip drops them
     if (data.meta.famousGame !== undefined) payload.famousGame = JSON.parse(JSON.stringify(data.meta.famousGame));
     payload.description = data.meta.description;

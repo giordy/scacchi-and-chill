@@ -3010,6 +3010,85 @@ button.infotip-trigger.presence-trigger {
 }
 
 /* Organizer area: the master's photo, with its preview */
+/* Colour of the scudetto (organizer area): the shield as it will be, then the colours to choose from */
+.scudetto-field {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.scudetto-field legend {
+  padding: 0;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.scudetto-field-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.scudetto-preview {
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+}
+
+.scudetto-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+label.scudetto-swatch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  border-radius: 50%;
+  border: 2px solid var(--panel);
+  box-shadow: 0 0 0 1px var(--line);
+  cursor: pointer;
+}
+
+label.scudetto-swatch.is-auto {
+  width: auto;
+  padding: 0 10px;
+  border-radius: 16px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Already used with this initial: a white dot in the middle */
+label.scudetto-swatch.is-taken::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.85;
+}
+
+input:checked + label.scudetto-swatch {
+  box-shadow: 0 0 0 2px var(--brass);
+}
+
+input:focus-visible + label.scudetto-swatch {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.scudetto-warning {
+  color: var(--warning);
+}
+
 .photo-field {
   display: flex;
   gap: 12px;

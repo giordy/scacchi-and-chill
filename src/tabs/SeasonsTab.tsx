@@ -62,7 +62,7 @@ export function SeasonsTab({
           flash={flash}
           onUpdateTournamentMeta={onUpdateTournamentMeta}
         />
-        <SeasonInfoSection meta={meta} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
+        <SeasonInfoSection meta={meta} seasons={seasons} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
         <MasterAnecdotesSection meta={meta} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
       </CollapsibleSection>
 
