@@ -51,21 +51,13 @@ export function CareerSection({ career, highs }: { career: CareerSeason[]; highs
   );
 }
 
-// Won / drawn / lost against one opponent, as plain text: the numbers in ink, the zeros faded
-// (same look in every head-to-head list, current season or past)
-export function H2hRecord({ won, drawn, lost, className = "" }: { won: number; drawn: number; lost: number; className?: string }) {
-  const part = (n: number, l: string, word: string) => (
-    <span className={n === 0 ? "h2h-rec-zero" : undefined} aria-label={`${n} ${word}`}>
-      <b>{n}</b>{l}
-    </span>
-  );
-  return (
-    <span className={`h2h-record ${className}`.trim()}>
-      {part(won, "V", won === 1 ? "vittoria" : "vittorie")}
-      {part(drawn, "N", drawn === 1 ? "patta" : "patte")}
-      {part(lost, "P", lost === 1 ? "sconfitta" : "sconfitte")}
-    </span>
-  );
+// Won / drawn / lost against one opponent, in words and without the zeros: "3 vinte · 1 persa"
+export function recordWords({ won, drawn, lost }: { won: number; drawn: number; lost: number }) {
+  return [
+    won > 0 ? `${won} ${won === 1 ? "vinta" : "vinte"}` : "",
+    drawn > 0 ? `${drawn} ${drawn === 1 ? "patta" : "patte"}` : "",
+    lost > 0 ? `${lost} ${lost === 1 ? "persa" : "perse"}` : "",
+  ].filter(Boolean).join(" · ");
 }
 
 // Player page: the record against every opponent ever met, across seasons
@@ -78,10 +70,7 @@ export function AllTimeHeadToHeadSection({ rows, nameOf, since }: { rows: AllTim
         {rows.map((h) => (
           <li key={h.opponent} className="h2h-row">
             <a href={playerHref(h.opponent)} className="h2h-name">{nameOf(h.opponent)}</a>
-            <H2hRecord won={h.won} drawn={h.drawn} lost={h.lost} />
-            <span className="h2h-score" aria-label={`Punteggio ${fmt(h.scored)} a ${fmt(h.conceded)}`}>
-              {fmt(h.scored)} – {fmt(h.conceded)}
-            </span>
+            <span className="h2h-past-record">{recordWords(h)}</span>
           </li>
         ))}
       </ul>

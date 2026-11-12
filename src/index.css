@@ -1975,7 +1975,7 @@ a.champion-badge {
 
 .h2h-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 54px;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   padding: 9px 0;
@@ -2007,25 +2007,12 @@ a.champion-badge {
   gap: 4px;
 }
 
-.h2h-score {
+.h2h-past-record {
   text-align: right;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-/* Won / drawn / lost as text, aligned like the badges */
-.h2h-record {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--muted);
-  font-variant-numeric: lining-nums tabular-nums;
   white-space: nowrap;
 }
-.h2h-record b { margin-right: 1px; font-weight: 800; color: var(--ink); }
-.h2h-record .h2h-rec-zero b { color: inherit; font-weight: 600; }
-.h2h-record .h2h-rec-zero { opacity: 0.55; }
 
 .h2h-upcoming {
   display: inline-flex;
@@ -3537,10 +3524,9 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 }
 
 /* Player page: under a head-to-head of the season, the record across every season */
-/* "di sempre" line under a current-season row: same three columns as the row above */
-.h2h-ever-label { margin-top: -4px; font-size: 12px; color: var(--muted); }
-.h2h-ever-record { margin-top: -4px; font-size: 12px; }
-.h2h-ever-score { margin-top: -4px; text-align: right; font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+/* "Di sempre" under the opponent's name */
+.h2h-who { display: flex; flex-direction: column; min-width: 0; }
+.h2h-ever { font-size: 12px; color: var(--muted); }
 .h2h-subheading { margin: 16px 0 6px; font-size: 14px; color: var(--muted); }
 
 /* Five tabs on a phone: smaller labels, still on one line */

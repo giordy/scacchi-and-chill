@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
-import { AllTimeHeadToHead, allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, seasonsWithGames } from '../lib/allTime';
+import { allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, seasonsWithGames } from '../lib/allTime';
 import { computeStandings } from '../lib/standings';
 import { archivedGames, seasonDepartures } from '../lib/seasons';
 import { NameOf } from '../lib/roster';
-import { CareerSection, AllTimeHeadToHeadSection, H2hRecord } from '../components/CareerSections';
+import { CareerSection, AllTimeHeadToHeadSection, recordWords } from '../components/CareerSections';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref, publicViewHref } from '../lib/routes';
 import { flairFromGames, flairUrl } from '../lib/flair';
@@ -157,18 +157,6 @@ function CareerHighs({ handle, elo, seasonName, nameOf, title }: {
 const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
 // Under a head-to-head of the season: the record across every season
-function EverLine({ ever }: { ever: AllTimeHeadToHead }) {
-  return (
-    <>
-      <span className="h2h-ever-label">di sempre</span>
-      <H2hRecord won={ever.won} drawn={ever.drawn} lost={ever.lost} className="h2h-ever-record" />
-      <span className="h2h-ever-score" aria-label={`Di sempre ${fmt(ever.scored)} a ${fmt(ever.conceded)}`}>
-        {fmt(ever.scored)} – {fmt(ever.conceded)}
-      </span>
-    </>
-  );
-}
-
 function Flair({ flair }: { flair?: string }) {
   const [broken, setBroken] = useState(false);
   useEffect(() => setBroken(false), [flair]);
@@ -491,7 +479,15 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
         <ul className="h2h-list">
           {headToHead.map((h) => (
             <li key={h.opponent} className="h2h-row">
-              <a href={playerHref(h.opponent)} className="h2h-name">{nameOf(h.opponent)}</a>
+              <span className="h2h-who">
+                <a href={playerHref(h.opponent)} className="h2h-name">{nameOf(h.opponent)}</a>
+                {(() => {
+                  const ever = everOf(h.opponent);
+                  // Only when the past seasons add something to this season's games
+                  if (!ever || ever.seasons < 2 && ever.won + ever.drawn + ever.lost <= h.outcomes.length) return null;
+                  return <span className="h2h-ever">Di sempre: {recordWords(ever)}</span>;
+                })()}
+              </span>
               <span className="h2h-games">
                 {h.outcomes.map((o, i) => (
                   <span key={i} className={`status-badge ${OUTCOME_CLASS[o]}`}>{OUTCOME_LABEL[o]}</span>
@@ -508,15 +504,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                   <span className="status-badge pending">Da programmare</span>
                 )}
               </span>
-              <span className="h2h-score" aria-label={`Punteggio ${fmt(h.scored)} a ${fmt(h.conceded)}`}>
-                {h.scored + h.conceded > 0 ? `${fmt(h.scored)} – ${fmt(h.conceded)}` : "–"}
-              </span>
-              {(() => {
-                const ever = everOf(h.opponent);
-                // Only when the past seasons add something to this season's games
-                if (!ever || ever.seasons < 2 && ever.won + ever.drawn + ever.lost <= h.outcomes.length) return null;
-                return <EverLine ever={ever} />;
-              })()}
             </li>
           ))}
         </ul>
@@ -527,8 +514,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               {pastOnly.map((h) => (
                 <li key={h.opponent} className="h2h-row">
                   <a href={playerHref(h.opponent)} className="h2h-name">{longNameOf(h.opponent)}</a>
-                  <H2hRecord won={h.won} drawn={h.drawn} lost={h.lost} />
-                  <span className="h2h-score">{fmt(h.scored)} – {fmt(h.conceded)}</span>
+                  <span className="h2h-past-record">{recordWords(h)}</span>
                 </li>
               ))}
             </ul>
