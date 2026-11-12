@@ -357,14 +357,17 @@ describe('the live dot, once seen', () => {
   const presence = { seenAt: { carla: t - 60_000, anna: t - 60_000 }, flair: {}, now: t };
   afterEach(() => localStorage.clear());
 
-  it('stays off for a live game already seen on the Partite tab, as the cronaca dot does', () => {
+  it('stays off once the last move of a live game was seen on the Partite tab, and lights at the next one', () => {
     vi.stubGlobal('localStorage', (() => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), clear: () => m.clear() }; })());
     at('');
     const render = () => renderToStaticMarkup(
       <PublicTournamentView config={config} tournamentMeta={config.tournament!} history={history} gameStates={liveStates} nameOf={nameOf} seasons={[season1]} presence={presence} />
     );
     expect(render()).toContain('switch-dot is-live');
-    localStorage.setItem('scacchi-partite-live-viste', JSON.stringify(['bbbbbbbb']));
+    localStorage.setItem('scacchi-partite-mosse-viste', JSON.stringify({ bbbbbbbb: t - 60_000 }));
     expect(render()).not.toContain('switch-dot is-live');
+    // A move seen before the last one: the last one is news
+    localStorage.setItem('scacchi-partite-mosse-viste', JSON.stringify({ bbbbbbbb: t - 120_000 }));
+    expect(render()).toContain('switch-dot is-live');
   });
 });

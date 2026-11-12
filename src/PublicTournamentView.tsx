@@ -32,7 +32,7 @@ import { PillsburyIcon } from "./components/PillsburyIcon";
 import { ScudettoIcon } from "./components/ScudettoIcon";
 import { currentScudetto } from "./lib/scudetto";
 import { liveGameIds } from "./lib/live";
-import { useSeenLive } from "./hooks/useSeenLive";
+import { SeenMoves, useSeenLive } from "./hooks/useSeenLive";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound, stateOf } from "./lib/games";
 import { MASTER_OPENING_TITLE, masterSurname, openingFamily, playsFamily, scudettoTitle } from "./lib/masterOpening";
@@ -182,18 +182,21 @@ export function PublicTournamentView({
     if (view === "timeline") markSeen();
   }, [view, markSeen]);
   const news = seen ? [] : newsSince(activity, lastVisit);
-  // Partite: the games being played right now, both players there (see lib/live.ts). Its dot works as
-  // the cronaca's: off once the tab is opened, back only for a live game not seen there yet
-  const liveIds = useMemo(() => liveGameIds(history, gameStates, presence, Date.now()), [history, gameStates, presence]);
-  const { seenLive, markLiveSeen } = useSeenLive();
-  // On the tab, every live game is seen. Elsewhere a seen game is forgotten once no longer live, so it
-  // lights the dot again if it turns live later; only once the profiles have been read from Lichess
-  const presenceRead = Object.keys(presence?.seenAt ?? {}).length > 0;
+  // Partite: the games being played right now, both players there (see lib/live.ts), with the time of
+  // their last move. Its dot works as the cronaca's: it lights at every move of a live game made while
+  // the visitor is elsewhere, and goes off once the tab is opened
+  const liveMoves = useMemo(() => {
+    const moves: SeenMoves = {};
+    liveGameIds(history, gameStates, presence, Date.now()).forEach((id) => {
+      moves[id] = gameStates[id]?.lastMoveAt ?? 0;
+    });
+    return moves;
+  }, [history, gameStates, presence]);
+  const { seenMoves, markMovesSeen } = useSeenLive();
   useEffect(() => {
-    if (view === "matches") markLiveSeen(liveIds);
-    else if (presenceRead) markLiveSeen(new Set([...seenLive].filter((id) => liveIds.has(id))));
-  }, [view, liveIds, presenceRead, seenLive, markLiveSeen]);
-  const newLive = [...liveIds].filter((id) => !seenLive.has(id)).length;
+    if (view === "matches") markMovesSeen(liveMoves);
+  }, [view, liveMoves, markMovesSeen]);
+  const newLive = Object.entries(liveMoves).filter(([id, at]) => at > (seenMoves[id] ?? 0)).length;
   // Under the standings: the latest results and moments, a door to the cronaca
   const latest = activity.filter((e) => !FRAME_KINDS.has(e.kind)).slice(0, 3);
 
@@ -336,7 +339,7 @@ export function PublicTournamentView({
             {t.label}
             {t.key === "timeline" && news.length > 0 && activeTab !== "timeline" && <span className="switch-dot" role="img" aria-label=", con novità" />}
             {t.key === "matches" && newLive > 0 && activeTab !== "matches" && (
-              <span className="switch-dot is-live" role="img" aria-label={newLive === 1 ? ", una partita live" : `, ${newLive} partite live`} />
+              <span className="switch-dot is-live" role="img" aria-label={newLive === 1 ? ", una mossa nuova in una partita live" : `, mosse nuove in ${newLive} partite live`} />
             )}
           </button>
         ))}

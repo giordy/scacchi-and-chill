@@ -1,30 +1,39 @@
 import { useCallback, useState } from 'react';
 
-const SEEN_LIVE_KEY = 'scacchi-partite-live-viste';
+const SEEN_LIVE_KEY = 'scacchi-partite-mosse-viste';
+const DAY = 24 * 60 * 60 * 1000;
 
-// The live games the visitor has already seen on the Partite tab, by Lichess id: the dot on the tab
-// works as the cronaca's, it goes off once the tab is opened and comes back only for a game that
-// turns live and was not seen yet. Kept in the browser, so a reload does not bring the dot back;
-// only the games live now are kept, so the list never grows. Nothing when the browser keeps no data.
-export function useSeenLive(): { seenLive: Set<string>; markLiveSeen: (ids: Set<string>) => void } {
-  const [seenLive, setSeenLive] = useState<Set<string>>(() => {
+// The last move the visitor has seen on the Partite tab, by Lichess id: the time of the game's last
+// move when the tab was open. The dot on the tab works as the cronaca's: it lights at every move
+// of a live game not seen yet, and goes off once the tab is opened. Kept in the browser, so a
+// reload does not bring the dot back; moves older than a day are dropped, so the list stays short.
+// Nothing when the browser keeps no data.
+export type SeenMoves = Record<string, number>;
+
+export function useSeenLive(): { seenMoves: SeenMoves; markMovesSeen: (moves: SeenMoves) => void } {
+  const [seenMoves, setSeenMoves] = useState<SeenMoves>(() => {
     try {
-      const list = JSON.parse(localStorage.getItem(SEEN_LIVE_KEY) ?? '[]');
-      return new Set(Array.isArray(list) ? list.filter((x): x is string => typeof x === 'string') : []);
+      const saved = JSON.parse(localStorage.getItem(SEEN_LIVE_KEY) ?? '{}');
+      return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
     } catch {
-      return new Set();
+      return {};
     }
   });
-  const markLiveSeen = useCallback((ids: Set<string>) => {
-    setSeenLive((prev) => {
-      if ([...ids].every((id) => prev.has(id)) && prev.size === ids.size) return prev;
+  const markMovesSeen = useCallback((moves: SeenMoves) => {
+    setSeenMoves((prev) => {
+      if (Object.entries(moves).every(([id, at]) => (prev[id] ?? 0) >= at)) return prev;
+      const now = Date.now();
+      const next: SeenMoves = {};
+      Object.entries({ ...prev, ...moves }).forEach(([id, at]) => {
+        if (typeof at === 'number' && now - at < DAY) next[id] = Math.max(at, prev[id] ?? 0);
+      });
       try {
-        localStorage.setItem(SEEN_LIVE_KEY, JSON.stringify([...ids]));
+        localStorage.setItem(SEEN_LIVE_KEY, JSON.stringify(next));
       } catch {
         // ignore
       }
-      return new Set(ids);
+      return next;
     });
   }, []);
-  return { seenLive, markLiveSeen };
+  return { seenMoves, markMovesSeen };
 }
