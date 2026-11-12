@@ -2702,6 +2702,12 @@ button.infotip-trigger.trophy:hover,
   display: block;
 }
 
+/* In text, in place of the 🏆 */
+.scudetto-icon.is-inline {
+  display: inline-block;
+  vertical-align: -0.28em;
+}
+
 /* A shield is narrower than an emoji drawn at the same size: larger, to weigh as the medals; the crown,
    wide and bright, a little smaller than them */
 .trophy.is-scudetto .trophy-icon {

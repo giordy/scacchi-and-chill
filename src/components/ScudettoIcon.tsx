@@ -1,14 +1,15 @@
 // The scudetto of a season: a gold shield, the badge sewn on the champions' shirt, with the initial
 // of the season's master on his colour, or a Staunty knight for the Scudetto Chill (see lib/scudetto.ts).
-// Sized in em, so it follows the font size of where it stands, as an emoji.
+// Sized in em, so it follows the font size of where it stands, as an emoji. Inline, it stands in text
+// in place of the 🏆, as the PillsburyIcon does (in a WhatsApp message the trophy stays 🏆).
 import React, { useId } from 'react';
 import { Scudetto } from '../lib/scudetto';
 import { StauntonPiece } from './StauntonPiece';
 
-export function ScudettoIcon({ scudetto, size = '1em' }: { scudetto: Scudetto; size?: string | number }) {
+export function ScudettoIcon({ scudetto, size, inline = false }: { scudetto: Scudetto; size?: string | number; inline?: boolean }) {
   const gold = `scudetto-gold-${useId().replace(/:/g, '')}`;
   return (
-    <svg className="scudetto-icon" width={size} height={size} viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+    <svg className={`scudetto-icon${inline ? ' is-inline' : ''}`} width={size ?? (inline ? '1.3em' : '1em')} height={size ?? (inline ? '1.3em' : '1em')} viewBox="0 0 40 40" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id={gold} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#f3dc95" />

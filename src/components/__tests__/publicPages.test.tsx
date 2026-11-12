@@ -308,3 +308,13 @@ describe('the Elo di partenza from Lichess', () => {
     expect(html).toContain('Esordiente: nelle sue partite si muove solo il suo Elo.');
   });
 });
+
+describe('the scudetto shield in place of the 🏆', () => {
+  it('stands next to the scudetto in the standings, the rules and the hall of fame', () => {
+    for (const hash of ['', '#/regolamento', '#/albo']) {
+      const html = publicPage(hash);
+      expect(html).toContain('scudetto-icon is-inline');
+      expect(html).not.toMatch(/🏆<\/span> (<strong>)?Scudetto/);
+    }
+  });
+});

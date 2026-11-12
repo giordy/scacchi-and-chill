@@ -29,6 +29,8 @@ import { tournamentElo } from "./lib/tournamentElo";
 import { PillsburyRace } from "./components/PillsburyRace";
 import { reigningPillsbury } from "./lib/pillsbury";
 import { PillsburyIcon } from "./components/PillsburyIcon";
+import { ScudettoIcon } from "./components/ScudettoIcon";
+import { currentScudetto } from "./lib/scudetto";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound, stateOf } from "./lib/games";
 import { MASTER_OPENING_TITLE, masterSurname, openingFamily, playsFamily, scudettoTitle } from "./lib/masterOpening";
@@ -229,6 +231,8 @@ export function PublicTournamentView({
   const masterName = tournamentMeta.masterName ?? "";
   // The main trophy, named after the master ("Scudetto Capablanca")
   const scudetto = scudettoTitle(masterName);
+  // The shield of this season's scudetto, in place of the 🏆 on the page
+  const shield = <ScudettoIcon scudetto={currentScudetto(tournamentMeta.season, masterName, tournamentMeta.masterColor, seasons)} inline />;
   // A link, a path in the code, or a photo uploaded from the organizer area (read from Firestore)
   const masterPhoto = useImageSrc(
     tournamentMeta.imageUrl || (!masterName || /capablanca/i.test(masterName) ? "assets/capablanca.jpg" : "")
@@ -330,7 +334,7 @@ export function PublicTournamentView({
               aria-pressed={view !== "pillsbury"}
               onClick={() => show("standings")}
             >
-              <span className="trophy-card-name"><span aria-hidden="true">🏆</span> {scudetto}</span>
+              <span className="trophy-card-name">{shield} {scudetto}</span>
               <span className="trophy-card-desc">Chi fa più punti</span>
             </button>
             <button
@@ -363,7 +367,7 @@ export function PublicTournamentView({
             <p className="title-race" role="status">
               {race.champion ? (
                 <>
-                  🏆 <strong>{race.champion.name}</strong> vince matematicamente lo {scudetto}: nessuno può più arrivare in testa, con{" "}
+                  {shield} <strong>{race.champion.name}</strong> vince matematicamente lo {scudetto}: nessuno può più arrivare in testa, con{" "}
                   {race.roundsLeft === 1 ? "un turno" : `${race.roundsLeft} turni`} d'anticipo.
                 </>
               ) : (
@@ -706,7 +710,7 @@ export function PublicTournamentView({
               <summary className="rules-heading">Trofei</summary>
               <ul className="rules-list">
                 <li>
-                  <span aria-hidden="true">🏆</span> <strong>{scudetto}:</strong> a chi fa più punti a fine stagione; a
+                  {shield} <strong>{scudetto}:</strong> a chi fa più punti a fine stagione; a
                   pari punti decide lo spareggio Sonneborn-Berger. Ogni stagione lo Scudetto prende il nome del suo maestro.
                 </li>
                 <li>
