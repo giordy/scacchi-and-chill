@@ -417,6 +417,10 @@
     {
       "black": "drake097",
       "createdAt": 1794247049378,
+      "lichess": {
+        "id": "IUQYFfYM",
+        "status": "started"
+      },
       "round": "3",
       "url": "https://lichess.org/game/IUQYFfYM",
       "white": "luca_sgarbossa"
@@ -1694,7 +1698,7 @@
     "description": "Nato a L'Avana nel 1888, Capablanca è passato alla storia come uno dei più grandi talenti naturali della disciplina. Imparò il gioco a soli quattro anni osservando il padre e sviluppò fin da subito un'incredibile intuizione posizionale.\n\nIl suo stile era lineare, essenziale e privo di orpelli: evitava le complicazioni inutili e convertiva i vantaggi con una precisione quasi infallibile, specialmente nei finali di partita. Questa sua regolarità gli valse il celebre soprannome di *\"La Macchina degli Scacchi\"*.\n\nTra il 1916 e il 1924 mantenne un record eccezionale: *63 partite consecutive disputate ad altissimo livello senza subire alcuna sconfitta*. Nel 1921 diventò Campione del Mondo battendo Emanuel Lasker, detenendo il titolo fino al 1927.",
     "fairPlayText": "• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.\n• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.\n• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.",
     "famousGame": {
-      "note": "È la più famosa, e ha una storia perfetta per due righe di presentazione. Si dice che Marshall avesse preparato per anni una variante d'attacco segreta nella Spagnola, tenuta da parte apposta per Capablanca. Gliela lanciò contro e Capablanca, vedendola per la prima volta alla scacchiera, si difese con calma e vinse. Quella variante oggi si chiama «Attacco Marshall» e si gioca ancora ai massimi livelli.",
+      "note": "Si dice che Marshall avesse preparato per anni una variante d'attacco segreta nella Spagnola, tenuta da parte apposta per Capablanca. Gliela lanciò contro e Capablanca, vedendola per la prima volta alla scacchiera, si difese con calma e vinse. Quella variante oggi si chiama «Attacco Marshall» e si gioca ancora ai massimi livelli.",
       "title": "Capablanca – Marshall, New York 1918",
       "url": "https://lichess.org/study/tGEhgIAZ/wLvBG6PX"
     },
@@ -1767,17 +1771,17 @@
         "date": "2026-09-09",
         "handle": "drake097",
         "lichess": 1822,
-        "mean": 1663,
-        "offset": 511,
+        "mean": 1623,
+        "offset": 448,
         "perf": "blitz",
-        "rating": 1998,
+        "rating": 1947,
         "ratings": {
           "blitz": 1822,
           "rapid": 1903
         },
         "regulars": [
           {
-            "elo": 1721,
+            "elo": 1675,
             "handle": "battimat",
             "ratings": {
               "blitz": 1122,
@@ -1785,7 +1789,7 @@
             }
           },
           {
-            "elo": 2022,
+            "elo": 1922,
             "handle": "fsgach",
             "ratings": {
               "blitz": 1759,
@@ -1793,7 +1797,7 @@
             }
           },
           {
-            "elo": 1721,
+            "elo": 1675,
             "handle": "giords",
             "ratings": {
               "blitz": 1049,
@@ -1801,40 +1805,41 @@
             }
           },
           {
-            "elo": 1378,
+            "elo": 1387,
             "handle": "luca_sgarbossa",
             "ratings": {
               "correspondence": 1568
             }
           },
           {
-            "elo": 1648,
+            "elo": 1609,
             "handle": "matepaco",
             "ratings": {}
           },
           {
-            "elo": 1486,
+            "elo": 1471,
             "handle": "scarsoforteh",
             "ratings": {}
           }
         ],
-        "rule": 2
+        "rule": 4,
+        "sigma": 171
       },
       {
         "date": "2026-09-08",
         "handle": "frasal",
         "lichess": 1486,
-        "mean": 1663,
-        "offset": 511,
+        "mean": 1623,
+        "offset": 448,
         "perf": "blitz",
-        "rating": 1830,
+        "rating": 1779,
         "ratings": {
           "blitz": 1486,
           "rapid": 1752
         },
         "regulars": [
           {
-            "elo": 1721,
+            "elo": 1675,
             "handle": "battimat",
             "ratings": {
               "blitz": 1122,
@@ -1842,7 +1847,7 @@
             }
           },
           {
-            "elo": 2022,
+            "elo": 1922,
             "handle": "fsgach",
             "ratings": {
               "blitz": 1759,
@@ -1850,7 +1855,7 @@
             }
           },
           {
-            "elo": 1721,
+            "elo": 1675,
             "handle": "giords",
             "ratings": {
               "blitz": 1049,
@@ -1858,24 +1863,25 @@
             }
           },
           {
-            "elo": 1378,
+            "elo": 1387,
             "handle": "luca_sgarbossa",
             "ratings": {
               "correspondence": 1591
             }
           },
           {
-            "elo": 1648,
+            "elo": 1609,
             "handle": "matepaco",
             "ratings": {}
           },
           {
-            "elo": 1486,
+            "elo": 1471,
             "handle": "scarsoforteh",
             "ratings": {}
           }
         ],
-        "rule": 2
+        "rule": 4,
+        "sigma": 171
       }
     ],
     "subtitle": "La macchina degli scacchi",
