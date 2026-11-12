@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
 import { EloReport } from '../lib/tournamentElo';
-import { objectiveReached, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_RANKED_FROM, PILLSBURY_TITLE, pillsburyRace, pillsburyWinners, projectedPoints, raceRanked, reigningPillsbury } from '../lib/pillsbury';
+import { objectiveReached, PILLSBURY_MIN_PLAYERS, PILLSBURY_ORIGIN, PILLSBURY_TITLE, pillsburyRace, pillsburyWinners, projectedPoints, reigningPillsbury } from '../lib/pillsbury';
 import { playerHref } from '../lib/routes';
 import { Trend, TrendKind } from './Trend';
 import { InfoTip } from './InfoTip';
@@ -30,8 +30,8 @@ function Pace({ trend, points }: { trend: TrendKind; points: number }) {
 
 // Public view next to Classifica and Tabellone: the race for the Trofeo Pillsbury. For each player
 // the points made, the objective and the ritmo (the points at the end at this pace); ordered by the
-// points beyond those expected, weighed by how sure each objective is (PillsburyRow.score). In the
-// first rounds the order is mostly luck: the table waits to rank anyone (raceRanked).
+// points beyond those expected, weighed by how sure each objective is (PillsburyRow.score). Ranked
+// from the first game, as the standings: early on the order is mostly luck, and that is fine.
 export function PillsburyRace({
   players,
   elo,
@@ -57,7 +57,6 @@ export function PillsburyRace({
   const reigning = reigningPillsbury(seasons);
   // Once the last game is over, who wins it (the same rule as the awards under the standings)
   const winners = concluded ? pillsburyWinners(race).map((r) => r.handle) : [];
-  const ranked = raceRanked(race, concluded);
   // The points of the standings, to mark who has a different count here (games that do not count)
   const standingPoints = useMemo(
     () => new Map(computeStandings(players, history, gameStates).standings.map((r) => [r.handle.toLowerCase(), r.points])),
@@ -104,12 +103,10 @@ export function PillsburyRace({
           )}
         </td>
         <td className="col-center">{f ? halves(pronosticoPoints(f)) : '–'}</td>
-        {ranked && <td className="col-center">{r && f ? <Pace trend={r.trend} points={projectedPoints(f)} /> : <span className="muted">–</span>}</td>}
+        <td className="col-center">{r && f ? <Pace trend={r.trend} points={projectedPoints(f)} /> : <span className="muted">–</span>}</td>
       </tr>
     );
   };
-  // Before the race is ranked: the players by name, no order to read into
-  const unranked = [...race.rows.map((r) => r.handle), ...race.waiting].sort((a, b) => nameOf(a).localeCompare(nameOf(b), 'it'));
   const firstSeason = seasons.length === 0;
 
   return (
@@ -135,11 +132,6 @@ export function PillsburyRace({
               )}
             </p>
           )}
-          {!ranked && !race.suspended && (
-            <p className="note note-flush pillsbury-wait">
-              ⏳ La graduatoria parte quando metà dei giocatori ha giocato {PILLSBURY_RANKED_FROM} partite: dopo poche partite conta soprattutto la fortuna.
-            </p>
-          )}
           <div className="table-responsive">
             <table className="standings-table pillsbury-table">
               <thead>
@@ -152,18 +144,14 @@ export function PillsburyRace({
                   <th className="col-center" scope="col">
                     <InfoTip className="cell-tip th-tip" text="I punti previsti dall'Elo del torneo a inizio stagione, contro il suo calendario">Obiettivo</InfoTip>
                   </th>
-                  {ranked && <th className="col-center" scope="col">
+                  <th className="col-center" scope="col">
                     <InfoTip className="cell-tip th-tip" text="I punti a fine stagione se da qui in poi ogni partita va come prevede l'Elo. ▲ sopra l'obiettivo, ▼ sotto">Ritmo</InfoTip>
-                  </th>}
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {ranked
-                  ? [
-                      ...race.rows.map((r, i) => row(r.handle, String(i + 1), winners.includes(r.handle) ? 'row-leader' : '')),
-                      ...race.waiting.map((h) => row(h, '–')),
-                    ]
-                  : unranked.map((h) => row(h, '–'))}
+                {race.rows.map((r, i) => row(r.handle, String(i + 1), winners.includes(r.handle) ? 'row-leader' : ''))}
+                {race.waiting.map((h) => row(h, '–'))}
               </tbody>
             </table>
           </div>
@@ -172,7 +160,7 @@ export function PillsburyRace({
               * Punti diversi dalla classifica: per il trofeo non contano le partite decise a tavolino (ritiri, chiusure per scorrettezza) né quelle con gli esordienti.
             </p>
           )}
-          {ranked && race.rows.length > 1 && <p className="note note-top-xs">A parità di scarto, è davanti chi ha l'obiettivo più sicuro.</p>}
+          {race.rows.length > 1 && <p className="note note-top-xs">A parità di scarto, è davanti chi ha l'obiettivo più sicuro.</p>}
           {race.rows.length === 0 && <p className="note note-top-xs">La corsa parte con le prime partite concluse.</p>}
           {race.newcomers.length > 0 && (
             <p className="note note-top-xs">

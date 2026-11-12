@@ -2810,7 +2810,6 @@ button.infotip-trigger.th-tip { font: inherit; color: inherit; text-decoration: 
 .pace { font-weight: 700; white-space: nowrap; }
 .pace-up { color: var(--accent); }
 .pace-same, .pace-down { color: var(--muted); }
-.pillsbury-wait { margin: 0 0 10px; }
 details.pillsbury-about { margin-top: 8px; }
 details.pillsbury-about > summary { cursor: pointer; font-size: 14px; font-weight: 700; color: var(--muted); }
 
