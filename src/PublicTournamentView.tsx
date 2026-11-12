@@ -717,8 +717,8 @@ export function PublicTournamentView({
               <div className="rules-text">{tournamentMeta.howItWorks || DEFAULT_TOURNAMENT.howItWorks}</div>
             </details>
 
-            {/* What is at stake: the two trophies. The other awards are for fun: L'allievo is told on the
-                season tab, next to the master's opening, and the rest stay a surprise */}
+            {/* What is at stake: the two trophies. The other awards are for fun and not announced here:
+                L'allievo is told on the season tab, next to the master's opening */}
             <details className="rules-section" open>
               <summary className="rules-heading">Trofei</summary>
               <ul className="rules-list">
@@ -731,7 +731,6 @@ export function PublicTournamentView({
                   <a href={publicViewHref("pillsbury")}>Come funziona</a>.
                 </li>
               </ul>
-              <p className="note">E a fine stagione qualche premio per sorridere, a sorpresa.</p>
             </details>
 
             <details className="rules-section" open>
