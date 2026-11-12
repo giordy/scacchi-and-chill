@@ -19,7 +19,7 @@ function Marker({ outcome, cx, cy, r }: { outcome: "win" | "draw" | "loss"; cx: 
 // Legend swatch drawn with the same marker as the chart, so the three symbols share one size
 function LegendIcon({ outcome }: { outcome: "win" | "draw" | "loss" }) {
   return (
-    <svg className="pc-legend-icon" viewBox="0 0 14 14" aria-hidden="true">
+    <svg className="pc-legend-icon" viewBox="0 0 14 14" width="13" height="13" aria-hidden="true">
       <Marker outcome={outcome} cx={7} cy={7} r={outcome === "draw" ? 4.2 : 4.5} />
     </svg>
   );

@@ -1929,7 +1929,7 @@ a.champion-badge {
   margin: 0;
 }
 
-.points-chart svg {
+.points-chart > svg {
   display: block;
   width: 100%;
   height: auto;
@@ -1943,7 +1943,7 @@ a.champion-badge {
   color: var(--muted);
 }
 
-.pc-legend-icon {
+.points-chart-tip .pc-legend-icon {
   display: inline-block;
   width: 0.9em;
   height: 0.9em;
