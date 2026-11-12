@@ -3251,11 +3251,11 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 .trophy-card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 11px;
+  column-gap: 9px;
   row-gap: 1px;
   align-content: center;
   min-height: 0;
-  padding: 11px 14px 12px;
+  padding: 8px 12px 9px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -3264,7 +3264,7 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   cursor: pointer;
 }
 /* The trophy's icon on the left, as tall as the name and the line under it, both starting after it */
-.trophy-card-icon { grid-row: 1 / span 2; align-self: center; display: flex; font-size: 32px; line-height: 1; }
+.trophy-card-icon { grid-row: 1 / span 2; align-self: center; display: flex; font-size: 26px; line-height: 1; }
 .trophy-card-icon svg { display: block; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25)); }
 /* A long master's surname goes to a new line (and, longer than the card, is broken anywhere) */
 .trophy-card-name { grid-column: 2; min-width: 0; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
