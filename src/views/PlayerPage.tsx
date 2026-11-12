@@ -4,7 +4,7 @@ import { AllTimeHeadToHead, allTimeHeadToHead, allTimeNameOf, archivedName, care
 import { computeStandings } from '../lib/standings';
 import { archivedGames, seasonDepartures } from '../lib/seasons';
 import { NameOf } from '../lib/roster';
-import { CareerSection, AllTimeHeadToHeadSection } from '../components/CareerSections';
+import { CareerSection, AllTimeHeadToHeadSection, H2hRecord } from '../components/CareerSections';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref, publicViewHref } from '../lib/routes';
 import { flairFromGames, flairUrl } from '../lib/flair';
@@ -159,9 +159,13 @@ const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 // Under a head-to-head of the season: the record across every season
 function EverLine({ ever }: { ever: AllTimeHeadToHead }) {
   return (
-    <span className="h2h-ever">
-      Di sempre: {ever.won} V · {ever.drawn} N · {ever.lost} P, {fmt(ever.scored)} – {fmt(ever.conceded)}
-    </span>
+    <>
+      <span className="h2h-ever-label">di sempre</span>
+      <H2hRecord won={ever.won} drawn={ever.drawn} lost={ever.lost} className="h2h-ever-record" />
+      <span className="h2h-ever-score" aria-label={`Di sempre ${fmt(ever.scored)} a ${fmt(ever.conceded)}`}>
+        {fmt(ever.scored)} – {fmt(ever.conceded)}
+      </span>
+    </>
   );
 }
 
@@ -523,11 +527,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               {pastOnly.map((h) => (
                 <li key={h.opponent} className="h2h-row">
                   <a href={playerHref(h.opponent)} className="h2h-name">{longNameOf(h.opponent)}</a>
-                  <span className="h2h-games">
-                    <span className="status-badge win">{h.won} V</span>
-                    <span className="status-badge draw">{h.drawn} N</span>
-                    <span className="status-badge loss">{h.lost} P</span>
-                  </span>
+                  <H2hRecord won={h.won} drawn={h.drawn} lost={h.lost} />
                   <span className="h2h-score">{fmt(h.scored)} – {fmt(h.conceded)}</span>
                 </li>
               ))}
