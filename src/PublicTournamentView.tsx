@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive, TournamentMeta } from "./types";
+import { AppConfig, HistoryGame, LichessExportGame, Player, SeasonArchive, TournamentMeta } from "./types";
 import { SeasonsHistory } from "./components/SeasonsHistory";
 import { playerHref } from "./lib/routes";
-import { championText, computeStandings, isTied, leaderText, seasonStarted, sharedRanks } from "./lib/standings";
+import { championText, computeStandings, isTied, leadersOf, leaderText, seasonStarted, sharedRanks } from "./lib/standings";
 import { RankCell } from "./components/RankCell";
 import { computeSeasonProgress } from "./lib/progress";
 import { DEFAULT_TOURNAMENT } from "./lib/tournament";
@@ -68,6 +68,23 @@ const TABS: { key: PublicTab; label: string }[] = [
 ];
 
 // "Anna", "Anna e Bruno", "Anna, Bruno e Carla"
+// Who can win no trophy (fair play) and is worth a word under the table: those who, without the
+// rule, would be in the race for the Scudetto, or at the end of the season would have won it.
+// Anywhere else in the table nothing changes for the visitor, and nothing is said.
+export function suspendedToMention(
+  players: Player[],
+  standings: { handle: string; name: string; points: number; sb: number; won?: number }[],
+  allGames: HistoryGame[],
+  gameStates: Record<string, LichessExportGame>,
+  out: Set<string>,
+  concluded: boolean
+): string[] {
+  const inPlay = concluded
+    ? leadersOf(standings).map((s) => s.handle)
+    : (titleRace(players, allGames, gameStates)?.contenders ?? []).map((c) => c.handle);
+  return standings.filter((s) => out.has(s.handle.toLowerCase()) && inPlay.includes(s.handle)).map((s) => s.name);
+}
+
 const namesList = (names: string[]) =>
   names.length > 1 ? `${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}` : names[0] ?? "";
 const ALBO_HREF = publicViewHref("hall");
@@ -147,8 +164,11 @@ export function PublicTournamentView({
       summits: summitGames(players, allGames, gameStates),
       race: titleRace(players, allGames, gameStates, noTrophies),
       stats: seasonStats(players, history, gameStates),
-      // Who can win no trophy this season (fair play): in the table with a note, out of the Scudetto
+      // Who can win no trophy this season (fair play): out of the Scudetto
       noTrophies,
+      // Of them, those a sober note under the table names: only when it changes what the visitor sees,
+      // that is when they could still finish first (or finished first) and the Scudetto goes elsewhere
+      suspended: noTrophies.size === 0 ? [] : suspendedToMention(players, standings, allGames, gameStates, noTrophies, concluded),
       // When the current season is being played: "da novembre 2026", both months once it is over
       currentPeriod: periodLabel(periodOfGames(history, gameStates), true),
     };
@@ -468,9 +488,6 @@ export function PublicTournamentView({
                               <PillsburyIcon />
                             </a>
                           )}
-                          {season.noTrophies.has(p.handle.toLowerCase()) && (
-                            <span className="withdrawal-tag">fuori dai trofei</span>
-                          )}
                           {withdrawalNote(p.handle, tournamentMeta.withdrawals) && (
                             <span className="withdrawal-tag">{withdrawalNote(p.handle, tournamentMeta.withdrawals)}</span>
                           )}
@@ -496,6 +513,11 @@ export function PublicTournamentView({
               </tbody>
             </table>
           </div>
+          {season.suspended.length > 0 && (
+            <p className="note note-top-xs">
+              Per questa stagione {namesList(season.suspended)} {season.suspended.length === 1 ? "non concorre" : "non concorrono"} allo {scudetto} e ai premi.
+            </p>
+          )}
           <p className="note note-top-xs">
             G giocate · V vinte · N patte · P perse. A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il
             numero di vittorie; chi è pari anche lì condivide la posizione. Tocca un nome per vedere le partite del giocatore.
