@@ -16,6 +16,7 @@ export function SeasonArchiveSection({
   onUpdateSchedule,
   setHistory,
   onSeasonReset,
+  reminders = [],
 }: {
   config: AppConfig;
   history: HistoryGame[];
@@ -26,6 +27,7 @@ export function SeasonArchiveSection({
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
   onSeasonReset: () => void;
+  reminders?: string[]; // what seems not done yet (lib/seasonChecklist.ts closeReminders): asked before closing
 }) {
   const [busy, setBusy] = useState(false);
   const [nextSeason, setNextSeason] = useState("");
@@ -61,6 +63,7 @@ export function SeasonArchiveSection({
       return;
     }
     const ok = window.confirm(
+      (reminders.length > 0 ? `Prima di chiudere: ${reminders.join('; ')}.\n\n` : '') +
       `Chiudere «${meta.season}» e iniziare «${nextSeason.trim()}»?\n\n` +
         `• la classifica finale viene salvata nello storico${alreadyArchived ? " (sostituisce quella già archiviata)" : ""}\n` +
         `• ${preview.champion.name} entra nell'Albo d'Oro come campione\n` +

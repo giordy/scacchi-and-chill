@@ -3851,3 +3851,68 @@ button.photo-dialog-close {
   font-size: 16px;
   cursor: pointer;
 }
+
+/* Organizer area, between two seasons: the steps to close it and prepare the next */
+.season-checklist > summary {
+  cursor: pointer;
+}
+.checklist {
+  margin: 10px 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+.checklist li:last-child {
+  border-bottom: 0;
+}
+.checklist-mark {
+  flex: none;
+  width: 20px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--muted);
+}
+.checklist li.is-done .checklist-mark {
+  color: var(--ok);
+}
+.checklist-box {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0 1px;
+}
+.checklist-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.checklist li.is-done .checklist-label {
+  color: var(--muted);
+}
+.checklist-detail {
+  font-size: 13px;
+  color: var(--muted);
+}
+.checklist-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+button.btn-mini.btn-go {
+  color: var(--ink);
+}
+.checklist-actions a {
+  font-size: 13px;
+  color: var(--muted);
+}
+.season-checklist > summary .muted-normal {
+  margin-left: 0.3em;
+}

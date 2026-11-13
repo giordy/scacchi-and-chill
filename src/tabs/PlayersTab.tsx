@@ -31,7 +31,7 @@ export function PlayersTab({
 }) {
   return (
     <div className="settings-stack">
-      <CollapsibleSection title="Registro dei giocatori" defaultOpen>
+      <CollapsibleSection title="Registro dei giocatori" defaultOpen id="registro">
         <RosterSection
           meta={config.tournament}
           players={config.players}

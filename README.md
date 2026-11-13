@@ -18,6 +18,7 @@ Sito di un torneo di scacchi per corrispondenza tra amici: sfide su Lichess, dat
 
 ## Area organizzatore (`#admin`)
 Login Google; organizzatore è chi ha un documento in `admins/<email>`. Ogni azione distruttiva chiede conferma. All'apertura sincronizza i risultati da Lichess su Firestore.
+- **Tra una stagione e l'altra**, in cima all'area: cosa fare. Quando l'ultima partita è conclusa, per chiudere la stagione (racconto finale, premi, copia dei dati, chiusura); dopo la chiusura, per preparare la nuova (giocatori, maestro con l'AI, partita celebre, foto con una ricerca su Wikimedia, regolamento, calendario, accettazioni) fino alle sfide del Turno 1. Quasi tutto si legge dai dati; le poche caselle si spuntano a mano e restano nel documento privato. Ogni passo ha «Vai» alla sua sezione, e chiudendo la stagione il sito ricorda cosa sembra mancare (`src/lib/seasonChecklist.ts`).
 - **Turni**: crea le sfide su Lichess, ricrea o sostituisce un link, prepara messaggio e bollettino per WhatsApp.
 - **WhatsApp**: prompt per il racconto della stagione, premi. I testi dei messaggi e le frasi del bollettino stanno in `config.json`: si cambiano lì, con un nuovo deploy.
 - **Giocatori**: registro (il nome vale anche per le stagioni passate), chi gioca la stagione, ritiri (regola della metà o sostituto).

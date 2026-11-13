@@ -40,7 +40,7 @@ export function SettingsTab({
         <TokenSection settings={settings} setSettings={setSettings} flash={flash} />
       </CollapsibleSection>
 
-      <CollapsibleSection title="Copia dei dati">
+      <CollapsibleSection title="Copia dei dati" id="copia-dati">
         <BackupSection
           config={config}
           history={history}

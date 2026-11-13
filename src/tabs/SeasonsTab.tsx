@@ -40,6 +40,7 @@ export function SeasonsTab({
   flash,
   onUpdateTournamentMeta,
   onUpdateSchedule,
+  closeReminders = [],
 }: {
   config: AppConfig;
   settings: Settings;
@@ -48,6 +49,7 @@ export function SeasonsTab({
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
   // Closes the open round: the new season starts from the list of rounds
   onSeasonReset: () => void;
+  closeReminders?: string[]; // asked before closing the season (lib/seasonChecklist.ts)
   gameStates: Record<string, LichessExportGame>;
   seasons: SeasonArchive[];
   flash: Flash;
@@ -60,7 +62,7 @@ export function SeasonsTab({
   const pledgeState = pledgeStatus(pledges, meta?.season ?? '', config.players, rulesVersion(meta));
   return (
     <div className="settings-stack">
-      <CollapsibleSection title="Stagione corrente" defaultOpen>
+      <CollapsibleSection title="Stagione corrente" defaultOpen id="stagione-corrente">
         <MasterAISection
           meta={meta}
           schedule={config.schedule ?? []}
@@ -73,6 +75,7 @@ export function SeasonsTab({
       </CollapsibleSection>
 
       <CollapsibleSection
+        id="regolamento"
         title={pledgesLoaded && config.players.length > 0 ? `Regolamento · accettato da ${pledgeState.accepted.length} su ${config.players.length}` : 'Regolamento'}
       >
         <RulesSection
@@ -94,7 +97,7 @@ export function SeasonsTab({
       </CollapsibleSection>
 
       {/* At the start of a season: the round robin, or the rounds still missing (open while there are none) */}
-      <CollapsibleSection title="Calendario" defaultOpen={(config.schedule ?? []).length === 0 && history.length === 0}>
+      <CollapsibleSection id="calendario" title="Calendario" defaultOpen={(config.schedule ?? []).length === 0 && history.length === 0}>
         <GeneratorSection
           players={config.players}
           schedule={config.schedule ?? []}
@@ -104,7 +107,7 @@ export function SeasonsTab({
         />
       </CollapsibleSection>
 
-      <CollapsibleSection title={`Fine stagione e storico (${seasons.length})`}>
+      <CollapsibleSection id="fine-stagione" title={`Fine stagione e storico (${seasons.length})`}>
         <SeasonArchiveSection
           config={config}
           history={applyWithdrawals(history, meta?.withdrawals)}
@@ -115,6 +118,7 @@ export function SeasonsTab({
           onUpdateSchedule={onUpdateSchedule}
           setHistory={setHistory}
           onSeasonReset={onSeasonReset}
+          reminders={closeReminders}
         />
         <HallOfFameSection
           winners={meta?.winners ?? []}

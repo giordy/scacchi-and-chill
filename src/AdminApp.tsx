@@ -28,6 +28,11 @@ import { AdminConsole, AdminTab, isAdminTab } from './views/AdminConsole';
 import { useNameOf } from './components/Names';
 import { saveTournamentFullToFirebase } from './firebaseService';
 import { errorMessage } from './lib/utils';
+import { usePledges } from './hooks/usePledges';
+import { pledgeStatus, rulesVersion } from './lib/pledges';
+import { ChecklistSection, ChecklistTab, closeReminders, seasonChecklist, toggleTick } from './lib/seasonChecklist';
+import { SeasonChecklistPanel } from './components/SeasonChecklistPanel';
+import { openSection } from './components/CollapsibleSection';
 
 interface AdminAppProps {
   config: AppConfig;
@@ -138,6 +143,26 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
     token: settings.token || undefined,
   });
 
+  // Between two seasons: what to do to close the one that ended and prepare the next (lib/seasonChecklist.ts)
+  const { pledges, loaded: pledgesLoaded } = usePledges();
+  const checklistInput = {
+    meta: config.tournament,
+    players: config.players,
+    schedule: config.schedule ?? [],
+    history,
+    gameStates: lichess.gameStates,
+    pledges: pledgesLoaded ? pledgeStatus(pledges, config.tournament?.season ?? '', config.players, rulesVersion(config.tournament)) : undefined,
+    ticks: organizer.checklist ?? {},
+  };
+  const checklist = gamesLoaded && organizer.loaded ? seasonChecklist(checklistInput) : null;
+  const goTo = (tab: ChecklistTab, section?: ChecklistSection) => {
+    setActiveTab(tab);
+    if (tab === 'rounds') setOpenRoundRaw('');
+    // Once the tab is shown
+    if (section) setTimeout(() => openSection(section), 60);
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const setOpenRound = (r: string) => {
     setNotice(null);
     setOpenRoundRaw(r);
@@ -173,6 +198,14 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
         nameOf={nameOf}
         awardsBan={config.tournament?.fairPlayAwardsBan}
       />
+
+      {checklist && (
+        <SeasonChecklistPanel
+          checklist={checklist}
+          onGo={goTo}
+          onTick={(step) => organizer.replaceAll({ checklist: toggleTick(organizer.checklist ?? {}, checklist.key, step) })}
+        />
+      )}
 
       {activeTab === 'rounds' && (
         <>
@@ -245,6 +278,7 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             flash={flash}
             onUpdateTournamentMeta={updateTournamentMeta}
             onUpdateSchedule={updateSchedule}
+            closeReminders={closeReminders(checklistInput)}
           />
         </>
       )}

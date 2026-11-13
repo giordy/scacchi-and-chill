@@ -144,6 +144,8 @@ export interface OrganizerData {
   settings?: Partial<Settings>;
   // Lichess ids of the cheating cases the organizer already acknowledged
   fairPlaySeen?: string[];
+  // Steps between two seasons ticked by hand (lib/seasonChecklist.ts), by season id
+  checklist?: Record<string, string[]>;
 }
 
 const organizerRef = () => doc(db, "tournaments", TOURNAMENT_DOC_ID, "private", "organizer");
@@ -173,6 +175,7 @@ export function subscribeToOrganizerData(
         anecdotes: d.anecdotes ?? {},
         settings: d.settings,
         fairPlaySeen: d.fairPlaySeen ?? [],
+        checklist: d.checklist ?? {},
       });
     },
     (err) => {
