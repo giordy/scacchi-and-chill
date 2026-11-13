@@ -56,6 +56,10 @@ export function RoundsTab({
   const pledgeState = pledgeStatus(pledges, season, config.players, rulesVersion(config.tournament));
   // Only once read: before, nobody would look missing
   const missingPledges = pledgesLoaded ? pledgeState.missing.map((p) => p.name) : [];
+  // On top of the tab, in the list of rounds and in a round alike (the area reopens the last round seen)
+  const pledgesPanel = pledgesLoaded && season && (
+    <PledgesPanel season={season} status={pledgeState} players={config.players} onReload={reloadPledges} flash={flash} />
+  );
 
   // Games created on Lichess whose saving on Firestore failed: kept on this device until saved,
   // so their links are not lost.
@@ -111,6 +115,7 @@ export function RoundsTab({
     return (
       <>
         {unsavedNotice}
+        {pledgesPanel}
         <RoundDetail
           key={openRound}
           round={openRound}
@@ -142,9 +147,7 @@ export function RoundsTab({
   return (
     <div className="settings-stack">
       {unsavedNotice}
-      {pledgesLoaded && season && (
-        <PledgesPanel season={season} status={pledgeState} players={config.players} onReload={reloadPledges} flash={flash} />
-      )}
+      {pledgesPanel}
       <section className="panel">
         <h2 className="panel-title">
           Turni <span className="muted-normal">· {rounds.length}</span>
