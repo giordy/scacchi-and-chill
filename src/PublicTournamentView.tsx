@@ -49,6 +49,7 @@ import { useLastVisit } from "./hooks/useLastVisit";
 import { outForFairPlay, scudettoContenders } from "./lib/fairPlay";
 import { Pledge, pledgeStatus, rulesVersion } from "./lib/pledges";
 import { PledgeBox } from "./components/PledgeBox";
+import { PhotoViewer } from "./components/PhotoViewer";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -302,6 +303,8 @@ export function PublicTournamentView({
     : 0;
   const famousGame = tournamentMeta.famousGame?.url ? tournamentMeta.famousGame : undefined;
   const [famousReplay, setFamousReplay] = useState(false);
+  // The master's photo, shown large with a tap
+  const [photoOpen, setPhotoOpen] = useState(false);
   const days = tournamentMeta.daysPerMove ?? config.defaults.days;
   const rated = tournamentMeta.rated ?? config.defaults.rated;
 
@@ -676,12 +679,15 @@ export function PublicTournamentView({
 
       {view === "season" && (
         <section role="tabpanel" id="pub-panel-season" aria-labelledby="pub-tab-season" className="tournament-panel">
+          {photoOpen && masterPhoto && (
+            <PhotoViewer src={masterPhoto} alt={masterName || "Il maestro della stagione"} onClose={() => setPhotoOpen(false)} />
+          )}
           <article className="dossier-card">
             <div className="dossier-row">
               {masterPhoto && (
-                <div className="dossier-photo">
+                <button type="button" className="dossier-photo" onClick={() => setPhotoOpen(true)} aria-label={`Ingrandisci la foto di ${masterName || "il maestro"}`}>
                   <img src={masterPhoto} alt={masterName || "Il maestro della stagione"} className="dossier-photo-img" />
-                </div>
+                </button>
               )}
               <div className="dossier-body">
                 <p className="dossier-kicker">{tournamentMeta.season} è dedicata a</p>

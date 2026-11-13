@@ -1627,6 +1627,13 @@ button.rounds-more {
 .dossier-photo {
   flex-shrink: 0;
   width: 132px;
+  /* A button: a tap shows the photo large (PhotoViewer) */
+  display: block;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 0 0 1px var(--line), var(--shadow);
@@ -3800,4 +3807,47 @@ button.link-button {
   gap: 8px;
   padding: 6px 0;
   border-bottom: 1px solid var(--line);
+}
+
+/* The master's photo, large over the page: a tap anywhere closes it */
+/* The whole screen, so that any tap lands on it and closes it */
+.photo-dialog {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(10, 12, 11, 0.85);
+  cursor: zoom-out;
+}
+.photo-dialog[open] {
+  display: grid;
+  place-items: center;
+}
+.photo-dialog::backdrop {
+  background: transparent;
+}
+.photo-dialog-img {
+  display: block;
+  max-width: min(92vw, 720px);
+  max-height: 86vh;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+button.photo-dialog-close {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: 12px;
+  min-height: 0;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
+  font-size: 16px;
+  cursor: pointer;
 }
