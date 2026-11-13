@@ -1696,7 +1696,7 @@
   "tournament": {
     "color": "green",
     "description": "Nato a L'Avana nel 1888, Capablanca è passato alla storia come uno dei più grandi talenti naturali della disciplina. Imparò il gioco a soli quattro anni osservando il padre e sviluppò fin da subito un'incredibile intuizione posizionale.\n\nIl suo stile era lineare, essenziale e privo di orpelli: evitava le complicazioni inutili e convertiva i vantaggi con una precisione quasi infallibile, specialmente nei finali di partita. Questa sua regolarità gli valse il celebre soprannome di *\"La Macchina degli Scacchi\"*.\n\nTra il 1916 e il 1924 mantenne un record eccezionale: *63 partite consecutive disputate ad altissimo livello senza subire alcuna sconfitta*. Nel 1921 diventò Campione del Mondo battendo Emanuel Lasker, detenendo il titolo fino al 1927.",
-    "fairPlayText": "• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.\n• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.\n• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.",
+    "fairPlayText": "• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima della partita vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.\n• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.\n• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.",
     "famousGame": {
       "note": "Si dice che Marshall avesse preparato per anni una variante d'attacco segreta nella Spagnola, tenuta da parte apposta per Capablanca. Gliela lanciò contro e Capablanca, vedendola per la prima volta alla scacchiera, si difese con calma e vinse. Quella variante oggi si chiama «Attacco Marshall» e si gioca ancora ai massimi livelli.",
       "title": "Capablanca – Marshall, New York 1918",
@@ -1762,6 +1762,7 @@
         "title": "L'addio al Marshall Chess Club"
       }
     ],
+    "masterColor": "",
     "masterName": "José Raúl Capablanca",
     "masterOpening": "queens-gambit",
     "rulesText": "",
@@ -1907,7 +1908,7 @@
         "start": "2025-09"
       }
     ],
-    "withdrawalText": "",
+    "withdrawalText": "• Chi si ritira prima di aver giocato metà delle sue partite esce dal torneo e tutte le sue partite vengono annullate, anche quelle già giocate.\n• Chi si ritira dopo aver giocato almeno metà delle sue partite resta in classifica con i risultati ottenuti; le partite che non giocherà valgono come vittoria a tavolino per gli avversari.\n• Se pensi di ritirarti, avvisa prima l'organizzatore in privato.",
     "withdrawals": []
   },
   "version": "2.0"
