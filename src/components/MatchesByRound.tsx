@@ -277,17 +277,19 @@ function MatchCard({
             <a href={playerHref(game.black)} className="player-name player-page-link">{nameOf(game.black)}</a>
           </div>
         </div>
-        {badge}
-      </div>
-      <div className="match-footer">
-        <div className="match-footer-info">
+        <div className="match-status">
+          {badge}
           {moved && (
-            // The same brass dot as on the tab: these are the games it was lit for
+            // Under the state, where the eye goes; the same brass dot as on the tab
             <span className="new-moves-tag">
               <span className="switch-dot" aria-hidden="true" />
               {progress === "finished" ? "Appena conclusa" : "Mosse nuove"}
             </span>
           )}
+        </div>
+      </div>
+      <div className="match-footer">
+        <div className="match-footer-info">
           {(showRound || opening) && (
             <span className="opening-label">
               {showRound && <span className="match-round">Turno {game.round}</span>}
