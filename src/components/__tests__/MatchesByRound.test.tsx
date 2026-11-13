@@ -26,4 +26,14 @@ describe('MatchesByRound', () => {
     const html = renderToStaticMarkup(<MatchesByRound games={games} gameStates={{}} nameOf={nameOf} />);
     expect(html).toMatch(/<div class="player-row is-winner">.*?#\/giocatore\/anna/);
   });
+
+  it('marks the games with moves not seen, also in the summary of a closed round', () => {
+    const html = renderToStaticMarkup(<MatchesByRound games={games} gameStates={{}} nameOf={nameOf} moved={new Set(['aaaaaaaa'])} />);
+    expect(html).toContain('match-card has-new-moves');
+    expect(html).toContain('Appena conclusa');
+    expect(html).toContain('1 con mosse nuove');
+    const none = renderToStaticMarkup(<MatchesByRound games={games} gameStates={{}} nameOf={nameOf} />);
+    expect(none).not.toContain('has-new-moves');
+    expect(none).not.toContain('con mosse nuove');
+  });
 });

@@ -19,6 +19,15 @@ export interface Pledge {
 // One document per season and player
 export const pledgeDocId = (season: string, handle: string) => `${seasonId(season)}--${handle.toLowerCase()}`;
 
+// The documents that may be written this season: one per player. Kept on the tournament document
+// (field pledgeKeys), where firestore.rules reads it: so only a player of the season can accept, and
+// only under the id of the season (the rules cannot work it out from the season's name)
+export const pledgeKeys = (season: string, players: Player[]): string[] => players.map((p) => pledgeDocId(season, p.handle)).sort();
+
+// Whether the keys stored on the tournament are those of the season and its players
+export const samePledgeKeys = (stored: string[] | null | undefined, expected: string[]) =>
+  Array.isArray(stored) && stored.length === expected.length && [...stored].sort().every((k, i) => k === expected[i]);
+
 // The rules as the page shows them: what is accepted
 export function rulesText(meta: TournamentMeta | undefined): string {
   const d = DEFAULT_TOURNAMENT;

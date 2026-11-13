@@ -141,6 +141,18 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
       await assertFails(setDoc(doc(visitor(), `${P}/stagione-2--Anna!`), pledge('Anna!')));
     });
 
+    it('with the list of the season on the tournament, only its players and under the id of the season', async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(doc(ctx.firestore(), T), { ...tournament, pledgeKeys: ['stagione-2--anna', 'stagione-2--bruno'] });
+      });
+      await assertSucceeds(setDoc(doc(visitor(), `${P}/stagione-2--anna`), pledge()));
+      // Not a player of the season
+      await assertFails(setDoc(doc(visitor(), `${P}/stagione-2--zeno`), pledge('zeno')));
+      // A player, under another id: it would add a second acceptance, out of the organizer's reach
+      await assertFails(setDoc(doc(visitor(), `${P}/altro--bruno`), pledge('bruno')));
+      await assertSucceeds(setDoc(doc(visitor(), `${P}/stagione-2--bruno`), pledge('bruno')));
+    });
+
     it('the organizer can cancel one, and the player accepts again', async () => {
       await assertSucceeds(setDoc(doc(visitor(), `${P}/stagione-2--anna`), pledge()));
       await assertFails(deleteDoc(doc(stranger(), `${P}/stagione-2--anna`)));

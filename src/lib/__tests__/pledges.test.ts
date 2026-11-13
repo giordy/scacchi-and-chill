@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { pledgeCommit, readPledges } from '../firestoreRest';
-import { pledgeDocId, pledgeFromDoc, pledgeMessage, pledgeStatus, rulesText, rulesVersion } from '../pledges';
+import { pledgeDocId, pledgeFromDoc, pledgeKeys, pledgeMessage, pledgeStatus, rulesText, rulesVersion, samePledgeKeys } from '../pledges';
 import { currentSeasonActivity } from '../activity';
 import { TournamentMeta } from '../../types';
 
@@ -36,6 +36,21 @@ describe('pledgeStatus', () => {
     expect(s.all).toBe(false);
     expect(pledgeStatus([pledge('anna', 1), pledge('bruno', 2), pledge('carla', 3)], meta.season, players, v).all).toBe(true);
     expect(pledgeStatus([], meta.season, [], v).all).toBe(false);
+  });
+});
+
+describe('who may accept (pledgeKeys, read by firestore.rules)', () => {
+  const players = [{ handle: 'Bruno', name: 'Bruno' }, { handle: 'anna', name: 'Anna' }];
+  it('one document id per player of the season, the same the page writes', () => {
+    expect(pledgeKeys('Stagione 3 - Fischer', players)).toEqual(['stagione-3-fischer--anna', 'stagione-3-fischer--bruno']);
+    expect(pledgeKeys('Stagione 3 - Fischer', players)).toContain(pledgeDocId('Stagione 3 - Fischer', 'Bruno'));
+  });
+  it('are put right when missing, or when the season or the players changed', () => {
+    const keys = pledgeKeys('S3', players);
+    expect(samePledgeKeys(['s3--bruno', 's3--anna'], keys)).toBe(true);
+    expect(samePledgeKeys(null, keys)).toBe(false);
+    expect(samePledgeKeys(['s2--anna', 's2--bruno'], keys)).toBe(false);
+    expect(samePledgeKeys(['s3--anna'], keys)).toBe(false);
   });
 });
 

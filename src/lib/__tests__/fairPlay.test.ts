@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { AWARDS_BAN_RULE, cheatCases, outForFairPlay, withAwardsBanRule } from '../fairPlay';
+import { applyWithdrawals } from '../withdrawals';
+import { Withdrawal } from '../../types';
 import { DEFAULT_TOURNAMENT } from '../tournament';
 import { HistoryGame, LichessExportGame } from '../../types';
 
@@ -31,6 +33,40 @@ describe('out of the Trofeo Pillsbury and the awards for fair play', () => {
     expect([...outForFairPlay(undefined, history, states)]).toEqual([]);
     expect([...outForFairPlay(false, history, states)]).toEqual([]);
     expect([...outForFairPlay(true, history, states)]).toEqual(['bruno']);
+  });
+});
+
+describe('a replacement: the fault stays with who played the game on Lichess', () => {
+  // Bruno is replaced by Zeno after round 1: the calendar (with the withdrawal applied) gives Zeno
+  // Bruno's games, and Bruno the ones after him nowhere
+  const replaced: Withdrawal[] = [{ handle: 'bruno', name: 'Bruno', at: '2026-01-10', played: 1, total: 3, mode: 'replaced', replacedBy: { handle: 'zeno', name: 'Zeno' } }];
+  const onLichess = (white: string, black: string): LichessExportGame['players'] => ({ white: { user: { id: white } }, black: { user: { id: black } } });
+  it('who left cheated: the substitute keeps every trophy', () => {
+    const history = [g('1', 'anna', 'bruno', 'aaaaaaaa'), g('2', 'zeno', 'carla', 'bbbbbbbb')];
+    const states: Record<string, LichessExportGame> = {
+      aaaaaaaa: { id: 'aaaaaaaa', status: 'cheat', winner: 'white', players: onLichess('anna', 'bruno') },
+      bbbbbbbb: { id: 'bbbbbbbb', status: 'started', players: onLichess('zeno', 'carla') },
+    };
+    const seen = applyWithdrawals(history, replaced);
+    expect(seen[0].black).toBe('zeno'); // the place is Zeno's in the standings...
+    expect([...outForFairPlay(true, seen, states)]).toEqual(['bruno']); // ...the fault is Bruno's
+    expect(cheatCases(seen, states)[0]).toMatchObject({ handle: 'bruno', opponent: 'anna' });
+  });
+  it('the substitute cheated: the fault is theirs, never of who left', () => {
+    const history = [g('1', 'anna', 'bruno', 'aaaaaaaa'), g('2', 'zeno', 'carla', 'bbbbbbbb')];
+    const states: Record<string, LichessExportGame> = {
+      aaaaaaaa: { id: 'aaaaaaaa', status: 'resign', winner: 'white', players: onLichess('anna', 'bruno') },
+      bbbbbbbb: { id: 'bbbbbbbb', status: 'cheat', winner: 'black', players: onLichess('zeno', 'carla') },
+    };
+    expect([...outForFairPlay(true, applyWithdrawals(history, replaced), states)]).toEqual(['zeno']);
+  });
+  it('counts the repeats of a player whatever the case of the handle', () => {
+    const history = [g('1', 'anna', 'Bruno', 'aaaaaaaa'), g('2', 'bruno', 'carla', 'bbbbbbbb')];
+    const states: Record<string, LichessExportGame> = {
+      aaaaaaaa: { id: 'aaaaaaaa', status: 'cheat', winner: 'white', players: onLichess('anna', 'bruno') },
+      bbbbbbbb: { id: 'bbbbbbbb', status: 'cheat', winner: 'black', players: onLichess('bruno', 'carla') },
+    };
+    expect(cheatCases(history, states).map((c) => [c.handle, c.count])).toEqual([['Bruno', 1], ['bruno', 2]]);
   });
 });
 

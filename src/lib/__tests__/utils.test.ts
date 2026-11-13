@@ -54,6 +54,17 @@ describe('extractGameId', () => {
     expect(extractGameId('lichess.org/embed/game/AbCd1234')).toBe('AbCd1234');
     expect(extractGameId('')).toBeUndefined();
   });
+  it('reads it after /game/ too, with or without the moves or the side after it', () => {
+    expect(extractGameId('https://lichess.org/game/AbCd1234')).toBe('AbCd1234');
+    expect(extractGameId('https://lichess.org/game/export/AbCd1234?moves=false')).toBe('AbCd1234');
+    expect(extractGameId('https://lichess.org/AbCd1234/black#12')).toBe('AbCd1234');
+    expect(extractGameId('https://lichess.org/challenge/AbCd1234')).toBe('AbCd1234');
+  });
+  it('never takes for a game a page of Lichess or a longer path', () => {
+    ['https://lichess.org/training/abc', 'https://lichess.org/analysis', 'https://lichess.org/tournament/AbCd1234', 'https://lichess.org/AbCd123', 'https://lichess.org/AbCd12345', 'https://lichess.org/study/AbCd1234', 'https://lichess.org/@/anna1234'].forEach((u) =>
+      expect(extractGameId(u), u).toBeUndefined()
+    );
+  });
 });
 
 describe('shouldPoll (public page: at most one call every 5 minutes, only when visible)', () => {

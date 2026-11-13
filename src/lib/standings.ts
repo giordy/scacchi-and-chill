@@ -25,6 +25,13 @@ export function scoredResult(s?: LichessExportGame): "1-0" | "0-1" | "½-½" | n
   return s.winner === "white" ? "1-0" : s.winner === "black" ? "0-1" : "½-½";
 }
 
+// The handle of a game as the players list spells it: Lichess ignores case, the site's data may not
+// (a game restored or typed by hand as "anna" for the player "Anna")
+export function canonicalHandle(players: Player[]): (handle: string) => string {
+  const byKey = new Map(players.map((p) => [p.handle.toLowerCase(), p.handle]));
+  return (handle) => byKey.get(handle.toLowerCase()) ?? handle;
+}
+
 const emptyStats = () => ({ played: 0, won: 0, drawn: 0, lost: 0, points: 0, sb: 0 });
 
 // Pure function: standings, tiebreaks and crosstable from the games and their Lichess states.
@@ -53,9 +60,11 @@ export function computeStandings(
 
   const finished: Array<{ white: string; black: string; result: "1-0" | "0-1" | "½-½" }> = [];
 
+  const canon = canonicalHandle(players);
   history.forEach((g) => {
     const s = stateOf(g, gameStates);
-    const { white, black } = g;
+    const white = canon(g.white);
+    const black = canon(g.black);
 
     if (!stats[white]) stats[white] = emptyStats();
     if (!stats[black]) stats[black] = emptyStats();

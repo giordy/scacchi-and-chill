@@ -1,5 +1,5 @@
 import { HistoryGame, LichessExportGame, Player } from '../types';
-import { computeStandings } from './standings';
+import { canonicalHandle, computeStandings } from './standings';
 import { gameProgress } from './progress';
 import { isVoid, stateOf } from './games';
 import { scudettoContenders } from './fairPlay';
@@ -38,13 +38,16 @@ export function titleRace(
   const left = new Map<string, number>();
   const between = new Map<string, number>(); // games left between two players, "a|b" both ways
   const openRounds = new Set<string>();
+  const canon = canonicalHandle(players);
   games.forEach((g) => {
+    const white = canon(g.white);
+    const black = canon(g.black);
     const s = stateOf(g, gameStates);
     // Not finished, or aborted (to be replayed): still to play
     if (gameProgress(s) === 'finished' && !isVoid(s)) return;
     openRounds.add(g.round);
-    [g.white, g.black].forEach((h) => left.set(h, (left.get(h) ?? 0) + 1));
-    [`${g.white}|${g.black}`, `${g.black}|${g.white}`].forEach((k) => between.set(k, (between.get(k) ?? 0) + 1));
+    [white, black].forEach((h) => left.set(h, (left.get(h) ?? 0) + 1));
+    [`${white}|${black}`, `${black}|${white}`].forEach((k) => between.set(k, (between.get(k) ?? 0) + 1));
   });
   if (openRounds.size === 0 || standings.length < 2) return null; // season not started or over
   const leader = standings[0];

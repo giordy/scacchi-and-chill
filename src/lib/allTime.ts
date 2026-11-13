@@ -6,6 +6,7 @@ import { archivedGames, seasonId } from './seasons';
 import { RankKey, seasonStarted, sharedRanks } from './standings';
 import { fullPodium } from './honours';
 import { upsetFrom } from './upset';
+import { decidedAtTable } from './games';
 import { CURRENT, EloReport, gameKey } from './tournamentElo';
 import { gamesByWhoPlayed, OwnRow, ownRows, replacedIn } from './departures';
 import { pillsburyWins } from './pillsbury';
@@ -227,7 +228,7 @@ const MIN_UNBEATEN_STREAK = 4;
 
 const moves = (plies: number) => Math.ceil(plies / 2);
 const gameUrl = (g: ArchivedGame) => (g.id ? `https://lichess.org/${g.id}` : undefined);
-const onBoard = (g: ArchivedGame) => g.status !== 'forfeit' && (g.plies ?? 0) > 0;
+const onBoard = (g: ArchivedGame) => !decidedAtTable(g.status) && (g.plies ?? 0) > 0;
 const seasonSpan = (from: string, to: string) => (from === to ? from : `${from} → ${to}`);
 
 // The all-time records from the archived games: longest winning and unbeaten runs, longest game,
@@ -316,7 +317,7 @@ export function allTimeRecords(list: SeasonGames[], nameOf: (handle: string) => 
   let upset: { x: (typeof all)[number]; gap: number; winner: string; loser: string } | null = null;
   all.forEach((x) => {
     const { g } = x;
-    if (g.status === 'forfeit') return;
+    if (decidedAtTable(g.status)) return;
     const u = upsetFrom(g.result, elo?.before.get(gameKey(g, x.key)));
     if (u?.kind === 'win' && (!upset || u.gap > upset.gap)) {
       const whiteWon = g.result === '1-0';

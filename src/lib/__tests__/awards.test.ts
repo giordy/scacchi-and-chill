@@ -20,6 +20,24 @@ const st = (id: string, status: string, plies: number, hours: number, winner?: '
   lastMoveAt: 1000 + hours * H,
 });
 
+describe('a game closed for cheating', () => {
+  it('gives no Fulmine nor Maratoneta: the win was decided by Lichess, not on the board', () => {
+    const history = [g('anna', 'bruno', 'aaaaaaaa'), g('bruno', 'carla', 'bbbbbbbb'), g('carla', 'anna', 'cccccccc')];
+    const gs = {
+      aaaaaaaa: st('aaaaaaaa', 'cheat', 4, 2, 'white'), // closed after 2 moves: Anna "wins"
+      bbbbbbbb: st('bbbbbbbb', 'mate', 40, 20, 'black'), // Carla in 20
+      cccccccc: st('cccccccc', 'resign', 160, 90, 'white'), // closed after 80 moves: Carla's
+    };
+    const ids = (cheat: string) => {
+      const awards = computeSeasonAwards(players, history, { ...gs, cccccccc: { ...gs.cccccccc, status: cheat } });
+      return awards.filter((a) => a.id === 'fastest' || a.id === 'longest').map((a) => [a.id, a.winners.map((w) => w.handle), a.detail]);
+    };
+    expect(ids('resign')).toEqual([['fastest', ['carla'], 'in 20 mosse'], ['longest', ['carla'], 'in 80 mosse contro Anna']]);
+    // The longest game closed for cheating too: the Maratoneta is the mate in 20
+    expect(ids('cheat')).toEqual([['fastest', ['carla'], 'in 20 mosse'], ['longest', ['carla'], 'in 20 mosse contro Bruno']]);
+  });
+});
+
 describe('computeSeasonAwards', () => {
   const history = [
     g('anna', 'bruno', 'aaaaaaaa'),

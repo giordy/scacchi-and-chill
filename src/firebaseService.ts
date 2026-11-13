@@ -71,6 +71,7 @@ export interface TournamentDocData {
   seeds?: EloSeed[];
   players?: Player[];
   schedule?: ScheduledMatch[];
+  pledgeKeys?: string[]; // who may accept the rules this season (lib/pledges.ts pledgeKeys)
   updatedAt?: string;
 }
 
@@ -79,6 +80,7 @@ export async function saveTournamentFullToFirebase(data: {
   meta?: TournamentMeta;
   players?: Player[];
   schedule?: ScheduledMatch[];
+  pledgeKeys?: string[]; // with a new season or new players: see lib/pledges.ts pledgeKeys
 }): Promise<void> {
   const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID);
   const payload: Record<string, unknown> = {
@@ -115,6 +117,7 @@ export async function saveTournamentFullToFirebase(data: {
   if (data.schedule) {
     payload.schedule = data.schedule;
   }
+  if (data.pledgeKeys) payload.pledgeKeys = data.pledgeKeys;
   await setDoc(ref, payload, { merge: true });
 }
 

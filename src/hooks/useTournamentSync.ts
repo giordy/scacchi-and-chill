@@ -16,6 +16,9 @@ export function useTournamentSync(
   const [ready, setReady] = useState(false);
   // True after the first snapshot of the games collection
   const [gamesLoaded, setGamesLoaded] = useState(false);
+  // Who may accept the rules, as stored (lib/pledges.ts): undefined until the document is read, or
+  // when there is none; null when it has none yet
+  const [storedPledgeKeys, setStoredPledgeKeys] = useState<string[] | null | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,6 +51,7 @@ export function useTournamentSync(
       (doc) => {
         latestDoc = doc;
         setConfig((prev) => withTournamentDoc(prev, doc));
+        setStoredPledgeKeys(doc ? (Array.isArray(doc.pledgeKeys) ? doc.pledgeKeys : null) : undefined);
         docDone = true;
         checkReady();
       },
@@ -70,5 +74,5 @@ export function useTournamentSync(
     };
   }, []);
 
-  return { ready, gamesLoaded };
+  return { ready, gamesLoaded, storedPledgeKeys };
 }

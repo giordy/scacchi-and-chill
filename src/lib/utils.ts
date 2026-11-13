@@ -6,11 +6,16 @@ export const clampDays = (value: string | number, fallback: number) => {
   return Number.isFinite(n) ? Math.min(14, Math.max(1, n)) : fallback;
 };
 
-// Extracts 8-character game ID supporting lichess.org/ID, lichess.org/game/ID, lichess.org/challenge/ID, etc.
+// Pages of Lichess with an 8-letter name: never a game id (ids are random letters and digits)
+export const LICHESS_PAGES = new Set(['training', 'analysis', 'practice', 'streamer', 'features', 'insights', 'calendar', 'settings', 'tutorial', 'password']);
+
+// The 8-character game id of a Lichess link: lichess.org/ID, /ID + the 4 characters of a player's
+// link, /game/ID, /game/export/ID, /challenge/ID, /embed/ID... The id is a whole path segment
+// ("tournament/…" is no game), and not one of the pages above ("training/…", "analysis")
 export function extractGameId(url?: string): string | undefined {
   if (!url) return undefined;
-  const match = url.match(/(?:https?:\/\/)?(?:www\.)?lichess\.org\/(?:(?:game|challenge|embed\/game|embed)\/)?([a-zA-Z0-9]{8})/i);
-  return match?.[1];
+  const id = url.match(/(?:https?:\/\/)?(?:www\.)?lichess\.org\/(?:(?:game\/export|game|challenge|embed\/game|embed)\/)?([a-zA-Z0-9]{8})(?:[a-zA-Z0-9]{4})?(?=$|[/?#])/i)?.[1];
+  return id && !LICHESS_PAGES.has(id.toLowerCase()) ? id : undefined;
 }
 
 export function formatDeadline(ms: number) {

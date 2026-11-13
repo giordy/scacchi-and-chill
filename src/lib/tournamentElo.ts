@@ -87,10 +87,9 @@ export interface EloReport {
 
 export const CURRENT = 'current';
 
-// Games decided at the table: points in the standings, but they say nothing of anyone's level, so
-// they are out of the Elo del torneo and of the Trofeo Pillsbury: forfeits after a withdrawal, and
-// games Lichess closed for cheating ("cheat detected")
-export const decidedAtTable = (status: string | undefined) => status === 'forfeit' || status === 'cheat';
+// Games decided at the table (forfeits, games closed for cheating): see lib/games.ts
+export { decidedAtTable } from './games';
+import { decidedAtTable } from './games';
 
 // The seeds with a rating, by handle, as computeElo takes them (a seed without one leaves an esordiente)
 export const seedRatings = (seeds: EloSeed[] | undefined): Record<string, number> =>

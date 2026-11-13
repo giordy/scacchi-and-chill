@@ -11,6 +11,7 @@ import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { plural } from './games';
 import { pointsText } from './standings';
 import { outForFairPlay } from './fairPlay';
+import { decidedAtTable } from './games';
 import { MASTER_OPENING_ID, MASTER_OPENING_TITLE, masterSurname, openingFamily, playsFamily } from './masterOpening';
 // L'ammazzagiganti (most colpacci) was given until the Trofeo Pillsbury took its place: past
 // seasons keep it, with the Lichess ratings and the gap it used then.
@@ -222,7 +223,7 @@ export function awardsMessage(season: string, awards: SeasonAward[], scudetto?: 
 export function withAwardGames(awards: SeasonAward[], games: ArchivedGame[] | undefined): SeasonAward[] {
   if (!games || games.length === 0) return awards;
   const winnerOf = (g: ArchivedGame) => (g.result === '1-0' ? g.white : g.result === '0-1' ? g.black : undefined);
-  const decisive = games.filter((g) => winnerOf(g) && g.status !== 'forfeit' && (g.plies ?? 0) > 0);
+  const decisive = games.filter((g) => winnerOf(g) && !decidedAtTable(g.status) && (g.plies ?? 0) > 0);
   const moves = (g: ArchivedGame) => Math.ceil((g.plies ?? 0) / 2);
   return awards.map((a) => {
     if (a.games) return a;

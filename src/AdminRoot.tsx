@@ -13,7 +13,7 @@ export default function AdminRoot() {
   const [config, setConfig] = useState<AppConfig>(defaultConfig);
   // Mirror of the games on Firestore (see useTournamentSync): never kept in this browser
   const [history, setHistory] = useState<HistoryGame[]>([]);
-  const { gamesLoaded } = useTournamentSync(setConfig, setHistory);
+  const { gamesLoaded, storedPledgeKeys } = useTournamentSync(setConfig, setHistory);
   const seasons = useSeasons();
   const nameOf = useMemo(
     () => rosterNameOf(fullRoster({ roster: config.tournament?.roster, players: config.players, seasons, winners: config.tournament?.winners })),
@@ -21,7 +21,7 @@ export default function AdminRoot() {
   );
   return (
     <NamesContext.Provider value={nameOf}>
-      <AdminApp config={config} setConfig={setConfig} history={history} setHistory={setHistory} gamesLoaded={gamesLoaded} seasons={seasons} />
+      <AdminApp config={config} setConfig={setConfig} history={history} setHistory={setHistory} gamesLoaded={gamesLoaded} seasons={seasons} storedPledgeKeys={storedPledgeKeys} />
     </NamesContext.Provider>
   );
 }

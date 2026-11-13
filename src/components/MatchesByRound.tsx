@@ -15,7 +15,6 @@ import { stateOf } from '../lib/games';
 import { playerHref } from '../lib/routes';
 import { PresenceInfo, seenAtOf } from '../lib/presence';
 import { ColorDot } from './PresenceDot';
-import { isLiveGame } from '../lib/live';
 import { OpeningFamily, playsFamily } from '../lib/masterOpening';
 
 export interface MasterTag {
@@ -32,11 +31,16 @@ interface MatchesByRoundProps {
   presence?: PresenceInfo; // when each player was last on Lichess, for the ongoing games
   elo?: EloReport; // Elo del torneo, for the colpacci
   masterTag?: MasterTag; // the master's opening, tagged on the games that play it
+  moved?: Set<string>; // Lichess ids of the games with moves the visitor has not seen (lib/seenMoves.ts)
 }
 
 // Public "Partite": the current round first, then the unfinished games of earlier rounds,
 // the upcoming rounds and finally the played rounds, newest first; both collapsed
-export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence, elo, masterTag }: MatchesByRoundProps) {
+export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence, elo, masterTag, moved }: MatchesByRoundProps) {
+  const hasMoved = (g: HistoryGame) => {
+    const id = extractGameId(g.url);
+    return !!id && !!moved?.has(id);
+  };
   const stateOfGame = (g: HistoryGame) => stateOf(g, gameStates);
   const progressOf = (g: HistoryGame) => gameProgress(stateOfGame(g));
   const legOf = (round: string) =>
@@ -47,12 +51,16 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
     const finished = progress.filter((p) => p === "finished").length;
     const ongoing = progress.filter((p) => p === "ongoing").length;
     const pending = progress.length - finished - ongoing;
+    // A closed round still says which of its games moved: it may hide the end of one
+    const news = roundGames.filter(hasMoved).length;
+    const newsText = news === 0 ? "" : news === 1 ? "1 con mosse nuove" : `${news} con mosse nuove`;
     return finished === progress.length
-      ? "Turno concluso"
+      ? ["Turno concluso", newsText].filter(Boolean).join(" · ")
       : [
           finished > 0 ? `${finished} ${finished === 1 ? "conclusa" : "concluse"}` : "",
           ongoing > 0 ? `${ongoing} in corso` : "",
           pending > 0 ? `${pending} da giocare` : "",
+          newsText,
         ]
           .filter(Boolean)
           .join(", ");
@@ -71,6 +79,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
           presence={presence}
           elo={elo}
           masterTag={masterTag}
+          moved={hasMoved(g)}
         />
       ))}
     </div>
@@ -106,16 +115,29 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
   );
 
   const layout = layoutMatches(games, progressOf);
+  const movedCount = games.filter(hasMoved).length;
+  const movedNote = movedCount > 0 && (
+    <p className="note new-moves-note" role="status">
+      <span className="switch-dot" aria-hidden="true" />
+      {movedCount === 1 ? "Una partita ha mosse nuove dall'ultima visita: è segnata qui sotto." : `${movedCount} partite hanno mosse nuove dall'ultima visita: sono segnate qui sotto.`}
+    </p>
+  );
   const roundCount = layout.played.length + layout.upcoming.length + (layout.current ? 1 : 0);
 
   // A single round (filter) or a season not started yet: nothing to reorder
   if (roundCount <= 1 || !layout.current) {
     const blocks = [...(layout.current ? [layout.current] : []), ...layout.upcoming];
-    return <div className="rounds-list">{blocks.map((b) => openRound(b))}</div>;
+    return (
+      <div className="rounds-list">
+        {movedNote}
+        {blocks.map((b) => openRound(b))}
+      </div>
+    );
   }
 
   return (
     <div className="rounds-list">
+      {movedNote}
       {openRound(layout.current, " is-current", layout.concluded ? "Ultimo turno" : "Turno attuale")}
 
       {layout.late.length > 0 && (
@@ -173,6 +195,7 @@ function MatchCard({
   presence,
   elo,
   masterTag,
+  moved = false,
 }: {
   game: HistoryGame;
   state?: LichessExportGame;
@@ -182,14 +205,13 @@ function MatchCard({
   presence?: PresenceInfo;
   elo?: EloReport;
   masterTag?: MasterTag;
+  moved?: boolean; // moves the visitor has not seen yet
 }) {
   // Scheduled game not created on Lichess yet
   let badge = game.url
     ? <span className="status-badge pending">Da giocare</span>
     : <span className="status-badge pending">In programma</span>;
-  // A live game: both players on Lichess and a move in the last minutes (see lib/live.ts)
-  if (s?.status === "started" && isLiveGame(game, s, presence, Date.now())) badge = <span className="status-badge live">Live</span>;
-  else if (s?.status === "started") badge = <span className="status-badge ongoing">In corso</span>;
+  if (s?.status === "started") badge = <span className="status-badge ongoing">In corso</span>;
   // Neutral result: here 0-1 is a win for Black, not a "loss"
   else if (s?.winner === "white") badge = <span className="status-badge result">1 – 0</span>;
   else if (s?.winner === "black") badge = <span className="status-badge result">0 – 1</span>;
@@ -218,7 +240,7 @@ function MatchCard({
   ) : null;
 
   return (
-    <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}${upset ? " is-upset" : ""}`}>
+    <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}${upset ? " is-upset" : ""}${moved ? " has-new-moves" : ""}`}>
 
       <div className="match-card-body">
         {tile &&
@@ -259,6 +281,13 @@ function MatchCard({
       </div>
       <div className="match-footer">
         <div className="match-footer-info">
+          {moved && (
+            // The same brass dot as on the tab: these are the games it was lit for
+            <span className="new-moves-tag">
+              <span className="switch-dot" aria-hidden="true" />
+              {progress === "finished" ? "Appena conclusa" : "Mosse nuove"}
+            </span>
+          )}
           {(showRound || opening) && (
             <span className="opening-label">
               {showRound && <span className="match-round">Turno {game.round}</span>}

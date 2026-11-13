@@ -1,6 +1,7 @@
 import { HistoryGame, LichessExportGame } from '../types';
 import { extractGameId } from './utils';
 import { byRound, stateOf } from './games';
+import { playersOnBoard } from './tournamentElo';
 
 export interface CheatCase {
   id: string; // Lichess game id
@@ -14,7 +15,9 @@ export interface CheatCase {
 }
 
 // Games closed by Lichess with "cheat detected", in round order. Lichess gives the win to the
-// other player, so the player at fault is the loser.
+// other player, so the player at fault is the loser: who played the game on Lichess, by their
+// account. After a replacement the calendar gives the substitute the games of who left (and the
+// other way round): neither carries the other's fault.
 export function cheatCases(history: HistoryGame[], gameStates: Record<string, LichessExportGame>): CheatCase[] {
   const seen = new Map<string, number>();
   const cases: CheatCase[] = [];
@@ -22,10 +25,14 @@ export function cheatCases(history: HistoryGame[], gameStates: Record<string, Li
     const id = extractGameId(g.url);
     const s = stateOf(g, gameStates);
     if (!id || s?.status !== 'cheat' || !s.winner) return;
-    const handle = s.winner === 'white' ? g.black : g.white;
-    const count = (seen.get(handle) ?? 0) + 1;
-    seen.set(handle, count);
-    cases.push({ id, url: g.url, round: g.round, white: g.white, black: g.black, handle, opponent: handle === g.white ? g.black : g.white, count });
+    // The calendar's spelling when the account is one of the two, the Lichess account otherwise
+    const board = playersOnBoard(g, s, [g.white, g.black]);
+    const handle = s.winner === 'white' ? board.black : board.white;
+    const opponent = s.winner === 'white' ? board.white : board.black;
+    const key = handle.toLowerCase();
+    const count = (seen.get(key) ?? 0) + 1;
+    seen.set(key, count);
+    cases.push({ id, url: g.url, round: g.round, white: board.white, black: board.black, handle, opponent, count });
   });
   return cases;
 }
