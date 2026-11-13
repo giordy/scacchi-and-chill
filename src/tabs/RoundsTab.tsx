@@ -6,6 +6,9 @@ import { errorMessage, extractGameId } from '../lib/utils';
 import { saveGamesBatchToFirebase } from '../firebaseService';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { RoundDetail } from './rounds/RoundDetail';
+import { PledgesPanel } from './rounds/PledgesPanel';
+import { usePledges } from '../hooks/usePledges';
+import { pledgeStatus, rulesVersion } from '../lib/pledges';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
 
@@ -47,6 +50,12 @@ export function RoundsTab({
   seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo in the bulletin
 }) {
   const schedule = config.schedule ?? [];
+  // Who accepted the rules of the season (lib/pledges.ts)
+  const { pledges, loaded: pledgesLoaded, reload: reloadPledges } = usePledges();
+  const season = config.tournament?.season ?? '';
+  const pledgeState = pledgeStatus(pledges, season, config.players, rulesVersion(config.tournament));
+  // Only once read: before, nobody would look missing
+  const missingPledges = pledgesLoaded ? pledgeState.missing.map((p) => p.name) : [];
 
   // Games created on Lichess whose saving on Firestore failed: kept on this device until saved,
   // so their links are not lost.
@@ -124,6 +133,7 @@ export function RoundsTab({
           triggerToast={triggerToast}
           onMissingToken={onMissingToken}
           seasons={seasons}
+          missingPledges={missingPledges}
         />
       </>
     );
@@ -132,6 +142,9 @@ export function RoundsTab({
   return (
     <div className="settings-stack">
       {unsavedNotice}
+      {pledgesLoaded && season && (
+        <PledgesPanel season={season} status={pledgeState} players={config.players} onReload={reloadPledges} flash={flash} />
+      )}
       <section className="panel">
         <h2 className="panel-title">
           Turni <span className="muted-normal">· {rounds.length}</span>

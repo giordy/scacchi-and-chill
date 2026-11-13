@@ -8,6 +8,7 @@ import { LoadingScreen } from '../components/LoadingScreen';
 import { PublicTournamentView } from '../PublicTournamentView';
 import { PresenceInfo } from '../lib/presence';
 import { NameOf } from '../lib/roster';
+import { Pledge } from '../lib/pledges';
 
 // The player page is a chunk of its own: downloaded when a player is opened
 const PlayerPage = lazy(() => import('./PlayerPage').then((m) => ({ default: m.PlayerPage })));
@@ -20,6 +21,9 @@ interface PublicPageProps {
   onRetry?: () => void;
   // No network at the first read: the page shows the tournament as this browser last read it, then
   staleAt?: number;
+  // Who accepted the rules (lib/pledges.ts), and a new acceptance written by this page
+  pledges?: Pledge[];
+  onPledged?: (p: Pledge) => void;
   config: AppConfig;
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
@@ -31,7 +35,7 @@ interface PublicPageProps {
 }
 
 // Public tournament page, with a discreet link to the organizer area
-export function PublicPage({ seasons, ready, failed, staleAt, onRetry, config, history, gameStates, liveUpdatedAt, nameOf, presence }: PublicPageProps) {
+export function PublicPage({ seasons, ready, failed, staleAt, pledges, onPledged, onRetry, config, history, gameStates, liveUpdatedAt, nameOf, presence }: PublicPageProps) {
   const hash = useHash();
   // Nothing read yet: never an empty tournament in its place
   if (!ready && failed) {
@@ -74,6 +78,8 @@ export function PublicPage({ seasons, ready, failed, staleAt, onRetry, config, h
         seasons={seasons}
         presence={presence}
         movesRead={!!liveUpdatedAt}
+        pledges={pledges}
+        onPledged={onPledged}
       />
 
       <footer className="public-footer">

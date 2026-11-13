@@ -11,12 +11,14 @@ Sito di un torneo di scacchi per corrispondenza tra amici: sfide su Lichess, dat
 - **La stagione in breve**: a fine stagione, nella pagina giocatore, il suo riepilogo: posto e punti, premi, serie, colpacci, l'avversario preferito e quello più duro, la vittoria più rapida, la partita più lunga, l'apertura più giocata e l'Elo del torneo. Resta visibile, per l'ultima stagione archiviata, finché il giocatore non chiude una partita della nuova.
 - **Risultati live**: le partite non concluse si leggono da Lichess all'apertura e ogni 5 minuti a pagina visibile (al massimo due chiamate: partite e profili).
 - **Leggera**: la pagina pubblica legge Firestore con semplici richieste HTTP (`src/lib/firestoreRest.ts`), senza l'SDK Firebase, e ogni 5 minuti a pagina visibile rilegge torneo e partite (le stagioni archiviate solo all'apertura e quando cambia la stagione). Se la lettura non riesce lo dice, senza mostrare un torneo vuoto, e riprova da sé dopo pochi secondi. L'SDK si scarica solo con l'area organizzatore.
+- **Accettazione del regolamento**: in fondo alla pagina del regolamento ognuno sceglie il proprio nome e accetta («gioco con le mie forze»). Il sito registra chi, quando e quale testo (`src/lib/pledges.ts`, `tournaments/<id>/pledges`), senza login: le regole permettono solo di accettare per la stagione in corso, una volta. Ogni accettazione va in cronaca, e una notizia quando hanno accettato tutti; nel tab Stagione «Accettato da N su M».
 - Su telefono si cambia sezione con uno swipe.
 - **Senza rete**: i file del sito restano nel browser (`public/sw.js`), così la pagina e l'app installata si aprono lo stesso; al posto dei dati mostra l'ultimo torneo letto da quel browser, dicendo di quando è (`src/lib/publicCache.ts`), e riprova da sé.
 - I caratteri (Alegreya e Alegreya Sans) sono serviti dal sito, senza richieste a Google Fonts (`src/fonts.css`).
 
 ## Area organizzatore (`#admin`)
 Login Google; organizzatore è chi ha un documento in `admins/<email>`. Ogni azione distruttiva chiede conferma. All'apertura sincronizza i risultati da Lichess su Firestore.
+- **Regolamento** (in cima ai Turni): chi ha accettato e chi manca, il messaggio con il link per il gruppo, l'annullamento di un'accettazione; creando le sfide, se qualcuno non ha accettato il sito chiede conferma (non blocca).
 - **Turni**: crea le sfide su Lichess, ricrea o sostituisce un link, prepara messaggio e bollettino per WhatsApp.
 - **WhatsApp**: prompt per il racconto della stagione, premi. I testi dei messaggi e le frasi del bollettino stanno in `config.json`: si cambiano lì, con un nuovo deploy.
 - **Giocatori**: registro (il nome vale anche per le stagioni passate), chi gioca la stagione, ritiri (regola della metà o sostituto).
@@ -57,6 +59,7 @@ L'account scrive solo i campi `lichess` e `syncedAt` delle partite che esistono 
 | `tournaments/<id>/games/*` | pubblica | partite e stato Lichess |
 | `tournaments/<id>/seasons/*` | pubblica | stagioni archiviate |
 | `tournaments/<id>/media/*` | pubblica | foto del maestro (sotto 900 KB) |
+| `tournaments/<id>/pledges/*` | pubblica | chi ha accettato il regolamento (scrive il sito pubblico, una volta per stagione) |
 | `tournaments/<id>/private/organizer` | organizzatore | aneddoti, token Lichess, impostazioni |
 | `admins/<email>` | il proprio | un documento vuoto per organizzatore |
 

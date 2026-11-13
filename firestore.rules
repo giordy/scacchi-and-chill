@@ -53,6 +53,23 @@ service cloud.firestore {
                      && request.resource.data.dataUrl.matches('data:image/(jpeg|png|webp);base64,.*');
       }
 
+      // Who accepted the rules of the season (src/lib/pledges.ts): public, so the page and the cronaca
+      // show it. Written by the public page without signing in: one document per season and player,
+      // only for the current season, only once (no update), with the server's time. The organizer can
+      // cancel one, and the player accepts again.
+      match /pledges/{pledgeId} {
+        allow read: if true;
+        allow delete: if isAdmin();
+        allow create: if request.resource.data.keys().hasOnly(['handle', 'season', 'rules', 'at'])
+                     && request.resource.data.handle is string
+                     && request.resource.data.handle.matches('[a-z0-9_-]{2,30}')
+                     && pledgeId.matches('[a-z0-9-]+--' + request.resource.data.handle)
+                     && request.resource.data.season == get(/databases/$(database)/documents/tournaments/$(tournamentId)).data.season
+                     && request.resource.data.rules is string
+                     && request.resource.data.rules.matches('[0-9a-f]{8}')
+                     && request.resource.data.at == request.time;
+      }
+
       match /games/{gameId} {
         // Games are publicly readable so standings and matches can be displayed to all participants
         allow read: if true;

@@ -35,6 +35,7 @@ export function RoundDetail({
   triggerToast,
   onMissingToken,
   seasons = [],
+  missingPledges = [],
 }: {
   round: string;
   summary?: RoundSummary;
@@ -58,6 +59,7 @@ export function RoundDetail({
   triggerToast: (msg: string) => void;
   onMissingToken: () => void;
   seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo in the bulletin
+  missingPledges?: string[]; // who has not accepted the rules yet (lib/pledges.ts): a confirmation, not a block
 }) {
   const matches = summary?.matches ?? [];
   const created = summary?.created ?? 0;
@@ -139,6 +141,13 @@ export function RoundDetail({
       onMissingToken();
       return flash("err", "Aggiungi prima il token API Lichess in Impostazioni → Token Lichess.");
     }
+    if (
+      missingPledges.length > 0 &&
+      !window.confirm(
+        `Non hanno ancora accettato il regolamento: ${missingPledges.join(", ")}.\n\nCreare lo stesso le sfide del Turno ${round}?`
+      )
+    )
+      return;
     const games: HistoryGame[] = [];
     const errors: string[] = [];
     for (const [i, m] of todo.entries()) {

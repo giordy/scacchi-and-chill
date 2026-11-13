@@ -3,7 +3,8 @@ import { AppConfig, HistoryGame, SeasonArchive } from '../types';
 import { errorMessage } from '../lib/utils';
 import { defaultConfig, validateAndNormalizeConfig, withTournamentDoc } from '../lib/config';
 import { sortSeasons } from '../lib/seasons';
-import { readGames, readSeasons, readTournamentDoc } from '../lib/firestoreRest';
+import { readGames, readPledges, readSeasons, readTournamentDoc } from '../lib/firestoreRest';
+import { Pledge } from '../lib/pledges';
 import { useVisiblePolling } from './useVisiblePolling';
 import { loadSnapshot, saveSnapshot } from '../lib/publicCache';
 
@@ -27,6 +28,10 @@ export function usePublicData(enabled: boolean) {
   const [seasons, setSeasons] = useState<SeasonArchive[]>([]);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  // Who accepted the rules (lib/pledges.ts): the page works without them
+  const [pledges, setPledges] = useState<Pledge[]>([]);
+  // Read at least once: until then (or with firestore.rules not yet published) the page says nothing about them
+  const [pledgesReady, setPledgesReady] = useState(false);
   const [staleAt, setStaleAt] = useState<number | undefined>(undefined);
   const isReady = useRef(false);
   const seasonsNow = useRef<SeasonArchive[]>([]);
@@ -62,7 +67,7 @@ export function usePublicData(enabled: boolean) {
   useVisiblePolling(
     async () => {
       const cfg = base.current ?? Promise.resolve(defaultConfig);
-      const [docResult, gamesResult] = await Promise.allSettled([readTournamentDoc(), readGames()]);
+      const [docResult, gamesResult, pledgesResult] = await Promise.allSettled([readTournamentDoc(), readGames(), readPledges()]);
       const start = await cfg;
       if (docResult.status === 'rejected') console.warn('Lettura del torneo non riuscita:', docResult.reason);
       if (gamesResult.status === 'rejected') console.warn('Lettura delle partite non riuscita:', gamesResult.reason);
@@ -101,6 +106,11 @@ export function usePublicData(enabled: boolean) {
       }
       setConfig(next);
       setHistory(gamesResult.value);
+      if (pledgesResult.status === 'fulfilled') {
+        setPledges(pledgesResult.value);
+        setPledgesReady(true);
+      }
+      else console.warn('Lettura delle accettazioni del regolamento non riuscita:', pledgesResult.reason);
       setFailed(false);
       setStaleAt(undefined);
       setReady(true);
@@ -113,5 +123,8 @@ export function usePublicData(enabled: boolean) {
     enabled
   );
 
-  return { config, history, seasons, ready, failed, staleAt, retry, gamesLoaded: ready };
+  // An acceptance just written by this page, shown at once (the next read brings it from Firestore)
+  const addPledge = useCallback((p: Pledge) => setPledges((list) => [...list, p]), []);
+
+  return { config, history, seasons, pledges: pledgesReady ? pledges : undefined, addPledge, ready, failed, staleAt, retry, gamesLoaded: ready };
 }

@@ -5,6 +5,7 @@
 import { HistoryGame, SeasonArchive } from '../types';
 import type { TournamentDocData } from '../firebaseService';
 import firebaseConfig from '../../firebase-applet-config.json';
+import { Pledge, pledgeDocId, pledgeFromDoc } from './pledges';
 
 export const TOURNAMENT_DOC_ID = 'scacchi-and-chill-official';
 
@@ -81,4 +82,39 @@ export async function readSeasons(): Promise<SeasonArchive[]> {
 export async function readMediaImage(id: string): Promise<string | null> {
   const doc = await getDocument(`/media/${encodeURIComponent(id)}`);
   return typeof doc?.dataUrl === 'string' ? doc.dataUrl : null;
+}
+
+// Who accepted the rules (lib/pledges.ts), every season
+export async function readPledges(): Promise<Pledge[]> {
+  const rows = await listCollection('pledges');
+  return rows.map((r) => pledgeFromDoc(r.data)).filter((p): p is Pledge => p !== null);
+}
+
+const DATABASE = `projects/${firebaseConfig.projectId}/databases/${firebaseConfig.firestoreDatabaseId || '(default)'}`;
+
+// The write that accepts the rules, as firestore.rules expects it: a new document (it fails if the
+// player already accepted), with the server's time. Separate, so the tests can send it to the emulator.
+export function pledgeCommit(database: string, season: string, handle: string, rules: string) {
+  const name = `${database}/documents/tournaments/${TOURNAMENT_DOC_ID}/pledges/${pledgeDocId(season, handle)}`;
+  return {
+    writes: [
+      {
+        update: { name, fields: { handle: { stringValue: handle.toLowerCase() }, season: { stringValue: season }, rules: { stringValue: rules } } },
+        updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
+        currentDocument: { exists: false },
+      },
+    ],
+  };
+}
+
+// The public page accepts the rules for a player, without signing in (see firestore.rules)
+export async function writePledge(season: string, handle: string, rules: string): Promise<void> {
+  const res = await fetch(`https://firestore.googleapis.com/v1/${DATABASE}/documents:commit?${KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(pledgeCommit(DATABASE, season, handle, rules)),
+    signal: AbortSignal.timeout(20000),
+  });
+  if (res.status === 409 || res.status === 400) throw new Error('Il regolamento risulta già accettato con questo nome.');
+  if (!res.ok) throw new Error(res.status === 403 ? 'Accettazione non registrata: ricarica la pagina e riprova, e se non va avvisa l’organizzatore.' : `Firestore: HTTP ${res.status}`);
 }

@@ -6,6 +6,7 @@ import {
   setDoc,
   getDocs,
   getDoc,
+  deleteDoc,
   onSnapshot,
   writeBatch,
 } from "firebase/firestore";
@@ -254,6 +255,11 @@ export async function loadAllMediaImages(): Promise<Record<string, string>> {
 // Predictable ID of a game document: r<round>_<white>_<black>
 function gameDocIdOf(game: Pick<HistoryGame, "round" | "white" | "black">): string {
   return `r${game.round}_${game.white}_${game.black}`;
+}
+
+// Cancels an acceptance of the rules (lib/pledges.ts): the player accepts again from the rules page
+export async function deletePledge(docId: string): Promise<void> {
+  await deleteDoc(doc(db, "tournaments", TOURNAMENT_DOC_ID, "pledges", docId));
 }
 
 // Deletes the given games (e.g. a round created by mistake)

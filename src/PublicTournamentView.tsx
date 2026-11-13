@@ -47,6 +47,8 @@ import { currentSeasonActivity, FRAME_KINDS, HIGHLIGHT_KINDS, newsSince } from "
 import { ActivityText } from "./components/Timeline";
 import { useLastVisit } from "./hooks/useLastVisit";
 import { outForFairPlay, scudettoContenders } from "./lib/fairPlay";
+import { Pledge, pledgeStatus, rulesVersion } from "./lib/pledges";
+import { PledgeBox } from "./components/PledgeBox";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -57,6 +59,8 @@ interface PublicTournamentViewProps {
   seasons?: SeasonArchive[];
   presence?: PresenceInfo; // when each player was last on Lichess
   movesRead?: boolean; // the games in progress have been read from Lichess at least once
+  pledges?: Pledge[]; // who accepted the rules (lib/pledges.ts); undefined until read
+  onPledged?: (p: Pledge) => void;
 }
 
 const TABS: { key: PublicTab; label: string }[] = [
@@ -98,6 +102,8 @@ export function PublicTournamentView({
   seasons = [],
   presence,
   movesRead = false,
+  pledges,
+  onPledged,
 }: PublicTournamentViewProps) {
   // The open section lives in the URL hash, so a refresh or a shared link keeps it
   const view = parsePublicView(useHash());
@@ -186,6 +192,9 @@ export function PublicTournamentView({
     return () => showHoliday(holiday);
   }, [shownHoliday]);
   // Cronaca: what happened this season, and what is new since the visitor last opened it
+  // Who accepted the rules of this season (lib/pledges.ts)
+  const rulesVersionNow = rulesVersion(tournamentMeta);
+  const pledgeState = useMemo(() => pledgeStatus(pledges ?? [], tournamentMeta.season, players, rulesVersionNow), [pledges, tournamentMeta.season, players, rulesVersionNow]);
   const activity = useMemo(
     () =>
       currentSeasonActivity({
@@ -199,10 +208,11 @@ export function PublicTournamentView({
         schedule,
         withdrawals: tournamentMeta.withdrawals,
         fairPlayBan: tournamentMeta.fairPlayAwardsBan,
+        pledges: pledges ? pledgeState : undefined,
         archives: seasons,
         elo,
       }),
-    [tournamentMeta.season, tournamentMeta.masterName, tournamentMeta.masterOpening, tournamentMeta.masterAnecdotes, players, history, gameStates, schedule, tournamentMeta.withdrawals, tournamentMeta.fairPlayAwardsBan, seasons, elo]
+    [tournamentMeta.season, tournamentMeta.masterName, tournamentMeta.masterOpening, tournamentMeta.masterAnecdotes, players, history, gameStates, schedule, tournamentMeta.withdrawals, tournamentMeta.fairPlayAwardsBan, pledgeState, seasons, elo]
   );
   const { lastVisit, seen, markSeen } = useLastVisit();
   useEffect(() => {
@@ -736,6 +746,7 @@ export function PublicTournamentView({
 
           <p className="note season-rules-link">
             Come si gioca, fair play e ritiri: <a href={publicViewHref("rules")}>leggi il regolamento</a>.
+            {pledgeState.accepted.length > 0 && (pledgeState.all ? " Accettato da tutti." : ` Accettato da ${pledgeState.accepted.length} su ${players.length}.`)}
           </p>
         </section>
       )}
@@ -807,6 +818,10 @@ export function PublicTournamentView({
               </li>
               </ul>
             </details>
+
+            {pledges && players.length > 0 && (
+              <PledgeBox season={tournamentMeta.season} status={pledgeState} version={rulesVersionNow} onPledged={onPledged} />
+            )}
           </article>
         </section>
       )}

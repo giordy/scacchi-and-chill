@@ -26,6 +26,7 @@ import { computeSeasonProgress } from './progress';
 import { withScheduledGames } from './publicGames';
 import { summitGames, summitKey } from './summit';
 import { titleRace } from './titleRace';
+import type { PledgeStatus } from './pledges';
 import { outForFairPlay, scudettoContenders } from './fairPlay';
 import { anecdoteForRound } from './masterAnecdotes';
 import { publicViewHref } from './routes';
@@ -46,7 +47,9 @@ export type ActivityKind =
   | 'roundEnd' // the last game of a round is over
   | 'objective' // someone reaches their objective of the season (see lib/pillsbury.ts)
   | 'end' // the last game of the season is over
-  | 'pillsbury'; // who wins the Trofeo Pillsbury, with the end of the season
+  | 'pillsbury' // who wins the Trofeo Pillsbury, with the end of the season
+  | 'pledge' // someone accepts the rules of the season (lib/pledges.ts)
+  | 'pledges'; // everyone did
 
 export interface ActivityEvent {
   key: string; // stable, for React
@@ -239,6 +242,7 @@ export interface CurrentSeasonInput {
   schedule?: ScheduledMatch[];
   withdrawals?: Withdrawal[];
   fairPlayBan?: boolean; // TournamentMeta.fairPlayAwardsBan: who can win no trophy
+  pledges?: PledgeStatus; // who accepted the rules of the season
   elo?: EloReport;
   masterAnecdotes?: MasterAnecdote[];
   archives?: SeasonArchive[]; // the earlier seasons: who already won a game in the tournament
@@ -385,6 +389,7 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
     if (end) events.push({ key: `${CURRENT}:e`, kind: 'end', at: seasonEnd, emoji: '🏆', ...end });
   }
   if (elo) events.push(...objectiveEvents(input, elo, calendar, seasonEnd));
+  if (input.pledges) events.push(...pledgeEvents(input.pledges));
 
   // Rounds over: with their last game, and who leads then. The last one is the end of the season.
   const byRoundGames = new Map<string, HistoryGame[]>();
@@ -434,6 +439,30 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
     break;
   }
   return sortEvents(events);
+}
+
+// Who accepted the rules, each when they did, and once everyone has, a moment of its own: accepting
+// for somebody else would be seen by everyone
+function pledgeEvents(status: PledgeStatus): ActivityEvent[] {
+  const events: ActivityEvent[] = status.accepted.map((p) => ({
+    key: `${CURRENT}:pl:${p.handle}`,
+    kind: 'pledge',
+    at: p.at,
+    emoji: '📜',
+    parts: [{ handle: p.handle }, ' accetta il regolamento'],
+    link: { href: publicViewHref('rules'), label: 'Leggi' },
+  }));
+  const last = status.accepted[status.accepted.length - 1];
+  if (status.all && last) {
+    events.push({
+      key: `${CURRENT}:pla`,
+      kind: 'pledges',
+      at: last.at,
+      emoji: '🤝',
+      parts: ['Tutti hanno accettato il regolamento: si gioca con le proprie forze'],
+    });
+  }
+  return events;
 }
 
 // "Anna vince il Trofeo Pillsbury", "Anna e Bruno vincono il Trofeo Pillsbury"
@@ -614,6 +643,8 @@ const ORDER: Record<ActivityKind, number> = {
   roundEnd: 8,
   end: 9,
   pillsbury: 10,
+  pledge: 0,
+  pledges: 1,
 };
 export function sortEvents(events: ActivityEvent[]): ActivityEvent[] {
   return events
@@ -627,8 +658,8 @@ export const isNewSince = (e: ActivityEvent, lastVisit: number | undefined) => l
 
 // The frame of the season (rounds and anecdotes) and the moments worth telling: the three weights
 // of the cronaca. Only what is not frame counts as news.
-export const FRAME_KINDS = new Set<ActivityKind>(['season', 'round', 'roundEnd', 'anecdote']);
-export const HIGHLIGHT_KINDS = new Set<ActivityKind>(['leader', 'firstWin', 'streak', 'objective', 'champion', 'end', 'pillsbury']);
+export const FRAME_KINDS = new Set<ActivityKind>(['season', 'round', 'roundEnd', 'anecdote', 'pledge']);
+export const HIGHLIGHT_KINDS = new Set<ActivityKind>(['leader', 'firstWin', 'streak', 'objective', 'champion', 'end', 'pillsbury', 'pledges']);
 
 // The events since the last visit worth calling news, newest first
 export const newsSince = (events: ActivityEvent[], lastVisit: number | undefined) =>

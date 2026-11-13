@@ -3754,3 +3754,53 @@ button.link-button {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* Accepting the rules (lib/pledges.ts): at the bottom of the rules page */
+.pledge-box {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.pledge-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 8px;
+}
+.pledge-form .filter-select {
+  flex: 1 1 160px;
+}
+.pledge-oath {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-style: italic;
+}
+.pledge-done {
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: var(--ok);
+}
+.pledge-count {
+  margin-top: 8px;
+}
+.pledge-accept {
+  width: 100%;
+}
+
+/* Organizer area: who accepted the rules */
+.pledges-panel > summary {
+  cursor: pointer;
+}
+.pledges-list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.pledges-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}

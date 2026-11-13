@@ -2,9 +2,10 @@
 // starts the emulator (Java needed) and sets FIRESTORE_EMULATOR_HOST; `npm test` skips them.
 import fs from 'node:fs';
 import path from 'node:path';
-import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { assertFails, assertSucceeds, initializeTestEnvironment, RulesTestEnvironment } from '@firebase/rules-unit-testing';
-import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore';
+import { pledgeCommit } from '../src/lib/firestoreRest';
 
 const RULES = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'utf8');
 const ADMIN = 'organizer@example.com';
@@ -117,6 +118,52 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
       await assertFails(setDoc(doc(admin(), `${T}/media/m3`), { dataUrl: 'data:text/html;base64,AAAA' }));
       await assertFails(setDoc(doc(admin(), `${T}/media/m4`), { dataUrl: 'data:image/png;base64,' + 'A'.repeat(900_000) }));
       await assertSucceeds(deleteDoc(doc(admin(), `${T}/media/m1`)));
+    });
+  });
+  describe('accepting the rules (pledges)', () => {
+    const P = `${T}/pledges`;
+    const pledge = (handle = 'anna', season = 'Stagione 2') => ({ handle, season, rules: '0a1b2c3d', at: serverTimestamp() });
+
+    it('a visitor accepts for the current season, once, and everyone reads it', async () => {
+      await assertSucceeds(setDoc(doc(visitor(), `${P}/stagione-2--anna`), pledge()));
+      await assertSucceeds(getDocs(collection(visitor(), P)));
+      // Once: no rewriting, no deleting
+      await assertFails(setDoc(doc(visitor(), `${P}/stagione-2--anna`), pledge()));
+      await assertFails(deleteDoc(doc(visitor(), `${P}/stagione-2--anna`)));
+    });
+
+    it('refuses another season, a document of another player, other fields or a time of the client', async () => {
+      await assertFails(setDoc(doc(visitor(), `${P}/stagione-1--anna`), pledge('anna', 'Stagione 1')));
+      await assertFails(setDoc(doc(visitor(), `${P}/stagione-2--bruno`), pledge('anna')));
+      await assertFails(setDoc(doc(visitor(), `${P}/stagione-2--anna`), { ...pledge(), extra: true }));
+      await assertFails(setDoc(doc(visitor(), `${P}/stagione-2--anna`), { ...pledge(), at: new Date(2020, 0, 1) }));
+      await assertFails(setDoc(doc(visitor(), `${P}/stagione-2--anna`), { ...pledge(), rules: 'not a version' }));
+      await assertFails(setDoc(doc(visitor(), `${P}/stagione-2--Anna!`), pledge('Anna!')));
+    });
+
+    it('the organizer can cancel one, and the player accepts again', async () => {
+      await assertSucceeds(setDoc(doc(visitor(), `${P}/stagione-2--anna`), pledge()));
+      await assertFails(deleteDoc(doc(stranger(), `${P}/stagione-2--anna`)));
+      await assertSucceeds(deleteDoc(doc(admin(), `${P}/stagione-2--anna`)));
+      await assertSucceeds(setDoc(doc(visitor(), `${P}/stagione-2--anna`), pledge()));
+    });
+
+    it('takes the write of the public page, as it sends it (REST, no sign-in)', async () => {
+      const database = 'projects/demo-scacchi/databases/(default)';
+      const send = (body: unknown) =>
+        fetch(`http://${process.env.FIRESTORE_EMULATOR_HOST}/v1/${database}/documents:commit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      const first = await send(pledgeCommit(database, 'Stagione 2', 'Anna', '0a1b2c3d'));
+      expect(first.status).toBe(200);
+      const again = await send(pledgeCommit(database, 'Stagione 2', 'Anna', '0a1b2c3d'));
+      expect(again.ok).toBe(false);
+      const old = await send(pledgeCommit(database, 'Stagione 1', 'Bruno', '0a1b2c3d'));
+      expect(old.status).toBe(403);
+      const saved = await getDoc(doc(visitor(), `${P}/stagione-2--anna`));
+      expect(saved.data()).toMatchObject({ handle: 'anna', season: 'Stagione 2', rules: '0a1b2c3d' });
     });
   });
 });
