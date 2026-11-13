@@ -4,15 +4,15 @@ import { pledgeDocId, pledgeMessage, PledgeStatus } from '../../lib/pledges';
 import { deletePledge } from '../../firebaseService';
 import { errorMessage } from '../../lib/utils';
 
-type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
+type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
 const timeOf = (ms: number) =>
   new Date(ms).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
-// Organizer area, Turni: who accepted the rules of the season (lib/pledges.ts), the message with
-// the link for the group, and a way to cancel an acceptance (the player then accepts again).
-// Folded once everyone accepted.
-export function PledgesPanel({
+// Organizer area, Stagioni > Regolamento, under the rules: who accepted them this season
+// (lib/pledges.ts), the message with the link for the group, and a way to cancel an acceptance (the
+// player then accepts again).
+export function PledgesSection({
   season,
   status,
   players,
@@ -52,10 +52,10 @@ export function PledgesPanel({
   };
 
   return (
-    <details className="panel pledges-panel" open={!status.all}>
-      <summary className="panel-title">
-        📜 Regolamento <span className="muted-normal">· accettato da {status.accepted.length} su {players.length}</span>
-      </summary>
+    <div className="subcard mt-12">
+      <h4 className="subcard-title">
+        📜 Accettazione <span className="muted-normal">· {status.all ? 'accettato da tutti' : `accettato da ${status.accepted.length} su ${players.length}`}</span>
+      </h4>
       <p className="note note-flush">
         Manda nel gruppo il link al regolamento: ognuno lo legge e in fondo sceglie il suo nome e accetta. Chi accetta
         compare nella cronaca. Le sfide si possono creare anche se manca qualcuno: il sito chiede solo conferma.
@@ -96,6 +96,6 @@ export function PledgesPanel({
       <button type="button" className="link-muted mt-8" onClick={onReload}>
         Aggiorna
       </button>
-    </details>
+    </div>
   );
 }

@@ -13,6 +13,9 @@ import { SeasonInfoSection } from './settings/SeasonInfoSection';
 import { MasterAnecdotesSection } from './settings/MasterAnecdotesSection';
 import { MasterAISection } from './settings/MasterAISection';
 import { RulesSection } from './settings/RulesSection';
+import { PledgesSection } from './settings/PledgesSection';
+import { usePledges } from '../hooks/usePledges';
+import { pledgeStatus, rulesVersion } from '../lib/pledges';
 import { SeasonArchiveSection } from './settings/SeasonArchiveSection';
 import { HallOfFameSection } from './settings/HallOfFameSection';
 import { GeneratorSection } from './rounds/GeneratorSection';
@@ -52,6 +55,9 @@ export function SeasonsTab({
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
 }) {
   const meta = config.tournament;
+  // Who accepted the rules of the season (lib/pledges.ts)
+  const { pledges, loaded: pledgesLoaded, reload: reloadPledges } = usePledges();
+  const pledgeState = pledgeStatus(pledges, meta?.season ?? '', config.players, rulesVersion(meta));
   return (
     <div className="settings-stack">
       <CollapsibleSection title="Stagione corrente" defaultOpen>
@@ -66,7 +72,9 @@ export function SeasonsTab({
         <MasterAnecdotesSection meta={meta} flash={flash} onUpdateTournamentMeta={onUpdateTournamentMeta} />
       </CollapsibleSection>
 
-      <CollapsibleSection title="Regolamento">
+      <CollapsibleSection
+        title={pledgesLoaded && config.players.length > 0 ? `Regolamento · accettato da ${pledgeState.accepted.length} su ${config.players.length}` : 'Regolamento'}
+      >
         <RulesSection
           meta={meta}
           days={settings.days}
@@ -76,6 +84,9 @@ export function SeasonsTab({
         >
           <ChallengeSection settings={settings} setSettings={setSettings} />
         </RulesSection>
+        {pledgesLoaded && meta?.season && (
+          <PledgesSection season={meta.season} status={pledgeState} players={config.players} onReload={reloadPledges} flash={flash} />
+        )}
       </CollapsibleSection>
 
       <CollapsibleSection title="Elo di partenza">

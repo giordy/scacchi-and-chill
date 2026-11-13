@@ -3788,9 +3788,6 @@ button.link-button {
 }
 
 /* Organizer area: who accepted the rules */
-.pledges-panel > summary {
-  cursor: pointer;
-}
 .pledges-list {
   margin: 12px 0 0;
   padding: 0;
