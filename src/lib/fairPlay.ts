@@ -30,11 +30,12 @@ export function cheatCases(history: HistoryGame[], gameStates: Record<string, Li
   return cases;
 }
 
-// From the season after the one it was decided in, a game closed for cheating also costs the
-// Trofeo Pillsbury and the season's awards (the Scudetto stays with the standings). Said in the rules:
-// the sentence goes in when that season is closed (lib/seasonClose.ts).
+// From the season after the one it was decided in, a game closed for cheating also costs every
+// trophy of the season: the Scudetto, the Trofeo Pillsbury and the awards. The player stays in the
+// standings with their points; the trophies go to the first of the others. Said in the rules: the
+// sentence goes in when that season is closed (lib/seasonClose.ts).
 export const AWARDS_BAN_RULE =
-  "Per tutta la stagione è anche fuori dal Trofeo Pillsbury e dagli altri premi della stagione (lo Scudetto resta di chi vince la classifica).";
+  "Per tutta la stagione non può vincere lo Scudetto, il Trofeo Pillsbury né gli altri premi: resta in classifica con i suoi punti e gioca solo per la gloria.";
 const FIRST_PENALTY = "perde la partita e i punti del turno.";
 
 // The fair play rules with the sentence: after the penalty of a first time, or at the end
@@ -44,11 +45,16 @@ export function withAwardsBanRule(text: string): string {
   return text.trim() ? `${text.trimEnd()}\n• ${AWARDS_BAN_RULE}` : text;
 }
 
-// Who is out of the Trofeo Pillsbury and the awards, by lower-case handle: nobody until the rule applies
+// Who can win no trophy this season, by lower-case handle: nobody until the rule applies
 export function outForFairPlay(
   ban: boolean | undefined,
   history: HistoryGame[],
   gameStates: Record<string, LichessExportGame>
 ): Set<string> {
   return new Set(ban ? cheatCases(history, gameStates).map((c) => c.handle.toLowerCase()) : []);
+}
+
+// The rows of a table that can win the Scudetto, in its order: the champion is the first of them
+export function scudettoContenders<T extends { handle: string }>(rows: T[], out: Set<string>): T[] {
+  return out.size === 0 ? rows : rows.filter((r) => !out.has(r.handle.toLowerCase()));
 }

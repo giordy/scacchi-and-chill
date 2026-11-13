@@ -136,7 +136,7 @@ export interface TournamentMeta {
   howItWorks?: string;
   fairPlayText?: string;
   // From the season after the one it was decided in (set when that season is closed): who has a game
-  // closed by Lichess for cheating is out of the Trofeo Pillsbury and the awards (lib/fairPlay.ts)
+  // closed by Lichess for cheating can win no trophy: Scudetto, Trofeo Pillsbury, awards (lib/fairPlay.ts)
   fairPlayAwardsBan?: boolean;
   withdrawalText?: string; // rules for a player who leaves during the season
   withdrawals?: Withdrawal[];
@@ -280,6 +280,9 @@ export interface SeasonArchive {
   standings: SeasonArchiveStanding[];
   gamesPlayed: number;
   champion?: { handle: string; name: string; points: number };
+  // Who could win no trophy that season (fair play, lib/fairPlay.ts), lower-case handles: the champion
+  // and the podium are the first of the others
+  noTrophies?: string[];
   awards?: SeasonAward[];
   // Who left during the season, and who took their place (see lib/departures.ts)
   departures?: SeasonDeparture[];

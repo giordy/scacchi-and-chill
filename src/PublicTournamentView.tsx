@@ -46,6 +46,7 @@ import { Timeline } from "./components/Timeline";
 import { currentSeasonActivity, FRAME_KINDS, HIGHLIGHT_KINDS, newsSince } from "./lib/activity";
 import { ActivityText } from "./components/Timeline";
 import { useLastVisit } from "./hooks/useLastVisit";
+import { outForFairPlay, scudettoContenders } from "./lib/fairPlay";
 
 interface PublicTournamentViewProps {
   config: AppConfig;
@@ -130,6 +131,7 @@ export function PublicTournamentView({
   const elo = useMemo(() => tournamentElo(seasons, players.map((p) => p.handle), history, gameStates, tournamentMeta.seeds), [seasons, players, history, gameStates, tournamentMeta.seeds]);
   const season = useMemo(() => {
     const { standings, crosstable } = computeStandings(players, history, gameStates);
+    const noTrophies = outForFairPlay(tournamentMeta.fairPlayAwardsBan, history, gameStates);
     const progress = computeSeasonProgress(history, gameStates, schedule);
     const concluded = progress.total > 0 && progress.finished === progress.total;
     // Created games plus the scheduled ones still to be created on Lichess
@@ -143,12 +145,14 @@ export function PublicTournamentView({
       allGames,
       rounds: [...new Set(allGames.map((g) => g.round))].sort(byRound),
       summits: summitGames(players, allGames, gameStates),
-      race: titleRace(players, allGames, gameStates),
+      race: titleRace(players, allGames, gameStates, noTrophies),
       stats: seasonStats(players, history, gameStates),
+      // Who can win no trophy this season (fair play): in the table with a note, out of the Scudetto
+      noTrophies,
       // When the current season is being played: "da novembre 2026", both months once it is over
       currentPeriod: periodLabel(periodOfGames(history, gameStates), true),
     };
-  }, [players, history, gameStates, schedule, seasons, tournamentMeta.masterName, tournamentMeta.masterOpening]);
+  }, [players, history, gameStates, schedule, seasons, tournamentMeta.masterName, tournamentMeta.masterOpening, tournamentMeta.fairPlayAwardsBan]);
   const { standings, crosstable, progress, concluded, awards, allGames, rounds, summits, race, stats, currentPeriod } = season;
 
   // The season-end celebration takes the place of a calendar holiday while the season is over
@@ -273,7 +277,7 @@ export function PublicTournamentView({
 
   // Once the last game is over the hero tells who won; until then the round and who leads
   const roundLine = concluded
-    ? championText(standings, scudetto)
+    ? championText(scudettoContenders(standings, season.noTrophies), scudetto)
     : progress.currentRound
     ? `Turno ${progress.currentRound} in corso.`
     : "La stagione sta per cominciare.";
@@ -463,6 +467,9 @@ export function PublicTournamentView({
                             >
                               <PillsburyIcon />
                             </a>
+                          )}
+                          {season.noTrophies.has(p.handle.toLowerCase()) && (
+                            <span className="withdrawal-tag">fuori dai trofei</span>
                           )}
                           {withdrawalNote(p.handle, tournamentMeta.withdrawals) && (
                             <span className="withdrawal-tag">{withdrawalNote(p.handle, tournamentMeta.withdrawals)}</span>

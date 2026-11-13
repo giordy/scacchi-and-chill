@@ -7,6 +7,7 @@ import { awardEmoji, awardsMessage, awardTitle, awardWinnersLine, computeSeasonA
 import { errorMessage } from '../lib/utils';
 import { computeStandings, leadersOf, pointsText } from '../lib/standings';
 import { scudettoTitle } from '../lib/masterOpening';
+import { outForFairPlay, scudettoContenders } from '../lib/fairPlay';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
@@ -22,7 +23,8 @@ function AwardsSection({ season, config, history, gameStates, flash, seasons }: 
   const awards = computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening }, config.tournament?.fairPlayAwardsBan);
   if (awards.length === 0) return <p className="note note-flush">I premi compaiono quando ci sono partite concluse.</p>;
   // The Scudetto first: who leads the table now, the first place shared on a full tie
-  const leaders = leadersOf(computeStandings(config.players, history, gameStates).standings);
+  const out = outForFairPlay(config.tournament?.fairPlayAwardsBan, history, gameStates);
+  const leaders = leadersOf(scudettoContenders(computeStandings(config.players, history, gameStates).standings, out));
   const scudetto = { title: scudettoTitle(config.tournament?.masterName), names: leaders.map((l) => l.name), points: leaders[0]?.points ?? 0 };
   const copy = async () => {
     try {

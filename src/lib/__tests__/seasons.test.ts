@@ -19,6 +19,30 @@ describe('seasonId', () => {
 });
 
 describe('buildSeasonArchive', () => {
+  it('with the fair play rule, crowns the first of who can win and keeps them off the podium', () => {
+    const four = [...players, { name: 'Dario', handle: 'dario' }];
+    const g = (id: string, white: string, black: string): HistoryGame => ({ round: '1', white, black, url: `https://lichess.org/${id}` });
+    // Anna beats Bruno and Carla, then Lichess closes her game with Dario for cheating (a point to
+    // Dario); Bruno beats Carla. Dario and Bruno 1 point each: Dario ahead on the tie-break
+    const history = [g('aaaaaaaa', 'anna', 'bruno'), g('bbbbbbbb', 'anna', 'carla'), g('cccccccc', 'anna', 'dario'), g('dddddddd', 'bruno', 'carla')];
+    const states = {
+      aaaaaaaa: st('aaaaaaaa', 'mate', 'white'),
+      bbbbbbbb: st('bbbbbbbb', 'mate', 'white'),
+      cccccccc: st('cccccccc', 'cheat', 'black'),
+      dddddddd: st('dddddddd', 'mate', 'white'),
+    };
+    const before = buildSeasonArchive(meta, four, history, states, now);
+    expect(before.champion?.handle).toBe('anna');
+    expect(before).not.toHaveProperty('noTrophies');
+    const after = buildSeasonArchive({ ...meta, fairPlayAwardsBan: true }, four, history, states, now);
+    expect(after.standings[0].handle).toBe('anna'); // still first in the table, with her points
+    expect(after.champion).toMatchObject({ handle: 'dario', points: 1 });
+    expect(after.noTrophies).toEqual(['anna']);
+    const entry = withChampion([], after)[0];
+    expect(entry.handle).toBe('dario');
+    expect(entry.podium?.map((p) => [p.handle, p.place])).toEqual([['bruno', 2]]);
+  });
+
   const now = new Date('2026-12-31T10:00:00Z');
 
   it('captures standings, champion and number of games', () => {

@@ -10,6 +10,7 @@ import { summitGames, summitKey } from './summit';
 import { computeSeasonProgress, gameProgress } from './progress';
 import { reigningChampions } from './honours';
 import { PILLSBURY_EMOJI, PILLSBURY_TITLE, PillsburyRace, pillsburyRace, pillsburyWinners, reigningPillsbury } from './pillsbury';
+import { outForFairPlay, scudettoContenders } from './fairPlay';
 
 const DAY_MS = 86400000;
 
@@ -308,7 +309,9 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     const seasonOver = progress.total > 0 && progress.finished === progress.total;
     // At the end of the season who leads wins the Scudetto: said with its name. Only with the
     // official calendar: without it any complete round would look like the last
-    leader = seasonOver && (config.schedule?.length ?? 0) > 0 ? scudettoLine(standings, scudettoTitle(config.tournament?.masterName)) : leaderLine(standings);
+    // The Scudetto to the first of who can win it (fair play)
+    const contenders = scudettoContenders(standings, outForFairPlay(config.tournament?.fairPlayAwardsBan, history, allStates));
+    leader = seasonOver && (config.schedule?.length ?? 0) > 0 ? scudettoLine(contenders, scudettoTitle(config.tournament?.masterName)) : leaderLine(standings);
     table = standingsBlock(standings, round, reigningChampions(config.tournament?.winners)?.handles, reigningPillsbury(seasons)?.handles);
     // The second trophy, after the Scudetto; from the second season (in the first all are esordienti)
     if (seasons.length > 0) {

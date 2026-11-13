@@ -26,6 +26,7 @@ import { computeSeasonProgress } from './progress';
 import { withScheduledGames } from './publicGames';
 import { summitGames, summitKey } from './summit';
 import { titleRace } from './titleRace';
+import { outForFairPlay, scudettoContenders } from './fairPlay';
 import { anecdoteForRound } from './masterAnecdotes';
 import { publicViewHref } from './routes';
 
@@ -237,7 +238,7 @@ export interface CurrentSeasonInput {
   gameStates: Record<string, LichessExportGame>;
   schedule?: ScheduledMatch[];
   withdrawals?: Withdrawal[];
-  fairPlayBan?: boolean; // TournamentMeta.fairPlayAwardsBan: for the Trofeo Pillsbury
+  fairPlayBan?: boolean; // TournamentMeta.fairPlayAwardsBan: who can win no trophy
   elo?: EloReport;
   masterAnecdotes?: MasterAnecdote[];
   archives?: SeasonArchive[]; // the earlier seasons: who already won a game in the tournament
@@ -379,7 +380,8 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
   let seasonEnd: number | undefined;
   if (progress.total > 0 && progress.finished === progress.total && games.length > 0) {
     seasonEnd = Math.max(...games.map((g) => g.at));
-    const end = endParts(finalTable(games), season, scudettoTitle(input.masterName));
+    // The Scudetto to the first of who can win it (fair play)
+    const end = endParts(scudettoContenders(finalTable(games), outForFairPlay(input.fairPlayBan, history, gameStates)), season, scudettoTitle(input.masterName));
     if (end) events.push({ key: `${CURRENT}:e`, kind: 'end', at: seasonEnd, emoji: '🏆', ...end });
   }
   if (elo) events.push(...objectiveEvents(input, elo, calendar, seasonEnd));
@@ -418,7 +420,7 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
       const at = finishedAt.get(g);
       return { ...g, url: '', lichess: at !== undefined && at <= t ? stateOf(g, gameStates) : undefined };
     });
-    const race = titleRace(input.players, view, {});
+    const race = titleRace(input.players, view, {}, outForFairPlay(input.fairPlayBan, history, gameStates));
     if (!race?.champion) continue;
     const ahead = race.roundsLeft === 1 ? "con un turno d'anticipo" : `con ${race.roundsLeft} turni d'anticipo`;
     events.push({
@@ -463,6 +465,8 @@ function objectiveEvents(input: CurrentSeasonInput, elo: EloReport, calendar: Hi
     .filter((g) => typeof g.end === 'number')
     .sort((a, b) => a.end! - b.end!);
   const left = new Set((input.withdrawals ?? []).filter((w) => w.mode !== 'replaced').map((w) => lower(w.handle)));
+  // Who can win no trophy has no objective (the Trofeo Pillsbury's)
+  outForFairPlay(input.fairPlayBan, history, gameStates).forEach((h) => left.add(h));
   players.forEach((p) => {
     const me = lower(p.handle);
     if (left.has(me)) return;
@@ -579,7 +583,7 @@ export function archivedSeasonActivity(archive: SeasonArchive, elo?: EloReport):
   });
   const events = gameEvents(games, archive.id, masterLabelOf(archive.masterName));
   const at = games.length > 0 ? Math.max(...games.map((g) => g.at)) : Date.parse(archive.archivedAt);
-  const end = endParts(archive.standings, seasonLabel(archive), scudettoTitle(archive.masterName));
+  const end = endParts(scudettoContenders(archive.standings, new Set(archive.noTrophies ?? [])), seasonLabel(archive), scudettoTitle(archive.masterName));
   if (end && Number.isFinite(at)) events.push({ key: `${archive.id}:e`, kind: 'end', at, emoji: '🏆', ...end });
   const award = archive.awards?.find((a) => a.id === PILLSBURY_ID);
   if (award && award.winners.length > 0 && Number.isFinite(at)) {

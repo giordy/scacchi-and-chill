@@ -7,6 +7,7 @@ import { currentSeason, isNewcomer, ratingOf, tournamentElo } from "./lib/tourna
 import { pillsburyRace, reigningPillsbury } from "./lib/pillsbury";
 import { scudettoTitle } from "./lib/masterOpening";
 import type { OrganizerStore } from "./hooks/useOrganizerData";
+import { outForFairPlay } from "./lib/fairPlay";
 
 interface ReviewsTabProps {
   history: HistoryGame[];
@@ -167,6 +168,18 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
         `- Poi i giocatori, come sopra.`,
         `- In fondo, se i dati lo permettono, al massimo 2 o 3 menzioni per tutto il gruppo (per esempio la partita più lunga o la patta più combattuta), preferibilmente non per i primi tre.`,
         `- Chiudi con un grazie a tutti, in una frase.`,
+      );
+    }
+
+    // Who can win no trophy this season (fair play): the model is told not to make them champion,
+    // and not why (no accusations in the group)
+    const noTrophies = [...outForFairPlay(config.tournament?.fairPlayAwardsBan, history, gameStates)];
+    if (noTrophies.length > 0 && reviewType !== "andata") {
+      const who = config.players.filter((p) => noTrophies.includes(p.handle.toLowerCase())).map((p) => p.name);
+      add(
+        ``,
+        `TROFEI`,
+        `- Per regolamento quest'anno ${who.join(", ")} ${who.length === 1 ? "non può" : "non possono"} vincere lo ${scudetto} né gli altri premi: resta in classifica con i suoi punti, ma lo ${scudetto} va al primo degli altri. Non spiegare perché e non farne un caso: racconta le sue partite come quelle di tutti.`,
       );
     }
 

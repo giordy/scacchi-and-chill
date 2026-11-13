@@ -19,7 +19,7 @@ export function FairPlayAlert({
   seen: string[];
   onSeen: (ids: string[]) => void;
   nameOf: (handle: string) => string;
-  awardsBan?: boolean; // TournamentMeta.fairPlayAwardsBan
+  awardsBan?: boolean; // TournamentMeta.fairPlayAwardsBan: no trophy for the season
 }) {
   const left = new Set(withdrawals.map((w) => w.handle));
   // A first case stays until acknowledged; a repeat stays until the player is out of the tournament
@@ -40,7 +40,7 @@ export function FairPlayAlert({
             attribuendo la scorrettezza a <strong>{nameOf(c.handle)}</strong>.{' '}
             {c.count === 1
               ? awardsBan
-                ? 'Per regolamento perde la partita ed è fuori dal Trofeo Pillsbury e dagli altri premi della stagione: il sito lo fa da sé, non serve fare altro.'
+                ? 'Per regolamento perde la partita e per tutta la stagione non può vincere lo Scudetto, il Trofeo Pillsbury né gli altri premi: il sito lo fa da sé, non serve fare altro.'
                 : 'Per regolamento perde la partita: il risultato di Lichess lo dice già, non serve fare altro.'
               : `È la ${c.count}ª volta: per regolamento va escluso dal torneo e i suoi risultati annullati (♟ Giocatori → Ritiri, «Esclusione per fair play»).`}
           </li>

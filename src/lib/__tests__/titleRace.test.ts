@@ -32,6 +32,16 @@ describe('titleRace', () => {
     ]);
   });
 
+  it('leaves out who can win no trophy (fair play): the race is among the others', () => {
+    // Anna 2 can win no trophy: Carla, 0 with 2 left, leads the race against Bruno, 0 with 1 left
+    const games = [won('1', 'anna', 'bruno', 'white'), won('2', 'anna', 'bruno', 'white'), todo('3', 'bruno', 'carla'), todo('4', 'carla', 'anna')];
+    expect(titleRace(players, games, {}, new Set(['anna']))).toBeNull(); // both can still win it
+    const later = [...games.slice(0, 2), won('3', 'bruno', 'carla', 'black'), todo('4', 'carla', 'anna')];
+    const race = titleRace(players, later, {}, new Set(['anna']))!;
+    expect(race.champion).toEqual({ handle: 'carla', name: 'Carla' });
+    expect(race.contenders.map((c) => c.handle)).toEqual(['carla']);
+  });
+
   it('crowns the leader once nobody can reach them', () => {
     // Anna 3, Bruno 0 and Carla 0, with one game each left
     const games = [

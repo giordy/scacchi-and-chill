@@ -7,6 +7,7 @@ import { podiumFromStandings } from './honours';
 import { monthKey, periodOfGames } from './period';
 import { departuresOf } from './departures';
 import { playersOnBoard } from './tournamentElo';
+import { outForFairPlay, scudettoContenders } from './fairPlay';
 
 // Stable document id from the season name: "Stagione 2 - Capablanca" -> "stagione-2-capablanca"
 export function seasonId(season: string): string {
@@ -30,7 +31,9 @@ export function buildSeasonArchive(
   seasons: SeasonArchive[] = [] // the seasons archived before, for the Elo del torneo of the awards
 ): SeasonArchive {
   const { standings } = computeStandings(players, history, gameStates);
-  const top = standings[0];
+  // Who can win no trophy (fair play): the champion is the first of the others
+  const out = outForFairPlay(meta.fairPlayAwardsBan, history, gameStates);
+  const top = scudettoContenders(standings, out)[0];
   const archive: SeasonArchive = {
     id: seasonId(meta.season),
     season: meta.season,
@@ -50,6 +53,7 @@ export function buildSeasonArchive(
   archive.end = period.end ?? monthKey(now.getTime());
   // No champion until at least one game has been scored
   if (top && top.points > 0) archive.champion = { handle: top.handle, name: top.name, points: top.points };
+  if (out.size > 0) archive.noTrophies = [...out];
   const awards = computeSeasonAwards(players, history, gameStates, seasons.filter((s) => s.id !== seasonId(meta.season)), meta.seeds, meta.withdrawals, { name: meta.masterName, opening: meta.masterOpening }, meta.fairPlayAwardsBan);
   if (awards.length > 0) archive.awards = awards;
   // Where the esordienti started: the Elo del torneo of the next seasons is computed again from the archives
@@ -123,7 +127,7 @@ export function withChampion(winners: SeasonWinner[] | undefined, archive: Seaso
   };
   if (archive.start) entry.start = archive.start;
   if (archive.end) entry.end = archive.end;
-  const podium = podiumFromStandings(archive.standings);
+  const podium = podiumFromStandings(scudettoContenders(archive.standings, new Set(archive.noTrophies ?? [])));
   if (podium.length > 0) entry.podium = podium;
   const idx = list.findIndex((w) => w.season === archive.season);
   if (idx === -1) return [...list, entry];

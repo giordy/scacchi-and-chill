@@ -2,6 +2,7 @@ import { HistoryGame, LichessExportGame, Player } from '../types';
 import { computeStandings } from './standings';
 import { gameProgress } from './progress';
 import { isVoid, stateOf } from './games';
+import { scudettoContenders } from './fairPlay';
 
 export interface TitleRace {
   // Players who can still finish first (alone or level on points), in standings order
@@ -25,8 +26,15 @@ export interface TitleNeed {
 // Who can still win the season, from the points so far plus one point per game left. Shown only
 // when it says something: once someone is out of reach, until the season ends. Players out of the
 // race are never named, only those still in it.
-export function titleRace(players: Player[], games: HistoryGame[], gameStates: Record<string, LichessExportGame>): TitleRace | null {
-  const { standings } = computeStandings(players, games, gameStates);
+// Who can win no trophy (fair play, lib/fairPlay.ts) is not in the race: their games still give and
+// take points from the others.
+export function titleRace(
+  players: Player[],
+  games: HistoryGame[],
+  gameStates: Record<string, LichessExportGame>,
+  out: Set<string> = new Set()
+): TitleRace | null {
+  const standings = scudettoContenders(computeStandings(players, games, gameStates).standings, out);
   const left = new Map<string, number>();
   const between = new Map<string, number>(); // games left between two players, "a|b" both ways
   const openRounds = new Set<string>();
