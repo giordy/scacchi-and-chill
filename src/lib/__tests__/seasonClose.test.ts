@@ -89,6 +89,16 @@ describe('closeSeason', () => {
     expect(io.onUpdateSchedule).toHaveBeenCalledWith([]);
   });
 
+  it('from the next season, a game closed for cheating also costs the awards, and the rules say so', async () => {
+    const { io, archives } = fakeIO();
+    await closeSeason(input({ meta: { ...input().meta, fairPlayText: '• Se Lichess chiude una partita, il colpevole perde la partita e i punti del turno.' } }), io);
+    const patch = io.onUpdateTournamentMeta.mock.calls[0]![0];
+    expect(patch.fairPlayAwardsBan).toBe(true);
+    expect(patch.fairPlayText).toMatch(/perde la partita e i punti del turno\. Per tutta la stagione è anche fuori dal Trofeo Pillsbury/);
+    // The season being closed is archived as it was played, without the new rule
+    expect(archives).toHaveLength(1);
+  });
+
   it('keeps the schedule when asked to', async () => {
     const { io, steps } = fakeIO();
     await closeSeason(input({ clearSchedule: false }), io);

@@ -12,7 +12,7 @@ export const DEFAULT_TOURNAMENT: TournamentMeta = {
   howItWorks:
     "1. All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida.\n2. Quando la partita finisce, scrivi nel gruppo WhatsApp così il risultato viene registrato.",
   fairPlayText:
-    "• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.\n• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.\n• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.",
+    "• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.\n• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Per tutta la stagione è anche fuori dal Trofeo Pillsbury e dagli altri premi della stagione (lo Scudetto resta di chi vince la classifica). Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.\n• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.",
   withdrawalText:
     "• Chi si ritira prima di aver giocato metà delle sue partite esce dal torneo e tutte le sue partite vengono annullate, anche quelle già giocate.\n• Chi si ritira dopo aver giocato almeno metà delle sue partite resta in classifica con i risultati ottenuti; le partite che non giocherà valgono come vittoria a tavolino per gli avversari.\n• Se pensi di ritirarti, avvisa prima l'organizzatore in privato.",
   masterAnecdotes: [
@@ -52,6 +52,7 @@ export function tournamentFromDoc(doc: TournamentDocData): TournamentMeta | null
     description: doc.description || DEFAULT_TOURNAMENT.description,
     howItWorks: doc.howItWorks || "",
     fairPlayText: doc.fairPlayText || "",
+    ...(doc.fairPlayAwardsBan === true ? { fairPlayAwardsBan: true } : {}),
     withdrawalText: doc.withdrawalText || "",
     withdrawals: doc.withdrawals || [],
     // Before any were saved, the default ones belong only to the season they were written for
@@ -82,6 +83,7 @@ export function mergeTournamentMeta(
     description: patch.description ?? current?.description ?? d.description,
     howItWorks: patch.howItWorks ?? current?.howItWorks ?? d.howItWorks,
     fairPlayText: patch.fairPlayText ?? current?.fairPlayText ?? d.fairPlayText,
+    ...((patch.fairPlayAwardsBan ?? current?.fairPlayAwardsBan) ? { fairPlayAwardsBan: true } : {}),
     withdrawalText: patch.withdrawalText ?? current?.withdrawalText ?? d.withdrawalText,
     withdrawals: patch.withdrawals ?? current?.withdrawals ?? [],
     masterAnecdotes: patch.masterAnecdotes ?? current?.masterAnecdotes ?? d.masterAnecdotes,

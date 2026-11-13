@@ -172,7 +172,7 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
 
     // The second trophy: a sentence or two, after the Scudetto. Good news only, as on the site: the
     // model is told who is above or in line with the objective, never who is below
-    const race = pillsburyRace(config.players, elo, history, history, gameStates, config.tournament?.withdrawals);
+    const race = pillsburyRace(config.players, elo, history, history, gameStates, config.tournament?.withdrawals, config.tournament?.fairPlayAwardsBan);
     if (seasons.length > 0 && !race.suspended && race.rows.length > 0) {
       const up = race.rows.filter((r) => r.trend === "up");
       const inLine = race.rows.filter((r) => r.trend === "same");

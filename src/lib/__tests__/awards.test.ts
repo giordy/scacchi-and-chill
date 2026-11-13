@@ -48,6 +48,16 @@ describe('computeSeasonAwards', () => {
     expect(byId.draws).toBeUndefined(); // a single draw is no wall
   });
 
+  it('once the rule applies, gives nothing to who had a game closed for cheating: the next one wins', () => {
+    // Carla's quick win stays a win, but Lichess closed a game of hers for cheating
+    const cheat = { ...gs, eeeeeeee: { ...st('eeeeeeee', 'cheat', 10, 5, 'white'), moves: '' } }; // Anna at fault
+    const by = (list: ReturnType<typeof computeSeasonAwards>, id: string) => list.find((x) => x.id === id)?.winners.map((w) => w.handle);
+    expect(by(computeSeasonAwards(players, history, cheat), 'longest')).toEqual(['anna']);
+    const banned = computeSeasonAwards(players, history, cheat, [], undefined, undefined, undefined, true);
+    expect(banned.flatMap((x) => x.winners.map((w) => w.handle))).not.toContain('anna');
+    expect(by(banned, 'longest')).toEqual(['carla']);
+  });
+
   it('needs at least two draws for Il muro', () => {
     const draws = computeSeasonAwards(players, [g('bruno', 'carla', 'bbbbbbbb'), g('carla', 'bruno', 'ffffffff')], {
       bbbbbbbb: st('bbbbbbbb', 'draw', 60, 30),

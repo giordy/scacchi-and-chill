@@ -237,6 +237,7 @@ export interface CurrentSeasonInput {
   gameStates: Record<string, LichessExportGame>;
   schedule?: ScheduledMatch[];
   withdrawals?: Withdrawal[];
+  fairPlayBan?: boolean; // TournamentMeta.fairPlayAwardsBan: for the Trofeo Pillsbury
   elo?: EloReport;
   masterAnecdotes?: MasterAnecdote[];
   archives?: SeasonArchive[]; // the earlier seasons: who already won a game in the tournament
@@ -494,7 +495,7 @@ function objectiveEvents(input: CurrentSeasonInput, elo: EloReport, calendar: Hi
   });
 
   if (seasonEnd !== undefined) {
-    const race = pillsburyRace(players, elo, calendar, history, gameStates, input.withdrawals);
+    const race = pillsburyRace(players, elo, calendar, history, gameStates, input.withdrawals, input.fairPlayBan);
     const top = pillsburyWinners(race);
     const best = top[0];
     if (best) {

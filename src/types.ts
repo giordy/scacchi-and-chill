@@ -135,6 +135,9 @@ export interface TournamentMeta {
   description: string;
   howItWorks?: string;
   fairPlayText?: string;
+  // From the season after the one it was decided in (set when that season is closed): who has a game
+  // closed by Lichess for cheating is out of the Trofeo Pillsbury and the awards (lib/fairPlay.ts)
+  fairPlayAwardsBan?: boolean;
   withdrawalText?: string; // rules for a player who leaves during the season
   withdrawals?: Withdrawal[];
   masterAnecdotes?: MasterAnecdote[]; // one per round, in order

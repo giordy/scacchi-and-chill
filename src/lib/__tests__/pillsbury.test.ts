@@ -67,6 +67,17 @@ describe('the race, with who left and the games won at the table', () => {
     expect(pillsburyRace(four, report, history, history, states as never).rows[0].handle).toBe('bruno');
   });
 
+  it('leaves out, once the rule applies, who had a game closed for cheating', () => {
+    const cheat = { ...states, aaaaaaaa: { ...states.aaaaaaaa, status: 'cheat' } };
+    // Bruno won his game against Anna, then Lichess closed it for cheating: Anna is at fault
+    const before = pillsburyRace(four, report, history, history, cheat as never);
+    expect(before.forecasts.anna).toBeDefined();
+    const after = pillsburyRace(four, report, history, history, cheat as never, undefined, true);
+    expect(after.forecasts.anna).toBeUndefined();
+    expect([...after.rows, ...after.waiting.map((handle) => ({ handle }))].map((r) => r.handle)).not.toContain('anna');
+    expect(after.newcomers).not.toContain('anna');
+  });
+
   it('makes no objective of a forfeit or an aborted game', () => {
     // Carla's only game is a forfeit, Anna's second was aborted: no game that counts for either
     expect(race.counted.carla).toEqual({ played: 0, games: 0 });

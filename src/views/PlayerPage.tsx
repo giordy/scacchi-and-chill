@@ -255,7 +255,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
     ? []
     : shownAwards(
         wrappedOf!.current
-          ? computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening })
+          ? computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening }, config.tournament?.fairPlayAwardsBan)
           : wrappedArchive?.awards ?? []
       ).filter((a) => a.winners.some((w) => w.handle.toLowerCase() === shownHandle.toLowerCase()));
   const wrappedCard = wrapped && wrappedOf && (
@@ -331,7 +331,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   // Pronostico: points expected in the season from the Elo del torneo at its start, as the race of the
   // Trofeo Pillsbury has it (the same games, the same players: who left is not in it)
   const seasonCalendar = raceCalendar(withScheduledGames(history, config.schedule ?? []), gameStates);
-  const race = pillsburyRace(config.players, elo, seasonCalendar, history, gameStates, config.tournament?.withdrawals);
+  const race = pillsburyRace(config.players, elo, seasonCalendar, history, gameStates, config.tournament?.withdrawals, config.tournament?.fairPlayAwardsBan);
   const forecast = race.forecasts[player.handle];
   // All the player's games of the season, those against esordienti included: "10 delle 14"
   const calendar = boardCalendar(seasonCalendar, gameStates, config.players.map((p) => p.handle));

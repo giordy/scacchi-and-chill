@@ -139,7 +139,7 @@ export function PublicTournamentView({
       crosstable,
       progress,
       concluded,
-      awards: concluded ? computeSeasonAwards(players, history, gameStates, seasons, tournamentMeta.seeds, tournamentMeta.withdrawals, { name: tournamentMeta.masterName, opening: tournamentMeta.masterOpening }) : [],
+      awards: concluded ? computeSeasonAwards(players, history, gameStates, seasons, tournamentMeta.seeds, tournamentMeta.withdrawals, { name: tournamentMeta.masterName, opening: tournamentMeta.masterOpening }, tournamentMeta.fairPlayAwardsBan) : [],
       allGames,
       rounds: [...new Set(allGames.map((g) => g.round))].sort(byRound),
       summits: summitGames(players, allGames, gameStates),
@@ -174,10 +174,11 @@ export function PublicTournamentView({
         gameStates,
         schedule,
         withdrawals: tournamentMeta.withdrawals,
+        fairPlayBan: tournamentMeta.fairPlayAwardsBan,
         archives: seasons,
         elo,
       }),
-    [tournamentMeta.season, tournamentMeta.masterName, tournamentMeta.masterOpening, tournamentMeta.masterAnecdotes, players, history, gameStates, schedule, tournamentMeta.withdrawals, seasons, elo]
+    [tournamentMeta.season, tournamentMeta.masterName, tournamentMeta.masterOpening, tournamentMeta.masterAnecdotes, players, history, gameStates, schedule, tournamentMeta.withdrawals, tournamentMeta.fairPlayAwardsBan, seasons, elo]
   );
   const { lastVisit, seen, markSeen } = useLastVisit();
   useEffect(() => {
@@ -534,6 +535,7 @@ export function PublicTournamentView({
           history={history}
           gameStates={gameStates}
           withdrawals={tournamentMeta.withdrawals}
+          fairPlayBan={tournamentMeta.fairPlayAwardsBan}
           seasons={seasons}
           nameOf={nameOf}
           concluded={concluded}

@@ -19,7 +19,7 @@ function AwardsSection({ season, config, history, gameStates, flash, seasons }: 
   gameStates: Record<string, LichessExportGame>;
   flash: Flash;
 }) {
-  const awards = computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening });
+  const awards = computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening }, config.tournament?.fairPlayAwardsBan);
   if (awards.length === 0) return <p className="note note-flush">I premi compaiono quando ci sono partite concluse.</p>;
   // The Scudetto first: who leads the table now, the first place shared on a full tie
   const leaders = leadersOf(computeStandings(config.players, history, gameStates).standings);

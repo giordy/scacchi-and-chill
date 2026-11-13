@@ -1,5 +1,6 @@
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch, SeasonArchive, TournamentMeta } from '../types';
 import { buildSeasonArchive, withChampion } from './seasons';
+import { withAwardsBanRule } from './fairPlay';
 
 // What closing a season writes, passed in so the order of the steps can be tested without Firestore
 export interface SeasonCloseIO {
@@ -46,6 +47,10 @@ export async function closeSeason(input: SeasonCloseInput, io: SeasonCloseIO): P
     withdrawals: [],
     masterAnecdotes: [],
     seeds: [], // the next season's esordienti get theirs at their first game (see lib/seeds.ts)
+    // A game closed for cheating also costs the Trofeo Pillsbury and the awards: decided during
+    // Stagione 2 for the seasons after it, so it starts with the next one, and the rules say so
+    fairPlayAwardsBan: true,
+    ...(meta.fairPlayText !== undefined ? { fairPlayText: withAwardsBanRule(meta.fairPlayText) } : {}),
   });
   if (input.clearSchedule) io.onUpdateSchedule([]);
   return snapshot;

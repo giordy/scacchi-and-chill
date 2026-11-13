@@ -59,6 +59,7 @@ export interface TournamentDocData {
   description?: string;
   howItWorks?: string;
   fairPlayText?: string;
+  fairPlayAwardsBan?: boolean;
   withdrawalText?: string;
   withdrawals?: Withdrawal[];
   masterAnecdotes?: MasterAnecdote[];
@@ -95,6 +96,7 @@ export async function saveTournamentFullToFirebase(data: {
     payload.description = data.meta.description;
     if (data.meta.howItWorks !== undefined) payload.howItWorks = data.meta.howItWorks;
     if (data.meta.fairPlayText !== undefined) payload.fairPlayText = data.meta.fairPlayText;
+    if (data.meta.fairPlayAwardsBan !== undefined) payload.fairPlayAwardsBan = data.meta.fairPlayAwardsBan;
     if (data.meta.withdrawalText !== undefined) payload.withdrawalText = data.meta.withdrawalText;
     if (data.meta.masterAnecdotes !== undefined) payload.masterAnecdotes = data.meta.masterAnecdotes;
     if (data.meta.withdrawals !== undefined) payload.withdrawals = JSON.parse(JSON.stringify(data.meta.withdrawals));

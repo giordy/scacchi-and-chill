@@ -171,6 +171,7 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
         seen={organizer.fairPlaySeen ?? []}
         onSeen={(ids) => organizer.replaceAll({ fairPlaySeen: ids })}
         nameOf={nameOf}
+        awardsBan={config.tournament?.fairPlayAwardsBan}
       />
 
       {activeTab === 'rounds' && (

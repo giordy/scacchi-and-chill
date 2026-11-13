@@ -10,6 +10,7 @@
 import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
 import { boardCalendar, currentSeason, decidedAtTable, eloSeasonFromCurrent, EloReport, Forecast, pronosticoPoints, roundHalf, seasonForecast } from './tournamentElo';
 import { isVoid, stateOf } from './games';
+import { outForFairPlay } from './fairPlay';
 
 export const PILLSBURY_ID = 'pillsbury';
 // In text (WhatsApp, tooltips); on the site the trophy is drawn by components/PillsburyIcon
@@ -80,13 +81,16 @@ export function pillsburyRace(
   calendar: HistoryGame[], // the season's games, created and still to create
   history: HistoryGame[],
   gameStates: Record<string, LichessExportGame>,
-  withdrawals?: Withdrawal[] // who left the season: out of the race (with forfeits they stay in the list)
+  withdrawals?: Withdrawal[], // who left the season: out of the race (with forfeits they stay in the list)
+  fairPlayBan?: boolean // TournamentMeta.fairPlayAwardsBan: a game closed for cheating puts its player out
 ): PillsburyRace {
   const season = currentSeason(report);
   const handles = players.map((p) => p.handle);
   const finished = eloSeasonFromCurrent(handles, history, gameStates).games;
   const board = boardCalendar(raceCalendar(calendar, gameStates), gameStates, handles);
   const left = new Set((withdrawals ?? []).filter((w) => w.mode !== 'replaced').map((w) => w.handle.toLowerCase()));
+  // Out without a word, as who left: the rules ask not to point at anyone on the site
+  outForFairPlay(fairPlayBan, history, gameStates).forEach((h) => left.add(h));
   const rows: PillsburyRow[] = [];
   const waiting: string[] = [];
   const counted: PillsburyRace['counted'] = {};

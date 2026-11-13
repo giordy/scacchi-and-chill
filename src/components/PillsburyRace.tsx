@@ -39,6 +39,7 @@ export function PillsburyRace({
   history,
   gameStates,
   withdrawals,
+  fairPlayBan,
   seasons,
   nameOf,
   concluded = false,
@@ -49,11 +50,12 @@ export function PillsburyRace({
   history: HistoryGame[];
   gameStates: Record<string, LichessExportGame>;
   withdrawals?: Withdrawal[]; // who left the season: out of the race
+  fairPlayBan?: boolean; // TournamentMeta.fairPlayAwardsBan
   seasons: SeasonArchive[];
   nameOf: (handle: string) => string;
   concluded?: boolean; // every game of the season played: the trophy is decided
 }) {
-  const race = useMemo(() => pillsburyRace(players, elo, calendar, history, gameStates, withdrawals), [players, elo, calendar, history, gameStates, withdrawals]);
+  const race = useMemo(() => pillsburyRace(players, elo, calendar, history, gameStates, withdrawals, fairPlayBan), [players, elo, calendar, history, gameStates, withdrawals, fairPlayBan]);
   const reigning = reigningPillsbury(seasons);
   // Once the last game is over, who wins it (the same rule as the awards under the standings)
   const winners = concluded ? pillsburyWinners(race).map((r) => r.handle) : [];

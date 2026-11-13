@@ -10,6 +10,7 @@ import { formatPace } from './playerProfile';
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { plural } from './games';
 import { pointsText } from './standings';
+import { outForFairPlay } from './fairPlay';
 import { MASTER_OPENING_ID, MASTER_OPENING_TITLE, masterSurname, openingFamily, playsFamily } from './masterOpening';
 // L'ammazzagiganti (most colpacci) was given until the Trofeo Pillsbury took its place: past
 // seasons keep it, with the Lichess ratings and the gap it used then.
@@ -56,18 +57,21 @@ export function computeSeasonAwards(
   seasons: SeasonArchive[] = [], // archived seasons, for the Elo del torneo of the Trofeo Pillsbury
   seeds?: EloSeed[], // where this season's esordienti started (TournamentMeta.seeds)
   withdrawals?: Withdrawal[], // who left: out of the race for the Trofeo Pillsbury
-  master?: { name?: string; opening?: string } // the season's master and their opening family
+  master?: { name?: string; opening?: string }, // the season's master and their opening family
+  fairPlayBan?: boolean // TournamentMeta.fairPlayAwardsBan: who had a game closed for cheating wins nothing
 ): SeasonAward[] {
   const nameOf = (h: string) => players.find((p) => p.handle === h)?.name ?? h;
   const who = (handles: string[]) => handles.map((handle) => ({ handle, name: nameOf(handle) }));
   const games = collectFinishedGames(players, history, gameStates);
+  const out = outForFairPlay(fairPlayBan, history, gameStates);
+  const can = (h: string | undefined) => !!h && !out.has(h.toLowerCase());
 
   const awards: SeasonAward[] = [];
 
   // Trofeo Pillsbury: who beat their pronostico by most (see lib/pillsbury). First, apart from
   // the light-hearted awards. One winner, unless two beat it by the same (to a millionth of a point),
   // and only above the objective as the race table shows it (▲): not the first of those in line.
-  const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates, seeds), history, history, gameStates, withdrawals);
+  const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates, seeds), history, history, gameStates, withdrawals, fairPlayBan);
   const top = pillsburyWinners(race);
   if (top.length > 0) {
     const best = top[0];
@@ -86,7 +90,7 @@ export function computeSeasonAwards(
 
   // Fulmine: the decisive game won in the fewest moves. The loser is not named: it would put
   // the quickest defeat of the season on display
-  const decisive = games.filter((g) => g.winner && g.moves > 0);
+  const decisive = games.filter((g) => can(g.winner) && g.moves > 0);
   if (decisive.length > 0) {
     const fewest = Math.min(...decisive.map((g) => g.moves));
     const winners = [...new Set(decisive.filter((g) => g.moves === fewest).map((g) => g.winner as string))];
@@ -120,7 +124,7 @@ export function computeSeasonAwards(
   }
 
   // Il bradipo: the player who takes the longest over their own moves
-  const eligible = [...playerMoveTimes(games)];
+  const eligible = [...playerMoveTimes(games)].filter(([h]) => can(h));
   const slowest = Math.max(...eligible.map(([, t]) => t));
   const sloths = players.map((p) => p.handle).filter((h) => eligible.some(([e, t]) => e === h && t === slowest));
   if (eligible.length >= 2 && sloths.length < eligible.length) {
@@ -138,8 +142,7 @@ export function computeSeasonAwards(
   const draws = new Map<string, number>();
   games.forEach((g) => {
     if (!g.draw) return;
-    draws.set(g.white, (draws.get(g.white) ?? 0) + 1);
-    draws.set(g.black, (draws.get(g.black) ?? 0) + 1);
+    [g.white, g.black].filter(can).forEach((h) => draws.set(h, (draws.get(h) ?? 0) + 1));
   });
   const wall = leaders(draws, players);
   if (wall.handles.length > 0 && wall.best >= MIN_COUNT) {
@@ -161,7 +164,7 @@ export function computeSeasonAwards(
     const played = games.filter((g) => playsFamily(g.state.opening?.name, family));
     played.forEach((g) => {
       const h = family.side === 'white' ? g.white : g.black;
-      counts.set(h, (counts.get(h) ?? 0) + 1);
+      if (can(h)) counts.set(h, (counts.get(h) ?? 0) + 1);
     });
     const top = leaders(counts, players);
     if (top.handles.length > 0) {

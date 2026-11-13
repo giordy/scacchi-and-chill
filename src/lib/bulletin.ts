@@ -312,7 +312,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     table = standingsBlock(standings, round, reigningChampions(config.tournament?.winners)?.handles, reigningPillsbury(seasons)?.handles);
     // The second trophy, after the Scudetto; from the second season (in the first all are esordienti)
     if (seasons.length > 0) {
-      pillsbury = pillsburyLine(pillsburyRace(config.players, elo, history, history, allStates, config.tournament?.withdrawals), nameOf, seasonOver);
+      pillsbury = pillsburyLine(pillsburyRace(config.players, elo, history, history, allStates, config.tournament?.withdrawals, config.tournament?.fairPlayAwardsBan), nameOf, seasonOver);
     }
   }
 
