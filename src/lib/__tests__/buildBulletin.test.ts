@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { buildBulletin, phrasePicker } from '../bulletin';
 import { defaultConfig } from '../config';
 import { applyWithdrawals } from '../withdrawals';
+import { pillsburyRace } from '../pillsbury';
+import { tournamentElo } from '../tournamentElo';
+import { withScheduledGames } from '../publicGames';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../../types';
 
 const players = ['anna', 'bruno', 'carla', 'dario', 'elena', 'fabio'].map((h) => ({ handle: h, name: h[0].toUpperCase() + h.slice(1) }));
@@ -212,5 +215,20 @@ describe('buildBulletin: deadlines and phrases', () => {
     const open: HistoryGame[] = [...games, { round: '1', white: 'anna', black: 'bruno', url: url('qqqqqqqq') }];
     expect(buildBulletin({ round: '1', games: open, states, history: open, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(4)] }).text).not.toContain('Pillsbury');
     expect(buildBulletin({ round: '1', games, states, history: games, config, expiryDays: 2, now: NOW, random: first }).text).not.toContain('Pillsbury');
+  });
+
+  it('measures the race against the whole calendar, as the site does, not only the rounds created', () => {
+    // Elena beat Fabio in the only game created so far. On that game alone her objective shows as 0
+    // and she is a point above it; on her three games of the calendar it shows as 1 and her pace as
+    // 1½: half a point above, which is what the race table of the site says
+    const games: HistoryGame[] = [{ round: '1', white: 'elena', black: 'fabio', url: url('pppppppp') }];
+    const states = { pppppppp: finished('pppppppp', 'white') };
+    const schedule = [{ round: '2', white: 'elena', black: 'anna' }, { round: '3', white: 'bruno', black: 'elena' }];
+    const elo = tournamentElo([pastSeason(2)], players.map((p) => p.handle), games, states);
+    const gapOn = (calendar: HistoryGame[]) => pillsburyRace(players, elo, calendar, games, states).rows.find((r) => r.handle === 'elena')!.gap;
+    expect(gapOn(games)).toBe(1);
+    expect(gapOn(withScheduledGames(games, schedule))).toBe(0.5);
+    const mid = buildBulletin({ round: '1', games, states, history: games, config: { ...config, schedule }, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(2)] });
+    expect(mid.text).toContain('🏅 *Trofeo Pillsbury* (punti oltre le attese): Elena +½');
   });
 });

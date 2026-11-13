@@ -46,6 +46,14 @@ describe('the documents', () => {
     expect(pledgeFromDoc({ handle: 'anna', season: 'S' })).toBeNull();
     expect(typeof readPledges).toBe('function');
   });
+  it('counts only the document of that season and player: another id the rules let through is ignored', () => {
+    const data = { handle: 'anna', season: 'Stagione 3 - Fischer', at: '2026-11-13T10:00:00Z', rules: v };
+    expect(pledgeFromDoc(data, 'stagione-3-fischer--anna')).not.toBeNull();
+    // Written by hand to change the date or the text accepted, or after the organizer cancelled the real one
+    expect(pledgeFromDoc(data, 'x--anna')).toBeNull();
+    expect(pledgeFromDoc(data, 'stagione-3-fischer-2--anna')).toBeNull();
+    expect(pledgeFromDoc({ ...data, handle: 'bruno' }, 'stagione-3-fischer--anna')).toBeNull();
+  });
   it('are written new, with the server time', () => {
     const body = pledgeCommit('projects/p/databases/(default)', meta.season, 'Anna', v);
     expect(body.writes[0].update.name).toBe('projects/p/databases/(default)/documents/tournaments/scacchi-and-chill-official/pledges/stagione-3-fischer--anna');

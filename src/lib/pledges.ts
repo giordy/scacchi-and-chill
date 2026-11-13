@@ -61,10 +61,14 @@ export function pledgeStatus(pledges: Pledge[], season: string, players: Player[
   return { accepted, missing, outdated, all: players.length > 0 && missing.length === 0 };
 }
 
-// A pledge as read from Firestore; null when incomplete
-export function pledgeFromDoc(data: Record<string, unknown>): Pledge | null {
+// A pledge as read from Firestore; null when incomplete. With the id of its document, null also when
+// the document is not the one of that season and player: firestore.rules cannot work out the id of a
+// season, so a visitor can write "anything--anna"; only the document the site writes counts, the one
+// that can be written once and that the organizer cancels.
+export function pledgeFromDoc(data: Record<string, unknown>, id?: string): Pledge | null {
   const at = typeof data.at === 'string' ? Date.parse(data.at) : typeof data.at === 'number' ? data.at : NaN;
   if (typeof data.handle !== 'string' || typeof data.season !== 'string' || !Number.isFinite(at)) return null;
+  if (id !== undefined && id !== pledgeDocId(data.season, data.handle)) return null;
   return { handle: data.handle.toLowerCase(), season: data.season, at, rules: typeof data.rules === 'string' ? data.rules : '' };
 }
 
