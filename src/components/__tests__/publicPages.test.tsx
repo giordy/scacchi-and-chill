@@ -321,27 +321,6 @@ describe('the scudetto shield in place of the 🏆', () => {
   });
 });
 
-describe('a live game', () => {
-  const t = Date.now();
-  const liveStates: Record<string, LichessExportGame> = { ...gameStates, bbbbbbbb: { id: 'bbbbbbbb', status: 'started', createdAt: 1, lastMoveAt: t - 2 * 60 * 1000 } };
-  const page = (hash: string, seenAt: Record<string, number>) => {
-    at(hash);
-    return renderToStaticMarkup(
-      <PublicTournamentView config={config} tournamentMeta={config.tournament!} history={history} gameStates={liveStates} nameOf={nameOf} seasons={[season1]} presence={{ seenAt, flair: {}, now: t }} />
-    );
-  };
-
-  it('has a Live badge, with both players there', () => {
-    expect(page('#/partite', { carla: t - 60_000, anna: t - 60_000 })).toContain('status-badge live');
-  });
-
-  it('is only in progress when one of the two is not on Lichess', () => {
-    const matches = page('#/partite', { carla: t - 60_000 });
-    expect(matches).not.toContain('status-badge live');
-    expect(matches).toContain('status-badge ongoing');
-  });
-});
-
 describe('the scudetto on the season tab', () => {
   it('is named under the master, with its shield', () => {
     const html = publicPage('#/stagione');
@@ -375,5 +354,40 @@ describe('the dot on the Partite tab', () => {
     expect(render()).toMatch(dot);
     localStorage.setItem('scacchi-partite-mosse-viste', JSON.stringify({ aaaaaaaa: 2, bbbbbbbb: t - 60_000 }));
     expect(render()).not.toMatch(dot);
+  });
+});
+
+describe('the games with moves not seen yet, in the Partite tab', () => {
+  const t = Date.now();
+  const states: Record<string, LichessExportGame> = { ...gameStates, bbbbbbbb: { id: 'bbbbbbbb', status: 'started', createdAt: 1, lastMoveAt: t - 60_000 } };
+  const matches = (seen: Record<string, number> | null, presence?: Record<string, number>) => {
+    const m = new Map<string, string>();
+    if (seen) m.set('scacchi-partite-mosse-viste', JSON.stringify(seen));
+    vi.stubGlobal('localStorage', { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v) });
+    at('#/partite');
+    return renderToStaticMarkup(
+      <PublicTournamentView config={config} tournamentMeta={config.tournament!} history={history} gameStates={states} nameOf={nameOf} seasons={[season1]} movesRead
+        presence={presence && { seenAt: presence, flair: {}, now: t }} />
+    );
+  };
+  const marked = (html: string) => (html.match(/class="match-card[^"]*has-new-moves/g) ?? []).length;
+
+  it('marks the game that moved since the last visit, and says so at the top', () => {
+    const html = matches({ aaaaaaaa: 2, bbbbbbbb: t - 120_000 });
+    expect(marked(html)).toBe(1);
+    expect(html).toMatch(/has-new-moves[\s\S]*?new-moves-tag"><span class="switch-dot" aria-hidden="true"><\/span>Mosse nuove/);
+    expect(html).toContain("Una partita ha mosse nuove dall&#x27;ultima visita");
+  });
+
+  it('marks nothing when every move was seen, or on a first visit', () => {
+    expect(marked(matches({ aaaaaaaa: 2, bbbbbbbb: t - 60_000 }))).toBe(0);
+    expect(marked(matches(null))).toBe(0);
+    expect(matches(null)).not.toContain('new-moves-note');
+  });
+
+  it('has no Live badge any more: the game is in progress, whoever is on Lichess', () => {
+    const html = matches({ aaaaaaaa: 2, bbbbbbbb: t - 60_000 }, { carla: t - 60_000, anna: t - 60_000 });
+    expect(html).not.toContain('status-badge live');
+    expect(html).toContain('status-badge ongoing');
   });
 });

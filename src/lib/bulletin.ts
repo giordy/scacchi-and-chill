@@ -11,6 +11,7 @@ import { computeSeasonProgress, gameProgress } from './progress';
 import { reigningChampions } from './honours';
 import { PILLSBURY_EMOJI, PILLSBURY_TITLE, PillsburyRace, pillsburyRace, pillsburyWinners, reigningPillsbury } from './pillsbury';
 import { outForFairPlay, scudettoContenders } from './fairPlay';
+import { withScheduledGames } from './publicGames';
 
 const DAY_MS = 86400000;
 
@@ -315,7 +316,9 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     table = standingsBlock(standings, round, reigningChampions(config.tournament?.winners)?.handles, reigningPillsbury(seasons)?.handles);
     // The second trophy, after the Scudetto; from the second season (in the first all are esordienti)
     if (seasons.length > 0) {
-      pillsbury = pillsburyLine(pillsburyRace(config.players, elo, history, history, allStates, config.tournament?.withdrawals, config.tournament?.fairPlayAwardsBan), nameOf, seasonOver);
+      // Against the whole calendar, games still to create included, as the race table of the site
+      const calendar = withScheduledGames(history, config.schedule ?? []);
+      pillsbury = pillsburyLine(pillsburyRace(config.players, elo, calendar, history, allStates, config.tournament?.withdrawals, config.tournament?.fairPlayAwardsBan), nameOf, seasonOver);
     }
   }
 

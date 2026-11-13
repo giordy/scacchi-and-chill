@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import type { SeenMoves } from '../lib/seenMoves';
 
 const SEEN_MOVES_KEY = 'scacchi-partite-mosse-viste';
 
@@ -7,7 +8,7 @@ const SEEN_MOVES_KEY = 'scacchi-partite-mosse-viste';
 // while the visitor is elsewhere, and goes off once the tab is opened. Kept in the browser, so a
 // reload does not bring the dot back; only the games of the season are kept, so the list stays short.
 // null on a first visit (or when the browser keeps no data): nothing is news then.
-export type SeenMoves = Record<string, number>;
+export type { SeenMoves };
 
 export function useSeenMoves(): { seenMoves: SeenMoves | null; markMovesSeen: (moves: SeenMoves) => void } {
   const [seenMoves, setSeenMoves] = useState<SeenMoves | null>(() => {

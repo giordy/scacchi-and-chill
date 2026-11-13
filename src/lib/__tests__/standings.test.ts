@@ -120,6 +120,15 @@ describe('computeStandings', () => {
     expect(crosstable.anna.anna).toBe('✕');
   });
 
+  it('reads the handles of the games whatever their case, as Lichess does', () => {
+    const players = [{ handle: 'Anna', name: 'Anna' }, { handle: 'bruno', name: 'Bruno' }];
+    const history = [{ round: '1', white: 'anna', black: 'BRUNO', url: 'https://lichess.org/aaaaaaaa' }];
+    const { standings, crosstable } = computeStandings(players, history, { aaaaaaaa: { id: 'aaaaaaaa', status: 'mate', winner: 'white' } });
+    expect(standings.map((s) => [s.handle, s.points, s.played])).toEqual([['Anna', 1, 1], ['bruno', 0, 1]]);
+    expect(standings).toHaveLength(2);
+    expect(crosstable.Anna.bruno).toBe('1');
+  });
+
   it('does not crash on games with players missing from the roster', () => {
     const history = [game('anna', 'ghost', 'aaaaaaaa')];
     const gs = states(state('aaaaaaaa', 'mate', 'white'));

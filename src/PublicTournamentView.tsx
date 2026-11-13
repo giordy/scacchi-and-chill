@@ -32,7 +32,8 @@ import { PillsburyIcon } from "./components/PillsburyIcon";
 import { ScudettoIcon } from "./components/ScudettoIcon";
 import { currentScudetto } from "./lib/scudetto";
 import { extractGameId } from "./lib/utils";
-import { SeenMoves, useSeenMoves } from "./hooks/useSeenMoves";
+import { useSeenMoves } from "./hooks/useSeenMoves";
+import { lastMovesOf, newMoveIds, SeenMoves } from "./lib/seenMoves";
 import { SeasonAwards } from "./components/SeasonAwards";
 import { byRound, stateOf } from "./lib/games";
 import { MASTER_OPENING_TITLE, masterSurname, openingFamily, playsFamily, scudettoTitle } from "./lib/masterOpening";
@@ -223,20 +224,21 @@ export function PublicTournamentView({
   // Partite: the time of the last move of every game of the season. Its dot works as the cronaca's: it
   // lights at every move made while the visitor is elsewhere, and goes off once the tab is opened. On a
   // first visit nothing is news: the moves are taken as seen once read from Lichess
-  const lastMoves = useMemo(() => {
-    const moves: SeenMoves = {};
-    history.forEach((g) => {
-      const id = extractGameId(g.url);
-      const at = id ? gameStates[id]?.lastMoveAt : undefined;
-      if (id && typeof at === "number" && at > 0) moves[id] = at;
-    });
-    return moves;
-  }, [history, gameStates]);
+  const lastMoves = useMemo(() => lastMovesOf(history, gameStates), [history, gameStates]);
   const { seenMoves, markMovesSeen } = useSeenMoves();
+  // What had been seen when the tab was opened: the games moved since keep their mark while the tab
+  // stays open (and those moving meanwhile get one), until the next visit to it
+  const [seenAtOpen, setSeenAtOpen] = useState<SeenMoves | null>(seenMoves);
+  const onMatches = useRef(false);
+  useEffect(() => {
+    if (view === "matches" && !onMatches.current) setSeenAtOpen(seenMoves);
+    onMatches.current = view === "matches";
+  }, [view, seenMoves]);
   useEffect(() => {
     if (movesRead && (view === "matches" || seenMoves === null)) markMovesSeen(lastMoves);
   }, [view, movesRead, lastMoves, seenMoves, markMovesSeen]);
-  const newMoves = seenMoves ? Object.entries(lastMoves).filter(([id, at]) => at > (seenMoves[id] ?? 0)).length : 0;
+  const newMoves = newMoveIds(lastMoves, seenMoves).size;
+  const movedGames = useMemo(() => newMoveIds(lastMoves, seenAtOpen), [lastMoves, seenAtOpen]);
   // Under the standings: the latest results and moments, a door to the cronaca
   const latest = activity.filter((e) => !FRAME_KINDS.has(e.kind)).slice(0, 3);
 
@@ -659,6 +661,7 @@ export function PublicTournamentView({
               presence={presence}
               elo={elo}
               masterTag={masterTag}
+              moved={movedGames}
             />
           )}
         </section>

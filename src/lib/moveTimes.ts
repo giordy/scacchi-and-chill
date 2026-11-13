@@ -1,9 +1,11 @@
 import { HistoryGame, LichessExportGame, Player } from '../types';
 import { gameProgress } from './progress';
-import { fullMovesOf, isVoid, pliesOf, stateOf } from './games';
+import { decidedAtTable, fullMovesOf, isVoid, pliesOf, stateOf } from './games';
 
-// Not played on the board: aborted, never started, or won by forfeit after a withdrawal
-const notPlayed = (s: LichessExportGame) => isVoid(s) || s.status === "forfeit";
+// Not played to its end on the board: aborted, never started, won by forfeit after a withdrawal, or
+// closed by Lichess for cheating (the win of the other player says nothing of the game: no Fulmine
+// or Maratoneta from it)
+const notPlayed = (s: LichessExportGame) => isVoid(s) || decidedAtTable(s.status);
 
 export interface FinishedGame {
   white: string;

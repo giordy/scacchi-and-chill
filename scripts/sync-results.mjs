@@ -30,9 +30,11 @@ export function toValue(v) {
   throw new Error(`Valore non supportato: ${typeof v}`);
 }
 
-// The Lichess id in a game link (as src/lib/utils.ts extractGameId)
+// The Lichess id in a game link: the same rule as src/lib/utils.ts extractGameId (a test checks it)
+const LICHESS_PAGES = new Set(['training', 'analysis', 'practice', 'streamer', 'features', 'insights', 'calendar', 'settings', 'tutorial', 'password']);
 export function gameIdOf(url) {
-  return url?.match(/(?:https?:\/\/)?(?:www\.)?lichess\.org\/(?:(?:game|challenge|embed\/game|embed)\/)?([a-zA-Z0-9]{8})/i)?.[1];
+  const id = url?.match(/(?:https?:\/\/)?(?:www\.)?lichess\.org\/(?:(?:game\/export|game|challenge|embed\/game|embed)\/)?([a-zA-Z0-9]{8})(?:[a-zA-Z0-9]{4})?(?=$|[/?#])/i)?.[1];
+  return id && !LICHESS_PAGES.has(id.toLowerCase()) ? id : undefined;
 }
 
 const isFinal = (s) => Boolean(s && s.status && s.status !== 'created' && s.status !== 'started');

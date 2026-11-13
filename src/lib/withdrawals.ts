@@ -13,14 +13,22 @@ export interface WithdrawalPlan {
   created: HistoryGame[]; // the open games already created on Lichess
 }
 
-// What the half rule gives for a player leaving now
+// What the half rule gives for a player leaving now. The half is of the place in the standings: a
+// substitute who leaves counts the games played before them by who they replaced (all of them,
+// along a chain of substitutes), as the standings and an annulment do.
 export function planWithdrawal(
   handle: string,
-  history: HistoryGame[],
+  history: HistoryGame[], // the games as stored
   schedule: ScheduledMatch[],
-  gameStates: Record<string, LichessExportGame>
+  gameStates: Record<string, LichessExportGame>,
+  withdrawals?: Withdrawal[] // the season's earlier withdrawals
 ): WithdrawalPlan {
-  const mine = history.filter((g) => involves(g, handle));
+  // The games still on Lichess are those stored under the player's own name
+  const created = history.filter((g) => involves(g, handle)).filter((g) => {
+    const s = stateOf(g, gameStates);
+    return !(gameProgress(s) === 'finished' && !isVoid(s));
+  });
+  const mine = applyWithdrawals(history, withdrawals).filter((g) => involves(g, handle));
   // Aborted games did not happen: they stay open like the ones never started
   const done = mine.filter((g) => {
     const s = stateOf(g, gameStates);
@@ -33,7 +41,6 @@ export function planWithdrawal(
   const played = done.length;
   const total = all.length;
   const open = all.filter((m) => !done.some((g) => same(m, g)));
-  const created = mine.filter((g) => !done.includes(g));
   return { played, total, mode: played * 2 < total ? 'annulled' : 'forfeit', open, created };
 }
 

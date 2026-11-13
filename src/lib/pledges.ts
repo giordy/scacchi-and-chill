@@ -19,6 +19,15 @@ export interface Pledge {
 // One document per season and player
 export const pledgeDocId = (season: string, handle: string) => `${seasonId(season)}--${handle.toLowerCase()}`;
 
+// The documents that may be written this season: one per player. Kept on the tournament document
+// (field pledgeKeys), where firestore.rules reads it: so only a player of the season can accept, and
+// only under the id of the season (the rules cannot work it out from the season's name)
+export const pledgeKeys = (season: string, players: Player[]): string[] => players.map((p) => pledgeDocId(season, p.handle)).sort();
+
+// Whether the keys stored on the tournament are those of the season and its players
+export const samePledgeKeys = (stored: string[] | null | undefined, expected: string[]) =>
+  Array.isArray(stored) && stored.length === expected.length && [...stored].sort().every((k, i) => k === expected[i]);
+
 // The rules as the page shows them: what is accepted
 export function rulesText(meta: TournamentMeta | undefined): string {
   const d = DEFAULT_TOURNAMENT;
@@ -61,10 +70,14 @@ export function pledgeStatus(pledges: Pledge[], season: string, players: Player[
   return { accepted, missing, outdated, all: players.length > 0 && missing.length === 0 };
 }
 
-// A pledge as read from Firestore; null when incomplete
-export function pledgeFromDoc(data: Record<string, unknown>): Pledge | null {
+// A pledge as read from Firestore; null when incomplete. With the id of its document, null also when
+// the document is not the one of that season and player: firestore.rules cannot work out the id of a
+// season, so a visitor can write "anything--anna"; only the document the site writes counts, the one
+// that can be written once and that the organizer cancels.
+export function pledgeFromDoc(data: Record<string, unknown>, id?: string): Pledge | null {
   const at = typeof data.at === 'string' ? Date.parse(data.at) : typeof data.at === 'number' ? data.at : NaN;
   if (typeof data.handle !== 'string' || typeof data.season !== 'string' || !Number.isFinite(at)) return null;
+  if (id !== undefined && id !== pledgeDocId(data.season, data.handle)) return null;
   return { handle: data.handle.toLowerCase(), season: data.season, at, rules: typeof data.rules === 'string' ? data.rules : '' };
 }
 

@@ -3,7 +3,7 @@
 // best run, the opponent who hurt most and the one beaten most, the longest game, the quickest win,
 // the opening played most, the colpacci and how the Elo del torneo moved.
 import { ArchivedGame } from '../types';
-import { byRound } from './games';
+import { byRound, decidedAtTable } from './games';
 import { EloReport, gameKey } from './tournamentElo';
 import { upsetFrom } from './upset';
 
@@ -71,8 +71,8 @@ export function seasonWrapped(handle: string, games: ArchivedGame[], elo?: EloRe
   const nemesis = standsOut(list.filter((r) => balance(r) < 0).sort((a, b) => balance(a) - balance(b)));
   const favourite = standsOut(list.filter((r) => balance(r) > 0).sort((a, b) => balance(b) - balance(a)));
 
-  // Games on the board only (not those won by forfeit), moves rounded up from the half-moves
-  const onBoard = mine.map((g, i) => ({ g, s: scores[i] })).filter(({ g }) => g.status !== 'forfeit' && typeof g.plies === 'number' && g.plies > 0);
+  // Games on the board only (not those decided at the table: forfeits, cheating), moves rounded up from the half-moves
+  const onBoard = mine.map((g, i) => ({ g, s: scores[i] })).filter(({ g }) => !decidedAtTable(g.status) && typeof g.plies === 'number' && g.plies > 0);
   const moves = (g: ArchivedGame) => Math.ceil(g.plies! / 2);
   const longestGame = [...onBoard].sort((a, b) => b.g.plies! - a.g.plies!)[0];
   const quickest = onBoard.filter(({ s }) => s === 1).sort((a, b) => a.g.plies! - b.g.plies!)[0];

@@ -87,7 +87,7 @@ export async function readMediaImage(id: string): Promise<string | null> {
 // Who accepted the rules (lib/pledges.ts), every season
 export async function readPledges(): Promise<Pledge[]> {
   const rows = await listCollection('pledges');
-  return rows.map((r) => pledgeFromDoc(r.data)).filter((p): p is Pledge => p !== null);
+  return rows.map((r) => pledgeFromDoc(r.data, r.id)).filter((p): p is Pledge => p !== null);
 }
 
 const DATABASE = `projects/${firebaseConfig.projectId}/databases/${firebaseConfig.firestoreDatabaseId || '(default)'}`;

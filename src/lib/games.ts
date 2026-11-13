@@ -9,6 +9,11 @@ export const byRound = (a: string, b: string) => a.localeCompare(b, undefined, {
 export const VOID_STATUSES = new Set(['aborted', 'noStart']);
 export const isVoid = (s?: LichessExportGame) => !!s && VOID_STATUSES.has(s.status);
 
+// Games decided at the table: points in the standings, but they say nothing of anyone's level or
+// play, so they are out of the Elo del torneo, the Trofeo Pillsbury, the awards and the records:
+// forfeits after a withdrawal, and games Lichess closed for cheating ("cheat detected")
+export const decidedAtTable = (status: string | undefined) => status === 'forfeit' || status === 'cheat';
+
 // The Lichess state of a game: the fresh one read from Lichess when there is one, otherwise the
 // one stored with the game (also the only one of a game won by forfeit, which has no link)
 export function stateOf(g: HistoryGame, gameStates: Record<string, LichessExportGame>): LichessExportGame | undefined {

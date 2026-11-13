@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { pledgeCommit, readPledges } from '../firestoreRest';
-import { pledgeDocId, pledgeFromDoc, pledgeMessage, pledgeStatus, rulesText, rulesVersion } from '../pledges';
+import { pledgeDocId, pledgeFromDoc, pledgeKeys, pledgeMessage, pledgeStatus, rulesText, rulesVersion, samePledgeKeys } from '../pledges';
 import { currentSeasonActivity } from '../activity';
 import { TournamentMeta } from '../../types';
 
@@ -39,12 +39,35 @@ describe('pledgeStatus', () => {
   });
 });
 
+describe('who may accept (pledgeKeys, read by firestore.rules)', () => {
+  const players = [{ handle: 'Bruno', name: 'Bruno' }, { handle: 'anna', name: 'Anna' }];
+  it('one document id per player of the season, the same the page writes', () => {
+    expect(pledgeKeys('Stagione 3 - Fischer', players)).toEqual(['stagione-3-fischer--anna', 'stagione-3-fischer--bruno']);
+    expect(pledgeKeys('Stagione 3 - Fischer', players)).toContain(pledgeDocId('Stagione 3 - Fischer', 'Bruno'));
+  });
+  it('are put right when missing, or when the season or the players changed', () => {
+    const keys = pledgeKeys('S3', players);
+    expect(samePledgeKeys(['s3--bruno', 's3--anna'], keys)).toBe(true);
+    expect(samePledgeKeys(null, keys)).toBe(false);
+    expect(samePledgeKeys(['s2--anna', 's2--bruno'], keys)).toBe(false);
+    expect(samePledgeKeys(['s3--anna'], keys)).toBe(false);
+  });
+});
+
 describe('the documents', () => {
   it('one per season and player, read back from Firestore', () => {
     expect(pledgeDocId('Stagione 3 - Fischer', 'Anna')).toBe('stagione-3-fischer--anna');
     expect(pledgeFromDoc({ handle: 'Anna', season: 'S', at: '2026-11-13T10:00:00Z', rules: v })).toEqual({ handle: 'anna', season: 'S', at: Date.parse('2026-11-13T10:00:00Z'), rules: v });
     expect(pledgeFromDoc({ handle: 'anna', season: 'S' })).toBeNull();
     expect(typeof readPledges).toBe('function');
+  });
+  it('counts only the document of that season and player: another id the rules let through is ignored', () => {
+    const data = { handle: 'anna', season: 'Stagione 3 - Fischer', at: '2026-11-13T10:00:00Z', rules: v };
+    expect(pledgeFromDoc(data, 'stagione-3-fischer--anna')).not.toBeNull();
+    // Written by hand to change the date or the text accepted, or after the organizer cancelled the real one
+    expect(pledgeFromDoc(data, 'x--anna')).toBeNull();
+    expect(pledgeFromDoc(data, 'stagione-3-fischer-2--anna')).toBeNull();
+    expect(pledgeFromDoc({ ...data, handle: 'bruno' }, 'stagione-3-fischer--anna')).toBeNull();
   });
   it('are written new, with the server time', () => {
     const body = pledgeCommit('projects/p/databases/(default)', meta.season, 'Anna', v);

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error a Node script without types
 import { changed, gameIdOf, syncTargets, toValue } from '../../../scripts/sync-results.mjs';
+import { extractGameId } from '../utils';
 // @ts-expect-error a Node script without types
 import { fields } from '../../../scripts/backup.mjs';
 
@@ -27,5 +28,15 @@ describe('results sync script', () => {
     expect(changed({ status: 'started', moves: 'e4' }, { status: 'started', moves: 'e4' })).toBe(false);
     expect(changed({ status: 'started', moves: 'e4' }, { status: 'started', moves: 'e4 e5' })).toBe(true);
     expect(changed({ status: 'started', moves: 'e4' }, { status: 'resign', moves: 'e4' })).toBe(true);
+  });
+});
+
+describe('the id of a game link', () => {
+  it('is read by the hourly sync as by the site', () => {
+    [
+      'https://lichess.org/AbCd1234', 'https://lichess.org/AbCd1234wXyZ', 'https://lichess.org/game/AbCd1234', 'https://lichess.org/game/export/AbCd1234',
+      'lichess.org/embed/game/AbCd1234', 'https://lichess.org/AbCd1234/black', 'https://lichess.org/training/abc', 'https://lichess.org/analysis',
+      'https://lichess.org/tournament/AbCd1234', '', undefined,
+    ].forEach((u) => expect(gameIdOf(u), String(u)).toBe(extractGameId(u)));
   });
 });

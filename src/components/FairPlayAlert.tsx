@@ -21,9 +21,9 @@ export function FairPlayAlert({
   nameOf: (handle: string) => string;
   awardsBan?: boolean; // TournamentMeta.fairPlayAwardsBan: no trophy for the season
 }) {
-  const left = new Set(withdrawals.map((w) => w.handle));
+  const left = new Set(withdrawals.map((w) => w.handle.toLowerCase()));
   // A first case stays until acknowledged; a repeat stays until the player is out of the tournament
-  const cases = cheatCases(history, gameStates).filter((c) => !left.has(c.handle) && (c.count >= 2 || !seen.includes(c.id)));
+  const cases = cheatCases(history, gameStates).filter((c) => !left.has(c.handle.toLowerCase()) && (c.count >= 2 || !seen.includes(c.id)));
   if (cases.length === 0) return null;
   const firsts = cases.filter((c) => c.count === 1);
 

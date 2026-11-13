@@ -45,7 +45,7 @@ export function WithdrawalSection({
   // Players still playing: not already withdrawn with forfeits
   const active = config.players.filter((p) => !withdrawals.some((w) => w.mode === 'forfeit' && w.handle === p.handle));
   const player = active.find((p) => p.handle === handle);
-  const basePlan = player ? planWithdrawal(player.handle, history, schedule, gameStates) : null;
+  const basePlan = player ? planWithdrawal(player.handle, history, schedule, gameStates, withdrawals) : null;
   const plan = basePlan && exclusion && !withSub ? { ...basePlan, mode: 'annulled' as const } : basePlan;
   const openCreated = plan?.created.filter((g) => g.url).length ?? 0;
 

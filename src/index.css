@@ -616,37 +616,13 @@ details .body {
 }
 
 /* A game in progress has a still dot: in a correspondence tournament there are some almost always.
-   Only a live game (see lib/live.ts), with both players there and moving, has a green pulsing one. */
-.status-badge.ongoing::before,
-.status-badge.live::before {
+   What is worth seeing is which games moved since the last visit: see .new-moves-tag */
+.status-badge.ongoing::before {
   content: "";
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: currentColor;
-}
-
-.status-badge.live {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: color-mix(in srgb, var(--ok) 16%, transparent);
-  color: var(--ok);
-}
-
-.status-badge.live::before {
-  animation: livePulse 1.6s ease-out infinite;
-}
-
-@keyframes livePulse {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 55%, transparent); }
-  100% { box-shadow: 0 0 0 6px transparent; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .status-badge.live::before {
-    animation: none;
-  }
 }
 
 .status-badge.win {
@@ -1361,6 +1337,43 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
 .match-card.is-ongoing {
   border-color: color-mix(in srgb, var(--info) 45%, var(--line));
   box-shadow: inset 4px 0 0 var(--info);
+}
+
+/* Moves the visitor has not seen: the brass of the dot on the Partite tab */
+.match-card.has-new-moves {
+  border-color: var(--brass);
+}
+
+/* The state of the game, with the mark of new moves under it */
+.match-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.new-moves-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--brass-soft);
+  color: var(--brass);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.new-moves-tag .switch-dot,
+.new-moves-note .switch-dot {
+  margin: 0;
+  vertical-align: 1px;
+}
+
+.new-moves-note .switch-dot {
+  margin-right: 6px;
 }
 
 .match-card-body {

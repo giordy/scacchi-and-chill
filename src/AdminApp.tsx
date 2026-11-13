@@ -29,7 +29,7 @@ import { useNameOf } from './components/Names';
 import { saveTournamentFullToFirebase } from './firebaseService';
 import { errorMessage } from './lib/utils';
 import { usePledges } from './hooks/usePledges';
-import { pledgeStatus, rulesVersion } from './lib/pledges';
+import { pledgeKeys, pledgeStatus, rulesVersion, samePledgeKeys } from './lib/pledges';
 import { ChecklistSection, ChecklistTab, closeReminders, seasonChecklist, toggleTick } from './lib/seasonChecklist';
 import { SeasonChecklistPanel } from './components/SeasonChecklistPanel';
 import { openSection } from './components/CollapsibleSection';
@@ -41,11 +41,12 @@ interface AdminAppProps {
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
   gamesLoaded: boolean;
   seasons: SeasonArchive[];
+  storedPledgeKeys?: string[] | null; // see useTournamentSync
 }
 
 // Organizer area (#admin): sign-in, rounds, reviews and tournament settings. Loaded on demand by
 // App, so visitors of the public page never download it (nor Firebase Authentication).
-export default function AdminApp({ config, setConfig, history, setHistory, gamesLoaded, seasons }: AdminAppProps) {
+export default function AdminApp({ config, setConfig, history, setHistory, gamesLoaded, seasons, storedPledgeKeys }: AdminAppProps) {
   const admin = useAdminAuth();
 
   // v3: "Turno" and "Calendario" became "Turni", an old stored value falls back to it
@@ -82,12 +83,22 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
   const updateTournamentMeta = (patch: Partial<TournamentMeta>) => {
     const updatedMeta: TournamentMeta = mergeTournamentMeta(config.tournament, patch);
     setConfig((prev) => ({ ...prev, tournament: updatedMeta }));
-    saveTournamentFullToFirebase({ meta: updatedMeta }).catch(saveFailed('del torneo'));
+    // Who may accept the rules follows the season and its players (lib/pledges.ts pledgeKeys)
+    saveTournamentFullToFirebase({ meta: updatedMeta, pledgeKeys: pledgeKeys(updatedMeta.season, config.players) }).catch(saveFailed('del torneo'));
   };
   const updatePlayers = (updatedPlayers: AppConfig['players']) => {
     setConfig((prev) => ({ ...prev, players: updatedPlayers }));
-    saveTournamentFullToFirebase({ players: updatedPlayers }).catch(saveFailed('dei giocatori'));
+    const season = config.tournament?.season;
+    saveTournamentFullToFirebase({ players: updatedPlayers, ...(season ? { pledgeKeys: pledgeKeys(season, updatedPlayers) } : {}) }).catch(saveFailed('dei giocatori'));
   };
+  // A tournament saved before the keys existed, or changed elsewhere (the console): put them right
+  // once the organizer is in. Only on a document that exists (the rules want its title and season)
+  const expectedKeys = config.tournament?.season ? pledgeKeys(config.tournament.season, config.players) : undefined;
+  const keysOk = !expectedKeys || storedPledgeKeys === undefined || samePledgeKeys(storedPledgeKeys, expectedKeys);
+  useEffect(() => {
+    if (!admin.isAuthenticated || keysOk || !expectedKeys) return;
+    saveTournamentFullToFirebase({ pledgeKeys: expectedKeys }).catch(saveFailed('dei giocatori che accettano il regolamento'));
+  }, [admin.isAuthenticated, keysOk, expectedKeys?.join(',')]);
   const updateSchedule = (updatedSchedule: NonNullable<AppConfig['schedule']>) => {
     setConfig((prev) => ({ ...prev, schedule: updatedSchedule }));
     saveTournamentFullToFirebase({ schedule: updatedSchedule }).catch(saveFailed('del calendario'));
