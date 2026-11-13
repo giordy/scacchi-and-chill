@@ -83,7 +83,10 @@ interface ScoredGame {
   upset: boolean;
   master: boolean;
   summit?: boolean; // scontro al vertice (see lib/summit.ts)
-  silent?: boolean; // counts for the standings but has no event of its own (forfeits after a withdrawal)
+  // Counts for the standings but has no event of its own, nor a first win or a streak: the games decided
+  // at the table, forfeits after a withdrawal and games closed for cheating (the rules ask not to point
+  // at anyone on the site)
+  silent?: boolean;
 }
 
 const lower = (h: string) => h.toLowerCase();
@@ -374,7 +377,7 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
       upset: !forfeit && !!upsetOf(s, elo, { ...board, round: g.round, id }),
       master: !!family && playsFamily(s.opening?.name, family),
       summit: summits.has(summitKey(g)),
-      silent: forfeit,
+      silent: decidedAtTable(s.status),
     });
   });
   events.push(...gameEvents(games, CURRENT, masterLabelOf(input.masterName), input.archives?.length ? pastWinnersOf(input.archives) : undefined));
@@ -607,7 +610,7 @@ export function archivedSeasonActivity(archive: SeasonArchive, elo?: EloReport):
       id: g.id,
       upset: !decidedAtTable(g.status) && !!upsetFrom(g.result, ratings),
       master: !!family && playsFamily(g.opening, family),
-      silent: g.status === 'forfeit',
+      silent: decidedAtTable(g.status),
     });
   });
   const events = gameEvents(games, archive.id, masterLabelOf(archive.masterName));

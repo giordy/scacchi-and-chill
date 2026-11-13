@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { AWARDS_BAN_RULE, cheatCases, outForFairPlay, withAwardsBanRule } from '../fairPlay';
 import { applyWithdrawals } from '../withdrawals';
 import { buildSeasonArchive } from '../seasons';
+import { currentSeasonActivity, archivedSeasonActivity } from '../activity';
 import { Withdrawal } from '../../types';
 import { DEFAULT_TOURNAMENT } from '../tournament';
 import { HistoryGame, LichessExportGame } from '../../types';
@@ -93,6 +94,15 @@ describe('several games closed for cheating', () => {
     expect(archive.champion?.handle).toBe('bruno');
     expect(archive.noTrophies).toEqual(['anna', 'dario', 'carla']);
     expect(archive.awards ?? []).toEqual([]);
+  });
+
+  it('are not told in the cronaca: no result, first win or streak from them, only the standings they make', () => {
+    const events = currentSeasonActivity({ season: 'S', players, history, gameStates: states, fairPlayBan: true });
+    expect(events.filter((e) => ['result', 'firstWin', 'streak'].includes(e.kind))).toEqual([]);
+    // The end of the season still says who wins it
+    expect(events.find((e) => e.kind === 'end')?.parts).toContainEqual({ handle: 'bruno' });
+    const archive = buildSeasonArchive({ title: 'T', season: 'S', description: '', fairPlayAwardsBan: true }, players, history, states);
+    expect(archivedSeasonActivity(archive).filter((e) => e.kind === 'result')).toEqual([]);
   });
 
   it('once a player is excluded (every game annulled), the others are counted as before', () => {
