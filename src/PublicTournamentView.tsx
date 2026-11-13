@@ -237,6 +237,21 @@ export function PublicTournamentView({
     if (movesRead && (view === "matches" || seenMoves === null)) markMovesSeen(lastMoves);
   }, [view, movesRead, lastMoves, seenMoves, markMovesSeen]);
   const newMoves = seenMoves ? Object.entries(lastMoves).filter(([id, at]) => at > (seenMoves[id] ?? 0)).length : 0;
+  // On the Partite tab the dot goes off at once, even when the site opens straight on it: the moves seen
+  // when the tab was opened are kept while it stays open, and the games moved since are marked there
+  const [movesAtOpen, setMovesAtOpen] = useState<SeenMoves | null>(null);
+  useEffect(() => {
+    if (view === "matches") setMovesAtOpen((prev) => prev ?? seenMoves);
+    else setMovesAtOpen(null);
+    // seenMoves on purpose not a dependency: the snapshot is the one of when the tab was opened
+  }, [view]);
+  const freshMoves = useMemo(
+    () => new Set(movesAtOpen ? Object.entries(lastMoves).filter(([id, at]) => at > (movesAtOpen[id] ?? 0)).map(([id]) => id) : []),
+    [movesAtOpen, lastMoves]
+  );
+  const freshPairings = history
+    .filter((g) => freshMoves.has(extractGameId(g.url) ?? ""))
+    .map((g) => `${nameOf(g.white)} – ${nameOf(g.black)}`);
   // Under the standings: the latest results and moments, a door to the cronaca
   const latest = activity.filter((e) => !FRAME_KINDS.has(e.kind)).slice(0, 3);
 
@@ -647,6 +662,16 @@ export function PublicTournamentView({
             </div>
           )}
 
+          {view === "matches" && freshPairings.length > 0 && (
+            <p className="fresh-moves-note" role="status">
+              Mosse nuove dall'ultima visita:{" "}
+              {freshPairings.length <= 4
+                ? freshPairings.join(", ")
+                : `${freshPairings.slice(0, 3).join(", ")} e altre ${freshPairings.length - 3} partite`}
+              .
+            </p>
+          )}
+
           {view !== "matches" ? null : filteredGames.length === 0 ? (
             <p className="note">Le partite compariranno qui quando l'organizzatore pubblica il calendario.</p>
           ) : (
@@ -659,6 +684,7 @@ export function PublicTournamentView({
               presence={presence}
               elo={elo}
               masterTag={masterTag}
+              freshMoves={freshMoves}
             />
           )}
         </section>
