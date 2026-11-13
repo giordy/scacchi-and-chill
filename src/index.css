@@ -3916,23 +3916,3 @@ button.btn-mini.btn-go {
 .season-checklist > summary .muted-normal {
   margin-left: 0.3em;
 }
-
-/* Partite: the games moved since the visitor's last look (the tab's dot goes off once it is open) */
-.status-badge.fresh {
-  color: var(--ink);
-  background: var(--brass-soft);
-  border: 1px solid color-mix(in srgb, var(--brass) 55%, var(--line));
-}
-.fresh-moves-note {
-  margin: 0 0 12px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--brass);
-}
-.match-badges {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}

@@ -32,12 +32,11 @@ interface MatchesByRoundProps {
   presence?: PresenceInfo; // when each player was last on Lichess, for the ongoing games
   elo?: EloReport; // Elo del torneo, for the colpacci
   masterTag?: MasterTag; // the master's opening, tagged on the games that play it
-  freshMoves?: Set<string>; // Lichess ids of the games with a move since the visitor's last look
 }
 
 // Public "Partite": the current round first, then the unfinished games of earlier rounds,
 // the upcoming rounds and finally the played rounds, newest first; both collapsed
-export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence, elo, masterTag, freshMoves }: MatchesByRoundProps) {
+export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence, elo, masterTag }: MatchesByRoundProps) {
   const stateOfGame = (g: HistoryGame) => stateOf(g, gameStates);
   const progressOf = (g: HistoryGame) => gameProgress(stateOfGame(g));
   const legOf = (round: string) =>
@@ -72,7 +71,6 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
           presence={presence}
           elo={elo}
           masterTag={masterTag}
-          fresh={!!freshMoves?.has(extractGameId(g.url) ?? "")}
         />
       ))}
     </div>
@@ -175,7 +173,6 @@ function MatchCard({
   presence,
   elo,
   masterTag,
-  fresh = false,
 }: {
   game: HistoryGame;
   state?: LichessExportGame;
@@ -185,7 +182,6 @@ function MatchCard({
   presence?: PresenceInfo;
   elo?: EloReport;
   masterTag?: MasterTag;
-  fresh?: boolean; // a move since the visitor's last look
 }) {
   // Scheduled game not created on Lichess yet
   let badge = game.url
@@ -259,15 +255,7 @@ function MatchCard({
             <a href={playerHref(game.black)} className="player-name player-page-link">{nameOf(game.black)}</a>
           </div>
         </div>
-        {fresh ? (
-          // A move since the last look: under the state of the game, without taking room from the names
-          <span className="match-badges">
-            {badge}
-            <span className="status-badge fresh">Mossa nuova</span>
-          </span>
-        ) : (
-          badge
-        )}
+        {badge}
       </div>
       <div className="match-footer">
         <div className="match-footer-info">
