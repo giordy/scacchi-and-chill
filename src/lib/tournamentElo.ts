@@ -21,7 +21,7 @@ import { EloSeed, HistoryGame, LichessExportGame, SeasonArchive, SeasonDeparture
 import { byRound, stateOf, isVoid } from './games';
 import { scoredResult } from './standings';
 import { extractGameId } from './utils';
-import { beforeSubstitute, startKnown } from './departures';
+import { playedBy as playedByAt, startKnown } from './departures';
 
 export const ELO_START = 1500;
 export const ELO_K = 32;
@@ -355,12 +355,9 @@ export function computeElo(inputs: EloSeasonInput[]): EloReport {
 // played them; without it, the substitute's rating of that season is doubtful.
 export function eloSeasonFromArchive(archive: SeasonArchive): EloSeasonInput {
   const replaced = (archive.departures ?? []).filter((d) => d.mode === 'replaced' && d.replacedBy);
-  const before = beforeSubstitute;
   const known = startKnown;
-  const playedBy = (handle: string, round: string, end?: number) => {
-    const d = replaced.find((x) => known(x) && lower(x.replacedBy!.handle) === lower(handle) && before(x, round, end));
-    return d ? d.handle : handle;
-  };
+  // Along a chain of substitutes too (see lib/departures.ts playedBy)
+  const playedBy = (handle: string, round: string, end?: number) => playedByAt(replaced, handle, round, end);
   return {
     key: archive.id,
     players: [...archive.standings.map((s) => s.handle), ...replaced.filter(known).map((d) => d.handle)],

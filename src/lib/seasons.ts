@@ -75,17 +75,24 @@ export function seasonDepartures(
   gameStates: Record<string, LichessExportGame>
 ): SeasonDeparture[] {
   const handles = players.map((p) => p.handle);
+  // When each one took a place: a substitute's games count from there. Who left and later came back
+  // as a substitute played before too: only the rounds from their return count for it
+  const entered = new Map<string, string>();
   return departuresOf(withdrawals).map((d) => {
     if (d.mode !== 'replaced' || !d.replacedBy) return d;
     const sub = d.replacedBy.handle.toLowerCase();
+    const since = entered.get(d.handle.toLowerCase());
     const rounds = history
       .filter((g) => {
         const board = playersOnBoard(g, stateOf(g, gameStates), handles);
         return [board.white, board.black].some((h) => h.toLowerCase() === sub) && !!stateOf(g, gameStates)?.players;
       })
       .map((g) => g.round)
+      .filter((r) => since === undefined || byRound(r, since) >= 0)
       .sort(byRound);
-    return rounds.length > 0 ? { ...d, fromRound: rounds[0] } : d;
+    if (rounds.length === 0) return d;
+    entered.set(sub, rounds[0]);
+    return { ...d, fromRound: rounds[0] };
   });
 }
 
