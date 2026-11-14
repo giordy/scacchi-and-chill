@@ -418,8 +418,48 @@
       "black": "drake097",
       "createdAt": 1794247049378,
       "lichess": {
+        "createdAt": 1794393584377,
+        "daysPerTurn": 2,
+        "division": {
+          "end": 33,
+          "middle": 17
+        },
         "id": "IUQYFfYM",
-        "status": "started"
+        "lastFen": "2k3r1/ppp1b2p/8/4pp2/2P5/7P/PP3P1P/RNB2q1K w - - 3 1",
+        "lastMove": "d3f1",
+        "lastMoveAt": 1794606890521,
+        "moves": "e4 e5 Bc4 Nc6 Qf3 Nf6 d3 Be7 Nh3 Nd4 Qd1 d5 Bxd5 Nxd5 exd5 Bxh3 gxh3 Qxd5 Rg1 Nf3+ Kf1 Nxg1 Kxg1 O-O-O c4 Qxd3 Qg4+ f5 Qxg7 Rhg8 Qg2 Rxg2+ Kxg2 Rg8+ Kh1 Qf1#",
+        "opening": {
+          "eco": "C23",
+          "name": "Bishop's Opening",
+          "ply": 3
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "provisional": true,
+            "rating": 1404,
+            "ratingDiff": 240,
+            "user": {
+              "id": "drake097",
+              "name": "drake097"
+            }
+          },
+          "white": {
+            "rating": 1614,
+            "ratingDiff": -26,
+            "user": {
+              "id": "luca_sgarbossa",
+              "name": "luca_sgarbossa"
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "mate",
+        "variant": "standard",
+        "winner": "black"
       },
       "round": "3",
       "url": "https://lichess.org/game/IUQYFfYM",
@@ -1765,6 +1805,16 @@
     "masterColor": "",
     "masterName": "José Raúl Capablanca",
     "masterOpening": "queens-gambit",
+    "pledgeKeys": [
+      "stagione-2-capablanca--battimat",
+      "stagione-2-capablanca--drake097",
+      "stagione-2-capablanca--frasal",
+      "stagione-2-capablanca--fsgach",
+      "stagione-2-capablanca--giords",
+      "stagione-2-capablanca--luca_sgarbossa",
+      "stagione-2-capablanca--matepaco",
+      "stagione-2-capablanca--scarsoforteh"
+    ],
     "rulesText": "",
     "season": "Stagione 2 - Capablanca",
     "seeds": [
