@@ -3727,7 +3727,8 @@ button.btn-mini.is-active { background: var(--brass-soft); }
 
 /* Player page: under a head-to-head of the season, the record across every season */
 /* "Di sempre" under the opponent's name */
-.h2h-subheading { margin: 16px 0 6px; font-size: 14px; color: var(--muted); }
+/* A second part of a card, under its own smaller heading */
+.card-subheading { margin: 16px 0 6px; font-size: 14px; color: var(--muted); }
 
 /* Five tabs on a phone: smaller labels, still on one line */
 .pub-tab-btn { white-space: nowrap; }
@@ -3983,3 +3984,19 @@ button.btn-mini.btn-go {
 .player-zone[hidden] { display: none; }
 .zone-switch { display: flex; width: fit-content; max-width: 100%; margin: 18px 0 12px; }
 .zone-switch button { padding: 8px 16px; font-size: 14px; }
+/* Elo badge: how much it moved in the season, beside the arrow, in the arrow's colour */
+.player-elo-move { margin-left: -2px; font-size: 13px; font-weight: 700; }
+/* The charts keep a readable height on a wide screen: beyond it the drawing stays centred */
+.points-chart > svg { max-height: 220px; }
+/* A single minor pill (the colours, before the time per move is known) is a slim line, not a box */
+.player-season .stat-pills-minor .stat-pill:only-child { display: flex; justify-content: center; align-items: baseline; gap: 8px; }
+/* Player page, games: the link to Lichess looks like what it is, something to tap */
+.player-game .lichess-link-btn {
+  justify-self: start;
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  font-size: 13px;
+}
+.player-game .lichess-link-btn::after { content: " ↗"; }

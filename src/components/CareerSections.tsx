@@ -11,7 +11,8 @@ const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 // top. The season being played is not here: it has the top of the page.
 // highs: the career records under the summary (Elo massimo, colpaccio migliore), when there are any
 // recaps: «La stagione in breve» of each season that has one, by season name: its row opens it
-export function CareerSection({ career, highs, recaps = {} }: { career: CareerSeason[]; highs?: React.ReactNode; recaps?: Record<string, React.ReactNode> }) {
+// label: a season's name as its row says it (the short one, without the tournament's title)
+export function CareerSection({ career, highs, recaps = {}, label = (s) => s }: { career: CareerSeason[]; highs?: React.ReactNode; recaps?: Record<string, React.ReactNode>; label?: (season: string) => string }) {
   const nameOf = useNameOf();
   const [open, setOpen] = useState<string | null>(null);
   const concluded = career.filter((c) => !c.current);
@@ -38,7 +39,7 @@ export function CareerSection({ career, highs, recaps = {} }: { career: CareerSe
             const isOpen = !!recap && open === c.season;
             const row = (
               <>
-                <span className="career-season">{c.season}</span>
+                <span className="career-season">{label(c.season)}</span>
                 <span className="career-place">
                   {medal && <span aria-hidden="true">{MEDAL_EMOJI[medal]} </span>}
                   {c.place === null ? "–" : `${c.place}° su ${c.of}`}

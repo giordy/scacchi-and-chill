@@ -283,7 +283,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const showAllTime = pastGames && allTimeRows.length > 0;
   const careerCards = (showCareer || hasHighs || showAllTime) && (
     <>
-      {(showCareer || hasHighs) && <CareerSection key={handle} career={career} highs={highs} recaps={recaps} />}
+      {(showCareer || hasHighs) && <CareerSection key={handle} career={career} highs={highs} recaps={recaps} label={(season) => shortSeason(season, config.tournament?.title)} />}
       {showAllTime && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
     </>
   );
@@ -358,7 +358,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const pronostico = forecast ? pronosticoPoints(forecast) : 0;
   // The objective is the Trofeo Pillsbury's: none when the award is suspended (too few in the race)
   const pillsburySuspended = race.suspended;
-  const seasonLabel = currentSeason || "Stagione in corso";
+  const seasonLabel = shortSeason(currentSeason, config.tournament?.title) || "Stagione in corso";
   const eloTrend: TrendKind = eloMove > 0 ? "up" : eloMove < 0 ? "down" : "same";
 
   return (
@@ -403,6 +403,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                 <span className="player-elo-label">Elo</span>
                 <span className="player-elo-val">{eloNow}</span>
                 {!newcomer && <Trend kind={eloTrend} label={eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione`} />}
+                {/* How much it moved, beside the arrow that says which way */}
+                {!newcomer && eloMove !== 0 && <span className={`player-elo-move trend-${eloTrend}`} aria-hidden="true">{Math.abs(eloMove)}</span>}
               </InfoTip>
             </div>
             )}
@@ -496,35 +498,35 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
 
       {wrappedCard}
 
-      {pointsByRound.length > 0 && (
+      {/* How the season is going: the points round by round and, under them, how the games end */}
+      {(pointsByRound.length > 0 || wins + losses + endings.draws > 0) && (
         <section className="dossier-card">
           <h2 className="section-heading">Andamento</h2>
           <PointsChart data={pointsByRound} nameOf={nameOf} />
-        </section>
-      )}
-
-      {wins + losses + endings.draws > 0 && (
-        <section className="dossier-card">
-          <h2 className="section-heading">Come finiscono le sue partite</h2>
-          <ul className="endings-list">
-            {wins > 0 && (
-              <li>
-                <span className="endings-label">Vittorie ({wins})</span>
-                <span>{describeEndings(endings.wins)}</span>
-              </li>
-            )}
-            {losses > 0 && (
-              <li>
-                <span className="endings-label">Sconfitte ({losses})</span>
-                <span>{describeEndings(endings.losses)}</span>
-              </li>
-            )}
-            {endings.draws > 0 && (
-              <li>
-                <span className="endings-label">Patte ({endings.draws})</span>
-              </li>
-            )}
-          </ul>
+          {wins + losses + endings.draws > 0 && (
+            <>
+              <h3 className="card-subheading">Come finiscono le sue partite</h3>
+              <ul className="endings-list">
+                {wins > 0 && (
+                  <li>
+                    <span className="endings-label">Vittorie ({wins})</span>
+                    <span>{describeEndings(endings.wins)}</span>
+                  </li>
+                )}
+                {losses > 0 && (
+                  <li>
+                    <span className="endings-label">Sconfitte ({losses})</span>
+                    <span>{describeEndings(endings.losses)}</span>
+                  </li>
+                )}
+                {endings.draws > 0 && (
+                  <li>
+                    <span className="endings-label">Patte ({endings.draws})</span>
+                  </li>
+                )}
+              </ul>
+            </>
+          )}
         </section>
       )}
 
