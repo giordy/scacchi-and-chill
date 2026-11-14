@@ -45,7 +45,7 @@ describe('buildBulletin', () => {
     const b = buildBulletin({ round: '2', games, states, history: games, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(4)], matchesUrl });
     expect(b.isComplete).toBe(false);
     // where to follow the games, just above the site
-    expect(b.text).toContain(`📡 Le partite in diretta: ${matchesUrl}\n\n${defaultConfig.statusPhrases.infoLine}`);
+    expect(b.text).toContain(`📡 Le partite in corso: ${matchesUrl}\n\n${defaultConfig.statusPhrases.infoLine}`);
     expect(b.text).toContain('📊 *Aggiornamento Turno 2*');
     expect(b.text).toContain('*Anna* ⚪ vs *Bruno* ⚫\nDa avviare ⏳');
     // the deadline once, under the games, with the games still to accept
@@ -61,7 +61,7 @@ describe('buildBulletin', () => {
     const e = buildBulletin({ round: '2', games: end, states, history: end, config, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(4)], matchesUrl });
     expect(e.isComplete).toBe(true);
     // nothing left to follow at the round's end
-    expect(e.text).not.toContain('Le partite in diretta');
+    expect(e.text).not.toContain('Le partite in corso');
     expect(e.text).toContain('🎉\n♟️ Apertura: Caro-Kann Defense: Campomanes Attack\n💥 Colpaccio di Elena, contro un avversario sulla carta più forte');
     // A draw against him, once he is 400 points ahead, is a colpaccio too
     const draw = { ...states, ffffffff: { ...states.ffffffff, status: 'draw', winner: undefined } };

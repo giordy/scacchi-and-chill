@@ -339,7 +339,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
     studiesAppendix,
     // During the round, the Partite tab: the games move there between two bulletins
-    !isRoundComplete && matchesUrl ? `📡 Le partite in diretta: ${matchesUrl}` : "",
+    !isRoundComplete && matchesUrl ? `📡 Le partite in corso: ${matchesUrl}` : "",
     // The site, where results update between two bulletins
     config.statusPhrases.infoLine ?? "",
   ]
