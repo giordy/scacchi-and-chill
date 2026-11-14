@@ -4,7 +4,7 @@ import { allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, SeasonGames, 
 import { computeStandings } from '../lib/standings';
 import { archivedGames, seasonDepartures } from '../lib/seasons';
 import { NameOf } from '../lib/roster';
-import { CareerSection, AllTimeHeadToHeadSection, recordWords } from '../components/CareerSections';
+import { CareerSection, AllTimeHeadToHeadSection } from '../components/CareerSections';
 import { computePlayerProfile, EndReason, formatPace, GameOutcome } from '../lib/playerProfile';
 import { playerHref, publicViewHref } from '../lib/routes';
 import { flairFromGames, flairUrl } from '../lib/flair';
@@ -190,8 +190,12 @@ function Flair({ flair }: { flair?: string }) {
 export function PlayerPage({ handle, config, history, gameStates, nameOf, presence, seasons = [] }: PlayerPageProps) {
   const profile = computePlayerProfile(handle, config.players, history, gameStates, config.schedule ?? []);
 
+  // The two zones of the page, one at a time: the season being played first
+  const [zone, setZone] = useState<"season" | "career">("season");
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    setZone("season");
   }, [handle]);
 
   // A former player, not in the current season: found in the hall of fame or in an archived table
@@ -277,14 +281,12 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   // The second zone of the page, after the season being played: everything across seasons. The
   // concluded seasons, the career highs and the record against every opponent ever met
   const showAllTime = pastGames && allTimeRows.length > 0;
-  const acrossSeasons = (showCareer || hasHighs || showAllTime) && (
+  const careerCards = (showCareer || hasHighs || showAllTime) && (
     <>
-      <h2 className="zone-heading">Carriera</h2>
       {(showCareer || hasHighs) && <CareerSection key={handle} career={career} highs={highs} recaps={recaps} />}
       {showAllTime && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
     </>
   );
-  const everOf = (opponent: string) => (pastGames ? allTimeRows.find((r) => r.opponent.toLowerCase() === opponent.toLowerCase()) : undefined);
 
 
   useEffect(() => {
@@ -312,7 +314,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           <p className="note">Non partecipa alla stagione in corso.</p>
         </section>
         {wrappedCard}
-        {acrossSeasons}
+        {careerCards && <h2 className="zone-heading">Carriera</h2>}
+        {careerCards}
       </main>
     );
   }
@@ -355,6 +358,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const pronostico = forecast ? pronosticoPoints(forecast) : 0;
   // The objective is the Trofeo Pillsbury's: none when the award is suspended (too few in the race)
   const pillsburySuspended = race.suspended;
+  const seasonLabel = currentSeason || "Stagione in corso";
   const eloTrend: TrendKind = eloMove > 0 ? "up" : eloMove < 0 ? "down" : "same";
 
   return (
@@ -407,12 +411,26 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
         </div>
       </section>
 
-      {/* First zone: the season being played, under its name. The Carriera, below, is the second */}
-      <h2 className="zone-heading">
-        {currentSeason || "Stagione in corso"}
-        {!currentOver && <span className="zone-tag">in corso</span>}
-      </h2>
+      {/* Two zones, one at a time: the season being played, under its name, and the Carriera. Both are
+          in the page, the one not chosen hidden: what is open in the Carriera stays so. Without a
+          Carriera (a first season) the season has only its name */}
+      {careerCards ? (
+        <div className="view-switch zone-switch" role="group" aria-label="Stagione in corso o carriera">
+          <button type="button" className={zone === "season" ? "active" : ""} aria-pressed={zone === "season"} onClick={() => setZone("season")}>
+            {seasonLabel}
+          </button>
+          <button type="button" className={zone === "career" ? "active" : ""} aria-pressed={zone === "career"} onClick={() => setZone("career")}>
+            Carriera
+          </button>
+        </div>
+      ) : (
+        <h2 className="zone-heading">
+          {seasonLabel}
+          {!currentOver && <span className="zone-tag">in corso</span>}
+        </h2>
+      )}
 
+      <div className="player-zone" hidden={!!careerCards && zone !== "season"}>
       <section className="dossier-card player-season">
         <div className="stat-pills">
           <div className="stat-pill">
@@ -523,15 +541,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
         <ul className="h2h-list">
           {headToHead.map((h) => (
             <li key={h.opponent} className="h2h-row">
-              <span className="h2h-who">
-                <a href={playerHref(h.opponent)} className="h2h-name">{nameOf(h.opponent)}</a>
-                {(() => {
-                  const ever = everOf(h.opponent);
-                  // Only when the past seasons add something to this season's games
-                  if (!ever || ever.seasons < 2 && ever.won + ever.drawn + ever.lost <= h.outcomes.length) return null;
-                  return <span className="h2h-ever">Di sempre <b>{fmt(ever.scored)}–{fmt(ever.conceded)}</b> · {recordWords(ever)}</span>;
-                })()}
-              </span>
+              <a href={playerHref(h.opponent)} className="h2h-name">{nameOf(h.opponent)}</a>
               <span className="h2h-games">
                 {h.outcomes.map((o, i) => (
                   <span key={i} className={`status-badge ${OUTCOME_CLASS[o]}`}>{OUTCOME_LABEL[o]}</span>
@@ -585,8 +595,9 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           </ul>
         )}
       </section>
+      </div>
 
-      {acrossSeasons}
+      {careerCards && <div className="player-zone" hidden={zone !== "career"}>{careerCards}</div>}
     </main>
   );
 }

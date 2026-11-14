@@ -135,14 +135,16 @@ describe('player page', () => {
   it('shows the career and the all-time head-to-heads of a current player', () => {
     const html = playerPage('anna');
     expect(html).toContain('Carriera');
-    // Two zones: the season being played under its name, then the Carriera with the concluded ones
-    expect(html).toContain('<span class="zone-tag">in corso</span>');
+    // Two zones, one at a time: the season being played first, the Carriera with the concluded ones
+    expect(html).toContain('aria-label="Stagione in corso o carriera"');
+    expect(html).toContain('<div class="player-zone" hidden="">');
     expect(html).toContain('1 stagione conclusa');
-    expect(html.indexOf('class="section-heading">Partite')).toBeLessThan(html.indexOf('class="zone-heading">Carriera'));
+    expect(html.indexOf('class="section-heading">Partite')).toBeLessThan(html.indexOf('Stagioni concluse'));
     // The season being played is not a row of the Carriera
     expect(html).not.toContain('career-current');
-    // The record against everyone ever met is in the Carriera, not among the season's head-to-heads
-    expect(html.indexOf('Scontri diretti di sempre')).toBeGreaterThan(html.indexOf('class="zone-heading">Carriera'));
+    // The record against everyone ever met is said once, in the Carriera
+    expect(html.indexOf('Scontri diretti di sempre')).toBeGreaterThan(html.indexOf('Stagioni concluse'));
+    expect(html).not.toContain('Di sempre ');
     expect(html).not.toContain('Nelle stagioni passate');
   });
 
@@ -157,7 +159,7 @@ describe('player page', () => {
     // Once over: a card of its own at the top, for the season just played
     expect(html).toContain('wrapped-card');
     expect(html).toContain('2 vittorie di fila');
-    expect(html.indexOf('wrapped-card')).toBeLessThan(html.indexOf('Carriera'));
+    expect(html.indexOf('wrapped-card')).toBeLessThan(html.indexOf('Stagioni concluse'));
   });
 
   it('gives a page to a former player found in an archived table', () => {
@@ -221,6 +223,9 @@ describe('player page', () => {
   it('has no sections across seasons without an archive', () => {
     const html = playerPage('anna', []);
     expect(html).not.toContain('Carriera');
+    // The season has its name all the same, without a switch
+    expect(html).toContain('<span class="zone-tag">in corso</span>');
+    expect(html).not.toContain('zone-switch');
     expect(html).not.toContain('Scontri diretti di sempre');
   });
 });
