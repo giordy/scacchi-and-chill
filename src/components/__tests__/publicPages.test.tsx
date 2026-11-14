@@ -135,19 +135,23 @@ describe('player page', () => {
   it('shows the career and the all-time head-to-heads of a current player', () => {
     const html = playerPage('anna');
     expect(html).toContain('Carriera');
-    expect(html).toContain('2 stagioni');
-    expect(html).toContain('in corso');
-    // The all-time record is in the season's head-to-heads, not in a list of its own
-    expect(html).not.toContain('Scontri diretti di sempre');
-    expect(html).toMatch(/Di sempre |Nelle stagioni passate/);
+    // Two zones: the season being played under its name, then the Carriera with the concluded ones
+    expect(html).toContain('<span class="zone-tag">in corso</span>');
+    expect(html).toContain('1 stagione conclusa');
+    expect(html.indexOf('class="section-heading">Partite')).toBeLessThan(html.indexOf('class="zone-heading">Carriera'));
+    // The season being played is not a row of the Carriera
+    expect(html).not.toContain('career-current');
+    // The record against everyone ever met is in the Carriera, not among the season's head-to-heads
+    expect(html.indexOf('Scontri diretti di sempre')).toBeGreaterThan(html.indexOf('class="zone-heading">Carriera'));
+    expect(html).not.toContain('Nelle stagioni passate');
   });
 
   it('sums up the season on the player page once its last game is over, and the past ones in the Carriera', () => {
-    // During the season: no card of its own, the archived season is a view of the Carriera
+    // During the season: no card of its own, the archived season opens from its row of the Carriera
     const during = playerPage('anna');
     expect(during).not.toContain('wrapped-card');
-    expect(during).toContain('aria-label="Vista della carriera"');
-    expect(during).toContain('>La stagione in breve</button>');
+    expect(during).toContain('class="career-row-main career-toggle" aria-expanded="false"');
+    expect(during).not.toContain('wrapped-list');
     const over = { ...gameStates, bbbbbbbb: { id: 'bbbbbbbb', status: 'resign', winner: 'black' as const, moves: 'd4 d5', createdAt: 1, lastMoveAt: 3 } };
     const html = renderToStaticMarkup(<PlayerPage handle="anna" config={config} history={history} gameStates={over} nameOf={nameOf} seasons={[season1]} />);
     // Once over: a card of its own at the top, for the season just played
@@ -179,7 +183,7 @@ describe('player page', () => {
     expect(html).toContain('Scontri diretti di sempre');
     // Dario keeps only the games from round 2, Greta played the one against Anna in round 1
     const dario = playerPage('dario', [withStart]);
-    expect(dario).toContain('1 stagione · 2 partite · 1 punto');
+    expect(dario).toContain('1 stagione conclusa · 2 partite · 1 punto');
     expect(dario).toContain('1P');
   });
 

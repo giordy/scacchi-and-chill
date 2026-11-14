@@ -189,8 +189,6 @@ function Flair({ flair }: { flair?: string }) {
 // Public page of a single player: results, games and opponents still to face
 export function PlayerPage({ handle, config, history, gameStates, nameOf, presence, seasons = [] }: PlayerPageProps) {
   const profile = computePlayerProfile(handle, config.players, history, gameStates, config.schedule ?? []);
-  // The season chosen for «La stagione in breve», on this player's page
-  const [wrappedPick, setWrappedPick] = useState<{ handle: string; season: string } | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -269,25 +267,21 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   const currentGames = withGames.find((x) => x.current);
   const currentRecap = currentOver && currentGames?.games.some(plays) ? recapOf(currentGames) : null;
   const wrappedCard = currentRecap && <WrappedCard {...currentRecap} />;
-  // The archived seasons: in the Carriera, one at a time, the latest first. Kept apart from the season
-  // being played, so that their numbers are not taken for this season's
-  const pastRecaps = withGames.filter((x) => !x.current && x.games.some(plays));
-  const pickedPast = (wrappedPick?.handle === handle ? pastRecaps.find((x) => x.season === wrappedPick.season) : undefined) ?? pastRecaps[pastRecaps.length - 1];
-  const pastRecap = pickedPast ? recapOf(pickedPast) : null;
-  const recapInCareer = pastRecap && (
-    <WrappedCard
-      {...pastRecap}
-      embedded
-      seasons={pastRecaps.map((x) => x.season)}
-      onPick={(season) => setWrappedPick({ handle, season })}
-      label={(season) => shortSeason(season, config.tournament?.title)}
-    />
-  );
-  // For who plays the season the all-time record goes in the season's head-to-heads (one list)
-  const acrossSeasons = (withAllTime: boolean) => (
+  // The archived seasons: in the Carriera, each under its own row, opened with a tap. Kept apart from
+  // the season being played, so that their numbers are not taken for this season's
+  const recaps: Record<string, React.ReactNode> = {};
+  withGames.filter((x) => !x.current && x.games.some(plays)).forEach((x) => {
+    const recap = recapOf(x);
+    if (recap) recaps[x.season] = <WrappedCard {...recap} embedded />;
+  });
+  // The second zone of the page, after the season being played: everything across seasons. The
+  // concluded seasons, the career highs and the record against every opponent ever met
+  const showAllTime = pastGames && allTimeRows.length > 0;
+  const acrossSeasons = (showCareer || hasHighs || showAllTime) && (
     <>
-      {(showCareer || hasHighs) && <CareerSection career={career} highs={highs} recap={recapInCareer || undefined} />}
-      {withAllTime && pastGames && allTimeRows.length > 0 && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
+      <h2 className="zone-heading">Carriera</h2>
+      {(showCareer || hasHighs) && <CareerSection key={handle} career={career} highs={highs} recaps={recaps} />}
+      {showAllTime && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
     </>
   );
   const everOf = (opponent: string) => (pastGames ? allTimeRows.find((r) => r.opponent.toLowerCase() === opponent.toLowerCase()) : undefined);
@@ -318,7 +312,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           <p className="note">Non partecipa alla stagione in corso.</p>
         </section>
         {wrappedCard}
-        {acrossSeasons(true)}
+        {acrossSeasons}
       </main>
     );
   }
@@ -333,8 +327,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   }
 
   const { player, rank, tied, standing, games, pointsByRound, headToHead, pace, byColor, endings } = profile;
-  // Opponents met only in past seasons: under this season's
-  const pastOnly = pastGames ? allTimeRows.filter((r) => !headToHead.some((h) => h.opponent.toLowerCase() === r.opponent.toLowerCase())) : [];
   const sum = (counts: Record<EndReason, number>) => END_ORDER.reduce((n, r) => n + counts[r], 0);
   const wins = sum(endings.wins);
   const losses = sum(endings.losses);
@@ -413,7 +405,15 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
             <TrophyShelf medals={medals} champion={isChampion ? champions!.season : undefined} title={config.tournament?.title} pillsbury={pillsburyWins(player.handle, seasons)} seasons={seasons} />
           </div>
         </div>
+      </section>
 
+      {/* First zone: the season being played, under its name. The Carriera, below, is the second */}
+      <h2 className="zone-heading">
+        {currentSeason || "Stagione in corso"}
+        {!currentOver && <span className="zone-tag">in corso</span>}
+      </h2>
+
+      <section className="dossier-card player-season">
         <div className="stat-pills">
           <div className="stat-pill">
             <span className="stat-pill-label">Posizione</span>
@@ -551,23 +551,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
             </li>
           ))}
         </ul>
-        {pastOnly.length > 0 && (
-          <>
-            <h3 className="h2h-subheading">Nelle stagioni passate</h3>
-            <ul className="h2h-list">
-              {pastOnly.map((h) => (
-                <li key={h.opponent} className="h2h-row">
-                  <a href={playerHref(h.opponent)} className="h2h-name">{longNameOf(h.opponent)}</a>
-                  <span className="h2h-past-record">{recordWords(h)} <b>{fmt(h.scored)}–{fmt(h.conceded)}</b></span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-        {pastGames && since && <p className="note note-sm">Gli scontri di sempre partono dalle partite registrate da {since}.</p>}
       </section>
-
-      {acrossSeasons(false)}
 
       <section className="dossier-card">
         <h2 className="section-heading">Partite ({games.length})</h2>
@@ -601,6 +585,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           </ul>
         )}
       </section>
+
+      {acrossSeasons}
     </main>
   );
 }

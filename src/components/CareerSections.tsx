@@ -7,61 +7,66 @@ import { useNameOf } from './Names';
 
 const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
-// Player page: every season they played, newest first, with a short summary on top
+// Player page, in the Carriera: the seasons already concluded, newest first, with a short summary on
+// top. The season being played is not here: it has the top of the page.
 // highs: the career records under the summary (Elo massimo, colpaccio migliore), when there are any
-// The Carriera, and when given «La stagione in breve» of the past seasons in a view of its own
-export function CareerSection({ career, highs, recap }: { career: CareerSeason[]; highs?: React.ReactNode; recap?: React.ReactNode }) {
+// recaps: «La stagione in breve» of each season that has one, by season name: its row opens it
+export function CareerSection({ career, highs, recaps = {} }: { career: CareerSeason[]; highs?: React.ReactNode; recaps?: Record<string, React.ReactNode> }) {
   const nameOf = useNameOf();
-  const [view, setView] = useState<'summary' | 'recap'>('summary');
-  const finished = career.filter((c) => !c.current && c.place !== null);
-  const best = finished.length > 0 ? Math.min(...finished.map((c) => c.place!)) : null;
-  const played = career.reduce((n, c) => n + c.played, 0);
-  const points = career.reduce((n, c) => n + c.points, 0);
+  const [open, setOpen] = useState<string | null>(null);
+  const concluded = career.filter((c) => !c.current);
+  const placed = concluded.filter((c) => c.place !== null);
+  const best = placed.length > 0 ? Math.min(...placed.map((c) => c.place!)) : null;
+  const played = concluded.reduce((n, c) => n + c.played, 0);
+  const points = concluded.reduce((n, c) => n + c.points, 0);
   const summary = [
-    `${career.length} ${career.length === 1 ? "stagione" : "stagioni"}`,
+    concluded.length === 1 ? "1 stagione conclusa" : `${concluded.length} stagioni concluse`,
     `${played} ${played === 1 ? "partita" : "partite"}`,
     `${fmt(points)} ${points === 1 || points === 0.5 ? "punto" : "punti"}`,
     best !== null ? `miglior piazzamento ${best}°` : "",
   ].filter(Boolean);
   return (
     <section className="dossier-card">
-      <h2 className="section-heading">Carriera</h2>
-      {recap && (
-        <div className="view-switch" role="group" aria-label="Vista della carriera">
-          <button type="button" className={view === "summary" ? "active" : ""} aria-pressed={view === "summary"} onClick={() => setView("summary")}>
-            Riepilogo
-          </button>
-          <button type="button" className={view === "recap" ? "active" : ""} aria-pressed={view === "recap"} onClick={() => setView("recap")}>
-            La stagione in breve
-          </button>
-        </div>
-      )}
-      {recap && view === "recap" ? recap : (
-        <>
-      <p className="note career-summary">{summary.join(" · ")}</p>
+      <h2 className="section-heading">{concluded.length > 0 ? "Stagioni concluse" : "Primati"}</h2>
+      {concluded.length > 0 && <p className="note career-summary">{summary.join(" · ")}</p>}
       {highs}
-      <ul className="career-list">
-        {career.map((c) => {
-          const medal = c.place !== null && !c.current ? podiumPlace(c.place, c.points) : undefined;
-          return (
-            <li key={c.season} className="career-row">
-              <span className="career-season">{c.season}</span>
-              <span className="career-place">
-                {medal && <span aria-hidden="true">{MEDAL_EMOJI[medal]} </span>}
-                {c.place === null ? "–" : `${c.place}° su ${c.of}`}
-                {c.tied && " (pari merito)"}
-                {c.current && <span className="career-current"> · in corso</span>}
-              </span>
-              <span className="career-score">
-                {fmt(c.points)} pt · {c.won}V {c.drawn}N {c.lost}P
-                {c.replacing && ` · al posto di ${nameOf(c.replacing.handle, c.replacing.name)}`}
-                {c.replacedBy && ` · poi al suo posto ${nameOf(c.replacedBy.handle, c.replacedBy.name)}`}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-        </>
+      {concluded.length > 0 && (
+        <ul className="career-list">
+          {concluded.map((c) => {
+            const medal = c.place !== null ? podiumPlace(c.place, c.points) : undefined;
+            const recap = recaps[c.season];
+            const isOpen = !!recap && open === c.season;
+            const row = (
+              <>
+                <span className="career-season">{c.season}</span>
+                <span className="career-place">
+                  {medal && <span aria-hidden="true">{MEDAL_EMOJI[medal]} </span>}
+                  {c.place === null ? "–" : `${c.place}° su ${c.of}`}
+                  {c.tied && " (pari merito)"}
+                </span>
+                <span className="career-score">
+                  {fmt(c.points)} pt · {c.won}V {c.drawn}N {c.lost}P
+                  {c.replacing && ` · al posto di ${nameOf(c.replacing.handle, c.replacing.name)}`}
+                  {c.replacedBy && ` · poi al suo posto ${nameOf(c.replacedBy.handle, c.replacedBy.name)}`}
+                </span>
+              </>
+            );
+            return (
+              <li key={c.season} className="career-row">
+                {recap ? (
+                  <button type="button" className="career-row-main career-toggle" aria-expanded={isOpen} onClick={() => setOpen(isOpen ? null : c.season)}>
+                    {row}
+                    <span className="career-chevron" aria-hidden="true">›</span>
+                    <span className="sr-only">La stagione in breve</span>
+                  </button>
+                ) : (
+                  <div className="career-row-main">{row}</div>
+                )}
+                {isOpen && <div className="career-recap">{recap}</div>}
+              </li>
+            );
+          })}
+        </ul>
       )}
     </section>
   );
