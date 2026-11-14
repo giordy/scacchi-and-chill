@@ -3984,7 +3984,7 @@ button.btn-mini.btn-go {
 .player-zone[hidden] { display: none; }
 .zone-switch { display: flex; width: fit-content; max-width: 100%; margin: 18px 0 12px; }
 .zone-switch button { padding: 8px 16px; font-size: 14px; }
-/* Elo badge: how much it moved in the season, beside the arrow, in the arrow's colour */
+/* Elo badge: how much it rose in the season, beside the arrow, in the arrow's colour */
 .player-elo-move { margin-left: -2px; font-size: 13px; font-weight: 700; }
 /* The charts keep a readable height on a wide screen: beyond it the drawing stays centred */
 .points-chart > svg { max-height: 220px; }

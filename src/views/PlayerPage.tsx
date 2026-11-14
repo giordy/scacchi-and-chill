@@ -403,8 +403,9 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                 <span className="player-elo-label">Elo</span>
                 <span className="player-elo-val">{eloNow}</span>
                 {!newcomer && <Trend kind={eloTrend} label={eloMove === 0 ? "come a inizio stagione" : `${eloMove > 0 ? "+" : "−"}${Math.abs(eloMove)} da inizio stagione`} />}
-                {/* How much it moved, beside the arrow that says which way */}
-                {!newcomer && eloMove !== 0 && <span className={`player-elo-move trend-${eloTrend}`} aria-hidden="true">{Math.abs(eloMove)}</span>}
+                {/* How much it rose, beside the arrow: good news only. A fall has the arrow alone, its
+                    number a tap away in the explanation */}
+                {!newcomer && eloMove > 0 && <span className="player-elo-move trend-up" aria-hidden="true">{eloMove}</span>}
               </InfoTip>
             </div>
             )}
