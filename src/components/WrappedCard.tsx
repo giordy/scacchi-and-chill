@@ -11,23 +11,14 @@ import { PILLSBURY_EMOJI, PILLSBURY_TITLE } from '../lib/pillsbury';
 const halves = (n: number) => String(n).replace('.5', '½').replace(/^0½/, '½');
 const pts = (n: number) => `${halves(n)} ${n === 1 ? 'punto' : 'punti'}`;
 const OUTCOME = ['persa', 'patta', 'vinta'];
-const one = (n: number) => n.toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-const signedOne = (n: number) => (n < 0 ? `−${one(-n)}` : `+${one(n)}`);
 
-// How the race for the Trofeo Pillsbury went for the player: the objective, the points, the gap
-// measured against what chance alone could do, and the place. The numbers the trophy was given by
+// How the race for the Trofeo Pillsbury went for the player, in a few words: the objective, the
+// points and the place. How the race is ordered is told under its table (components/PillsburyRace)
 export function pillsburyLine(mine: PillsburyEntry, race: PillsburyEntry[]): string {
   const objective = Math.round(mine.objective * 2) / 2;
   const gap = mine.points - objective;
-  const gapText = gap > 0 ? `${halves(gap)} in più` : gap < 0 ? `${halves(-gap)} in meno` : "pari all'obiettivo";
-  const over = mine.points - mine.objective;
-  const margin = `Il caso da solo può spostare circa ±${one(mine.spread)} punti`;
-  const ratio = over > 0 ? `${margin}: lo scarto esatto, ${signedOne(over)}, vale ${one(mine.score)} volte questo margine.` : `${margin}.`;
-  const winners = race.filter((r) => r.winner);
-  const place = mine.winner
-    ? `${mine.place}° su ${race.length} nella corsa: il più alto.`
-    : `${mine.place}° su ${race.length} nella corsa${winners.length > 0 ? `; chi l'ha vinto: ${one(winners[0].score)} volte.` : ', nessuno sopra il proprio obiettivo.'}`;
-  return `Obiettivo ${halves(objective)}, fatti ${halves(mine.points)}: ${gapText}. ${ratio} ${place}`;
+  const gapText = gap > 0 ? `${halves(gap)} in più` : gap < 0 ? `${halves(-gap)} in meno` : "in linea";
+  return `obiettivo ${halves(objective)}, fatti ${halves(mine.points)} (${gapText}): ${mine.place}° su ${race.length} nella corsa.`;
 }
 
 // Player page, at the end of a season: «La stagione in breve», one line per figure that says something

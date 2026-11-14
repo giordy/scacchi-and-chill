@@ -42,15 +42,10 @@ describe('the Pillsbury line of «La stagione in breve»', () => {
   });
   const race = [entry('anna', 7, 5.2, 0.9, 1, true), entry('bruno', 9, 6.6, 1.4, 2), entry('carla', 4, 5.4, 1.2, 3)];
 
-  it('gives the objective, the gap, the margin and the place', () => {
-    expect(pillsburyLine(race[1], race)).toBe(
-      'Obiettivo 6½, fatti 9: 2½ in più. Il caso da solo può spostare circa ±1,4 punti: lo scarto esatto, +2,4, vale 1,7 volte questo margine. 2° su 3 nella corsa; chi l\'ha vinto: 2,0 volte.'
-    );
-    expect(pillsburyLine(race[0], race)).toContain('1° su 3 nella corsa: il più alto.');
-  });
-
-  it('says no ratio below the objective', () => {
-    expect(pillsburyLine(race[2], race)).toBe('Obiettivo 5½, fatti 4: 1½ in meno. Il caso da solo può spostare circa ±1,2 punti. 3° su 3 nella corsa; chi l\'ha vinto: 2,0 volte.');
+  it('gives the objective, the points and the place', () => {
+    expect(pillsburyLine(race[1], race)).toBe('obiettivo 6½, fatti 9 (2½ in più): 2° su 3 nella corsa.');
+    expect(pillsburyLine(race[2], race)).toBe('obiettivo 5½, fatti 4 (1½ in meno): 3° su 3 nella corsa.');
+    expect(pillsburyLine(entry('dario', 5, 4.9, 1, 2), race)).toContain('(in linea)');
   });
 });
 
