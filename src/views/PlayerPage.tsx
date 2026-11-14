@@ -189,6 +189,8 @@ function Flair({ flair }: { flair?: string }) {
 // Public page of a single player: results, games and opponents still to face
 export function PlayerPage({ handle, config, history, gameStates, nameOf, presence, seasons = [] }: PlayerPageProps) {
   const profile = computePlayerProfile(handle, config.players, history, gameStates, config.schedule ?? []);
+  // The season chosen for «La stagione in breve», on this player's page
+  const [wrappedPick, setWrappedPick] = useState<{ handle: string; season: string } | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -239,17 +241,18 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
       {withAllTime && pastGames && allTimeRows.length > 0 && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
     </>
   );
-  // «La stagione in breve»: the current season once its last game is over; while the player has no
-  // finished game in the current one, the latest archived season they played
+  // «La stagione in breve», of any season the player played: the archived ones (with their games),
+  // and the current one once its last game is over. Shown first: the current season once over, and
+  // otherwise the latest archived one; the others are chosen above the card
   const plays = (g: { white: string; black: string }) => [g.white, g.black].some((h) => h.toLowerCase() === shownHandle.toLowerCase());
   const progress = computeSeasonProgress(history, gameStates, config.schedule ?? []);
   const currentOver = progress.total > 0 && progress.finished === progress.total;
-  const currentGames = withGames.find((x) => x.current);
-  const wrappedOf = currentOver && currentGames?.games.some(plays)
-    ? currentGames
-    : currentGames?.games.some(plays)
-    ? undefined
-    : [...withGames].reverse().find((x) => !x.current && x.games.some(plays));
+  const wrappable = withGames.filter((x) => (!x.current || currentOver) && x.games.some(plays));
+  const chosenWrapped = wrappedPick?.handle === handle ? wrappable.find((x) => x.season === wrappedPick.season) : undefined;
+  const wrappedOf = chosenWrapped ?? wrappable[wrappable.length - 1];
+  // While the player is in a season still going, the card goes down by the Carriera: the top of the
+  // page is for the season being played
+  const wrappedBelow = !!profile && !currentOver;
   const wrappedArchive = wrappedOf && !wrappedOf.current ? seasons.find((x) => x.season === wrappedOf.season) : undefined;
   const wrapped = wrappedOf ? seasonWrapped(shownHandle, wrappedOf.games, elo, wrappedOf.current ? CURRENT : wrappedArchive?.id) : null;
   const wrappedAwards = !wrapped
@@ -278,6 +281,9 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
       pillsbury={pillsburyMine && pillsburyFinal ? { mine: pillsburyMine, race: pillsburyFinal } : undefined}
       eloPath={eloPath}
       nameOf={longNameOf}
+      seasons={wrappable.map((x) => x.season)}
+      onPick={(season) => setWrappedPick({ handle, season })}
+      label={(season) => shortSeason(season, config.tournament?.title)}
     />
   );
   const everOf = (opponent: string) => (pastGames ? allTimeRows.find((r) => r.opponent.toLowerCase() === opponent.toLowerCase()) : undefined);
@@ -466,7 +472,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
         )}
       </section>
 
-      {wrappedCard}
+      {!wrappedBelow && wrappedCard}
 
       {pointsByRound.length > 0 && (
         <section className="dossier-card">
@@ -558,6 +564,8 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
       </section>
 
       {acrossSeasons(false)}
+
+      {wrappedBelow && wrappedCard}
 
       <section className="dossier-card">
         <h2 className="section-heading">Partite ({games.length})</h2>

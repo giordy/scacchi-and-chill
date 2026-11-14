@@ -3934,3 +3934,5 @@ button.btn-mini.btn-go {
 .elo-chart { margin: 14px 0 0; }
 .elo-chart figcaption { margin: 4px 0 0; }
 .pc-base { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
+/* «La stagione in breve»: one button per season, wrapping on a phone */
+.wrapped-seasons { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; border-radius: 18px; }

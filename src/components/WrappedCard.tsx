@@ -30,6 +30,9 @@ export function WrappedCard({
   pillsbury,
   eloPath,
   nameOf,
+  seasons = [],
+  onPick,
+  label = (s) => s,
 }: {
   season: string;
   wrapped: SeasonWrapped;
@@ -38,6 +41,9 @@ export function WrappedCard({
   pillsbury?: { mine: PillsburyEntry; race: PillsburyEntry[] }; // the final race (SeasonArchive.pillsbury), when the player was in it
   eloPath?: EloPath | null; // the Elo del torneo game after game
   nameOf: (handle: string) => string;
+  seasons?: string[]; // every season with a recap, oldest first: a switch when more than one
+  onPick?: (season: string) => void;
+  label?: (season: string) => string; // a season's name on its button
 }) {
   const w = wrapped;
   const vs = (handle: string) => <a href={playerHref(handle)}>{nameOf(handle)}</a>;
@@ -69,7 +75,17 @@ export function WrappedCard({
   return (
     <section className="dossier-card wrapped-card">
       <h2 className="section-heading">La stagione in breve</h2>
-      <p className="note note-sm">{season}</p>
+      {seasons.length > 1 && onPick ? (
+        <div className="view-switch wrapped-seasons" role="group" aria-label="Stagione">
+          {seasons.map((s) => (
+            <button key={s} type="button" className={s === season ? 'active' : ''} aria-pressed={s === season} onClick={() => onPick(s)}>
+              {label(s)}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="note note-sm">{season}</p>
+      )}
       <ul className="wrapped-list">
         {lines.map((l, i) => (
           <li key={i}>
