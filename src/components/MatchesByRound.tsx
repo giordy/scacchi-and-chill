@@ -34,7 +34,7 @@ interface MatchesByRoundProps {
   moved?: Set<string>; // Lichess ids of the games with moves the visitor has not seen (lib/seenMoves.ts)
 }
 
-// Public "Partite": the current round first, then the unfinished games of earlier rounds,
+// Public "Partite": the current round first (its games by what there is to see), then the unfinished games of earlier rounds,
 // the upcoming rounds and finally the played rounds, newest first; both collapsed
 export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence, elo, masterTag, moved }: MatchesByRoundProps) {
   const hasMoved = (g: HistoryGame) => {
@@ -99,10 +99,17 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
     );
   };
 
-  const openRound = (block: RoundBlock, extraClass = "", tag?: string) => (
+  // The current round by what there is to see, not by pairing: the games with moves the visitor has not
+  // seen, then those being played, those still to start and last the finished ones. Within each, as paired
+  const ORDER = { ongoing: 1, pending: 2, finished: 3 } as const;
+  const rankOf = (g: HistoryGame) => (hasMoved(g) ? 0 : ORDER[progressOf(g)]);
+  const byNews = (roundGames: HistoryGame[]) =>
+    roundGames.map((g, i) => ({ g, i, rank: rankOf(g) })).sort((a, b) => a.rank - b.rank || a.i - b.i).map((x) => x.g);
+
+  const openRound = (block: RoundBlock, extraClass = "", tag?: string, sorted = false) => (
     <section key={block.round} className={`round-group${extraClass}`} aria-labelledby={`round-${block.round}`}>
       <header className="round-group-header">{header(block, tag)}</header>
-      {grid(block.games)}
+      {grid(sorted ? byNews(block.games) : block.games)}
     </section>
   );
 
@@ -138,7 +145,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
   return (
     <div className="rounds-list">
       {movedNote}
-      {openRound(layout.current, " is-current", layout.concluded ? "Ultimo turno" : "Turno attuale")}
+      {openRound(layout.current, " is-current", layout.concluded ? "Ultimo turno" : "Turno attuale", true)}
 
       {layout.late.length > 0 && (
         <section className="round-group is-late" aria-labelledby="late-games">

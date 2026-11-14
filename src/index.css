@@ -3990,8 +3990,9 @@ button.btn-mini.btn-go {
 .points-chart > svg { max-height: 220px; }
 /* A single minor pill (the colours, before the time per move is known) is a slim line, not a box */
 .player-season .stat-pills-minor .stat-pill:only-child { display: flex; justify-content: center; align-items: baseline; gap: 8px; }
-/* Player page, games: the link to Lichess looks like what it is, something to tap */
-.player-game .lichess-link-btn {
+/* The link to Lichess of a game (player page, Partite) looks like what it is, something to tap */
+.player-game .lichess-link-btn,
+.match-footer .lichess-link-btn {
   justify-self: start;
   padding: 3px 10px;
   border: 1px solid var(--line);
@@ -3999,4 +4000,8 @@ button.btn-mini.btn-go {
   background: var(--panel);
   font-size: 13px;
 }
-.player-game .lichess-link-btn::after { content: " ↗"; }
+.player-game .lichess-link-btn::after,
+.match-footer .lichess-link-btn::after {
+  content: " ↗";
+}
+.match-footer .lichess-link-btn { white-space: nowrap; }
