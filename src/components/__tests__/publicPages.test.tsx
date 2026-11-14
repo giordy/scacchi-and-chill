@@ -142,20 +142,18 @@ describe('player page', () => {
     expect(html).toMatch(/Di sempre |Nelle stagioni passate/);
   });
 
-  it('sums up the season on the player page once its last game is over, and the past ones meanwhile', () => {
-    // During the season: the archived one, below the Carriera, and not the season being played
+  it('sums up the season on the player page once its last game is over, and the past ones in the Carriera', () => {
+    // During the season: no card of its own, the archived season is a view of the Carriera
     const during = playerPage('anna');
-    expect(during).toContain('La stagione in breve');
-    expect(during.indexOf('La stagione in breve')).toBeGreaterThan(during.indexOf('Carriera'));
-    expect(during).not.toContain('2 vittorie di fila');
+    expect(during).not.toContain('wrapped-card');
+    expect(during).toContain('aria-label="Vista della carriera"');
+    expect(during).toContain('>La stagione in breve</button>');
     const over = { ...gameStates, bbbbbbbb: { id: 'bbbbbbbb', status: 'resign', winner: 'black' as const, moves: 'd4 d5', createdAt: 1, lastMoveAt: 3 } };
     const html = renderToStaticMarkup(<PlayerPage handle="anna" config={config} history={history} gameStates={over} nameOf={nameOf} seasons={[season1]} />);
-    expect(html).toContain('La stagione in breve');
+    // Once over: a card of its own at the top, for the season just played
+    expect(html).toContain('wrapped-card');
     expect(html).toContain('2 vittorie di fila');
-    // Once over, at the top, with a button for each season
-    expect(html.indexOf('La stagione in breve')).toBeLessThan(html.indexOf('Carriera'));
-    expect(html).toContain('aria-label="Stagione"');
-    expect(html).toContain('>Stagione 1</button>');
+    expect(html.indexOf('wrapped-card')).toBeLessThan(html.indexOf('Carriera'));
   });
 
   it('gives a page to a former player found in an archived table', () => {

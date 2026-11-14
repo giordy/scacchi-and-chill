@@ -3936,3 +3936,4 @@ button.btn-mini.btn-go {
 .pc-base { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
 /* «La stagione in breve»: one button per season, wrapping on a phone */
 .wrapped-seasons { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; border-radius: 18px; }
+.wrapped-embedded > .note { margin: 0 0 8px; }

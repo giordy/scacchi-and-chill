@@ -33,6 +33,7 @@ export function WrappedCard({
   seasons = [],
   onPick,
   label = (s) => s,
+  embedded = false,
 }: {
   season: string;
   wrapped: SeasonWrapped;
@@ -44,6 +45,7 @@ export function WrappedCard({
   seasons?: string[]; // every season with a recap, oldest first: a switch when more than one
   onPick?: (season: string) => void;
   label?: (season: string) => string; // a season's name on its button
+  embedded?: boolean; // inside another card (the Carriera): no card and no heading of its own
 }) {
   const w = wrapped;
   const vs = (handle: string) => <a href={playerHref(handle)}>{nameOf(handle)}</a>;
@@ -72,9 +74,8 @@ export function WrappedCard({
     const move = w.elo.end - w.elo.start;
     lines.push({ emoji: move >= 0 ? '📈' : '📉', text: <>Elo del torneo: {w.elo.start} → {w.elo.end} ({move >= 0 ? '+' : ''}{move})</> });
   }
-  return (
-    <section className="dossier-card wrapped-card">
-      <h2 className="section-heading">La stagione in breve</h2>
+  const body = (
+    <>
       {seasons.length > 1 && onPick ? (
         <div className="view-switch wrapped-seasons" role="group" aria-label="Stagione">
           {seasons.map((s) => (
@@ -95,6 +96,13 @@ export function WrappedCard({
         ))}
       </ul>
       {eloPath && <EloChart path={eloPath} nameOf={nameOf} />}
+    </>
+  );
+  if (embedded) return <div className="wrapped-embedded">{body}</div>;
+  return (
+    <section className="dossier-card wrapped-card">
+      <h2 className="section-heading">La stagione in breve</h2>
+      {body}
     </section>
   );
 }

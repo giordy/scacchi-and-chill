@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AllTimeHeadToHead, CareerSeason } from '../lib/allTime';
 import { podiumPlace } from '../lib/standings';
 import { MEDAL_EMOJI } from '../lib/honours';
@@ -9,8 +9,10 @@ const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
 // Player page: every season they played, newest first, with a short summary on top
 // highs: the career records under the summary (Elo massimo, colpaccio migliore), when there are any
-export function CareerSection({ career, highs }: { career: CareerSeason[]; highs?: React.ReactNode }) {
+// The Carriera, and when given «La stagione in breve» of the past seasons in a view of its own
+export function CareerSection({ career, highs, recap }: { career: CareerSeason[]; highs?: React.ReactNode; recap?: React.ReactNode }) {
   const nameOf = useNameOf();
+  const [view, setView] = useState<'summary' | 'recap'>('summary');
   const finished = career.filter((c) => !c.current && c.place !== null);
   const best = finished.length > 0 ? Math.min(...finished.map((c) => c.place!)) : null;
   const played = career.reduce((n, c) => n + c.played, 0);
@@ -24,6 +26,18 @@ export function CareerSection({ career, highs }: { career: CareerSeason[]; highs
   return (
     <section className="dossier-card">
       <h2 className="section-heading">Carriera</h2>
+      {recap && (
+        <div className="view-switch" role="group" aria-label="Vista della carriera">
+          <button type="button" className={view === "summary" ? "active" : ""} aria-pressed={view === "summary"} onClick={() => setView("summary")}>
+            Riepilogo
+          </button>
+          <button type="button" className={view === "recap" ? "active" : ""} aria-pressed={view === "recap"} onClick={() => setView("recap")}>
+            La stagione in breve
+          </button>
+        </div>
+      )}
+      {recap && view === "recap" ? recap : (
+        <>
       <p className="note career-summary">{summary.join(" · ")}</p>
       {highs}
       <ul className="career-list">
@@ -47,6 +61,8 @@ export function CareerSection({ career, highs }: { career: CareerSeason[]; highs
           );
         })}
       </ul>
+        </>
+      )}
     </section>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
-import { allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, seasonsWithGames } from '../lib/allTime';
+import { allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, SeasonGames, seasonsWithGames } from '../lib/allTime';
 import { computeStandings } from '../lib/standings';
 import { archivedGames, seasonDepartures } from '../lib/seasons';
 import { NameOf } from '../lib/roster';
@@ -234,57 +234,61 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   // is then shown for it, with only the season in progress
   const hasHighs = !!peakOf(elo, shownHandle) || !!bestUpset(elo, shownHandle);
   const highs = <CareerHighs handle={shownHandle} elo={elo} seasonName={seasonName} nameOf={longNameOf} title={config.tournament?.title} />;
-  // For who plays the season the all-time record goes in the season's head-to-heads (one list)
-  const acrossSeasons = (withAllTime: boolean) => (
-    <>
-      {(showCareer || hasHighs) && <CareerSection career={career} highs={highs} />}
-      {withAllTime && pastGames && allTimeRows.length > 0 && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
-    </>
-  );
-  // «La stagione in breve», of any season the player played: the archived ones (with their games),
-  // and the current one once its last game is over. Shown first: the current season once over, and
-  // otherwise the latest archived one; the others are chosen above the card
+  // «La stagione in breve» of a season the player played: the archived ones (with their games), and
+  // the current one once its last game is over
   const plays = (g: { white: string; black: string }) => [g.white, g.black].some((h) => h.toLowerCase() === shownHandle.toLowerCase());
   const progress = computeSeasonProgress(history, gameStates, config.schedule ?? []);
   const currentOver = progress.total > 0 && progress.finished === progress.total;
-  const wrappable = withGames.filter((x) => (!x.current || currentOver) && x.games.some(plays));
-  const chosenWrapped = wrappedPick?.handle === handle ? wrappable.find((x) => x.season === wrappedPick.season) : undefined;
-  const wrappedOf = chosenWrapped ?? wrappable[wrappable.length - 1];
-  // While the player is in a season still going, the card goes down by the Carriera: the top of the
-  // page is for the season being played
-  const wrappedBelow = !!profile && !currentOver;
-  const wrappedArchive = wrappedOf && !wrappedOf.current ? seasons.find((x) => x.season === wrappedOf.season) : undefined;
-  const wrapped = wrappedOf ? seasonWrapped(shownHandle, wrappedOf.games, elo, wrappedOf.current ? CURRENT : wrappedArchive?.id) : null;
-  const wrappedAwards = !wrapped
-    ? []
-    : shownAwards(
-        wrappedOf!.current
-          ? computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening }, config.tournament?.fairPlayAwardsBan)
-          : wrappedArchive?.awards ?? []
-      ).filter((a) => a.winners.some((w) => w.handle.toLowerCase() === shownHandle.toLowerCase()));
-  // The final race for the Trofeo Pillsbury: as the archive kept it, or for the current season once
-  // over as the awards compute it (the archive will keep the same)
-  const pillsburyFinal = !wrapped
-    ? undefined
-    : wrappedOf!.current
-    ? pillsburyStandings(finalPillsburyRace(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, config.tournament?.fairPlayAwardsBan))
-    : wrappedArchive?.pillsbury;
-  const pillsburyMine = pillsburyFinal?.find((r) => r.handle.toLowerCase() === shownHandle.toLowerCase());
-  const eloKey = wrappedOf?.current ? CURRENT : wrappedArchive?.id;
-  const eloPath = wrapped && eloKey ? seasonEloPath(elo, shownHandle, eloKey) : null;
-  const wrappedCard = wrapped && wrappedOf && (
+  const recapOf = (of: SeasonGames) => {
+    const archive = of.current ? undefined : seasons.find((x) => x.season === of.season);
+    const eloKey = of.current ? CURRENT : archive?.id;
+    const wrapped = seasonWrapped(shownHandle, of.games, elo, eloKey);
+    if (!wrapped) return null;
+    const awards = shownAwards(
+      of.current
+        ? computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening }, config.tournament?.fairPlayAwardsBan)
+        : archive?.awards ?? []
+    ).filter((a) => a.winners.some((w) => w.handle.toLowerCase() === shownHandle.toLowerCase()));
+    // The final race for the Trofeo Pillsbury: as the archive kept it, or for the current season once
+    // over as the awards compute it (the archive will keep the same)
+    const race = of.current
+      ? pillsburyStandings(finalPillsburyRace(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, config.tournament?.fairPlayAwardsBan))
+      : archive?.pillsbury;
+    const mine = race?.find((r) => r.handle.toLowerCase() === shownHandle.toLowerCase());
+    return {
+      season: of.season,
+      wrapped,
+      career: career.find((c) => c.season === of.season),
+      awards,
+      pillsbury: mine && race ? { mine, race } : undefined,
+      eloPath: eloKey ? seasonEloPath(elo, shownHandle, eloKey) : null,
+      nameOf: longNameOf,
+    };
+  };
+  // The current season once over: a card of its own at the top of the page
+  const currentGames = withGames.find((x) => x.current);
+  const currentRecap = currentOver && currentGames?.games.some(plays) ? recapOf(currentGames) : null;
+  const wrappedCard = currentRecap && <WrappedCard {...currentRecap} />;
+  // The archived seasons: in the Carriera, one at a time, the latest first. Kept apart from the season
+  // being played, so that their numbers are not taken for this season's
+  const pastRecaps = withGames.filter((x) => !x.current && x.games.some(plays));
+  const pickedPast = (wrappedPick?.handle === handle ? pastRecaps.find((x) => x.season === wrappedPick.season) : undefined) ?? pastRecaps[pastRecaps.length - 1];
+  const pastRecap = pickedPast ? recapOf(pickedPast) : null;
+  const recapInCareer = pastRecap && (
     <WrappedCard
-      season={wrappedOf.season}
-      wrapped={wrapped}
-      career={career.find((c) => c.season === wrappedOf.season)}
-      awards={wrappedAwards}
-      pillsbury={pillsburyMine && pillsburyFinal ? { mine: pillsburyMine, race: pillsburyFinal } : undefined}
-      eloPath={eloPath}
-      nameOf={longNameOf}
-      seasons={wrappable.map((x) => x.season)}
+      {...pastRecap}
+      embedded
+      seasons={pastRecaps.map((x) => x.season)}
       onPick={(season) => setWrappedPick({ handle, season })}
       label={(season) => shortSeason(season, config.tournament?.title)}
     />
+  );
+  // For who plays the season the all-time record goes in the season's head-to-heads (one list)
+  const acrossSeasons = (withAllTime: boolean) => (
+    <>
+      {(showCareer || hasHighs) && <CareerSection career={career} highs={highs} recap={recapInCareer || undefined} />}
+      {withAllTime && pastGames && allTimeRows.length > 0 && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
+    </>
   );
   const everOf = (opponent: string) => (pastGames ? allTimeRows.find((r) => r.opponent.toLowerCase() === opponent.toLowerCase()) : undefined);
 
@@ -472,7 +476,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
         )}
       </section>
 
-      {!wrappedBelow && wrappedCard}
+      {wrappedCard}
 
       {pointsByRound.length > 0 && (
         <section className="dossier-card">
@@ -564,8 +568,6 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
       </section>
 
       {acrossSeasons(false)}
-
-      {wrappedBelow && wrappedCard}
 
       <section className="dossier-card">
         <h2 className="section-heading">Partite ({games.length})</h2>
