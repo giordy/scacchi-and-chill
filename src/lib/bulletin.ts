@@ -106,6 +106,7 @@ export interface BulletinInput {
   now?: number;
   random?: () => number; // which phrase of each list; Math.random unless a test fixes it
   seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo of the colpacci
+  matchesUrl?: string; // the site's Partite tab: where to follow the games during the round
 }
 
 export interface Bulletin {
@@ -136,7 +137,7 @@ const PHASE_TEXT: Record<GamePhase, string> = {
 };
 
 // The WhatsApp message on the state of a round, from the games and what Lichess says of them
-export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random, seasons = [] }: BulletinInput): Bulletin {
+export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random, seasons = [], matchesUrl }: BulletinInput): Bulletin {
   const nameOf = nameFrom(config.players);
   const idToHandle = (id?: string) =>
     config.players.find((p) => p.handle.toLowerCase() === String(id ?? "").toLowerCase())?.handle;
@@ -337,6 +338,8 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     pillsbury,
     config.statusPhrases.closing && config.statusPhrases.closing.length > 0 ? pickFor("closing") : "",
     studiesAppendix,
+    // During the round, the Partite tab: the games move there between two bulletins
+    !isRoundComplete && matchesUrl ? `📡 Le partite in diretta: ${matchesUrl}` : "",
     // The site, where results update between two bulletins
     config.statusPhrases.infoLine ?? "",
   ]

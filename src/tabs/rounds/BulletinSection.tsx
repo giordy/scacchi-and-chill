@@ -89,7 +89,10 @@ export function BulletinSection({
         .map((g) => extractGameId(g.url))
         .filter((id): id is string => Boolean(id));
       const states = ids.length > 0 ? await fetchGameStates(ids) : {};
-      const built = buildBulletin({ round, games, states, history, config, expiryDays, seasons });
+      const built = buildBulletin({
+        round, games, states, history, config, expiryDays, seasons,
+        matchesUrl: `${window.location.origin}${window.location.pathname}#/partite`,
+      });
       if (editedRound.current === targetRound) setNewer(built.text === text ? null : { round: targetRound, text: built.text });
       else {
         editedRound.current = null;
