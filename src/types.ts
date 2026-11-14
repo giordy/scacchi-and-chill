@@ -291,6 +291,21 @@ export interface SeasonArchive {
   games?: ArchivedGame[];
   // Where its esordienti started in the Elo del torneo (missing on seasons closed before seeds existed)
   seeds?: EloSeed[];
+  // The final race for the Trofeo Pillsbury, best first (see lib/pillsbury.ts, pillsburyStandings):
+  // missing on seasons closed before it was saved, and when the trophy was suspended
+  pillsbury?: PillsburyEntry[];
+}
+
+// One player in the final race for the Trofeo Pillsbury
+export interface PillsburyEntry {
+  handle: string;
+  points: number; // made in the games that count
+  played: number;
+  objective: number; // the points the Elo expected from those games, exact (Forecast.expectedSoFar)
+  spread: number; // how much points - objective could be by chance alone (Forecast.spread)
+  score: number; // (points - objective) / spread: the order of the race
+  place: number; // shared on a tie
+  winner?: true;
 }
 
 // A player who left an archived season: shown as a note under its table, and as "al posto di"

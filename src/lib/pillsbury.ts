@@ -7,8 +7,8 @@
 // after Harry Nelson Pillsbury, who in 1895, aged 22 and almost unknown, won Hastings ahead of
 // Lasker, Steinitz, Tarrasch and Chigorin. Esordienti, and the games against them, are left out;
 // so is a player who left the season, and the games won or lost at the table.
-import { HistoryGame, LichessExportGame, Player, SeasonArchive, Withdrawal } from '../types';
-import { boardCalendar, currentSeason, decidedAtTable, eloSeasonFromCurrent, EloReport, Forecast, pronosticoPoints, roundHalf, seasonForecast } from './tournamentElo';
+import { EloSeed, HistoryGame, LichessExportGame, PillsburyEntry, Player, SeasonArchive, Withdrawal } from '../types';
+import { boardCalendar, currentSeason, decidedAtTable, eloSeasonFromCurrent, EloReport, Forecast, pronosticoPoints, roundHalf, seasonForecast, tournamentElo } from './tournamentElo';
 import { isVoid, stateOf } from './games';
 import { outForFairPlay } from './fairPlay';
 
@@ -125,6 +125,41 @@ export function pillsburyWinners(race: PillsburyRace): PillsburyRow[] {
   const best = above[0];
   if (race.suspended || !best) return [];
   return above.filter((r) => Math.abs(r.score - best.score) < 1e-6);
+}
+
+// The race at the end of a season, as the awards see it: the season's games are its calendar, the
+// Elo del torneo from the seasons archived before. The same for the awards, the archive and the
+// player's «La stagione in breve», so that what they say never differs.
+export function finalPillsburyRace(
+  players: Player[],
+  history: HistoryGame[],
+  gameStates: Record<string, LichessExportGame>,
+  seasons: SeasonArchive[], // archived before this season
+  seeds?: EloSeed[],
+  withdrawals?: Withdrawal[],
+  fairPlayBan?: boolean
+): PillsburyRace {
+  const report = tournamentElo(seasons, players.map((p) => p.handle), history, gameStates, seeds);
+  return pillsburyRace(players, report, history, history, gameStates, withdrawals, fairPlayBan);
+}
+
+const tidy = (n: number) => Math.round(n * 1000) / 1000;
+
+// The final race as the archive keeps it (SeasonArchive.pillsbury), best first, for the player's
+// «La stagione in breve»: kept at the close because the way the race is computed may change later,
+// and the numbers shown must stay those the trophy was given by. Nothing when suspended.
+export function pillsburyStandings(race: PillsburyRace): PillsburyEntry[] | undefined {
+  if (race.suspended || race.rows.length === 0) return undefined;
+  const winners = new Set(pillsburyWinners(race).map((r) => r.handle));
+  let place = 0;
+  return race.rows.map((r, i) => {
+    // Shared places on a tie, to a millionth as the winners
+    if (i === 0 || Math.abs(r.score - race.rows[i - 1].score) >= 1e-6) place = i + 1;
+    const f = r.forecast;
+    const entry: PillsburyEntry = { handle: r.handle, points: f.points, played: f.played, objective: tidy(f.expectedSoFar), spread: tidy(f.spread), score: tidy(r.score), place };
+    if (winners.has(r.handle)) entry.winner = true;
+    return entry;
+  });
 }
 
 // Who won the Trofeo Pillsbury of the latest archived season that gave it

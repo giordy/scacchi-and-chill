@@ -13,6 +13,7 @@ import { fullPodium, Medal, MEDAL_EMOJI, medalsOf, PlayerMedal, reigningChampion
 import { PointsChart } from '../components/PointsChart';
 import { WrappedCard } from '../components/WrappedCard';
 import { seasonWrapped } from '../lib/wrapped';
+import { seasonEloPath } from '../lib/eloPath';
 import { computeSeasonProgress } from '../lib/progress';
 import { computeSeasonAwards, shownAwards } from '../lib/awards';
 import { PresenceMeta } from '../components/PresenceDot';
@@ -21,7 +22,7 @@ import { boardCalendar, CURRENT, currentSeason as eloSeasonNow, EloReport, isNew
 import { bestUpset, upsetSentence } from '../lib/upset';
 import { withScheduledGames } from '../lib/publicGames';
 import { Trend, TrendKind } from '../components/Trend';
-import { pillsburyRace, pillsburyWins, raceCalendar } from '../lib/pillsbury';
+import { finalPillsburyRace, pillsburyRace, pillsburyStandings, pillsburyWins, raceCalendar } from '../lib/pillsbury';
 import { PillsburyIcon } from '../components/PillsburyIcon';
 import { ScudettoIcon } from '../components/ScudettoIcon';
 import { scudettoOf } from '../lib/scudetto';
@@ -258,12 +259,24 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
           ? computeSeasonAwards(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, { name: config.tournament?.masterName, opening: config.tournament?.masterOpening }, config.tournament?.fairPlayAwardsBan)
           : wrappedArchive?.awards ?? []
       ).filter((a) => a.winners.some((w) => w.handle.toLowerCase() === shownHandle.toLowerCase()));
+  // The final race for the Trofeo Pillsbury: as the archive kept it, or for the current season once
+  // over as the awards compute it (the archive will keep the same)
+  const pillsburyFinal = !wrapped
+    ? undefined
+    : wrappedOf!.current
+    ? pillsburyStandings(finalPillsburyRace(config.players, history, gameStates, seasons, config.tournament?.seeds, config.tournament?.withdrawals, config.tournament?.fairPlayAwardsBan))
+    : wrappedArchive?.pillsbury;
+  const pillsburyMine = pillsburyFinal?.find((r) => r.handle.toLowerCase() === shownHandle.toLowerCase());
+  const eloKey = wrappedOf?.current ? CURRENT : wrappedArchive?.id;
+  const eloPath = wrapped && eloKey ? seasonEloPath(elo, shownHandle, eloKey) : null;
   const wrappedCard = wrapped && wrappedOf && (
     <WrappedCard
       season={wrappedOf.season}
       wrapped={wrapped}
       career={career.find((c) => c.season === wrappedOf.season)}
       awards={wrappedAwards}
+      pillsbury={pillsburyMine && pillsburyFinal ? { mine: pillsburyMine, race: pillsburyFinal } : undefined}
+      eloPath={eloPath}
       nameOf={longNameOf}
     />
   );

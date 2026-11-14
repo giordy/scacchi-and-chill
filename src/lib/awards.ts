@@ -1,6 +1,6 @@
 import { ArchivedGame, EloSeed, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonAward, Withdrawal } from '../types';
-import { roundHalf, tournamentElo } from './tournamentElo';
-import { PILLSBURY_EMOJI, PILLSBURY_ID, PILLSBURY_TITLE, pillsburyRace, pillsburyWinners } from './pillsbury';
+import { roundHalf } from './tournamentElo';
+import { finalPillsburyRace, PILLSBURY_EMOJI, PILLSBURY_ID, PILLSBURY_TITLE, pillsburyWinners } from './pillsbury';
 
 // 5.5 -> "5½", 0.5 -> "½"
 const halves = (n: number) => String(Math.round(n * 2) / 2).replace(".5", "½").replace(/^0½/, "½");
@@ -72,7 +72,7 @@ export function computeSeasonAwards(
   // Trofeo Pillsbury: who beat their pronostico by most (see lib/pillsbury). First, apart from
   // the light-hearted awards. One winner, unless two beat it by the same (to a millionth of a point),
   // and only above the objective as the race table shows it (▲): not the first of those in line.
-  const race = pillsburyRace(players, tournamentElo(seasons, players.map((p) => p.handle), history, gameStates, seeds), history, history, gameStates, withdrawals, fairPlayBan);
+  const race = finalPillsburyRace(players, history, gameStates, seasons, seeds, withdrawals, fairPlayBan);
   const top = pillsburyWinners(race);
   if (top.length > 0) {
     const best = top[0];

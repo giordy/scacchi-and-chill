@@ -3929,3 +3929,8 @@ button.btn-mini.btn-go {
 .season-checklist > summary .muted-normal {
   margin-left: 0.3em;
 }
+
+/* «La stagione in breve»: the Elo del torneo game after game (components/EloChart) */
+.elo-chart { margin: 14px 0 0; }
+.elo-chart figcaption { margin: 4px 0 0; }
+.pc-base { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }

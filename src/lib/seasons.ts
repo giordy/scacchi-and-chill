@@ -3,6 +3,7 @@ import { computeStandings, scoredResult, seasonStarted, sharedRanks } from './st
 import { byRound, pliesOf, stateOf } from './games';
 import { extractGameId } from './utils';
 import { computeSeasonAwards } from './awards';
+import { finalPillsburyRace, pillsburyStandings } from './pillsbury';
 import { podiumFromStandings } from './honours';
 import { monthKey, periodOfGames } from './period';
 import { departuresOf } from './departures';
@@ -54,8 +55,12 @@ export function buildSeasonArchive(
   // No champion until at least one game has been scored
   if (top && top.points > 0) archive.champion = { handle: top.handle, name: top.name, points: top.points };
   if (out.size > 0) archive.noTrophies = [...out];
-  const awards = computeSeasonAwards(players, history, gameStates, seasons.filter((s) => s.id !== seasonId(meta.season)), meta.seeds, meta.withdrawals, { name: meta.masterName, opening: meta.masterOpening }, meta.fairPlayAwardsBan);
+  const before = seasons.filter((s) => s.id !== seasonId(meta.season));
+  const awards = computeSeasonAwards(players, history, gameStates, before, meta.seeds, meta.withdrawals, { name: meta.masterName, opening: meta.masterOpening }, meta.fairPlayAwardsBan);
   if (awards.length > 0) archive.awards = awards;
+  // The numbers the Trofeo Pillsbury was given by, for each player's «La stagione in breve»
+  const pillsbury = pillsburyStandings(finalPillsburyRace(players, history, gameStates, before, meta.seeds, meta.withdrawals, meta.fairPlayAwardsBan));
+  if (pillsbury) archive.pillsbury = pillsbury;
   // Where the esordienti started: the Elo del torneo of the next seasons is computed again from the archives
   if (meta.seeds && meta.seeds.length > 0) archive.seeds = meta.seeds;
   const departures = seasonDepartures(meta.withdrawals, players, history, gameStates);
