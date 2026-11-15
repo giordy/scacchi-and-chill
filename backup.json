@@ -396,8 +396,49 @@
       "black": "battimat",
       "createdAt": 1794247049269,
       "lichess": {
+        "createdAt": 1794247477182,
+        "daysPerTurn": 2,
+        "division": {
+          "end": 54,
+          "middle": 23
+        },
         "id": "HiOldHtt",
-        "status": "started"
+        "lastFen": "5rk1/ppp3p1/7p/7r/1PPpN3/P2P1P2/4R1Kq/5R2 w - - 3 1",
+        "lastMove": "f4h2",
+        "lastMoveAt": 1794729561933,
+        "moves": "e4 e5 Bc4 Nf6 d3 Nc6 Nf3 h6 a3 Bc5 h3 d5 exd5 Nxd5 O-O O-O Nbd2 Be6 Ne4 Bb6 Qe2 Nf4 Bxf4 exf4 Qd2 Nd4 Nh2 f3 Bxe6 fxe6 g3 Qd7 Kh1 e5 g4 Rae8 Rae1 Ne2 c4 Bd4 Nc3 Nf4 Nxf3 Nxh3 Nxd4 exd4 Ne4 Qxg4 b4 Qf3+ Kh2 Nf4 Qxf4 Qxf4+ Kg2 Re5 f3 Rh5 Re2 Qh2#",
+        "opening": {
+          "eco": "C55",
+          "name": "Italian Game: Two Knights Defense, Modern Bishop's Opening",
+          "ply": 7
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "provisional": true,
+            "rating": 1741,
+            "ratingDiff": 41,
+            "user": {
+              "id": "battimat",
+              "name": "battimat"
+            }
+          },
+          "white": {
+            "provisional": true,
+            "rating": 1722,
+            "ratingDiff": -103,
+            "user": {
+              "id": "fsgach",
+              "name": "fsgach"
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "mate",
+        "variant": "standard",
+        "winner": "black"
       },
       "round": "3",
       "url": "https://lichess.org/game/HiOldHtt",
