@@ -115,7 +115,9 @@ export function Timeline(props: TimelineProps) {
                       <p className="timeline-detail">
                         {e.detail}
                         {e.tags?.map((t) => (
-                          <span key={t} className="timeline-tag">{t}</span>
+                          <span key={t.label} className="timeline-tag">
+                            <span aria-hidden="true">{t.icon}</span> {t.label}
+                          </span>
                         ))}
                       </p>
                     )}

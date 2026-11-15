@@ -58,10 +58,16 @@ export interface ActivityEvent {
   emoji: string;
   parts: ActivityPart[];
   detail?: string; // a second, smaller line
-  tags?: string[]; // "Colpaccio", "L'apertura di Capablanca"
+  tags?: ActivityTag[]; // "Colpaccio", "L'apertura di Capablanca"
   gameId?: string; // Lichess id, for a link to the game
   link?: { href: string; label: string }; // a page of the site
   score?: string; // a result: "1 – 0", "0 – 1", "½ – ½"
+}
+
+// A tag on a game, with the same icon it has in the Partite tab
+export interface ActivityTag {
+  icon: string;
+  label: string;
 }
 
 type Result = '1-0' | '0-1' | '½-½';
@@ -164,7 +170,11 @@ function gameEvents(games: ScoredGame[], seasonKey: string, masterLabel: string,
       }
     }
     if (!g.silent) {
-      const tags = [g.summit ? 'Scontro al vertice' : '', g.upset ? 'Colpaccio' : '', g.master ? masterLabel : ''].filter(Boolean);
+      const tags: ActivityTag[] = [
+        ...(g.summit ? [{ icon: '🔝', label: 'Scontro al vertice' }] : []),
+        ...(g.upset ? [{ icon: '💥', label: 'Colpaccio' }] : []),
+        ...(g.master ? [{ icon: '♞', label: masterLabel }] : []),
+      ];
       events.push({
         key: `${seasonKey}:r:${g.key}`,
         kind: 'result',
