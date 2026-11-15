@@ -1353,8 +1353,10 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
   flex-shrink: 0;
 }
 
+/* Inset as the text of the badge above (.status-badge padding), so the two line up */
 .last-move-note {
   margin-top: -2px;
+  padding: 0 7px;
   font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
