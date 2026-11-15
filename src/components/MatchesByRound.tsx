@@ -231,7 +231,7 @@ function MatchCard({
   const phase = progress === 'ongoing' ? gamePhase(s) : undefined;
   // Only when the move is fresh: see lib/live.ts
   const lastMove = progress === 'ongoing' ? recentMoveLabel(s, presence?.now ?? Date.now()) : '';
-  const progressText = [moves, phase && PHASE_LABEL[phase], lastMove].filter(Boolean).join(' · ');
+  const progressText = [moves, phase && PHASE_LABEL[phase]].filter(Boolean).join(' · ');
   const opening = s?.opening?.name ?? '';
   const inMasterOpening = !!masterTag && playsFamily(opening, masterTag.family);
   const upset = progress === 'finished' ? upsetOf(s, elo, { ...game, id: extractGameId(game.url) || undefined }) : null;
@@ -289,6 +289,7 @@ function MatchCard({
         </div>
         <div className="match-status">
           {badge}
+          {lastMove && <span className="last-move-note">{lastMove}</span>}
           {moved && (
             // Under the state, where the eye goes; the same brass dot as on the tab
             <span className="new-moves-tag">

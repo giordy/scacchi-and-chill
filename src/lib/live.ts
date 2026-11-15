@@ -33,7 +33,7 @@ export function liveGameIds(
   return ids;
 }
 
-// "ultima mossa 3 ore fa", on an ongoing game whose last move came within the day; nothing beyond.
+// "mossa 3 ore fa", under the state of an ongoing game whose last move came within the day; nothing beyond.
 // Only good news: a fresh move says the game is alive, while an old one would point at whoever is
 // to move, although they are within the days the rules give them. The game, not a player: Lichess
 // hides the latest moves, so the site does not know who moved.
@@ -42,5 +42,5 @@ export const RECENT_MOVE_WINDOW_MS = 24 * 60 * 60 * 1000;
 export function recentMoveLabel(s: LichessExportGame | undefined, now: number): string {
   if (!s || s.status !== 'started' || typeof s.lastMoveAt !== 'number' || s.lastMoveAt <= 0) return '';
   if (now - s.lastMoveAt >= RECENT_MOVE_WINDOW_MS) return '';
-  return `ultima mossa ${agoLabel(s.lastMoveAt, now)}`;
+  return `mossa ${agoLabel(s.lastMoveAt, now)}`;
 }

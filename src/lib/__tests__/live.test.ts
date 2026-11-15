@@ -45,9 +45,9 @@ describe('liveGameIds', () => {
 
 describe('recentMoveLabel', () => {
   it('tells how fresh the last move of an ongoing game is, within the day', () => {
-    expect(recentMoveLabel(started(now - 2 * MIN), now)).toBe('ultima mossa poco fa');
-    expect(recentMoveLabel(started(now - 20 * MIN), now)).toBe('ultima mossa 20 minuti fa');
-    expect(recentMoveLabel(started(now - 5 * 60 * MIN), now)).toBe('ultima mossa 5 ore fa');
+    expect(recentMoveLabel(started(now - 2 * MIN), now)).toBe('mossa poco fa');
+    expect(recentMoveLabel(started(now - 20 * MIN), now)).toBe('mossa 20 minuti fa');
+    expect(recentMoveLabel(started(now - 5 * 60 * MIN), now)).toBe('mossa 5 ore fa');
   });
 
   it('says nothing beyond the day, without a move or once the game is over', () => {

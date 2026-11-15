@@ -1353,6 +1353,13 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
   flex-shrink: 0;
 }
 
+.last-move-note {
+  margin-top: -2px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 .new-moves-tag {
   display: inline-flex;
   align-items: center;
