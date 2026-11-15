@@ -66,3 +66,38 @@ self.addEventListener('message', (event) => {
     )
   );
 });
+
+// Push notifications of the moves (scripts/push.mjs sends them, src/lib/push.ts subscribes): one
+// at a time, the newer in place of the older, so a phone left aside does not fill up
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : '' };
+  }
+  const base = self.registration.scope;
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Scacchi & Chill', {
+      body: data.body || 'Mosse nuove nelle partite del torneo',
+      icon: new URL('icon-192.png', base).href,
+      badge: new URL('favicon-32.png', base).href,
+      tag: 'mosse',
+      renotify: true,
+      data: { url: new URL(data.hash || '#/partite', base).href },
+    })
+  );
+});
+
+// A tap opens the Partite tab: in the site's window when there is one, otherwise in a new one
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || self.registration.scope;
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+      const own = wins.find((w) => w.url.startsWith(self.registration.scope));
+      if (own) return own.navigate(url).then((w) => (w || own).focus()).catch(() => own.focus());
+      return self.clients.openWindow(url);
+    })
+  );
+});

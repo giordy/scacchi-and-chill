@@ -1,0 +1,4 @@
+{
+  "_readme": "Chiave pubblica VAPID delle notifiche push (vedi il README). La privata è il secret VAPID_PRIVATE_KEY di GitHub.",
+  "vapidPublicKey": "BPURxwNtXog-ctwHUPREttyHkn6LTkE-bPv3QhBqLnit14YZffXirYPuJjc4hzSPXmEDwW5OE5WySHXYxHvBtWw"
+}

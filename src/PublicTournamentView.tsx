@@ -50,6 +50,7 @@ import { useLastVisit } from "./hooks/useLastVisit";
 import { outForFairPlay, scudettoContenders } from "./lib/fairPlay";
 import { Pledge, pledgeStatus, rulesVersion } from "./lib/pledges";
 import { PledgeBox } from "./components/PledgeBox";
+import { PushToggle } from "./components/PushToggle";
 import { PhotoViewer } from "./components/PhotoViewer";
 
 interface PublicTournamentViewProps {
@@ -646,6 +647,7 @@ export function PublicTournamentView({
                   </option>
                 ))}
               </select>
+              <PushToggle players={players} />
             </div>
           )}
 

@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fields } from './backup.mjs';
+import { movesNews, notificationFor, sameState, sendPush, vapidKeys } from './push.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const TOURNAMENT_DOC_ID = 'scacchi-and-chill-official';
@@ -128,6 +129,74 @@ async function saveState(base, token, docId, state) {
   if (!res.ok) throw new Error(`Salvataggio di ${docId}: HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
 }
 
+async function getDoc(base, token, docPath) {
+  const res = await fetch(docPath ? `${base}/${docPath}` : base, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30000) });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Lettura di ${docPath}: HTTP ${res.status}`);
+  return fields((await res.json()).fields);
+}
+
+async function listDocs(base, token, collectionId) {
+  const res = await fetch(`${base}:runQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ structuredQuery: { from: [{ collectionId }] } }),
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!res.ok) throw new Error(`Lettura di ${collectionId}: HTTP ${res.status}`);
+  return (await res.json()).filter((r) => r.document).map((r) => ({ docId: r.document.name.split('/').pop(), ...fields(r.document.fields) }));
+}
+
+async function setDoc(base, token, docPath, data) {
+  const res = await fetch(`${base}/${docPath}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ fields: toValue(data).mapValue.fields }),
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!res.ok) throw new Error(`Salvataggio di ${docPath}: HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
+}
+
+async function deleteDoc(base, token, docPath) {
+  const res = await fetch(`${base}/${docPath}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30000) });
+  if (!res.ok && res.status !== 404) throw new Error(`Cancellazione di ${docPath}: HTTP ${res.status}`);
+}
+
+// Who gets the notifications may be written by anyone (firestore.rules): never more than these a run
+const MAX_SUBSCRIPTIONS = 300;
+// The JWT's subject: who sends, for the push services
+const PUSH_SUBJECT = 'https://github.com/giordy/scacchi-and-chill';
+
+// The push notifications of the moves (scripts/push.mjs). games: every game of the season, with its
+// state from Lichess when read in this run
+async function notify(base, token, vapid, games, states, prev) {
+  const tournament = (await getDoc(base, token, '')) ?? {};
+  const names = new Map([...(tournament.roster ?? []), ...(tournament.players ?? [])].map((p) => [String(p.handle).toLowerCase(), p.name || p.handle]));
+  const nameOf = (h) => names.get(h.toLowerCase()) ?? h;
+  const { news, state } = movesNews(games, states, prev);
+  if (news.length > 0) {
+    const subs = (await listDocs(base, token, 'pushSubscriptions')).slice(0, MAX_SUBSCRIPTIONS);
+    let sent = 0;
+    let gone = 0;
+    for (const sub of subs) {
+      const payload = notificationFor(news, nameOf, sub.skip);
+      if (!payload) continue;
+      try {
+        if ((await sendPush(sub, payload, vapid, PUSH_SUBJECT)) === 'gone') {
+          await deleteDoc(base, token, `pushSubscriptions/${encodeURIComponent(sub.docId)}`);
+          gone++;
+        } else sent++;
+      } catch (e) {
+        console.warn(`Notifica non inviata: ${e.message}`);
+      }
+    }
+    console.log(`Notifiche: ${news.length} partite con novità, ${sent} inviate, ${gone} iscrizioni scadute tolte.`);
+  } else if (!prev) {
+    console.log('Notifiche: primo giro, stato delle partite registrato senza inviare nulla.');
+  }
+  if (!sameState(prev, state)) await setDoc(base, token, 'private/push', state);
+}
+
 async function main() {
   const secret = process.env.FIREBASE_SERVICE_ACCOUNT?.trim();
   if (!secret) {
@@ -140,12 +209,25 @@ async function main() {
     `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/` +
     `${encodeURIComponent(cfg.firestoreDatabaseId || '(default)')}/documents/tournaments/${TOURNAMENT_DOC_ID}`;
   const token = await accessToken(account);
-  const targets = syncTargets(await readGames(base, token));
-  if (targets.length === 0) {
+  const all = await readGames(base, token);
+  const targets = syncTargets(all);
+  // The notifications need the games that were still open at the last run too: the organizer area
+  // may have saved their end in the meantime
+  const privateKey = process.env.VAPID_PRIVATE_KEY?.trim();
+  const vapid = privateKey ? vapidKeys(privateKey) : null;
+  if (vapid) {
+    const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'push.json'), 'utf8'));
+    if (cfg.vapidPublicKey !== vapid.publicKey) console.warn('VAPID_PRIVATE_KEY non corrisponde alla chiave pubblica di push.json: le notifiche non arriveranno.');
+  }
+  const watched = all.map((g) => ({ ...g, id: gameIdOf(g.url) })).filter((g) => g.id);
+  const prevPush = vapid ? await getDoc(base, token, 'private/push') : null;
+  const pushIds = vapid ? watched.filter((g) => !prevPush?.games?.[g.id]?.final).map((g) => g.id) : [];
+  const ids = [...new Set([...targets.map((g) => gameIdOf(g.url)), ...pushIds])];
+  if (ids.length === 0) {
     console.log('Tutte le partite con un link hanno già il risultato salvato.');
     return;
   }
-  const states = await readLichess([...new Set(targets.map((g) => gameIdOf(g.url)))]);
+  const states = await readLichess(ids);
   let saved = 0;
   for (const g of targets) {
     const next = states[gameIdOf(g.url)];
@@ -155,6 +237,8 @@ async function main() {
   }
   const finished = targets.filter((g) => isFinal(states[gameIdOf(g.url)])).length;
   console.log(`Partite da controllare: ${targets.length}; aggiornate: ${saved}; concluse ora: ${finished}.`);
+  if (vapid) await notify(base, token, vapid, watched, states, prevPush);
+  else console.log('Manca il secret VAPID_PRIVATE_KEY: nessuna notifica (vedi il README).');
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

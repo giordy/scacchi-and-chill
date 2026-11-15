@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { assertFails, assertSucceeds, initializeTestEnvironment, RulesTestEnvironment } from '@firebase/rules-unit-testing';
 import { collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore';
 import { pledgeCommit } from '../src/lib/firestoreRest';
+import { pushCommit } from '../src/lib/push';
 
 const RULES = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'utf8');
 const ADMIN = 'organizer@example.com';
@@ -176,6 +177,52 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
       expect(old.status).toBe(403);
       const saved = await getDoc(doc(visitor(), `${P}/stagione-2--anna`));
       expect(saved.data()).toMatchObject({ handle: 'anna', season: 'Stagione 2', rules: '0a1b2c3d' });
+    });
+  });
+
+  describe('push notifications (pushSubscriptions)', () => {
+    const S = `${T}/pushSubscriptions`;
+    const ID = 'AbCdEfGhIjKlMnOpQrStUvWxYz012345';
+    const sub = (extra: Record<string, unknown> = {}) => ({
+      endpoint: 'https://fcm.googleapis.com/fcm/send/abc:DEF',
+      p256dh: 'B' + 'a'.repeat(86),
+      auth: 'q'.repeat(22),
+      skip: '',
+      at: serverTimestamp(),
+      ...extra,
+    });
+
+    it('a visitor subscribes, changes it and deletes it, but nobody reads or lists them from the site', async () => {
+      await assertSucceeds(setDoc(doc(visitor(), `${S}/${ID}`), sub()));
+      await assertSucceeds(setDoc(doc(visitor(), `${S}/${ID}`), sub({ skip: 'anna' })));
+      await assertFails(getDoc(doc(visitor(), `${S}/${ID}`)));
+      await assertFails(getDocs(collection(visitor(), S)));
+      await assertFails(getDocs(collection(admin(), S)));
+      await assertSucceeds(deleteDoc(doc(visitor(), `${S}/${ID}`)));
+    });
+
+    it('refuses a short id, another address, other fields or a time of the client', async () => {
+      await assertFails(setDoc(doc(visitor(), `${S}/short`), sub()));
+      await assertFails(setDoc(doc(visitor(), `${S}/${ID}`), sub({ endpoint: 'https://evil.example/fcm.googleapis.com/x' })));
+      await assertFails(setDoc(doc(visitor(), `${S}/${ID}`), sub({ endpoint: 'http://fcm.googleapis.com/x' })));
+      await assertFails(setDoc(doc(visitor(), `${S}/${ID}`), sub({ extra: true })));
+      await assertFails(setDoc(doc(visitor(), `${S}/${ID}`), sub({ at: new Date(2020, 0, 1) })));
+      await assertFails(setDoc(doc(visitor(), `${S}/${ID}`), sub({ skip: 'Anna!' })));
+      await assertFails(setDoc(doc(visitor(), `${S}/${ID}`), sub({ p256dh: 'short' })));
+    });
+
+    it('takes the write of the public page, as it sends it (REST, no sign-in)', async () => {
+      const database = 'projects/demo-scacchi/databases/(default)';
+      const res = await fetch(`http://${process.env.FIRESTORE_EMULATOR_HOST}/v1/${database}/documents:commit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pushCommit(database, ID, { endpoint: 'https://web.push.apple.com/QAbc-123', p256dh: 'B' + 'x'.repeat(86), auth: 'y'.repeat(22) }, 'Anna')),
+      });
+      expect(res.status).toBe(200);
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        const saved = await getDoc(doc(ctx.firestore(), `${S}/${ID}`));
+        expect(saved.data()).toMatchObject({ endpoint: 'https://web.push.apple.com/QAbc-123', skip: 'anna' });
+      });
     });
   });
 });
