@@ -149,6 +149,19 @@ describe('careerOf', () => {
     expect(careerOf('bruno', [tied])[0]).toMatchObject({ place: 1, tied: true });
   });
 
+  it('takes the places of the hall of fame for a concluded season, as its medals do', () => {
+    // Bruno and Carla level on points, Bruno ahead on Sonneborn-Berger; the hall of fame has them both second
+    const archive: SeasonArchive = {
+      ...s1,
+      standings: [row('anna', 'Anna', 3, 4, 3, 0, 1), row('bruno', 'Bruno', 2, 4, 2, 0, 2, 3), row('carla', 'Carla', 2, 4, 2, 0, 2, 1), row('dario', 'Dario', 1, 4, 1, 0, 3)],
+    };
+    const winner = { season: 'Stagione 1', name: 'Anna', handle: 'anna', podium: [{ handle: 'bruno', name: 'Bruno', place: 2 as const }, { handle: 'carla', name: 'Carla', place: 2 as const }] };
+    expect(careerOf('carla', [archive])[0]).toMatchObject({ place: 3, tied: false });
+    expect(careerOf('carla', [archive], undefined, [winner])[0]).toMatchObject({ place: 2, tied: true });
+    expect(careerOf('bruno', [archive], undefined, [winner])[0]).toMatchObject({ place: 2, tied: true });
+    expect(careerOf('dario', [archive], undefined, [winner])[0]).toMatchObject({ place: 4, tied: false });
+  });
+
   it('skips seasons the player was not in', () => {
     expect(careerOf('carla', [s1, s2]).map((c) => c.season)).toEqual(['Stagione 1']);
   });

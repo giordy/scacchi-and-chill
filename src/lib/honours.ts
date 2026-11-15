@@ -9,6 +9,17 @@ export function fullPodium(w: SeasonWinner): PodiumPlace[] {
   return [{ handle: w.handle, name: w.name, place: 1 as const }, ...(w.podium ?? [])].sort((a, b) => a.place - b.place);
 }
 
+// Places of an archived table, with the hall of fame as the last word: who is on its podium has the
+// place it gives (it can be corrected by hand, and an older season may have ranked a tie by points
+// only, where the table separates it by Sonneborn-Berger); the others come after the podium. The
+// table's own shared places without an entry in the hall of fame.
+export function placesWithPodium(standings: Array<{ handle: string; points: number; sb: number; won?: number }>, winner?: SeasonWinner): number[] {
+  const ranks = sharedRanks(standings);
+  if (!winner) return ranks;
+  const podium = fullPodium(winner);
+  return standings.map((s, i) => podium.find((p) => p.handle.toLowerCase() === s.handle.toLowerCase())?.place ?? Math.max(ranks[i], podium.length + 1));
+}
+
 // Champions of the latest season in the hall of fame (more than one when they tied)
 export function reigningChampions(winners: SeasonWinner[] | undefined): { season: string; handles: string[] } | undefined {
   const last = reigningChampion(winners);

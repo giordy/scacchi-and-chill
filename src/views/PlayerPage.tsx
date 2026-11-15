@@ -224,7 +224,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
     standings: computeStandings(config.players, history, gameStates).standings,
     departures,
     games: archivedGames(history, gameStates),
-  });
+  }, winners);
   const showCareer = career.some((c) => !c.current);
   const withGames = seasonsWithGames(seasons, { season: currentSeason, history, gameStates, departures });
   const allTimeRows = allTimeHeadToHead(handle, withGames);

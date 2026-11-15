@@ -4,7 +4,7 @@
 import { ArchivedGame, HistoryGame, LichessExportGame, SeasonArchive, SeasonWinner } from '../types';
 import { archivedGames, seasonId } from './seasons';
 import { RankKey, seasonStarted, sharedRanks } from './standings';
-import { fullPodium } from './honours';
+import { fullPodium, placesWithPodium } from './honours';
 import { upsetFrom } from './upset';
 import { decidedAtTable } from './games';
 import { CURRENT, EloReport, gameKey } from './tournamentElo';
@@ -121,12 +121,13 @@ export interface CareerSeason {
 // Every season a player took part in, newest first: the one in progress, then the archived ones.
 // The place is the official one; points and games are the player's own (see ownRows): a
 // substitute counts only the games they played, who left the ones played before.
-export function careerOf(handle: string, seasons: SeasonArchive[], current?: CurrentStandings): CareerSeason[] {
+export function careerOf(handle: string, seasons: SeasonArchive[], current?: CurrentStandings, winners?: SeasonWinner[]): CareerSeason[] {
   const entry = (season: string, standings: StandingRow[], isCurrent: boolean, departures?: SeasonDeparture[], games?: ArchivedGame[]): CareerSeason | null => {
     const own = ownRows(standings, departures, games).find((s) => same(s.handle, handle));
     if (!own) return null;
     const i = standings.findIndex((s) => same(s.handle, handle));
-    const ranks = sharedRanks(standings);
+    // The places of the hall of fame for a concluded season, as its medals say
+    const ranks = isCurrent ? sharedRanks(standings) : placesWithPodium(standings, winners?.find((w) => w.season === season));
     const started = seasonStarted(standings);
     const replacing = replacedIn(departures, handle);
     const left = departures?.find((d) => same(d.handle, handle) && d.replacedBy);

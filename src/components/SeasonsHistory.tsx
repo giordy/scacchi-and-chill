@@ -4,9 +4,9 @@ import { pastSeasonPeriod } from '../lib/period';
 import { playerHref } from '../lib/routes';
 import { SeasonAwards } from './SeasonAwards';
 import { RankCell } from './RankCell';
-import { isTied, seasonStarted, sharedRanks } from '../lib/standings';
+import { isTied, seasonStarted } from '../lib/standings';
 import { departureText } from '../lib/departures';
-import { fullPodium, MEDAL_EMOJI, podiumFromStandings, shortSeason } from '../lib/honours';
+import { fullPodium, MEDAL_EMOJI, placesWithPodium, podiumFromStandings, shortSeason } from '../lib/honours';
 import { useNameOf } from './Names';
 import { shownAwards, withAwardGames } from '../lib/awards';
 import { useImageSrc } from '../hooks/useImageSrc';
@@ -53,10 +53,10 @@ const podiumOf = ({ winner, archive }: PastSeason): PodiumPlace[] => {
 };
 
 // The final table of an archived season, the note on who left and the awards
-function SeasonDetails({ archive }: { archive: SeasonArchive }) {
+function SeasonDetails({ archive, winner }: { archive: SeasonArchive; winner?: SeasonWinner }) {
   const nameOf = useNameOf();
-  // Shared places on a full tie, as in the live standings
-  const ranks = sharedRanks(archive.standings);
+  // Shared places on a full tie, as in the live standings; the podium as the hall of fame has it
+  const ranks = placesWithPodium(archive.standings, winner);
   const started = seasonStarted(archive.standings);
   return (
     <div className="season-details">
@@ -153,7 +153,7 @@ export function SeasonsHistory({ seasons, winners = [], title }: { seasons: Seas
                   {head}
                   <span className="season-more">Classifica finale e premi</span>
                 </summary>
-                <SeasonDetails archive={p.archive} />
+                <SeasonDetails archive={p.archive} winner={p.winner} />
               </details>
             ) : (
               head
