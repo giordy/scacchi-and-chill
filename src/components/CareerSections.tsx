@@ -9,10 +9,9 @@ const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
 // Player page, in the Carriera: the seasons already concluded, newest first, with a short summary on
 // top. The season being played is not here: it has the top of the page.
-// highs: the career records under the summary (Elo massimo, colpaccio migliore), when there are any
 // recaps: «La stagione in breve» of each season that has one, by season name: its row opens it
 // label: a season's name as its row says it (the short one, without the tournament's title)
-export function CareerSection({ career, highs, recaps = {}, label = (s) => s }: { career: CareerSeason[]; highs?: React.ReactNode; recaps?: Record<string, React.ReactNode>; label?: (season: string) => string }) {
+export function CareerSection({ career, recaps = {}, label = (s) => s }: { career: CareerSeason[]; recaps?: Record<string, React.ReactNode>; label?: (season: string) => string }) {
   const nameOf = useNameOf();
   const [open, setOpen] = useState<string | null>(null);
   const concluded = career.filter((c) => !c.current);
@@ -28,9 +27,8 @@ export function CareerSection({ career, highs, recaps = {}, label = (s) => s }: 
   ].filter(Boolean);
   return (
     <section className="dossier-card">
-      <h2 className="section-heading">{concluded.length > 0 ? "Stagioni concluse" : "Primati"}</h2>
+      <h2 className="section-heading">Stagioni concluse</h2>
       {concluded.length > 0 && <p className="note career-summary">{summary.join(" · ")}</p>}
-      {highs}
       {concluded.length > 0 && (
         <ul className="career-list">
           {concluded.map((c) => {

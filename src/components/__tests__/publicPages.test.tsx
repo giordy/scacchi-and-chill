@@ -211,8 +211,10 @@ describe('player page', () => {
     expect(html).toContain('Elo massimo');
     expect(html).toContain('Colpaccio migliore');
     expect(html).toContain('href="https://lichess.org/dddddddd"');
-    // In the Carriera, under its summary
+    // In the Carriera, in a card of their own before the concluded seasons: they count the season in progress too
     expect(html.indexOf('Elo massimo')).toBeGreaterThan(html.indexOf('Carriera'));
+    expect(html.indexOf('class="section-heading">Primati')).toBeLessThan(html.indexOf('Elo massimo'));
+    expect(html.indexOf('Colpaccio migliore')).toBeLessThan(html.indexOf('class="section-heading">Stagioni concluse'));
     expect(playerPage('anna')).not.toContain('Colpaccio migliore');
     // In the first season no level is known yet
     const first = playerPage('anna', []);

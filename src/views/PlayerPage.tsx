@@ -116,8 +116,9 @@ function TrophyShelf({ medals, champion, title, pillsbury = [], seasons }: { med
   );
 }
 
-// Two career highs, good news only, under the summary of the Carriera: the highest Elo del torneo
-// reached and the best colpaccio. Nothing when there is neither (in a player's first season, or
+// Primati, a card of its own at the top of the Carriera: two highs, good news only, the highest Elo
+// del torneo reached and the best colpaccio, across every season, the one in progress included (so
+// not under "Stagioni concluse"). Nothing when there is neither (in a player's first season, or
 // without any colpaccio).
 function CareerHighs({ handle, elo, seasonName, nameOf, title }: {
   handle: string;
@@ -132,36 +133,39 @@ function CareerHighs({ handle, elo, seasonName, nameOf, title }: {
   const now = ratingOf(elo, handle);
   const season = (key: string) => shortSeason(seasonName(key), title);
   return (
-    <ul className="career-highs">
-      {peak && (
-        <li>
-          <InfoTip className="career-high-label" text="Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione).">
-            Elo massimo <span className="infotip-mark" aria-hidden="true">ⓘ</span>
-          </InfoTip>{" "}
-          <strong>{peak.rating}</strong> <span className="career-high-when">({peak.season === CURRENT && peak.rating === now ? "adesso" : season(peak.season)})</span>
-        </li>
-      )}
-      {upset && (
-        <li>
-          <InfoTip className="career-high-label" text={`Il suo colpaccio più grosso: ${upsetSentence(upset.upset, nameOf(handle))}.`}>
-            Colpaccio migliore <span className="infotip-mark" aria-hidden="true">ⓘ</span>
-          </InfoTip>{" "}
-          <strong>
-            {upset.upset.kind === "win" ? "vs " : "½ vs "}
-            <a href={playerHref(upset.opponent)}>{nameOf(upset.opponent)}</a>
-          </strong>{" "}
-          <span className="career-high-when">
-            (
-            {upset.game.id ? (
-              <a href={`https://lichess.org/${upset.game.id}`} target="_blank" rel="noopener noreferrer">{season(upset.season)}</a>
-            ) : (
-              season(upset.season)
-            )}
-            )
-          </span>
-        </li>
-      )}
-    </ul>
+    <section className="dossier-card">
+      <h2 className="section-heading">Primati</h2>
+      <ul className="career-highs">
+        {peak && (
+          <li>
+            <InfoTip className="career-high-label" text="Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione).">
+              Elo massimo <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+            </InfoTip>{" "}
+            <strong>{peak.rating}</strong> <span className="career-high-when">({peak.season === CURRENT && peak.rating === now ? "adesso" : season(peak.season)})</span>
+          </li>
+        )}
+        {upset && (
+          <li>
+            <InfoTip className="career-high-label" text={`Il suo colpaccio più grosso: ${upsetSentence(upset.upset, nameOf(handle))}.`}>
+              Colpaccio migliore <span className="infotip-mark" aria-hidden="true">ⓘ</span>
+            </InfoTip>{" "}
+            <strong>
+              {upset.upset.kind === "win" ? "vs " : "½ vs "}
+              <a href={playerHref(upset.opponent)}>{nameOf(upset.opponent)}</a>
+            </strong>{" "}
+            <span className="career-high-when">
+              (
+              {upset.game.id ? (
+                <a href={`https://lichess.org/${upset.game.id}`} target="_blank" rel="noopener noreferrer">{season(upset.season)}</a>
+              ) : (
+                season(upset.season)
+              )}
+              )
+            </span>
+          </li>
+        )}
+      </ul>
+    </section>
   );
 }
 
@@ -279,11 +283,12 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
     if (recap) recaps[x.season] = <WrappedCard {...recap} embedded />;
   });
   // The second zone of the page, after the season being played: everything across seasons. The
-  // concluded seasons, the career highs and the record against every opponent ever met
+  // career highs, the concluded seasons and the record against every opponent ever met
   const showAllTime = pastGames && allTimeRows.length > 0;
   const careerCards = (showCareer || hasHighs || showAllTime) && (
     <>
-      {(showCareer || hasHighs) && <CareerSection key={handle} career={career} highs={highs} recaps={recaps} label={(season) => shortSeason(season, config.tournament?.title)} />}
+      {hasHighs && highs}
+      {showCareer && <CareerSection key={handle} career={career} recaps={recaps} label={(season) => shortSeason(season, config.tournament?.title)} />}
       {showAllTime && <AllTimeHeadToHeadSection rows={allTimeRows} nameOf={longNameOf} since={since} />}
     </>
   );
