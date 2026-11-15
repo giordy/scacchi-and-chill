@@ -16,7 +16,7 @@ import { playerHref } from '../lib/routes';
 import { PresenceInfo, seenAtOf } from '../lib/presence';
 import { ColorDot } from './PresenceDot';
 import { OpeningFamily, playsFamily } from '../lib/masterOpening';
-import { recentMoveLabel } from '../lib/live';
+import { recentMove } from '../lib/live';
 
 export interface MasterTag {
   family: OpeningFamily;
@@ -230,7 +230,7 @@ function MatchCard({
   const moves = progress === 'pending' ? '' : movesLabel(s, progress === 'finished');
   const phase = progress === 'ongoing' ? gamePhase(s) : undefined;
   // Only when the move is fresh: see lib/live.ts
-  const lastMove = progress === 'ongoing' ? recentMoveLabel(s, presence?.now ?? Date.now()) : '';
+  const lastMove = progress === 'ongoing' ? recentMove(s, presence?.now ?? Date.now()) : null;
   const progressText = [moves, phase && PHASE_LABEL[phase]].filter(Boolean).join(' · ');
   const opening = s?.opening?.name ?? '';
   const inMasterOpening = !!masterTag && playsFamily(opening, masterTag.family);
@@ -289,7 +289,12 @@ function MatchCard({
         </div>
         <div className="match-status">
           {badge}
-          {lastMove && <span className="last-move-note">{lastMove}</span>}
+          {lastMove && (
+            <span className="last-move-note" title={lastMove.full}>
+              <span aria-hidden="true">{"\u265F\uFE0E"} {lastMove.short}</span>
+              <span className="sr-only">{lastMove.full}</span>
+            </span>
+          )}
           {moved && (
             // Under the state, where the eye goes; the same brass dot as on the tab
             <span className="new-moves-tag">

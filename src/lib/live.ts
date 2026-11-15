@@ -33,14 +33,25 @@ export function liveGameIds(
   return ids;
 }
 
-// "mossa 3 ore fa", under the state of an ongoing game whose last move came within the day; nothing beyond.
+// How fresh the last move of an ongoing game is, under its state: "♟ 9 min fa", within the day only.
 // Only good news: a fresh move says the game is alive, while an old one would point at whoever is
 // to move, although they are within the days the rules give them. The game, not a player: Lichess
-// hides the latest moves, so the site does not know who moved.
+// hides the latest moves, so the site does not know who moved. short is what the card shows next
+// to the piece; full is what a screen reader says.
 export const RECENT_MOVE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-export function recentMoveLabel(s: LichessExportGame | undefined, now: number): string {
-  if (!s || s.status !== 'started' || typeof s.lastMoveAt !== 'number' || s.lastMoveAt <= 0) return '';
-  if (now - s.lastMoveAt >= RECENT_MOVE_WINDOW_MS) return '';
-  return `mossa ${agoLabel(s.lastMoveAt, now)}`;
+export interface RecentMove {
+  short: string; // "poco fa", "9 min fa", "5 ore fa"
+  full: string; // "ultima mossa 9 minuti fa"
+}
+
+const MIN = 60 * 1000;
+const HOUR = 60 * MIN;
+
+export function recentMove(s: LichessExportGame | undefined, now: number): RecentMove | null {
+  if (!s || s.status !== 'started' || typeof s.lastMoveAt !== 'number' || s.lastMoveAt <= 0) return null;
+  const ago = Math.max(0, now - s.lastMoveAt);
+  if (ago >= RECENT_MOVE_WINDOW_MS) return null;
+  const short = ago < 5 * MIN ? 'poco fa' : ago < HOUR ? `${Math.floor(ago / MIN)} min fa` : ago < 2 * HOUR ? "un'ora fa" : `${Math.floor(ago / HOUR)} ore fa`;
+  return { short, full: `ultima mossa ${agoLabel(s.lastMoveAt, now)}` };
 }
