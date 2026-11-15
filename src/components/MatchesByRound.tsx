@@ -288,12 +288,17 @@ function MatchCard({
           </div>
         </div>
         <div className="match-status">
-          {badge}
-          {lastMove && (
-            <span className="last-move-note" title={lastMove.full}>
-              <span aria-hidden="true">{"\u265F\uFE0E"} {lastMove.short}</span>
-              <span className="sr-only">{lastMove.full}</span>
+          {lastMove ? (
+            // The badge with the time of the last move centred under it, as one block
+            <span className="status-stack">
+              {badge}
+              <span className="last-move-note" title={lastMove.full}>
+                <span aria-hidden="true">{"\u265F\uFE0E"} {lastMove.short}</span>
+                <span className="sr-only">{lastMove.full}</span>
+              </span>
             </span>
+          ) : (
+            badge
           )}
           {moved && (
             // Under the state, where the eye goes; the same brass dot as on the tab
