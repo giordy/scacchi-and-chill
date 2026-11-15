@@ -16,6 +16,7 @@ import { playerHref } from '../lib/routes';
 import { PresenceInfo, seenAtOf } from '../lib/presence';
 import { ColorDot } from './PresenceDot';
 import { OpeningFamily, playsFamily } from '../lib/masterOpening';
+import { recentMoveLabel } from '../lib/live';
 
 export interface MasterTag {
   family: OpeningFamily;
@@ -228,7 +229,9 @@ function MatchCard({
   // Ongoing games: Lichess hides the last moves, so only an approximate count is shown
   const moves = progress === 'pending' ? '' : movesLabel(s, progress === 'finished');
   const phase = progress === 'ongoing' ? gamePhase(s) : undefined;
-  const progressText = [moves, phase && PHASE_LABEL[phase]].filter(Boolean).join(' · ');
+  // Only when the move is fresh: see lib/live.ts
+  const lastMove = progress === 'ongoing' ? recentMoveLabel(s, presence?.now ?? Date.now()) : '';
+  const progressText = [moves, phase && PHASE_LABEL[phase], lastMove].filter(Boolean).join(' · ');
   const opening = s?.opening?.name ?? '';
   const inMasterOpening = !!masterTag && playsFamily(opening, masterTag.family);
   const upset = progress === 'finished' ? upsetOf(s, elo, { ...game, id: extractGameId(game.url) || undefined }) : null;
