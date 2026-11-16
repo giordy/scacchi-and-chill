@@ -15,8 +15,17 @@ export function lastMovesOf(history: HistoryGame[], gameStates: Record<string, L
   return moves;
 }
 
-// The games moved since what was seen: none on a first visit (nothing seen yet, nothing is news)
-export function newMoveIds(lastMoves: SeenMoves, seen: SeenMoves | null): Set<string> {
+// How long a move stays news: with 2 days per move, one older than this is the state of the game,
+// not news. Who comes back after longer finds the results in the cronaca.
+export const NEWS_MS = 3 * 24 * 60 * 60 * 1000;
+
+// The games moved since what was seen, in the last NEWS_MS: none on a first visit (nothing seen yet,
+// nothing is news)
+export function newMoveIds(lastMoves: SeenMoves, seen: SeenMoves | null, now = Date.now()): Set<string> {
   if (!seen) return new Set();
-  return new Set(Object.entries(lastMoves).filter(([id, at]) => at > (seen[id] ?? 0)).map(([id]) => id));
+  return new Set(
+    Object.entries(lastMoves)
+      .filter(([id, at]) => at > (seen[id] ?? 0) && now - at <= NEWS_MS)
+      .map(([id]) => id)
+  );
 }
