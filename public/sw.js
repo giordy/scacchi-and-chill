@@ -81,7 +81,9 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification(data.title || 'Scacchi & Chill', {
       body: data.body || 'Mosse nuove nelle partite del torneo',
       icon: new URL('icon-192.png', base).href,
-      badge: new URL('favicon-32.png', base).href,
+      // Android draws the status bar icon from the alpha only: a white knight on transparent
+      // (from the Staunty knight of src/components/pieces, CC BY-NC-SA 4.0)
+      badge: new URL('badge-96.png', base).href,
       tag: 'mosse',
       renotify: true,
       data: { url: new URL(data.hash || '#/partite', base).href },
