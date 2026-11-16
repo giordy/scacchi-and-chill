@@ -448,8 +448,51 @@
       "black": "frasal",
       "createdAt": 1794247049489,
       "lichess": {
+        "createdAt": 1794250386943,
+        "daysPerTurn": 2,
+        "division": {
+          "end": 62,
+          "middle": 26
+        },
         "id": "ATMJ3iLY",
-        "status": "started"
+        "lastFen": "8/5kp1/p3p3/7p/2P3bP/PP1N2PK/4pr2/4R3 w - - 3 1",
+        "lastMove": "f3g4",
+        "lastMoveAt": 1794772862422,
+        "moves": "d4 d5 Nc3 Nf6 Nf3 Nc6 Bf4 a6 e3 e6 a3 Be7 Bd3 Bd7 O-O O-O e4 dxe4 Nxe4 Re8 Bg3 Nh5 c3 Nxg3 fxg3 f5 Nc5 Bc8 Re1 Bf6 h4 b6 Nb3 Qd6 Kh2 Bb7 Nbd2 Ne7 Nc4 Qd7 Nfe5 Qd5 Qf3 Rab8 Qxd5 Nxd5 Nd7 Rbd8 Nce5 Bxe5 Nxe5 Nf6 Be2 c5 dxc5 bxc5 Rad1 Rd5 Bf3 Ne4 Bxe4 fxe4 Nc4 Rf8 Nd6 Bc6 c4 Rxd1 Rxd1 Rf2 Nc8 Kf7 b3 e3 Re1 e2 Nb6 Rxg2+ Kh3 h5 Na4 Bf3 Nxc5 Rf2 Nd3 Bg4#",
+        "opening": {
+          "eco": "A45",
+          "name": "Queen's Pawn Game: Chigorin Variation",
+          "ply": 4
+        },
+        "perf": "correspondence",
+        "players": {
+          "black": {
+            "provisional": true,
+            "rating": 1845,
+            "ratingDiff": 124,
+            "user": {
+              "id": "frasal",
+              "name": "frasal"
+            }
+          },
+          "white": {
+            "rating": 1690,
+            "ratingDiff": -13,
+            "user": {
+              "flair": "nature.fallen-leaf",
+              "id": "giords",
+              "name": "giords",
+              "patron": true,
+              "patronColor": 9
+            }
+          }
+        },
+        "rated": true,
+        "source": "friend",
+        "speed": "correspondence",
+        "status": "mate",
+        "variant": "standard",
+        "winner": "black"
       },
       "round": "3",
       "url": "https://lichess.org/game/ATMJ3iLY",
