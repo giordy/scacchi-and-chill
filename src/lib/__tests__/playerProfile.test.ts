@@ -130,18 +130,33 @@ describe('game pace', () => {
 
   // Own times: Anna 1 h, Bruno 3 h, Carla 5 h per move; each game's pace is the average of its two players
   const ten = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7';
-  const season = [g('1', 'anna', 'bruno', 'aaaaaaaa'), g('2', 'bruno', 'carla', 'bbbbbbbb'), g('3', 'carla', 'anna', 'cccccccc')];
+  // Each pair meets twice, so that every player has the three games the estimate waits for
+  const season = [
+    g('1', 'anna', 'bruno', 'aaaaaaaa'), g('2', 'bruno', 'carla', 'bbbbbbbb'), g('3', 'carla', 'anna', 'cccccccc'),
+    g('4', 'bruno', 'anna', 'dddddddd'), g('5', 'carla', 'bruno', 'eeeeeeee'), g('6', 'anna', 'carla', 'ffffffff'),
+  ];
   const seasonStates = {
     aaaaaaaa: timed('aaaaaaaa', 'mate', ten, 20), // (1 + 3) / 2 · 10
     bbbbbbbb: timed('bbbbbbbb', 'resign', ten, 40), // (3 + 5) / 2 · 10
     cccccccc: timed('cccccccc', 'draw', ten, 30), // (5 + 1) / 2 · 10
+    dddddddd: timed('dddddddd', 'mate', ten, 20),
+    eeeeeeee: timed('eeeeeeee', 'resign', ten, 40),
+    ffffffff: timed('ffffffff', 'draw', ten, 30),
   };
 
   it("is the player's own time per move, told apart from the opponents'", () => {
     const anna = computePlayerProfile('anna', players, season, seasonStates)!;
-    expect(anna.pace?.games).toBe(2);
-    expect(anna.pace!.msPerMove / H).toBeCloseTo(1);
-    expect(computePlayerProfile('carla', players, season, seasonStates)!.pace!.msPerMove / H).toBeCloseTo(5);
+    const carla = computePlayerProfile('carla', players, season, seasonStates)!;
+    expect(anna.pace?.games).toBe(4);
+    // Few short games: below the season average of 3 h for Anna, above it for Carla
+    expect(anna.pace!.msPerMove / H).toBeGreaterThan(1);
+    expect(anna.pace!.msPerMove / H).toBeLessThan(3);
+    expect(carla.pace!.msPerMove / H).toBeGreaterThan(3);
+    expect(carla.pace!.msPerMove / H).toBeLessThan(5);
+  });
+
+  it('waits for three games of the player', () => {
+    expect(computePlayerProfile('anna', players, season.slice(0, 3), seasonStates)!.pace).toBeNull();
   });
 
   it('is null until the games pin it down', () => {

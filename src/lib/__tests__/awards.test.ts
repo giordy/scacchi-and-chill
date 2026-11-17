@@ -133,15 +133,21 @@ describe('il bradipo', () => {
     expect(sloth.detail).toBe('circa 3 h per ogni sua mossa');
   });
 
-  it('recovers each own time per move', () => {
-    const t = estimateMoveTimes(
-      pairs.map(([w, b]) => ({ white: w, black: b, plies: 40, ms: 20 * (own[w] + own[b]) * H }))
-    )!;
-    Object.entries(own).forEach(([h, hours]) => expect(t.get(h)! / H).toBeCloseTo(hours, 6));
+  it('recovers each own time per move, once the games are many', () => {
+    const timed = (times: number) =>
+      Array.from({ length: times }, () => pairs).flat().map(([w, b]) => ({ white: w, black: b, plies: 40, ms: 20 * (own[w] + own[b]) * H }));
+    // Few games: the order is kept, the times pulled towards the season average
+    const few = estimateMoveTimes(timed(1))!;
+    expect([...few].sort((a, b) => b[1] - a[1]).map(([h]) => h).slice(0, 2)).toEqual(['anna', 'dario']);
+    expect(few.get('anna')! / H).toBeLessThan(3);
+    expect(few.get('bruno')! / H).toBeGreaterThan(1);
+    const many = estimateMoveTimes(timed(50))!;
+    Object.entries(own).forEach(([h, hours]) => expect(many.get(h)! / H).toBeCloseTo(hours, 1));
   });
 
   it('counts the turn a player let run out when losing on time', () => {
-    // Carla let a 7-day turn run out twice: (60 moves × 1 h + 2 × 168 h) / 62 moves ≈ 6.4 h
+    // Carla let a 7-day turn run out twice: about (60 moves × 1.3 h + 2 × 168 h) / 62 moves ≈ 6.7 h,
+    // her 1 h pulled a little towards the season average
     const withTimeouts = {
       ...gs,
       game0001: { ...gs.game0001, status: 'outoftime', daysPerTurn: 7 }, // Anna – Carla, 1-0
@@ -149,7 +155,7 @@ describe('il bradipo', () => {
     };
     const sloth = computeSeasonAwards(players4, history, withTimeouts).find((a) => a.id === 'slowest')!;
     expect(sloth.winners.map((w) => w.handle)).toEqual(['carla']);
-    expect(sloth.detail).toBe('circa 6 h per ogni sua mossa');
+    expect(sloth.detail).toBe('circa 7 h per ogni sua mossa');
   });
 
   it('gives no award when the games cannot tell the players apart', () => {

@@ -476,7 +476,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
               <span className="stat-pill-label">Tempo a mossa</span>
               <InfoTip
                 className="stat-pill-val"
-                text={`Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (${pace.games} sue).`}
+                text={`Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (${pace.games} sue). Finché le partite sono poche resta vicina alla media del torneo.`}
               >
                 circa {formatPace(pace.msPerMove)} <span className="infotip-mark" aria-hidden="true">ⓘ</span>
               </InfoTip>
