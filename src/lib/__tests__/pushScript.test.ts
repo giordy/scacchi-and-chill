@@ -3,72 +3,77 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error a Node script without types
-import { encryptPayload, moveText, movesNews, notificationFor, PUSH_ENDPOINT, sameState, vapidHeader, vapidKeys } from '../../../scripts/push.mjs';
+import { encryptPayload, movesNews, notificationFor, PUSH_ENDPOINT, sameState, vapidHeader, vapidKeys } from '../../../scripts/push.mjs';
 
 const games = [
-  { id: 'aaaaaaaa', white: 'anna', black: 'bruno' },
-  { id: 'bbbbbbbb', white: 'carla', black: 'dario' },
+  { id: 'aaaaaaaa', white: 'anna', black: 'bruno', round: '3' },
+  { id: 'bbbbbbbb', white: 'carla', black: 'dario', round: '3' },
 ];
 const names: Record<string, string> = { anna: 'Anna', bruno: 'Bruno', carla: 'Carla', dario: 'Dario' };
 const nameOf = (h: string) => names[h] ?? h;
 
 describe('push of the moves: what to tell', () => {
   it('records the state on the first run without telling anything', () => {
-    const { news, state } = movesNews(games, { aaaaaaaa: { status: 'started', moves: 'e4 e5' } }, null);
+    const { news, state } = movesNews(games, { aaaaaaaa: { status: 'started', moves: 'e4 e5', lastMoveAt: 100 } }, null);
     expect(news).toEqual([]);
-    expect(state).toEqual({ games: { aaaaaaaa: { plies: 2, final: false } } });
+    expect(state).toEqual({ games: { aaaaaaaa: { at: 100, final: false } } });
   });
 
-  it('tells the new moves and the ends, and keeps the games not read now', () => {
-    const prev = { games: { aaaaaaaa: { plies: 2, final: false }, bbbbbbbb: { plies: 10, final: false } } };
-    const { news, state } = movesNews(games, { aaaaaaaa: { status: 'started', moves: 'e4 e5 Nf3 Nc6 Bb5' } }, prev);
-    expect(news).toHaveLength(1);
-    expect(news[0]).toMatchObject({ id: 'aaaaaaaa', newPlies: 3, plies: 5, lastSan: 'Bb5', ended: false });
-    expect(state.games.bbbbbbbb).toEqual({ plies: 10, final: false });
-
-    const end = movesNews(games, { bbbbbbbb: { status: 'resign', winner: 'black', moves: 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7' } }, prev);
-    expect(end.news[0]).toMatchObject({ ended: true, newPlies: 0, winner: 'black' });
+  it('tells a move from the time of the last move, not from the moves listed (Lichess hides the latest)', () => {
+    const prev = { games: { aaaaaaaa: { at: 100, final: false }, bbbbbbbb: { at: 50, final: false } } };
+    // Same moves listed, a later move: somebody moved
+    const { news, state } = movesNews(games, { aaaaaaaa: { status: 'started', moves: 'e4 e5', lastMoveAt: 200 } }, prev);
+    expect(news).toEqual([{ id: 'aaaaaaaa', white: 'anna', black: 'bruno', round: '3', ended: false, winner: undefined }]);
+    // Not read now: kept as it was
+    expect(state.games.bbbbbbbb).toEqual({ at: 50, final: false });
   });
 
-  it('tells nothing for a game that did not change, nor for one never played', () => {
-    const prev = { games: { aaaaaaaa: { plies: 2, final: false } } };
-    expect(movesNews(games, { aaaaaaaa: { status: 'started', moves: 'e4 e5' } }, prev).news).toEqual([]);
-    expect(movesNews(games, { bbbbbbbb: { status: 'aborted' } }, prev).news).toEqual([]);
-    expect(movesNews(games, { bbbbbbbb: { status: 'created' } }, prev).news).toEqual([]);
+  it('tells the first moves of a game, all hidden by Lichess', () => {
+    const { news } = movesNews(games, { bbbbbbbb: { status: 'started', lastMoveAt: 300 } }, { games: { bbbbbbbb: { at: 0, final: false } } });
+    expect(news.map((n: { id: string }) => n.id)).toEqual(['bbbbbbbb']);
   });
 
-  it('a game of a new round with moves already made is news', () => {
-    const { news } = movesNews(games, { bbbbbbbb: { status: 'started', moves: 'd4' } }, { games: {} });
-    expect(news[0]).toMatchObject({ id: 'bbbbbbbb', newPlies: 1, lastSan: 'd4' });
+  it('tells the end of a game, not of one never played', () => {
+    const prev = { games: { aaaaaaaa: { at: 100, final: false }, bbbbbbbb: { at: 50, final: false } } };
+    const end = movesNews(games, { aaaaaaaa: { status: 'resign', winner: 'black', lastMoveAt: 400 }, bbbbbbbb: { status: 'aborted', lastMoveAt: 50 } }, prev);
+    expect(end.news).toHaveLength(1);
+    expect(end.news[0]).toMatchObject({ id: 'aaaaaaaa', ended: true, winner: 'black' });
+  });
+
+  it('tells nothing for a challenge not accepted, nor for an unchanged game', () => {
+    const prev = { games: { aaaaaaaa: { at: 100, final: false } } };
+    expect(movesNews(games, { aaaaaaaa: { status: 'started', lastMoveAt: 100 } }, prev).news).toEqual([]);
+    expect(movesNews(games, { bbbbbbbb: { status: 'created', lastMoveAt: 500 } }, prev).news).toEqual([]);
+  });
+
+  it('a game kept before the time was recorded: no notification until its next move', () => {
+    const prev = { games: { aaaaaaaa: { plies: 12, final: false } } };
+    const first = movesNews(games, { aaaaaaaa: { status: 'started', lastMoveAt: 100 } }, prev);
+    expect(first.news).toEqual([]);
+    expect(movesNews(games, { aaaaaaaa: { status: 'started', lastMoveAt: 200 } }, first.state).news).toHaveLength(1);
   });
 
   it('writes the state again only when it changed', () => {
     expect(sameState(null, { games: {} })).toBe(false);
-    expect(sameState({ games: { a: { plies: 1, final: false } } }, { games: { a: { plies: 1, final: false } } })).toBe(true);
-    expect(sameState({ games: { a: { plies: 1, final: false } } }, { games: { a: { plies: 2, final: false } } })).toBe(false);
+    expect(sameState({ games: { a: { at: 1, final: false } } }, { games: { a: { at: 1, final: false } } })).toBe(true);
+    expect(sameState({ games: { a: { at: 1, final: false } } }, { games: { a: { at: 2, final: false } } })).toBe(false);
   });
 });
 
 describe('push of the moves: the notification', () => {
-  const one = { id: 'aaaaaaaa', white: 'anna', black: 'bruno', newPlies: 1, plies: 5, lastSan: 'Bb5', ended: false, status: 'started' };
-  const two = { id: 'bbbbbbbb', white: 'carla', black: 'dario', newPlies: 0, plies: 40, lastSan: 'Qh7#', ended: true, status: 'mate', winner: 'white' };
+  const one = { id: 'aaaaaaaa', white: 'anna', black: 'bruno', round: '3', ended: false };
+  const two = { id: 'bbbbbbbb', white: 'carla', black: 'dario', round: '3', ended: true, winner: 'white' };
 
-  it('numbers the moves', () => {
-    expect(moveText(5, 'Bb5')).toBe('3. Bb5');
-    expect(moveText(6, 'Nf6')).toBe('3… Nf6');
+  it('for one game, its players and round, never a move', () => {
+    expect(notificationFor([one], nameOf, '')).toEqual({ title: 'Anna – Bruno', body: 'Turno 3: nuova mossa', hash: '#/partite' });
+    expect(notificationFor([two], nameOf, '').body).toBe('Turno 3: finita, vince Carla (1-0)');
+    expect(notificationFor([{ ...two, winner: undefined }], nameOf, '').body).toBe('Turno 3: finita, patta (½-½)');
   });
 
-  it('for one game, its players and the move', () => {
-    expect(notificationFor([one], nameOf, '')).toEqual({ title: 'Anna – Bruno', body: 'Nuova mossa: 3. Bb5', hash: '#/partite' });
-    expect(notificationFor([{ ...one, newPlies: 3 }], nameOf, '').body).toBe("3 mosse nuove, l'ultima 3. Bb5");
-    expect(notificationFor([two], nameOf, '').body).toBe('Finita: vince Carla (1-0)');
-    expect(notificationFor([{ ...two, winner: undefined, status: 'draw' }], nameOf, '').body).toBe('Finita: patta (½-½)');
-  });
-
-  it('for several games, one line each', () => {
+  it('for several games, one line each: the players, and the result when it ended', () => {
     const n = notificationFor([one, two], nameOf, '');
-    expect(n.title).toBe('Mosse nuove in 2 partite');
-    expect(n.body).toBe('Anna – Bruno: 3. Bb5\nCarla – Dario: finita, vince Carla (1-0)');
+    expect(n.title).toBe('Si muove in 2 partite');
+    expect(n.body).toBe('Anna – Bruno\nCarla – Dario: finita, vince Carla (1-0)');
   });
 
   it("skips the subscriber's own games, and says nothing when only those moved", () => {

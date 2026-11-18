@@ -3,7 +3,7 @@
 // games ended since the run before.
 // - who: tournaments/<id>/pushSubscriptions, written by the public page (src/lib/push.ts), never
 //   readable from the site; subscriptions the push service calls gone are deleted here
-// - what was already told: tournaments/<id>/private/push, the plies and the end of every game. With
+// - what was already told: tournaments/<id>/private/push, the last move's time and the end of every game. With
 //   no such document (the first run) nothing is sent: the state is only recorded, so switching the
 //   notifications on does not send the whole season
 // - how: Web Push (RFC 8291 encryption, RFC 8292 VAPID), with node:crypto and no library. The private
@@ -13,15 +13,17 @@ import crypto from 'node:crypto';
 const isFinal = (s) => Boolean(s && s.status && s.status !== 'created' && s.status !== 'started');
 // Games that ended without being played are not news
 const UNPLAYED = new Set(['aborted', 'noStart']);
-export const pliesOf = (s) => (s?.moves ? s.moves.trim().split(/\s+/).filter(Boolean).length : 0);
 
 // The push services of the browsers: the only addresses the run sends to (firestore.rules checks the
 // same when a subscription is written)
 export const PUSH_ENDPOINT = /^https:\/\/(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|web\.push\.apple\.com|[a-z0-9.-]+\.notify\.windows\.com)\/\S+$/;
 
 // What to tell since the last run, and the state to keep. games: the season's games with their
-// Lichess id (id, white, black); states: their state from Lichess, by id (missing: not read now);
-// prev: the state kept by the run before, null on the first run.
+// Lichess id (id, white, black, round); states: their state from Lichess, by id (missing: not read
+// now); prev: the state kept by the run before, null on the first run.
+// Lichess hides the last 3 half-moves of an ongoing game (anti-cheat, src/lib/utils.ts HIDDEN_PLIES):
+// the moves it lists are old ones, so a notification never names them. What Lichess gives right is
+// the time of the last move: a later one means somebody moved.
 export function movesNews(games, states, prev) {
   const next = {};
   const news = [];
@@ -32,26 +34,15 @@ export function movesNews(games, states, prev) {
       if (before) next[g.id] = before;
       return;
     }
-    const plies = pliesOf(s);
+    const at = typeof s.lastMoveAt === 'number' ? s.lastMoveAt : 0;
     const final = isFinal(s);
-    next[g.id] = { plies, final };
+    next[g.id] = { at, final };
     if (!prev) return;
-    const was = before ?? { plies: 0, final: false };
+    // A game kept before the time was (plies only): recorded now, told from the next move
+    const was = before ?? { at: 0, final: false };
     const ended = final && !was.final && !UNPLAYED.has(s.status);
-    if (plies > was.plies || ended) {
-      const sans = s.moves ? s.moves.trim().split(/\s+/) : [];
-      news.push({
-        id: g.id,
-        white: g.white,
-        black: g.black,
-        newPlies: Math.max(0, plies - was.plies),
-        plies,
-        lastSan: sans[sans.length - 1],
-        ended,
-        status: s.status,
-        winner: s.winner,
-      });
-    }
+    const moved = !final && s.status === 'started' && was.at !== undefined && at > was.at;
+    if (moved || ended) news.push({ id: g.id, white: g.white, black: g.black, round: g.round, ended, winner: s.winner });
   });
   return { news, state: { games: next } };
 }
@@ -59,22 +50,9 @@ export function movesNews(games, states, prev) {
 // Whether the state to keep is the one already kept (then it is not written again)
 export const sameState = (prev, next) => Boolean(prev) && JSON.stringify(prev.games ?? {}) === JSON.stringify(next.games);
 
-// "23. Cf3" or "23… Cf6": the move number of a ply, as the site writes it
-export function moveText(plies, san) {
-  if (!san || plies < 1) return '';
-  const n = Math.ceil(plies / 2);
-  return `${n}${plies % 2 === 1 ? '.' : '…'} ${san}`;
-}
-
 function resultText(item, nameOf) {
   if (item.winner) return `vince ${nameOf(item.winner === 'white' ? item.white : item.black)} (${item.winner === 'white' ? '1-0' : '0-1'})`;
   return 'patta (½-½)';
-}
-
-function lineOf(item, nameOf) {
-  if (item.ended) return `finita, ${resultText(item, nameOf)}`;
-  const last = moveText(item.plies, item.lastSan);
-  return item.newPlies > 1 ? `${item.newPlies} mosse, l'ultima ${last}` : last;
 }
 
 const MAX_LINES = 6;
@@ -86,14 +64,15 @@ export function notificationFor(news, nameOf, skip) {
   const mine = news.filter((n) => !k || (n.white.toLowerCase() !== k && n.black.toLowerCase() !== k));
   if (mine.length === 0) return null;
   const pair = (n) => `${nameOf(n.white)} – ${nameOf(n.black)}`;
+  const round = (n) => (n.round ? `Turno ${n.round}: ` : '');
   if (mine.length === 1) {
     const n = mine[0];
-    return { title: pair(n), body: n.ended ? `Finita: ${resultText(n, nameOf)}` : n.newPlies > 1 ? `${n.newPlies} mosse nuove, l'ultima ${moveText(n.plies, n.lastSan)}` : `Nuova mossa: ${moveText(n.plies, n.lastSan)}`, hash: '#/partite' };
+    return { title: pair(n), body: round(n) + (n.ended ? `finita, ${resultText(n, nameOf)}` : 'nuova mossa'), hash: '#/partite' };
   }
-  const lines = mine.slice(0, MAX_LINES).map((n) => `${pair(n)}: ${lineOf(n, nameOf)}`);
+  const lines = mine.slice(0, MAX_LINES).map((n) => (n.ended ? `${pair(n)}: finita, ${resultText(n, nameOf)}` : pair(n)));
   if (mine.length > MAX_LINES) lines.push(`e altre ${mine.length - MAX_LINES}`);
   const ended = mine.filter((n) => n.ended).length;
-  return { title: ended === mine.length ? `${mine.length} partite finite` : `Mosse nuove in ${mine.length} partite`, body: lines.join('\n'), hash: '#/partite' };
+  return { title: ended === mine.length ? `${mine.length} partite finite` : `Si muove in ${mine.length} partite`, body: lines.join('\n'), hash: '#/partite' };
 }
 
 // ---- Web Push ----
