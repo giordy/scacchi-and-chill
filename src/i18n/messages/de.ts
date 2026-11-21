@@ -20,6 +20,10 @@ export const de: DeepPartial<Messages> = {
   admin: {
   },
 
+  // ---- season: the season's lifecycle in the organizer area (checklist, closing, backups, Lichess sync, Elo seeds, withdrawals) ----
+  season: {
+  },
+
   // ---- messages: the group chat messages (round launch, status bulletin, season texts) ----
   messages: {
   },
