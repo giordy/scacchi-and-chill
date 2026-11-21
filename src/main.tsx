@@ -5,6 +5,7 @@ import './fonts.css';
 import './index.css';
 import { captureGoogleAnswer } from './lib/googleRedirect';
 import { holiday, showHoliday } from './lib/holiday';
+import { initLocale } from './i18n';
 
 // Back from the Google sign-in of the installed app: take the answer out of the address first
 captureGoogleAnswer();
@@ -12,10 +13,13 @@ captureGoogleAnswer();
 // Seasonal decorations live in CSS under this attribute
 showHoliday(holiday);
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+// The viewer's language first (a separate file for the languages not in the bundle), then the page
+initLocale().finally(() =>
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  )
 );
 
 // The site's files stay in the browser, to open without network (see public/sw.js). Not while

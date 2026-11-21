@@ -1,0 +1,132 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Stagione conclusa: Marco Ber vince lo Scudetto Capablanca con 9 punti! 🏆
+[aria-label: 56 partite concluse e 0 in corso su 56]
+__ 56 concluse__ 0 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+Turno
+[value: all]
+Tutti (56 partite)
+[value: 1]
+Turno 1 (andata)
+[value: 2]
+Turno 2 (andata)
+[value: 3]
+Turno 3 (andata)
+[value: 4]
+Turno 4 (andata)
+[value: 5]
+Turno 5 (andata)
+[value: 6]
+Turno 6 (andata)
+[value: 7]
+Turno 7 (andata)
+[value: 8]
+Turno 8 (ritorno)
+[value: 9]
+Turno 9 (ritorno)
+[value: 10]
+Turno 10 (ritorno)
+[value: 11]
+Turno 11 (ritorno)
+[value: 12]
+Turno 12 (ritorno)
+[value: 13]
+Turno 13 (ritorno)
+[value: 14]
+Turno 14 (ritorno)
+Turno 14ritornoUltimo turno
+Turno concluso
+[aria-label: Rivedi Marco Bel – Carla]
+[aria-label: Posizione finale di Marco Bel – Carla]
+▶
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Carla
+0 – 1
+Caro-Kann Defense: Campomanes Attack28 mosse
+Apri su Lichess
+[aria-label: Rivedi Marco Ber – Sergio]
+[aria-label: Posizione finale di Marco Ber – Sergio]
+▶
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Sergio
+1 – 0
+Italian Game: Two Knights Defense, Modern Bishop's Opening30 mosse
+Apri su Lichess
+[aria-label: Rivedi Andrea – Elena]
+[aria-label: Posizione finale di Andrea – Elena]
+▶
+[aria-label: Bianco]
+Andrea
+[aria-label: Nero]
+Elena
+½ – ½
+Queen's Pawn Game: Chigorin Variation43 mosse
+Apri su Lichess
+[aria-label: Rivedi Dario – Bruno]
+[aria-label: Posizione finale di Dario – Bruno]
+▶
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Bruno
+0 – 1
+Bishop's Opening18 mosse
+Apri su Lichess
+Turni giocati
+Turno 13ritorno
+Turno concluso
+[aria-label: Rivedi Marco Bel – Bruno]
+[aria-label: Posizione finale di Marco Bel – Bruno]
+▶
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Bruno
+1 – 0
+Indian Defense31 mosse
+💥 Colpaccio
+Colpaccio: Marco Bel ha battuto un avversario molto più forte, secondo l'Elo del torneo.
+Apri su Lichess
+[aria-label: Rivedi Carla – Elena]
+[aria-label: Posizione finale di Carla – Elena]
+▶
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Elena
+0 – 1
+Queen's Pawn Game: Accelerated London System44 mosse
+Apri su Lichess
+[aria-label: Rivedi Marco Ber – Andrea]
+[aria-label: Posizione finale di Marco Ber – Andrea]
+▶
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Andrea
+1 – 0
+King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit41 mosse
+🔝 Scontro al vertice
+Scontro al vertice: 1° contro 3° in classifica a inizio turno.
+Apri su Lichess
+[aria-label: Rivedi Sergio – Dario]
+[aria-label: Posizione finale di Sergio – Dario]
+▶
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Dario
+0 – 1
+Owen Defense54 mosse
+Apri su Lichess
+Mostra gli altri 12 turni giocati

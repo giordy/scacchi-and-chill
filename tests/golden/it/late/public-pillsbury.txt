@@ -1,0 +1,90 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Turno 13 in corso. In testa Elena con 8 punti.
+[aria-label: 48 partite concluse e 4 in corso su 56]
+__ 48 concluse__ 4 in corso__ 4 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+[aria-label: Trofeo]
+CScudetto CapablancaChi fa più punti
+Trofeo PillsburyChi batte le attese
+[aria-label: Trofeo Pillsbury]
+Posizione
+Giocatore
+Punti
+I punti fatti nelle partite che contano per il trofeo, e quante ne ha giocate
+Obiettivo
+I punti previsti dall'Elo del torneo a inizio stagione, contro il suo calendario
+Ritmo
+I punti a fine stagione se da qui in poi ogni partita va come prevede l'Elo. ▲ sopra l'obiettivo, ▼ sotto
+1
+Carla🎯 Obiettivo raggiunto
+411 di 13
+2
+[title: sopra l'obiettivo]
+[aria-label: sopra l'obiettivo]
+▲ 4½
+2
+Dario🎯 Obiettivo raggiunto
+6½11 di 13
+6½
+[title: sopra l'obiettivo]
+[aria-label: sopra l'obiettivo]
+▲ 7½
+3
+Elena
+5
+[aria-label: , diversi dalla classifica]
+*9 di 11
+5½
+[title: sopra l'obiettivo]
+[aria-label: sopra l'obiettivo]
+▲ 6
+4
+Marco Bel
+4½
+[aria-label: , diversi dalla classifica]
+*10 di 12
+5
+[title: sopra l'obiettivo]
+[aria-label: sopra l'obiettivo]
+▲ 5½
+5
+Sergio
+2½10 di 12
+3
+[title: in linea con l'obiettivo]
+[aria-label: in linea con l'obiettivo]
+= 3
+6
+Bruno
+811 di 13
+10
+[title: sotto l'obiettivo]
+[aria-label: sotto l'obiettivo]
+▼
+7
+Andrea
+6
+[aria-label: , diversi dalla classifica]
+*9 di 11
+8½
+[title: sotto l'obiettivo]
+[aria-label: sotto l'obiettivo]
+▼
+8
+Marco Ber
+4½11 di 13
+8
+[title: sotto l'obiettivo]
+[aria-label: sotto l'obiettivo]
+▼
+* Punti diversi dalla classifica: per il trofeo non contano le partite decise a tavolino (ritiri, chiusure per scorrettezza) né quelle con gli esordienti.
+Il *Trofeo Pillsbury* va a chi chiude la stagione più sopra il proprio obiettivo, di almeno mezzo punto.
+Come funziona
+L'obiettivo è fisso per la stagione e lo trovate anche nel vostro profilo. La graduatoria pesa lo scarto con quanto è sicuro l'obiettivo: chi ha un Elo ancora incerto, come chi gioca la prima stagione, deve superarlo di più, perché una parte dello scarto può venire dall'Elo e non dalla sua stagione. Le partite con gli esordienti e quelle decise a tavolino non contano.
+*Perché Pillsbury.* Nel 1895, a Hastings, Harry Nelson Pillsbury era un ventiduenne americano quasi sconosciuto, al suo primo grande torneo: lo vinse davanti a Lasker, Steinitz, Tarrasch e Čigorin, i più forti del mondo. È la sorpresa più famosa della storia degli scacchi.

@@ -1,0 +1,64 @@
+===== master prompt =====
+Prepara i testi per la nuova stagione del torneo di scacchi per corrispondenza tra amici "Scacchi & Chill", dedicata a José Raúl Capablanca.
+I testi vanno sul sito del torneo e nel gruppo WhatsApp: italiano semplice, tono da amici appassionati, frasi brevi.
+
+ACCURATEZZA
+- Solo fatti noti e documentati. Meglio un aneddoto famoso e verificabile che uno raro.
+- Non inventare date, cifre, citazioni o partite. Se un dettaglio è incerto, scrivilo in "toCheck".
+- Non scrivere link, notazioni delle partite (PGN) o indirizzi di immagini.
+- Ogni testo va sul sito così com'è: niente frasi rivolte a me, come «ecco» o «perfetta per la presentazione».
+
+COSA SERVE
+1. motto: una frase breve che lo riassuma, senza virgolette (es. per Capablanca "La macchina degli scacchi").
+2. presentation: chi era, in 2 o 3 paragrafi brevi (in tutto 80-150 parole). Formattazione WhatsApp: *grassetto* per uno o due passaggi chiave, nient'altro.
+3. anecdotes: esattamente 14 aneddoti, uno per turno del torneo, in ordine cronologico della sua vita. Ognuno con un titolo breve (al massimo 8 parole, senza numerazione) e un testo di 40-80 parole. Aneddoti diversi tra loro: carriera, partite, carattere, curiosità.
+4. opening: la famiglia di aperture più legata a lui, scelta SOLO tra queste chiavi:
+- queens-gambit: Gambetto di Donna (la sceglie il bianco)
+- slav: Difesa Slava (la sceglie il nero)
+- tarrasch: Difesa Tarrasch (la sceglie il nero)
+- catalan: Catalana (la sceglie il bianco)
+- london: Sistema Londra (la sceglie il bianco)
+- colle: Sistema Colle (la sceglie il bianco)
+- kings-indian: Est-Indiana (la sceglie il nero)
+- nimzo-indian: Nimzo-Indiana (la sceglie il nero)
+- queens-indian: Ovest-Indiana (la sceglie il nero)
+- grunfeld: Difesa Grünfeld (la sceglie il nero)
+- benoni: Benoni (la sceglie il nero)
+- dutch: Olandese (la sceglie il nero)
+- english: Inglese (la sceglie il bianco)
+- reti: Apertura Réti (la sceglie il bianco)
+- bird: Apertura Bird (la sceglie il bianco)
+- kings-indian-attack: Attacco Est-Indiano (la sceglie il bianco)
+- ruy-lopez: Spagnola (la sceglie il bianco)
+- italian: Italiana (la sceglie il bianco)
+- scotch: Scozzese (la sceglie il bianco)
+- bishops-opening: Apertura d'Alfiere (la sceglie il bianco)
+- vienna: Viennese (la sceglie il bianco)
+- four-knights: Quattro Cavalli (la sceglie il bianco)
+- kings-gambit: Gambetto di Re (la sceglie il bianco)
+- sicilian: Siciliana (la sceglie il nero)
+- french: Francese (la sceglie il nero)
+- caro-kann: Caro-Kann (la sceglie il nero)
+- alekhine: Difesa Alekhine (la sceglie il nero)
+- scandinavian: Scandinava (la sceglie il nero)
+- pirc-modern: Pirc e Moderna (la sceglie il nero)
+- petrov: Difesa Petrov (la sceglie il nero)
+- philidor: Difesa Philidor (la sceglie il nero)
+   Se nessuna è davvero sua, scegli quella che giocava più spesso e spiegalo in "toCheck".
+5. famousGame: la sua partita più celebre, preferibilmente una sua vittoria, con white e black (cognomi), place, year e note (2 o 3 frasi su perché è famosa, scritte per chi legge il sito: niente commenti sulla scelta o su questa richiesta).
+6. photo: dove trovare una sua foto libera da diritti (per esempio cosa cercare su Wikimedia Commons).
+7. toCheck: l'elenco dei dettagli da verificare, vuoto se non ce ne sono.
+
+FORMATO DELLA RISPOSTA
+Rispondi solo con questo JSON, in un blocco di codice, senza testo prima o dopo:
+```json
+{
+  "motto": "…",
+  "presentation": "…",
+  "anecdotes": [{ "title": "…", "text": "…" }],
+  "opening": "…",
+  "famousGame": { "white": "…", "black": "…", "place": "…", "year": 1918, "note": "…" },
+  "photo": "…",
+  "toCheck": ["…"]
+}
+```

@@ -1,0 +1,138 @@
+===== status bulletin, round 1 =====
+🏁 *Turno 1 completato* – Tutti i risultati:
+
+1️⃣ *Bruno* ⚪ vs *Carla* ⚫
+Si chiude con la vittoria di Bruno col bianco con il matto in 69 mosse *(1-0)* 📌
+♟️ Apertura: Hungarian Opening
+
+2️⃣ *Dario* ⚪ vs *Elena* ⚫
+Finita! Ha vinto Elena col nero per abbandono in 37 mosse *(0-1)* 🎉
+♟️ Apertura: Four Knights Game: Scotch Variation
+
+3️⃣ *Marco Bel* ⚪ vs *Marco Ber* ⚫
+Fine dei giochi: vince Marco Bel col bianco in 39 mosse *(1-0)* 🔔
+♟️ Apertura: Ponziani Opening: Jaenisch Counterattack
+
+4️⃣ *Sergio* ⚪ vs *Andrea* ⚫
+Partita archiviata: vince Andrea col nero con il matto in 31 mosse *(0-1)* 🗂️
+♟️ Apertura: Indian Defense
+
+🥇 In testa Elena con 3 punti.
+
+📈 *Classifica dopo il Turno 1*
+1. Elena – 3 punti
+2. Marco Bel – 2 punti
+3. Marco Ber – 2 punti
+4. Andrea – 2 punti
+5. Bruno 👑 – 1 punto
+5. Dario – 1 punto
+7. Carla – 0 punti
+7. Sergio – 0 punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Marco Ber +1
+
+📚 *Studi consigliati per le aperture del turno:*
+• Hungarian Opening: https://lichess.org/study/search?q=Hungarian+Opening&order=popular
+• Four Knights Game: https://lichess.org/study/search?q=Four+Knights+Game&order=popular
+• Ponziani Opening: https://lichess.org/study/search?q=Ponziani+Opening&order=popular
+• Indian Defense: https://lichess.org/study/search?q=Indian+Defense&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. vKcYyBiC: stato mate, vincitore white, mosse 69, Elo bianco 1814?, Elo nero 1626, apertura Hungarian Opening
+2. bGWJT8gq: stato resign, vincitore black, mosse 37, Elo bianco 1690, Elo nero 1687?, apertura Four Knights Game: Scotch Variation
+3. yaufZA8M: stato cheat, vincitore white, mosse 39, Elo bianco 1500?, Elo nero 1500?, apertura Ponziani Opening: Jaenisch Counterattack
+4. 3UflZBAj: stato mate, vincitore black, mosse 31, Elo bianco 838?, Elo nero 1448?, apertura Indian Defense
+===== status bulletin, round 2 =====
+🏁 *Turno 2 completato* – Tutti i risultati:
+
+1️⃣ *Elena* ⚪ vs *Sergio* ⚫
+Elena incassa il punto col bianco per abbandono in 44 mosse *(1-0)* 💪
+♟️ Apertura: Queen's Pawn Game: Accelerated London System
+
+2️⃣ *Andrea* ⚪ vs *Marco Bel* ⚫
+Partita chiusa: vittoria di Marco Bel col nero per abbandono in 41 mosse *(0-1)* ✅
+♟️ Apertura: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+
+3️⃣ *Marco Ber* ⚪ vs *Bruno* ⚫
+Punto pieno per Marco Ber col bianco con il matto in 54 mosse *(1-0)* 🏆
+♟️ Apertura: Owen Defense
+
+4️⃣ *Carla* ⚪ vs *Dario* ⚫
+Fine dei giochi: vince Dario col nero con il matto in 28 mosse *(0-1)* 🔔
+♟️ Apertura: Caro-Kann Defense: Campomanes Attack
+
+🥇 In testa Elena con 3 punti.
+
+📈 *Classifica dopo il Turno 2*
+1. Elena – 3 punti
+2. Marco Bel – 2 punti
+3. Marco Ber – 2 punti
+4. Andrea – 2 punti
+5. Bruno 👑 – 1 punto
+5. Dario – 1 punto
+7. Carla – 0 punti
+7. Sergio – 0 punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Marco Ber +1
+
+📚 *Studi consigliati per le aperture del turno:*
+• Queen's Pawn Game: https://lichess.org/study/search?q=Queen's+Pawn+Game&order=popular
+• King's Pawn Game: https://lichess.org/study/search?q=King's+Pawn+Game&order=popular
+• Owen Defense: https://lichess.org/study/search?q=Owen+Defense&order=popular
+• Caro-Kann Defense: https://lichess.org/study/search?q=Caro-Kann+Defense&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. 1Wj3IRMp: stato resign, vincitore white, mosse 44, Elo bianco 1739?, Elo nero 779?, apertura Queen's Pawn Game: Accelerated London System
+2. lIwilhzZ: stato resign, vincitore black, mosse 41, Elo bianco 1490?, Elo nero 1737?, apertura King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+3. rn2r1GHE: stato mate, vincitore white, mosse 54, Elo bianco 1262?, Elo nero 1898?, apertura Owen Defense
+4. MdtCEmtV: stato mate, vincitore black, mosse 28, Elo bianco 1628, Elo nero 1668, apertura Caro-Kann Defense: Campomanes Attack
+===== status bulletin, round 3 =====
+📊 *Turno 3*: il punto della settimana
+
+1️⃣ *Bruno* ⚪ vs *Elena* ⚫
+Elena incassa il punto col nero con il matto in 30 mosse *(0-1)* 💪
+♟️ Apertura: Italian Game: Two Knights Defense, Modern Bishop's Opening
+
+2️⃣ *Dario* ⚪ vs *Marco Ber* ⚫
+Finita! Ha vinto Marco Ber col nero con il matto in 43 mosse *(0-1)* 🎉
+♟️ Apertura: Queen's Pawn Game: Chigorin Variation
+
+3️⃣ *Carla* ⚪ vs *Andrea* ⚫
+Andrea la spunta su Carla col nero con il matto in 18 mosse *(0-1)* 🙌
+♟️ Apertura: Bishop's Opening
+
+4️⃣ *Marco Bel* ⚪ vs *Sergio* ⚫
+In corso ♟️ (meno di 10 mosse)
+
+📊 *Riepilogo: 3 finite · 1 in corso*
+
+📡 Le partite in corso: https://example.org/#/partite
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. HiOldHtt: stato mate, vincitore black, mosse 30, Elo bianco 1722?, Elo nero 1741?, apertura Italian Game: Two Knights Defense, Modern Bishop's Opening
+2. ATMJ3iLY: stato mate, vincitore black, mosse 43, Elo bianco 1690, Elo nero 1845?, apertura Queen's Pawn Game: Chigorin Variation
+3. IUQYFfYM: stato mate, vincitore black, mosse 18, Elo bianco 1614, Elo nero 1404?, apertura Bishop's Opening
+4. RKzC96bM: bianco=?, nero=?, semimosse visibili via API=0 (Lichess ne nasconde fino a 3), ~meno di 10 mosse, fase Lichess=n/d
+===== leader =====
+ In testa Elena con 3 punti.
+===== champion =====
+Stagione conclusa: Elena vince lo Scudetto Capablanca con 3 punti! 🏆
+===== awards message, archived Scacchi & Chill - Stagione 1 =====
+🏆 *I premi di Scacchi & Chill - Stagione 1*
+
+⚡ *Fulmine*: Bruno (in 4 mosse)
+🏃 *Il maratoneta*: Elena (in 79 mosse contro Carla)
+🦥 *Il bradipo*: Elena "Lena" (circa 10 h per ogni sua mossa)
+===== awards message, current season =====
+🏆 *I premi di Stagione 2 - Capablanca*
+
+🏅 *Trofeo Pillsbury*: Marco Ber (2 punti su 2 partite, obiettivo 1)
+_A chi ha superato di più il proprio obiettivo, come Pillsbury a Hastings nel 1895 (esordienti esclusi)_
+
+E poi, per sorridere:
+⚡ *Fulmine*: Andrea (in 18 mosse)
+🏃 *Il maratoneta*: Bruno (in 69 mosse contro Carla)
+🦥 *Il bradipo*: Carla (circa 3 h per ogni sua mossa)

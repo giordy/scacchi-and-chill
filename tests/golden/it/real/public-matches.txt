@@ -1,0 +1,157 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Turno 3 in corso. In testa Elena con 3 punti.
+[aria-label: 11 partite concluse e 1 in corso su 56]
+__ 11 concluse__ 1 in corso__ 44 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+Turno
+[value: all]
+Tutti (56 partite)
+[value: 1]
+Turno 1 (andata)
+[value: 2]
+Turno 2 (andata)
+[value: 3]
+Turno 3 (andata)
+[value: 4]
+Turno 4 (andata)
+[value: 5]
+Turno 5 (andata)
+[value: 6]
+Turno 6 (andata)
+[value: 7]
+Turno 7 (andata)
+[value: 8]
+Turno 8 (ritorno)
+[value: 9]
+Turno 9 (ritorno)
+[value: 10]
+Turno 10 (ritorno)
+[value: 11]
+Turno 11 (ritorno)
+[value: 12]
+Turno 12 (ritorno)
+[value: 13]
+Turno 13 (ritorno)
+[value: 14]
+Turno 14 (ritorno)
+Turno 3andataTurno attuale
+3 concluse, 1 in corso
+[aria-label: Marco Bel – Sergio: partita in corso]
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Sergio
+In corso
+Apri su Lichess
+[aria-label: Rivedi Bruno – Elena]
+[aria-label: Posizione finale di Bruno – Elena]
+▶
+[aria-label: Bianco]
+Bruno
+[aria-label: Nero]
+Elena
+0 – 1
+Italian Game: Two Knights Defense, Modern Bishop's Opening30 mosse
+Apri su Lichess
+[aria-label: Rivedi Carla – Andrea]
+[aria-label: Posizione finale di Carla – Andrea]
+▶
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Andrea
+0 – 1
+Bishop's Opening18 mosse
+Apri su Lichess
+[aria-label: Rivedi Dario – Marco Ber]
+[aria-label: Posizione finale di Dario – Marco Ber]
+▶
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Marco Ber
+0 – 1
+Queen's Pawn Game: Chigorin Variation43 mosse
+Apri su Lichess
+Prossimi turni
+Turno 4andata
+4 da giocare
+[aria-label: Elena – Marco Bel: partita da giocare]
+[aria-label: Bianco]
+Elena
+[aria-label: Nero]
+Marco Bel
+In programma
+Link in arrivo all'inizio del turno
+[aria-label: Marco Ber – Carla: partita da giocare]
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Carla
+In programma
+Link in arrivo all'inizio del turno
+[aria-label: Sergio – Bruno: partita da giocare]
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Bruno
+In programma
+Link in arrivo all'inizio del turno
+[aria-label: Dario – Andrea: partita da giocare]
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Andrea
+In programma
+Link in arrivo all'inizio del turno
+Mostra gli altri 10 turni
+Turni giocati
+Turno 2andata
+Turno concluso
+[aria-label: Rivedi Andrea – Marco Bel]
+[aria-label: Posizione finale di Andrea – Marco Bel]
+▶
+[aria-label: Bianco]
+Andrea
+[aria-label: Nero]
+Marco Bel
+0 – 1
+King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit41 mosse
+Apri su Lichess
+[aria-label: Rivedi Marco Ber – Bruno]
+[aria-label: Posizione finale di Marco Ber – Bruno]
+▶
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Bruno
+1 – 0
+Owen Defense54 mosse
+Apri su Lichess
+[aria-label: Rivedi Elena – Sergio]
+[aria-label: Posizione finale di Elena – Sergio]
+▶
+[aria-label: Bianco]
+Elena
+[aria-label: Nero]
+Sergio
+1 – 0
+Queen's Pawn Game: Accelerated London System44 mosse
+Apri su Lichess
+[aria-label: Rivedi Carla – Dario]
+[aria-label: Posizione finale di Carla – Dario]
+▶
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Dario
+0 – 1
+Caro-Kann Defense: Campomanes Attack28 mosse
+Apri su Lichess
+Mostra l'altro turno

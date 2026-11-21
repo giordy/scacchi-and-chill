@@ -1,0 +1,1160 @@
+===== cavallo_pazzo =====
+← Torna al torneo
+Andrea
+@cavallo_pazzo su Lichess
+Elo1912
+[title: −35 da inizio stagione]
+[aria-label: −35 da inizio stagione]
+▼
+Elo del torneo, calcolato solo dalle nostre partite. Al primo anno: parte da 1947, il suo Elo Lichess blitz del 9 set 2026 (1822) riportato sulla scala del torneo. −35 da inizio stagione.
+Stagione 2 - Capablancain corso
+Posizione2° / 8
+Punti8
+V / N / P8 / 0 / 4
+Colori
+[aria-label: Col bianco]
+4/6
+[aria-label: Col nero]
+4/6
+Tempo a mossa
+circa 2 h ⓘ
+Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (12 sue). Finché le partite sono poche resta vicina alla media del torneo.
+Obiettivo per il Trofeo Pillsbury8½ punti su 11 partite›
+Andamento
+vittoria · patta · sconfitta. Tocca un punto per i dettagli.
+[aria-label: Punti dopo ogni turno: turno 1 1, turno 2 1, turno 3 2, turno 4 3, turno 5 4, turno 6 5, turno 7 5, turno 8 6, turno 9 7, turno 10 7, turno 11 8, turno 12 8]
+012345678InizioT1T2T3T4T5T6T7T8T9T10T11T12
+[aria-label: Turno 1: vittoria con Sergio · 1 punto]
+[aria-label: Turno 2: sconfitta con Marco Bel · 1 punto]
+[aria-label: Turno 3: vittoria con Carla · 2 punti]
+[aria-label: Turno 4: vittoria con Dario · 3 punti]
+[aria-label: Turno 5: vittoria con Bruno · 4 punti]
+[aria-label: Turno 6: vittoria con Marco Ber · 5 punti]
+[aria-label: Turno 7: sconfitta con Elena · 5 punti]
+[aria-label: Turno 8: vittoria con Sergio · 6 punti]
+[aria-label: Turno 9: vittoria con Marco Bel · 7 punti]
+[aria-label: Turno 10: sconfitta con Carla · 7 punti]
+[aria-label: Turno 11: vittoria con Dario · 8 punti]
+[aria-label: Turno 12: sconfitta con Bruno · 8 punti]
+Come finiscono le sue partite
+Vittorie (8)2 con il matto · 4 per abbandono · 2 per tempo scaduto
+Sconfitte (4)2 con il matto · 1 per abbandono · 1 per tempo scaduto
+Scontri diretti
+ⓘCosa indicano i pallini
+Nelle partite ancora da giocare il pallino dice con che colore giocherà: bianco o nero.
+Marco BelSconfittaVittoria
+Marco BerVittoriaIn corso
+SergioVittoriaVittoria
+BrunoVittoriaSconfitta
+CarlaVittoriaSconfitta
+DarioVittoriaVittoria
+ElenaSconfitta
+[aria-label: Col bianco]
+Turno 14
+Partite (13)
+Turno 13
+[aria-label: Nero]
+Marco Ber
+[title: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit]
+King's Pawn Game: Busch-Gass Gambit, Chiodini GambitIn corsoLichess
+Turno 12
+[aria-label: Nero]
+Bruno
+[title: Bishop's Opening]
+Bishop's OpeningSconfittaLichess
+Turno 11
+[aria-label: Bianco]
+Dario
+[title: Italian Game: Two Knights Defense, Modern Bishop's Opening]
+Italian Game: Two Knights Defense, Modern Bishop's OpeningVittoriaLichess
+Turno 10
+[aria-label: Bianco]
+Carla
+[title: Indian Defense]
+Indian DefenseSconfittaLichess
+Turno 9
+[aria-label: Nero]
+Marco Bel
+[title: Caro-Kann Defense: Campomanes Attack]
+Caro-Kann Defense: Campomanes AttackVittoriaLichess
+Turno 8
+[aria-label: Bianco]
+Sergio
+[title: Queen's Pawn Game: Accelerated London System]
+Queen's Pawn Game: Accelerated London SystemVittoriaLichess
+Turno 7
+[aria-label: Nero]
+Elena
+[title: Hungarian Opening]
+Hungarian OpeningSconfittaLichess
+Turno 6
+[aria-label: Bianco]
+Marco Ber
+[title: Caro-Kann Defense: Campomanes Attack]
+Caro-Kann Defense: Campomanes AttackVittoriaLichess
+Turno 5
+[aria-label: Bianco]
+Bruno
+[title: Four Knights Game: Scotch Variation]
+Four Knights Game: Scotch VariationVittoriaLichess
+Turno 4
+[aria-label: Nero]
+Dario
+[title: Bishop's Opening]
+Bishop's OpeningVittoriaLichess
+Turno 3
+[aria-label: Nero]
+Carla
+[title: Bishop's Opening]
+Bishop's OpeningVittoriaLichess
+Turno 2
+[aria-label: Bianco]
+Marco Bel
+[title: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit]
+King's Pawn Game: Busch-Gass Gambit, Chiodini GambitSconfittaLichess
+Turno 1
+[aria-label: Nero]
+Sergio
+[title: Indian Defense]
+Indian DefenseVittoriaLichess
+
+===== re_bianco =====
+← Torna al torneo
+Bruno
+@re_bianco su Lichess
+Elo1911
+[title: −11 da inizio stagione]
+[aria-label: −11 da inizio stagione]
+▼
+Elo del torneo, calcolato solo dalle nostre partite. −11 da inizio stagione.
+[aria-label: Trofei]
+👑Campione in carica · Scacchi & Chill - Stagione 1
+Campione in carica · Scacchi & Chill - Stagione 1
+Scudetto Chill · Scacchi & Chill - Stagione 1
+Scudetto Chill · Scacchi & Chill - Stagione 1
+[aria-label: Stagione in corso o carriera]
+Stagione 2 - Capablanca
+Carriera
+Posizione3° / 8
+Punti8
+V / N / P8 / 0 / 4
+Colori
+[aria-label: Col bianco]
+5/7
+[aria-label: Col nero]
+3/5
+Tempo a mossa
+circa 3 h ⓘ
+Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (12 sue). Finché le partite sono poche resta vicina alla media del torneo.
+Obiettivo per il Trofeo Pillsbury10 punti su 13 delle 14 partite›
+Andamento
+vittoria · patta · sconfitta. Tocca un punto per i dettagli.
+[aria-label: Punti dopo ogni turno: turno 1 1, turno 2 1, turno 3 1, turno 4 2, turno 5 2, turno 6 3, turno 7 3, turno 8 4, turno 9 5, turno 10 6, turno 11 7, turno 12 8]
+012345678InizioT1T2T3T4T5T6T7T8T9T10T11T12
+[aria-label: Turno 1: vittoria con Carla · 1 punto]
+[aria-label: Turno 2: sconfitta con Marco Ber · 1 punto]
+[aria-label: Turno 3: sconfitta con Elena · 1 punto]
+[aria-label: Turno 4: vittoria con Sergio · 2 punti]
+[aria-label: Turno 5: sconfitta con Andrea · 2 punti]
+[aria-label: Turno 6: vittoria con Marco Bel · 3 punti]
+[aria-label: Turno 7: sconfitta con Dario · 3 punti]
+[aria-label: Turno 8: vittoria con Carla · 4 punti]
+[aria-label: Turno 9: vittoria con Marco Ber · 5 punti]
+[aria-label: Turno 10: vittoria con Elena · 6 punti]
+[aria-label: Turno 11: vittoria con Sergio · 7 punti]
+[aria-label: Turno 12: vittoria con Andrea · 8 punti]
+Come finiscono le sue partite
+Vittorie (8)2 con il matto · 5 per abbandono · 1 per tempo scaduto
+Sconfitte (4)2 con il matto · 1 per abbandono · 1 per tempo scaduto
+Scontri diretti
+ⓘCosa indicano i pallini
+Nelle partite ancora da giocare il pallino dice con che colore giocherà: bianco o nero.
+Marco BelVittoriaIn corso
+Marco BerSconfittaVittoria
+SergioVittoriaVittoria
+AndreaSconfittaVittoria
+CarlaVittoriaVittoria
+DarioSconfitta
+[aria-label: Col nero]
+Turno 14
+ElenaSconfittaVittoria
+Partite (13)
+Turno 13
+[aria-label: Nero]
+Marco Bel
+[title: Indian Defense]
+Indian DefenseIn corsoLichess
+Turno 12
+[aria-label: Bianco]
+Andrea
+[title: Bishop's Opening]
+Bishop's OpeningVittoriaLichess
+Turno 11
+[aria-label: Bianco]
+Sergio
+[title: Caro-Kann Defense: Campomanes Attack]
+Caro-Kann Defense: Campomanes AttackVittoriaLichess
+Turno 10
+[aria-label: Nero]
+Elena
+[title: Four Knights Game: Scotch Variation]
+Four Knights Game: Scotch VariationVittoriaLichess
+Turno 9
+[aria-label: Bianco]
+Marco Ber
+[title: Italian Game: Two Knights Defense, Modern Bishop's Opening]
+Italian Game: Two Knights Defense, Modern Bishop's OpeningVittoriaLichess
+Turno 8
+[aria-label: Nero]
+Carla
+[title: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit]
+King's Pawn Game: Busch-Gass Gambit, Chiodini GambitVittoriaLichess
+Turno 7
+[aria-label: Bianco]
+Dario
+[title: Four Knights Game: Scotch Variation]
+Four Knights Game: Scotch VariationSconfittaLichess
+Turno 6
+[aria-label: Bianco]
+Marco Bel
+[title: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit]
+King's Pawn Game: Busch-Gass Gambit, Chiodini GambitVittoriaLichess
+Turno 5
+[aria-label: Nero]
+Andrea
+[title: Four Knights Game: Scotch Variation]
+Four Knights Game: Scotch VariationSconfittaLichess
+Turno 4
+[aria-label: Nero]
+Sergio
+[title: Queen's Pawn Game: Chigorin Variation]
+Queen's Pawn Game: Chigorin VariationVittoriaLichess
+Turno 3
+[aria-label: Bianco]
+Elena
+[title: Italian Game: Two Knights Defense, Modern Bishop's Opening]
+Italian Game: Two Knights Defense, Modern Bishop's OpeningSconfittaLichess
+Turno 2
+[aria-label: Nero]
+Marco Ber
+[title: Owen Defense]
+Owen DefenseSconfittaLichess
+Turno 1
+[aria-label: Bianco]
+Carla
+[title: Hungarian Opening]
+Hungarian OpeningVittoriaLichess
+Primati
+Elo massimo ⓘ
+Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione). *1924* (Stagione 2 - Capablanca)
+Stagioni concluse
+1 stagione conclusa · 14 partite · 13½ punti · miglior piazzamento 1°
+Stagione 1🥇 1° su 813½ pt · 13V 1N 0P›La stagione in breve
+Scontri diretti di sempre
+Carla4V *4–0*
+Sergio4V *4–0*
+Elena3V 1P *3–1*
+Dario2V 1P *2–1*
+Marco Ber1V 1P *1–1*
+Andrea1V 1P *1–1*
+Elena "Lena"1V 1N *1½–½*
+Irene2V *2–0*
+Marco Bel2V *2–0*
+Giulia1V *1–0*
+
+===== donna_rossa =====
+← Torna al torneo
+Carla
+@donna_rossa su Lichess
+Elo1446
+[title: +59 da inizio stagione]
+[aria-label: +59 da inizio stagione]
+▲59
+Elo del torneo, calcolato solo dalle nostre partite. +59 da inizio stagione.
+[aria-label: Stagione in corso o carriera]
+Stagione 2 - Capablanca
+Carriera
+Posizione7° / 8
+Punti4
+V / N / P3 / 2 / 7
+Colori
+[aria-label: Col bianco]
+1½/6
+[aria-label: Col nero]
+2½/6
+Tempo a mossa
+circa 2 h ⓘ
+Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (12 sue). Finché le partite sono poche resta vicina alla media del torneo.
+Obiettivo per il Trofeo Pillsbury2 punti su 13 delle 14 partite›
+Andamento
+vittoria · patta · sconfitta. Tocca un punto per i dettagli.
+[aria-label: Punti dopo ogni turno: turno 1 0, turno 2 0, turno 3 0, turno 4 1, turno 5 2, turno 6 2½, turno 7 2½, turno 8 2½, turno 9 2½, turno 10 3½, turno 11 4, turno 12 4]
+01234InizioT1T2T3T4T5T6T7T8T9T10T11T12
+[aria-label: Turno 1: sconfitta con Bruno · 0 punti]
+[aria-label: Turno 2: sconfitta con Dario · 0 punti]
+[aria-label: Turno 3: sconfitta con Andrea · 0 punti]
+[aria-label: Turno 4: vittoria con Marco Ber · 1 punto]
+[aria-label: Turno 5: vittoria con Sergio · 2 punti]
+[aria-label: Turno 6: patta con Elena · 2½ punti]
+[aria-label: Turno 7: sconfitta con Marco Bel · 2½ punti]
+[aria-label: Turno 8: sconfitta con Bruno · 2½ punti]
+[aria-label: Turno 9: sconfitta con Dario · 2½ punti]
+[aria-label: Turno 10: vittoria con Andrea · 3½ punti]
+[aria-label: Turno 11: patta con Marco Ber · 4 punti]
+[aria-label: Turno 12: sconfitta con Sergio · 4 punti]
+Come finiscono le sue partite
+Vittorie (3)1 con il matto · 1 per abbandono · 1 per tempo scaduto
+Sconfitte (7)5 con il matto · 1 per abbandono · 1 per tempo scaduto
+Patte (2)
+Scontri diretti
+ⓘCosa indicano i pallini
+Nelle partite ancora da giocare il pallino dice con che colore giocherà: bianco o nero.
+Marco BelSconfitta
+[aria-label: Col nero]
+Turno 14
+Marco BerVittoriaPatta
+SergioVittoriaSconfitta
+AndreaSconfittaVittoria
+BrunoSconfittaSconfitta
+DarioSconfittaSconfitta
+ElenaPattaIn corso
+Partite (13)
+Turno 13
+[aria-label: Bianco]
+Elena
+[title: Queen's Pawn Game: Accelerated London System]
+Queen's Pawn Game: Accelerated London SystemIn corsoLichess
+Turno 12
+[aria-label: Nero]
+Sergio
+[title: Four Knights Game: Scotch Variation]
+Four Knights Game: Scotch VariationSconfittaLichess
+Turno 11
+[aria-label: Bianco]
+Marco Ber
+[title: Owen Defense]
+Owen DefensePattaLichess
+Turno 10
+[aria-label: Nero]
+Andrea
+[title: Indian Defense]
+Indian DefenseVittoriaLichess
+Turno 9
+[aria-label: Nero]
+Dario
+[title: Bishop's Opening]
+Bishop's OpeningSconfittaLichess
+Turno 8
+[aria-label: Bianco]
+Bruno
+[title: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit]
+King's Pawn Game: Busch-Gass Gambit, Chiodini GambitSconfittaLichess
+Turno 7
+[aria-label: Bianco]
+Marco Bel
+[title: Queen's Pawn Game: Chigorin Variation]
+Queen's Pawn Game: Chigorin VariationSconfittaLichess
+Turno 6
+[aria-label: Nero]
+Elena
+[title: Owen Defense]
+Owen DefensePattaLichess
+Turno 5
+[aria-label: Bianco]
+Sergio
+[title: Queen's Pawn Game: Accelerated London System]
+Queen's Pawn Game: Accelerated London SystemVittoriaLichess
+Turno 4
+[aria-label: Nero]
+Marco Ber
+[title: Italian Game: Two Knights Defense, Modern Bishop's Opening]
+Italian Game: Two Knights Defense, Modern Bishop's OpeningVittoriaLichess
+Turno 3
+[aria-label: Bianco]
+Andrea
+[title: Bishop's Opening]
+Bishop's OpeningSconfittaLichess
+Turno 2
+[aria-label: Bianco]
+Dario
+[title: Caro-Kann Defense: Campomanes Attack]
+Caro-Kann Defense: Campomanes AttackSconfittaLichess
+Turno 1
+[aria-label: Nero]
+Bruno
+[title: Hungarian Opening]
+Hungarian OpeningSconfittaLichess
+Primati
+Elo massimo ⓘ
+Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione). *1462* (Stagione 2 - Capablanca)
+Colpaccio migliore ⓘ
+Il suo colpaccio più grosso: Carla ha battuto un avversario molto più forte, secondo l'Elo del torneo. *vs Andrea* (Stagione 2 - Capablanca)
+Stagioni concluse
+1 stagione conclusa · 14 partite · 4½ punti · miglior piazzamento 7°
+Stagione 17° su 84½ pt · 4V 1N 9P›La stagione in breve
+Scontri diretti di sempre
+Dario4P *0–4*
+Sergio1V 1N 2P *1½–2½*
+Bruno4P *0–4*
+Elena1N 2P *½–2½*
+Marco Ber1V 1N *1½–½*
+Andrea1V 1P *1–1*
+Elena "Lena"1V 1P *1–1*
+Irene2V *2–0*
+Marco Bel2P *0–2*
+Giulia1V *1–0*
+
+===== arrocco =====
+← Torna al torneo
+Dario
+@arrocco su Lichess
+Elo1703
+[title: +28 da inizio stagione]
+[aria-label: +28 da inizio stagione]
+▲28
+Elo del torneo, calcolato solo dalle nostre partite. +28 da inizio stagione.
+[aria-label: Trofei]
+🥈2° posto · Scacchi & Chill - Stagione 1
+2° posto · Scacchi & Chill - Stagione 1
+[aria-label: Stagione in corso o carriera]
+Stagione 2 - Capablanca
+Carriera
+Posizione4° / 8
+Punti6.5
+V / N / P6 / 1 / 5
+Colori
+[aria-label: Col bianco]
+3/6
+[aria-label: Col nero]
+3½/6
+Tempo a mossa
+circa 2 h ⓘ
+Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (12 sue). Finché le partite sono poche resta vicina alla media del torneo.
+Obiettivo per il Trofeo Pillsbury6½ punti su 13 delle 14 partite›
+Andamento
+vittoria · patta · sconfitta. Tocca un punto per i dettagli.
+[aria-label: Punti dopo ogni turno: turno 1 0, turno 2 1, turno 3 1, turno 4 1, turno 5 2, turno 6 3, turno 7 4, turno 8 4½, turno 9 5½, turno 10 5½, turno 11 5½, turno 12 6½]
+01234567InizioT1T2T3T4T5T6T7T8T9T10T11T12
+[aria-label: Turno 1: sconfitta con Elena · 0 punti]
+[aria-label: Turno 2: vittoria con Carla · 1 punto]
+[aria-label: Turno 3: sconfitta con Marco Ber · 1 punto]
+[aria-label: Turno 4: sconfitta con Andrea · 1 punto]
+[aria-label: Turno 5: vittoria con Marco Bel · 2 punti]
+[aria-label: Turno 6: vittoria con Sergio · 3 punti]
+[aria-label: Turno 7: vittoria con Bruno · 4 punti]
+[aria-label: Turno 8: patta con Elena · 4½ punti]
+[aria-label: Turno 9: vittoria con Carla · 5½ punti]
+[aria-label: Turno 10: sconfitta con Marco Ber · 5½ punti]
+[aria-label: Turno 11: sconfitta con Andrea · 5½ punti]
+[aria-label: Turno 12: vittoria con Marco Bel · 6½ punti]
+Come finiscono le sue partite
+Vittorie (6)3 con il matto · 2 per abbandono · 1 per tempo scaduto
+Sconfitte (5)2 con il matto · 2 per abbandono · 1 per tempo scaduto
+Patte (1)
+Scontri diretti
+ⓘCosa indicano i pallini
+Nelle partite ancora da giocare il pallino dice con che colore giocherà: bianco o nero.
+Marco BelVittoriaVittoria
+Marco BerSconfittaSconfitta
+SergioVittoriaIn corso
+AndreaSconfittaSconfitta
+BrunoVittoria
+[aria-label: Col bianco]
+Turno 14
+CarlaVittoriaVittoria
+ElenaSconfittaPatta
+Partite (13)
+Turno 13
+[aria-label: Nero]
+Sergio
+[title: Owen Defense]
+Owen DefenseIn corsoLichess
+Turno 12
+[aria-label: Bianco]
+Marco Bel
+[title: Queen's Pawn Game: Chigorin Variation]
+Queen's Pawn Game: Chigorin VariationVittoriaLichess
+Turno 11
+[aria-label: Nero]
+Andrea
+[title: Italian Game: Two Knights Defense, Modern Bishop's Opening]
+Italian Game: Two Knights Defense, Modern Bishop's OpeningSconfittaLichess
+Turno 10
+[aria-label: Nero]
+Marco Ber
+[title: Queen's Pawn Game: Accelerated London System]
+Queen's Pawn Game: Accelerated London SystemSconfittaLichess
+Turno 9
+[aria-label: Bianco]
+Carla
+[title: Bishop's Opening]
+Bishop's OpeningVittoriaLichess
+Turno 8
+[aria-label: Nero]
+Elena
+[title: Owen Defense]
+Owen DefensePattaLichess
+Turno 7
+[aria-label: Nero]
+Bruno
+[title: Four Knights Game: Scotch Variation]
+Four Knights Game: Scotch VariationVittoriaLichess
+Turno 6
+[aria-label: Bianco]
+Sergio
+[title: Italian Game: Two Knights Defense, Modern Bishop's Opening]
+Italian Game: Two Knights Defense, Modern Bishop's OpeningVittoriaLichess
+Turno 5
+[aria-label: Nero]
+Marco Bel
+[title: Hungarian Opening]
+Hungarian OpeningVittoriaLichess
+Turno 4
+[aria-label: Bianco]
+Andrea
+[title: Bishop's Opening]
+Bishop's OpeningSconfittaLichess
+Turno 3
+[aria-label: Bianco]
+Marco Ber
+[title: Queen's Pawn Game: Chigorin Variation]
+Queen's Pawn Game: Chigorin VariationSconfittaLichess
+Turno 2
+[aria-label: Nero]
+Carla
+[title: Caro-Kann Defense: Campomanes Attack]
+Caro-Kann Defense: Campomanes AttackVittoriaLichess
+Turno 1
+[aria-label: Bianco]
+Elena
+[title: Four Knights Game: Scotch Variation]
+Four Knights Game: Scotch VariationSconfittaLichess
+Primati
+Elo massimo ⓘ
+Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione). *1712* (Stagione 2 - Capablanca)
+Colpaccio migliore ⓘ
+Il suo colpaccio più grosso: Dario ha battuto un avversario molto più forte, secondo l'Elo del torneo. *vs Bruno* (Stagione 2 - Capablanca)
+Stagioni concluse
+1 stagione conclusa · 14 partite · 10 punti · miglior piazzamento 2°
+Stagione 1🥈 2° su 8 (pari merito)10 pt · 10V 0N 4P›La stagione in breve
+Scontri diretti di sempre
+Carla4V *4–0*
+Elena1V 1N 2P *1½–2½*
+Sergio3V *3–0*
+Bruno1V 2P *1–2*
+Marco Bel2V 1P *2–1*
+Marco Ber2P *0–2*
+Andrea2P *0–2*
+Elena "Lena"2V *2–0*
+Irene2V *2–0*
+Giulia1V *1–0*
+
+===== scaccomatto =====
+← Torna al torneo
+Elena
+@scaccomatto su Lichess
+Elo1692
+[title: +17 da inizio stagione]
+[aria-label: +17 da inizio stagione]
+▲17
+Elo del torneo, calcolato solo dalle nostre partite. +17 da inizio stagione.
+[aria-label: Trofei]
+🥈2° posto · Scacchi & Chill - Stagione 1
+2° posto · Scacchi & Chill - Stagione 1
+[aria-label: Stagione in corso o carriera]
+Stagione 2 - Capablanca
+Carriera
+Posizione1° / 8
+Punti8
+V / N / P7 / 2 / 3
+Colori
+[aria-label: Col bianco]
+5/7
+[aria-label: Col nero]
+3/5
+Tempo a mossa
+circa 50 min ⓘ
+Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (12 sue). Finché le partite sono poche resta vicina alla media del torneo.
+Obiettivo per il Trofeo Pillsbury5½ punti su 11 partite›
+Andamento
+vittoria · patta · sconfitta. Tocca un punto per i dettagli.
+[aria-label: Punti dopo ogni turno: turno 1 1, turno 2 2, turno 3 3, turno 4 4, turno 5 4, turno 6 4½, turno 7 5½, turno 8 6, turno 9 7, turno 10 7, turno 11 7, turno 12 8]
+012345678InizioT1T2T3T4T5T6T7T8T9T10T11T12
+[aria-label: Turno 1: vittoria con Dario · 1 punto]
+[aria-label: Turno 2: vittoria con Sergio · 2 punti]
+[aria-label: Turno 3: vittoria con Bruno · 3 punti]
+[aria-label: Turno 4: vittoria con Marco Bel · 4 punti]
+[aria-label: Turno 5: sconfitta con Marco Ber · 4 punti]
+[aria-label: Turno 6: patta con Carla · 4½ punti]
+[aria-label: Turno 7: vittoria con Andrea · 5½ punti]
+[aria-label: Turno 8: patta con Dario · 6 punti]
+[aria-label: Turno 9: vittoria con Sergio · 7 punti]
+[aria-label: Turno 10: sconfitta con Bruno · 7 punti]
+[aria-label: Turno 11: sconfitta con Marco Bel · 7 punti]
+[aria-label: Turno 12: vittoria con Marco Ber · 8 punti]
+Come finiscono le sue partite
+Vittorie (7)4 con il matto · 2 per abbandono · 1 per tempo scaduto
+Sconfitte (3)2 con il matto · 1 per tempo scaduto
+Patte (2)
+Scontri diretti
+ⓘCosa indicano i pallini
+Nelle partite ancora da giocare il pallino dice con che colore giocherà: bianco o nero.
+Marco BelVittoriaSconfitta
+Marco BerSconfittaVittoria
+SergioVittoriaVittoria
+AndreaVittoria
+[aria-label: Col nero]
+Turno 14
+BrunoVittoriaSconfitta
+CarlaPattaIn corso
+DarioVittoriaPatta
+Partite (13)
+Turno 13
+[aria-label: Nero]
+Carla
+[title: Queen's Pawn Game: Accelerated London System]
+Queen's Pawn Game: Accelerated London SystemIn corsoLichess
+Turno 12
+[aria-label: Bianco]
+Marco Ber
+[title: Hungarian Opening]
+Hungarian OpeningVittoriaLichess
+Turno 11
+[aria-label: Nero]
+Marco Bel
+[title: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit]
+King's Pawn Game: Busch-Gass Gambit, Chiodini GambitSconfittaLichess
+Turno 10
+[aria-label: Bianco]
+Bruno
+[title: Four Knights Game: Scotch Variation]
+Four Knights Game: Scotch VariationSconfittaLichess
+Turno 9
+[aria-label: Nero]
+Sergio
+[title: Queen's Pawn Game: Chigorin Variation]
+Queen's Pawn Game: Chigorin VariationVittoriaLichess
+Turno 8
+[aria-label: Bianco]
+Dario
+[title: Owen Defense]
+Owen DefensePattaLichess
+Turno 7
+[aria-label: Bianco]
+Andrea
+[title: Hungarian Opening]
+Hungarian OpeningVittoriaLichess
+Turno 6
+[aria-label: Bianco]
+Carla
+[title: Owen Defense]
+Owen DefensePattaLichess
+Turno 5
+[aria-label: Nero]
+Marco Ber
+[title: Indian Defense]
+Indian DefenseSconfittaLichess
+Turno 4
+[aria-label: Bianco]
+Marco Bel
+[title: Caro-Kann Defense: Campomanes Attack]
+Caro-Kann Defense: Campomanes AttackVittoriaLichess
+Turno 3
+[aria-label: Nero]
+Bruno
+[title: Italian Game: Two Knights Defense, Modern Bishop's Opening]
+Italian Game: Two Knights Defense, Modern Bishop's OpeningVittoriaLichess
+Turno 2
+[aria-label: Bianco]
+Sergio
+[title: Queen's Pawn Game: Accelerated London System]
+Queen's Pawn Game: Accelerated London SystemVittoriaLichess
+Turno 1
+[aria-label: Nero]
+Dario
+[title: Four Knights Game: Scotch Variation]
+Four Knights Game: Scotch VariationVittoriaLichess
+Primati
+Elo massimo ⓘ
+Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione). *1702* (Stagione 2 - Capablanca)
+Colpaccio migliore ⓘ
+Il suo colpaccio più grosso: Elena ha battuto un avversario molto più forte, secondo l'Elo del torneo. *vs Andrea* (Stagione 2 - Capablanca)
+Stagioni concluse
+1 stagione conclusa · 14 partite · 10 punti · miglior piazzamento 2°
+Stagione 1🥈 2° su 8 (pari merito)10 pt · 10V 0N 4P›La stagione in breve
+Scontri diretti di sempre
+Dario2V 1N 1P *2½–1½*
+Sergio4V *4–0*
+Bruno1V 3P *1–3*
+Carla2V 1N *2½–½*
+Marco Bel2V 1P *2–1*
+Marco Ber1V 1P *1–1*
+Elena "Lena"1V 1P *1–1*
+Irene2V *2–0*
+Andrea1V *1–0*
+Giulia1V *1–0*
+
+===== pa_ro =====
+← Torna al torneo
+Elena "Lena"
+@pa_ro su Lichess
+Non partecipa alla stagione in corso.
+Carriera
+Primati
+Elo massimo ⓘ
+Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione). *1492* (Stagione 1)
+Stagioni concluse
+1 stagione conclusa · 14 partite · 6½ punti · miglior piazzamento 4°
+Stagione 14° su 86½ pt · 6V 1N 7P›La stagione in breve
+Scontri diretti di sempre
+Dario2P *0–2*
+Carla1V 1P *1–1*
+Sergio2P *0–2*
+Bruno1N 1P *½–1½*
+Irene2V *2–0*
+Elena1V 1P *1–1*
+Giulia1V *1–0*
+Marco Bel1V *1–0*
+
+===== gambetto =====
+← Torna al torneo
+Giulia
+@gambetto su Lichess
+Non partecipa alla stagione in corso.
+Carriera
+Primati
+Elo massimo ⓘ
+Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione). *1115* (Stagione 1)
+Stagioni concluse
+1 stagione conclusa · 6 partite · 0 punti
+Stagione 1–0 pt · 0V 0N 6P · poi al suo posto Marco Bel›La stagione in breve
+Scontri diretti di sempre
+Dario1P *0–1*
+Carla1P *0–1*
+Elena "Lena"1P *0–1*
+Bruno1P *0–1*
+Irene1P *0–1*
+Elena1P *0–1*
+
+===== regina_b =====
+← Torna al torneo
+Irene
+@regina_b su Lichess
+Non partecipa alla stagione in corso.
+Carriera
+Primati
+Elo massimo ⓘ
+Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione). *1152* (Stagione 1)
+Stagioni concluse
+1 stagione conclusa · 14 partite · 1 punto · miglior piazzamento 8°
+Stagione 18° su 81 pt · 1V 0N 13P›La stagione in breve
+Scontri diretti di sempre
+Dario2P *0–2*
+Carla2P *0–2*
+Elena "Lena"2P *0–2*
+Sergio2P *0–2*
+Bruno2P *0–2*
+Elena2P *0–2*
+Giulia1V *1–0*
+Marco Bel1P *0–1*
+
+===== torre_nera =====
+← Torna al torneo
+Marco Bel
+@torre_nera su Lichess
+Elo1619
+[title: +10 da inizio stagione]
+[aria-label: +10 da inizio stagione]
+▲10
+Elo del torneo, calcolato solo dalle nostre partite. +10 da inizio stagione.
+[aria-label: Stagione in corso o carriera]
+Stagione 2 - Capablanca
+Carriera
+Posizione5° / 8
+Punti6.5
+V / N / P6 / 1 / 5
+Colori
+[aria-label: Col bianco]
+2½/5
+[aria-label: Col nero]
+4/7
+Tempo a mossa
+circa 2 h ⓘ
+Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (11 sue). Finché le partite sono poche resta vicina alla media del torneo.
+Obiettivo per il Trofeo Pillsbury5 punti su 12 partite›
+Andamento
+vittoria · patta · sconfitta. Tocca un punto per i dettagli.
+[aria-label: Punti dopo ogni turno: turno 1 1, turno 2 2, turno 3 2½, turno 4 2½, turno 5 2½, turno 6 2½, turno 7 3½, turno 8 4½, turno 9 4½, turno 10 5½, turno 11 6½, turno 12 6½]
+01234567InizioT1T2T3T4T5T6T7T8T9T10T11T12
+[aria-label: Turno 1: vittoria con Marco Ber · 1 punto]
+[aria-label: Turno 2: vittoria con Andrea · 2 punti]
+[aria-label: Turno 3: patta con Sergio · 2½ punti]
+[aria-label: Turno 4: sconfitta con Elena · 2½ punti]
+[aria-label: Turno 5: sconfitta con Dario · 2½ punti]
+[aria-label: Turno 6: sconfitta con Bruno · 2½ punti]
+[aria-label: Turno 7: vittoria con Carla · 3½ punti]
+[aria-label: Turno 8: vittoria con Marco Ber · 4½ punti]
+[aria-label: Turno 9: sconfitta con Andrea · 4½ punti]
+[aria-label: Turno 10: vittoria con Sergio · 5½ punti]
+[aria-label: Turno 11: vittoria con Elena · 6½ punti]
+[aria-label: Turno 12: sconfitta con Dario · 6½ punti]
+Come finiscono le sue partite
+Vittorie (6)1 con il matto · 1 per abbandono · 3 per tempo scaduto · 1 in altro modo
+Sconfitte (5)2 con il matto · 2 per abbandono · 1 per tempo scaduto
+Patte (1)
+Scontri diretti
+ⓘCosa indicano i pallini
+Nelle partite ancora da giocare il pallino dice con che colore giocherà: bianco o nero.
+Marco BerVittoriaVittoria
+SergioPattaVittoria
+AndreaVittoriaSconfitta
+BrunoSconfittaIn corso
+CarlaVittoria
+[aria-label: Col bianco]
+Turno 14
+DarioSconfittaSconfitta
+ElenaSconfittaVittoria
+Partite (13)
+Turno 13
+[aria-label: Bianco]
+Bruno
+[title: Indian Defense]
+Indian DefenseIn corsoLichess
+Turno 12
+[aria-label: Nero]
+Dario
+[title: Queen's Pawn Game: Chigorin Variation]
+Queen's Pawn Game: Chigorin VariationSconfittaLichess
+Turno 11
+[aria-label: Bianco]
+Elena
+[title: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit]
+King's Pawn Game: Busch-Gass Gambit, Chiodini GambitVittoriaLichess
+Turno 10
+[aria-label: Nero]
+Sergio
+[title: Hungarian Opening]
+Hungarian OpeningVittoriaLichess
+Turno 9
+[aria-label: Bianco]
+Andrea
+[title: Caro-Kann Defense: Campomanes Attack]
+Caro-Kann Defense: Campomanes AttackSconfittaLichess
+Turno 8
+[aria-label: Nero]
+Marco Ber
+[title: Indian Defense]
+Indian DefenseVittoriaLichess
+Turno 7
+[aria-label: Nero]
+Carla
+[title: Queen's Pawn Game: Chigorin Variation]
+Queen's Pawn Game: Chigorin VariationVittoriaLichess
+Turno 6
+[aria-label: Nero]
+Bruno
+[title: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit]
+King's Pawn Game: Busch-Gass Gambit, Chiodini GambitSconfittaLichess
+Turno 5
+[aria-label: Bianco]
+Dario
+[title: Hungarian Opening]
+Hungarian OpeningSconfittaLichess
+Turno 4
+[aria-label: Nero]
+Elena
+[title: Caro-Kann Defense: Campomanes Attack]
+Caro-Kann Defense: Campomanes AttackSconfittaLichess
+Turno 3
+[aria-label: Bianco]
+Sergio
+[title: Hungarian Opening]
+Hungarian OpeningPattaLichess
+Turno 2
+[aria-label: Nero]
+Andrea
+[title: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit]
+King's Pawn Game: Busch-Gass Gambit, Chiodini GambitVittoriaLichess
+Turno 1
+[aria-label: Bianco]
+Marco Ber
+[title: Ponziani Opening: Jaenisch Counterattack]
+Ponziani Opening: Jaenisch CounterattackVittoriaLichess
+Primati
+Elo massimo ⓘ
+Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione). *1633* (Stagione 2 - Capablanca)
+Stagioni concluse
+1 stagione conclusa · 8 partite · 5 punti · miglior piazzamento 6°
+Stagione 16° su 85 pt · 5V 0N 3P · al posto di Giulia›La stagione in breve
+Scontri diretti di sempre
+Sergio3V 1N *3½–½*
+Dario1V 2P *1–2*
+Elena1V 2P *1–2*
+Marco Ber2V *2–0*
+Andrea1V 1P *1–1*
+Carla2V *2–0*
+Bruno2P *0–2*
+Elena "Lena"1P *0–1*
+Irene1V *1–0*
+
+===== alfiere7 =====
+← Torna al torneo
+Marco Ber
+@alfiere7 su Lichess
+Elo1711
+[title: −68 da inizio stagione]
+[aria-label: −68 da inizio stagione]
+▼
+Elo del torneo, calcolato solo dalle nostre partite. Al primo anno: parte da 1779, il suo Elo Lichess blitz del 8 set 2026 (1486) riportato sulla scala del torneo. −68 da inizio stagione.
+Stagione 2 - Capablancain corso
+Posizione6° / 8
+Punti4.5
+V / N / P4 / 1 / 7
+Colori
+[aria-label: Col bianco]
+3/5
+[aria-label: Col nero]
+1½/7
+Tempo a mossa
+circa 1 h ⓘ
+Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (11 sue). Finché le partite sono poche resta vicina alla media del torneo.
+Obiettivo per il Trofeo Pillsbury8 punti su 13 partite›
+Andamento
+vittoria · patta · sconfitta. Tocca un punto per i dettagli.
+[aria-label: Punti dopo ogni turno: turno 1 0, turno 2 1, turno 3 2, turno 4 2, turno 5 3, turno 6 3, turno 7 3, turno 8 3, turno 9 3, turno 10 4, turno 11 4½, turno 12 4½]
+012345InizioT1T2T3T4T5T6T7T8T9T10T11T12
+[aria-label: Turno 1: sconfitta con Marco Bel · 0 punti]
+[aria-label: Turno 2: vittoria con Bruno · 1 punto]
+[aria-label: Turno 3: vittoria con Dario · 2 punti]
+[aria-label: Turno 4: sconfitta con Carla · 2 punti]
+[aria-label: Turno 5: vittoria con Elena · 3 punti]
+[aria-label: Turno 6: sconfitta con Andrea · 3 punti]
+[aria-label: Turno 7: sconfitta con Sergio · 3 punti]
+[aria-label: Turno 8: sconfitta con Marco Bel · 3 punti]
+[aria-label: Turno 9: sconfitta con Bruno · 3 punti]
+[aria-label: Turno 10: vittoria con Dario · 4 punti]
+[aria-label: Turno 11: patta con Carla · 4½ punti]
+[aria-label: Turno 12: sconfitta con Elena · 4½ punti]
+Come finiscono le sue partite
+Vittorie (4)4 con il matto
+Sconfitte (7)2 con il matto · 3 per abbandono · 1 per tempo scaduto · 1 in altro modo
+Patte (1)
+Scontri diretti
+ⓘCosa indicano i pallini
+Nelle partite ancora da giocare il pallino dice con che colore giocherà: bianco o nero.
+Marco BelSconfittaSconfitta
+SergioSconfitta
+[aria-label: Col bianco]
+Turno 14
+AndreaSconfittaIn corso
+BrunoVittoriaSconfitta
+CarlaSconfittaPatta
+DarioVittoriaVittoria
+ElenaVittoriaSconfitta
+Partite (13)
+Turno 13
+[aria-label: Bianco]
+Andrea
+[title: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit]
+King's Pawn Game: Busch-Gass Gambit, Chiodini GambitIn corsoLichess
+Turno 12
+[aria-label: Nero]
+Elena
+[title: Hungarian Opening]
+Hungarian OpeningSconfittaLichess
+Turno 11
+[aria-label: Nero]
+Carla
+[title: Owen Defense]
+Owen DefensePattaLichess
+Turno 10
+[aria-label: Bianco]
+Dario
+[title: Queen's Pawn Game: Accelerated London System]
+Queen's Pawn Game: Accelerated London SystemVittoriaLichess
+Turno 9
+[aria-label: Nero]
+Bruno
+[title: Italian Game: Two Knights Defense, Modern Bishop's Opening]
+Italian Game: Two Knights Defense, Modern Bishop's OpeningSconfittaLichess
+Turno 8
+[aria-label: Bianco]
+Marco Bel
+[title: Indian Defense]
+Indian DefenseSconfittaLichess
+Turno 7
+[aria-label: Nero]
+Sergio
+[title: Bishop's Opening]
+Bishop's OpeningSconfittaLichess
+Turno 6
+[aria-label: Nero]
+Andrea
+[title: Caro-Kann Defense: Campomanes Attack]
+Caro-Kann Defense: Campomanes AttackSconfittaLichess
+Turno 5
+[aria-label: Bianco]
+Elena
+[title: Indian Defense]
+Indian DefenseVittoriaLichess
+Turno 4
+[aria-label: Bianco]
+Carla
+[title: Italian Game: Two Knights Defense, Modern Bishop's Opening]
+Italian Game: Two Knights Defense, Modern Bishop's OpeningSconfittaLichess
+Turno 3
+[aria-label: Nero]
+Dario
+[title: Queen's Pawn Game: Chigorin Variation]
+Queen's Pawn Game: Chigorin VariationVittoriaLichess
+Turno 2
+[aria-label: Bianco]
+Bruno
+[title: Owen Defense]
+Owen DefenseVittoriaLichess
+Turno 1
+[aria-label: Nero]
+Marco Bel
+[title: Ponziani Opening: Jaenisch Counterattack]
+Ponziani Opening: Jaenisch CounterattackSconfittaLichess
+
+===== pedone_lento =====
+← Torna al torneo
+Sergio
+@pedone_lento su Lichess
+Elo1471
+[title: come a inizio stagione]
+[aria-label: come a inizio stagione]
+=
+Elo del torneo, calcolato solo dalle nostre partite. Come a inizio stagione.
+[aria-label: Stagione in corso o carriera]
+Stagione 2 - Capablanca
+Carriera
+Posizione8° / 8
+Punti2.5
+V / N / P2 / 1 / 9
+Colori
+[aria-label: Col bianco]
+2/6
+[aria-label: Col nero]
+½/6
+Tempo a mossa
+circa 3 h ⓘ
+Stima del tempo che impiega per ogni sua mossa, separato da quello degli avversari, dalle partite concluse della stagione (12 sue). Finché le partite sono poche resta vicina alla media del torneo.
+Obiettivo per il Trofeo Pillsbury3 punti su 12 delle 14 partite›
+Andamento
+vittoria · patta · sconfitta. Tocca un punto per i dettagli.
+[aria-label: Punti dopo ogni turno: turno 1 0, turno 2 0, turno 3 ½, turno 4 ½, turno 5 ½, turno 6 ½, turno 7 1½, turno 8 1½, turno 9 1½, turno 10 1½, turno 11 1½, turno 12 2½]
+0123InizioT1T2T3T4T5T6T7T8T9T10T11T12
+[aria-label: Turno 1: sconfitta con Andrea · 0 punti]
+[aria-label: Turno 2: sconfitta con Elena · 0 punti]
+[aria-label: Turno 3: patta con Marco Bel · ½ punti]
+[aria-label: Turno 4: sconfitta con Bruno · ½ punti]
+[aria-label: Turno 5: sconfitta con Carla · ½ punti]
+[aria-label: Turno 6: sconfitta con Dario · ½ punti]
+[aria-label: Turno 7: vittoria con Marco Ber · 1½ punti]
+[aria-label: Turno 8: sconfitta con Andrea · 1½ punti]
+[aria-label: Turno 9: sconfitta con Elena · 1½ punti]
+[aria-label: Turno 10: sconfitta con Marco Bel · 1½ punti]
+[aria-label: Turno 11: sconfitta con Bruno · 1½ punti]
+[aria-label: Turno 12: vittoria con Carla · 2½ punti]
+Come finiscono le sue partite
+Vittorie (2)2 con il matto
+Sconfitte (9)2 con il matto · 5 per abbandono · 2 per tempo scaduto
+Patte (1)
+Scontri diretti
+ⓘCosa indicano i pallini
+Nelle partite ancora da giocare il pallino dice con che colore giocherà: bianco o nero.
+Marco BelPattaSconfitta
+Marco BerVittoria
+[aria-label: Col nero]
+Turno 14
+AndreaSconfittaSconfitta
+BrunoSconfittaSconfitta
+CarlaSconfittaVittoria
+DarioSconfittaIn corso
+ElenaSconfittaSconfitta
+Partite (13)
+Turno 13
+[aria-label: Bianco]
+Dario
+[title: Owen Defense]
+Owen DefenseIn corsoLichess
+Turno 12
+[aria-label: Bianco]
+Carla
+[title: Four Knights Game: Scotch Variation]
+Four Knights Game: Scotch VariationVittoriaLichess
+Turno 11
+[aria-label: Nero]
+Bruno
+[title: Caro-Kann Defense: Campomanes Attack]
+Caro-Kann Defense: Campomanes AttackSconfittaLichess
+Turno 10
+[aria-label: Bianco]
+Marco Bel
+[title: Hungarian Opening]
+Hungarian OpeningSconfittaLichess
+Turno 9
+[aria-label: Bianco]
+Elena
+[title: Queen's Pawn Game: Chigorin Variation]
+Queen's Pawn Game: Chigorin VariationSconfittaLichess
+Turno 8
+[aria-label: Nero]
+Andrea
+[title: Queen's Pawn Game: Accelerated London System]
+Queen's Pawn Game: Accelerated London SystemSconfittaLichess
+Turno 7
+[aria-label: Bianco]
+Marco Ber
+[title: Bishop's Opening]
+Bishop's OpeningVittoriaLichess
+Turno 6
+[aria-label: Nero]
+Dario
+[title: Italian Game: Two Knights Defense, Modern Bishop's Opening]
+Italian Game: Two Knights Defense, Modern Bishop's OpeningSconfittaLichess
+Turno 5
+[aria-label: Nero]
+Carla
+[title: Queen's Pawn Game: Accelerated London System]
+Queen's Pawn Game: Accelerated London SystemSconfittaLichess
+Turno 4
+[aria-label: Bianco]
+Bruno
+[title: Queen's Pawn Game: Chigorin Variation]
+Queen's Pawn Game: Chigorin VariationSconfittaLichess
+Turno 3
+[aria-label: Nero]
+Marco Bel
+[title: Hungarian Opening]
+Hungarian OpeningPattaLichess
+Turno 2
+[aria-label: Nero]
+Elena
+[title: Queen's Pawn Game: Accelerated London System]
+Queen's Pawn Game: Accelerated London SystemSconfittaLichess
+Turno 1
+[aria-label: Bianco]
+Andrea
+[title: Indian Defense]
+Indian DefenseSconfittaLichess
+Primati
+Elo massimo ⓘ
+Il suo Elo del torneo più alto di sempre, da quando il suo livello è noto (dalla fine della sua prima stagione). *1476* (Stagione 2 - Capablanca)
+Colpaccio migliore ⓘ
+Il suo colpaccio più grosso: Sergio ha battuto un avversario molto più forte, secondo l'Elo del torneo. *vs Marco Ber* (Stagione 2 - Capablanca)
+Stagioni concluse
+1 stagione conclusa · 14 partite · 5½ punti · miglior piazzamento 5°
+Stagione 15° su 85½ pt · 5V 1N 8P›La stagione in breve
+Scontri diretti di sempre
+Carla2V 1N 1P *2½–1½*
+Bruno4P *0–4*
+Elena4P *0–4*
+Marco Bel1N 3P *½–3½*
+Dario3P *0–3*
+Andrea2P *0–2*
+Elena "Lena"2V *2–0*
+Irene2V *2–0*
+Marco Ber1V *1–0*

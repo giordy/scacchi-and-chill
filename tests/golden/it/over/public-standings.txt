@@ -1,0 +1,144 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Stagione conclusa: Marco Ber vince lo Scudetto Capablanca con 9 punti! 🏆
+[aria-label: 56 partite concluse e 0 in corso su 56]
+__ 56 concluse__ 0 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+[aria-label: Trofeo]
+CScudetto CapablancaChi fa più punti
+Trofeo PillsburyChi batte le attese
+[aria-label: Vista della classifica]
+Classifica
+Tabellone
+[aria-label: Classifica]
+Posizione
+Giocatore
+Punti
+[title: Partite giocate]
+G
+[title: Vinte]
+V
+[title: Patte]
+N
+[title: Perse]
+P
+[title: Spareggio Sonneborn-Berger]
+SB
+[aria-label: 1°]
+1
+Marco Ber@alfiere7
+9
+14
+8
+2
+4
+56.3
+[aria-label: 2°]
+2
+Andrea@cavallo_pazzo
+9
+14
+8
+2
+4
+54.5
+[aria-label: 3°]
+3
+Bruno
+[title: Campione in carica · Scacchi & Chill - Stagione 1]
+[aria-label: Campione in carica, Scacchi & Chill - Stagione 1: vai all'Albo d'Oro]
+👑@re_bianco
+9
+14
+9
+0
+5
+54.0
+[aria-label: 4°]
+4
+Elena@scaccomatto
+8
+14
+7
+2
+5
+53.0
+[aria-label: 5°]
+5
+Marco Bel@torre_nera
+7
+14
+6
+2
+6
+48.3
+[aria-label: 6°]
+6
+Carla@donna_rossa
+6.5
+14
+6
+1
+7
+35.5
+[aria-label: 7°]
+7
+Dario@arrocco
+6
+14
+6
+0
+8
+34.5
+[aria-label: 8°]
+8
+Sergio@pedone_lento
+1.5
+14
+1
+1
+12
+11.5
+G giocate · V vinte · N patte · P perse. A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il numero di vittorie; chi è pari anche lì condivide la posizione. Tocca un nome per vedere le partite del giocatore.
+Dalla cronaca
+Tutta la cronaca →
+🏅
+Carla vince il Trofeo Pillsbury
+6 feb
+🏆
+Marco Ber vince lo Scudetto Capablanca
+6 feb
+📈
+Marco Ber passa in testa alla classifica
+6 feb
+I premi della stagione
+Trofeo Pillsbury
+Carla
+6½ punti su 13 partite, obiettivo 2
+A chi ha superato di più il proprio obiettivo, come Pillsbury a Hastings nel 1895 (esordienti esclusi). Perché si chiama così
+E poi, per sorridere
+⚡
+Fulmine
+Andrea, Marco Ber, Carla e Bruno
+in 18 mosse
+La vittoria più rapida della stagione
+🏃
+Il maratoneta
+Bruno, Marco Bel, Andrea e Marco Ber
+in 69 mosse
+La vittoria più lunga della stagione
+🦥
+Il bradipo
+Sergio
+circa 3 h per ogni sua mossa
+Per chi si gode ogni mossa con calma: il più lento a rispondere, stimato dalla durata delle sue partite
+🧱
+Il muro
+Marco Bel, Marco Ber, Andrea e Elena
+2 patte
+Più partite chiuse in parità

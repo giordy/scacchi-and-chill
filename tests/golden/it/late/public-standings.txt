@@ -1,0 +1,124 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Turno 13 in corso. In testa Elena con 8 punti.
+[aria-label: 48 partite concluse e 4 in corso su 56]
+__ 48 concluse__ 4 in corso__ 4 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+[aria-label: Trofeo]
+CScudetto CapablancaChi fa più punti
+Trofeo PillsburyChi batte le attese
+[aria-label: Vista della classifica]
+Classifica
+Tabellone
+[aria-label: Classifica]
+🏁 *Corsa allo Scudetto Capablanca:* possono ancora vincere Elena, Andrea, Bruno, Dario e Marco Bel · mancano 2 turni.
+Cosa serve per vincere
+*Elena*: con 2 punti nelle ultime 2 partite arriva almeno a pari punti; per il primo posto servono passi falsi degli altri.
+*Andrea*: con 2 punti nelle ultime 2 partite arriva almeno a pari punti; per il primo posto servono passi falsi degli altri.
+*Bruno*: con 2 punti nelle ultime 2 partite arriva almeno a pari punti; per il primo posto servono passi falsi degli altri.
+*Dario*: non dipende solo dalle sue partite: servono passi falsi degli altri.
+*Marco Bel*: non dipende solo dalle sue partite: servono passi falsi degli altri.
+Calcolato su quello che può succedere nelle partite rimaste, senza contare lo spareggio.
+Posizione
+Giocatore
+Punti
+[title: Partite giocate]
+G
+[title: Vinte]
+V
+[title: Patte]
+N
+[title: Perse]
+P
+[title: Spareggio Sonneborn-Berger]
+SB
+[aria-label: 1°]
+1
+Elena@scaccomatto
+8
+12
+7
+2
+3
+43.8
+[aria-label: 2°]
+2
+Andrea@cavallo_pazzo
+8
+12
+8
+0
+4
+41.0
+[aria-label: 3°]
+3
+Bruno
+[title: Campione in carica · Scacchi & Chill - Stagione 1]
+[aria-label: Campione in carica, Scacchi & Chill - Stagione 1: vai all'Albo d'Oro]
+👑@re_bianco
+8
+12
+8
+0
+4
+40.0
+[aria-label: 4°]
+4
+Dario@arrocco
+6.5
+12
+6
+1
+5
+35.5
+[aria-label: 5°]
+5
+Marco Bel@torre_nera
+6.5
+12
+6
+1
+5
+32.8
+[aria-label: 6°]
+6
+Marco Ber@alfiere7
+4.5
+12
+4
+1
+7
+31.0
+[aria-label: 7°]
+7
+Carla@donna_rossa
+4
+12
+3
+2
+7
+21.3
+[aria-label: 8°]
+8
+Sergio@pedone_lento
+2.5
+12
+2
+1
+9
+11.8
+G giocate · V vinte · N patte · P perse. A parità di punti decide lo spareggio Sonneborn-Berger (SB), poi il numero di vittorie; chi è pari anche lì condivide la posizione. Tocca un nome per vedere le partite del giocatore.
+Dalla cronaca
+Tutta la cronaca →
+Sergio batte Carla con il matto
+1 – 022 gen
+🎯
+Dario raggiunge il suo obiettivo della stagione
+20 gen
+Dario batte Marco Bel con il matto
+1 – 020 gen

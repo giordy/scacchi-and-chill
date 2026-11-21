@@ -1,0 +1,30 @@
+===== all news =====
+{
+ "title": "48 partite finite",
+ "body": "Bruno – Carla: finita, vince Bruno (1-0)\nDario – Elena: finita, vince Elena (0-1)\nMarco Bel – Marco Ber: finita, vince Marco Bel (1-0)\nSergio – Andrea: finita, vince Andrea (0-1)\nElena – Sergio: finita, vince Elena (1-0)\nAndrea – Marco Bel: finita, vince Marco Bel (0-1)\ne altre 42",
+ "hash": "#/partite"
+}
+===== one game =====
+{
+ "title": "Bruno – Carla",
+ "body": "Turno 1: finita, vince Bruno (1-0)",
+ "hash": "#/partite"
+}
+===== one ongoing game =====
+{
+ "title": "anna – bruno",
+ "body": "Turno 3: nuova mossa",
+ "hash": "#/partite"
+}
+===== draws only =====
+{
+ "title": "2 partite finite",
+ "body": "anna – bruno: finita, patta (½-½)\ncarla – dario: finita, patta (½-½)",
+ "hash": "#/partite"
+}
+===== skipping the first player =====
+{
+ "title": "36 partite finite",
+ "body": "Bruno – Carla: finita, vince Bruno (1-0)\nDario – Elena: finita, vince Elena (0-1)\nSergio – Andrea: finita, vince Andrea (0-1)\nElena – Sergio: finita, vince Elena (1-0)\nMarco Ber – Bruno: finita, vince Marco Ber (1-0)\nCarla – Dario: finita, vince Dario (0-1)\ne altre 30",
+ "hash": "#/partite"
+}

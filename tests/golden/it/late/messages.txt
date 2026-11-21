@@ -1,0 +1,594 @@
+===== status bulletin, round 1 =====
+🏁 *Turno 1 completato* – Tutti i risultati:
+
+1️⃣ *Bruno* ⚪ vs *Carla* ⚫
+Si chiude con la vittoria di Bruno col bianco con il matto in 69 mosse *(1-0)* 📌
+♟️ Apertura: Hungarian Opening
+
+2️⃣ *Dario* ⚪ vs *Elena* ⚫
+Finita! Ha vinto Elena col nero per abbandono in 37 mosse *(0-1)* 🎉
+♟️ Apertura: Four Knights Game: Scotch Variation
+
+3️⃣ *Marco Bel* ⚪ vs *Marco Ber* ⚫
+Fine dei giochi: vince Marco Bel col bianco in 39 mosse *(1-0)* 🔔
+♟️ Apertura: Ponziani Opening: Jaenisch Counterattack
+
+4️⃣ *Sergio* ⚪ vs *Andrea* ⚫
+Partita archiviata: vince Andrea col nero con il matto in 31 mosse *(0-1)* 🗂️
+♟️ Apertura: Indian Defense
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 1*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• Hungarian Opening: https://lichess.org/study/search?q=Hungarian+Opening&order=popular
+• Four Knights Game: https://lichess.org/study/search?q=Four+Knights+Game&order=popular
+• Ponziani Opening: https://lichess.org/study/search?q=Ponziani+Opening&order=popular
+• Indian Defense: https://lichess.org/study/search?q=Indian+Defense&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. vKcYyBiC: stato mate, vincitore white, mosse 69, Elo bianco 1814?, Elo nero 1626, apertura Hungarian Opening
+2. bGWJT8gq: stato resign, vincitore black, mosse 37, Elo bianco 1690, Elo nero 1687?, apertura Four Knights Game: Scotch Variation
+3. yaufZA8M: stato cheat, vincitore white, mosse 39, Elo bianco 1500?, Elo nero 1500?, apertura Ponziani Opening: Jaenisch Counterattack
+4. 3UflZBAj: stato mate, vincitore black, mosse 31, Elo bianco 838?, Elo nero 1448?, apertura Indian Defense
+===== status bulletin, round 2 =====
+🏁 *Turno 2 completato* – Tutti i risultati:
+
+1️⃣ *Elena* ⚪ vs *Sergio* ⚫
+Elena incassa il punto col bianco per abbandono in 44 mosse *(1-0)* 💪
+♟️ Apertura: Queen's Pawn Game: Accelerated London System
+
+2️⃣ *Andrea* ⚪ vs *Marco Bel* ⚫
+Partita chiusa: vittoria di Marco Bel col nero per abbandono in 41 mosse *(0-1)* ✅
+♟️ Apertura: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+
+3️⃣ *Marco Ber* ⚪ vs *Bruno* ⚫
+Punto pieno per Marco Ber col bianco con il matto in 54 mosse *(1-0)* 🏆
+♟️ Apertura: Owen Defense
+
+4️⃣ *Carla* ⚪ vs *Dario* ⚫
+Fine dei giochi: vince Dario col nero con il matto in 28 mosse *(0-1)* 🔔
+♟️ Apertura: Caro-Kann Defense: Campomanes Attack
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 2*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• Queen's Pawn Game: https://lichess.org/study/search?q=Queen's+Pawn+Game&order=popular
+• King's Pawn Game: https://lichess.org/study/search?q=King's+Pawn+Game&order=popular
+• Owen Defense: https://lichess.org/study/search?q=Owen+Defense&order=popular
+• Caro-Kann Defense: https://lichess.org/study/search?q=Caro-Kann+Defense&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. 1Wj3IRMp: stato resign, vincitore white, mosse 44, Elo bianco 1739?, Elo nero 779?, apertura Queen's Pawn Game: Accelerated London System
+2. lIwilhzZ: stato resign, vincitore black, mosse 41, Elo bianco 1490?, Elo nero 1737?, apertura King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+3. rn2r1GHE: stato mate, vincitore white, mosse 54, Elo bianco 1262?, Elo nero 1898?, apertura Owen Defense
+4. MdtCEmtV: stato mate, vincitore black, mosse 28, Elo bianco 1628, Elo nero 1668, apertura Caro-Kann Defense: Campomanes Attack
+===== status bulletin, round 3 =====
+🏁 *Turno 3 completato* – Tutti i risultati:
+
+1️⃣ *Bruno* ⚪ vs *Elena* ⚫
+Elena incassa il punto col nero con il matto in 30 mosse *(0-1)* 💪
+♟️ Apertura: Italian Game: Two Knights Defense, Modern Bishop's Opening
+
+2️⃣ *Dario* ⚪ vs *Marco Ber* ⚫
+Finita! Ha vinto Marco Ber col nero con il matto in 43 mosse *(0-1)* 🎉
+♟️ Apertura: Queen's Pawn Game: Chigorin Variation
+
+3️⃣ *Carla* ⚪ vs *Andrea* ⚫
+Andrea la spunta su Carla col nero con il matto in 18 mosse *(0-1)* 🙌
+♟️ Apertura: Bishop's Opening
+
+4️⃣ *Marco Bel* ⚪ vs *Sergio* ⚫
+Finita in patta in 69 mosse *(½-½)* 🤝
+♟️ Apertura: Hungarian Opening
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 3*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• Italian Game: https://lichess.org/study/search?q=Italian+Game&order=popular
+• Queen's Pawn Game: https://lichess.org/study/search?q=Queen's+Pawn+Game&order=popular
+• Bishop's Opening: https://lichess.org/study/search?q=Bishop's+Opening&order=popular
+• Hungarian Opening: https://lichess.org/study/search?q=Hungarian+Opening&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. HiOldHtt: stato mate, vincitore black, mosse 30, Elo bianco 1722?, Elo nero 1741?, apertura Italian Game: Two Knights Defense, Modern Bishop's Opening
+2. ATMJ3iLY: stato mate, vincitore black, mosse 43, Elo bianco 1690, Elo nero 1845?, apertura Queen's Pawn Game: Chigorin Variation
+3. IUQYFfYM: stato mate, vincitore black, mosse 18, Elo bianco 1614, Elo nero 1404?, apertura Bishop's Opening
+4. RKzC96bM: stato draw, vincitore nessuno, mosse 69, Elo bianco ?, Elo nero ?, apertura Hungarian Opening
+===== status bulletin, round 4 =====
+🏁 *Si chiude il Turno 4!* I verdetti delle scacchiere:
+
+1️⃣ *Elena* ⚪ vs *Marco Bel* ⚫
+Partita archiviata: vince Elena col bianco con il matto in 28 mosse *(1-0)* 🗂️
+♟️ Apertura: Caro-Kann Defense: Campomanes Attack
+
+2️⃣ *Marco Ber* ⚪ vs *Carla* ⚫
+Partita chiusa: vittoria di Carla col nero per abbandono in 30 mosse *(0-1)* ✅
+♟️ Apertura: Italian Game: Two Knights Defense, Modern Bishop's Opening
+💥 Colpaccio di Carla, contro un avversario sulla carta più forte
+
+3️⃣ *Sergio* ⚪ vs *Bruno* ⚫
+Finita! Ha vinto Bruno col nero per abbandono in 43 mosse *(0-1)* 🎉
+♟️ Apertura: Queen's Pawn Game: Chigorin Variation
+
+4️⃣ *Dario* ⚪ vs *Andrea* ⚫
+Punto pieno per Andrea col nero per tempo scaduto in 18 mosse *(0-1)* 🏆
+♟️ Apertura: Bishop's Opening
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 4*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• Caro-Kann Defense: https://lichess.org/study/search?q=Caro-Kann+Defense&order=popular
+• Italian Game: https://lichess.org/study/search?q=Italian+Game&order=popular
+• Queen's Pawn Game: https://lichess.org/study/search?q=Queen's+Pawn+Game&order=popular
+• Bishop's Opening: https://lichess.org/study/search?q=Bishop's+Opening&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. g040scto: stato mate, vincitore white, mosse 28, Elo bianco 1891, Elo nero 1780, apertura Caro-Kann Defense: Campomanes Attack
+2. g041aldo: stato resign, vincitore black, mosse 30, Elo bianco 1686, Elo nero 1596, apertura Italian Game: Two Knights Defense, Modern Bishop's Opening
+3. g042pere: stato resign, vincitore black, mosse 43, Elo bianco 1603, Elo nero 1562, apertura Queen's Pawn Game: Chigorin Variation
+4. g043arca: stato outoftime, vincitore black, mosse 18, Elo bianco 1579, Elo nero 1647, apertura Bishop's Opening
+===== status bulletin, round 5 =====
+🏁 *Turno 5 concluso!* Ecco i risultati finali:
+
+1️⃣ *Marco Bel* ⚪ vs *Dario* ⚫
+Si chiude con la vittoria di Dario col nero per abbandono in 69 mosse *(0-1)* 📌
+♟️ Apertura: Hungarian Opening
+
+2️⃣ *Andrea* ⚪ vs *Bruno* ⚫
+Andrea incassa il punto col bianco per abbandono in 37 mosse *(1-0)* 💪
+♟️ Apertura: Four Knights Game: Scotch Variation
+
+3️⃣ *Marco Ber* ⚪ vs *Elena* ⚫
+Marco Ber porta a casa il punto col bianco con il matto in 31 mosse *(1-0)* 👏
+♟️ Apertura: Indian Defense
+
+4️⃣ *Carla* ⚪ vs *Sergio* ⚫
+Fine dei giochi: vince Carla col bianco con il matto in 44 mosse *(1-0)* 🔔
+♟️ Apertura: Queen's Pawn Game: Accelerated London System
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 5*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• Hungarian Opening: https://lichess.org/study/search?q=Hungarian+Opening&order=popular
+• Four Knights Game: https://lichess.org/study/search?q=Four+Knights+Game&order=popular
+• Indian Defense: https://lichess.org/study/search?q=Indian+Defense&order=popular
+• Queen's Pawn Game: https://lichess.org/study/search?q=Queen's+Pawn+Game&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. g050toar: stato resign, vincitore black, mosse 69, Elo bianco 1619, Elo nero 1891, apertura Hungarian Opening
+2. g051care: stato resign, vincitore white, mosse 37, Elo bianco 1576, Elo nero 1557, apertura Four Knights Game: Scotch Variation
+3. g052alsc: stato mate, vincitore white, mosse 31, Elo bianco 1719, Elo nero 1805, apertura Indian Defense
+4. g053dope: stato mate, vincitore white, mosse 44, Elo bianco 1721, Elo nero 1749, apertura Queen's Pawn Game: Accelerated London System
+===== status bulletin, round 6 =====
+🏁 *Turno 6 concluso!* Ecco i risultati finali:
+
+1️⃣ *Bruno* ⚪ vs *Marco Bel* ⚫
+Fine dei giochi: vince Bruno col bianco per abbandono in 41 mosse *(1-0)* 🔔
+♟️ Apertura: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+
+2️⃣ *Elena* ⚪ vs *Carla* ⚫
+Finita in patta in 54 mosse *(½-½)* 🤝
+♟️ Apertura: Owen Defense
+
+3️⃣ *Andrea* ⚪ vs *Marco Ber* ⚫
+🔝 Scontro al vertice: 1° contro 3° in classifica
+Si chiude con la vittoria di Andrea col bianco per abbandono in 28 mosse *(1-0)* 📌
+♟️ Apertura: Caro-Kann Defense: Campomanes Attack
+
+4️⃣ *Dario* ⚪ vs *Sergio* ⚫
+Dario la spunta su Sergio col bianco per abbandono in 30 mosse *(1-0)* 🙌
+♟️ Apertura: Italian Game: Two Knights Defense, Modern Bishop's Opening
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 6*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• King's Pawn Game: https://lichess.org/study/search?q=King's+Pawn+Game&order=popular
+• Owen Defense: https://lichess.org/study/search?q=Owen+Defense&order=popular
+• Caro-Kann Defense: https://lichess.org/study/search?q=Caro-Kann+Defense&order=popular
+• Italian Game: https://lichess.org/study/search?q=Italian+Game&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. g060reto: stato resign, vincitore white, mosse 41, Elo bianco 1750, Elo nero 1868, apertura King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+2. g061scdo: stato draw, vincitore nessuno, mosse 54, Elo bianco 1570, Elo nero 1643, apertura Owen Defense
+3. g062caal: stato resign, vincitore white, mosse 28, Elo bianco 1535, Elo nero 1807, apertura Caro-Kann Defense: Campomanes Attack
+4. g063arpe: stato resign, vincitore white, mosse 30, Elo bianco 1687, Elo nero 1878, apertura Italian Game: Two Knights Defense, Modern Bishop's Opening
+===== status bulletin, round 7 =====
+🏁 *Turno 7 concluso!* Ecco i risultati finali:
+
+1️⃣ *Carla* ⚪ vs *Marco Bel* ⚫
+Finita! Ha vinto Marco Bel col nero per tempo scaduto in 43 mosse *(0-1)* 🎉
+♟️ Apertura: Queen's Pawn Game: Chigorin Variation
+
+2️⃣ *Sergio* ⚪ vs *Marco Ber* ⚫
+Sergio porta a casa il punto col bianco con il matto in 18 mosse *(1-0)* 👏
+♟️ Apertura: Bishop's Opening
+💥 Colpaccio: Sergio batte Marco Ber, sulla carta più forte
+
+3️⃣ *Elena* ⚪ vs *Andrea* ⚫
+Elena incassa il punto col bianco con il matto in 69 mosse *(1-0)* 💪
+♟️ Apertura: Hungarian Opening
+💥 Colpaccio di Elena: Andrea era sulla carta più forte
+
+4️⃣ *Bruno* ⚪ vs *Dario* ⚫
+Dario la spunta su Bruno col nero per tempo scaduto in 37 mosse *(0-1)* 🙌
+♟️ Apertura: Four Knights Game: Scotch Variation
+💥 Colpaccio di Dario, contro un avversario sulla carta più forte
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 7*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• Queen's Pawn Game: https://lichess.org/study/search?q=Queen's+Pawn+Game&order=popular
+• Bishop's Opening: https://lichess.org/study/search?q=Bishop's+Opening&order=popular
+• Hungarian Opening: https://lichess.org/study/search?q=Hungarian+Opening&order=popular
+• Four Knights Game: https://lichess.org/study/search?q=Four+Knights+Game&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. g070doto: stato outoftime, vincitore black, mosse 43, Elo bianco 1632, Elo nero 1643, apertura Queen's Pawn Game: Chigorin Variation
+2. g071peal: stato mate, vincitore white, mosse 18, Elo bianco 1865, Elo nero 1629, apertura Bishop's Opening
+3. g072scca: stato mate, vincitore white, mosse 69, Elo bianco 1635, Elo nero 1517, apertura Hungarian Opening
+4. g073rear: stato outoftime, vincitore black, mosse 37, Elo bianco 1719, Elo nero 1831, apertura Four Knights Game: Scotch Variation
+===== status bulletin, round 8 =====
+🏁 *Si chiude il Turno 8!* I verdetti delle scacchiere:
+
+1️⃣ *Marco Ber* ⚪ vs *Marco Bel* ⚫
+Marco Bel porta a casa il punto col nero per tempo scaduto in 31 mosse *(0-1)* 👏
+♟️ Apertura: Indian Defense
+
+2️⃣ *Andrea* ⚪ vs *Sergio* ⚫
+Si chiude con la vittoria di Andrea col bianco per abbandono in 44 mosse *(1-0)* 📌
+♟️ Apertura: Queen's Pawn Game: Accelerated London System
+
+3️⃣ *Carla* ⚪ vs *Bruno* ⚫
+Punto pieno per Bruno col nero per abbandono in 41 mosse *(0-1)* 🏆
+♟️ Apertura: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+
+4️⃣ *Elena* ⚪ vs *Dario* ⚫
+🔝 Partita di vertice: 1° contro 3° in classifica
+Patta in 54 mosse: il punto si divide *(½-½)* ✌️
+♟️ Apertura: Owen Defense
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 8*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• Indian Defense: https://lichess.org/study/search?q=Indian+Defense&order=popular
+• Queen's Pawn Game: https://lichess.org/study/search?q=Queen's+Pawn+Game&order=popular
+• King's Pawn Game: https://lichess.org/study/search?q=King's+Pawn+Game&order=popular
+• Owen Defense: https://lichess.org/study/search?q=Owen+Defense&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. g080alto: stato outoftime, vincitore black, mosse 31, Elo bianco 1547, Elo nero 1712, apertura Indian Defense
+2. g081cape: stato resign, vincitore white, mosse 44, Elo bianco 1884, Elo nero 1835, apertura Queen's Pawn Game: Accelerated London System
+3. g082dore: stato resign, vincitore black, mosse 41, Elo bianco 1887, Elo nero 1719, apertura King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+4. g083scar: stato draw, vincitore nessuno, mosse 54, Elo bianco 1706, Elo nero 1631, apertura Owen Defense
+===== status bulletin, round 9 =====
+🏁 *Turno 9 completato* – Tutti i risultati:
+
+1️⃣ *Marco Bel* ⚪ vs *Andrea* ⚫
+Andrea porta a casa il punto col nero per tempo scaduto in 28 mosse *(0-1)* 👏
+♟️ Apertura: Caro-Kann Defense: Campomanes Attack
+
+2️⃣ *Bruno* ⚪ vs *Marco Ber* ⚫
+Verdetto: Bruno vince col bianco per abbandono in 30 mosse *(1-0)* ⚖️
+♟️ Apertura: Italian Game: Two Knights Defense, Modern Bishop's Opening
+
+3️⃣ *Sergio* ⚪ vs *Elena* ⚫
+Partita chiusa: vittoria di Elena col nero per tempo scaduto in 43 mosse *(0-1)* ✅
+♟️ Apertura: Queen's Pawn Game: Chigorin Variation
+
+4️⃣ *Dario* ⚪ vs *Carla* ⚫
+Dario incassa il punto col bianco con il matto in 18 mosse *(1-0)* 💪
+♟️ Apertura: Bishop's Opening
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 9*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• Caro-Kann Defense: https://lichess.org/study/search?q=Caro-Kann+Defense&order=popular
+• Italian Game: https://lichess.org/study/search?q=Italian+Game&order=popular
+• Queen's Pawn Game: https://lichess.org/study/search?q=Queen's+Pawn+Game&order=popular
+• Bishop's Opening: https://lichess.org/study/search?q=Bishop's+Opening&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. g090toca: stato outoftime, vincitore black, mosse 28, Elo bianco 1802, Elo nero 1891, apertura Caro-Kann Defense: Campomanes Attack
+2. g091real: stato resign, vincitore white, mosse 30, Elo bianco 1672, Elo nero 1757, apertura Italian Game: Two Knights Defense, Modern Bishop's Opening
+3. g092pesc: stato outoftime, vincitore black, mosse 43, Elo bianco 1625, Elo nero 1595, apertura Queen's Pawn Game: Chigorin Variation
+4. g093ardo: stato mate, vincitore white, mosse 18, Elo bianco 1877, Elo nero 1833, apertura Bishop's Opening
+===== status bulletin, round 10 =====
+🏁 *Si chiude il Turno 10!* I verdetti delle scacchiere:
+
+1️⃣ *Sergio* ⚪ vs *Marco Bel* ⚫
+Fine dei giochi: vince Marco Bel col nero per tempo scaduto in 69 mosse *(0-1)* 🔔
+♟️ Apertura: Hungarian Opening
+
+2️⃣ *Elena* ⚪ vs *Bruno* ⚫
+Partita archiviata: vince Bruno col nero per tempo scaduto in 37 mosse *(0-1)* 🗂️
+♟️ Apertura: Four Knights Game: Scotch Variation
+
+3️⃣ *Andrea* ⚪ vs *Carla* ⚫
+Si chiude con la vittoria di Carla col nero per tempo scaduto in 31 mosse *(0-1)* 📌
+♟️ Apertura: Indian Defense
+💥 Colpaccio: Carla batte Andrea, sulla carta più forte
+
+4️⃣ *Marco Ber* ⚪ vs *Dario* ⚫
+Punto pieno per Marco Ber col bianco con il matto in 44 mosse *(1-0)* 🏆
+♟️ Apertura: Queen's Pawn Game: Accelerated London System
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 10*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• Hungarian Opening: https://lichess.org/study/search?q=Hungarian+Opening&order=popular
+• Four Knights Game: https://lichess.org/study/search?q=Four+Knights+Game&order=popular
+• Indian Defense: https://lichess.org/study/search?q=Indian+Defense&order=popular
+• Queen's Pawn Game: https://lichess.org/study/search?q=Queen's+Pawn+Game&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. g100peto: stato outoftime, vincitore black, mosse 69, Elo bianco 1748, Elo nero 1738, apertura Hungarian Opening
+2. g101scre: stato outoftime, vincitore black, mosse 37, Elo bianco 1611, Elo nero 1895, apertura Four Knights Game: Scotch Variation
+3. g102cado: stato outoftime, vincitore black, mosse 31, Elo bianco 1750, Elo nero 1832, apertura Indian Defense
+4. g103alar: stato mate, vincitore white, mosse 44, Elo bianco 1703, Elo nero 1727, apertura Queen's Pawn Game: Accelerated London System
+===== status bulletin, round 11 =====
+🏁 *Turno 11 completato* – Tutti i risultati:
+
+1️⃣ *Marco Bel* ⚪ vs *Elena* ⚫
+Fine dei giochi: vince Marco Bel col bianco con il matto in 41 mosse *(1-0)* 🔔
+♟️ Apertura: King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+
+2️⃣ *Carla* ⚪ vs *Marco Ber* ⚫
+Un pareggio in 54 mosse *(½-½)*, mezzo punto per uno ➗
+♟️ Apertura: Owen Defense
+
+3️⃣ *Bruno* ⚪ vs *Sergio* ⚫
+Si chiude con la vittoria di Bruno col bianco per abbandono in 28 mosse *(1-0)* 📌
+♟️ Apertura: Caro-Kann Defense: Campomanes Attack
+
+4️⃣ *Andrea* ⚪ vs *Dario* ⚫
+Andrea la spunta su Dario col bianco per abbandono in 30 mosse *(1-0)* 🙌
+♟️ Apertura: Italian Game: Two Knights Defense, Modern Bishop's Opening
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 11*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• King's Pawn Game: https://lichess.org/study/search?q=King's+Pawn+Game&order=popular
+• Owen Defense: https://lichess.org/study/search?q=Owen+Defense&order=popular
+• Caro-Kann Defense: https://lichess.org/study/search?q=Caro-Kann+Defense&order=popular
+• Italian Game: https://lichess.org/study/search?q=Italian+Game&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. g110tosc: stato mate, vincitore white, mosse 41, Elo bianco 1584, Elo nero 1825, apertura King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+2. g111doal: stato draw, vincitore nessuno, mosse 54, Elo bianco 1763, Elo nero 1896, apertura Owen Defense
+3. g112repe: stato resign, vincitore white, mosse 28, Elo bianco 1882, Elo nero 1696, apertura Caro-Kann Defense: Campomanes Attack
+4. g113caar: stato resign, vincitore white, mosse 30, Elo bianco 1818, Elo nero 1842, apertura Italian Game: Two Knights Defense, Modern Bishop's Opening
+===== status bulletin, round 12 =====
+🏁 *Turno 12 concluso!* Ecco i risultati finali:
+
+1️⃣ *Dario* ⚪ vs *Marco Bel* ⚫
+Partita chiusa: vittoria di Dario col bianco con il matto in 43 mosse *(1-0)* ✅
+♟️ Apertura: Queen's Pawn Game: Chigorin Variation
+
+2️⃣ *Bruno* ⚪ vs *Andrea* ⚫
+🔝 Partita di vertice: 1° contro 2° in classifica
+Finita! Ha vinto Bruno col bianco con il matto in 18 mosse *(1-0)* 🎉
+♟️ Apertura: Bishop's Opening
+
+3️⃣ *Elena* ⚪ vs *Marco Ber* ⚫
+Partita archiviata: vince Elena col bianco con il matto in 69 mosse *(1-0)* 🗂️
+♟️ Apertura: Hungarian Opening
+
+4️⃣ *Sergio* ⚪ vs *Carla* ⚫
+Punto pieno per Sergio col bianco con il matto in 37 mosse *(1-0)* 🏆
+♟️ Apertura: Four Knights Game: Scotch Variation
+
+🥇 In testa Elena con 8 punti.
+
+📈 *Classifica dopo il Turno 12*
+1. Elena – 8 punti
+2. Andrea – 8 punti
+3. Bruno 👑 – 8 punti
+4. Dario – 6½ punti
+5. Marco Bel – 6½ punti
+6. Marco Ber – 4½ punti
+7. Carla – 4 punti
+8. Sergio – 2½ punti
+
+🏅 *Trofeo Pillsbury* (punti oltre le attese): Carla +2½, Dario +1, Elena +½
+
+📚 *Studi consigliati per le aperture del turno:*
+• Queen's Pawn Game: https://lichess.org/study/search?q=Queen's+Pawn+Game&order=popular
+• Bishop's Opening: https://lichess.org/study/search?q=Bishop's+Opening&order=popular
+• Hungarian Opening: https://lichess.org/study/search?q=Hungarian+Opening&order=popular
+• Four Knights Game: https://lichess.org/study/search?q=Four+Knights+Game&order=popular
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. g120arto: stato mate, vincitore white, mosse 43, Elo bianco 1691, Elo nero 1710, apertura Queen's Pawn Game: Chigorin Variation
+2. g121reca: stato mate, vincitore white, mosse 18, Elo bianco 1676, Elo nero 1691, apertura Bishop's Opening
+3. g122scal: stato mate, vincitore white, mosse 69, Elo bianco 1569, Elo nero 1510, apertura Hungarian Opening
+4. g123pedo: stato mate, vincitore white, mosse 37, Elo bianco 1893, Elo nero 1524, apertura Four Knights Game: Scotch Variation
+===== status bulletin, round 13 =====
+📊 *Aggiornamento Turno 13*
+
+1️⃣ *Marco Bel* ⚪ vs *Bruno* ⚫
+Ancora sulla scacchiera ♞ (una decina di mosse)
+
+2️⃣ *Carla* ⚪ vs *Elena* ⚫
+Si gioca ancora 🔄 (più di 10 mosse, nel mediogioco)
+
+3️⃣ *Marco Ber* ⚪ vs *Andrea* ⚫
+In corso ♟️ (più di 10 mosse)
+
+4️⃣ *Sergio* ⚪ vs *Dario* ⚫
+Partita in corso ⏳ (una ventina di mosse)
+
+📊 *4 in corso*
+
+📡 Le partite in corso: https://example.org/#/partite
+
+🌐 Classifica, risultati e regolamento: https://linktr.ee/scacchi.chill
+--- details ---
+1. g130tore: bianco=torre_nera, nero=re_bianco, semimosse visibili via API=20 (Lichess ne nasconde fino a 3), ~una decina di mosse, fase Lichess=n/d
+2. g131dosc: bianco=donna_rossa, nero=scaccomatto, semimosse visibili via API=26 (Lichess ne nasconde fino a 3), ~più di 10 mosse, fase Lichess=middlegame
+3. g132alca: bianco=alfiere7, nero=cavallo_pazzo, semimosse visibili via API=32 (Lichess ne nasconde fino a 3), ~più di 10 mosse, fase Lichess=n/d
+4. g133pear: bianco=pedone_lento, nero=arrocco, semimosse visibili via API=38 (Lichess ne nasconde fino a 3), ~una ventina di mosse, fase Lichess=n/d
+===== leader =====
+ In testa Elena con 8 punti.
+===== champion =====
+Stagione conclusa: Elena vince lo Scudetto Capablanca con 8 punti! 🏆
+===== awards message, archived Scacchi & Chill - Stagione 1 =====
+🏆 *I premi di Scacchi & Chill - Stagione 1*
+
+⚡ *Fulmine*: Bruno (in 4 mosse)
+🏃 *Il maratoneta*: Elena (in 79 mosse contro Carla)
+🦥 *Il bradipo*: Elena "Lena" (circa 10 h per ogni sua mossa)
+===== awards message, current season =====
+🏆 *I premi di Stagione 2 - Capablanca*
+
+🏅 *Trofeo Pillsbury*: Carla (4 punti su 11 partite, obiettivo 2)
+_A chi ha superato di più il proprio obiettivo, come Pillsbury a Hastings nel 1895 (esordienti esclusi)_
+
+E poi, per sorridere:
+⚡ *Fulmine*: Andrea, Sergio, Dario e Bruno (in 18 mosse)
+🏃 *Il maratoneta*: Bruno, Dario, Elena e Marco Bel (in 69 mosse)
+🦥 *Il bradipo*: Sergio (circa 3 h per ogni sua mossa)
+🧱 *Il muro*: Carla e Elena (2 patte)

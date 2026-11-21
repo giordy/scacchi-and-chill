@@ -1,0 +1,141 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Turno 3 in corso. In testa Elena con 3 punti.
+[aria-label: 11 partite concluse e 1 in corso su 56]
+__ 11 concluse__ 1 in corso__ 44 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+Stagione
+[value: current]
+Stagione 2 - Capablanca
+[value: scacchi-chill-stagione-1]
+Scacchi & Chill - Stagione 1
+[aria-label: Martedì 17 novembre]
+Martedì 17 novembre
+Dario accetta il regolamento
+12:00Leggi
+[aria-label: Lunedì 16 novembre]
+Lunedì 16 novembre
+Carla accetta il regolamento
+12:00Leggi
+[aria-label: Domenica 15 novembre]
+Domenica 15 novembre
+Marco Ber batte Dario con il matto
+Turno 3 · 43 mosse · Queen's Pawn Game: Chigorin Variation
+0 – 121:01Partita
+Bruno accetta il regolamento
+12:00Leggi
+📈
+Elena passa in testa alla classifica
+con 3 punti
+08:59
+🔥
+jhoSEoPt vince la terza partita di fila
+08:59
+jhoSEoPt batte Bruno con il matto
+Turno 3 · 30 mosse · Italian Game: Two Knights Defense, Modern Bishop's Opening
+0 – 108:59Partita
+[aria-label: Sabato 14 novembre]
+Sabato 14 novembre
+Andrea accetta il regolamento
+12:00Leggi
+[aria-label: Venerdì 13 novembre]
+Venerdì 13 novembre
+hx4DVe9L batte Carla con il matto
+Turno 3 · 18 mosse · Bishop's Opening
+0 – 122:54Partita
+Sergio accetta il regolamento
+12:00Leggi
+[aria-label: Giovedì 12 novembre]
+Giovedì 12 novembre
+Marco Ber accetta il regolamento
+12:00Leggi
+[aria-label: Mercoledì 11 novembre]
+Mercoledì 11 novembre
+Marco Bel accetta il regolamento
+12:00Leggi
+[aria-label: Lunedì 9 novembre]
+Lunedì 9 novembre
+Nuovo aneddoto su Capablanca: «La simultanea a tempo di record»
+18:57Leggi
+Inizia il turno 3
+4 partite · andata
+18:57
+Si chiude il turno 2: in testa Marco Bel
+con 2 punti
+14:06
+jhoSEoPt batte Sergio per abbandono
+Turno 2 · 44 mosse · Queen's Pawn Game: Accelerated London System
+1 – 014:06Partita
+[aria-label: Giovedì 29 ottobre]
+Giovedì 29 ottobre
+🎉
+Dario conquista la sua prima vittoria della stagione
+23:06
+Dario batte Carla con il matto
+Turno 2 · 28 mosse · Caro-Kann Defense: Campomanes Attack
+0 – 123:06Partita
+[aria-label: Domenica 25 ottobre]
+Domenica 25 ottobre
+📈
+Marco Bel passa in testa alla classifica
+con 2 punti
+17:50
+🎉
+sEjT8gNc conquista la sua prima vittoria nel torneo
+17:50
+sEjT8gNc batte hx4DVe9L per abbandono
+Turno 2 · 41 mosse · King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+0 – 117:50Partita
+🎉
+Marco Ber conquista la sua prima vittoria nel torneo
+13:33
+Marco Ber batte Bruno con il matto
+Turno 2 · 54 mosse · Owen Defense
+1 – 013:33Partita
+[aria-label: Giovedì 22 ottobre]
+Giovedì 22 ottobre
+Nuovo aneddoto su Capablanca: «Campione di Cuba a 12 anni»
+08:15Leggi
+Inizia il turno 2
+4 partite · andata
+08:15
+[aria-label: Mercoledì 21 ottobre]
+Mercoledì 21 ottobre
+Si chiude il turno 1
+4 giocatori in testa con 1 punto
+17:29
+Bruno batte Carla con il matto
+Turno 1 · 69 mosse · Hungarian Opening
+1 – 013:15Partita
+[aria-label: Mercoledì 14 ottobre]
+Mercoledì 14 ottobre
+🎉
+hx4DVe9L conquista la sua prima vittoria nel torneo
+17:31
+hx4DVe9L batte Sergio con il matto
+Turno 1 · 31 mosse · Indian Defense
+0 – 117:31Partita
+[aria-label: Lunedì 12 ottobre]
+Lunedì 12 ottobre
+📈
+Elena passa in testa alla classifica
+con 1 punto
+15:42
+🎉
+jhoSEoPt conquista la sua prima vittoria nel torneo
+15:42
+jhoSEoPt batte Dario per abbandono
+Turno 1 · 37 mosse · Four Knights Game: Scotch Variation
+0 – 115:42Partita
+[aria-label: Giovedì 8 ottobre]
+Giovedì 8 ottobre
+Nuovo aneddoto su Capablanca: «Imparò a 4 anni correggendo il padre»
+16:41Leggi
+Comincia la Stagione 2 - Capablanca
+Turno 1 · 4 partite · dedicata a José Raúl Capablanca
+16:41

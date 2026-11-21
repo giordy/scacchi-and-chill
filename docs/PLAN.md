@@ -159,7 +159,29 @@ The trophy name ("Scudetto") becomes `tournament.trophyName`, with a translated 
 
 ## Phases
 
-### Phase 0 – Safety net and core (integrator, sequential)
+### Phase 0 – Safety net and core (integrator, sequential) — **done**
+
+Done: baseline green (654 unit tests, 21 rules tests, build); `tests/fixtures/tournament.json`
+(nightly backup, names, handles and Lichess ids made up); golden tests in `tests/golden/` (4
+scenarios: real, late, over, empty; 52 files of Italian text); `src/i18n/` core with tests;
+`docs/I18N.md` (how to write code with texts: **every agent reads it**); English route aliases
+(`#/player/…`, `#/games`, `#/hall-of-fame`…; links are still written in Italian); `initLocale()` in
+`main.tsx`. Found along the way, for the phases below:
+
+- Archived seasons store award texts in Italian (`title`, `description`, `detail`): agent C shows the
+  translation from the award `id` where the detail can be rebuilt, the stored text otherwise.
+- Stored identifiers that are Italian words stay (`'backup automatico'`, review moments
+  `andata`/`volata`/`finale`, `stagione-2-capablanca` ids…).
+- Agent A places `<LanguageSwitcher>` (public header or footer, and the organizer header: agent B)
+  and wraps the views in `<LocaleBoundary>` below the data hooks. This is a wanted golden change.
+- `setTournamentLocale()` is wired in phase 2 (tournament setting); until then the tournament's
+  language is `DEFAULT_LOCALE` (`it`).
+- i18n files import each other with the `.ts` extension (Node runs them for the workflows); keep it.
+- Not covered by the golden files yet, to add before changing: the review prompt (`ReviewsTab`,
+  each moment), `scripts/meta-tags.mjs`, `public/sw.js` notification defaults, `index.html`,
+  manifests (agent D); admin texts shown only after a click (confirm dialogs, flash messages): each
+  agent checks them in its diff by reading, as they cannot be rendered statically.
+- Phase E: bundle only English and the instance's default language (today English and Italian).
 
 1. `npm ci`, `npm test`, `npm run test:rules`, `npm run build`: record the baseline.
 2. Anonymised fixture from the public Firestore data (`tests/fixtures/tournament.json`): real

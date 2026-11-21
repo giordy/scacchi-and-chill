@@ -1,0 +1,2049 @@
+{
+ "history": [
+  {
+   "black": "donna_rossa",
+   "createdAt": 1793551785003,
+   "lichess": {
+    "createdAt": 1791532106538,
+    "daysPerTurn": 2,
+    "id": "vKcYyBiC",
+    "lastFen": "8/5P2/8/p4KQk/P7/8/8/8 b - - 6 1",
+    "lastMove": "g8g5",
+    "lastMoveAt": 1792581321059,
+    "moves": "g3 c6 b3 d5 Bb2 Nf6 Bg2 e6 d3 Bb4+ c3 Ba5 b4 Bb6 d4 O-O Nf3 Ne4 O-O Nd7 Nbd2 Ng5 Qc2 f5 Nxg5 Qxg5 f4 Qh6 Nf3 Nf6 Ne5 Ng4 Nxg4 fxg4 Bc1 Qg6 Qxg6 hxg6 a4 a5 b5 c5 e3 c4 Ba3 Rf5 h3 gxh3 Bxh3 Rh5 Kg2 Bd7 Bg4 Rh8 Rh1 Kf7 Kf3 Bc7 e4 dxe4+ Kxe4 Rhd8 Be2 Re8 Bxc4 Kf6 Ra2 g5 fxg5+ Kxg5 Bc1+ Kg6 Bf4 Bxf4 gxf4 Rac8 Rg2+ Kf7 Kd3 Kf6 Rg5 Rf8 Rhg1 Ke7 Rxg7+ Ke8 Rg8 Ke7 R1g7+ Rf7 Rxf7+ Kxf7 Rxc8 Bxc8 Ke4 Kf6 Be2 Bd7 c4 Be8 Bd1 Bg6+ Ke3 Bf5 c5 Ke7 Bb3 Kd7 d5 exd5 Bxd5 Be6 Ke4 Bxd5+ Kxd5 Kc8 f5 Kd8 f6 Ke8 Ke6 Kf8 c6 bxc6 bxc6 Ke8 f7+ Kf8 c7 Kg7 c8=Q Kg6 Qg8+ Kh6 Kf5 Kh5 Qg5#",
+    "opening": {
+     "eco": "A00",
+     "name": "Hungarian Opening",
+     "ply": 1
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "rating": 1626,
+      "ratingDiff": -10,
+      "user": {
+       "id": "donna_rossa",
+       "name": "donna_rossa"
+      }
+     },
+     "white": {
+      "provisional": true,
+      "rating": 1814,
+      "ratingDiff": 84,
+      "user": {
+       "id": "re_bianco",
+       "name": "re_bianco"
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "mate",
+    "variant": "standard",
+    "winner": "white"
+   },
+   "round": "1",
+   "url": "https://lichess.org/vKcYyBiC",
+   "white": "re_bianco"
+  },
+  {
+   "black": "scaccomatto",
+   "createdAt": 1793551785003,
+   "lichess": {
+    "createdAt": 1791470502534,
+    "daysPerTurn": 2,
+    "id": "bGWJT8gq",
+    "lastFen": "5k2/p5p1/8/6p1/P7/3n1qP1/7P/6K1 w - - 1 1",
+    "lastMove": "e5d3",
+    "lastMoveAt": 1791812539386,
+    "moves": "e4 e5 Nf3 Nc6 Nc3 Nf6 d4 Bb4 d5 Ne7 Bd3 d6 Bd2 Bg4 O-O h6 Bb5+ c6 dxc6 bxc6 Bd3 O-O a3 Bc5 Qe2 d5 exd5 cxd5 Qxe5 Bxf3 Bxh6 Bh5 Qg5 Bg6 Rfe1 Nh7 Na4 Nxg5 Bxg5 f6 Nxc5 fxg5 Ne6 Qb6 Nxf8 Kxf8 b3 Bxd3 cxd3 Qxb3 Re5 Qxd3 Rae1 Ng6 R5e3 Qb5 Rg3 Re8 Rge3 Rxe3 fxe3 Qb3 e4 dxe4 Rxe4 Qb1+ Kf2 Qxe4 g3 Ne5 Kg1 Qf3 a4 Nd3",
+    "opening": {
+     "eco": "C47",
+     "name": "Four Knights Game: Scotch Variation",
+     "ply": 7
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "provisional": true,
+      "rating": 1687,
+      "ratingDiff": 52,
+      "user": {
+       "id": "jhoSEoPt",
+       "name": "scaccomatto"
+      }
+     },
+     "white": {
+      "rating": 1690,
+      "ratingDiff": -22,
+      "user": {
+       "flair": "nature.fallen-leaf",
+       "id": "arrocco",
+       "name": "arrocco",
+       "patron": true,
+       "patronColor": 9
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "resign",
+    "variant": "standard",
+    "winner": "black"
+   },
+   "round": "1",
+   "url": "https://lichess.org/bGWJT8gq",
+   "white": "arrocco"
+  },
+  {
+   "black": "alfiere7",
+   "createdAt": 1793551785000,
+   "lichess": {
+    "createdAt": 1791472479862,
+    "daysPerTurn": 2,
+    "id": "yaufZA8M",
+    "lastFen": "2Q5/5q1k/1p4bp/p2pB3/1r3P2/1P4RP/6P1/6K1 b - - 4 1",
+    "lastMove": "c1c8",
+    "lastMoveAt": 1792596586988,
+    "moves": "e4 e5 Nf3 Nc6 c3 Nf6 Qa4 d6 Bb5 Bd7 Bd3 Be7 O-O O-O Qd1 h6 Re1 Re8 Bc2 Bf8 d4 exd4 Nxd4 Nxd4 cxd4 c6 Bd2 Qb6 Bc3 d5 e5 Ne4 Bxe4 dxe4 Nd2 Be7 Nxe4 Rad8 a4 a5 Qd2 Ra8 f4 Qd8 Rf1 f5 exf6 Bxf6 Nxf6+ Qxf6 d5 Qf7 Rae1 cxd5 Rxe8+ Rxe8 h3 b6 Rf3 Bf5 Rg3 Bg6 Be5 Kh7 Qd4 Qe6 Bxg7 Rc8 Be5 Rc4 Qd2 Rxa4 b3 Rb4 Qc1 Qf7 Qc8",
+    "opening": {
+     "eco": "C44",
+     "name": "Ponziani Opening: Jaenisch Counterattack",
+     "ply": 6
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "provisional": true,
+      "rating": 1500,
+      "ratingDiff": -238,
+      "user": {
+       "id": "alfiere7",
+       "name": "alfiere7"
+      }
+     },
+     "white": {
+      "provisional": true,
+      "rating": 1500,
+      "ratingDiff": 237,
+      "user": {
+       "flair": "food-drink.rice-ball",
+       "id": "sEjT8gNc",
+       "name": "torre_nera"
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "cheat",
+    "variant": "standard",
+    "winner": "white"
+   },
+   "round": "1",
+   "url": "https://lichess.org/yaufZA8M",
+   "white": "torre_nera"
+  },
+  {
+   "black": "cavallo_pazzo",
+   "createdAt": 1793551785002,
+   "lichess": {
+    "createdAt": 1791552506078,
+    "daysPerTurn": 2,
+    "id": "3UflZBAj",
+    "lastFen": "6k1/p1p5/3p2pb/3Pp3/2P1PP2/8/1r6/q1KQ4 w - - 5 1",
+    "lastMove": "a3a1",
+    "lastMoveAt": 1791991872768,
+    "moves": "d4 Nf6 Nc3 g6 Bg5 Bg7 f3 O-O e4 d6 h4 Nh5 Nge2 h6 g4 hxg5 gxh5 gxh4 Rxh4 e5 d5 Qxh4+ Kd2 Bh6+ Kd3 Qf2 Kc4 Bd7 hxg6 b5+ Nxb5 Qc5+ Kb3 Qxb5+ Kc3 Qc5+ Kb3 fxg6 Nc3 Na6 a4 Rab8+ Bb5 Bxb5 axb5 Rxb5+ Nxb5 Rb8 Rxa6 Qxb5+ Kc3 Qxb2+ Kd3 Qb5+ c4 Qxa6 f4 Qa3+ Kc2 Rb2+ Kc1 Qa1#",
+    "opening": {
+     "eco": "A45",
+     "name": "Indian Defense",
+     "ply": 2
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "provisional": true,
+      "rating": 1448,
+      "ratingDiff": 42,
+      "user": {
+       "id": "hx4DVe9L",
+       "name": "cavallo_pazzo"
+      }
+     },
+     "white": {
+      "provisional": true,
+      "rating": 838,
+      "ratingDiff": -59,
+      "user": {
+       "id": "pedone_lento",
+       "name": "pedone_lento"
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "mate",
+    "variant": "standard",
+    "winner": "black"
+   },
+   "round": "1",
+   "url": "https://lichess.org/3UflZBAj",
+   "white": "pedone_lento"
+  },
+  {
+   "black": "pedone_lento",
+   "createdAt": 1793551785004,
+   "lichess": {
+    "createdAt": 1792649704096,
+    "daysPerTurn": 2,
+    "division": {
+     "end": 63,
+     "middle": 21
+    },
+    "id": "1Wj3IRMp",
+    "lastFen": "8/7R/p2p1k2/1p1Q1n2/1P1P4/P3PP2/5K2/8 b - - 0 1",
+    "lastMove": "g8d5",
+    "lastMoveAt": 1794229575035,
+    "moves": "d4 d5 Bf4 Nc6 Nf3 Bf5 a3 Nf6 Nc3 e6 h3 h6 e3 Bd6 Bxd6 cxd6 Bb5 a6 Be2 O-O Qd2 Qa5 O-O b5 b4 Qb6 Nh4 g5 Nxf5 exf5 Bd3 Ne7 Ne2 Ne4 Qe1 Ng6 f3 Nf6 Bxf5 Rac8 Bxc8 Rxc8 c3 Rc4 Ng3 Qc6 Rc1 Qa8 Nf5 Qf8 Qg3 Ne8 h4 f6 Kf2 Kh7 Rh1 Rc7 hxg5 fxg5 Rxh6+ Qxh6 Nxh6 Kxh6 Rh1+ Kg7 Qxg5 Rxc3 Qxd5 Rc2+ Kg3 Rxg2+ Kxg2 Ne7 Qa8 Nc7 Qh8+ Kf7 Rh7+ Ke6 Qg7 Ncd5 Kf2 Nf5 Qg8+ Kf6 Qxd5",
+    "opening": {
+     "eco": "D00",
+     "name": "Queen's Pawn Game: Accelerated London System",
+     "ply": 3
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "provisional": true,
+      "rating": 779,
+      "ratingDiff": -5,
+      "user": {
+       "id": "pedone_lento",
+       "name": "pedone_lento"
+      }
+     },
+     "white": {
+      "provisional": true,
+      "rating": 1739,
+      "ratingDiff": 2,
+      "user": {
+       "id": "jhoSEoPt",
+       "name": "scaccomatto"
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "resign",
+    "variant": "standard",
+    "winner": "white"
+   },
+   "round": "2",
+   "url": "https://lichess.org/1Wj3IRMp",
+   "white": "scaccomatto"
+  },
+  {
+   "black": "torre_nera",
+   "createdAt": 1793551785003,
+   "lichess": {
+    "createdAt": 1792654221933,
+    "daysPerTurn": 2,
+    "id": "lIwilhzZ",
+    "lastFen": "8/p7/1p5p/2p2p2/P1Pk1p2/5P2/4KP2/8 w - - 11 1",
+    "lastMove": "e5d4",
+    "lastMoveAt": 1792947047505,
+    "moves": "e4 e5 Nf3 Bc5 Nxe5 Nc6 Nxc6 dxc6 Bd3 Nf6 O-O O-O h3 Re8 Re1 Qd6 Qf3 g5 e5 Rxe5 Rxe5 Qxe5 Qe2 Qg3 b4 Bxh3 Qf3 Qxf3 gxf3 Bxb4 Bb2 Nd5 Be4 Re8 c3 Bd6 Na3 Nf4 Nc4 Ne2+ Kh1 f5 Re1 Nf4 Bd5+ Kf8 Rxe8+ Kxe8 Nxd6+ cxd6 Bg8 h6 Bh7 Nd3 Ba3 c5 Kh2 Nf4 d4 Kf7 Bc1 Kg7 Bxf4 gxf4 Kxh3 Kxh7 dxc5 dxc5 a4 b6 c4 Kg7 Kh4 Kg6 Kh3 Kg5 Kg2 Kf6 Kf1 Ke5 Ke2 Kd4",
+    "opening": {
+     "eco": "C40",
+     "name": "King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit",
+     "ply": 6
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "provisional": true,
+      "rating": 1737,
+      "ratingDiff": 117,
+      "user": {
+       "flair": "food-drink.rice-ball",
+       "id": "sEjT8gNc",
+       "name": "torre_nera"
+      }
+     },
+     "white": {
+      "provisional": true,
+      "rating": 1490,
+      "ratingDiff": -86,
+      "user": {
+       "id": "hx4DVe9L",
+       "name": "cavallo_pazzo"
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "resign",
+    "variant": "standard",
+    "winner": "black"
+   },
+   "round": "2",
+   "url": "https://lichess.org/lIwilhzZ",
+   "white": "cavallo_pazzo"
+  },
+  {
+   "black": "re_bianco",
+   "createdAt": 1793551785004,
+   "lichess": {
+    "createdAt": 1792688071202,
+    "daysPerTurn": 2,
+    "id": "rn2r1GHE",
+    "lastFen": "2R4Q/r4pk1/p2r2b1/4p3/8/1B3P2/P4K2/6R1 b - - 1 1",
+    "lastMove": "h4h8",
+    "lastMoveAt": 1792931608773,
+    "moves": "e4 b6 d4 Bb7 Nc3 g6 Nf3 Bg7 Bd3 e6 Bf4 d6 O-O Ne7 Qd2 O-O Ne2 Nd7 c3 a6 Ng3 Kh8 Bh6 Rg8 Ng5 Qe8 Qf4 Rf8 Bxg7+ Kxg7 Qh4 Rh8 Qf4 Ng8 h4 h6 Nf3 Qe7 Rfe1 Rf8 Qe3 Ndf6 Qe2 Ng4 h5 g5 c4 N4f6 d5 e5 Nf5+ Kh7 Nxe7 Nxe7 Nh2 Nd7 b4 Ra8 Ng4 Bc8 Qf3 Kg7 Rac1 Ng8 c5 bxc5 bxc5 Nxc5 Nxe5 Nf6 Bb1 dxe5 Rxc5 Bg4 Qc3 Rhe8 f3 Bxh5 Rc1 Bg6 Qc4 h5 Rxc7 g4 d6 Rad8 Qc6 gxf3 gxf3 Re6 Rd1 h4 Rc8 Rd7 Bc2 Ra7 Bb3 Bh5 Kf2 Nxe4+ Qxe4 Rf6 Rg1+ Bg6 Qxh4 Rxd6 Qh8#",
+    "opening": {
+     "eco": "B00",
+     "name": "Owen Defense",
+     "ply": 2
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "provisional": true,
+      "rating": 1898,
+      "ratingDiff": -176,
+      "user": {
+       "id": "re_bianco",
+       "name": "re_bianco"
+      }
+     },
+     "white": {
+      "provisional": true,
+      "rating": 1262,
+      "ratingDiff": 583,
+      "user": {
+       "id": "alfiere7",
+       "name": "alfiere7"
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "mate",
+    "variant": "standard",
+    "winner": "white"
+   },
+   "round": "2",
+   "url": "https://lichess.org/rn2r1GHE",
+   "white": "alfiere7"
+  },
+  {
+   "black": "arrocco",
+   "createdAt": 1793551785004,
+   "lichess": {
+    "createdAt": 1792653423268,
+    "daysPerTurn": 2,
+    "id": "MdtCEmtV",
+    "lastFen": "2k4r/pp3pp1/2p4p/8/1R4PQ/5P1K/P4N1P/5bq1 w - - 7 1",
+    "lastMove": "c4f1",
+    "lastMoveAt": 1793311601427,
+    "moves": "e4 c6 d4 d5 Nc3 Nf6 e5 Ne4 Nxe4 dxe4 Bc4 Bf5 Bg5 Nd7 f3 Qb6 b3 e3 Bxe3 e6 g4 Bg6 Nh3 h6 O-O O-O-O Qe1 Bxc2 Qh4 Nxe5 Rae1 Nxc4 bxc4 Bd3 Rf2 Bxc4 Rd1 e5 Rfd2 Bb4 Rb1 exd4 Rxd4 Rxd4 Bxd4 Qxd4+ Nf2 Qe3 Rxb4 Qe1+ Kg2 Qf1+ Kg3 Qg1+ Kh3 Bf1#",
+    "opening": {
+     "eco": "B15",
+     "name": "Caro-Kann Defense: Campomanes Attack",
+     "ply": 6
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "rating": 1668,
+      "ratingDiff": 22,
+      "user": {
+       "flair": "nature.fallen-leaf",
+       "id": "arrocco",
+       "name": "arrocco",
+       "patron": true,
+       "patronColor": 9
+      }
+     },
+     "white": {
+      "rating": 1628,
+      "ratingDiff": -20,
+      "user": {
+       "id": "donna_rossa",
+       "name": "donna_rossa"
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "mate",
+    "variant": "standard",
+    "winner": "black"
+   },
+   "round": "2",
+   "url": "https://lichess.org/MdtCEmtV",
+   "white": "donna_rossa"
+  },
+  {
+   "black": "scaccomatto",
+   "createdAt": 1794247049269,
+   "lichess": {
+    "createdAt": 1794247477182,
+    "daysPerTurn": 2,
+    "division": {
+     "end": 54,
+     "middle": 23
+    },
+    "id": "nxC3zGC4",
+    "lastFen": "5rk1/ppp3p1/7p/7r/1PPpN3/P2P1P2/4R1Kq/5R2 w - - 3 1",
+    "lastMove": "f4h2",
+    "lastMoveAt": 1794729561933,
+    "moves": "e4 e5 Bc4 Nf6 d3 Nc6 Nf3 h6 a3 Bc5 h3 d5 exd5 Nxd5 O-O O-O Nbd2 Be6 Ne4 Bb6 Qe2 Nf4 Bxf4 exf4 Qd2 Nd4 Nh2 f3 Bxe6 fxe6 g3 Qd7 Kh1 e5 g4 Rae8 Rae1 Ne2 c4 Bd4 Nc3 Nf4 Nxf3 Nxh3 Nxd4 exd4 Ne4 Qxg4 b4 Qf3+ Kh2 Nf4 Qxf4 Qxf4+ Kg2 Re5 f3 Rh5 Re2 Qh2#",
+    "opening": {
+     "eco": "C55",
+     "name": "Italian Game: Two Knights Defense, Modern Bishop's Opening",
+     "ply": 7
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "provisional": true,
+      "rating": 1741,
+      "ratingDiff": 41,
+      "user": {
+       "id": "jhoSEoPt",
+       "name": "scaccomatto"
+      }
+     },
+     "white": {
+      "provisional": true,
+      "rating": 1722,
+      "ratingDiff": -103,
+      "user": {
+       "id": "re_bianco",
+       "name": "re_bianco"
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "mate",
+    "variant": "standard",
+    "winner": "black"
+   },
+   "round": "3",
+   "url": "https://lichess.org/game/HiOldHtt",
+   "white": "re_bianco"
+  },
+  {
+   "black": "alfiere7",
+   "createdAt": 1794247049489,
+   "lichess": {
+    "createdAt": 1794250386943,
+    "daysPerTurn": 2,
+    "division": {
+     "end": 62,
+     "middle": 26
+    },
+    "id": "6Mx3MgvG",
+    "lastFen": "8/5kp1/p3p3/7p/2P3bP/PP1N2PK/4pr2/4R3 w - - 3 1",
+    "lastMove": "f3g4",
+    "lastMoveAt": 1794772862422,
+    "moves": "d4 d5 Nc3 Nf6 Nf3 Nc6 Bf4 a6 e3 e6 a3 Be7 Bd3 Bd7 O-O O-O e4 dxe4 Nxe4 Re8 Bg3 Nh5 c3 Nxg3 fxg3 f5 Nc5 Bc8 Re1 Bf6 h4 b6 Nb3 Qd6 Kh2 Bb7 Nbd2 Ne7 Nc4 Qd7 Nfe5 Qd5 Qf3 Rab8 Qxd5 Nxd5 Nd7 Rbd8 Nce5 Bxe5 Nxe5 Nf6 Be2 c5 dxc5 bxc5 Rad1 Rd5 Bf3 Ne4 Bxe4 fxe4 Nc4 Rf8 Nd6 Bc6 c4 Rxd1 Rxd1 Rf2 Nc8 Kf7 b3 e3 Re1 e2 Nb6 Rxg2+ Kh3 h5 Na4 Bf3 Nxc5 Rf2 Nd3 Bg4#",
+    "opening": {
+     "eco": "A45",
+     "name": "Queen's Pawn Game: Chigorin Variation",
+     "ply": 4
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "provisional": true,
+      "rating": 1845,
+      "ratingDiff": 124,
+      "user": {
+       "id": "alfiere7",
+       "name": "alfiere7"
+      }
+     },
+     "white": {
+      "rating": 1690,
+      "ratingDiff": -13,
+      "user": {
+       "flair": "nature.fallen-leaf",
+       "id": "arrocco",
+       "name": "arrocco",
+       "patron": true,
+       "patronColor": 9
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "mate",
+    "variant": "standard",
+    "winner": "black"
+   },
+   "round": "3",
+   "url": "https://lichess.org/game/ATMJ3iLY",
+   "white": "arrocco"
+  },
+  {
+   "black": "cavallo_pazzo",
+   "createdAt": 1794247049378,
+   "lichess": {
+    "createdAt": 1794393584377,
+    "daysPerTurn": 2,
+    "division": {
+     "end": 33,
+     "middle": 17
+    },
+    "id": "hN8bUeBd",
+    "lastFen": "2k3r1/ppp1b2p/8/4pp2/2P5/7P/PP3P1P/RNB2q1K w - - 3 1",
+    "lastMove": "d3f1",
+    "lastMoveAt": 1794606890521,
+    "moves": "e4 e5 Bc4 Nc6 Qf3 Nf6 d3 Be7 Nh3 Nd4 Qd1 d5 Bxd5 Nxd5 exd5 Bxh3 gxh3 Qxd5 Rg1 Nf3+ Kf1 Nxg1 Kxg1 O-O-O c4 Qxd3 Qg4+ f5 Qxg7 Rhg8 Qg2 Rxg2+ Kxg2 Rg8+ Kh1 Qf1#",
+    "opening": {
+     "eco": "C23",
+     "name": "Bishop's Opening",
+     "ply": 3
+    },
+    "perf": "correspondence",
+    "players": {
+     "black": {
+      "provisional": true,
+      "rating": 1404,
+      "ratingDiff": 240,
+      "user": {
+       "id": "hx4DVe9L",
+       "name": "cavallo_pazzo"
+      }
+     },
+     "white": {
+      "rating": 1614,
+      "ratingDiff": -26,
+      "user": {
+       "id": "donna_rossa",
+       "name": "donna_rossa"
+      }
+     }
+    },
+    "rated": true,
+    "source": "friend",
+    "speed": "correspondence",
+    "status": "mate",
+    "variant": "standard",
+    "winner": "black"
+   },
+   "round": "3",
+   "url": "https://lichess.org/game/IUQYFfYM",
+   "white": "donna_rossa"
+  },
+  {
+   "black": "pedone_lento",
+   "createdAt": 1794247049113,
+   "lichess": {
+    "id": "J03iA2Ky",
+    "status": "started"
+   },
+   "round": "3",
+   "url": "https://lichess.org/game/RKzC96bM",
+   "white": "torre_nera"
+  }
+ ],
+ "media": {
+  "stagione-2-capablanca": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+ },
+ "players": [
+  {
+   "handle": "torre_nera",
+   "name": "Marco Bel"
+  },
+  {
+   "handle": "alfiere7",
+   "name": "Marco Ber"
+  },
+  {
+   "handle": "pedone_lento",
+   "name": "Sergio"
+  },
+  {
+   "handle": "cavallo_pazzo",
+   "name": "Andrea"
+  },
+  {
+   "handle": "re_bianco",
+   "name": "Bruno"
+  },
+  {
+   "handle": "donna_rossa",
+   "name": "Carla"
+  },
+  {
+   "handle": "arrocco",
+   "name": "Dario"
+  },
+  {
+   "handle": "scaccomatto",
+   "name": "Elena"
+  }
+ ],
+ "schedule": [
+  {
+   "black": "alfiere7",
+   "round": "1",
+   "white": "torre_nera"
+  },
+  {
+   "black": "cavallo_pazzo",
+   "round": "1",
+   "white": "pedone_lento"
+  },
+  {
+   "black": "donna_rossa",
+   "round": "1",
+   "white": "re_bianco"
+  },
+  {
+   "black": "scaccomatto",
+   "round": "1",
+   "white": "arrocco"
+  },
+  {
+   "black": "torre_nera",
+   "round": "2",
+   "white": "cavallo_pazzo"
+  },
+  {
+   "black": "re_bianco",
+   "round": "2",
+   "white": "alfiere7"
+  },
+  {
+   "black": "pedone_lento",
+   "round": "2",
+   "white": "scaccomatto"
+  },
+  {
+   "black": "arrocco",
+   "round": "2",
+   "white": "donna_rossa"
+  },
+  {
+   "black": "pedone_lento",
+   "round": "3",
+   "white": "torre_nera"
+  },
+  {
+   "black": "scaccomatto",
+   "round": "3",
+   "white": "re_bianco"
+  },
+  {
+   "black": "cavallo_pazzo",
+   "round": "3",
+   "white": "donna_rossa"
+  },
+  {
+   "black": "alfiere7",
+   "round": "3",
+   "white": "arrocco"
+  },
+  {
+   "black": "torre_nera",
+   "round": "4",
+   "white": "scaccomatto"
+  },
+  {
+   "black": "donna_rossa",
+   "round": "4",
+   "white": "alfiere7"
+  },
+  {
+   "black": "re_bianco",
+   "round": "4",
+   "white": "pedone_lento"
+  },
+  {
+   "black": "cavallo_pazzo",
+   "round": "4",
+   "white": "arrocco"
+  },
+  {
+   "black": "arrocco",
+   "round": "5",
+   "white": "torre_nera"
+  },
+  {
+   "black": "re_bianco",
+   "round": "5",
+   "white": "cavallo_pazzo"
+  },
+  {
+   "black": "scaccomatto",
+   "round": "5",
+   "white": "alfiere7"
+  },
+  {
+   "black": "pedone_lento",
+   "round": "5",
+   "white": "donna_rossa"
+  },
+  {
+   "black": "torre_nera",
+   "round": "6",
+   "white": "re_bianco"
+  },
+  {
+   "black": "donna_rossa",
+   "round": "6",
+   "white": "scaccomatto"
+  },
+  {
+   "black": "alfiere7",
+   "round": "6",
+   "white": "cavallo_pazzo"
+  },
+  {
+   "black": "pedone_lento",
+   "round": "6",
+   "white": "arrocco"
+  },
+  {
+   "black": "torre_nera",
+   "round": "7",
+   "white": "donna_rossa"
+  },
+  {
+   "black": "alfiere7",
+   "round": "7",
+   "white": "pedone_lento"
+  },
+  {
+   "black": "cavallo_pazzo",
+   "round": "7",
+   "white": "scaccomatto"
+  },
+  {
+   "black": "arrocco",
+   "round": "7",
+   "white": "re_bianco"
+  },
+  {
+   "black": "torre_nera",
+   "round": "8",
+   "white": "alfiere7"
+  },
+  {
+   "black": "pedone_lento",
+   "round": "8",
+   "white": "cavallo_pazzo"
+  },
+  {
+   "black": "re_bianco",
+   "round": "8",
+   "white": "donna_rossa"
+  },
+  {
+   "black": "arrocco",
+   "round": "8",
+   "white": "scaccomatto"
+  },
+  {
+   "black": "cavallo_pazzo",
+   "round": "9",
+   "white": "torre_nera"
+  },
+  {
+   "black": "alfiere7",
+   "round": "9",
+   "white": "re_bianco"
+  },
+  {
+   "black": "scaccomatto",
+   "round": "9",
+   "white": "pedone_lento"
+  },
+  {
+   "black": "donna_rossa",
+   "round": "9",
+   "white": "arrocco"
+  },
+  {
+   "black": "torre_nera",
+   "round": "10",
+   "white": "pedone_lento"
+  },
+  {
+   "black": "re_bianco",
+   "round": "10",
+   "white": "scaccomatto"
+  },
+  {
+   "black": "donna_rossa",
+   "round": "10",
+   "white": "cavallo_pazzo"
+  },
+  {
+   "black": "arrocco",
+   "round": "10",
+   "white": "alfiere7"
+  },
+  {
+   "black": "scaccomatto",
+   "round": "11",
+   "white": "torre_nera"
+  },
+  {
+   "black": "alfiere7",
+   "round": "11",
+   "white": "donna_rossa"
+  },
+  {
+   "black": "pedone_lento",
+   "round": "11",
+   "white": "re_bianco"
+  },
+  {
+   "black": "arrocco",
+   "round": "11",
+   "white": "cavallo_pazzo"
+  },
+  {
+   "black": "torre_nera",
+   "round": "12",
+   "white": "arrocco"
+  },
+  {
+   "black": "cavallo_pazzo",
+   "round": "12",
+   "white": "re_bianco"
+  },
+  {
+   "black": "alfiere7",
+   "round": "12",
+   "white": "scaccomatto"
+  },
+  {
+   "black": "donna_rossa",
+   "round": "12",
+   "white": "pedone_lento"
+  },
+  {
+   "black": "re_bianco",
+   "round": "13",
+   "white": "torre_nera"
+  },
+  {
+   "black": "scaccomatto",
+   "round": "13",
+   "white": "donna_rossa"
+  },
+  {
+   "black": "cavallo_pazzo",
+   "round": "13",
+   "white": "alfiere7"
+  },
+  {
+   "black": "arrocco",
+   "round": "13",
+   "white": "pedone_lento"
+  },
+  {
+   "black": "donna_rossa",
+   "round": "14",
+   "white": "torre_nera"
+  },
+  {
+   "black": "pedone_lento",
+   "round": "14",
+   "white": "alfiere7"
+  },
+  {
+   "black": "scaccomatto",
+   "round": "14",
+   "white": "cavallo_pazzo"
+  },
+  {
+   "black": "re_bianco",
+   "round": "14",
+   "white": "arrocco"
+  }
+ ],
+ "seasons": [
+  {
+   "archivedAt": "2026-10-06T15:48:08.490Z",
+   "awards": [
+    {
+     "description": "La vittoria più rapida della stagione",
+     "detail": "in 4 mosse",
+     "emoji": "⚡",
+     "id": "fastest",
+     "title": "Fulmine",
+     "winners": [
+      {
+       "handle": "re_bianco",
+       "name": "Bruno"
+      }
+     ]
+    },
+    {
+     "description": "La vittoria più lunga della stagione",
+     "detail": "in 79 mosse contro Carla",
+     "emoji": "🏃",
+     "id": "longest",
+     "title": "Il maratoneta",
+     "winners": [
+      {
+       "handle": "scaccomatto",
+       "name": "Elena"
+      }
+     ]
+    },
+    {
+     "description": "Per chi si gode ogni mossa con calma: il più lento a rispondere, stimato dalla durata delle sue partite",
+     "detail": "circa 10 h per ogni sua mossa",
+     "emoji": "🦥",
+     "id": "slowest",
+     "title": "Il bradipo",
+     "winners": [
+      {
+       "handle": "pa_ro",
+       "name": "Elena \"Lena\""
+      }
+     ]
+    }
+   ],
+   "champion": {
+    "handle": "re_bianco",
+    "name": "Bruno",
+    "points": 13.5
+   },
+   "departures": [
+    {
+     "fromDate": "2026-03-20",
+     "handle": "gambetto",
+     "mode": "replaced",
+     "name": "Giulia",
+     "replacedBy": {
+      "handle": "torre_nera",
+      "name": "Marco Bel"
+     }
+    }
+   ],
+   "end": "2026-10",
+   "games": [
+    {
+     "black": "donna_rossa",
+     "blackRating": 1500,
+     "end": 1757435257899,
+     "id": "YYW4aesu",
+     "opening": "Queen's Pawn Game: Accelerated London System",
+     "plies": 57,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "scaccomatto",
+     "whiteRating": 1328
+    },
+    {
+     "black": "arrocco",
+     "blackRating": 1787,
+     "end": 1757454672849,
+     "id": "L81Lovvn",
+     "opening": "Van't Kruijs Opening",
+     "plies": 66,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "resign",
+     "white": "pa_ro",
+     "whiteRating": 1500
+    },
+    {
+     "black": "pedone_lento",
+     "blackRating": 1500,
+     "end": 1757781923062,
+     "id": "eFDJ1VLE",
+     "opening": "Bishop's Opening",
+     "plies": 43,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "re_bianco",
+     "whiteRating": 1814
+    },
+    {
+     "black": "torre_nera",
+     "blackRating": 1500,
+     "end": 1758138453491,
+     "id": "v7VVkHPM",
+     "opening": "King's Pawn Game",
+     "plies": 65,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "regina_b",
+     "whiteRating": 1500
+    },
+    {
+     "black": "donna_rossa",
+     "blackRating": 1182,
+     "end": 1758742603269,
+     "id": "HfdUXtT5",
+     "opening": "Queen's Pawn Game: Zukertort Variation",
+     "plies": 61,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "arrocco",
+     "whiteRating": 1590
+    },
+    {
+     "black": "regina_b",
+     "blackRating": 1500,
+     "end": 1758882020793,
+     "id": "HVDrDrag",
+     "opening": "Queen's Pawn Game",
+     "plies": 77,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "scaccomatto",
+     "whiteRating": 1680
+    },
+    {
+     "black": "re_bianco",
+     "blackRating": 1814,
+     "end": 1759177411500,
+     "id": "boc8eHxE",
+     "opening": "Philidor Defense",
+     "plies": 30,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "torre_nera",
+     "whiteRating": 1500
+    },
+    {
+     "black": "pa_ro",
+     "blackRating": 1299,
+     "end": 1762699562254,
+     "id": "OpvnAth2",
+     "opening": "Queen's Pawn Game: Accelerated London System",
+     "plies": 65,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "resign",
+     "white": "pedone_lento",
+     "whiteRating": 1500
+    },
+    {
+     "black": "regina_b",
+     "blackRating": 1500,
+     "end": 1763726582000,
+     "id": "avEBTDbJ",
+     "opening": "King's Pawn Game",
+     "plies": 45,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "arrocco",
+     "whiteRating": 1670
+    },
+    {
+     "black": "re_bianco",
+     "blackRating": 1814,
+     "end": 1764422319053,
+     "id": "9cy7zuyY",
+     "opening": "English Defense",
+     "plies": 52,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "outoftime",
+     "white": "pa_ro",
+     "whiteRating": 1299
+    },
+    {
+     "black": "pedone_lento",
+     "blackRating": 1500,
+     "end": 1764527973503,
+     "id": "AimjI7vT",
+     "opening": "Queen's Pawn Game: Symmetrical Variation",
+     "plies": 123,
+     "provisional": true,
+     "result": "½-½",
+     "round": "–",
+     "status": "draw",
+     "white": "donna_rossa",
+     "whiteRating": 1170
+    },
+    {
+     "black": "scaccomatto",
+     "blackRating": 1680,
+     "end": 1765124200293,
+     "id": "z95bNkgu",
+     "opening": "King's Pawn Game: Leonardis Variation",
+     "plies": 38,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "torre_nera",
+     "whiteRating": 1500
+    },
+    {
+     "black": "scaccomatto",
+     "blackRating": 1680,
+     "end": 1765620134917,
+     "id": "Mskm8wCE",
+     "opening": "Scotch Game",
+     "plies": 73,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "arrocco",
+     "whiteRating": 1686
+    },
+    {
+     "black": "re_bianco",
+     "blackRating": 1814,
+     "end": 1766404942789,
+     "id": "gGJYly7F",
+     "opening": "English Defense",
+     "plies": 84,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "donna_rossa",
+     "whiteRating": 1139
+    },
+    {
+     "black": "regina_b",
+     "blackRating": 1500,
+     "end": 1767532041095,
+     "id": "diZx3yjZ",
+     "opening": "Sicilian Defense: Closed, Traditional",
+     "plies": 51,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "resign",
+     "white": "pedone_lento",
+     "whiteRating": 1500
+    },
+    {
+     "black": "torre_nera",
+     "blackRating": 1500,
+     "end": 1768544292734,
+     "id": "dKhvPOGj",
+     "opening": "Vienna Game",
+     "plies": 75,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "pa_ro",
+     "whiteRating": 1299
+    },
+    {
+     "black": "re_bianco",
+     "blackRating": 1814,
+     "end": 1769850932934,
+     "id": "LrTI4kS5",
+     "opening": "Owen Defense",
+     "plies": 58,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "regina_b",
+     "whiteRating": 1339
+    },
+    {
+     "black": "pa_ro",
+     "blackRating": 1299,
+     "end": 1769945413636,
+     "id": "hRPOnh6a",
+     "opening": "Queen's Pawn Game",
+     "plies": 45,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "donna_rossa",
+     "whiteRating": 1293
+    },
+    {
+     "black": "scaccomatto",
+     "blackRating": 1532,
+     "end": 1770409193755,
+     "id": "NZqDSyuO",
+     "opening": "Queen's Pawn Game: Chigorin Variation",
+     "plies": 82,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "resign",
+     "white": "pedone_lento",
+     "whiteRating": 1500
+    },
+    {
+     "black": "arrocco",
+     "blackRating": 1685,
+     "end": 1771067776622,
+     "id": "X9l46Ld1",
+     "opening": "Vienna Game: Max Lange Defense",
+     "plies": 58,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "outoftime",
+     "white": "torre_nera",
+     "whiteRating": 1500
+    },
+    {
+     "black": "scaccomatto",
+     "blackRating": 1532,
+     "end": 1771707568765,
+     "id": "kEKz4BuT",
+     "opening": "Hungarian Opening",
+     "plies": 113,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "resign",
+     "white": "re_bianco",
+     "whiteRating": 1814
+    },
+    {
+     "black": "arrocco",
+     "blackRating": 1770,
+     "end": 1772999374373,
+     "id": "FPkxQvmY",
+     "opening": "Queen's Pawn Game: Symmetrical Variation",
+     "plies": 90,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "resign",
+     "white": "pedone_lento",
+     "whiteRating": 838
+    },
+    {
+     "black": "torre_nera",
+     "blackRating": 1500,
+     "end": 1773036555593,
+     "id": "qA2ypvWx",
+     "opening": "Four Knights Game: Spanish Variation, Rubinstein Variation",
+     "plies": 23,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "donna_rossa",
+     "whiteRating": 1273
+    },
+    {
+     "black": "pa_ro",
+     "blackRating": 1299,
+     "end": 1774034640280,
+     "id": "smZa9Hpf",
+     "opening": "Bird Opening: Dutch Variation",
+     "plies": 74,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "regina_b",
+     "whiteRating": 1293
+    },
+    {
+     "black": "arrocco",
+     "blackRating": 1785,
+     "end": 1774595913891,
+     "id": "thXTrpZp",
+     "opening": "Hungarian Opening",
+     "plies": 99,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "re_bianco",
+     "whiteRating": 1814
+    },
+    {
+     "black": "donna_rossa",
+     "blackRating": 1312,
+     "end": 1774698579432,
+     "id": "P1s13vYU",
+     "opening": "Caro-Kann Defense: Hillbilly Attack",
+     "plies": 22,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "regina_b",
+     "whiteRating": 1293
+    },
+    {
+     "black": "pedone_lento",
+     "blackRating": 838,
+     "end": 1775726179976,
+     "id": "883XdnSu",
+     "opening": "Nimzo-Larsen Attack: Modern Variation",
+     "plies": 33,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "torre_nera",
+     "whiteRating": 1500
+    },
+    {
+     "black": "pa_ro",
+     "blackRating": 1299,
+     "end": 1775907317555,
+     "id": "6mHJ9GsH",
+     "opening": "Vienna Game: Stanley Variation",
+     "plies": 47,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "scaccomatto",
+     "whiteRating": 1532
+    },
+    {
+     "black": "scaccomatto",
+     "blackRating": 1532,
+     "end": 1777471334704,
+     "id": "CjiIsBFb",
+     "opening": "Three Knights Opening",
+     "plies": 158,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "donna_rossa",
+     "whiteRating": 1367
+    },
+    {
+     "black": "re_bianco",
+     "blackRating": 1814,
+     "end": 1778081767177,
+     "id": "D1xb0py7",
+     "opening": "Queen's Pawn Game: Zukertort Variation",
+     "plies": 62,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "resign",
+     "white": "pedone_lento",
+     "whiteRating": 838
+    },
+    {
+     "black": "regina_b",
+     "blackRating": 1293,
+     "end": 1778344130318,
+     "id": "HTwqlNrc",
+     "opening": "Hungarian Opening",
+     "plies": 93,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "torre_nera",
+     "whiteRating": 1500
+    },
+    {
+     "black": "pa_ro",
+     "blackRating": 1299,
+     "end": 1779875782210,
+     "id": "eQp4Dc6Q",
+     "opening": "Slav Defense: Exchange Variation",
+     "plies": 73,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "resign",
+     "white": "arrocco",
+     "whiteRating": 1777
+    },
+    {
+     "black": "scaccomatto",
+     "blackRating": 1588,
+     "end": 1780313606898,
+     "id": "y4f1bj1X",
+     "opening": "Bird Opening: Dutch Variation",
+     "plies": 30,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "regina_b",
+     "whiteRating": 1293
+    },
+    {
+     "black": "arrocco",
+     "blackRating": 1699,
+     "end": 1780948966460,
+     "id": "CY8slihO",
+     "opening": "Italian Game: Two Knights Defense, Knight Attack, Normal Variation",
+     "plies": 80,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "donna_rossa",
+     "whiteRating": 1465
+    },
+    {
+     "black": "torre_nera",
+     "blackRating": 1500,
+     "end": 1782034715232,
+     "id": "AzUJosgO",
+     "opening": "Bishop's Opening",
+     "plies": 81,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "re_bianco",
+     "whiteRating": 1814
+    },
+    {
+     "black": "pedone_lento",
+     "blackRating": 838,
+     "end": 1784041243018,
+     "id": "NkfEcgW1",
+     "opening": "Van't Kruijs Opening",
+     "plies": 62,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "outoftime",
+     "white": "pa_ro",
+     "whiteRating": 1299
+    },
+    {
+     "black": "arrocco",
+     "blackRating": 1688,
+     "end": 1784912394114,
+     "id": "jcDlKdcM",
+     "opening": "Bird Opening",
+     "plies": 34,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "regina_b",
+     "whiteRating": 1293
+    },
+    {
+     "black": "torre_nera",
+     "blackRating": 1500,
+     "end": 1785165668873,
+     "id": "Vh0RL0pX",
+     "opening": "Queen's Pawn Game: Accelerated London System",
+     "plies": 41,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "scaccomatto",
+     "whiteRating": 1588
+    },
+    {
+     "black": "donna_rossa",
+     "blackRating": 1532,
+     "end": 1785865169327,
+     "id": "6Kr5mAs3",
+     "opening": "Queen's Pawn Game: Chigorin Variation",
+     "plies": 69,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "pedone_lento",
+     "whiteRating": 838
+    },
+    {
+     "black": "pa_ro",
+     "blackRating": 1299,
+     "end": 1786187788383,
+     "id": "Ry0reCMy",
+     "opening": "Scandinavian Defense: Mieses-Kotroc Variation",
+     "plies": 95,
+     "provisional": true,
+     "result": "½-½",
+     "round": "–",
+     "status": "draw",
+     "white": "re_bianco",
+     "whiteRating": 1814
+    },
+    {
+     "black": "donna_rossa",
+     "blackRating": 1496,
+     "end": 1787237207079,
+     "id": "bI7uxTVf",
+     "opening": "Bishop's Opening: Boi Variation",
+     "plies": 59,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "re_bianco",
+     "whiteRating": 1814
+    },
+    {
+     "black": "arrocco",
+     "blackRating": 1768,
+     "end": 1787324473331,
+     "id": "MddncgwW",
+     "opening": "Queen's Pawn Game: London System",
+     "plies": 117,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "scaccomatto",
+     "whiteRating": 1588
+    },
+    {
+     "black": "pedone_lento",
+     "blackRating": 838,
+     "end": 1788076129283,
+     "id": "Z98DBhGc",
+     "opening": "Queen's Pawn Game",
+     "plies": 90,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "resign",
+     "white": "regina_b",
+     "whiteRating": 1293
+    },
+    {
+     "black": "pa_ro",
+     "blackRating": 1299,
+     "end": 1788644166067,
+     "id": "AsnpW22T",
+     "opening": "King's Pawn Game: Damiano Defense",
+     "plies": 106,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "torre_nera",
+     "whiteRating": 1500
+    },
+    {
+     "black": "regina_b",
+     "blackRating": 1293,
+     "end": 1788861410267,
+     "id": "naJqPiAE",
+     "opening": "Sicilian Defense: Bowdler Attack",
+     "plies": 7,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "re_bianco",
+     "whiteRating": 1814
+    },
+    {
+     "black": "torre_nera",
+     "blackRating": 1500,
+     "end": 1789036939835,
+     "id": "c5DSDdRW",
+     "opening": "Horwitz Defense",
+     "plies": 52,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "arrocco",
+     "whiteRating": 1712
+    },
+    {
+     "black": "pedone_lento",
+     "blackRating": 838,
+     "end": 1789483277256,
+     "id": "93pJ0J7N",
+     "opening": "Queen's Pawn Game: Accelerated London System",
+     "plies": 73,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "resign",
+     "white": "scaccomatto",
+     "whiteRating": 1588
+    },
+    {
+     "black": "donna_rossa",
+     "blackRating": 1591,
+     "end": 1789738308452,
+     "id": "iXG38bWa",
+     "opening": "Gunderam Defense",
+     "plies": 119,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "pa_ro",
+     "whiteRating": 1299
+    },
+    {
+     "black": "regina_b",
+     "blackRating": 1293,
+     "end": 1790142306592,
+     "id": "Q1QHVDXA",
+     "opening": "Sicilian Defense: Alapin Variation",
+     "plies": 33,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "pa_ro",
+     "whiteRating": 1299
+    },
+    {
+     "black": "re_bianco",
+     "blackRating": 1814,
+     "end": 1790144084793,
+     "id": "l2ffQrJQ",
+     "opening": "Rapport-Jobava System, with e6",
+     "plies": 122,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "resign",
+     "white": "scaccomatto",
+     "whiteRating": 1588
+    },
+    {
+     "black": "pedone_lento",
+     "blackRating": 838,
+     "end": 1790254657607,
+     "id": "slHL4970",
+     "opening": "Semi-Slav Defense: Accelerated Move Order",
+     "plies": 69,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "resign",
+     "white": "arrocco",
+     "whiteRating": 1712
+    },
+    {
+     "black": "donna_rossa",
+     "blackRating": 1563,
+     "end": 1790335789005,
+     "id": "yDWlL6JQ",
+     "opening": "Alekhine Defense",
+     "plies": 27,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "torre_nera",
+     "whiteRating": 1500
+    },
+    {
+     "black": "regina_b",
+     "blackRating": 1293,
+     "end": 1790663379575,
+     "id": "XpQIGUCl",
+     "opening": "King's Pawn Game: Damiano Defense",
+     "plies": 21,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "donna_rossa",
+     "whiteRating": 1571
+    },
+    {
+     "black": "re_bianco",
+     "blackRating": 1814,
+     "end": 1790766667356,
+     "id": "5IxB8FBo",
+     "opening": "Philidor Defense",
+     "plies": 108,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "mate",
+     "white": "arrocco",
+     "whiteRating": 1712
+    },
+    {
+     "black": "torre_nera",
+     "blackRating": 1500,
+     "end": 1791290398784,
+     "id": "GhEIcN1p",
+     "opening": "King's Pawn Game: Busch-Gass Gambit",
+     "plies": 84,
+     "provisional": true,
+     "result": "0-1",
+     "round": "–",
+     "status": "resign",
+     "white": "pedone_lento",
+     "whiteRating": 838
+    },
+    {
+     "black": "scaccomatto",
+     "blackRating": 1588,
+     "end": 1791301688490,
+     "id": "lcweoKjn",
+     "opening": "Queen's Pawn Game: Chigorin Variation",
+     "plies": 109,
+     "provisional": true,
+     "result": "1-0",
+     "round": "–",
+     "status": "mate",
+     "white": "pa_ro",
+     "whiteRating": 1299
+    }
+   ],
+   "gamesPlayed": 56,
+   "id": "scacchi-chill-stagione-1",
+   "season": "Scacchi & Chill - Stagione 1",
+   "standings": [
+    {
+     "drawn": 1,
+     "handle": "re_bianco",
+     "lost": 0,
+     "name": "Bruno",
+     "played": 14,
+     "points": 13.5,
+     "sb": 81.75,
+     "won": 13
+    },
+    {
+     "drawn": 0,
+     "handle": "arrocco",
+     "lost": 4,
+     "name": "Dario",
+     "played": 14,
+     "points": 10,
+     "sb": 50,
+     "won": 10
+    },
+    {
+     "drawn": 0,
+     "handle": "scaccomatto",
+     "lost": 4,
+     "name": "Elena",
+     "played": 14,
+     "points": 10,
+     "sb": 48.5,
+     "won": 10
+    },
+    {
+     "drawn": 1,
+     "handle": "pa_ro",
+     "lost": 7,
+     "name": "Elena \"Lena\"",
+     "played": 14,
+     "points": 6.5,
+     "sb": 33.25,
+     "won": 6
+    },
+    {
+     "drawn": 1,
+     "handle": "pedone_lento",
+     "lost": 8,
+     "name": "Sergio",
+     "played": 14,
+     "points": 5.5,
+     "sb": 21.75,
+     "won": 5
+    },
+    {
+     "drawn": 0,
+     "handle": "torre_nera",
+     "lost": 9,
+     "name": "Marco Bel",
+     "played": 14,
+     "points": 5,
+     "sb": 26.5,
+     "won": 5
+    },
+    {
+     "drawn": 1,
+     "handle": "donna_rossa",
+     "lost": 9,
+     "name": "Carla",
+     "played": 14,
+     "points": 4.5,
+     "sb": 16.25,
+     "won": 4
+    },
+    {
+     "drawn": 0,
+     "handle": "regina_b",
+     "lost": 13,
+     "name": "Irene",
+     "played": 14,
+     "points": 1,
+     "sb": 5,
+     "won": 1
+    }
+   ],
+   "start": "2025-09",
+   "title": "Scacchi & Chill"
+  }
+ ],
+ "source": "backup automatico",
+ "tournament": {
+  "color": "green",
+  "description": "Nato a L'Avana nel 1888, Capablanca è passato alla storia come uno dei più grandi talenti naturali della disciplina. Imparò il gioco a soli quattro anni osservando il padre e sviluppò fin da subito un'incredibile intuizione posizionale.\n\nIl suo stile era lineare, essenziale e privo di orpelli: evitava le complicazioni inutili e convertiva i vantaggi con una precisione quasi infallibile, specialmente nei finali di partita. Questa sua regolarità gli valse il celebre soprannome di *\"La Macchina degli Scacchi\"*.\n\nTra il 1916 e il 1924 mantenne un record eccezionale: *63 partite consecutive disputate ad altissimo livello senza subire alcuna sconfitta*. Nel 1921 diventò Campione del Mondo battendo Emanuel Lasker, detenendo il titolo fino al 1927.",
+  "fairPlayText": "• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima della partita vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.\n• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.\n• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.",
+  "famousGame": {
+   "note": "Si dice che Marshall avesse preparato per anni una variante d'attacco segreta nella Spagnola, tenuta da parte apposta per Capablanca. Gliela lanciò contro e Capablanca, vedendola per la prima volta alla scacchiera, si difese con calma e vinse. Quella variante oggi si chiama «Attacco Marshall» e si gioca ancora ai massimi livelli.",
+   "title": "Capablanca – Marshall, New York 1918",
+   "url": "https://lichess.org/study/tGEhgIAZ/wLvBG6PX"
+  },
+  "howItWorks": "1. All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida.\n2. Quando la partita finisce, scrivi nel gruppo WhatsApp così il risultato viene registrato.",
+  "imageUrl": "media:stagione-2-capablanca",
+  "masterAnecdotes": [
+   {
+    "text": "José Raúl Capablanca non prese mai lezioni. Imparò le regole semplicemente guardando il padre e un amico giocare nel salotto di casa a L'Avana. Durante una partita notò che il padre muoveva un cavallo in modo non consentito: quando glielo fece notare, il padre scosse la testa, ma il bambino gli dimostrò la mossa corretta... e lo batté nella sua prima vera partita subito dopo!",
+    "title": "Imparò a 4 anni correggendo il padre"
+   },
+   {
+    "text": "A soli 12 anni Capablanca affrontò in un match ufficiale Juan Corzo, campione nazionale cubano in carica ed esperto teorico. Lo batté (+4 −2 =6), diventando il più giovane campione nazionale della storia dell'epoca, affidandosi quasi esclusivamente al puro intuito visivo.",
+    "title": "Campione di Cuba a 12 anni"
+   },
+   {
+    "text": "Capablanca era celebre per la sua spaventosa velocità di calcolo intuitivo. Durante una tournée negli Stati Uniti giocò una simultanea contro 103 avversari: concluse l'evento in sole 7 ore, vincendo 102 partite e pattandone una sola, camminando quasi senza fermarsi davanti alle scacchiere.",
+    "title": "La simultanea a tempo di record"
+   },
+   {
+    "text": "Quando Capablanca fu invitato al prestigioso torneo di San Sebastián, alcuni dei più forti maestri europei protestarono, ritenendo il giovane cubano un \"incognito\" privo di titoli internazionali. Lui rispose sul campo, vincendo il torneo al suo esordio assoluto in Europa e aggiudicandosi anche il premio per la miglior partita.",
+    "title": "L'esordio a San Sebastián 1911"
+   },
+   {
+    "text": "Tra il 10 febbraio 1916 e il 15 gennaio 1924 Capablanca non perse neanche una partita in tornei o match ufficiali: 63 partite consecutive contro i migliori giocatori del mondo senza mai subire una sconfitta, un record leggendario per l'epoca.",
+    "title": "L'invincibilità durata 8 anni"
+   },
+   {
+    "text": "A differenza dei contemporanei come Alekhine o Lasker, che passavano ore ad analizzare le aperture e ad annotare varianti, Capablanca ammetteva di non studiare quasi mai la teoria sui libri. Preferiva affidarsi alla comprensione immediata della posizione, appena seduto alla scacchiera.",
+    "title": "\"Non studio mai gli scacchi\""
+   },
+   {
+    "text": "Nel torneo di San Pietroburgo del 1914 lo zar Nicola II rimase così affascinato dai cinque finalisti (Lasker, Capablanca, Alekhine, Tarrasch e Marshall) da conferire loro, per la prima volta nella storia, il titolo d'onore di *\"Gran Maestro di Scacchi\"*.",
+    "title": "La nascita del titolo di \"Gran Maestro\""
+   },
+   {
+    "text": "Attorno al 1920, convinto che gli scacchi ad altissimo livello portassero a troppe patte e fossero vicini all'essere \"risolti\", Capablanca propose una variante chiamata *Scacchi di Capablanca*: si giocava su una scacchiera 10x8 con due pezzi nuovi, l'*Arcivescovo* (Alfiere+Cavallo) e il *Cancelliere* (Torre+Cavallo).",
+    "title": "Voleva cambiare le regole degli scacchi"
+   },
+   {
+    "text": "Capablanca è considerato uno dei più grandi maestri di finali di sempre. La sua capacità di trasformare un vantaggio posizionale minimo, un pedone debole o una struttura migliore, in una vittoria nei finali di torre o di pedoni era così pulita da sembrare automatica.",
+    "title": "Il \"Mago dei Finali\""
+   },
+   {
+    "text": "Nel 1921 Capablanca sfidò Emanuel Lasker a L'Avana per il titolo mondiale. Lasker, che deteneva la corona da ben 27 anni, fu travolto dalla precisione del maestro cubano: Capablanca vinse 4 partite, ne pattò 10 e non ne perse alcuna, diventando il 3° Campione del Mondo della storia.",
+    "title": "La conquista del titolo mondiale (1921)"
+   },
+   {
+    "text": "Capablanca non era solo un genio sulla scacchiera, ma una figura di grande fascino pubblico. Parlava un inglese e un francese impeccabili, vestiva con eleganza sartoriale e fu una figura di rilievo nella diplomazia cubana, lavorando anche come ambasciatore straordinario per il suo Paese.",
+    "title": "Un'eleganza fuori dalla scacchiera"
+   },
+   {
+    "text": "Nel match mondiale di Buenos Aires del 1927 Capablanca era il favorito assoluto contro Alexander Alekhine, che non lo aveva mai battuto prima. Tuttavia la ferocissima preparazione sulle aperture e la tenacia di Alekhine riuscirono a scalzare il campione cubano dopo 34 estenuanti partite.",
+    "title": "La sconfitta shock con Alekhine (1927)"
+   },
+   {
+    "text": "Nonostante l'età e i primi problemi di salute, nel torneo di Nottingham 1936, uno dei più forti del '900 con ben 5 campioni del mondo presenti, Capablanca dimostrò di essere ancora un gigante, vincendo a pari merito con il giovane Mikhail Botvinnik.",
+    "title": "Il ritorno trionfale a Nottingham 1936"
+   },
+   {
+    "text": "Nel marzo 1942, mentre osservava le partite degli amici al celebre *Marshall Chess Club* di New York, Capablanca fu colpito da un improvviso attacco apoplettico. Il suo storico rivale Emanuel Lasker scrisse di lui: _\"Non ho mai conosciuto un altro genio degli scacchi paragonabile a lui\"_.",
+    "title": "L'addio al Marshall Chess Club"
+   }
+  ],
+  "masterColor": "",
+  "masterName": "José Raúl Capablanca",
+  "masterOpening": "queens-gambit",
+  "pledgeKeys": [
+   "stagione-2-capablanca--scaccomatto",
+   "stagione-2-capablanca--cavallo_pazzo",
+   "stagione-2-capablanca--alfiere7",
+   "stagione-2-capablanca--re_bianco",
+   "stagione-2-capablanca--arrocco",
+   "stagione-2-capablanca--donna_rossa",
+   "stagione-2-capablanca--torre_nera",
+   "stagione-2-capablanca--pedone_lento"
+  ],
+  "rulesText": "",
+  "season": "Stagione 2 - Capablanca",
+  "seeds": [
+   {
+    "date": "2026-09-09",
+    "handle": "cavallo_pazzo",
+    "lichess": 1822,
+    "mean": 1623,
+    "offset": 448,
+    "perf": "blitz",
+    "rating": 1947,
+    "ratings": {
+     "blitz": 1822,
+     "rapid": 1903
+    },
+    "regulars": [
+     {
+      "elo": 1675,
+      "handle": "scaccomatto",
+      "ratings": {
+       "blitz": 1122,
+       "rapid": 1502
+      }
+     },
+     {
+      "elo": 1922,
+      "handle": "re_bianco",
+      "ratings": {
+       "blitz": 1759,
+       "rapid": 1752
+      }
+     },
+     {
+      "elo": 1675,
+      "handle": "arrocco",
+      "ratings": {
+       "blitz": 1049,
+       "correspondence": 1712
+      }
+     },
+     {
+      "elo": 1387,
+      "handle": "donna_rossa",
+      "ratings": {
+       "correspondence": 1568
+      }
+     },
+     {
+      "elo": 1609,
+      "handle": "torre_nera",
+      "ratings": {}
+     },
+     {
+      "elo": 1471,
+      "handle": "pedone_lento",
+      "ratings": {}
+     }
+    ],
+    "rule": 4,
+    "sigma": 171
+   },
+   {
+    "date": "2026-09-08",
+    "handle": "alfiere7",
+    "lichess": 1486,
+    "mean": 1623,
+    "offset": 448,
+    "perf": "blitz",
+    "rating": 1779,
+    "ratings": {
+     "blitz": 1486,
+     "rapid": 1752
+    },
+    "regulars": [
+     {
+      "elo": 1675,
+      "handle": "scaccomatto",
+      "ratings": {
+       "blitz": 1122,
+       "rapid": 1502
+      }
+     },
+     {
+      "elo": 1922,
+      "handle": "re_bianco",
+      "ratings": {
+       "blitz": 1759,
+       "rapid": 1760
+      }
+     },
+     {
+      "elo": 1675,
+      "handle": "arrocco",
+      "ratings": {
+       "blitz": 1049,
+       "correspondence": 1712
+      }
+     },
+     {
+      "elo": 1387,
+      "handle": "donna_rossa",
+      "ratings": {
+       "correspondence": 1591
+      }
+     },
+     {
+      "elo": 1609,
+      "handle": "torre_nera",
+      "ratings": {}
+     },
+     {
+      "elo": 1471,
+      "handle": "pedone_lento",
+      "ratings": {}
+     }
+    ],
+    "rule": 4,
+    "sigma": 171
+   }
+  ],
+  "subtitle": "La macchina degli scacchi",
+  "title": "Scacchi & Chill",
+  "winners": [
+   {
+    "end": "2026-10",
+    "handle": "re_bianco",
+    "name": "Bruno",
+    "podium": [
+     {
+      "handle": "scaccomatto",
+      "name": "Elena",
+      "place": 2
+     },
+     {
+      "handle": "arrocco",
+      "name": "Dario",
+      "place": 2
+     }
+    ],
+    "season": "Scacchi & Chill - Stagione 1",
+    "start": "2025-09"
+   }
+  ],
+  "withdrawalText": "• Chi si ritira prima di aver giocato metà delle sue partite esce dal torneo e tutte le sue partite vengono annullate, anche quelle già giocate.\n• Chi si ritira dopo aver giocato almeno metà delle sue partite resta in classifica con i risultati ottenuti; le partite che non giocherà valgono come vittoria a tavolino per gli avversari.\n• Se pensi di ritirarti, avvisa prima l'organizzatore in privato.",
+  "withdrawals": []
+ },
+ "version": "2.0"
+}

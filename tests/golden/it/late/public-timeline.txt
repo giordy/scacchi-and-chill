@@ -1,0 +1,465 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Turno 13 in corso. In testa Elena con 8 punti.
+[aria-label: 48 partite concluse e 4 in corso su 56]
+__ 48 concluse__ 4 in corso__ 4 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+Stagione
+[value: current]
+Stagione 2 - Capablanca
+[value: scacchi-chill-stagione-1]
+Scacchi & Chill - Stagione 1
+[aria-label: Domenica 24 gennaio]
+Domenica 24 gennaio
+Nuovo aneddoto su Capablanca: «Il ritorno trionfale a Nottingham 1936»
+15:41Leggi
+Inizia il turno 13
+4 partite · ritorno
+15:41
+[aria-label: Venerdì 22 gennaio]
+Venerdì 22 gennaio
+Si chiude il turno 12: in testa Elena
+con 8 punti
+21:54
+Sergio batte Carla con il matto
+Turno 12 · 37 mosse · Four Knights Game: Scotch Variation
+1 – 021:54Partita
+[aria-label: Giovedì 21 gennaio]
+Giovedì 21 gennaio
+Dario accetta il regolamento
+06:41Leggi
+[aria-label: Mercoledì 20 gennaio]
+Mercoledì 20 gennaio
+🎯
+Dario raggiunge il suo obiettivo della stagione
+Obiettivo: 6½ punti
+12:55Pillsbury
+Dario batte Marco Bel con il matto
+Turno 12 · 43 mosse · Queen's Pawn Game: Chigorin Variation
+1 – 012:55Partita
+Carla accetta il regolamento
+06:41Leggi
+[aria-label: Martedì 19 gennaio]
+Martedì 19 gennaio
+Bruno accetta il regolamento
+06:41Leggi
+[aria-label: Lunedì 18 gennaio]
+Lunedì 18 gennaio
+🔥
+Bruno vince la quinta partita di fila
+10:48
+Bruno batte Andrea con il matto
+Turno 12 · 18 mosse · Bishop's Opening🔝 Scontro al vertice
+1 – 010:48Partita
+Andrea accetta il regolamento
+06:41Leggi
+[aria-label: Domenica 17 gennaio]
+Domenica 17 gennaio
+Sergio accetta il regolamento
+06:41Leggi
+[aria-label: Sabato 16 gennaio]
+Sabato 16 gennaio
+📈
+Elena passa in testa alla classifica
+con 8 punti
+18:14
+Elena batte Marco Ber con il matto
+Turno 12 · 69 mosse · Hungarian Opening
+1 – 018:14Partita
+Marco Ber accetta il regolamento
+06:41Leggi
+[aria-label: Venerdì 15 gennaio]
+Venerdì 15 gennaio
+Nuovo aneddoto su Capablanca: «La sconfitta shock con Alekhine (1927)»
+15:41Leggi
+Inizia il turno 12
+4 partite · ritorno
+15:41
+Marco Bel accetta il regolamento
+06:41Leggi
+[aria-label: Martedì 12 gennaio]
+Martedì 12 gennaio
+Si chiude il turno 11: in testa Andrea
+con 8 punti
+21:25
+🔥
+Bruno vince la quarta partita di fila
+21:25
+Bruno batte Sergio per abbandono
+Turno 11 · 28 mosse · Caro-Kann Defense: Campomanes Attack
+1 – 021:25Partita
+Carla e Marco Ber fanno patta
+Turno 11 · 54 mosse · Owen Defense
+½ – ½20:19Partita
+[aria-label: Lunedì 11 gennaio]
+Lunedì 11 gennaio
+📈
+Andrea passa in testa alla classifica
+con 8 punti
+20:48
+Andrea batte Dario per abbandono
+Turno 11 · 30 mosse · Italian Game: Two Knights Defense, Modern Bishop's Opening
+1 – 020:48Partita
+[aria-label: Domenica 10 gennaio]
+Domenica 10 gennaio
+Marco Bel batte Elena con il matto
+Turno 11 · 41 mosse · King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+1 – 010:15Partita
+[aria-label: Mercoledì 6 gennaio]
+Mercoledì 6 gennaio
+Nuovo aneddoto su Capablanca: «Un'eleganza fuori dalla scacchiera»
+15:41Leggi
+Inizia il turno 11
+4 partite · ritorno
+15:41
+[aria-label: Martedì 5 gennaio]
+Martedì 5 gennaio
+Si chiude il turno 10: in testa Elena
+con 7 punti
+17:43
+Marco Ber batte Dario con il matto
+Turno 10 · 44 mosse · Queen's Pawn Game: Accelerated London System
+1 – 017:43Partita
+🔥
+Bruno vince la terza partita di fila
+15:49
+Bruno batte Elena per tempo scaduto
+Turno 10 · 37 mosse · Four Knights Game: Scotch Variation
+0 – 115:49Partita
+[aria-label: Lunedì 4 gennaio]
+Lunedì 4 gennaio
+Carla batte Andrea per tempo scaduto
+Turno 10 · 31 mosse · Indian Defense💥 Colpaccio
+0 – 108:55Partita
+[aria-label: Martedì 29 dicembre 2026]
+Martedì 29 dicembre 2026
+Marco Bel batte Sergio per tempo scaduto
+Turno 10 · 69 mosse · Hungarian Opening
+0 – 118:06Partita
+[aria-label: Lunedì 28 dicembre 2026]
+Lunedì 28 dicembre 2026
+Nuovo aneddoto su Capablanca: «La conquista del titolo mondiale (1921)»
+15:41Leggi
+Inizia il turno 10
+4 partite · ritorno
+15:41
+[aria-label: Sabato 26 dicembre 2026]
+Sabato 26 dicembre 2026
+Si chiude il turno 9: in testa Elena
+con 7 punti
+10:59
+Bruno batte Marco Ber per abbandono
+Turno 9 · 30 mosse · Italian Game: Two Knights Defense, Modern Bishop's Opening
+1 – 010:59Partita
+[aria-label: Giovedì 24 dicembre 2026]
+Giovedì 24 dicembre 2026
+📈
+Elena passa in testa alla classifica
+con 7 punti
+14:22
+Elena batte Sergio per tempo scaduto
+Turno 9 · 43 mosse · Queen's Pawn Game: Chigorin Variation
+0 – 114:22Partita
+📈
+Andrea passa in testa alla classifica
+con 7 punti
+12:00
+Andrea batte Marco Bel per tempo scaduto
+Turno 9 · 28 mosse · Caro-Kann Defense: Campomanes Attack
+0 – 112:00Partita
+[aria-label: Domenica 20 dicembre 2026]
+Domenica 20 dicembre 2026
+Dario batte Carla con il matto
+Turno 9 · 18 mosse · Bishop's Opening
+1 – 022:44Partita
+[aria-label: Sabato 19 dicembre 2026]
+Sabato 19 dicembre 2026
+Nuovo aneddoto su Capablanca: «Il "Mago dei Finali"»
+15:41Leggi
+Inizia il turno 9
+4 partite · ritorno
+15:41
+[aria-label: Venerdì 18 dicembre 2026]
+Venerdì 18 dicembre 2026
+Si chiude il turno 8: in testa Elena
+con 6 punti
+11:37
+Bruno batte Carla per abbandono
+Turno 8 · 41 mosse · King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+0 – 111:37Partita
+Marco Bel batte Marco Ber per tempo scaduto
+Turno 8 · 31 mosse · Indian Defense
+0 – 102:14Partita
+[aria-label: Giovedì 17 dicembre 2026]
+Giovedì 17 dicembre 2026
+Andrea batte Sergio per abbandono
+Turno 8 · 44 mosse · Queen's Pawn Game: Accelerated London System
+1 – 022:23Partita
+[aria-label: Venerdì 11 dicembre 2026]
+Venerdì 11 dicembre 2026
+Elena e Dario fanno patta
+Turno 8 · 54 mosse · Owen Defense🔝 Scontro al vertice
+½ – ½19:39Partita
+[aria-label: Giovedì 10 dicembre 2026]
+Giovedì 10 dicembre 2026
+Nuovo aneddoto su Capablanca: «Voleva cambiare le regole degli scacchi»
+15:41Leggi
+Inizia il turno 8
+4 partite · ritorno
+15:41
+[aria-label: Mercoledì 9 dicembre 2026]
+Mercoledì 9 dicembre 2026
+Si chiude il turno 7: in testa Elena
+con 5½ punti
+05:29
+🔥
+Dario vince la terza partita di fila
+05:29
+Dario batte Bruno per tempo scaduto
+Turno 7 · 37 mosse · Four Knights Game: Scotch Variation💥 Colpaccio
+0 – 105:29Partita
+[aria-label: Lunedì 7 dicembre 2026]
+Lunedì 7 dicembre 2026
+🎉
+Marco Bel conquista la sua prima vittoria della stagione
+11:19
+Marco Bel batte Carla per tempo scaduto
+Turno 7 · 43 mosse · Queen's Pawn Game: Chigorin Variation
+0 – 111:19Partita
+📈
+Elena passa in testa alla classifica
+con 5½ punti
+03:54
+Elena batte Andrea con il matto
+Turno 7 · 69 mosse · Hungarian Opening💥 Colpaccio
+1 – 003:54Partita
+[aria-label: Giovedì 3 dicembre 2026]
+Giovedì 3 dicembre 2026
+🎉
+Sergio conquista la sua prima vittoria della stagione
+15:05
+Sergio batte Marco Ber con il matto
+Turno 7 · 18 mosse · Bishop's Opening💥 Colpaccio
+1 – 015:05Partita
+[aria-label: Martedì 1 dicembre 2026]
+Martedì 1 dicembre 2026
+Nuovo aneddoto su Capablanca: «La nascita del titolo di "Gran Maestro"»
+15:41Leggi
+Inizia il turno 7
+4 partite · andata
+15:41
+[aria-label: Lunedì 30 novembre 2026]
+Lunedì 30 novembre 2026
+Si chiude il turno 6: in testa Andrea
+con 5 punti
+09:58
+Bruno batte Marco Bel per abbandono
+Turno 6 · 41 mosse · King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+1 – 009:58Partita
+[aria-label: Giovedì 26 novembre 2026]
+Giovedì 26 novembre 2026
+Dario batte Sergio per abbandono
+Turno 6 · 30 mosse · Italian Game: Two Knights Defense, Modern Bishop's Opening
+1 – 018:23Partita
+[aria-label: Lunedì 23 novembre 2026]
+Lunedì 23 novembre 2026
+Elena e Carla fanno patta
+Turno 6 · 54 mosse · Owen Defense
+½ – ½23:24Partita
+📈
+Andrea passa in testa alla classifica
+con 5 punti
+21:05
+🔥
+Andrea vince la terza partita di fila
+21:05
+Andrea batte Marco Ber per abbandono
+Turno 6 · 28 mosse · Caro-Kann Defense: Campomanes Attack🔝 Scontro al vertice
+1 – 021:05Partita
+[aria-label: Domenica 22 novembre 2026]
+Domenica 22 novembre 2026
+Nuovo aneddoto su Capablanca: «"Non studio mai gli scacchi"»
+15:41Leggi
+Inizia il turno 6
+4 partite · andata
+15:41
+[aria-label: Sabato 21 novembre 2026]
+Sabato 21 novembre 2026
+Si chiude il turno 5: in testa Elena
+con 4 punti
+04:04
+🎯
+Carla raggiunge il suo obiettivo della stagione
+Obiettivo: 2 punti
+04:04Pillsbury
+Carla batte Sergio con il matto
+Turno 5 · 44 mosse · Queen's Pawn Game: Accelerated London System
+1 – 004:04Partita
+[aria-label: Venerdì 20 novembre 2026]
+Venerdì 20 novembre 2026
+Andrea batte Bruno per abbandono
+Turno 5 · 37 mosse · Four Knights Game: Scotch Variation
+1 – 020:09Partita
+[aria-label: Mercoledì 18 novembre 2026]
+Mercoledì 18 novembre 2026
+Dario batte Marco Bel per abbandono
+Turno 5 · 69 mosse · Hungarian Opening
+0 – 109:31Partita
+[aria-label: Lunedì 16 novembre 2026]
+Lunedì 16 novembre 2026
+Marco Ber batte Elena con il matto
+Turno 5 · 31 mosse · Indian Defense
+1 – 018:34Partita
+[aria-label: Domenica 15 novembre 2026]
+Domenica 15 novembre 2026
+Si chiude il turno 3: in testa Elena
+con 4 punti
+21:01
+Marco Ber batte Dario con il matto
+Turno 3 · 43 mosse · Queen's Pawn Game: Chigorin Variation
+0 – 121:01Partita
+🔥
+jhoSEoPt vince la terza partita di fila
+08:59
+jhoSEoPt batte Bruno con il matto
+Turno 3 · 30 mosse · Italian Game: Two Knights Defense, Modern Bishop's Opening
+0 – 108:59Partita
+[aria-label: Venerdì 13 novembre 2026]
+Venerdì 13 novembre 2026
+hx4DVe9L batte Carla con il matto
+Turno 3 · 18 mosse · Bishop's Opening
+0 – 122:54Partita
+Marco Bel e Sergio fanno patta
+Turno 3 · 69 mosse · Hungarian Opening
+½ – ½18:57Partita
+Nuovo aneddoto su Capablanca: «L'invincibilità durata 8 anni»
+15:41Leggi
+Inizia il turno 5
+4 partite · andata
+15:41
+[aria-label: Martedì 10 novembre 2026]
+Martedì 10 novembre 2026
+Si chiude il turno 4: in testa Elena
+con 3 punti
+20:18
+Bruno batte Sergio per abbandono
+Turno 4 · 43 mosse · Queen's Pawn Game: Chigorin Variation
+0 – 120:18Partita
+[aria-label: Lunedì 9 novembre 2026]
+Lunedì 9 novembre 2026
+Si chiude il turno 2: in testa Elena
+con 3 punti
+14:06
+jhoSEoPt batte Sergio per abbandono
+Turno 2 · 44 mosse · Queen's Pawn Game: Accelerated London System
+1 – 014:06Partita
+🎉
+Andrea conquista la sua prima vittoria nel torneo
+09:47
+Andrea batte Dario per tempo scaduto
+Turno 4 · 18 mosse · Bishop's Opening
+0 – 109:47Partita
+[aria-label: Domenica 8 novembre 2026]
+Domenica 8 novembre 2026
+🎉
+Carla conquista la sua prima vittoria della stagione
+12:49
+Carla batte Marco Ber per abbandono
+Turno 4 · 30 mosse · Italian Game: Two Knights Defense, Modern Bishop's Opening💥 Colpaccio
+0 – 112:49Partita
+[aria-label: Venerdì 6 novembre 2026]
+Venerdì 6 novembre 2026
+📈
+Elena passa in testa alla classifica
+con 2 punti
+02:06
+Elena batte Marco Bel con il matto
+Turno 4 · 28 mosse · Caro-Kann Defense: Campomanes Attack
+1 – 002:06Partita
+[aria-label: Mercoledì 4 novembre 2026]
+Mercoledì 4 novembre 2026
+Nuovo aneddoto su Capablanca: «L'esordio a San Sebastián 1911»
+15:41Leggi
+Inizia il turno 4
+4 partite · andata
+15:41
+[aria-label: Giovedì 29 ottobre 2026]
+Giovedì 29 ottobre 2026
+🎉
+Dario conquista la sua prima vittoria della stagione
+23:06
+Dario batte Carla con il matto
+Turno 2 · 28 mosse · Caro-Kann Defense: Campomanes Attack
+0 – 123:06Partita
+[aria-label: Domenica 25 ottobre 2026]
+Domenica 25 ottobre 2026
+📈
+Marco Bel passa in testa alla classifica
+con 2 punti
+17:50
+🎉
+sEjT8gNc conquista la sua prima vittoria nel torneo
+17:50
+sEjT8gNc batte hx4DVe9L per abbandono
+Turno 2 · 41 mosse · King's Pawn Game: Busch-Gass Gambit, Chiodini Gambit
+0 – 117:50Partita
+🎉
+Marco Ber conquista la sua prima vittoria nel torneo
+13:33
+Marco Ber batte Bruno con il matto
+Turno 2 · 54 mosse · Owen Defense
+1 – 013:33Partita
+[aria-label: Giovedì 22 ottobre 2026]
+Giovedì 22 ottobre 2026
+Nuovo aneddoto su Capablanca: «Campione di Cuba a 12 anni»
+08:15Leggi
+Inizia il turno 2
+4 partite · andata
+08:15
+[aria-label: Mercoledì 21 ottobre 2026]
+Mercoledì 21 ottobre 2026
+Si chiude il turno 1
+4 giocatori in testa con 1 punto
+17:29
+Bruno batte Carla con il matto
+Turno 1 · 69 mosse · Hungarian Opening
+1 – 013:15Partita
+[aria-label: Mercoledì 14 ottobre 2026]
+Mercoledì 14 ottobre 2026
+🎉
+hx4DVe9L conquista la sua prima vittoria nel torneo
+17:31
+hx4DVe9L batte Sergio con il matto
+Turno 1 · 31 mosse · Indian Defense
+0 – 117:31Partita
+[aria-label: Lunedì 12 ottobre 2026]
+Lunedì 12 ottobre 2026
+📈
+Elena passa in testa alla classifica
+con 1 punto
+15:42
+🎉
+jhoSEoPt conquista la sua prima vittoria nel torneo
+15:42
+jhoSEoPt batte Dario per abbandono
+Turno 1 · 37 mosse · Four Knights Game: Scotch Variation
+0 – 115:42Partita
+[aria-label: Venerdì 9 ottobre 2026]
+Venerdì 9 ottobre 2026
+Nuovo aneddoto su Capablanca: «La simultanea a tempo di record»
+09:48Leggi
+Inizia il turno 3
+4 partite · andata
+09:48
+[aria-label: Giovedì 8 ottobre 2026]
+Giovedì 8 ottobre 2026
+Nuovo aneddoto su Capablanca: «Imparò a 4 anni correggendo il padre»
+16:41Leggi
+Comincia la Stagione 2 - Capablanca
+Turno 1 · 4 partite · dedicata a José Raúl Capablanca
+16:41

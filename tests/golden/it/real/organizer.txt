@@ -1,0 +1,1502 @@
+===== console =====
+Area organizzatore
+Scacchi & Chill
+Vista pubblica
+[title: Esci (organizer@example.org)]
+Esci
+↻ Sincronizza risultati
+Ultima alle 12:00
+[aria-label: Sezioni]
+♞Turni
+💬WhatsApp
+♟Giocatori
+♛Stagioni
+⚙Impostazioni
+
+===== fair play alert =====
+*⚠️ Fair play: partite chiuse da Lichess per scorrettezza*
+Turno 1: Lichess ha chiuso sEjT8gNc – Marco Ber attribuendo la scorrettezza a *Marco Ber*. Per regolamento perde la partita: il risultato di Lichess lo dice già, non serve fare altro.
+Come dice il regolamento, se ne parla solo in privato: questo avviso non compare sul sito.
+Ho preso nota
+
+===== season checklist =====
+(no checklist)
+
+===== rounds tab, open round "" =====
+Turni · 14
+*Turno 1* · 4 partiteConcluso
+*Turno 2* · 4 partiteConcluso
+*Turno 3* · 4 partiteIn corso
+*Turno 4* · 4 partiteDa avviare
+*Turno 5* · 4 partiteDa avviare
+*Turno 6* · 4 partiteDa avviare
+*Turno 7* · 4 partiteDa avviare
+*Turno 8* · 4 partiteDa avviare
+*Turno 9* · 4 partiteDa avviare
+*Turno 10* · 4 partiteDa avviare
+*Turno 11* · 4 partiteDa avviare
+*Turno 12* · 4 partiteDa avviare
+*Turno 13* · 4 partiteDa avviare
+*Turno 14* · 4 partiteDa avviare
++ Nuovo turno (15)
+
+===== rounds tab, open round "1" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 1 · 4 partite, tutte su Lichess
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Marco Ber
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Marco Bel – Marco Ber dal turno]
+✕
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Andrea
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Sergio – Andrea dal turno]
+✕
+[aria-label: Bianco]
+Bruno
+[aria-label: Nero]
+Carla
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Bruno – Carla dal turno]
+✕
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Elena
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Dario – Elena dal turno]
+✕
+💬 Messaggio con i link
+📊 Bollettino
+Elimina turno 1
+
+===== rounds tab, open round "2" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 2 · 4 partite, tutte su Lichess
+[aria-label: Bianco]
+Andrea
+[aria-label: Nero]
+Marco Bel
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Andrea – Marco Bel dal turno]
+✕
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Bruno
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Marco Ber – Bruno dal turno]
+✕
+[aria-label: Bianco]
+Elena
+[aria-label: Nero]
+Sergio
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Elena – Sergio dal turno]
+✕
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Dario
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Carla – Dario dal turno]
+✕
+💬 Messaggio con i link
+📊 Bollettino
+Elimina turno 2
+
+===== rounds tab, open round "3" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 3 · 4 partite, tutte su Lichess
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Sergio
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Marco Bel – Sergio dal turno]
+✕
+[aria-label: Bianco]
+Bruno
+[aria-label: Nero]
+Elena
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Bruno – Elena dal turno]
+✕
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Andrea
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Carla – Andrea dal turno]
+✕
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Marco Ber
+Lichess ↗
+[title: Togli dal turno]
+[aria-label: Togli Dario – Marco Ber dal turno]
+✕
+💬 Messaggio con i link
+📊 Bollettino
+Elimina turno 3
+
+===== rounds tab, open round "4" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 4 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Elena
+[aria-label: Nero]
+Marco Bel
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Elena – Marco Bel]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Elena – Marco Bel dal turno]
+✕
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Carla
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Ber – Carla]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Ber – Carla dal turno]
+✕
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Bruno
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Sergio – Bruno]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Sergio – Bruno dal turno]
+✕
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Andrea
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Dario – Andrea]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Dario – Andrea dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 4
+
+===== rounds tab, open round "5" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 5 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Dario
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Bel – Dario]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Bel – Dario dal turno]
+✕
+[aria-label: Bianco]
+Andrea
+[aria-label: Nero]
+Bruno
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Andrea – Bruno]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Andrea – Bruno dal turno]
+✕
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Elena
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Ber – Elena]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Ber – Elena dal turno]
+✕
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Sergio
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Carla – Sergio]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Carla – Sergio dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 5
+
+===== rounds tab, open round "6" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 6 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Bruno
+[aria-label: Nero]
+Marco Bel
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Bruno – Marco Bel]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Bruno – Marco Bel dal turno]
+✕
+[aria-label: Bianco]
+Elena
+[aria-label: Nero]
+Carla
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Elena – Carla]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Elena – Carla dal turno]
+✕
+[aria-label: Bianco]
+Andrea
+[aria-label: Nero]
+Marco Ber
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Andrea – Marco Ber]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Andrea – Marco Ber dal turno]
+✕
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Sergio
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Dario – Sergio]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Dario – Sergio dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 6
+
+===== rounds tab, open round "7" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 7 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Marco Bel
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Carla – Marco Bel]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Carla – Marco Bel dal turno]
+✕
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Marco Ber
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Sergio – Marco Ber]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Sergio – Marco Ber dal turno]
+✕
+[aria-label: Bianco]
+Elena
+[aria-label: Nero]
+Andrea
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Elena – Andrea]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Elena – Andrea dal turno]
+✕
+[aria-label: Bianco]
+Bruno
+[aria-label: Nero]
+Dario
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Bruno – Dario]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Bruno – Dario dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 7
+
+===== rounds tab, open round "8" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 8 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Marco Bel
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Ber – Marco Bel]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Ber – Marco Bel dal turno]
+✕
+[aria-label: Bianco]
+Andrea
+[aria-label: Nero]
+Sergio
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Andrea – Sergio]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Andrea – Sergio dal turno]
+✕
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Bruno
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Carla – Bruno]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Carla – Bruno dal turno]
+✕
+[aria-label: Bianco]
+Elena
+[aria-label: Nero]
+Dario
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Elena – Dario]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Elena – Dario dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 8
+
+===== rounds tab, open round "9" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 9 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Andrea
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Bel – Andrea]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Bel – Andrea dal turno]
+✕
+[aria-label: Bianco]
+Bruno
+[aria-label: Nero]
+Marco Ber
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Bruno – Marco Ber]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Bruno – Marco Ber dal turno]
+✕
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Elena
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Sergio – Elena]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Sergio – Elena dal turno]
+✕
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Carla
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Dario – Carla]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Dario – Carla dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 9
+
+===== rounds tab, open round "10" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 10 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Marco Bel
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Sergio – Marco Bel]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Sergio – Marco Bel dal turno]
+✕
+[aria-label: Bianco]
+Elena
+[aria-label: Nero]
+Bruno
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Elena – Bruno]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Elena – Bruno dal turno]
+✕
+[aria-label: Bianco]
+Andrea
+[aria-label: Nero]
+Carla
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Andrea – Carla]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Andrea – Carla dal turno]
+✕
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Dario
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Ber – Dario]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Ber – Dario dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 10
+
+===== rounds tab, open round "11" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 11 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Elena
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Bel – Elena]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Bel – Elena dal turno]
+✕
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Marco Ber
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Carla – Marco Ber]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Carla – Marco Ber dal turno]
+✕
+[aria-label: Bianco]
+Bruno
+[aria-label: Nero]
+Sergio
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Bruno – Sergio]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Bruno – Sergio dal turno]
+✕
+[aria-label: Bianco]
+Andrea
+[aria-label: Nero]
+Dario
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Andrea – Dario]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Andrea – Dario dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 11
+
+===== rounds tab, open round "12" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 12 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Marco Bel
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Dario – Marco Bel]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Dario – Marco Bel dal turno]
+✕
+[aria-label: Bianco]
+Bruno
+[aria-label: Nero]
+Andrea
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Bruno – Andrea]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Bruno – Andrea dal turno]
+✕
+[aria-label: Bianco]
+Elena
+[aria-label: Nero]
+Marco Ber
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Elena – Marco Ber]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Elena – Marco Ber dal turno]
+✕
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Carla
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Sergio – Carla]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Sergio – Carla dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 12
+
+===== rounds tab, open round "13" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 13 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Bruno
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Bel – Bruno]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Bel – Bruno dal turno]
+✕
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Elena
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Carla – Elena]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Carla – Elena dal turno]
+✕
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Andrea
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Ber – Andrea]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Ber – Andrea dal turno]
+✕
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Dario
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Sergio – Dario]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Sergio – Dario dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 13
+
+===== rounds tab, open round "14" =====
+← Tutti i turni
+[aria-label: Turno precedente]
+‹
+[aria-label: Turno successivo]
+›
+Turno 14 · 4 partite, nessun link ancora
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Carla
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Bel – Carla]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Bel – Carla dal turno]
+✕
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Sergio
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Marco Ber – Sergio]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Marco Ber – Sergio dal turno]
+✕
+[aria-label: Bianco]
+Andrea
+[aria-label: Nero]
+Elena
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Andrea – Elena]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Andrea – Elena dal turno]
+✕
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Bruno
+[title: Scambia i colori]
+[aria-label: Scambia i colori di Dario – Bruno]
+⇅
+[title: Togli dal turno]
+[aria-label: Togli Dario – Bruno dal turno]
+✕
+Crea link Lichess (4 partite)
+Elimina turno 14
+
+===== launch message, round 1 =====
+💬 Anteprima WhatsApp (Lancio Turno 1)
+⚔️ *Turno 1: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+1️⃣ *Marco Bel* ⚪ vs *Marco Ber* ⚫
+🔗 https://lichess.org/yaufZA8M
+2️⃣ *Sergio* ⚪ vs *Andrea* ⚫
+🔗 https://lichess.org/3UflZBAj
+3️⃣ *Bruno* ⚪ vs *Carla* ⚫
+🔗 https://lichess.org/vKcYyBiC
+4️⃣ *Dario* ⚪ vs *Elena* ⚫
+🔗 https://lichess.org/bGWJT8gq
+⏳ I link scadono martedì 03/11 alle 17:50: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #1: Imparò a 4 anni correggendo il padre*
+José Raúl Capablanca non prese mai lezioni. Imparò le regole semplicemente guardando il padre e un amico giocare nel salotto di casa a L'Avana. Durante una partita notò che il padre muoveva un cavallo in modo non consentito: quando glielo fece notare, il padre scosse la testa, ma il bambino gli dimostrò la mossa corretta... e lo batté nella sua prima vera partita subito dopo!
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 1: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+1️⃣ *Marco Bel* ⚪ vs *Marco Ber* ⚫
+🔗 https://lichess.org/yaufZA8M
+2️⃣ *Sergio* ⚪ vs *Andrea* ⚫
+🔗 https://lichess.org/3UflZBAj
+3️⃣ *Bruno* ⚪ vs *Carla* ⚫
+🔗 https://lichess.org/vKcYyBiC
+4️⃣ *Dario* ⚪ vs *Elena* ⚫
+🔗 https://lichess.org/bGWJT8gq
+⏳ I link scadono martedì 03/11 alle 17:50: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #1: Imparò a 4 anni correggendo il padre*
+José Raúl Capablanca non prese mai lezioni. Imparò le regole semplicemente guardando il padre e un amico giocare nel salotto di casa a L'Avana. Durante una partita notò che il padre muoveva un cavallo in modo non consentito: quando glielo fece notare, il padre scosse la testa, ma il bambino gli dimostrò la mossa corretta... e lo batté nella sua prima vera partita subito dopo!
+
+===== launch message, round 2 =====
+💬 Anteprima WhatsApp (Lancio Turno 2)
+⚔️ *Turno 2: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+1️⃣ *Andrea* ⚪ vs *Marco Bel* ⚫
+🔗 https://lichess.org/lIwilhzZ
+2️⃣ *Marco Ber* ⚪ vs *Bruno* ⚫
+🔗 https://lichess.org/rn2r1GHE
+3️⃣ *Elena* ⚪ vs *Sergio* ⚫
+🔗 https://lichess.org/1Wj3IRMp
+4️⃣ *Carla* ⚪ vs *Dario* ⚫
+🔗 https://lichess.org/MdtCEmtV
+⏳ I link scadono martedì 03/11 alle 17:50: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #2: Campione di Cuba a 12 anni*
+A soli 12 anni Capablanca affrontò in un match ufficiale Juan Corzo, campione nazionale cubano in carica ed esperto teorico. Lo batté (+4 −2 =6), diventando il più giovane campione nazionale della storia dell'epoca, affidandosi quasi esclusivamente al puro intuito visivo.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 2: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+1️⃣ *Andrea* ⚪ vs *Marco Bel* ⚫
+🔗 https://lichess.org/lIwilhzZ
+2️⃣ *Marco Ber* ⚪ vs *Bruno* ⚫
+🔗 https://lichess.org/rn2r1GHE
+3️⃣ *Elena* ⚪ vs *Sergio* ⚫
+🔗 https://lichess.org/1Wj3IRMp
+4️⃣ *Carla* ⚪ vs *Dario* ⚫
+🔗 https://lichess.org/MdtCEmtV
+⏳ I link scadono martedì 03/11 alle 17:50: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #2: Campione di Cuba a 12 anni*
+A soli 12 anni Capablanca affrontò in un match ufficiale Juan Corzo, campione nazionale cubano in carica ed esperto teorico. Lo batté (+4 −2 =6), diventando il più giovane campione nazionale della storia dell'epoca, affidandosi quasi esclusivamente al puro intuito visivo.
+
+===== launch message, round 3 =====
+💬 Anteprima WhatsApp (Lancio Turno 3)
+⚔️ *Turno 3: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+1️⃣ *Marco Bel* ⚪ vs *Sergio* ⚫
+🔗 https://lichess.org/game/RKzC96bM
+2️⃣ *Bruno* ⚪ vs *Elena* ⚫
+🔗 https://lichess.org/game/HiOldHtt
+3️⃣ *Carla* ⚪ vs *Andrea* ⚫
+🔗 https://lichess.org/game/IUQYFfYM
+4️⃣ *Dario* ⚪ vs *Marco Ber* ⚫
+🔗 https://lichess.org/game/ATMJ3iLY
+⏳ I link scadono mercoledì 11/11 alle 19:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #3: La simultanea a tempo di record*
+Capablanca era celebre per la sua spaventosa velocità di calcolo intuitivo. Durante una tournée negli Stati Uniti giocò una simultanea contro 103 avversari: concluse l'evento in sole 7 ore, vincendo 102 partite e pattandone una sola, camminando quasi senza fermarsi davanti alle scacchiere.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 3: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+1️⃣ *Marco Bel* ⚪ vs *Sergio* ⚫
+🔗 https://lichess.org/game/RKzC96bM
+2️⃣ *Bruno* ⚪ vs *Elena* ⚫
+🔗 https://lichess.org/game/HiOldHtt
+3️⃣ *Carla* ⚪ vs *Andrea* ⚫
+🔗 https://lichess.org/game/IUQYFfYM
+4️⃣ *Dario* ⚪ vs *Marco Ber* ⚫
+🔗 https://lichess.org/game/ATMJ3iLY
+⏳ I link scadono mercoledì 11/11 alle 19:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #3: La simultanea a tempo di record*
+Capablanca era celebre per la sua spaventosa velocità di calcolo intuitivo. Durante una tournée negli Stati Uniti giocò una simultanea contro 103 avversari: concluse l'evento in sole 7 ore, vincendo 102 partite e pattandone una sola, camminando quasi senza fermarsi davanti alle scacchiere.
+
+===== launch message, round 4 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 4)
+⚔️ *Turno 4: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #4: L'esordio a San Sebastián 1911*
+Quando Capablanca fu invitato al prestigioso torneo di San Sebastián, alcuni dei più forti maestri europei protestarono, ritenendo il giovane cubano un "incognito" privo di titoli internazionali. Lui rispose sul campo, vincendo il torneo al suo esordio assoluto in Europa e aggiudicandosi anche il premio per la miglior partita.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 4: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #4: L'esordio a San Sebastián 1911*
+Quando Capablanca fu invitato al prestigioso torneo di San Sebastián, alcuni dei più forti maestri europei protestarono, ritenendo il giovane cubano un "incognito" privo di titoli internazionali. Lui rispose sul campo, vincendo il torneo al suo esordio assoluto in Europa e aggiudicandosi anche il premio per la miglior partita.
+
+===== launch message, round 5 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 5)
+⚔️ *Turno 5: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #5: L'invincibilità durata 8 anni*
+Tra il 10 febbraio 1916 e il 15 gennaio 1924 Capablanca non perse neanche una partita in tornei o match ufficiali: 63 partite consecutive contro i migliori giocatori del mondo senza mai subire una sconfitta, un record leggendario per l'epoca.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 5: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #5: L'invincibilità durata 8 anni*
+Tra il 10 febbraio 1916 e il 15 gennaio 1924 Capablanca non perse neanche una partita in tornei o match ufficiali: 63 partite consecutive contro i migliori giocatori del mondo senza mai subire una sconfitta, un record leggendario per l'epoca.
+
+===== launch message, round 6 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 6)
+⚔️ *Turno 6: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #6: "Non studio mai gli scacchi"*
+A differenza dei contemporanei come Alekhine o Lasker, che passavano ore ad analizzare le aperture e ad annotare varianti, Capablanca ammetteva di non studiare quasi mai la teoria sui libri. Preferiva affidarsi alla comprensione immediata della posizione, appena seduto alla scacchiera.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 6: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #6: "Non studio mai gli scacchi"*
+A differenza dei contemporanei come Alekhine o Lasker, che passavano ore ad analizzare le aperture e ad annotare varianti, Capablanca ammetteva di non studiare quasi mai la teoria sui libri. Preferiva affidarsi alla comprensione immediata della posizione, appena seduto alla scacchiera.
+
+===== launch message, round 7 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 7)
+⚔️ *Turno 7: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #7: La nascita del titolo di "Gran Maestro"*
+Nel torneo di San Pietroburgo del 1914 lo zar Nicola II rimase così affascinato dai cinque finalisti (Lasker, Capablanca, Alekhine, Tarrasch e Marshall) da conferire loro, per la prima volta nella storia, il titolo d'onore di *"Gran Maestro di Scacchi"*.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 7: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #7: La nascita del titolo di "Gran Maestro"*
+Nel torneo di San Pietroburgo del 1914 lo zar Nicola II rimase così affascinato dai cinque finalisti (Lasker, Capablanca, Alekhine, Tarrasch e Marshall) da conferire loro, per la prima volta nella storia, il titolo d'onore di *"Gran Maestro di Scacchi"*.
+
+===== launch message, round 8 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 8)
+⚔️ *Turno 8: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #8: Voleva cambiare le regole degli scacchi*
+Attorno al 1920, convinto che gli scacchi ad altissimo livello portassero a troppe patte e fossero vicini all'essere "risolti", Capablanca propose una variante chiamata *Scacchi di Capablanca*: si giocava su una scacchiera 10x8 con due pezzi nuovi, l'*Arcivescovo* (Alfiere+Cavallo) e il *Cancelliere* (Torre+Cavallo).
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 8: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #8: Voleva cambiare le regole degli scacchi*
+Attorno al 1920, convinto che gli scacchi ad altissimo livello portassero a troppe patte e fossero vicini all'essere "risolti", Capablanca propose una variante chiamata *Scacchi di Capablanca*: si giocava su una scacchiera 10x8 con due pezzi nuovi, l'*Arcivescovo* (Alfiere+Cavallo) e il *Cancelliere* (Torre+Cavallo).
+
+===== launch message, round 9 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 9)
+⚔️ *Turno 9: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #9: Il "Mago dei Finali"*
+Capablanca è considerato uno dei più grandi maestri di finali di sempre. La sua capacità di trasformare un vantaggio posizionale minimo, un pedone debole o una struttura migliore, in una vittoria nei finali di torre o di pedoni era così pulita da sembrare automatica.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 9: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #9: Il "Mago dei Finali"*
+Capablanca è considerato uno dei più grandi maestri di finali di sempre. La sua capacità di trasformare un vantaggio posizionale minimo, un pedone debole o una struttura migliore, in una vittoria nei finali di torre o di pedoni era così pulita da sembrare automatica.
+
+===== launch message, round 10 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 10)
+⚔️ *Turno 10: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #10: La conquista del titolo mondiale (1921)*
+Nel 1921 Capablanca sfidò Emanuel Lasker a L'Avana per il titolo mondiale. Lasker, che deteneva la corona da ben 27 anni, fu travolto dalla precisione del maestro cubano: Capablanca vinse 4 partite, ne pattò 10 e non ne perse alcuna, diventando il 3° Campione del Mondo della storia.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 10: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #10: La conquista del titolo mondiale (1921)*
+Nel 1921 Capablanca sfidò Emanuel Lasker a L'Avana per il titolo mondiale. Lasker, che deteneva la corona da ben 27 anni, fu travolto dalla precisione del maestro cubano: Capablanca vinse 4 partite, ne pattò 10 e non ne perse alcuna, diventando il 3° Campione del Mondo della storia.
+
+===== launch message, round 11 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 11)
+⚔️ *Turno 11: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #11: Un'eleganza fuori dalla scacchiera*
+Capablanca non era solo un genio sulla scacchiera, ma una figura di grande fascino pubblico. Parlava un inglese e un francese impeccabili, vestiva con eleganza sartoriale e fu una figura di rilievo nella diplomazia cubana, lavorando anche come ambasciatore straordinario per il suo Paese.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 11: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #11: Un'eleganza fuori dalla scacchiera*
+Capablanca non era solo un genio sulla scacchiera, ma una figura di grande fascino pubblico. Parlava un inglese e un francese impeccabili, vestiva con eleganza sartoriale e fu una figura di rilievo nella diplomazia cubana, lavorando anche come ambasciatore straordinario per il suo Paese.
+
+===== launch message, round 12 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 12)
+⚔️ *Turno 12: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #12: La sconfitta shock con Alekhine (1927)*
+Nel match mondiale di Buenos Aires del 1927 Capablanca era il favorito assoluto contro Alexander Alekhine, che non lo aveva mai battuto prima. Tuttavia la ferocissima preparazione sulle aperture e la tenacia di Alekhine riuscirono a scalzare il campione cubano dopo 34 estenuanti partite.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 12: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #12: La sconfitta shock con Alekhine (1927)*
+Nel match mondiale di Buenos Aires del 1927 Capablanca era il favorito assoluto contro Alexander Alekhine, che non lo aveva mai battuto prima. Tuttavia la ferocissima preparazione sulle aperture e la tenacia di Alekhine riuscirono a scalzare il campione cubano dopo 34 estenuanti partite.
+
+===== launch message, round 13 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 13)
+⚔️ *Turno 13: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #13: Il ritorno trionfale a Nottingham 1936*
+Nonostante l'età e i primi problemi di salute, nel torneo di Nottingham 1936, uno dei più forti del '900 con ben 5 campioni del mondo presenti, Capablanca dimostrò di essere ancora un gigante, vincendo a pari merito con il giovane Mikhail Botvinnik.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 13: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #13: Il ritorno trionfale a Nottingham 1936*
+Nonostante l'età e i primi problemi di salute, nel torneo di Nottingham 1936, uno dei più forti del '900 con ben 5 campioni del mondo presenti, Capablanca dimostrò di essere ancora un gigante, vincendo a pari merito con il giovane Mikhail Botvinnik.
+
+===== launch message, round 14 =====
+Il messaggio contiene solo le 0 partite con il link: crea prima le altre su Lichess.
+💬 Anteprima WhatsApp (Lancio Turno 14)
+⚔️ *Turno 14: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #14: L'addio al Marshall Chess Club*
+Nel marzo 1942, mentre osservava le partite degli amici al celebre *Marshall Chess Club* di New York, Capablanca fu colpito da un improvviso attacco apoplettico. Il suo storico rivale Emanuel Lasker scrisse di lui: _"Non ho mai conosciuto un altro genio degli scacchi paragonabile a lui"_.
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 14: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #14: L'addio al Marshall Chess Club*
+Nel marzo 1942, mentre osservava le partite degli amici al celebre *Marshall Chess Club* di New York, Capablanca fu colpito da un improvviso attacco apoplettico. Il suo storico rivale Emanuel Lasker scrisse di lui: _"Non ho mai conosciuto un altro genio degli scacchi paragonabile a lui"_.
+
+===== launch message with a bye =====
+💬 Anteprima WhatsApp (Lancio Turno 1)
+⚔️ *Turno 1: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+1️⃣ *Marco Bel* ⚪ vs *Marco Ber* ⚫
+🔗 https://lichess.org/yaufZA8M
+2️⃣ *Sergio* ⚪ vs *Andrea* ⚫
+🔗 https://lichess.org/3UflZBAj
+3️⃣ *Bruno* ⚪ vs *Carla* ⚫
+🔗 https://lichess.org/vKcYyBiC
+4️⃣ *Dario* ⚪ vs *Elena* ⚫
+🔗 https://lichess.org/bGWJT8gq
+🏖️ Riposa in questo turno: *Zoe*
+⏳ I link scadono martedì 03/11 alle 17:50: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #1: Imparò a 4 anni correggendo il padre*
+José Raúl Capablanca non prese mai lezioni. Imparò le regole semplicemente guardando il padre e un amico giocare nel salotto di casa a L'Avana. Durante una partita notò che il padre muoveva un cavallo in modo non consentito: quando glielo fece notare, il padre scosse la testa, ma il bambino gli dimostrò la mossa corretta... e lo batté nella sua prima vera partita subito dopo!
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 1: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+1️⃣ *Marco Bel* ⚪ vs *Marco Ber* ⚫
+🔗 https://lichess.org/yaufZA8M
+2️⃣ *Sergio* ⚪ vs *Andrea* ⚫
+🔗 https://lichess.org/3UflZBAj
+3️⃣ *Bruno* ⚪ vs *Carla* ⚫
+🔗 https://lichess.org/vKcYyBiC
+4️⃣ *Dario* ⚪ vs *Elena* ⚫
+🔗 https://lichess.org/bGWJT8gq
+🏖️ Riposa in questo turno: *Zoe*
+⏳ I link scadono martedì 03/11 alle 17:50: aprite il vostro e accettate la sfida. Buone partite!
+📜 *Aneddoto #1: Imparò a 4 anni correggendo il padre*
+José Raúl Capablanca non prese mai lezioni. Imparò le regole semplicemente guardando il padre e un amico giocare nel salotto di casa a L'Avana. Durante una partita notò che il padre muoveva un cavallo in modo non consentito: quando glielo fece notare, il padre scosse la testa, ma il bambino gli dimostrò la mossa corretta... e lo batté nella sua prima vera partita subito dopo!
+
+===== bulletin section =====
+
+
+===== whatsapp tab =====
+✨ Il racconto della stagione
+Prepara il racconto di fine andata, delle ultime partite o di fine stagione: tono sobrio e affettuoso, senza voti né classifiche di bravura.
+Partite12 (11 finite, 1 in corso)
+L'Elo dei giocatori nel prompt è l'Elo del torneo, calcolato dalle partite: non serve scaricarlo da Lichess.
+Momento del Torneo
+🔄 Fine AndataCom'è andata l'andata, due o tre frasi per giocatore.
+⏱️ Volata FinaleconsigliatoCosa resta in gioco nelle ultime partite.
+🏆 Fine TorneoIl racconto finale, il campione e poche menzioni per il gruppo.
+Note extra dell'organizzatore (opzionale)
+[placeholder: es. Tante partite decise nel finale, ritmo rilassato...]
+Aneddoti personali dei giocatori (8)
+Modifica note ▼
+📋 Copia Prompt per Claude / ChatGPT
+💡 Copia il prompt, incollalo nella tua chat AI abituale e poi incolla qui sotto la recensione ottenuta per vedere l'anteprima WhatsApp.
+Recensione ricevuta dall'AI
+[placeholder: Incolla qui il testo generato da Claude o ChatGPT…]
+🏆 Premi della stagione
+Calcolati sulle partite concluse finora. Sul sito compaiono sotto la classifica a stagione conclusa.
+🏆 *Scudetto Capablanca*: Elena (3 punti)
+🏅 *Trofeo Pillsbury*: Marco Ber (2 punti su 2 partite, obiettivo 1)
+⚡ *Fulmine*: Andrea (in 18 mosse)
+🏃 *Il maratoneta*: Bruno (in 69 mosse contro Carla)
+🦥 *Il bradipo*: Carla (circa 3 h per ogni sua mossa)
+È un'anteprima: finché la stagione non è conclusa i premi possono cambiare, il Trofeo Pillsbury più di tutti.
+Copia il messaggio per WhatsApp
+
+===== reviews =====
+Prepara il racconto di fine andata, delle ultime partite o di fine stagione: tono sobrio e affettuoso, senza voti né classifiche di bravura.
+Partite12 (11 finite, 1 in corso)
+L'Elo dei giocatori nel prompt è l'Elo del torneo, calcolato dalle partite: non serve scaricarlo da Lichess.
+Momento del Torneo
+🔄 Fine AndataCom'è andata l'andata, due o tre frasi per giocatore.
+⏱️ Volata FinaleconsigliatoCosa resta in gioco nelle ultime partite.
+🏆 Fine TorneoIl racconto finale, il campione e poche menzioni per il gruppo.
+Note extra dell'organizzatore (opzionale)
+[placeholder: es. Tante partite decise nel finale, ritmo rilassato...]
+Aneddoti personali dei giocatori (8)
+Modifica note ▼
+📋 Copia Prompt per Claude / ChatGPT
+💡 Copia il prompt, incollalo nella tua chat AI abituale e poi incolla qui sotto la recensione ottenuta per vedere l'anteprima WhatsApp.
+Recensione ricevuta dall'AI
+[placeholder: Incolla qui il testo generato da Claude o ChatGPT…]
+
+===== players tab =====
+Registro dei giocatori
+Tutti i giocatori passati dal torneo. Il nome utente Lichess li distingue; il nome è quello mostrato sul sito, anche nelle stagioni passate, e si cambia qui (salva quando esci dal campo).
+In questa stagione (8)
+[aria-label: Nome di @cavallo_pazzo]
+[value: Andrea]
+@cavallo_pazzoHa partite: per toglierlo, Ritiri
+[aria-label: Nome di @re_bianco]
+[value: Bruno]
+@re_bianco · 1 stagioneHa partite: per toglierlo, Ritiri
+[aria-label: Nome di @donna_rossa]
+[value: Carla]
+@donna_rossa · 1 stagioneHa partite: per toglierlo, Ritiri
+[aria-label: Nome di @arrocco]
+[value: Dario]
+@arrocco · 1 stagioneHa partite: per toglierlo, Ritiri
+[aria-label: Nome di @scaccomatto]
+[value: Elena]
+@scaccomatto · 1 stagioneHa partite: per toglierlo, Ritiri
+[aria-label: Nome di @torre_nera]
+[value: Marco Bel]
+@torre_nera · 1 stagioneHa partite: per toglierlo, Ritiri
+[aria-label: Nome di @alfiere7]
+[value: Marco Ber]
+@alfiere7Ha partite: per toglierlo, Ritiri
+[aria-label: Nome di @pedone_lento]
+[value: Sergio]
+@pedone_lento · 1 stagioneHa partite: per toglierlo, Ritiri
+Nello storico
+Hanno giocato stagioni passate: si possono rinominare, non eliminare.
+[aria-label: Nome di @pa_ro]
+[value: Elena "Lena"]
+@pa_ro · 1 stagione
+Aggiungi alla stagione
+[aria-label: Nome di @gambetto]
+[value: Giulia]
+@gambetto · 1 stagione
+Aggiungi alla stagione
+[aria-label: Nome di @regina_b]
+[value: Irene]
+@regina_b · 1 stagione
+Aggiungi alla stagione
+Nuovo giocatore
+Nome sul sito
+[placeholder: es. Marco R.]
+Nome utente Lichess
+[placeholder: es. marco_chess]
++ Aggiungi
+Gioca questa stagione
+Ritiri
+Ritiri e sostituzioni
+Applica la regola della metà del regolamento: chi ha giocato meno di metà delle sue partite esce e tutte le sue partite vengono annullate; da metà in poi i risultati restano e le partite rimaste vanno a tavolino. Con un sostituto, il nuovo giocatore prende il suo posto con i punti già fatti.
+Giocatore che si ritira
+Scegli…
+[value: torre_nera]
+Marco Bel
+[value: alfiere7]
+Marco Ber
+[value: pedone_lento]
+Sergio
+[value: cavallo_pazzo]
+Andrea
+[value: re_bianco]
+Bruno
+[value: donna_rossa]
+Carla
+[value: arrocco]
+Dario
+[value: scaccomatto]
+Elena
+
+===== seasons tab =====
+Stagione corrente
+Prepara il maestro con l'AI
+Un prompt per Claude o ChatGPT con tutto quello che serve: motto, presentazione, un aneddoto per turno, apertura e partita celebre. Incolla qui la risposta e i campi si compilano da soli. La foto e il link della partita restano da cercare a te.
+Maestro
+[placeholder: es. Mikhail Tal]
+[value: José Raúl Capablanca]
+Aneddoti (uno per turno)
+[value: 14]
+📋 Copia prompt
+Risposta dell'AI
+[placeholder: Incolla qui la risposta, con il blocco JSON]
+Compila i campi
+Nome del torneo
+[placeholder: es. Scacchi & Chill]
+[value: Scacchi & Chill]
+Stagione
+[placeholder: es. Stagione 2 - Capablanca]
+[value: Stagione 2 - Capablanca]
+Maestro della stagione
+[placeholder: es. José Raúl Capablanca]
+[value: José Raúl Capablanca]
+Dà il nome al trofeo: *Scudetto Capablanca*.
+Motto
+[placeholder: es. La macchina degli scacchi]
+[value: La macchina degli scacchi]
+Colore dello scudetto
+C
+[title: Lo sceglie il sito]
+Auto
+[title: blu]
+blu
+[title: rosso]
+rosso
+[title: viola]
+viola
+[title: ruggine]
+ruggine
+[title: ottanio]
+ottanio
+[title: bordeaux]
+bordeaux
+[title: oliva]
+oliva
+[title: ardesia]
+ardesia
+Lo sceglie il sito: blu, mai usato prima con la «C».
+Foto del maestro
+Foto caricata dall'area organizzatore.
+📷 Cambia foto
+Togli foto
+La foto viene ridotta e salvata nel database del torneo: non serve modificare il codice.
+Presentazione della stagione
+Nato a L'Avana nel 1888, Capablanca è passato alla storia come uno dei più grandi talenti naturali della disciplina. Imparò il gioco a soli quattro anni osservando il padre e sviluppò fin da subito un'incredibile intuizione posizionale.
+Il suo stile era lineare, essenziale e privo di orpelli: evitava le complicazioni inutili e convertiva i vantaggi con una precisione quasi infallibile, specialmente nei finali di partita. Questa sua regolarità gli valse il celebre soprannome di *"La Macchina degli Scacchi"*.
+Tra il 1916 e il 1924 mantenne un record eccezionale: *63 partite consecutive disputate ad altissimo livello senza subire alcuna sconfitta*. Nel 1921 diventò Campione del Mondo battendo Emanuel Lasker, detenendo il titolo fino al 1927.
+Apertura del maestro
+Nessuna
+[value: queens-gambit]
+Gambetto di Donna (bianco)
+[value: slav]
+Difesa Slava (nero)
+[value: tarrasch]
+Difesa Tarrasch (nero)
+[value: catalan]
+Catalana (bianco)
+[value: london]
+Sistema Londra (bianco)
+[value: colle]
+Sistema Colle (bianco)
+[value: kings-indian]
+Est-Indiana (nero)
+[value: nimzo-indian]
+Nimzo-Indiana (nero)
+[value: queens-indian]
+Ovest-Indiana (nero)
+[value: grunfeld]
+Difesa Grünfeld (nero)
+[value: benoni]
+Benoni (nero)
+[value: dutch]
+Olandese (nero)
+[value: english]
+Inglese (bianco)
+[value: reti]
+Apertura Réti (bianco)
+[value: bird]
+Apertura Bird (bianco)
+[value: kings-indian-attack]
+Attacco Est-Indiano (bianco)
+[value: ruy-lopez]
+Spagnola (bianco)
+[value: italian]
+Italiana (bianco)
+[value: scotch]
+Scozzese (bianco)
+[value: bishops-opening]
+Apertura d'Alfiere (bianco)
+[value: vienna]
+Viennese (bianco)
+[value: four-knights]
+Quattro Cavalli (bianco)
+[value: kings-gambit]
+Gambetto di Re (bianco)
+[value: sicilian]
+Siciliana (nero)
+[value: french]
+Francese (nero)
+[value: caro-kann]
+Caro-Kann (nero)
+[value: alekhine]
+Difesa Alekhine (nero)
+[value: scandinavian]
+Scandinava (nero)
+[value: pirc-modern]
+Pirc e Moderna (nero)
+[value: petrov]
+Difesa Petrov (nero)
+[value: philidor]
+Difesa Philidor (nero)
+Le partite che la giocano hanno un'etichetta, e a fine stagione il premio «L'allievo» va a chi l'ha giocata di più, dal lato indicato. Conta tutta la famiglia: per la Siciliana, anche Najdorf, Dragone e le altre varianti.
+Partita celebre del maestro
+[placeholder: https://lichess.org/…]
+[value: https://lichess.org/study/tGEhgIAZ/wLvBG6PX]
+Titolo della partita
+[placeholder: es. Capablanca – Marshall, New York 1918]
+[value: Capablanca – Marshall, New York 1918]
+Prima il bianco, poi il nero: i nomi compaiono sotto la scacchiera.
+Due righe sulla partita (facoltative)
+Si dice che Marshall avesse preparato per anni una variante d'attacco segreta nella Spagnola, tenuta da parte apposta per Capablanca. Gliela lanciò contro e Capablanca, vedendola per la prima volta alla scacchiera, si difese con calma e vinse. Quella variante oggi si chiama «Attacco Marshall» e si gioca ancora ai massimi livelli.
+Una partita su Lichess, oppure il capitolo di uno studio pubblico (lichess.org/study/…/…). Se non la trovi, incolla la sua notazione (PGN) in lichess.org/paste e copia qui il link che ottieni. Nella sezione Stagione si rivede mossa per mossa.
+Salva stagione
+Aneddoti del maestro (14)
+Uno per turno, nell'ordine: l'aneddoto #N chiude il messaggio di creazione delle partite del Turno N e da quel momento compare anche sul sito. Prima riga il titolo, poi il testo; separa gli aneddoti con una riga con solo ---. Vale la formattazione di WhatsApp (*grassetto*, _corsivo_).
+[aria-label: Aneddoti del maestro]
+Imparò a 4 anni correggendo il padre
+José Raúl Capablanca non prese mai lezioni. Imparò le regole semplicemente guardando il padre e un amico giocare nel salotto di casa a L'Avana. Durante una partita notò che il padre muoveva un cavallo in modo non consentito: quando glielo fece notare, il padre scosse la testa, ma il bambino gli dimostrò la mossa corretta... e lo batté nella sua prima vera partita subito dopo!
+---
+Campione di Cuba a 12 anni
+A soli 12 anni Capablanca affrontò in un match ufficiale Juan Corzo, campione nazionale cubano in carica ed esperto teorico. Lo batté (+4 −2 =6), diventando il più giovane campione nazionale della storia dell'epoca, affidandosi quasi esclusivamente al puro intuito visivo.
+---
+La simultanea a tempo di record
+Capablanca era celebre per la sua spaventosa velocità di calcolo intuitivo. Durante una tournée negli Stati Uniti giocò una simultanea contro 103 avversari: concluse l'evento in sole 7 ore, vincendo 102 partite e pattandone una sola, camminando quasi senza fermarsi davanti alle scacchiere.
+---
+L'esordio a San Sebastián 1911
+Quando Capablanca fu invitato al prestigioso torneo di San Sebastián, alcuni dei più forti maestri europei protestarono, ritenendo il giovane cubano un "incognito" privo di titoli internazionali. Lui rispose sul campo, vincendo il torneo al suo esordio assoluto in Europa e aggiudicandosi anche il premio per la miglior partita.
+---
+L'invincibilità durata 8 anni
+Tra il 10 febbraio 1916 e il 15 gennaio 1924 Capablanca non perse neanche una partita in tornei o match ufficiali: 63 partite consecutive contro i migliori giocatori del mondo senza mai subire una sconfitta, un record leggendario per l'epoca.
+---
+"Non studio mai gli scacchi"
+A differenza dei contemporanei come Alekhine o Lasker, che passavano ore ad analizzare le aperture e ad annotare varianti, Capablanca ammetteva di non studiare quasi mai la teoria sui libri. Preferiva affidarsi alla comprensione immediata della posizione, appena seduto alla scacchiera.
+---
+La nascita del titolo di "Gran Maestro"
+Nel torneo di San Pietroburgo del 1914 lo zar Nicola II rimase così affascinato dai cinque finalisti (Lasker, Capablanca, Alekhine, Tarrasch e Marshall) da conferire loro, per la prima volta nella storia, il titolo d'onore di *"Gran Maestro di Scacchi"*.
+---
+Voleva cambiare le regole degli scacchi
+Attorno al 1920, convinto che gli scacchi ad altissimo livello portassero a troppe patte e fossero vicini all'essere "risolti", Capablanca propose una variante chiamata *Scacchi di Capablanca*: si giocava su una scacchiera 10x8 con due pezzi nuovi, l'*Arcivescovo* (Alfiere+Cavallo) e il *Cancelliere* (Torre+Cavallo).
+---
+Il "Mago dei Finali"
+Capablanca è considerato uno dei più grandi maestri di finali di sempre. La sua capacità di trasformare un vantaggio posizionale minimo, un pedone debole o una struttura migliore, in una vittoria nei finali di torre o di pedoni era così pulita da sembrare automatica.
+---
+La conquista del titolo mondiale (1921)
+Nel 1921 Capablanca sfidò Emanuel Lasker a L'Avana per il titolo mondiale. Lasker, che deteneva la corona da ben 27 anni, fu travolto dalla precisione del maestro cubano: Capablanca vinse 4 partite, ne pattò 10 e non ne perse alcuna, diventando il 3° Campione del Mondo della storia.
+---
+Un'eleganza fuori dalla scacchiera
+Capablanca non era solo un genio sulla scacchiera, ma una figura di grande fascino pubblico. Parlava un inglese e un francese impeccabili, vestiva con eleganza sartoriale e fu una figura di rilievo nella diplomazia cubana, lavorando anche come ambasciatore straordinario per il suo Paese.
+---
+La sconfitta shock con Alekhine (1927)
+Nel match mondiale di Buenos Aires del 1927 Capablanca era il favorito assoluto contro Alexander Alekhine, che non lo aveva mai battuto prima. Tuttavia la ferocissima preparazione sulle aperture e la tenacia di Alekhine riuscirono a scalzare il campione cubano dopo 34 estenuanti partite.
+---
+Il ritorno trionfale a Nottingham 1936
+Nonostante l'età e i primi problemi di salute, nel torneo di Nottingham 1936, uno dei più forti del '900 con ben 5 campioni del mondo presenti, Capablanca dimostrò di essere ancora un gigante, vincendo a pari merito con il giovane Mikhail Botvinnik.
+---
+L'addio al Marshall Chess Club
+Nel marzo 1942, mentre osservava le partite degli amici al celebre *Marshall Chess Club* di New York, Capablanca fu colpito da un improvviso attacco apoplettico. Il suo storico rivale Emanuel Lasker scrisse di lui: _"Non ho mai conosciuto un altro genio degli scacchi paragonabile a lui"_.
+Salva aneddoti
+Regolamento
+Giorni per mossa
+[value: 2]
+Partite rated
+Validità del link di sfida (giorni)
+[value: 2]
+Regole della sfida su Lichess
+Niente richieste di rivincita
+Non si può regalare tempo all'avversario
+Non si può reclamare la vittoria se l'avversario sparisce
+Niente patta nelle prime mosse
+Questi campi si salvano subito e valgono per le sfide create da qui in poi; giorni per mossa e rated compaiono anche nel regolamento pubblico.
+Come funziona il torneo
+1. All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida.
+2. Quando la partita finisce, scrivi nel gruppo WhatsApp così il risultato viene registrato.
+Regole di fair play
+• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima della partita vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.
+• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.
+• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.
+Ritiri
+• Chi si ritira prima di aver giocato metà delle sue partite esce dal torneo e tutte le sue partite vengono annullate, anche quelle già giocate.
+• Chi si ritira dopo aver giocato almeno metà delle sue partite resta in classifica con i risultati ottenuti; le partite che non giocherà valgono come vittoria a tavolino per gli avversari.
+• Se pensi di ritirarti, avvisa prima l'organizzatore in privato.
+Salva regolamento
+Elo di partenza
+Chi gioca la prima stagione parte dal suo Elo Lichess di 30 giorni prima della sua prima partita, riportato sulla scala del torneo. Si fissa da solo, una volta; senza un Elo affidabile resta esordiente.
+*Marco Ber* · 1779 ±171Lichess blitz 1486 del 8 set 2026, correzione +448 (1934), poi a metà strada verso la media dei veterani (1623). Veterani usati (Elo del torneo/Lichess): Elena 1675/1122, Bruno 1922/1759, Dario 1675/1049
+*Andrea* · 1947 ±171Lichess blitz 1822 del 9 set 2026, correzione +448 (2270), poi a metà strada verso la media dei veterani (1623). Veterani usati (Elo del torneo/Lichess): Elena 1675/1122, Bruno 1922/1759, Dario 1675/1049
+Calendario
+Ognuno incontra tutti gli altri, con bianco e nero alternati il più possibile. Se i giocatori sono dispari, a ogni turno uno riposa. I turni generati non hanno ancora link Lichess: li crei dal turno, quando lo avvii.
+Andata e ritorno
+Completa i turni mancanti
+Tiene i 14 turni già presenti, comprese le partite già create, e aggiunge solo le partite che mancano.
+Rigenera tutto da zero
+Fine stagione e storico (1)
+Chiudi «Stagione 2 - Capablanca» e inizia la prossima
+In testa: Elena (3 pt) · 11 partite concluse
+la classifica finale va nello storico pubblico;
+il primo in classifica entra nell'Albo d'Oro come campione;
+i premi della stagione vengono salvati insieme alla classifica;
+*tutte le partite della stagione vengono cancellate*; giocatori e impostazioni restano.
+Nome nuova stagione
+[placeholder: es. Stagione 3 - Fischer]
+Maestro (opzionale)
+[placeholder: es. Bobby Fischer]
+Svuota anche il calendario ufficiale
+Chiudi la stagione e inizia la prossima
+Ti serve solo una copia della classifica di oggi?
+Scaricala come file (CSV)
+: non tocca lo storico né l'Albo d'Oro.
+I premi della stagione, con il messaggio per il gruppo, sono in 💬 WhatsApp.
+*Scacchi & Chill - Stagione 1* · campione Brunoset 2025 – ott 2026
+Albo d'Oro
+Archiviando una stagione campione e podio vengono aggiunti da soli. Qui puoi correggerli o aggiungere le stagioni passate, dalla più vecchia alla più recente: l'ultima dà il campione in carica.
+*Scacchi & Chill - Stagione 1:* 🥇 Bruno · 🥈 Elena · 🥈 Dario · set 2025 – ott 2026
+[aria-label: Sposta su Scacchi & Chill - Stagione 1]
+↑
+[aria-label: Sposta giù Scacchi & Chill - Stagione 1]
+↓
+[aria-label: Modifica Scacchi & Chill - Stagione 1]
+✎
+[aria-label: Rimuovi Scacchi & Chill - Stagione 1]
+✕
+Stagione
+[placeholder: es. Stagione 2]
+[value: torre_nera]
+Marco Bel
+[value: alfiere7]
+Marco Ber
+[value: pedone_lento]
+Sergio
+[value: cavallo_pazzo]
+Andrea
+[value: re_bianco]
+Bruno
+[value: donna_rossa]
+Carla
+[value: arrocco]
+Dario
+[value: scaccomatto]
+Elena
+[aria-label: Posizione]
+[value: 1]
+🥇 1°
+[value: 2]
+🥈 2°
+[value: 3]
+🥉 3°
+[aria-label: Giocatore (username Lichess)]
+[placeholder: username Lichess]
+[aria-label: Togli riga]
+✕
+[aria-label: Posizione]
+[value: 1]
+🥇 1°
+[value: 2]
+🥈 2°
+[value: 3]
+🥉 3°
+[aria-label: Giocatore (username Lichess)]
+[placeholder: username Lichess]
+[aria-label: Togli riga]
+✕
+[aria-label: Posizione]
+[value: 1]
+🥇 1°
+[value: 2]
+🥈 2°
+[value: 3]
+🥉 3°
+[aria-label: Giocatore (username Lichess)]
+[placeholder: username Lichess]
+[aria-label: Togli riga]
+✕
++ Pari merito
+A pari merito i giocatori condividono il posto e quelli dopo scalano: due primi e poi un 3°, due secondi e nessun terzo. Si può scrivere anche lo username di chi non gioca più.
+Dal mese
+[placeholder: 2026-11]
+Al mese
+[placeholder: 2027-03]
+Il periodo si compila da solo quando archivi una stagione; qui lo puoi aggiungere alle stagioni passate o correggere.
+Note
+[placeholder: opzionale]
+Aggiungi all'Albo d'Oro
+
+===== settings tab =====
+Token Lichess
+Token API Lichess (Organizzatore)
+[placeholder: lip_…]
+[value: lip_test]
+Crea un token su lichess.org/account/oauth/token con il permesso _Challenge_. Si salva nel documento privato del torneo, leggibile solo dal tuo account: vale su tutti i tuoi dispositivi.
+Salva token
+Dimentica token
+Copia dei dati
+I dati del torneo sono salvati su Firestore. Qui puoi scaricarne una copia in JSON (torneo, giocatori, calendario, partite, stagioni, foto caricate, aneddoti e impostazioni). Il token Lichess non viene incluso.
+Scarica copia JSON
+Ripristino
+Ogni notte una copia automatica di torneo, giocatori, calendario, partite e stagioni viene salvata su GitHub, solo se qualcosa è cambiato: elenco delle versioni (apri una versione, poi «Download raw file»). Puoi ripristinare quella o una copia scaricata qui sopra.
+[aria-label: File di backup da ripristinare]

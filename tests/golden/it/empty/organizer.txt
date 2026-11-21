@@ -1,0 +1,365 @@
+===== console =====
+Area organizzatore
+Nuovo torneo
+Vista pubblica
+[title: Esci (organizer@example.org)]
+Esci
+↻ Sincronizza risultati
+Ultima alle 12:00
+[aria-label: Sezioni]
+♞Turni
+💬WhatsApp
+♟Giocatori
+♛Stagioni
+⚙Impostazioni
+
+===== fair play alert =====
+
+
+===== season checklist =====
+🌱 Prepara la Stagione 1 · 1 su 8
+[aria-label: Chi gioca la stagione: da fare]
+Chi gioca la stagione0 giocatori
+Vai
+[aria-label: da fare]
+○José Raúl Capablanca, preparato con l’AImotto, presentazione, aneddoti, apertura e partita
+Vai
+[aria-label: da fare]
+○La partita celebre, con il link Lichess
+Vai
+[aria-label: fatto]
+✓La foto del maestro
+Vai
+[aria-label: Regolamento riletto: da fare]
+Regolamento rilettotesti, giorni per mossa, partite classificate
+Vai
+[aria-label: da fare]
+○Calendario generatodopo aver scelto i giocatori
+Vai
+[aria-label: da fare]
+○Regolamento accettato da tutti0 su 0: il link è in Stagioni → Regolamento
+Vai
+[aria-label: da fare]
+○Sfide del Turno 1 create e messaggio mandato
+Vai
+Si aggiorna da solo; le caselle le spunti tu. Sparisce quando crei le sfide del Turno 1.
+
+===== rounds tab, open round "" =====
+Turni · 0
+Nessun turno ancora. Genera il calendario con il girone all'italiana in
+♛ Stagioni → Calendario
+, oppure crea un turno a mano.
++ Nuovo turno (1)
+
+===== launch message with a bye =====
+💬 Anteprima WhatsApp (Lancio Turno 1)
+⚔️ *Turno 1: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+🏖️ Riposa in questo turno: *Zoe*
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+Adesso✓✓
+📲 Condividi su WhatsApp
+📋 Copia testo
+✏️ Modifica testo prima dell'invio
+[aria-label: Messaggio di lancio del turno]
+⚔️ *Turno 1: accoppiamenti e link*
+⏱️ 2 giorni a mossa · partite classificate
+🏖️ Riposa in questo turno: *Zoe*
+⏳ I link scadono lunedì 23/11 alle 12:00: aprite il vostro e accettate la sfida. Buone partite!
+
+===== bulletin section =====
+
+
+===== whatsapp tab =====
+✨ Il racconto della stagione
+Prepara il racconto di fine andata, delle ultime partite o di fine stagione: tono sobrio e affettuoso, senza voti né classifiche di bravura.
+Partite0 (0 finite, 0 in corso)
+L'Elo dei giocatori nel prompt è l'Elo del torneo, calcolato dalle partite: non serve scaricarlo da Lichess.
+Momento del Torneo
+🔄 Fine AndataconsigliatoCom'è andata l'andata, due o tre frasi per giocatore.
+⏱️ Volata FinaleCosa resta in gioco nelle ultime partite.
+🏆 Fine TorneoIl racconto finale, il campione e poche menzioni per il gruppo.
+Note extra dell'organizzatore (opzionale)
+[placeholder: es. Tante partite decise nel finale, ritmo rilassato...]
+Aneddoti personali dei giocatori (0)
+Modifica note ▼
+📋 Copia Prompt per Claude / ChatGPT
+💡 Copia il prompt, incollalo nella tua chat AI abituale e poi incolla qui sotto la recensione ottenuta per vedere l'anteprima WhatsApp.
+Recensione ricevuta dall'AI
+[placeholder: Incolla qui il testo generato da Claude o ChatGPT…]
+🏆 Premi della stagione
+I premi compaiono quando ci sono partite concluse.
+
+===== reviews =====
+Prepara il racconto di fine andata, delle ultime partite o di fine stagione: tono sobrio e affettuoso, senza voti né classifiche di bravura.
+Partite0 (0 finite, 0 in corso)
+L'Elo dei giocatori nel prompt è l'Elo del torneo, calcolato dalle partite: non serve scaricarlo da Lichess.
+Momento del Torneo
+🔄 Fine AndataconsigliatoCom'è andata l'andata, due o tre frasi per giocatore.
+⏱️ Volata FinaleCosa resta in gioco nelle ultime partite.
+🏆 Fine TorneoIl racconto finale, il campione e poche menzioni per il gruppo.
+Note extra dell'organizzatore (opzionale)
+[placeholder: es. Tante partite decise nel finale, ritmo rilassato...]
+Aneddoti personali dei giocatori (0)
+Modifica note ▼
+📋 Copia Prompt per Claude / ChatGPT
+💡 Copia il prompt, incollalo nella tua chat AI abituale e poi incolla qui sotto la recensione ottenuta per vedere l'anteprima WhatsApp.
+Recensione ricevuta dall'AI
+[placeholder: Incolla qui il testo generato da Claude o ChatGPT…]
+
+===== players tab =====
+Registro dei giocatori
+Tutti i giocatori passati dal torneo. Il nome utente Lichess li distingue; il nome è quello mostrato sul sito, anche nelle stagioni passate, e si cambia qui (salva quando esci dal campo).
+Nuovo giocatore
+Nome sul sito
+[placeholder: es. Marco R.]
+Nome utente Lichess
+[placeholder: es. marco_chess]
++ Aggiungi
+Gioca questa stagione
+Ritiri
+Ritiri e sostituzioni
+Applica la regola della metà del regolamento: chi ha giocato meno di metà delle sue partite esce e tutte le sue partite vengono annullate; da metà in poi i risultati restano e le partite rimaste vanno a tavolino. Con un sostituto, il nuovo giocatore prende il suo posto con i punti già fatti.
+Giocatore che si ritira
+Scegli…
+
+===== seasons tab =====
+Stagione corrente
+Prepara il maestro con l'AI
+Un prompt per Claude o ChatGPT con tutto quello che serve: motto, presentazione, un aneddoto per turno, apertura e partita celebre. Incolla qui la risposta e i campi si compilano da soli. La foto e il link della partita restano da cercare a te.
+Maestro
+[placeholder: es. Mikhail Tal]
+[value: José Raúl Capablanca]
+Aneddoti (uno per turno)
+[value: 10]
+📋 Copia prompt
+Risposta dell'AI
+[placeholder: Incolla qui la risposta, con il blocco JSON]
+Compila i campi
+Nome del torneo
+[placeholder: es. Scacchi & Chill]
+[value: Nuovo torneo]
+Stagione
+[placeholder: es. Stagione 2 - Capablanca]
+[value: Stagione 1]
+Maestro della stagione
+[placeholder: es. José Raúl Capablanca]
+[value: José Raúl Capablanca]
+Dà il nome al trofeo: *Scudetto Capablanca*.
+Motto
+[placeholder: es. La macchina degli scacchi]
+[value: La macchina degli scacchi]
+Colore dello scudetto
+C
+[title: Lo sceglie il sito]
+Auto
+[title: blu]
+blu
+[title: rosso]
+rosso
+[title: viola]
+viola
+[title: ruggine]
+ruggine
+[title: ottanio]
+ottanio
+[title: bordeaux]
+bordeaux
+[title: oliva]
+oliva
+[title: ardesia]
+ardesia
+Lo sceglie il sito: blu, mai usato prima con la «C».
+Foto del maestro
+[placeholder: Link a un'immagine, oppure caricala]
+[value: assets/capablanca.jpg]
+📷 Carica foto
+Togli foto
+La foto viene ridotta e salvata nel database del torneo: non serve modificare il codice.
+Presentazione della stagione
+Per rendere ogni appuntamento sempre vario e coinvolgente, ogni stagione del nostro torneo è dedicata a un grande campione della storia degli scacchi, con aneddoti e curiosità legati alla sua carriera durante lo svolgimento delle partite.
+Apertura del maestro
+Nessuna
+[value: queens-gambit]
+Gambetto di Donna (bianco)
+[value: slav]
+Difesa Slava (nero)
+[value: tarrasch]
+Difesa Tarrasch (nero)
+[value: catalan]
+Catalana (bianco)
+[value: london]
+Sistema Londra (bianco)
+[value: colle]
+Sistema Colle (bianco)
+[value: kings-indian]
+Est-Indiana (nero)
+[value: nimzo-indian]
+Nimzo-Indiana (nero)
+[value: queens-indian]
+Ovest-Indiana (nero)
+[value: grunfeld]
+Difesa Grünfeld (nero)
+[value: benoni]
+Benoni (nero)
+[value: dutch]
+Olandese (nero)
+[value: english]
+Inglese (bianco)
+[value: reti]
+Apertura Réti (bianco)
+[value: bird]
+Apertura Bird (bianco)
+[value: kings-indian-attack]
+Attacco Est-Indiano (bianco)
+[value: ruy-lopez]
+Spagnola (bianco)
+[value: italian]
+Italiana (bianco)
+[value: scotch]
+Scozzese (bianco)
+[value: bishops-opening]
+Apertura d'Alfiere (bianco)
+[value: vienna]
+Viennese (bianco)
+[value: four-knights]
+Quattro Cavalli (bianco)
+[value: kings-gambit]
+Gambetto di Re (bianco)
+[value: sicilian]
+Siciliana (nero)
+[value: french]
+Francese (nero)
+[value: caro-kann]
+Caro-Kann (nero)
+[value: alekhine]
+Difesa Alekhine (nero)
+[value: scandinavian]
+Scandinava (nero)
+[value: pirc-modern]
+Pirc e Moderna (nero)
+[value: petrov]
+Difesa Petrov (nero)
+[value: philidor]
+Difesa Philidor (nero)
+Le partite che la giocano hanno un'etichetta, e a fine stagione il premio «L'allievo» va a chi l'ha giocata di più, dal lato indicato. Conta tutta la famiglia: per la Siciliana, anche Najdorf, Dragone e le altre varianti.
+Partita celebre del maestro
+[placeholder: https://lichess.org/…]
+Titolo della partita
+[placeholder: es. Capablanca – Marshall, New York 1918]
+Prima il bianco, poi il nero: i nomi compaiono sotto la scacchiera.
+Due righe sulla partita (facoltative)
+Una partita su Lichess, oppure il capitolo di uno studio pubblico (lichess.org/study/…/…). Se non la trovi, incolla la sua notazione (PGN) in lichess.org/paste e copia qui il link che ottieni. Nella sezione Stagione si rivede mossa per mossa.
+Salva stagione
+Aneddoti del maestro (0)
+Uno per turno, nell'ordine: l'aneddoto #N chiude il messaggio di creazione delle partite del Turno N e da quel momento compare anche sul sito. Prima riga il titolo, poi il testo; separa gli aneddoti con una riga con solo ---. Vale la formattazione di WhatsApp (*grassetto*, _corsivo_).
+[aria-label: Aneddoti del maestro]
+Salva aneddoti
+Regolamento
+Giorni per mossa
+[value: 2]
+Partite rated
+Validità del link di sfida (giorni)
+[value: 2]
+Regole della sfida su Lichess
+Niente richieste di rivincita
+Non si può regalare tempo all'avversario
+Non si può reclamare la vittoria se l'avversario sparisce
+Niente patta nelle prime mosse
+Questi campi si salvano subito e valgono per le sfide create da qui in poi; giorni per mossa e rated compaiono anche nel regolamento pubblico.
+Come funziona il torneo
+1. All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida.
+2. Quando la partita finisce, scrivi nel gruppo WhatsApp così il risultato viene registrato.
+Regole di fair play
+• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo.
+• In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Per tutta la stagione non può vincere lo Scudetto, il Trofeo Pillsbury né gli altri premi: resta in classifica con i suoi punti e gioca solo per la gloria. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati.
+• Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.
+Ritiri
+• Chi si ritira prima di aver giocato metà delle sue partite esce dal torneo e tutte le sue partite vengono annullate, anche quelle già giocate.
+• Chi si ritira dopo aver giocato almeno metà delle sue partite resta in classifica con i risultati ottenuti; le partite che non giocherà valgono come vittoria a tavolino per gli avversari.
+• Se pensi di ritirarti, avvisa prima l'organizzatore in privato.
+Salva regolamento
+Elo di partenza
+Nella prima stagione del torneo sono tutti esordienti: nessun Elo di partenza da Lichess.
+Calendario
+Ognuno incontra tutti gli altri, con bianco e nero alternati il più possibile. Se i giocatori sono dispari, a ogni turno uno riposa. I turni generati non hanno ancora link Lichess: li crei dal turno, quando lo avvii.
+Andata e ritorno
+Genera calendario (0 giocatori)
+Fine stagione e storico (0)
+Chiudi «Stagione 1» e inizia la prossima
+Nessuna partita conclusa: sincronizza i risultati prima di chiudere la stagione.
+la classifica finale va nello storico pubblico;
+il primo in classifica entra nell'Albo d'Oro come campione;
+i premi della stagione vengono salvati insieme alla classifica;
+*tutte le partite della stagione vengono cancellate*; giocatori e impostazioni restano.
+Nome nuova stagione
+[placeholder: es. Stagione 3 - Fischer]
+Maestro (opzionale)
+[placeholder: es. Bobby Fischer]
+Svuota anche il calendario ufficiale
+Chiudi la stagione e inizia la prossima
+Ti serve solo una copia della classifica di oggi?
+Scaricala come file (CSV)
+: non tocca lo storico né l'Albo d'Oro.
+Albo d'Oro
+Archiviando una stagione campione e podio vengono aggiunti da soli. Qui puoi correggerli o aggiungere le stagioni passate, dalla più vecchia alla più recente: l'ultima dà il campione in carica.
+Stagione
+[placeholder: es. Stagione 1]
+[aria-label: Posizione]
+[value: 1]
+🥇 1°
+[value: 2]
+🥈 2°
+[value: 3]
+🥉 3°
+[aria-label: Giocatore (username Lichess)]
+[placeholder: username Lichess]
+[aria-label: Togli riga]
+✕
+[aria-label: Posizione]
+[value: 1]
+🥇 1°
+[value: 2]
+🥈 2°
+[value: 3]
+🥉 3°
+[aria-label: Giocatore (username Lichess)]
+[placeholder: username Lichess]
+[aria-label: Togli riga]
+✕
+[aria-label: Posizione]
+[value: 1]
+🥇 1°
+[value: 2]
+🥈 2°
+[value: 3]
+🥉 3°
+[aria-label: Giocatore (username Lichess)]
+[placeholder: username Lichess]
+[aria-label: Togli riga]
+✕
++ Pari merito
+A pari merito i giocatori condividono il posto e quelli dopo scalano: due primi e poi un 3°, due secondi e nessun terzo. Si può scrivere anche lo username di chi non gioca più.
+Dal mese
+[placeholder: 2026-11]
+Al mese
+[placeholder: 2027-03]
+Il periodo si compila da solo quando archivi una stagione; qui lo puoi aggiungere alle stagioni passate o correggere.
+Note
+[placeholder: opzionale]
+Aggiungi all'Albo d'Oro
+
+===== settings tab =====
+Token Lichess
+Token API Lichess (Organizzatore)
+[placeholder: lip_…]
+[value: lip_test]
+Crea un token su lichess.org/account/oauth/token con il permesso _Challenge_. Si salva nel documento privato del torneo, leggibile solo dal tuo account: vale su tutti i tuoi dispositivi.
+Salva token
+Dimentica token
+Copia dei dati
+I dati del torneo sono salvati su Firestore. Qui puoi scaricarne una copia in JSON (torneo, giocatori, calendario, partite, stagioni, foto caricate, aneddoti e impostazioni). Il token Lichess non viene incluso.
+Scarica copia JSON
+Ripristino
+Ogni notte una copia automatica di torneo, giocatori, calendario, partite e stagioni viene salvata su GitHub, solo se qualcosa è cambiato: elenco delle versioni (apri una versione, poi «Download raw file»). Puoi ripristinare quella o una copia scaricata qui sopra.
+[aria-label: File di backup da ripristinare]

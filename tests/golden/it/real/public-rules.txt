@@ -1,0 +1,33 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Turno 3 in corso. In testa Elena con 3 punti.
+[aria-label: 11 partite concluse e 1 in corso su 56]
+__ 11 concluse__ 1 in corso__ 44 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+[aria-label: Regolamento]
+Regolamento
+Come funziona
+1. All'inizio di ogni giornata ricevi nel gruppo il link della tua partita: basta aprirlo per avviare la sfida. 2. Quando la partita finisce, scrivi nel gruppo WhatsApp così il risultato viene registrato.
+Trofei
+C *Scudetto Capablanca:* a chi fa più punti a fine stagione; a pari punti decide lo spareggio Sonneborn-Berger. Ogni stagione lo Scudetto prende il nome del suo maestro.
+*Trofeo Pillsbury:* a chi batte di più le proprie attese. Come funziona.
+Fair play
+• Ti impegni a giocare ogni partita con le tue forze, senza motori né aiuti esterni durante la partita (teoria e libri di aperture prima della partita vanno bene), e a mantenere un’atmosfera di rispetto e fiducia nel torneo. • In caso di dubbio decide Lichess: se una partita viene chiusa da Lichess con “cheat detected”, il giocatore a cui Lichess attribuisce la violazione perde la partita e i punti del turno. Alla seconda volta, o se Lichess chiude l’account, è escluso dal torneo e i suoi risultati vengono annullati. • Non facciamo accuse nel gruppo: eventuali dubbi si scrivono privatamente all'organizzatore.
+Ritiri
+• Chi si ritira prima di aver giocato metà delle sue partite esce dal torneo e tutte le sue partite vengono annullate, anche quelle già giocate. • Chi si ritira dopo aver giocato almeno metà delle sue partite resta in classifica con i risultati ottenuti; le partite che non giocherà valgono come vittoria a tavolino per gli avversari. • Se pensi di ritirarti, avvisa prima l'organizzatore in privato.
+Partite su Lichess
+*Tempo:* 2 giorni per mossa, in modalità corrispondenza.
+*Rated:* le partite contano per il tuo Elo Lichess.
+Accetto il regolamento
+Ognuno lo accetta per sé, scegliendo il proprio nome: chi accetta compare nella cronaca.
+Il tuo nome
+Chi sei?
+[value: scaccomatto]
+Elena
+Accetto
+Accettato da Marco Bel, Marco Ber, Sergio, Andrea, Bruno, Carla e Dario (7 su 8).

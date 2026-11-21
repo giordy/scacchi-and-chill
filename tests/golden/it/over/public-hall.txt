@@ -1,0 +1,229 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Stagione conclusa: Marco Ber vince lo Scudetto Capablanca con 9 punti! 🏆
+[aria-label: 56 partite concluse e 0 in corso su 56]
+__ 56 concluse__ 0 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+Albo d'Oro
+Stagione 1 Scudetto Chillset 2025 – ott 2026
+[aria-label: 1° posto]
+🥇Bruno
+[aria-label: 2° posto]
+🥈Elena
+[aria-label: 2° posto]
+🥈DarioClassifica finale e premi
+Scacchi & Chill · 56 partite
+Posizione
+Giocatore
+Punti
+G
+V
+N
+P
+[title: Spareggio Sonneborn-Berger]
+SB
+[aria-label: 1°]
+1
+Bruno
+13½
+14
+13
+1
+0
+81.8
+[title: 2° posto a pari merito]
+[aria-label: 2° a pari merito]
+2
+Dario
+10
+14
+10
+0
+4
+50.0
+[title: 2° posto a pari merito]
+[aria-label: 2° a pari merito]
+2
+Elena
+10
+14
+10
+0
+4
+48.5
+[aria-label: 4°]
+4
+Elena "Lena"
+6½
+14
+6
+1
+7
+33.3
+[aria-label: 5°]
+5
+Sergio
+5½
+14
+5
+1
+8
+21.8
+[aria-label: 6°]
+6
+Marco Bel
+5
+14
+5
+0
+9
+26.5
+[aria-label: 7°]
+7
+Carla
+4½
+14
+4
+1
+9
+16.3
+[aria-label: 8°]
+8
+Irene
+1
+14
+1
+0
+13
+5.0
+Giulia ha lasciato il torneo; al suo posto ha giocato Marco Bel.
+Premi
+⚡*Fulmine*: Brunoin 4 mosse · vedi su Lichess
+🏃*Il maratoneta*: Elenain 79 mosse contro Carla · vedi su Lichess
+🦥*Il bradipo*: Elena "Lena"circa 10 h per ogni sua mossa
+Classifica di sempre
+Tutte le stagioni sommate, compresa quella in corso. «Media» sono i punti per partita.
+Posizione
+Giocatore
+Punti
+[title: Punti per partita]
+Media
+[title: Stagioni giocate]
+Stag.
+G
+V
+N
+P
+[title: Titoli vinti]
+🏆
+1
+Bruno
+22½
+0,80
+2
+28
+22
+1
+5
+1
+2
+Elena
+18
+0,64
+2
+28
+17
+2
+9
+3
+Dario
+16
+0,57
+2
+28
+16
+0
+12
+4
+Marco Bel
+12
+0,55
+2
+22
+11
+2
+9
+5
+Carla
+11
+0,39
+2
+28
+10
+2
+16
+6
+Andrea
+9
+0,64
+1
+14
+8
+2
+4
+6
+Marco Ber
+9
+0,64
+1
+14
+8
+2
+4
+8
+Sergio
+7
+0,25
+2
+28
+6
+2
+20
+9
+Elena "Lena"
+6½
+0,46
+1
+14
+6
+1
+7
+10
+Irene
+1
+0,07
+1
+14
+1
+0
+13
+11
+Giulia
+0
+0,00
+1
+6
+0
+0
+6
+Record
+🔥*Vittorie di fila*9 vittorie consecutive di BrunoStagione 1
+🛡️*Imbattibile*15 partite senza perdere di BrunoStagione 1 → Stagione 2 - Capablanca
+🐢*La partita più lunga*79 mosse, Carla – Elena (0-1)Stagione 1 · vedi su Lichess
+⚡*La vittoria più rapida*Bruno, in 4 mosseStagione 1 · vedi su Lichess
+🗡️*Il colpaccio più grosso*Marco Bel batte Bruno, che aveva 312 punti Elo del torneo in piùStagione 2 - Capablanca · vedi su Lichess

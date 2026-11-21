@@ -1,0 +1,110 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Turno 3 in corso. In testa Elena con 3 punti.
+[aria-label: 11 partite concluse e 1 in corso su 56]
+__ 11 concluse__ 1 in corso__ 44 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+[aria-label: Trofeo]
+CScudetto CapablancaChi fa più punti
+Trofeo PillsburyChi batte le attese
+[aria-label: Vista della classifica]
+Classifica
+Tabellone
+[aria-label: Tabellone]
+Posizione
+Giocatore
+1
+2
+3
+4
+5
+6
+7
+8
+Tot
+1
+Elena
+-
+-
+-
+1
+1
+-
+1
+3
+2
+Marco Bel
+-
+1
+1
+-
+-
+-
+-
+2
+3
+Marco Ber
+-
+0
+-
+1
+1
+-
+-
+2
+4
+Andrea
+-
+0
+-
+-
+-
+1
+1
+2
+5
+Bruno
+0
+-
+0
+-
+-
+1
+-
+1
+6
+Dario
+0
+-
+0
+-
+-
+1
+-
+1
+7
+Carla
+-
+-
+-
+0
+0
+0
+-
+0
+8
+Sergio
+0
+-
+-
+0
+-
+-
+-
+0
+Ogni riga è il risultato del giocatore contro l'avversario della colonna.

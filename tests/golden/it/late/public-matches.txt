@@ -1,0 +1,155 @@
+Scacchi & Chill
+Stagione 2 - Capablanca
+Turno 13 in corso. In testa Elena con 8 punti.
+[aria-label: 48 partite concluse e 4 in corso su 56]
+__ 48 concluse__ 4 in corso__ 4 da giocare
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+Turno
+[value: all]
+Tutti (56 partite)
+[value: 1]
+Turno 1 (andata)
+[value: 2]
+Turno 2 (andata)
+[value: 3]
+Turno 3 (andata)
+[value: 4]
+Turno 4 (andata)
+[value: 5]
+Turno 5 (andata)
+[value: 6]
+Turno 6 (andata)
+[value: 7]
+Turno 7 (andata)
+[value: 8]
+Turno 8 (ritorno)
+[value: 9]
+Turno 9 (ritorno)
+[value: 10]
+Turno 10 (ritorno)
+[value: 11]
+Turno 11 (ritorno)
+[value: 12]
+Turno 12 (ritorno)
+[value: 13]
+Turno 13 (ritorno)
+[value: 14]
+Turno 14 (ritorno)
+Turno 13ritornoTurno attuale
+4 in corso
+[aria-label: Marco Bel – Bruno: partita in corso]
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Bruno
+In corso
+Indian Defenseuna decina di mosse
+Apri su Lichess
+[aria-label: Carla – Elena: partita in corso, mediogioco]
+[aria-label: Bianco]
+Carla
+[aria-label: Nero]
+Elena
+In corso
+Queen's Pawn Game: Accelerated London Systempiù di 10 mosse · mediogioco
+Apri su Lichess
+[aria-label: Marco Ber – Andrea: partita in corso]
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Andrea
+In corso
+King's Pawn Game: Busch-Gass Gambit, Chiodini Gambitpiù di 10 mosse
+Apri su Lichess
+[aria-label: Sergio – Dario: partita in corso]
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Dario
+In corso
+Owen Defenseuna ventina di mosse
+Apri su Lichess
+Prossimi turni
+Turno 14ritorno
+4 da giocare
+[aria-label: Marco Bel – Carla: partita da giocare]
+[aria-label: Bianco]
+Marco Bel
+[aria-label: Nero]
+Carla
+In programma
+Link in arrivo all'inizio del turno
+[aria-label: Marco Ber – Sergio: partita da giocare]
+[aria-label: Bianco]
+Marco Ber
+[aria-label: Nero]
+Sergio
+In programma
+Link in arrivo all'inizio del turno
+[aria-label: Andrea – Elena: partita da giocare]
+[aria-label: Bianco]
+Andrea
+[aria-label: Nero]
+Elena
+In programma
+🔝 Scontro al vertice
+Scontro al vertice: entrambi al 1° posto in classifica a inizio turno.
+Link in arrivo all'inizio del turno
+[aria-label: Dario – Bruno: partita da giocare]
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Bruno
+In programma
+Link in arrivo all'inizio del turno
+Turni giocati
+Turno 12ritorno
+Turno concluso
+[aria-label: Rivedi Dario – Marco Bel]
+[aria-label: Posizione finale di Dario – Marco Bel]
+▶
+[aria-label: Bianco]
+Dario
+[aria-label: Nero]
+Marco Bel
+1 – 0
+Queen's Pawn Game: Chigorin Variation43 mosse
+Apri su Lichess
+[aria-label: Rivedi Bruno – Andrea]
+[aria-label: Posizione finale di Bruno – Andrea]
+▶
+[aria-label: Bianco]
+Bruno
+[aria-label: Nero]
+Andrea
+1 – 0
+Bishop's Opening18 mosse
+🔝 Scontro al vertice
+Scontro al vertice: 1° contro 2° in classifica a inizio turno.
+Apri su Lichess
+[aria-label: Rivedi Elena – Marco Ber]
+[aria-label: Posizione finale di Elena – Marco Ber]
+▶
+[aria-label: Bianco]
+Elena
+[aria-label: Nero]
+Marco Ber
+1 – 0
+Hungarian Opening69 mosse
+Apri su Lichess
+[aria-label: Rivedi Sergio – Carla]
+[aria-label: Posizione finale di Sergio – Carla]
+▶
+[aria-label: Bianco]
+Sergio
+[aria-label: Nero]
+Carla
+1 – 0
+Four Knights Game: Scotch Variation37 mosse
+Apri su Lichess
+Mostra gli altri 11 turni giocati

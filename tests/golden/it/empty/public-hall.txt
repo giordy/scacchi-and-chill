@@ -1,0 +1,12 @@
+[aria-label: José Raúl Capablanca: leggi la presentazione]
+Nuovo torneo
+Stagione 1
+La stagione sta per cominciare.
+[aria-label: Sezioni del torneo]
+Classifiche
+Partite
+Cronaca
+Stagione
+Albo
+Albo d'Oro
+Il primo campione sarà scritto qui a fine stagione.

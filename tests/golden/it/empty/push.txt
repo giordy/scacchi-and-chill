@@ -1,0 +1,18 @@
+===== all news =====
+null
+===== one game =====
+null
+===== one ongoing game =====
+{
+ "title": "anna – bruno",
+ "body": "Turno 3: nuova mossa",
+ "hash": "#/partite"
+}
+===== draws only =====
+{
+ "title": "2 partite finite",
+ "body": "anna – bruno: finita, patta (½-½)\ncarla – dario: finita, patta (½-½)",
+ "hash": "#/partite"
+}
+===== skipping the first player =====
+null
