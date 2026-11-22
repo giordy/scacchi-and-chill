@@ -169,9 +169,16 @@ function CareerHighs({ handle, elo, seasonName, nameOf, title }: {
   );
 }
 
-// The player's Lichess flair after their username, as Lichess shows it. From the games when they
-// played one, otherwise from their Lichess profile (read with the others' by usePresence); nothing
-// when they have none or the image does not load.
+// The player's Lichess flair after their username, as Lichess shows it: from their Lichess profile
+// (read with the others' by usePresence, so a change shows within one refresh), from their games
+// only until the profile has been read (the flair saved with a finished game is never read again);
+// nothing when they have none or the image does not load.
+function playerFlair(handle: string, history: HistoryGame[], gameStates: Record<string, LichessExportGame>, presence?: PresenceInfo) {
+  // The profile was read when Lichess answered with this player (seenAt): then no flair means none
+  if (seenAtOf(presence, handle) !== undefined) return profileFlairOf(presence, handle);
+  return flairFromGames(handle, history, gameStates);
+}
+
 const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
 // Under a head-to-head of the season: the record across every season
@@ -382,7 +389,7 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                 rel="noopener noreferrer"
               >
                 @{player.handle}
-                <Flair flair={flairFromGames(player.handle, history, gameStates) ?? profileFlairOf(presence, player.handle)} /> su Lichess
+                <Flair flair={playerFlair(player.handle, history, gameStates, presence)} /> su Lichess
               </a>
               {presence && <PresenceMeta seenAt={seenAtOf(presence, player.handle)} now={presence.now} />}
             </p>

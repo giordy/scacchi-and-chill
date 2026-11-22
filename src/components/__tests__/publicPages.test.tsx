@@ -7,6 +7,7 @@ import { PublicTournamentView } from '../../PublicTournamentView';
 import { PlayerPage } from '../../views/PlayerPage';
 import { defaultConfig } from '../../lib/config';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../../types';
+import { PresenceInfo } from '../../lib/presence';
 
 const players = [
   { handle: 'anna', name: 'Anna' },
@@ -406,5 +407,28 @@ describe('the games with moves not seen yet, in the Partite tab', () => {
     const html = matches({ aaaaaaaa: 2, bbbbbbbb: t - 60_000 }, { carla: t - 60_000, anna: t - 60_000 });
     expect(html).not.toContain('status-badge live');
     expect(html).toContain('status-badge ongoing');
+  });
+});
+
+describe('the flair on the player page', () => {
+  // A finished game saved with the flair the player had back then
+  const saved: Record<string, LichessExportGame> = {
+    ...gameStates,
+    aaaaaaaa: { ...gameStates.aaaaaaaa, players: { white: { user: { id: 'anna', name: 'anna', flair: 'nature.old' } }, black: { user: { id: 'bruno', name: 'bruno' } } } },
+  };
+  const flairOf = (presence?: PresenceInfo) => {
+    const html = renderToStaticMarkup(<PlayerPage handle="anna" config={config} history={history} gameStates={saved} nameOf={nameOf} seasons={[season1]} presence={presence} />);
+    return html.match(/flair\/img\/([^"]+)\.webp/)?.[1];
+  };
+
+  it('shows the flair of the Lichess profile once read, over the one saved with the games', () => {
+    expect(flairOf({ seenAt: { anna: 1 }, flair: { anna: 'nature.new' }, now: 2 })).toBe('nature.new');
+  });
+  it('shows none when the profile has none, even if an old game had one', () => {
+    expect(flairOf({ seenAt: { anna: 1 }, flair: {}, now: 2 })).toBeUndefined();
+  });
+  it('falls back to the games until the profile is read', () => {
+    expect(flairOf(undefined)).toBe('nature.old');
+    expect(flairOf({ seenAt: {}, flair: {}, now: 2 })).toBe('nature.old');
   });
 });
