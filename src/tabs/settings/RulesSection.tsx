@@ -116,7 +116,7 @@ export function RulesSection({
             )}
             <p className="note">
               {finalRounds > 0
-                ? `Le ultime ${finalRounds === 1 ? "giornata parte" : `${finalRounds} giornate partono`} solo quando sono finite tutte le partite dei turni prima: allo scadere di un turno il sito non propone il successivo finché resta una partita aperta, così nessuno gioca il finale conoscendo i risultati di un turno dopo. Creando le sfide prima, chiede conferma. Compare nel regolamento.`
+                ? `Le ultime ${finalRounds === 1 ? "giornata parte" : `${finalRounds} giornate partono`} solo quando sono finite tutte le partite dei turni prima: allo scadere di un turno il sito non propone il successivo finché resta una partita in corso, così nessuno gioca il finale conoscendo i risultati di un turno dopo. Avvisi e bollettino dicono quante partite mancano, senza nominare nessuno. Creando le sfide prima, chiede conferma. Compare nel regolamento.`
                 : "Spenta: anche nelle ultime giornate, allo scadere di un turno puoi creare il successivo mentre le partite aperte continuano."}
             </p>
             <OrganizerPushToggle />

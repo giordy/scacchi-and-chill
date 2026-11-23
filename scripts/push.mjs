@@ -213,12 +213,14 @@ export function deadlineNotification(item, nameOf, kind = 'expired') {
   if (kind === 'wait') {
     return {
       ...base,
-      title: `Turno ${item.round} scaduto`,
-      body: `Si è chiuso ${formatRoundEnd(item.end)}. Ultime giornate: il Turno ${item.next} parte quando ${item.waitFor.length === 1 ? 'finisce' : 'finiscono'} ${names(item.waitFor)}.`,
+      title: `Turno ${item.round} chiuso`,
+      body: `Si è chiuso ${formatRoundEnd(item.end)}. Ultime giornate: il Turno ${item.next} parte con calma, quando ${
+        item.waitFor.length === 1 ? "finisce l'ultima partita ancora in corso" : `finiscono le ${item.waitFor.length} partite ancora in corso`
+      }.`,
     };
   }
   if (kind === 'over') {
-    return { ...base, title: `Partite finite: tocca al Turno ${item.next}`, body: `Le partite dei turni prima sono tutte concluse: puoi creare il Turno ${item.next}.` };
+    return { ...base, title: `Tocca al Turno ${item.next}`, body: `Le partite dei turni prima sono tutte finite: puoi creare il Turno ${item.next}.` };
   }
   const open = item.open.length === 0 ? 'Le sue partite sono tutte concluse.' : `${item.open.length === 1 ? 'Continua' : 'Continuano'}: ${names(item.open)}.`;
   return {

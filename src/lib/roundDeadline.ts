@@ -151,6 +151,9 @@ export function carriedOver(round: string, history: HistoryGame[], states: Recor
   return history.filter((g) => byRound(g.round, round) < 0 && isOpen(g, states)).sort((a, b) => byRound(a.round, b.round));
 }
 
+// Ultime giornate, without naming anybody: "l'ultima partita ancora in corso", "le 2 partite ancora in corso"
+export const stillPlayingText = (n: number) => (n === 1 ? "l'ultima partita ancora in corso" : `le ${n} partite ancora in corso`);
+
 export interface ExpiredRound {
   round: string;
   end: number;

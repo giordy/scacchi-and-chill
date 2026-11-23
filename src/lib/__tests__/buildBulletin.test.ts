@@ -134,14 +134,14 @@ describe('buildBulletin', () => {
     // until the end of Sunday 8 November in Italy
     const end = Date.UTC(2026, 10, 8, 23);
     expect(build(end)).toContain('🗓️ *Il turno si chiude domenica 8 novembre* (mancano 3 giorni)');
-    expect(build(end - 4 * 86400e3)).toContain('⌛ *Tempo del turno scaduto* mercoledì 4 novembre: le partite ancora aperte continuano');
+    expect(build(end - 4 * 86400e3)).toContain('🗓️ *Il turno si è chiuso* mercoledì 4 novembre: chi sta ancora giocando continua con calma, anche col turno successivo.');
     // the next round is one of the last, that wait
     expect(
       buildBulletin({ round: '5', games, states, history: games, config, expiryDays: 2, now: NOW, random: first, roundEnd: end - 4 * 86400e3, nextWaits: true }).text
-    ).toContain('siamo alle ultime giornate, il turno successivo parte quando finiscono le partite ancora aperte');
+    ).toContain('🗓️ *Il turno si è chiuso* mercoledì 4 novembre: siamo alle ultime giornate, il prossimo parte quando tutte le partite sono finite. Nessuna fretta ♟️');
     // without the option, or once the round is over, nothing
-    expect(build()).not.toMatch(/si chiude|scaduto/);
-    expect(build(end, games.slice(1))).not.toMatch(/si chiude|scaduto/);
+    expect(build()).not.toMatch(/si chiude|si è chiuso/);
+    expect(build(end, games.slice(1))).not.toMatch(/si chiude|si è chiuso/);
   });
 });
 

@@ -21,7 +21,7 @@ describe('MatchesByRound', () => {
     const html = (roundEndOf?: (r: string) => number | undefined, at = now) =>
       renderToStaticMarkup(<MatchesByRound games={open} gameStates={{}} nameOf={nameOf} roundEndOf={roundEndOf} now={at} />);
     expect(html((r) => (r === '2' ? end : undefined))).toContain('Si chiude lunedì 7 dicembre · mancano 3 giorni');
-    expect(html((r) => (r === '2' ? end : undefined), end + 1)).toContain('Tempo scaduto lunedì 7 dicembre: le partite ancora aperte continuano');
+    expect(html((r) => (r === '2' ? end : undefined), end + 1)).toContain('Si è chiuso lunedì 7 dicembre: le partite in corso continuano con calma');
     expect(html()).not.toContain('round-group-deadline');
     // only the current round: the played one says nothing, even with an end
     expect(html((r) => (r === '1' ? end : undefined))).not.toContain('round-group-deadline');

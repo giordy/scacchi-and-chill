@@ -835,7 +835,7 @@ export function PublicTournamentView({
                   <strong>Turni:</strong> ogni turno dura {roundDays} giorni. Allo scadere parte il successivo, e chi non ha
                   finito continua la sua partita: la scadenza non decide nessun risultato.
                   {finalRounds > 0 &&
-                    ` Nelle ultime ${finalRounds === 1 ? "giornata" : `${finalRounds} giornate`} invece un turno parte solo quando sono finite tutte le partite dei turni prima.`}
+                    ` Nelle ultime ${finalRounds === 1 ? "giornata" : `${finalRounds} giornate`} invece si comincia il turno dopo quando tutte le partite sono finite, così il finale si gioca insieme.`}
                 </li>
               )}
               <li>

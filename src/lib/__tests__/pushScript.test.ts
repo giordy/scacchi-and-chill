@@ -223,13 +223,16 @@ describe('push to the organizer: a round past its end (Turni con scadenza)', () 
     expect(item.waitFor).toEqual(site!.waitFor.map(({ white, black }) => ({ white, black })));
     expect(item.waitFor).toEqual([{ white: 'carla', black: 'dario' }]);
     expect(organizerNews(item, [])).toEqual({ key: `${item.key}|attesa`, kind: 'wait' });
-    expect(deadlineNotification(item, nameOf, 'wait').body).toBe('Si è chiuso lunedì 7 dicembre. Ultime giornate: il Turno 3 parte quando finisce Carla – Dario.');
+    expect(deadlineNotification(item, nameOf, 'wait')).toMatchObject({
+      title: 'Turno 2 chiuso',
+      body: "Si è chiuso lunedì 7 dicembre. Ultime giornate: il Turno 3 parte con calma, quando finisce l'ultima partita ancora in corso.",
+    });
     expect(organizerNews(item, [`${item.key}|attesa`])).toBeNull();
     // the last game over: the round can start, said once
     const done = expiredRoundOf(last, all, { ...fresh, bbbbbbbb: { status: 'draw' } }, END, extractGameId);
     expect(done.waitFor).toEqual([]);
     expect(organizerNews(done, [`${item.key}|attesa`])).toEqual({ key: item.key, kind: 'over' });
-    expect(deadlineNotification(done, nameOf, 'over').title).toBe('Partite finite: tocca al Turno 3');
+    expect(deadlineNotification(done, nameOf, 'over').title).toBe('Tocca al Turno 3');
     expect(organizerNews(done, [`${item.key}|attesa`, item.key])).toBeNull();
     // without the wait, straight to "puoi creare"
     expect(organizerNews(expiredRoundOf(tournament, all, fresh, END, extractGameId), [])).toEqual({ key: item.key, kind: 'expired' });
