@@ -5,6 +5,18 @@ import { extractGameId } from './utils';
 // is kept in the same form (hooks/useSeenMoves): a game has news when its last move is later.
 export type SeenMoves = Record<string, number>;
 
+// Where the browser keeps what the visitor has seen (hooks/useSeenMoves)
+export const SEEN_MOVES_KEY = 'scacchi-partite-mosse-viste';
+
+export function savedSeenMoves(): SeenMoves | null {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SEEN_MOVES_KEY) ?? 'null');
+    return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
 export function lastMovesOf(history: HistoryGame[], gameStates: Record<string, LichessExportGame>): SeenMoves {
   const moves: SeenMoves = {};
   history.forEach((g) => {

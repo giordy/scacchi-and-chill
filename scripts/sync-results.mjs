@@ -179,7 +179,7 @@ async function notify(base, token, vapid, games, states, prev) {
     let sent = 0;
     let gone = 0;
     for (const sub of subs) {
-      const payload = notificationFor(news, nameOf, sub.skip);
+      const payload = notificationFor(news, nameOf, sub.skip, sub.seen);
       if (!payload) continue;
       try {
         if ((await sendPush(sub, payload, vapid, PUSH_SUBJECT)) === 'gone') {

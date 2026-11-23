@@ -84,11 +84,12 @@ service cloud.firestore {
       // push service is its own. The id is a random secret kept by that browser, so who knows it
       // is the browser itself: it may write its document again (new keys, another name to skip) or
       // delete it. The address must be one of a browser's push services, the only ones the GitHub
-      // Action sends to; skip, when given, is a Lichess handle.
+      // Action sends to; skip, when given, is a Lichess handle; seen, the last move the visitor has
+      // seen of each game (by Lichess id), so the moves already seen are not notified.
       match /pushSubscriptions/{subId} {
         allow delete: if subId.matches('[A-Za-z0-9_-]{32,64}');
         allow create, update: if subId.matches('[A-Za-z0-9_-]{32,64}')
-                     && request.resource.data.keys().hasOnly(['endpoint', 'p256dh', 'auth', 'skip', 'at'])
+                     && request.resource.data.keys().hasOnly(['endpoint', 'p256dh', 'auth', 'skip', 'seen', 'at'])
                      && request.resource.data.endpoint is string
                      && request.resource.data.endpoint.size() < 1000
                      && request.resource.data.endpoint.matches('https://(fcm\\.googleapis\\.com|updates\\.push\\.services\\.mozilla\\.com|web\\.push\\.apple\\.com|[a-z0-9.-]+\\.notify\\.windows\\.com)/[^ ]+')
@@ -97,6 +98,7 @@ service cloud.firestore {
                      && request.resource.data.auth is string
                      && request.resource.data.auth.matches('[A-Za-z0-9_-]{16,30}')
                      && (!('skip' in request.resource.data) || (request.resource.data.skip is string && request.resource.data.skip.matches('[a-z0-9_-]{0,30}')))
+                     && (!('seen' in request.resource.data) || (request.resource.data.seen is map && request.resource.data.seen.size() <= 300))
                      && request.resource.data.at == request.time;
       }
 

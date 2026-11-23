@@ -7,6 +7,7 @@
 import pushConfig from '../../push.json';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { TOURNAMENT_DOC_ID } from './firestoreRest';
+import { savedSeenMoves, type SeenMoves } from './seenMoves';
 
 const STORE_KEY = 'scacchi-notifiche-mosse';
 
@@ -63,14 +64,44 @@ const docName = (id: string) => `${DATABASE}/documents/tournaments/${TOURNAMENT_
 
 // The write of a subscription, as firestore.rules expects it. Separate, so the tests can send it to
 // the emulator.
-export function pushCommit(database: string, id: string, sub: { endpoint: string; p256dh: string; auth: string }, skip: string) {
+export function pushCommit(database: string, id: string, sub: { endpoint: string; p256dh: string; auth: string }, skip: string, seen?: SeenMoves | null) {
   return {
     writes: [
       {
         update: {
           name: `${database}/documents/tournaments/${TOURNAMENT_DOC_ID}/pushSubscriptions/${id}`,
-          fields: { endpoint: { stringValue: sub.endpoint }, p256dh: { stringValue: sub.p256dh }, auth: { stringValue: sub.auth }, skip: { stringValue: skip.toLowerCase() } },
+          fields: {
+            endpoint: { stringValue: sub.endpoint },
+            p256dh: { stringValue: sub.p256dh },
+            auth: { stringValue: sub.auth },
+            skip: { stringValue: skip.toLowerCase() },
+            ...(seen ? { seen: seenValue(seen) } : {}),
+          },
         },
+        updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
+      },
+    ],
+  };
+}
+
+// The moves seen, as Firestore keeps them: the newest MAX_SEEN games only (firestore.rules caps it)
+const MAX_SEEN = 300;
+function seenValue(seen: SeenMoves) {
+  const entries = Object.entries(seen)
+    .filter(([id, at]) => /^[A-Za-z0-9]{8}$/.test(id) && Number.isFinite(at) && at > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, MAX_SEEN);
+  return { mapValue: { fields: Object.fromEntries(entries.map(([id, at]) => [id, { integerValue: String(Math.round(at)) }])) } };
+}
+
+// Only the moves seen, on a subscription that exists (one deleted meanwhile is not written again)
+export function seenCommit(database: string, id: string, seen: SeenMoves) {
+  return {
+    writes: [
+      {
+        update: { name: `${database}/documents/tournaments/${TOURNAMENT_DOC_ID}/pushSubscriptions/${id}`, fields: { seen: seenValue(seen) } },
+        updateMask: { fieldPaths: ['seen'] },
+        currentDocument: { exists: true },
         updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
       },
     ],
@@ -87,6 +118,37 @@ async function write(id: string, sub: PushSubscription, skip: string) {
     signal: AbortSignal.timeout(20000),
   });
   if (!res.ok) throw new Error(res.status === 403 ? 'Il sito non ha potuto registrare gli avvisi: riprova più tardi.' : `Firestore: HTTP ${res.status}`);
+  // The document was written whole, without the moves seen: they go again (reportSeenMoves)
+  lastSeenSent = '';
+}
+
+// After a whole write of the subscription: the moves seen again, apart, so the subscription never
+// fails for them (firestore.rules not published yet, say)
+async function resendSeen() {
+  const seen = savedSeenMoves();
+  if (seen) await reportSeenMoves(seen).catch(() => {});
+}
+
+// The moves seen on the Partite tab, to the subscription of this browser (nothing when the
+// notifications are off): the GitHub Action then skips them (scripts/push.mjs notificationFor).
+// The same moves are written once per visit at most.
+let lastSeenSent = '';
+export async function reportSeenMoves(seen: SeenMoves): Promise<void> {
+  const saved = savedSetting();
+  if (!saved) return;
+  const key = `${saved.id}:${JSON.stringify(seen)}`;
+  if (key === lastSeenSent) return;
+  lastSeenSent = key;
+  const res = await fetch(`${DOCS}:commit?${KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(seenCommit(DATABASE, saved.id, seen)),
+    signal: AbortSignal.timeout(20000),
+  });
+  if (!res.ok) {
+    lastSeenSent = '';
+    throw new Error(`Firestore: HTTP ${res.status}`);
+  }
 }
 
 async function remove(id: string) {
@@ -112,6 +174,7 @@ export async function enablePush(skip: string): Promise<PushSetting> {
   const setting = { id: savedSetting()?.id ?? randomId(), endpoint: sub.endpoint, skip };
   await write(setting.id, sub, skip);
   keep(setting);
+  await resendSeen();
   return setting;
 }
 
@@ -143,6 +206,7 @@ export async function refreshPush(): Promise<PushSetting | null> {
     await write(saved.id, sub, saved.skip);
     const next = { ...saved, endpoint: sub.endpoint };
     keep(next);
+    await resendSeen();
     return next;
   }
   return saved;

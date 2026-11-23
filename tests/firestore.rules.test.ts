@@ -6,7 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { assertFails, assertSucceeds, initializeTestEnvironment, RulesTestEnvironment } from '@firebase/rules-unit-testing';
 import { collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore';
 import { pledgeCommit } from '../src/lib/firestoreRest';
-import { pushCommit } from '../src/lib/push';
+import { pushCommit, seenCommit } from '../src/lib/push';
 
 const RULES = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'utf8');
 const ADMIN = 'organizer@example.com';
@@ -223,6 +223,23 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
         const saved = await getDoc(doc(ctx.firestore(), `${S}/${ID}`));
         expect(saved.data()).toMatchObject({ endpoint: 'https://web.push.apple.com/QAbc-123', skip: 'anna' });
       });
+    });
+
+    it('takes the moves seen on an existing subscription only, and a capped map', async () => {
+      const database = 'projects/demo-scacchi/databases/(default)';
+      const commit = (body: unknown) =>
+        fetch(`http://${process.env.FIRESTORE_EMULATOR_HOST}/v1/${database}/documents:commit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      // No subscription yet: nothing is created
+      expect((await commit(seenCommit(database, ID, { aaaaaaaa: 100 }))).ok).toBe(false);
+      await assertSucceeds(setDoc(doc(visitor(), `${S}/${ID}`), sub()));
+      expect((await commit(seenCommit(database, ID, { aaaaaaaa: 100 }))).status).toBe(200);
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        const saved = await getDoc(doc(ctx.firestore(), `${S}/${ID}`));
+        expect(saved.data()).toMatchObject({ endpoint: 'https://fcm.googleapis.com/fcm/send/abc:DEF', seen: { aaaaaaaa: 100 } });
+      });
+      await assertFails(setDoc(doc(visitor(), `${S}/${ID}`), sub({ seen: 'x' })));
+      const tooMany = Object.fromEntries(Array.from({ length: 301 }, (_, i) => [`g${String(i).padStart(7, '0')}`, i + 1]));
+      await assertFails(setDoc(doc(visitor(), `${S}/${ID}`), sub({ seen: tooMany })));
     });
   });
 });

@@ -42,7 +42,7 @@ export function movesNews(games, states, prev) {
     const was = before ?? { at: 0, final: false };
     const ended = final && !was.final && !UNPLAYED.has(s.status);
     const moved = !final && s.status === 'started' && was.at !== undefined && at > was.at;
-    if (moved || ended) news.push({ id: g.id, white: g.white, black: g.black, round: g.round, ended, winner: s.winner });
+    if (moved || ended) news.push({ id: g.id, white: g.white, black: g.black, round: g.round, ended, winner: s.winner, at });
   });
   return { news, state: { games: next } };
 }
@@ -58,10 +58,13 @@ function resultText(item, nameOf) {
 const MAX_LINES = 6;
 
 // The notification for one subscriber: null when nothing is left once their own games are skipped
-// (skip: their Lichess handle, they get their own moves from Lichess already)
-export function notificationFor(news, nameOf, skip) {
+// (skip: their Lichess handle, they get their own moves from Lichess already) and the moves they have
+// already seen on the Partite tab (seen: the last move seen of each game, written by the page, see
+// src/lib/push.ts reportSeenMoves). The end of a game is told anyway: the page does not record it.
+export function notificationFor(news, nameOf, skip, seen) {
   const k = skip?.toLowerCase();
-  const mine = news.filter((n) => !k || (n.white.toLowerCase() !== k && n.black.toLowerCase() !== k));
+  const seenAt = (id) => (seen && typeof seen === 'object' ? Number(seen[id]) || 0 : 0);
+  const mine = news.filter((n) => (!k || (n.white.toLowerCase() !== k && n.black.toLowerCase() !== k)) && (n.ended || !(n.at > 0 && seenAt(n.id) >= n.at)));
   if (mine.length === 0) return null;
   const pair = (n) => `${nameOf(n.white)} – ${nameOf(n.black)}`;
   const round = (n) => (n.round ? `Turno ${n.round}: ` : '');

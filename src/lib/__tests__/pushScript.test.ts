@@ -23,7 +23,7 @@ describe('push of the moves: what to tell', () => {
     const prev = { games: { aaaaaaaa: { at: 100, final: false }, bbbbbbbb: { at: 50, final: false } } };
     // Same moves listed, a later move: somebody moved
     const { news, state } = movesNews(games, { aaaaaaaa: { status: 'started', moves: 'e4 e5', lastMoveAt: 200 } }, prev);
-    expect(news).toEqual([{ id: 'aaaaaaaa', white: 'anna', black: 'bruno', round: '3', ended: false, winner: undefined }]);
+    expect(news).toEqual([{ id: 'aaaaaaaa', white: 'anna', black: 'bruno', round: '3', ended: false, winner: undefined, at: 200 }]);
     // Not read now: kept as it was
     expect(state.games.bbbbbbbb).toEqual({ at: 50, final: false });
   });
@@ -80,6 +80,21 @@ describe('push of the moves: the notification', () => {
     expect(notificationFor([one, two], nameOf, 'Bruno').title).toBe('Carla – Dario');
     expect(notificationFor([one], nameOf, 'anna')).toBeNull();
   });
+
+  it('skips the moves the subscriber has already seen on the Partite tab, not the end of a game', () => {
+    const moved = { ...one, at: 500 };
+    // Seen that very move, or a later one: nothing to tell
+    expect(notificationFor([moved], nameOf, '', { [moved.id]: 500 })).toBeNull();
+    expect(notificationFor([moved], nameOf, '', { [moved.id]: 600 })).toBeNull();
+    // Seen an earlier move only, or nothing of it: told
+    expect(notificationFor([moved], nameOf, '', { [moved.id]: 400 })?.body).toBe('Turno 3: nuova mossa');
+    expect(notificationFor([moved], nameOf, '', { other: 900 })?.body).toBe('Turno 3: nuova mossa');
+    expect(notificationFor([moved], nameOf, '', undefined)?.body).toBe('Turno 3: nuova mossa');
+    // The end is told even with its last move seen
+    expect(notificationFor([{ ...two, at: 700 }], nameOf, '', { [two.id]: 700 })?.body).toBe('Turno 3: finita, vince Carla (1-0)');
+    // Of two games, only the one not seen is left
+    expect(notificationFor([moved, { ...two, ended: false, at: 800 }], nameOf, '', { [moved.id]: 500 })?.title).toBe('Carla – Dario');
+  });
 });
 
 describe('push of the moves: Web Push', () => {
@@ -135,5 +150,23 @@ describe('push of the moves: Web Push', () => {
     const plain = Buffer.concat([decipher.update(data.subarray(0, data.length - 16)), decipher.final()]);
     expect(plain[plain.length - 1]).toBe(2);
     expect(plain.subarray(0, -1).toString('utf8')).toBe('{"title":"Anna – Bruno ½"}');
+  });
+});
+
+describe('push of the moves: what the page writes of the moves seen', () => {
+  it('only the field seen, on a subscription that exists, newest games first and capped', async () => {
+    const { seenCommit, pushCommit } = await import('../push');
+    const w = seenCommit('db', 'ID', { aaaaaaaa: 100, bad: 5, bbbbbbbb: 0 }).writes[0];
+    expect(w.updateMask).toEqual({ fieldPaths: ['seen'] });
+    expect(w.currentDocument).toEqual({ exists: true });
+    expect(w.update.fields).toEqual({ seen: { mapValue: { fields: { aaaaaaaa: { integerValue: '100' } } } } });
+    const many = Object.fromEntries(Array.from({ length: 310 }, (_, i) => [`g${String(i).padStart(7, '0')}`, i + 1]));
+    const kept = Object.keys(seenCommit('db', 'ID', many).writes[0].update.fields.seen.mapValue.fields);
+    expect(kept).toHaveLength(300);
+    expect(kept).not.toContain('g0000000');
+    // The full write keeps the moves seen when given
+    const sub = { endpoint: 'https://fcm.googleapis.com/x', p256dh: 'p', auth: 'a' };
+    expect(pushCommit('db', 'ID', sub, '', { aaaaaaaa: 1 }).writes[0].update.fields).toHaveProperty('seen');
+    expect(pushCommit('db', 'ID', sub, '').writes[0].update.fields).not.toHaveProperty('seen');
   });
 });
