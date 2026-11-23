@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 // @ts-expect-error a Node script without types
 import { encryptPayload, movesNews, notificationFor, PUSH_ENDPOINT, sameState, vapidHeader, vapidKeys } from '../../../scripts/push.mjs';
 
@@ -172,7 +172,11 @@ describe('push of the moves: what the page writes of the moves seen', () => {
 });
 
 // @ts-expect-error a Node script without types
-import { deadlineNotification, expiredRoundOf, organizerNews } from '../../../scripts/push.mjs';
+import { deadlineNotification, deliverOrganizerNotice, expiredRoundOf, organizerNews } from '../../../scripts/push.mjs';
+// @ts-expect-error a Node script without types
+import { toValue } from '../../../scripts/sync-results.mjs';
+// @ts-expect-error a Node script without types
+import { fields } from '../../../scripts/backup.mjs';
 import { expiredRound } from '../roundDeadline';
 import { roundsOf } from '../rounds';
 import { extractGameId } from '../utils';
@@ -236,6 +240,60 @@ describe('push to the organizer: a round past its end (Turni con scadenza)', () 
     expect(organizerNews(done, [`${item.key}|attesa`, item.key])).toBeNull();
     // without the wait, straight to "puoi creare"
     expect(organizerNews(expiredRoundOf(tournament, all, fresh, END, extractGameId), [])).toEqual({ key: item.key, kind: 'expired' });
+  });
+
+  it('reads the tournament as Firestore gives it back (numbers from integerValue)', () => {
+    const stored = fields(toValue(tournament).mapValue.fields);
+    expect(expiredRoundOf(stored, all, fresh, END, extractGameId)).toMatchObject({ round: '2', next: '3', end: END });
+  });
+
+  it('tells again when the organizer moved the end: a new key', () => {
+    const item = expiredRoundOf(tournament, all, fresh, END, extractGameId);
+    const later = expiredRoundOf({ ...tournament, roundEnds: [{ round: '2', at: END + 86400e3 }] }, all, fresh, END + 86400e3, extractGameId);
+    expect(later.key).not.toBe(item.key);
+    expect(organizerNews(later, [item.key])).toEqual({ key: later.key, kind: 'expired' });
+    // moved into the future: nothing to tell yet
+    expect(expiredRoundOf({ ...tournament, roundEnds: [{ round: '2', at: END + 86400e3 }] }, all, fresh, END, extractGameId)).toBeNull();
+    expect(organizerNews(null, [])).toBeNull();
+  });
+
+  describe('delivery to the devices', () => {
+    const news = { key: 'S|2|1', kind: 'expired' };
+    const sub = (endpoint: string) => ({ endpoint, p256dh: 'p', auth: 'a' });
+    const payload = { title: 't' };
+
+    it('with no device tells nothing, so a device switched on later still gets it', async () => {
+      const send = vi.fn();
+      expect(await deliverOrganizerNotice(news, payload, [], [], send)).toEqual({ sent: 0, failed: 0, gone: 0, subs: null, told: null });
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('records it once a device got it, and takes off the devices gone', async () => {
+      const send = vi.fn(async (s: { endpoint: string }) => (s.endpoint === 'old' ? 'gone' : 'sent'));
+      const out = await deliverOrganizerNotice(news, payload, ['before'], [sub('old'), sub('phone')], send);
+      expect(send).toHaveBeenCalledWith(sub('phone'), payload);
+      expect(out).toMatchObject({ sent: 1, gone: 1, failed: 0, told: ['before', 'S|2|1'] });
+      expect(out.subs.map((s: { endpoint: string }) => s.endpoint)).toEqual(['phone']);
+    });
+
+    it('tries again at the next run when every device failed, not when they are all gone', async () => {
+      const failing = vi.fn(async () => {
+        throw new Error('HTTP 500');
+      });
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      expect(await deliverOrganizerNotice(news, payload, [], [sub('a')], failing)).toMatchObject({ sent: 0, failed: 1, told: null, subs: null });
+      warn.mockRestore();
+      const gone = await deliverOrganizerNotice(news, payload, [], [sub('a')], async () => 'gone');
+      expect(gone).toMatchObject({ sent: 0, gone: 1, told: ['S|2|1'], subs: [] });
+    });
+
+    it('keeps only the latest 30 keys told', async () => {
+      const told = Array.from({ length: 30 }, (_, i) => `k${i}`);
+      const out = await deliverOrganizerNotice(news, payload, told, [sub('a')], async () => 'sent');
+      expect(out.told).toHaveLength(30);
+      expect(out.told[29]).toBe('S|2|1');
+      expect(out.told[0]).toBe('k1');
+    });
   });
 
   it('keeps a short list of devices, the renewed one in place of the old', () => {

@@ -202,6 +202,33 @@ export function organizerNews(item, told) {
   return { key: item.key, kind: told.includes(`${item.key}|attesa`) ? 'over' : 'expired' };
 }
 
+// Sends the organizer's notice to their devices (send: as sendPush, 'sent' or 'gone', or throws). Returns
+// what to keep: the devices still subscribed (null: unchanged) and the keys told (null: unchanged; the
+// notice is told when a device got it, or when none could, all gone; with only failures it is tried
+// again at the next run). With no device nothing is told, so a device switched on later still gets it.
+export async function deliverOrganizerNotice(news, payload, told, subs, send) {
+  if (subs.length === 0) return { sent: 0, failed: 0, gone: 0, subs: null, told: null };
+  let sent = 0;
+  let failed = 0;
+  const gone = [];
+  for (const sub of subs) {
+    try {
+      if ((await send(sub, payload)) === 'gone') gone.push(sub.endpoint);
+      else sent++;
+    } catch (e) {
+      failed++;
+      console.warn(`Avviso all'organizzatore non inviato: ${e.message}`);
+    }
+  }
+  return {
+    sent,
+    failed,
+    gone: gone.length,
+    subs: gone.length > 0 ? subs.filter((s) => !gone.includes(s.endpoint)) : null,
+    told: sent > 0 || failed === 0 ? [...told, news.key].slice(-30) : null,
+  };
+}
+
 // "lunedì 7 dicembre": the last day of the round, as src/lib/roundDeadline.ts formatRoundEnd
 export const formatRoundEnd = (end) =>
   new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(end - 1));

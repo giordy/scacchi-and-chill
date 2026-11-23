@@ -134,8 +134,24 @@ export function roundEndFromInput(value: string): number | undefined {
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!match) return undefined;
   const [y, m, d] = [Number(match[1]), Number(match[2]), Number(match[3])];
-  if (m < 1 || m > 12 || d < 1 || d > 31) return undefined;
+  // A day that exists ("2026-02-31" does not)
+  const check = new Date(Date.UTC(y, m - 1, d));
+  if (check.getUTCFullYear() !== y || check.getUTCMonth() !== m - 1 || check.getUTCDate() !== d) return undefined;
   return romeMidnight(y, m, d + 1);
+}
+
+// The end a round gets as its challenges are created: only with the deadlines on, for a round that had
+// no challenge yet and no end (a round started before the option was on keeps none), counted from the
+// first challenge created now. Undefined: nothing to set
+export function endOnCreate(
+  meta: Pick<TournamentMeta, 'roundDays' | 'roundEnds'> | undefined,
+  round: string,
+  createdBefore: number,
+  createdAt: number[]
+): number | undefined {
+  if (!roundDeadlinesOn(meta) || createdBefore > 0 || createdAt.length === 0) return undefined;
+  if (roundEndOf(meta, round) !== undefined) return undefined;
+  return roundEndFrom(Math.min(...createdAt), meta!.roundDays!);
 }
 
 // When the round started: its first challenge created

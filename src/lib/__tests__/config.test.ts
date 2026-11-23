@@ -13,6 +13,23 @@ describe('validateAndNormalizeConfig', () => {
     expect(cfg.statusPhrases.header.length).toBeGreaterThan(0);
   });
 
+  it('has the lines of the Turni con scadenza, also when an older config.json lacks them', () => {
+    expect(validateAndNormalizeConfig(base()).messageTemplates).toMatchObject({
+      roundEnd: expect.stringContaining('{roundEnd}'),
+      carryOver: expect.stringContaining('{games}'),
+    });
+    const old = base();
+    delete old.roundMessage.roundEnd;
+    delete old.roundMessage.carryOver;
+    const cfg = validateAndNormalizeConfig(old);
+    expect(cfg.messageTemplates.roundEnd).toContain('{roundEnd}');
+    expect(cfg.messageTemplates.carryOver).toContain('{games}');
+    // a text of one's own wins
+    const own = base();
+    own.roundMessage.roundEnd = 'Fino a {roundEnd}';
+    expect(validateAndNormalizeConfig(own).messageTemplates.roundEnd).toBe('Fino a {roundEnd}');
+  });
+
   it('trims the players and falls back to the handle for a missing name', () => {
     const cfg = validateAndNormalizeConfig({ ...base(), players: [{ handle: ' anna ' }, { handle: 'bruno', name: 'Bruno' }] });
     expect(cfg.players).toEqual([

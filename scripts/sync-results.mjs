@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fields } from './backup.mjs';
-import { deadlineNotification, expiredRoundOf, movesNews, notificationFor, organizerNews, sameState, sendPush, vapidKeys } from './push.mjs';
+import { deadlineNotification, deliverOrganizerNotice, expiredRoundOf, movesNews, notificationFor, organizerNews, sameState, sendPush, vapidKeys } from './push.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const TOURNAMENT_DOC_ID = 'scacchi-and-chill-official';
@@ -227,22 +227,10 @@ async function notifyOrganizer(base, token, vapid, tournament, games, states) {
     return;
   }
   const payload = deadlineNotification(item, namesOf(tournament), news.kind);
-  let sent = 0;
-  let failed = 0;
-  const gone = [];
-  for (const sub of subs) {
-    try {
-      if ((await sendPush(sub, payload, vapid, PUSH_SUBJECT)) === 'gone') gone.push(sub.endpoint);
-      else sent++;
-    } catch (e) {
-      failed++;
-      console.warn(`Avviso all'organizzatore non inviato: ${e.message}`);
-    }
-  }
-  if (gone.length > 0) await patchFields(base, token, 'private/organizerPush', { subscriptions: subs.filter((s) => !gone.includes(s.endpoint)) });
-  // Tried again at the next run only when no device got it and some could
-  if (sent > 0 || failed === 0) await setDoc(base, token, 'private/deadlinePush', { told: [...told, news.key].slice(-30) });
-  console.log(`Turno ${item.round} scaduto: avviso all'organizzatore su ${sent} dispositivi${gone.length ? `, ${gone.length} non più iscritti tolti` : ''}.`);
+  const out = await deliverOrganizerNotice(news, payload, told, subs, (sub, p) => sendPush(sub, p, vapid, PUSH_SUBJECT));
+  if (out.subs) await patchFields(base, token, 'private/organizerPush', { subscriptions: out.subs });
+  if (out.told) await setDoc(base, token, 'private/deadlinePush', { told: out.told });
+  console.log(`Turno ${item.round}: avviso all'organizzatore su ${out.sent} dispositivi${out.gone ? `, ${out.gone} non più iscritti tolti` : ''}${out.failed ? `, ${out.failed} non riusciti` : ''}.`);
 }
 
 async function main() {

@@ -106,3 +106,17 @@ describe('syncTargets (organizer sync)', () => {
     expect(syncTargets([g('')]).linked).toBe(0);
   });
 });
+
+describe('clampDays', () => {
+  it('keeps a number of days in its range, 1 to 14 unless given', async () => {
+    const { clampDays } = await import('../utils');
+    expect(clampDays('0', 2)).toBe(1);
+    expect(clampDays('20', 2)).toBe(14);
+    expect(clampDays('', 2)).toBe(2);
+    // the length of a round: 3 to 60
+    expect(clampDays('2', 14, 3, 60)).toBe(3);
+    expect(clampDays('21', 14, 3, 60)).toBe(21);
+    expect(clampDays(90, 14, 3, 60)).toBe(60);
+    expect(clampDays('abc', 14, 3, 60)).toBe(14);
+  });
+});

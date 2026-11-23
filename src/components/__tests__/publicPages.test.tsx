@@ -432,3 +432,39 @@ describe('the flair on the player page', () => {
     expect(flairOf({ seenAt: {}, flair: {}, now: 2 })).toBe('nature.old');
   });
 });
+
+describe('Turni con scadenza on the public page', () => {
+  const future = Date.now() + 5 * 86400e3;
+  const page = (hash: string, extra: Partial<NonNullable<AppConfig['tournament']>>) => {
+    at(hash);
+    const meta = { ...config.tournament!, ...extra };
+    return renderToStaticMarkup(
+      <PublicTournamentView config={{ ...config, tournament: meta }} tournamentMeta={meta} history={history} gameStates={gameStates} nameOf={nameOf} seasons={[season1]} />
+    );
+  };
+
+  it('says until when the round goes on in the header, the date only', () => {
+    expect(page('', { roundDays: 14, roundEnds: [{ round: '1', at: future }] })).toMatch(/Turno 1 in corso, fino a \S+ \d+ \S+\./);
+    // past its end, or switched off: as before
+    expect(page('', { roundDays: 14, roundEnds: [{ round: '1', at: Date.now() - 1000 }] })).toContain('Turno 1 in corso.');
+    expect(page('', { roundDays: 0, roundEnds: [{ round: '1', at: future }] })).toContain('Turno 1 in corso.');
+  });
+
+  it('shows the date under the round in Partite, without a countdown', () => {
+    const html = page('#/partite', { roundDays: 14, roundEnds: [{ round: '1', at: future }] });
+    expect(html).toMatch(/Fino a \S+ \d+ \S+/);
+    expect(html).not.toMatch(/mancano|ultimo giorno/);
+    expect(page('#/partite', {})).not.toContain('round-group-deadline');
+  });
+
+  it('writes the rule in the rules, and the last rounds when that option is on too', () => {
+    const rules = page('#/regolamento', { roundDays: 14 });
+    expect(rules).toContain('ogni turno dura 14 giorni');
+    expect(rules).not.toContain('Nelle ultime');
+    expect(page('#/regolamento', { roundDays: 14, finalRoundsWait: 3 })).toContain('Nelle ultime 3 giornate invece un turno comincia quando sono finite tutte le partite dei turni prima.');
+    // off: no rule, also with the last rounds left on
+    const off = page('#/regolamento', { roundDays: 0, finalRoundsWait: 3 });
+    expect(off).not.toContain('ogni turno dura');
+    expect(off).not.toContain('Nelle ultime');
+  });
+});

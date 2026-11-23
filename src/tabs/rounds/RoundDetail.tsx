@@ -11,6 +11,7 @@ import { canRelink, linkState } from '../../lib/relink';
 import { stateOf } from '../../lib/games';
 import {
   carriedOver,
+  endOnCreate,
   finalRoundsOf,
   formatRoundEnd,
   roundDeadlinesOn,
@@ -189,8 +190,6 @@ export function RoundDetail({
       return;
     const games: HistoryGame[] = [];
     const errors: string[] = [];
-    // The round starts now: with the deadlines on it gets its end, counted from its first challenge
-    const startsRound = created === 0 && end === undefined && deadlinesOn;
     for (const [i, m] of todo.entries()) {
       setBusy(`Creazione partita ${i + 1} di ${todo.length} su Lichess…`);
       try {
@@ -208,9 +207,9 @@ export function RoundDetail({
         );
       }
     }
-    if (startsRound && games.length > 0) {
-      setEnd(roundEndFrom(Math.min(...games.map((g) => g.createdAt ?? Date.now())), meta!.roundDays!));
-    }
+    // The round starts now: with the deadlines on it gets its end, counted from its first challenge
+    const newEnd = endOnCreate(meta, round, created, games.map((g) => g.createdAt ?? Date.now()));
+    if (newEnd !== undefined) setEnd(newEnd);
     // Save what was created even if some challenges failed
     setBusy("Salvataggio nel torneo…");
     const saved = await onCreated(games);

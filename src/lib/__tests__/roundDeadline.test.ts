@@ -3,6 +3,7 @@ import {
   carriedOver,
   cleanRoundEnds,
   daysLeft,
+  endOnCreate,
   expiredRound,
   finalRoundsOf,
   formatRoundEnd,
@@ -63,6 +64,11 @@ describe('the end of a round', () => {
     expect(roundEndFromInput('2026-12-31')).toBe(Date.UTC(2026, 11, 31, 23));
     expect(roundEndFromInput('')).toBeUndefined();
     expect(roundEndFromInput('7/12/2026')).toBeUndefined();
+    // days that do not exist
+    expect(roundEndFromInput('2026-02-31')).toBeUndefined();
+    expect(roundEndFromInput('2026-13-01')).toBeUndefined();
+    expect(roundEndFromInput('2026-00-10')).toBeUndefined();
+    expect(roundEndFromInput('2028-02-29')).toBe(Date.UTC(2028, 1, 29, 23)); // a leap year
   });
 });
 
@@ -175,5 +181,55 @@ describe('the last rounds, without overlap (Ultime giornate)', () => {
     expect(expiredRound(meta, rounds, history, done, END_7_DEC)?.waitFor).toEqual([]);
     // off: as before
     expect(expiredRound({ ...meta, finalRoundsWait: 0 }, rounds, history, {}, END_7_DEC)?.waitFor).toEqual([]);
+  });
+});
+
+describe('the end a round gets when its challenges are created', () => {
+  const on = { roundDays: 14 };
+  it('counts from the first challenge created, with the deadlines on', () => {
+    expect(endOnCreate(on, '4', 0, [MONDAY_EVENING + HOUR, MONDAY_EVENING])).toBe(END_7_DEC);
+  });
+
+  it('sets nothing with the option off, for a round already started, or when no challenge was created', () => {
+    expect(endOnCreate(undefined, '4', 0, [MONDAY_EVENING])).toBeUndefined();
+    expect(endOnCreate({ roundDays: 0 }, '4', 0, [MONDAY_EVENING])).toBeUndefined();
+    // the second batch of a round started before the option was on: still no end
+    expect(endOnCreate(on, '4', 2, [MONDAY_EVENING])).toBeUndefined();
+    // every challenge failed on Lichess
+    expect(endOnCreate(on, '4', 0, [])).toBeUndefined();
+  });
+
+  it('keeps an end the round already has (moved by the organizer)', () => {
+    expect(endOnCreate({ ...on, roundEnds: [{ round: '4', at: 123 }] }, '4', 0, [MONDAY_EVENING])).toBeUndefined();
+    // the end of another round does not count
+    expect(endOnCreate({ ...on, roundEnds: [{ round: '3', at: 123 }] }, '4', 0, [MONDAY_EVENING])).toBe(END_7_DEC);
+  });
+});
+
+describe('corner cases of a round past its end', () => {
+  const rounds = [
+    { round: '9', created: 1 },
+    { round: '10', created: 1 },
+    { round: '11', created: 0 },
+  ];
+  it('orders the rounds by number, not as text (10 after 9)', () => {
+    const history = [game('9', 'anna', 'bruno', 'aaaaaaaa', 'mate'), game('10', 'carla', 'dario', 'bbbbbbbb', 'mate')];
+    const over = expiredRound({ roundDays: 14, roundEnds: [{ round: '10', at: END_7_DEC }] }, rounds, history, {}, END_7_DEC);
+    expect(over).toMatchObject({ round: '10', next: '11' });
+    // every game over: the next round can start, nothing goes on
+    expect(over?.open).toEqual([]);
+    expect(over?.waitFor).toEqual([]);
+  });
+
+  it('with more waiting rounds than the calendar has, every round waits for the ones before', () => {
+    const meta = { roundDays: 14, finalRoundsWait: 10 };
+    expect(['1', '2', '3'].every((r) => waitsForEarlier(meta, ['1', '2', '3'], r))).toBe(true);
+    // the first one has nothing to wait for
+    expect(carriedOver('1', [game('1', 'anna', 'bruno', 'aaaaaaaa', 'started')], {})).toEqual([]);
+  });
+
+  it('a game with no link is not still being played (a forfeit, a pairing not created)', () => {
+    const forfeit = { round: '1', white: 'anna', black: 'bruno', url: '', lichess: { id: '', status: 'forfeit' } as LichessExportGame };
+    expect(carriedOver('2', [forfeit], {})).toEqual([]);
   });
 });
