@@ -17,7 +17,7 @@ import { PresenceInfo, seenAtOf } from '../lib/presence';
 import { ColorDot } from './PresenceDot';
 import { OpeningFamily, playsFamily } from '../lib/masterOpening';
 import { recentMove } from '../lib/live';
-import { formatRoundEnd, roundExpired, timeLeftText } from '../lib/roundDeadline';
+import { formatRoundEnd, roundExpired } from '../lib/roundDeadline';
 
 export interface MasterTag {
   family: OpeningFamily;
@@ -89,7 +89,8 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
     </div>
   );
 
-  // Turni con scadenza: until when the round in progress goes on, while some of its games do
+  // Turni con scadenza: until when the round in progress goes on, while some of its games do. The date
+  // only, no countdown: for the players the deadline decides nothing (the organizer sees one in Turni)
   const deadlineOf = (block: RoundBlock) => {
     const end = roundEndOf?.(block.round);
     if (end === undefined || block.games.every((g) => progressOf(g) === "finished")) return null;
@@ -99,7 +100,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
       </span>
     ) : (
       <span className="round-group-deadline">
-        <span aria-hidden="true">🗓️ </span>Si chiude {formatRoundEnd(end)} · {timeLeftText(end, now)}
+        <span aria-hidden="true">🗓️ </span>Fino a {formatRoundEnd(end)}
       </span>
     );
   };

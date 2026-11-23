@@ -12,7 +12,7 @@ import { reigningChampions } from './honours';
 import { PILLSBURY_EMOJI, PILLSBURY_TITLE, PillsburyRace, pillsburyRace, pillsburyWinners, reigningPillsbury } from './pillsbury';
 import { outForFairPlay, scudettoContenders } from './fairPlay';
 import { withScheduledGames } from './publicGames';
-import { formatRoundEnd, roundExpired, timeLeftText } from './roundDeadline';
+import { formatRoundEnd, roundExpired } from './roundDeadline';
 
 const DAY_MS = 86400000;
 
@@ -339,7 +339,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
       ? nextWaits
         ? `🗓️ *Il turno si è chiuso* ${formatRoundEnd(roundEnd)}: ultime giornate, il prossimo parte quando sono finite tutte le partite.`
         : `🗓️ *Il turno si è chiuso* ${formatRoundEnd(roundEnd)}: le partite in corso continuano anche col turno successivo.`
-      : `🗓️ *Il turno si chiude ${formatRoundEnd(roundEnd)}* (${timeLeftText(roundEnd, now)})`;
+      : `🗓️ *Il turno si chiude ${formatRoundEnd(roundEnd)}*`; // the date only, no countdown
 
   const vars = { round, ...count, summary: roundSummary(count) };
   const textResult = [
