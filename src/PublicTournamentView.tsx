@@ -32,7 +32,7 @@ import { PillsburyIcon } from "./components/PillsburyIcon";
 import { ScudettoIcon } from "./components/ScudettoIcon";
 import { currentScudetto } from "./lib/scudetto";
 import { extractGameId } from "./lib/utils";
-import { formatRoundEnd, roundDeadlinesOn, roundEndOf, roundExpired } from "./lib/roundDeadline";
+import { finalRoundsOf, formatRoundEnd, roundDeadlinesOn, roundEndOf, roundExpired } from "./lib/roundDeadline";
 import { useSeenMoves } from "./hooks/useSeenMoves";
 import { lastMovesOf, newMoveIds, SeenMoves } from "./lib/seenMoves";
 import { SeasonAwards } from "./components/SeasonAwards";
@@ -313,6 +313,7 @@ export function PublicTournamentView({
   const rated = tournamentMeta.rated ?? config.defaults.rated;
   // Turni con scadenza (lib/roundDeadline.ts): nothing of it shows while it is off
   const roundDays = roundDeadlinesOn(tournamentMeta) ? tournamentMeta.roundDays! : 0;
+  const finalRounds = finalRoundsOf(tournamentMeta);
   const now = Date.now();
   const currentEnd = progress.currentRound ? roundEndOf(tournamentMeta, progress.currentRound) : undefined;
 
@@ -833,6 +834,8 @@ export function PublicTournamentView({
                 <li>
                   <strong>Turni:</strong> ogni turno dura {roundDays} giorni. Allo scadere parte il successivo, e chi non ha
                   finito continua la sua partita: la scadenza non decide nessun risultato.
+                  {finalRounds > 0 &&
+                    ` Nelle ultime ${finalRounds === 1 ? "giornata" : `${finalRounds} giornate`} invece un turno parte solo quando sono finite tutte le partite dei turni prima.`}
                 </li>
               )}
               <li>

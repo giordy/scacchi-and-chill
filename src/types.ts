@@ -157,6 +157,9 @@ export interface TournamentMeta {
   roundDays?: number;
   // The end each round got when its challenges were created (or as the organizer moved it)
   roundEnds?: RoundEnd[];
+  // Ultime giornate (lib/roundDeadline.ts): how many of the last rounds start only once the rounds
+  // before are over; missing or 0 when off. Only with the deadlines on
+  finalRoundsWait?: number;
   winners?: SeasonWinner[];
   // Every player who ever took part, with the name shown on the site (see lib/roster.ts)
   roster?: Player[];

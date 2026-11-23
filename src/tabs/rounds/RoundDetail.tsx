@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, SeasonArchive, Settings, TournamentMeta } from '../../types';
-import { RoundMatch, RoundSummary, addMatch, removeMatch, removeRound, swapColors } from '../../lib/rounds';
+import { RoundMatch, RoundSummary, addMatch, removeMatch, removeRound, roundsOf, swapColors } from '../../lib/rounds';
 import { createChallenge } from '../../lib/lichess';
 import { errorMessage } from '../../lib/utils';
 import { deleteGamesFromFirebase } from '../../firebaseService';
@@ -11,6 +11,7 @@ import { canRelink, linkState } from '../../lib/relink';
 import { stateOf } from '../../lib/games';
 import {
   carriedOver,
+  finalRoundsOf,
   formatRoundEnd,
   roundDeadlinesOn,
   roundEndFrom,
@@ -20,6 +21,7 @@ import {
   roundExpired,
   roundStart,
   timeLeftText,
+  waitsForEarlier,
   withRoundEnd,
 } from '../../lib/roundDeadline';
 
@@ -85,6 +87,11 @@ export function RoundDetail({
   const deadlinesOn = roundDeadlinesOn(meta);
   const end = roundEndOf(meta, round);
   const setEnd = (at?: number) => onUpdateTournamentMeta({ roundEnds: withRoundEnd(meta?.roundEnds, round, at) });
+  // Ultime giornate: this round, or the next, waits for every game of the rounds before it
+  const roundNames = roundsOf(schedule, history).map((r) => r.round);
+  const waits = waitsForEarlier(meta, roundNames, round);
+  const stillOpen = waits ? carriedOver(round, history, gameStates) : [];
+  const nextWaits = !!next && waitsForEarlier(meta, roundNames, next);
 
   const [busy, setBusy] = useState("");
   const [panel, setPanel] = useState<Panel>(null);
@@ -164,6 +171,14 @@ export function RoundDetail({
       onMissingToken();
       return flash("err", "Aggiungi prima il token API Lichess in Impostazioni → Token Lichess.");
     }
+    if (
+      stillOpen.length > 0 &&
+      !window.confirm(
+        `Siamo alle ultime ${finalRoundsOf(meta)} giornate: il Turno ${round} dovrebbe partire quando sono finite le partite dei turni prima. ` +
+          `Sono ancora aperte: ${stillOpen.map((g) => `${nameOf(g.white)} – ${nameOf(g.black)} (Turno ${g.round})`).join(", ")}.\n\nCreare lo stesso le sfide del Turno ${round}?`
+      )
+    )
+      return;
     if (
       missingPledges.length > 0 &&
       !window.confirm(
@@ -331,6 +346,9 @@ export function RoundDetail({
             end={end}
             start={created > 0 ? roundStart(matches.flatMap((m) => (m.game ? [m.game] : []))) : undefined}
             onSet={setEnd}
+            waitingFor={created === 0 ? stillOpen.map((g) => `${nameOf(g.white)} – ${nameOf(g.black)}`) : undefined}
+            finalRound={waits}
+            nextWaits={nextWaits}
           />
         )}
 
@@ -413,6 +431,7 @@ export function RoundDetail({
                 triggerToast={triggerToast}
                 seasons={seasons}
                 roundEnd={end}
+                nextWaits={nextWaits}
               />
             </div>
           )}
@@ -438,18 +457,28 @@ function RoundDeadline({
   end,
   start,
   onSet,
+  waitingFor,
+  finalRound = false,
+  nextWaits = false,
 }: {
   round: string;
   days: number; // the length of a round, from the settings
   end?: number;
   start?: number; // its first challenge, once created
   onSet: (at?: number) => void;
+  waitingFor?: string[]; // Ultime giornate: the games of earlier rounds still open, before this one starts
+  finalRound?: boolean; // one of the last rounds, that wait for the ones before
+  nextWaits?: boolean; // the round after this one waits for it
 }) {
   const now = Date.now();
   if (start === undefined && end === undefined) {
     return (
       <p className="note note-sm">
         🗓️ Creando le sfide, il Turno {round} durerà {days} giorni: fino a {formatRoundEnd(roundEndFrom(now, days))}.
+        {finalRound &&
+          (waitingFor && waitingFor.length > 0
+            ? ` È una delle ultime giornate: parte quando sono finite le partite dei turni prima, e sono ancora aperte ${waitingFor.join(", ")}.`
+            : " È una delle ultime giornate: le partite dei turni prima sono tutte finite, può partire.")}
       </p>
     );
   }
@@ -470,7 +499,9 @@ function RoundDeadline({
       <p className="note-flush">
         🗓️{" "}
         {roundExpired(end, now)
-          ? `Scaduto ${formatRoundEnd(end)}: le partite ancora aperte continuano accanto al turno successivo.`
+          ? nextWaits
+            ? `Scaduto ${formatRoundEnd(end)}: nelle ultime giornate il turno successivo parte quando sono finite le partite ancora aperte.`
+            : `Scaduto ${formatRoundEnd(end)}: le partite ancora aperte continuano accanto al turno successivo.`
           : `Si chiude ${formatRoundEnd(end)} · ${timeLeftText(end, now)}.`}
       </p>
       <div className="round-end-edit">

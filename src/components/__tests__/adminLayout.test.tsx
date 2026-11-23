@@ -283,6 +283,14 @@ describe('Turni con scadenza in the organizer area', () => {
     // the notice to the organizer: here a browser without notifications
     expect(on).toContain('si accende da un browser che le riceve');
     expect(html).not.toContain('da un browser che le riceve');
+    // the last rounds without overlap: a switch of its own, off
+    expect(on).toMatch(/<input id="final-rounds" type="checkbox"\/>/);
+    expect(on).not.toContain('Quante giornate');
+    const last = renderToStaticMarkup(
+      <SeasonsTab config={{ ...withDeadlines(14), tournament: { ...withDeadlines(14).tournament, finalRoundsWait: 3 } }} settings={settings} setSettings={noop as any} history={[]} setHistory={noop as any} onSeasonReset={noop} gameStates={{}} seasons={[]} flash={noop} onUpdateTournamentMeta={noop} onUpdateSchedule={noop} />
+    );
+    expect(last).toMatch(/<input id="final-rounds" type="checkbox" checked=""\/>/);
+    expect(last).toContain('Le ultime 3 giornate partono solo quando sono finite tutte le partite dei turni prima');
   });
 
   it('tells when the round is over and the next one can start, the open games going on', async () => {
@@ -294,6 +302,18 @@ describe('Turni con scadenza in the organizer area', () => {
     const off = await rounds(withDeadlines(0));
     expect(off).not.toContain('è scaduto');
     expect(off).not.toContain('>Scaduto<');
+  });
+
+  it('in the last rounds waits for the games still open instead of proposing the next round', async () => {
+    // two rounds in the calendar, the last one waits
+    const last = { ...withDeadlines(14), tournament: { ...withDeadlines(14).tournament, finalRoundsWait: 1 } };
+    const html = await rounds(last);
+    expect(html).toMatch(/Il Turno 1 è scaduto \S+ \d+ \S+\. Siamo alle ultime giornate: il Turno 2 parte\s+quando finisce la partita ancora aperta: anna – bruno\./);
+    expect(html).not.toContain('puoi creare il Turno 2');
+    const second = await rounds(last, '2');
+    expect(second).toContain('È una delle ultime giornate: parte quando sono finite le partite dei turni prima, e sono ancora aperte anna – bruno.');
+    const first = await rounds(last, '1');
+    expect(first).toContain('nelle ultime giornate il turno successivo parte quando sono finite le partite ancora aperte');
   });
 
   it('shows the end of a round, to move or remove, and what the next round will get', async () => {

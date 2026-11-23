@@ -62,6 +62,7 @@ export function tournamentFromDoc(doc: TournamentDocData): TournamentMeta | null
     rated: typeof doc.rated === "boolean" ? doc.rated : undefined,
     ...(typeof doc.roundDays === "number" && doc.roundDays > 0 ? { roundDays: doc.roundDays } : {}),
     ...(cleanRoundEnds(doc.roundEnds) ? { roundEnds: cleanRoundEnds(doc.roundEnds) } : {}),
+    ...(typeof doc.finalRoundsWait === "number" && doc.finalRoundsWait > 0 ? { finalRoundsWait: doc.finalRoundsWait } : {}),
     winners: doc.winners || [],
     ...(Array.isArray(doc.roster) ? { roster: doc.roster } : {}),
     ...(Array.isArray(doc.seeds) ? { seeds: doc.seeds } : {}),
@@ -95,6 +96,7 @@ export function mergeTournamentMeta(
     // 0 switches the deadlines off: kept as 0, so that the write reaches Firestore
     ...((patch.roundDays ?? current?.roundDays) !== undefined ? { roundDays: patch.roundDays ?? current?.roundDays } : {}),
     ...((patch.roundEnds ?? current?.roundEnds) ? { roundEnds: patch.roundEnds ?? current?.roundEnds } : {}),
+    ...((patch.finalRoundsWait ?? current?.finalRoundsWait) !== undefined ? { finalRoundsWait: patch.finalRoundsWait ?? current?.finalRoundsWait } : {}),
     winners: patch.winners ?? current?.winners ?? d.winners,
     ...((patch.roster ?? current?.roster) ? { roster: patch.roster ?? current?.roster } : {}),
     ...((patch.seeds ?? current?.seeds) ? { seeds: patch.seeds ?? current?.seeds } : {}),

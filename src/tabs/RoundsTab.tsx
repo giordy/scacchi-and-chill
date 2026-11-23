@@ -149,7 +149,14 @@ export function RoundsTab({
   return (
     <div className="settings-stack">
       {unsavedNotice}
-      {expired && (
+      {expired && expired.waitFor.length > 0 && (
+        <div className="notice warning">
+          Il Turno {expired.round} è scaduto {formatRoundEnd(expired.end)}. Siamo alle ultime giornate: il Turno {expired.next} parte
+          quando {expired.waitFor.length === 1 ? "finisce la partita ancora aperta" : `finiscono le ${expired.waitFor.length} partite ancora aperte`}:{" "}
+          {expired.waitFor.map((g) => `${nameOf(g.white)} – ${nameOf(g.black)}`).join(", ")}.
+        </div>
+      )}
+      {expired && expired.waitFor.length === 0 && (
         <div className="notice warning">
           Il Turno {expired.round} è scaduto {formatRoundEnd(expired.end)}: puoi creare il Turno {expired.next}.{" "}
           {expired.open.length === 0

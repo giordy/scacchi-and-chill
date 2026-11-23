@@ -168,18 +168,38 @@ export function expiredRoundOf(tournament, games, states, now, idOf) {
   if (typeof end !== 'number' || now < end) return null;
   const next = rounds.find((r) => byRound(r.round, current.round) > 0 && r.created === 0);
   if (!next) return null;
-  const open = games.filter((g) => {
-    if (String(g.round) !== current.round || !g.url) return false;
+  const isOpen = (g) => {
+    if (!g.url) return false;
     const id = idOf(g.url);
     return !isFinal((id && states[id]) || g.lichess);
-  });
+  };
+  const pair = (g) => ({ white: g.white, black: g.black });
+  // Ultime giornate: the last rounds of the calendar wait for every game of the rounds before them
+  const finalRounds = typeof tournament.finalRoundsWait === 'number' && tournament.finalRoundsWait > 0 ? Math.floor(tournament.finalRoundsWait) : 0;
+  const waits = finalRounds > 0 && rounds.slice(-finalRounds).some((r) => r.round === next.round);
+  const waitFor = waits ? games.filter((g) => byRound(g.round, next.round) < 0 && isOpen(g)).sort((a, b) => byRound(a.round, b.round)) : [];
   return {
     key: `${tournament.season ?? ''}|${current.round}|${end}`,
     round: current.round,
     next: next.round,
     end,
-    open: open.map((g) => ({ white: g.white, black: g.black })),
+    open: games.filter((g) => String(g.round) === current.round && isOpen(g)).map(pair),
+    waitFor: waitFor.map(pair),
   };
+}
+
+// What to tell the organizer, from the round past its end and the keys already told (each sent once):
+// - the next round can start: `key`; after a wait for the last games, said as the round being over
+// - Ultime giornate, the next round waits: `key|attesa`, once
+// null when it was all told already
+export function organizerNews(item, told) {
+  if (!item) return null;
+  if (item.waitFor.length > 0) {
+    const key = `${item.key}|attesa`;
+    return told.includes(key) ? null : { key, kind: 'wait' };
+  }
+  if (told.includes(item.key)) return null;
+  return { key: item.key, kind: told.includes(`${item.key}|attesa`) ? 'over' : 'expired' };
 }
 
 // "lunedì 7 dicembre": the last day of the round, as src/lib/roundDeadline.ts formatRoundEnd
@@ -187,13 +207,23 @@ export const formatRoundEnd = (end) =>
   new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(end - 1));
 
 // The notification: it opens the organizer area, and does not replace the one of the moves
-export function deadlineNotification(item, nameOf) {
-  const pairs = item.open.map((g) => `${nameOf(g.white)} – ${nameOf(g.black)}`);
-  const open = pairs.length === 0 ? 'Le sue partite sono tutte concluse.' : `${pairs.length === 1 ? 'Continua' : 'Continuano'}: ${pairs.join(', ')}.`;
+export function deadlineNotification(item, nameOf, kind = 'expired') {
+  const names = (list) => list.map((g) => `${nameOf(g.white)} – ${nameOf(g.black)}`).join(', ');
+  const base = { hash: '#admin', tag: 'turni' };
+  if (kind === 'wait') {
+    return {
+      ...base,
+      title: `Turno ${item.round} scaduto`,
+      body: `Si è chiuso ${formatRoundEnd(item.end)}. Ultime giornate: il Turno ${item.next} parte quando ${item.waitFor.length === 1 ? 'finisce' : 'finiscono'} ${names(item.waitFor)}.`,
+    };
+  }
+  if (kind === 'over') {
+    return { ...base, title: `Partite finite: tocca al Turno ${item.next}`, body: `Le partite dei turni prima sono tutte concluse: puoi creare il Turno ${item.next}.` };
+  }
+  const open = item.open.length === 0 ? 'Le sue partite sono tutte concluse.' : `${item.open.length === 1 ? 'Continua' : 'Continuano'}: ${names(item.open)}.`;
   return {
+    ...base,
     title: `Turno ${item.round} scaduto`,
     body: `Si è chiuso ${formatRoundEnd(item.end)}: puoi creare il Turno ${item.next}. ${open}`,
-    hash: '#admin',
-    tag: 'turni',
   };
 }

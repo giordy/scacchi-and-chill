@@ -109,6 +109,7 @@ export interface BulletinInput {
   seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo of the colpacci
   matchesUrl?: string; // the site's Partite tab: where to follow the games during the round
   roundEnd?: number; // Turni con scadenza (lib/roundDeadline.ts): when the round ends
+  nextWaits?: boolean; // Ultime giornate: the next round starts only once this one is over
 }
 
 export interface Bulletin {
@@ -139,7 +140,7 @@ const PHASE_TEXT: Record<GamePhase, string> = {
 };
 
 // The WhatsApp message on the state of a round, from the games and what Lichess says of them
-export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random, seasons = [], matchesUrl, roundEnd }: BulletinInput): Bulletin {
+export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random, seasons = [], matchesUrl, roundEnd, nextWaits = false }: BulletinInput): Bulletin {
   const nameOf = nameFrom(config.players);
   const idToHandle = (id?: string) =>
     config.players.find((p) => p.handle.toLowerCase() === String(id ?? "").toLowerCase())?.handle;
@@ -335,7 +336,9 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     roundEnd === undefined || isRoundComplete
       ? ""
       : roundExpired(roundEnd, now)
-      ? `⌛ *Tempo del turno scaduto* ${formatRoundEnd(roundEnd)}: le partite ancora aperte continuano, anche col turno successivo.`
+      ? nextWaits
+        ? `⌛ *Tempo del turno scaduto* ${formatRoundEnd(roundEnd)}: siamo alle ultime giornate, il turno successivo parte quando finiscono le partite ancora aperte.`
+        : `⌛ *Tempo del turno scaduto* ${formatRoundEnd(roundEnd)}: le partite ancora aperte continuano, anche col turno successivo.`
       : `🗓️ *Il turno si chiude ${formatRoundEnd(roundEnd)}* (${timeLeftText(roundEnd, now)})`;
 
   const vars = { round, ...count, summary: roundSummary(count) };

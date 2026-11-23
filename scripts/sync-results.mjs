@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fields } from './backup.mjs';
-import { deadlineNotification, expiredRoundOf, movesNews, notificationFor, sameState, sendPush, vapidKeys } from './push.mjs';
+import { deadlineNotification, expiredRoundOf, movesNews, notificationFor, organizerNews, sameState, sendPush, vapidKeys } from './push.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const TOURNAMENT_DOC_ID = 'scacchi-and-chill-official';
@@ -219,13 +219,14 @@ async function notifyOrganizer(base, token, vapid, tournament, games, states) {
   const item = expiredRoundOf(tournament, games, states, Date.now(), gameIdOf);
   if (!item) return;
   const told = (await getDoc(base, token, 'private/deadlinePush'))?.told ?? [];
-  if (told.includes(item.key)) return;
+  const news = organizerNews(item, told);
+  if (!news) return;
   const subs = (await getDoc(base, token, 'private/organizerPush'))?.subscriptions ?? [];
   if (subs.length === 0) {
     console.log(`Turno ${item.round} scaduto: nessun dispositivo dell'organizzatore con gli avvisi accesi.`);
     return;
   }
-  const payload = deadlineNotification(item, namesOf(tournament));
+  const payload = deadlineNotification(item, namesOf(tournament), news.kind);
   let sent = 0;
   let failed = 0;
   const gone = [];
@@ -240,7 +241,7 @@ async function notifyOrganizer(base, token, vapid, tournament, games, states) {
   }
   if (gone.length > 0) await patchFields(base, token, 'private/organizerPush', { subscriptions: subs.filter((s) => !gone.includes(s.endpoint)) });
   // Tried again at the next run only when no device got it and some could
-  if (sent > 0 || failed === 0) await setDoc(base, token, 'private/deadlinePush', { told: [...told, item.key].slice(-30) });
+  if (sent > 0 || failed === 0) await setDoc(base, token, 'private/deadlinePush', { told: [...told, news.key].slice(-30) });
   console.log(`Turno ${item.round} scaduto: avviso all'organizzatore su ${sent} dispositivi${gone.length ? `, ${gone.length} non più iscritti tolti` : ''}.`);
 }
 

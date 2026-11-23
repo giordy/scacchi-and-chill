@@ -69,6 +69,7 @@ export interface TournamentDocData {
   rated?: boolean;
   roundDays?: number;
   roundEnds?: RoundEnd[];
+  finalRoundsWait?: number;
   winners?: SeasonWinner[];
   roster?: Player[];
   seeds?: EloSeed[];
@@ -109,6 +110,7 @@ export async function saveTournamentFullToFirebase(data: {
     if (data.meta.daysPerMove !== undefined) payload.daysPerMove = data.meta.daysPerMove;
     if (data.meta.rated !== undefined) payload.rated = data.meta.rated;
     if (data.meta.roundDays !== undefined) payload.roundDays = data.meta.roundDays;
+    if (data.meta.finalRoundsWait !== undefined) payload.finalRoundsWait = data.meta.finalRoundsWait;
     // A list, not a map: a merge write would keep the keys of a map that were removed
     if (data.meta.roundEnds !== undefined) payload.roundEnds = data.meta.roundEnds.map(({ round, at }) => ({ round, at }));
     // Firestore rejects undefined values (e.g. a winner without notes): the JSON round trip drops them

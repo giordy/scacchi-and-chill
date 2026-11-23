@@ -10,6 +10,10 @@ import { gameProgress } from './progress';
 // in the middle of a round leaves that round without one. Switched off, no end is shown anywhere.
 
 export const DEFAULT_ROUND_DAYS = 14;
+// Ultime giornate (optional, apart): the last rounds of the calendar start only once every game of the
+// rounds before is over, so that no game is played knowing the results of a later round
+export const DEFAULT_FINAL_ROUNDS = 3;
+export const MAX_FINAL_ROUNDS = 10;
 export const MIN_ROUND_DAYS = 3;
 export const MAX_ROUND_DAYS = 60;
 
@@ -57,6 +61,25 @@ export function roundEndFrom(start: number, days: number): number {
 // Whether the rounds have a deadline: the organizer set a length
 export const roundDeadlinesOn = (meta: Pick<TournamentMeta, 'roundDays'> | undefined): boolean =>
   typeof meta?.roundDays === 'number' && meta.roundDays > 0;
+
+// How many of the last rounds wait for the ones before: 0 when off (also with the deadlines off)
+export function finalRoundsOf(meta: Pick<TournamentMeta, 'roundDays' | 'finalRoundsWait'> | undefined): number {
+  if (!roundDeadlinesOn(meta)) return 0;
+  const n = meta?.finalRoundsWait;
+  return typeof n === 'number' && n > 0 ? Math.floor(n) : 0;
+}
+
+// Whether this round is one of the last of the calendar that wait (roundNames: every round of the season)
+export function waitsForEarlier(
+  meta: Pick<TournamentMeta, 'roundDays' | 'finalRoundsWait'> | undefined,
+  roundNames: string[],
+  round: string
+): boolean {
+  const n = finalRoundsOf(meta);
+  if (n === 0) return false;
+  const sorted = [...new Set(roundNames)].sort(byRound);
+  return sorted.slice(-n).includes(round);
+}
 
 // The end of a round, only while the option is on
 export function roundEndOf(meta: Pick<TournamentMeta, 'roundDays' | 'roundEnds'> | undefined, round: string): number | undefined {
@@ -133,12 +156,15 @@ export interface ExpiredRound {
   end: number;
   next: string; // the round to start now
   open: HistoryGame[]; // its games still being played, which go on
+  // Ultime giornate: the next round is one of the last, and these games of the rounds before it are
+  // still being played: it starts when they are over (empty: it can start)
+  waitFor: HistoryGame[];
 }
 
 // For the organizer: the round in progress is past its end and the next one is still to start.
 // Undefined while the option is off, before the end, or when no round follows (the last one).
 export function expiredRound(
-  meta: Pick<TournamentMeta, 'roundDays' | 'roundEnds'> | undefined,
+  meta: Pick<TournamentMeta, 'roundDays' | 'roundEnds' | 'finalRoundsWait'> | undefined,
   rounds: { round: string; created: number }[],
   history: HistoryGame[],
   states: Record<string, LichessExportGame>,
@@ -151,5 +177,12 @@ export function expiredRound(
   if (end === undefined || !roundExpired(end, now)) return undefined;
   const next = rounds.find((r) => byRound(r.round, current.round) > 0 && r.created === 0);
   if (!next) return undefined;
-  return { round: current.round, end, next: next.round, open: history.filter((g) => g.round === current.round && isOpen(g, states)) };
+  const waits = waitsForEarlier(meta, rounds.map((r) => r.round), next.round);
+  return {
+    round: current.round,
+    end,
+    next: next.round,
+    open: history.filter((g) => g.round === current.round && isOpen(g, states)),
+    waitFor: waits ? carriedOver(next.round, history, states) : [],
+  };
 }

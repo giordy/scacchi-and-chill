@@ -172,7 +172,7 @@ describe('push of the moves: what the page writes of the moves seen', () => {
 });
 
 // @ts-expect-error a Node script without types
-import { deadlineNotification, expiredRoundOf } from '../../../scripts/push.mjs';
+import { deadlineNotification, expiredRoundOf, organizerNews } from '../../../scripts/push.mjs';
 import { expiredRound } from '../roundDeadline';
 import { roundsOf } from '../rounds';
 import { extractGameId } from '../utils';
@@ -214,6 +214,25 @@ describe('push to the organizer: a round past its end (Turni con scadenza)', () 
       tag: 'turni',
     });
     expect(deadlineNotification({ ...item, open: [] }, nameOf).body).toMatch(/Le sue partite sono tutte concluse\.$/);
+  });
+
+  it('in the last rounds tells the wait first, then that the next round can start', () => {
+    const last = { ...tournament, finalRoundsWait: 1 };
+    const item = expiredRoundOf(last, all, fresh, END, extractGameId);
+    const site = expiredRound(last, roundsOf(schedule, all as any), all as any, fresh as any, END);
+    expect(item.waitFor).toEqual(site!.waitFor.map(({ white, black }) => ({ white, black })));
+    expect(item.waitFor).toEqual([{ white: 'carla', black: 'dario' }]);
+    expect(organizerNews(item, [])).toEqual({ key: `${item.key}|attesa`, kind: 'wait' });
+    expect(deadlineNotification(item, nameOf, 'wait').body).toBe('Si è chiuso lunedì 7 dicembre. Ultime giornate: il Turno 3 parte quando finisce Carla – Dario.');
+    expect(organizerNews(item, [`${item.key}|attesa`])).toBeNull();
+    // the last game over: the round can start, said once
+    const done = expiredRoundOf(last, all, { ...fresh, bbbbbbbb: { status: 'draw' } }, END, extractGameId);
+    expect(done.waitFor).toEqual([]);
+    expect(organizerNews(done, [`${item.key}|attesa`])).toEqual({ key: item.key, kind: 'over' });
+    expect(deadlineNotification(done, nameOf, 'over').title).toBe('Partite finite: tocca al Turno 3');
+    expect(organizerNews(done, [`${item.key}|attesa`, item.key])).toBeNull();
+    // without the wait, straight to "puoi creare"
+    expect(organizerNews(expiredRoundOf(tournament, all, fresh, END, extractGameId), [])).toEqual({ key: item.key, kind: 'expired' });
   });
 
   it('keeps a short list of devices, the renewed one in place of the old', () => {

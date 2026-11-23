@@ -4,6 +4,7 @@ import {
   cleanRoundEnds,
   daysLeft,
   expiredRound,
+  finalRoundsOf,
   formatRoundEnd,
   roundDeadlinesOn,
   roundEndFrom,
@@ -14,6 +15,7 @@ import {
   roundExpired,
   roundStart,
   timeLeftText,
+  waitsForEarlier,
   withRoundEnd,
 } from '../roundDeadline';
 import { HistoryGame, LichessExportGame } from '../../types';
@@ -138,5 +140,40 @@ describe('rounds side by side', () => {
     expect(expiredRound(meta, rounds.slice(0, 2), history, {}, END_7_DEC)).toBeUndefined();
     // once the next round has its challenges, it is the one in progress
     expect(expiredRound(meta, [...rounds.slice(0, 2), { round: '4', created: 1 }], history, {}, END_7_DEC)).toBeUndefined();
+  });
+});
+
+describe('the last rounds, without overlap (Ultime giornate)', () => {
+  const names = Array.from({ length: 14 }, (_, i) => String(i + 1));
+  it('is off unless set, and only with the deadlines on', () => {
+    expect(finalRoundsOf({ roundDays: 14 })).toBe(0);
+    expect(finalRoundsOf({ roundDays: 14, finalRoundsWait: 0 })).toBe(0);
+    expect(finalRoundsOf({ roundDays: 0, finalRoundsWait: 3 })).toBe(0);
+    expect(finalRoundsOf({ roundDays: 14, finalRoundsWait: 3 })).toBe(3);
+  });
+
+  it('holds the last rounds of the calendar, by round number', () => {
+    const meta = { roundDays: 14, finalRoundsWait: 3 };
+    expect(names.filter((r) => waitsForEarlier(meta, names, r))).toEqual(['12', '13', '14']);
+    expect(waitsForEarlier({ roundDays: 14 }, names, '14')).toBe(false);
+  });
+
+  const history = [
+    game('10', 'anna', 'bruno', 'aaaaaaaa', 'started'),
+    game('11', 'carla', 'dario', 'bbbbbbbb', 'started'),
+    game('11', 'anna', 'carla', 'cccccccc', 'mate'),
+  ];
+  const rounds = names.map((round) => ({ round, created: Number(round) <= 11 ? 1 : 0 }));
+  const meta = { roundDays: 14, roundEnds: [{ round: '11', at: END_7_DEC }], finalRoundsWait: 3 };
+
+  it('waits, at the end of the round before them, for every game still open', () => {
+    const over = expiredRound(meta, rounds, history, {}, END_7_DEC);
+    expect(over).toMatchObject({ round: '11', next: '12' });
+    expect(over?.waitFor.map((g) => g.url)).toEqual([url('aaaaaaaa'), url('bbbbbbbb')]);
+    // once they are over, the next round can start
+    const done = { aaaaaaaa: { id: 'aaaaaaaa', status: 'draw' }, bbbbbbbb: { id: 'bbbbbbbb', status: 'resign' } } as Record<string, LichessExportGame>;
+    expect(expiredRound(meta, rounds, history, done, END_7_DEC)?.waitFor).toEqual([]);
+    // off: as before
+    expect(expiredRound({ ...meta, finalRoundsWait: 0 }, rounds, history, {}, END_7_DEC)?.waitFor).toEqual([]);
   });
 });

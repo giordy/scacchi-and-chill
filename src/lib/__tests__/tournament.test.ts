@@ -33,6 +33,9 @@ describe('tournament meta', () => {
     // 0 stays, so that the write switches them off on Firestore too; the ends stay for a later switch on
     expect(mergeTournamentMeta(current, { roundDays: 0 })).toMatchObject({ roundDays: 0, roundEnds: [{ round: '1', at: 5 }] });
     expect(mergeTournamentMeta(undefined, { title: 'T', season: 'S' })).not.toHaveProperty('roundDays');
+    // the last rounds without overlap, apart
+    expect(tournamentFromDoc({ title: 'T', season: 'S', finalRoundsWait: 3 })).toMatchObject({ finalRoundsWait: 3 });
+    expect(mergeTournamentMeta(mergeTournamentMeta(current, { finalRoundsWait: 3 }), { finalRoundsWait: 0 })).toMatchObject({ finalRoundsWait: 0 });
   });
 });
 
