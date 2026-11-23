@@ -152,7 +152,7 @@ export function RoundsTab({
       {expired && expired.waitFor.length > 0 && (
         <div className="notice">
           Il Turno {expired.round} si è chiuso {formatRoundEnd(expired.end)}. Siamo alle ultime giornate: il Turno {expired.next} parte
-          con calma, quando {expired.waitFor.length === 1 ? "finisce" : "finiscono"} {stillPlayingText(expired.waitFor.length)}.
+          quando {expired.waitFor.length === 1 ? "finisce" : "finiscono"} {stillPlayingText(expired.waitFor.length)}.
         </div>
       )}
       {expired && expired.waitFor.length === 0 && (

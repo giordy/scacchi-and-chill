@@ -337,8 +337,8 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
       ? ""
       : roundExpired(roundEnd, now)
       ? nextWaits
-        ? `🗓️ *Il turno si è chiuso* ${formatRoundEnd(roundEnd)}: siamo alle ultime giornate, il prossimo parte quando tutte le partite sono finite. Nessuna fretta ♟️`
-        : `🗓️ *Il turno si è chiuso* ${formatRoundEnd(roundEnd)}: chi sta ancora giocando continua con calma, anche col turno successivo.`
+        ? `🗓️ *Il turno si è chiuso* ${formatRoundEnd(roundEnd)}: ultime giornate, il prossimo parte quando sono finite tutte le partite.`
+        : `🗓️ *Il turno si è chiuso* ${formatRoundEnd(roundEnd)}: le partite in corso continuano anche col turno successivo.`
       : `🗓️ *Il turno si chiude ${formatRoundEnd(roundEnd)}* (${timeLeftText(roundEnd, now)})`;
 
   const vars = { round, ...count, summary: roundSummary(count) };

@@ -225,7 +225,7 @@ describe('push to the organizer: a round past its end (Turni con scadenza)', () 
     expect(organizerNews(item, [])).toEqual({ key: `${item.key}|attesa`, kind: 'wait' });
     expect(deadlineNotification(item, nameOf, 'wait')).toMatchObject({
       title: 'Turno 2 chiuso',
-      body: "Si è chiuso lunedì 7 dicembre. Ultime giornate: il Turno 3 parte con calma, quando finisce l'ultima partita ancora in corso.",
+      body: "Si è chiuso lunedì 7 dicembre. Ultime giornate: il Turno 3 parte quando finisce l'ultima partita ancora in corso.",
     });
     expect(organizerNews(item, [`${item.key}|attesa`])).toBeNull();
     // the last game over: the round can start, said once

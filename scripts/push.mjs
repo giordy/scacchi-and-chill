@@ -214,7 +214,7 @@ export function deadlineNotification(item, nameOf, kind = 'expired') {
     return {
       ...base,
       title: `Turno ${item.round} chiuso`,
-      body: `Si è chiuso ${formatRoundEnd(item.end)}. Ultime giornate: il Turno ${item.next} parte con calma, quando ${
+      body: `Si è chiuso ${formatRoundEnd(item.end)}. Ultime giornate: il Turno ${item.next} parte quando ${
         item.waitFor.length === 1 ? "finisce l'ultima partita ancora in corso" : `finiscono le ${item.waitFor.length} partite ancora in corso`
       }.`,
     };

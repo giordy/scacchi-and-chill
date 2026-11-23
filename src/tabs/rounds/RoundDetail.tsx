@@ -478,7 +478,7 @@ function RoundDeadline({
         🗓️ Creando le sfide, il Turno {round} durerà {days} giorni: fino a {formatRoundEnd(roundEndFrom(now, days))}.
         {finalRound &&
           (waitingFor
-            ? ` È una delle ultime giornate: parte con calma, quando ${waitingFor === 1 ? "finisce" : "finiscono"} ${stillPlayingText(waitingFor)}.`
+            ? ` È una delle ultime giornate: parte quando ${waitingFor === 1 ? "finisce" : "finiscono"} ${stillPlayingText(waitingFor)}.`
             : " È una delle ultime giornate: le partite dei turni prima sono tutte finite, può partire.")}
       </p>
     );
@@ -501,7 +501,7 @@ function RoundDeadline({
         🗓️{" "}
         {roundExpired(end, now)
           ? nextWaits
-            ? `Si è chiuso ${formatRoundEnd(end)}: nelle ultime giornate il turno successivo parte con calma, quando tutte le partite sono finite.`
+            ? `Si è chiuso ${formatRoundEnd(end)}: nelle ultime giornate il turno successivo parte quando sono finite tutte le partite.`
             : `Scaduto ${formatRoundEnd(end)}: le partite ancora aperte continuano accanto al turno successivo.`
           : `Si chiude ${formatRoundEnd(end)} · ${timeLeftText(end, now)}.`}
       </p>

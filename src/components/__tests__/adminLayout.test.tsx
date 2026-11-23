@@ -308,15 +308,15 @@ describe('Turni con scadenza in the organizer area', () => {
     // two rounds in the calendar, the last one waits
     const last = { ...withDeadlines(14), tournament: { ...withDeadlines(14).tournament, finalRoundsWait: 1 } };
     const html = await rounds(last);
-    expect(html).toMatch(/Il Turno 1 si è chiuso \S+ \d+ \S+\. Siamo alle ultime giornate: il Turno 2 parte\s+con calma, quando finisce l&#x27;ultima partita ancora in corso\./);
+    expect(html).toMatch(/Il Turno 1 si è chiuso \S+ \d+ \S+\. Siamo alle ultime giornate: il Turno 2 parte\s+quando finisce l&#x27;ultima partita ancora in corso\./);
     // nobody is named while they are waited for
     expect(html).not.toContain('anna – bruno');
     expect(html).not.toContain('puoi creare il Turno 2');
     const second = await rounds(last, '2');
-    expect(second).toContain('È una delle ultime giornate: parte con calma, quando finisce l&#x27;ultima partita ancora in corso.');
+    expect(second).toContain('È una delle ultime giornate: parte quando finisce l&#x27;ultima partita ancora in corso.');
     expect(second).not.toContain('anna – bruno');
     const first = await rounds(last, '1');
-    expect(first).toContain('nelle ultime giornate il turno successivo parte con calma, quando tutte le partite sono finite');
+    expect(first).toContain('nelle ultime giornate il turno successivo parte quando sono finite tutte le partite');
   });
 
   it('shows the end of a round, to move or remove, and what the next round will get', async () => {

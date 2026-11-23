@@ -95,7 +95,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
     if (end === undefined || block.games.every((g) => progressOf(g) === "finished")) return null;
     return roundExpired(end, now) ? (
       <span className="round-group-deadline is-over">
-        <span aria-hidden="true">🗓️ </span>Si è chiuso {formatRoundEnd(end)}: le partite in corso continuano con calma
+        <span aria-hidden="true">🗓️ </span>Si è chiuso {formatRoundEnd(end)}: le partite in corso continuano
       </span>
     ) : (
       <span className="round-group-deadline">
