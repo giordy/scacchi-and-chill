@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { AppConfig, HistoryGame, SeasonArchive } from '../../types';
 import { errorMessage, extractGameId } from '../../lib/utils';
 import { buildBulletin } from '../../lib/bulletin';
+import type { WaitReason } from '../../lib/roundDeadline';
 import { fetchGameStates } from '../../lib/lichess';
 import { applyWithdrawals } from '../../lib/withdrawals';
 import { gameProgress } from '../../lib/progress';
@@ -22,7 +23,7 @@ export function BulletinSection({
   triggerToast,
   seasons = [],
   roundEnd,
-  nextWaits = false,
+  nextWait,
 }: {
   round: string;
   history: HistoryGame[];
@@ -32,7 +33,7 @@ export function BulletinSection({
   triggerToast?: (msg: string) => void;
   seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo of the colpacci
   roundEnd?: number; // Turni con scadenza: when the round ends
-  nextWaits?: boolean; // Ultime giornate: the next round starts only when this one is over
+  nextWait?: WaitReason; // the next round waits (lib/roundDeadline.ts roundWait), and why
 }) {
   // Games annulled or won by forfeit after a withdrawal, as on the site
   const history = applyWithdrawals(rawHistory, config.tournament?.withdrawals);
@@ -96,7 +97,7 @@ export function BulletinSection({
         .filter((id): id is string => Boolean(id));
       const states = ids.length > 0 ? await fetchGameStates(ids) : {};
       const built = buildBulletin({
-        round, games, states, history, config, expiryDays, seasons, roundEnd, nextWaits,
+        round, games, states, history, config, expiryDays, seasons, roundEnd, nextWait,
         matchesUrl: `${window.location.origin}${window.location.pathname}#/partite`,
       });
       if (editedRound.current === targetRound) setNewer(built.text === text ? null : { round: targetRound, text: built.text });

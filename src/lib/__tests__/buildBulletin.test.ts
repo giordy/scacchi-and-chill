@@ -138,8 +138,11 @@ describe('buildBulletin', () => {
     expect(build(end - 4 * 86400e3)).toContain('🗓️ *Il turno si è chiuso* mercoledì 4 novembre: le partite in corso continuano anche col turno successivo.');
     // the next round is one of the last, that wait
     expect(
-      buildBulletin({ round: '5', games, states, history: games, config, expiryDays: 2, now: NOW, random: first, roundEnd: end - 4 * 86400e3, nextWaits: true }).text
+      buildBulletin({ round: '5', games, states, history: games, config, expiryDays: 2, now: NOW, random: first, roundEnd: end - 4 * 86400e3, nextWait: 'final' }).text
     ).toContain('🗓️ *Il turno si è chiuso* mercoledì 4 novembre: ultime giornate, il prossimo parte quando sono finite tutte le partite.');
+    expect(
+      buildBulletin({ round: '5', games, states, history: games, config, expiryDays: 2, now: NOW, random: first, roundEnd: end - 4 * 86400e3, nextWait: 'busy' }).text
+    ).toContain('🗓️ *Il turno si è chiuso* mercoledì 4 novembre: il prossimo parte quando chi ha già 2 partite in corso ne chiude una.');
     // without the option, or once the round is over, nothing
     expect(build()).not.toMatch(/si chiude|si è chiuso/);
     expect(build(end, games.slice(1))).not.toMatch(/si chiude|si è chiuso/);

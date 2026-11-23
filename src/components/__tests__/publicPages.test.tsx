@@ -461,6 +461,7 @@ describe('Turni con scadenza on the public page', () => {
     const rules = page('#/regolamento', { roundDays: 14 });
     expect(rules).toContain('ogni turno dura 14 giorni');
     expect(rules).not.toContain('Nelle ultime');
+    expect(rules).toContain('Nessuno però gioca più di 2 partite insieme: se ne avrebbe una in più, il turno successivo parte quando ne chiude una.');
     expect(page('#/regolamento', { roundDays: 14, finalRoundsWait: 3 })).toContain('Nelle ultime 3 giornate invece un turno comincia quando sono finite tutte le partite dei turni prima.');
     // off: no rule, also with the last rounds left on
     const off = page('#/regolamento', { roundDays: 0, finalRoundsWait: 3 });

@@ -4,6 +4,7 @@ import {
   cleanRoundEnds,
   daysLeft,
   endOnCreate,
+  busyPlayers,
   expiredRound,
   finalRoundsOf,
   formatRoundEnd,
@@ -15,8 +16,10 @@ import {
   romeMidnight,
   roundExpired,
   roundStart,
+  roundWait,
   timeLeftText,
   waitsForEarlier,
+  waitText,
   withRoundEnd,
 } from '../roundDeadline';
 import { HistoryGame, LichessExportGame } from '../../types';
@@ -231,5 +234,65 @@ describe('corner cases of a round past its end', () => {
   it('a game with no link is not still being played (a forfeit, a pairing not created)', () => {
     const forfeit = { round: '1', white: 'anna', black: 'bruno', url: '', lichess: { id: '', status: 'forfeit' } as LichessExportGame };
     expect(carriedOver('2', [forfeit], {})).toEqual([]);
+  });
+});
+
+describe('nobody plays more than two games at once', () => {
+  // Anna still has two games open, from rounds 2 and 3
+  const history = [
+    game('2', 'anna', 'bruno', 'aaaaaaaa', 'started'),
+    game('3', 'carla', 'Anna', 'bbbbbbbb', 'started'),
+    game('3', 'bruno', 'dario', 'cccccccc', 'started'),
+  ];
+  const on = { roundDays: 14 };
+  const names = ['2', '3', '4'];
+
+  it('finds who already has two games open, without minding the case of the handle', () => {
+    expect(busyPlayers(history)).toEqual(['anna', 'bruno']);
+    expect(busyPlayers(history, ['Anna', 'carla'])).toEqual(['anna']);
+    expect(busyPlayers(history, ['carla', 'dario'])).toEqual([]);
+  });
+
+  it('holds the next round when one of its players would get a third game', () => {
+    const wait = roundWait(on, names, '4', ['anna', 'dario'], history, {});
+    expect(wait?.reason).toBe('busy');
+    // the games of who has too many: Anna's two
+    expect(wait?.games.map((g) => g.url)).toEqual([url('aaaaaaaa'), url('bbbbbbbb')]);
+    // whoever rests in round 4 does not count
+    expect(roundWait(on, names, '4', ['carla', 'dario'], history, {})).toBeUndefined();
+    // once Anna ends one of them, the round can start
+    const ended = { aaaaaaaa: { id: 'aaaaaaaa', status: 'resign' } as LichessExportGame };
+    expect(roundWait(on, names, '4', ['anna', 'dario'], history, ended)).toBeUndefined();
+    // with no pairings known, everybody counts
+    expect(roundWait(on, names, '4', undefined, history, {})?.reason).toBe('busy');
+  });
+
+  it('applies only with the deadlines on, and the last rounds wait for every game first', () => {
+    expect(roundWait({ roundDays: 0 }, names, '4', ['anna'], history, {})).toBeUndefined();
+    const last = roundWait({ ...on, finalRoundsWait: 1 }, names, '4', ['carla', 'dario'], history, {});
+    expect(last).toMatchObject({ reason: 'final' });
+    expect(last?.games).toHaveLength(3);
+    // nothing open: nothing to wait for
+    expect(roundWait({ ...on, finalRoundsWait: 1 }, names, '2', ['anna'], history, {})).toBeUndefined();
+  });
+
+  it('tells the organizer that the round past its end waits, and why', () => {
+    const rounds = [
+      { round: '2', created: 1 },
+      { round: '3', created: 2 },
+      { round: '4', created: 0, matches: [{ white: 'anna', black: 'dario' }] },
+    ];
+    const over = expiredRound({ ...on, roundEnds: [{ round: '3', at: END_7_DEC }] }, rounds, history, {}, END_7_DEC);
+    expect(over).toMatchObject({ round: '3', next: '4', waitReason: 'busy' });
+    expect(over?.waitFor).toHaveLength(2);
+    const free = expiredRound({ ...on, roundEnds: [{ round: '3', at: END_7_DEC }] }, [...rounds.slice(0, 2), { round: '4', created: 0, matches: [{ white: 'carla', black: 'dario' }] }], history, {}, END_7_DEC);
+    expect(free?.waitReason).toBeUndefined();
+    expect(free?.waitFor).toEqual([]);
+  });
+
+  it('says what the round waits for without naming anybody', () => {
+    expect(waitText({ reason: 'busy', count: 2 })).toBe('quando chi ha già 2 partite in corso ne chiude una');
+    expect(waitText({ reason: 'final', count: 1 })).toBe("quando finisce l'ultima partita ancora in corso");
+    expect(waitText({ reason: 'final', count: 3 })).toBe('quando finiscono le 3 partite ancora in corso');
   });
 });

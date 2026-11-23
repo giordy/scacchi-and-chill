@@ -12,7 +12,7 @@ import { reigningChampions } from './honours';
 import { PILLSBURY_EMOJI, PILLSBURY_TITLE, PillsburyRace, pillsburyRace, pillsburyWinners, reigningPillsbury } from './pillsbury';
 import { outForFairPlay, scudettoContenders } from './fairPlay';
 import { withScheduledGames } from './publicGames';
-import { formatRoundEnd, roundExpired } from './roundDeadline';
+import { formatRoundEnd, MAX_OPEN_GAMES, roundExpired, WaitReason } from './roundDeadline';
 
 const DAY_MS = 86400000;
 
@@ -109,7 +109,7 @@ export interface BulletinInput {
   seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo of the colpacci
   matchesUrl?: string; // the site's Partite tab: where to follow the games during the round
   roundEnd?: number; // Turni con scadenza (lib/roundDeadline.ts): when the round ends
-  nextWaits?: boolean; // Ultime giornate: the next round starts only once this one is over
+  nextWait?: WaitReason; // the next round waits (lib/roundDeadline.ts roundWait), and why
 }
 
 export interface Bulletin {
@@ -140,7 +140,7 @@ const PHASE_TEXT: Record<GamePhase, string> = {
 };
 
 // The WhatsApp message on the state of a round, from the games and what Lichess says of them
-export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random, seasons = [], matchesUrl, roundEnd, nextWaits = false }: BulletinInput): Bulletin {
+export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random, seasons = [], matchesUrl, roundEnd, nextWait }: BulletinInput): Bulletin {
   const nameOf = nameFrom(config.players);
   const idToHandle = (id?: string) =>
     config.players.find((p) => p.handle.toLowerCase() === String(id ?? "").toLowerCase())?.handle;
@@ -336,8 +336,10 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     roundEnd === undefined || isRoundComplete
       ? ""
       : roundExpired(roundEnd, now)
-      ? nextWaits
+      ? nextWait === 'final'
         ? `🗓️ *Il turno si è chiuso* ${formatRoundEnd(roundEnd)}: ultime giornate, il prossimo parte quando sono finite tutte le partite.`
+        : nextWait === 'busy'
+        ? `🗓️ *Il turno si è chiuso* ${formatRoundEnd(roundEnd)}: il prossimo parte quando chi ha già ${MAX_OPEN_GAMES} partite in corso ne chiude una.`
         : `🗓️ *Il turno si è chiuso* ${formatRoundEnd(roundEnd)}: le partite in corso continuano anche col turno successivo.`
       : `🗓️ *Il turno si chiude ${formatRoundEnd(roundEnd)}*`; // the date only, no countdown
 

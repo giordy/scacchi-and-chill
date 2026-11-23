@@ -8,7 +8,7 @@ import { usePersistentState } from '../hooks/usePersistentState';
 import { RoundDetail } from './rounds/RoundDetail';
 import { usePledges } from '../hooks/usePledges';
 import { pledgeStatus, rulesVersion } from '../lib/pledges';
-import { expiredRound, formatRoundEnd, roundEndOf, roundExpired, stillPlayingText } from '../lib/roundDeadline';
+import { expiredRound, formatRoundEnd, roundEndOf, roundExpired, waitText } from '../lib/roundDeadline';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
 
@@ -149,13 +149,14 @@ export function RoundsTab({
   return (
     <div className="settings-stack">
       {unsavedNotice}
-      {expired && expired.waitFor.length > 0 && (
+      {expired && expired.waitReason && (
         <div className="notice">
-          Il Turno {expired.round} si è chiuso {formatRoundEnd(expired.end)}. Siamo alle ultime giornate: il Turno {expired.next} parte
-          quando {expired.waitFor.length === 1 ? "finisce" : "finiscono"} {stillPlayingText(expired.waitFor.length)}.
+          Il Turno {expired.round} si è chiuso {formatRoundEnd(expired.end)}.{" "}
+          {expired.waitReason === "final" ? "Siamo alle ultime giornate: il" : "Il"} Turno {expired.next} parte{" "}
+          {waitText({ reason: expired.waitReason, count: expired.waitFor.length })}.
         </div>
       )}
-      {expired && expired.waitFor.length === 0 && (
+      {expired && !expired.waitReason && (
         <div className="notice warning">
           Il Turno {expired.round} è scaduto {formatRoundEnd(expired.end)}: puoi creare il Turno {expired.next}.{" "}
           {expired.open.length === 0

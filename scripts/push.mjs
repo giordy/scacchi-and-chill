@@ -153,6 +153,8 @@ export async function sendPush(sub, payload, vapid, subject) {
 // organizerPush, readable only by the organizer and by this run): the next round can be created.
 
 const byRound = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true });
+// As src/lib/roundDeadline.ts MAX_OPEN_GAMES: nobody plays more games than this at once
+const MAX_OPEN_GAMES = 2;
 
 // The same rule as src/lib/roundDeadline.ts expiredRound (a test checks they agree): the round with
 // the highest number that has a challenge is past its end, and a round after it has none yet. The
@@ -174,10 +176,28 @@ export function expiredRoundOf(tournament, games, states, now, idOf) {
     return !isFinal((id && states[id]) || g.lichess);
   };
   const pair = (g) => ({ white: g.white, black: g.black });
-  // Ultime giornate: the last rounds of the calendar wait for every game of the rounds before them
+  // The next round waits (src/lib/roundDeadline.ts roundWait): 'final', one of the last rounds of the
+  // calendar, for every game of the rounds before; 'busy', for the games of its players who already
+  // have MAX_OPEN_GAMES open
+  const earlier = games.filter((g) => byRound(g.round, next.round) < 0 && isOpen(g)).sort((a, b) => byRound(a.round, b.round));
   const finalRounds = typeof tournament.finalRoundsWait === 'number' && tournament.finalRoundsWait > 0 ? Math.floor(tournament.finalRoundsWait) : 0;
-  const waits = finalRounds > 0 && rounds.slice(-finalRounds).some((r) => r.round === next.round);
-  const waitFor = waits ? games.filter((g) => byRound(g.round, next.round) < 0 && isOpen(g)).sort((a, b) => byRound(a.round, b.round)) : [];
+  const lower = (h) => String(h).toLowerCase();
+  let waitReason;
+  let waitFor = [];
+  if (earlier.length > 0 && finalRounds > 0 && rounds.slice(-finalRounds).some((r) => r.round === next.round)) {
+    waitReason = 'final';
+    waitFor = earlier;
+  } else if (earlier.length > 0) {
+    const pairings = (tournament.schedule ?? []).filter((m) => String(m.round) === next.round);
+    const players = pairings.length > 0 ? new Set(pairings.flatMap((m) => [lower(m.white), lower(m.black)])) : null;
+    const count = new Map();
+    earlier.forEach((g) => [g.white, g.black].forEach((h) => count.set(lower(h), (count.get(lower(h)) ?? 0) + 1)));
+    const busy = new Set([...count].filter(([h, n]) => n >= MAX_OPEN_GAMES && (!players || players.has(h))).map(([h]) => h));
+    if (busy.size > 0) {
+      waitReason = 'busy';
+      waitFor = earlier.filter((g) => busy.has(lower(g.white)) || busy.has(lower(g.black)));
+    }
+  }
   return {
     key: `${tournament.season ?? ''}|${current.round}|${end}`,
     round: current.round,
@@ -185,6 +205,7 @@ export function expiredRoundOf(tournament, games, states, now, idOf) {
     end,
     open: games.filter((g) => String(g.round) === current.round && isOpen(g)).map(pair),
     waitFor: waitFor.map(pair),
+    ...(waitReason ? { waitReason } : {}),
   };
 }
 
@@ -238,16 +259,16 @@ export function deadlineNotification(item, nameOf, kind = 'expired') {
   const names = (list) => list.map((g) => `${nameOf(g.white)} – ${nameOf(g.black)}`).join(', ');
   const base = { hash: '#admin', tag: 'turni' };
   if (kind === 'wait') {
-    return {
-      ...base,
-      title: `Turno ${item.round} chiuso`,
-      body: `Si è chiuso ${formatRoundEnd(item.end)}. Ultime giornate: il Turno ${item.next} parte quando ${
-        item.waitFor.length === 1 ? "finisce l'ultima partita ancora in corso" : `finiscono le ${item.waitFor.length} partite ancora in corso`
-      }.`,
-    };
+    const what =
+      item.waitReason === 'busy'
+        ? `Il Turno ${item.next} parte quando chi ha già ${MAX_OPEN_GAMES} partite in corso ne chiude una.`
+        : `Ultime giornate: il Turno ${item.next} parte quando ${
+            item.waitFor.length === 1 ? "finisce l'ultima partita ancora in corso" : `finiscono le ${item.waitFor.length} partite ancora in corso`
+          }.`;
+    return { ...base, title: `Turno ${item.round} chiuso`, body: `Si è chiuso ${formatRoundEnd(item.end)}. ${what}` };
   }
   if (kind === 'over') {
-    return { ...base, title: `Tocca al Turno ${item.next}`, body: `Le partite dei turni prima sono tutte finite: puoi creare il Turno ${item.next}.` };
+    return { ...base, title: `Tocca al Turno ${item.next}`, body: `Ora si può partire: puoi creare il Turno ${item.next}.` };
   }
   const open = item.open.length === 0 ? 'Le sue partite sono tutte concluse.' : `${item.open.length === 1 ? 'Continua' : 'Continuano'}: ${names(item.open)}.`;
   return {

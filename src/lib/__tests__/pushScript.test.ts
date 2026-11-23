@@ -242,6 +242,33 @@ describe('push to the organizer: a round past its end (Turni con scadenza)', () 
     expect(organizerNews(expiredRoundOf(tournament, all, fresh, END, extractGameId), [])).toEqual({ key: item.key, kind: 'expired' });
   });
 
+  it('holds the next round when one of its players already has two games open, as the organizer area', () => {
+    // Carla still plays in rounds 1 and 2, and plays in round 3
+    const busyAll = [
+      { round: '1', white: 'carla', black: 'bruno', url: link('dddddddd'), lichess: { status: 'started' } },
+      ...all,
+    ];
+    const sched = [...busyAll.map(({ round, white, black }) => ({ round, white, black })), { round: '3', white: 'carla', black: 'bruno' }];
+    const t = { ...tournament, schedule: sched };
+    const item = expiredRoundOf(t, busyAll, fresh, END, extractGameId);
+    const site = expiredRound(t, roundsOf(sched, busyAll as any), busyAll as any, fresh as any, END);
+    expect(item.waitReason).toBe('busy');
+    expect(site!.waitReason).toBe('busy');
+    expect(item.waitFor).toEqual(site!.waitFor.map(({ white, black }) => ({ white, black })));
+    expect(organizerNews(item, [])).toEqual({ key: `${item.key}|attesa`, kind: 'wait' });
+    expect(deadlineNotification(item, nameOf, 'wait').body).toBe('Si è chiuso lunedì 7 dicembre. Il Turno 3 parte quando chi ha già 2 partite in corso ne chiude una.');
+    // nobody named
+    expect(deadlineNotification(item, nameOf, 'wait').body).not.toMatch(/Carla|Bruno/);
+    // Carla ends one: round 3 can start
+    const done = expiredRoundOf(t, busyAll, { ...fresh, dddddddd: { status: 'draw' } }, END, extractGameId);
+    expect(done.waitReason).toBeUndefined();
+    expect(organizerNews(done, [`${item.key}|attesa`])).toEqual({ key: item.key, kind: 'over' });
+    expect(deadlineNotification(done, nameOf, 'over').body).toBe('Ora si può partire: puoi creare il Turno 3.');
+    // Carla resting in round 3: no wait
+    const rests = { ...t, schedule: [...sched.slice(0, 4), { round: '3', white: 'anna', black: 'dario' }] };
+    expect(expiredRoundOf(rests, busyAll, fresh, END, extractGameId).waitReason).toBeUndefined();
+  });
+
   it('reads the tournament as Firestore gives it back (numbers from integerValue)', () => {
     const stored = fields(toValue(tournament).mapValue.fields);
     expect(expiredRoundOf(stored, all, fresh, END, extractGameId)).toMatchObject({ round: '2', next: '3', end: END });

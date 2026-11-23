@@ -89,7 +89,7 @@ export function RulesSection({
         )}
         <p className="note">
           {roundDaysOn
-            ? `Ogni turno dura ${meta!.roundDays} giorni dalla creazione delle sfide. Allo scadere puoi creare il turno successivo: le partite ancora aperte continuano, nessun risultato viene deciso dalla scadenza. Vale per i turni creati da qui in poi; in Turni puoi spostare o togliere la scadenza di un turno, o darla a quello in corso. Compare nella pagina pubblica, nei messaggi e nel regolamento.`
+            ? `Ogni turno dura ${meta!.roundDays} giorni dalla creazione delle sfide. Allo scadere puoi creare il turno successivo: le partite ancora aperte continuano, nessun risultato viene deciso dalla scadenza. Nessuno gioca più di 2 partite insieme: se un giocatore del turno successivo ne ha già 2 in corso, il turno aspetta che ne chiuda una (creando le sfide prima, il sito chiede conferma). Vale per i turni creati da qui in poi; in Turni puoi spostare o togliere la scadenza di un turno, o darla a quello in corso. Compare nella pagina pubblica, nei messaggi e nel regolamento.`
             : "Spenta: i turni non hanno una data di fine e il successivo parte quando lo crei. Accesa, ogni turno dura un numero di giorni e allo scadere puoi creare il successivo, mentre le partite ancora aperte continuano."}
         </p>
         {roundDaysOn && (

@@ -32,7 +32,7 @@ import { PillsburyIcon } from "./components/PillsburyIcon";
 import { ScudettoIcon } from "./components/ScudettoIcon";
 import { currentScudetto } from "./lib/scudetto";
 import { extractGameId } from "./lib/utils";
-import { finalRoundsOf, formatRoundEnd, roundDeadlinesOn, roundEndOf, roundExpired } from "./lib/roundDeadline";
+import { finalRoundsOf, formatRoundEnd, MAX_OPEN_GAMES, roundDeadlinesOn, roundEndOf, roundExpired } from "./lib/roundDeadline";
 import { useSeenMoves } from "./hooks/useSeenMoves";
 import { lastMovesOf, newMoveIds, SeenMoves } from "./lib/seenMoves";
 import { SeasonAwards } from "./components/SeasonAwards";
@@ -833,7 +833,8 @@ export function PublicTournamentView({
               {roundDays > 0 && (
                 <li>
                   <strong>Turni:</strong> ogni turno dura {roundDays} giorni. Allo scadere parte il successivo, e chi non ha
-                  finito continua la sua partita: la scadenza non decide nessun risultato.
+                  finito continua la sua partita: la scadenza non decide nessun risultato. Nessuno però gioca più di {MAX_OPEN_GAMES}{" "}
+                  partite insieme: se ne avrebbe una in più, il turno successivo parte quando ne chiude una.
                   {finalRounds > 0 &&
                     ` Nelle ultime ${finalRounds === 1 ? "giornata" : `${finalRounds} giornate`} invece un turno comincia quando sono finite tutte le partite dei turni prima.`}
                 </li>

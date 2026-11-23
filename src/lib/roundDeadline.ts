@@ -170,21 +170,74 @@ export function carriedOver(round: string, history: HistoryGame[], states: Recor
 // Ultime giornate, without naming anybody: "l'ultima partita ancora in corso", "le 2 partite ancora in corso"
 export const stillPlayingText = (n: number) => (n === 1 ? "l'ultima partita ancora in corso" : `le ${n} partite ancora in corso`);
 
+// Nobody plays more than this many games at once: a round that would give somebody one more waits
+export const MAX_OPEN_GAMES = 2;
+
+// Why a round cannot start yet:
+// - 'final': one of the last rounds (Ultime giornate), with games of the rounds before still open
+// - 'busy': one of its players already has MAX_OPEN_GAMES games open; it can start once they end one
+export type WaitReason = 'final' | 'busy';
+
+export interface RoundWait {
+  reason: WaitReason;
+  games: HistoryGame[]; // the games it waits for (for 'busy': those of the players with too many)
+}
+
+const lower = (h: string) => h.toLowerCase();
+
+// Who already has MAX_OPEN_GAMES games open among these, of the players given (all when undefined)
+export function busyPlayers(open: HistoryGame[], players?: string[]): string[] {
+  const count = new Map<string, number>();
+  open.forEach((g) => [g.white, g.black].forEach((h) => count.set(lower(h), (count.get(lower(h)) ?? 0) + 1)));
+  const among = players ? new Set(players.map(lower)) : undefined;
+  return [...count.entries()].filter(([h, n]) => n >= MAX_OPEN_GAMES && (!among || among.has(h))).map(([h]) => h);
+}
+
+// Whether `round` must wait before its challenges are created, and for which games. Only with the
+// deadlines on. players: who plays in that round (from the calendar); undefined counts everybody.
+export function roundWait(
+  meta: Pick<TournamentMeta, 'roundDays' | 'finalRoundsWait'> | undefined,
+  roundNames: string[],
+  round: string,
+  players: string[] | undefined,
+  history: HistoryGame[],
+  states: Record<string, LichessExportGame>
+): RoundWait | undefined {
+  if (!roundDeadlinesOn(meta)) return undefined;
+  const earlier = carriedOver(round, history, states);
+  if (earlier.length === 0) return undefined;
+  if (waitsForEarlier(meta, roundNames, round)) return { reason: 'final', games: earlier };
+  const busy = new Set(busyPlayers(earlier, players));
+  if (busy.size === 0) return undefined;
+  return { reason: 'busy', games: earlier.filter((g) => busy.has(lower(g.white)) || busy.has(lower(g.black))) };
+}
+
+// What the round waits for, without naming anybody: "quando finisce l'ultima partita ancora in corso",
+// "quando chi ha già due partite in corso ne chiude una"
+export const waitText = (wait: { reason: WaitReason; count: number }) =>
+  wait.reason === 'final'
+    ? `quando ${wait.count === 1 ? 'finisce' : 'finiscono'} ${stillPlayingText(wait.count)}`
+    : `quando chi ha già ${MAX_OPEN_GAMES} partite in corso ne chiude una`;
+
+// The players of a round, from its pairings; undefined without any (then everybody counts)
+export const playersOf = (matches?: { white: string; black: string }[]) =>
+  matches && matches.length > 0 ? matches.flatMap((m) => [m.white, m.black]) : undefined;
+
 export interface ExpiredRound {
   round: string;
   end: number;
   next: string; // the round to start now
   open: HistoryGame[]; // its games still being played, which go on
-  // Ultime giornate: the next round is one of the last, and these games of the rounds before it are
-  // still being played: it starts when they are over (empty: it can start)
+  // The next round waits (roundWait): for these games; empty when it can start
   waitFor: HistoryGame[];
+  waitReason?: WaitReason;
 }
 
 // For the organizer: the round in progress is past its end and the next one is still to start.
 // Undefined while the option is off, before the end, or when no round follows (the last one).
 export function expiredRound(
   meta: Pick<TournamentMeta, 'roundDays' | 'roundEnds' | 'finalRoundsWait'> | undefined,
-  rounds: { round: string; created: number }[],
+  rounds: { round: string; created: number; matches?: { white: string; black: string }[] }[],
   history: HistoryGame[],
   states: Record<string, LichessExportGame>,
   now: number
@@ -196,12 +249,13 @@ export function expiredRound(
   if (end === undefined || !roundExpired(end, now)) return undefined;
   const next = rounds.find((r) => byRound(r.round, current.round) > 0 && r.created === 0);
   if (!next) return undefined;
-  const waits = waitsForEarlier(meta, rounds.map((r) => r.round), next.round);
+  const wait = roundWait(meta, rounds.map((r) => r.round), next.round, playersOf(next.matches), history, states);
   return {
     round: current.round,
     end,
     next: next.round,
     open: history.filter((g) => g.round === current.round && isOpen(g, states)),
-    waitFor: waits ? carriedOver(next.round, history, states) : [],
+    waitFor: wait?.games ?? [],
+    ...(wait ? { waitReason: wait.reason } : {}),
   };
 }

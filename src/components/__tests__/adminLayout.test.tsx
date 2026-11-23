@@ -319,6 +319,30 @@ describe('Turni con scadenza in the organizer area', () => {
     expect(first).toContain('nelle ultime giornate il turno successivo parte quando sono finite tutte le partite');
   });
 
+  it('holds the next round while one of its players already has two games open, naming nobody', async () => {
+    const { RoundsTab } = await import('../../tabs/RoundsTab');
+    const busyGames = [
+      games[0],
+      { round: '2', white: 'carla', black: 'anna', url: 'https://lichess.org/bbbbbbbb', createdAt: past - 86400e3, lichess: { id: 'bbbbbbbb', status: 'started' } },
+    ] as any[];
+    const cfg = {
+      ...config,
+      players: [...config.players, { handle: 'carla', name: 'Carla' }],
+      schedule: [schedule[0], { round: '2', white: 'carla', black: 'anna' }, { round: '3', white: 'anna', black: 'bruno' }],
+      tournament: { ...config.tournament, roundDays: 14, roundEnds: [{ round: '2', at: past }] },
+    };
+    const render = (openRound: string) =>
+      renderToStaticMarkup(
+        <RoundsTab openRound={openRound} setOpenRound={noop} config={cfg} settings={settings} templates={config.messageTemplates} history={busyGames} setHistory={noop as any} gameStates={{}} onUpdateSchedule={noop} onUpdateTournamentMeta={noop} nameOf={(h) => h} flash={noop} triggerToast={noop} onMissingToken={noop} />
+      );
+    const list = render('');
+    expect(list).toMatch(/Il Turno 2 si è chiuso \S+ \d+ \S+\. Il Turno 3 parte quando chi ha già 2 partite in corso ne chiude una\./);
+    expect(list).not.toContain('puoi creare il Turno 3');
+    expect(list).not.toMatch(/anna – |carla – /);
+    expect(render('3')).toContain('Parte quando chi ha già 2 partite in corso ne chiude una.');
+    expect(render('2')).toContain('il turno successivo parte quando chi ha già 2 partite in corso ne chiude una');
+  });
+
   it('shows the end of a round, to move or remove, and what the next round will get', async () => {
     const first = await rounds(withDeadlines(14), '1');
     expect(first).toMatch(/🗓️ Scaduto \S+ \d+ \S+: le partite ancora aperte continuano accanto al turno successivo\./);
