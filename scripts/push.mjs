@@ -146,3 +146,54 @@ export async function sendPush(sub, payload, vapid, subject) {
   if (!res.ok) throw new Error(`HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
   return 'sent';
 }
+
+// ---- Turni con scadenza: the organizer's notification ----
+// When the round in progress is past its end (src/lib/roundDeadline.ts), the organizer gets one
+// notification on the devices switched on from the organizer area (tournaments/<id>/private/
+// organizerPush, readable only by the organizer and by this run): the next round can be created.
+
+const byRound = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true });
+
+// The same rule as src/lib/roundDeadline.ts expiredRound (a test checks they agree): the round with
+// the highest number that has a challenge is past its end, and a round after it has none yet. The
+// tournament as read from Firestore; games: its game documents; states: fresh from Lichess, by id.
+export function expiredRoundOf(tournament, games, states, now, idOf) {
+  if (!(typeof tournament?.roundDays === 'number' && tournament.roundDays > 0)) return null;
+  const names = new Set([...(tournament.schedule ?? []).map((m) => String(m.round)), ...games.map((g) => String(g.round))]);
+  const rounds = [...names].sort(byRound).map((round) => ({ round, created: games.filter((g) => String(g.round) === round && g.url).length }));
+  const started = rounds.filter((r) => r.created > 0);
+  const current = started[started.length - 1];
+  if (!current) return null;
+  const end = (tournament.roundEnds ?? []).find((e) => e && e.round === current.round)?.at;
+  if (typeof end !== 'number' || now < end) return null;
+  const next = rounds.find((r) => byRound(r.round, current.round) > 0 && r.created === 0);
+  if (!next) return null;
+  const open = games.filter((g) => {
+    if (String(g.round) !== current.round || !g.url) return false;
+    const id = idOf(g.url);
+    return !isFinal((id && states[id]) || g.lichess);
+  });
+  return {
+    key: `${tournament.season ?? ''}|${current.round}|${end}`,
+    round: current.round,
+    next: next.round,
+    end,
+    open: open.map((g) => ({ white: g.white, black: g.black })),
+  };
+}
+
+// "lunedì 7 dicembre": the last day of the round, as src/lib/roundDeadline.ts formatRoundEnd
+export const formatRoundEnd = (end) =>
+  new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(end - 1));
+
+// The notification: it opens the organizer area, and does not replace the one of the moves
+export function deadlineNotification(item, nameOf) {
+  const pairs = item.open.map((g) => `${nameOf(g.white)} – ${nameOf(g.black)}`);
+  const open = pairs.length === 0 ? 'Le sue partite sono tutte concluse.' : `${pairs.length === 1 ? 'Continua' : 'Continuano'}: ${pairs.join(', ')}.`;
+  return {
+    title: `Turno ${item.round} scaduto`,
+    body: `Si è chiuso ${formatRoundEnd(item.end)}: puoi creare il Turno ${item.next}. ${open}`,
+    hash: '#admin',
+    tag: 'turni',
+  };
+}

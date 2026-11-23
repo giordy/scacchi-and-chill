@@ -88,7 +88,8 @@ self.addEventListener('push', (event) => {
       body: data.body || 'Mosse nuove nelle partite del torneo',
       icon: new URL('icon-192.png', base).href,
       badge: BADGE,
-      tag: 'mosse',
+      // The organizer's notification of a round past its end has its own (scripts/push.mjs)
+      tag: data.tag || 'mosse',
       renotify: true,
       data: { url: new URL(data.hash || '#/partite', base).href },
     })

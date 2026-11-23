@@ -194,6 +194,27 @@ export function subscribeToOrganizerData(
   );
 }
 
+// The organizer's devices for the notice of a round past its end (lib/organizerPush.ts): a private
+// document, read by the GitHub Action "Sincronizza risultati" (scripts/sync-results.mjs)
+export interface OrganizerPushDevice {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  at: number;
+}
+
+const organizerPushRef = () => doc(db, "tournaments", TOURNAMENT_DOC_ID, "private", "organizerPush");
+
+export async function readOrganizerPush(): Promise<OrganizerPushDevice[]> {
+  const snap = await getDoc(organizerPushRef());
+  const list = snap.exists() ? snap.data().subscriptions : undefined;
+  return Array.isArray(list) ? list.filter((s) => s && typeof s.endpoint === "string") : [];
+}
+
+export async function saveOrganizerPush(subscriptions: OrganizerPushDevice[]): Promise<void> {
+  await setDoc(organizerPushRef(), { subscriptions, updatedAt: new Date().toISOString() });
+}
+
 // Deletes every game of the tournament (used when starting a new season, after archiving)
 export async function deleteAllGames(): Promise<number> {
   const snap = await getDocs(collection(db, "tournaments", TOURNAMENT_DOC_ID, "games"));

@@ -108,9 +108,14 @@ export function seenCommit(database: string, id: string, seen: SeenMoves) {
   };
 }
 
-async function write(id: string, sub: PushSubscription, skip: string) {
+// What the GitHub Action needs to send to a browser
+export function subscriptionKeys(sub: PushSubscription) {
   const json = sub.toJSON();
-  const keys = { endpoint: sub.endpoint, p256dh: json.keys?.p256dh ?? b64u(sub.getKey('p256dh')), auth: json.keys?.auth ?? b64u(sub.getKey('auth')) };
+  return { endpoint: sub.endpoint, p256dh: json.keys?.p256dh ?? b64u(sub.getKey('p256dh')), auth: json.keys?.auth ?? b64u(sub.getKey('auth')) };
+}
+
+async function write(id: string, sub: PushSubscription, skip: string) {
+  const keys = subscriptionKeys(sub);
   const res = await fetch(`${DOCS}:commit?${KEY}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -164,13 +169,27 @@ async function registration() {
 
 // Switches the notifications on (or changes whose games to skip): asks the permission, subscribes,
 // writes the subscription
-export async function enablePush(skip: string): Promise<PushSetting> {
+// This browser's subscription to its push service, asking the permission first: the same one for the
+// moves (Partite tab) and for the organizer's notices (lib/organizerPush.ts)
+export async function browserSubscription(): Promise<PushSubscription> {
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') throw new Error(permission === 'denied' ? 'Notifiche bloccate: si riattivano dalle impostazioni del browser per questo sito.' : 'Serve il permesso per le notifiche.');
   const reg = await registration();
-  const sub =
+  return (
     (await reg.pushManager.getSubscription()) ??
-    (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: fromB64u(pushConfig.vapidPublicKey) }));
+    (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: fromB64u(pushConfig.vapidPublicKey) }))
+  );
+}
+
+// The subscription this browser has now, without asking anything; null without one
+export async function currentSubscription(): Promise<PushSubscription | null> {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return null;
+  const reg = await navigator.serviceWorker.getRegistration();
+  return (await reg?.pushManager.getSubscription()) ?? null;
+}
+
+export async function enablePush(skip: string): Promise<PushSetting> {
+  const sub = await browserSubscription();
   const setting = { id: savedSetting()?.id ?? randomId(), endpoint: sub.endpoint, skip };
   await write(setting.id, sub, skip);
   keep(setting);
@@ -178,10 +197,21 @@ export async function enablePush(skip: string): Promise<PushSetting> {
   return setting;
 }
 
+// Set by lib/organizerPush.ts while this browser gets the organizer's notices: they use the same
+// subscription, which then stays when the moves are switched off
+export const ORGANIZER_PUSH_KEY = 'scacchi-avvisi-organizzatore';
+
 export async function disablePush(): Promise<void> {
   const saved = savedSetting();
   if (saved) await remove(saved.id);
   keep(null);
+  let organizer = false;
+  try {
+    organizer = !!localStorage.getItem(ORGANIZER_PUSH_KEY);
+  } catch {
+    // unknown: unsubscribe as before
+  }
+  if (organizer) return;
   const reg = await navigator.serviceWorker.getRegistration();
   const sub = await reg?.pushManager.getSubscription();
   await sub?.unsubscribe().catch(() => {});

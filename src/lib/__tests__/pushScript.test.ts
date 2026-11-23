@@ -170,3 +170,56 @@ describe('push of the moves: what the page writes of the moves seen', () => {
     expect(pushCommit('db', 'ID', sub, '').writes[0].update.fields).not.toHaveProperty('seen');
   });
 });
+
+// @ts-expect-error a Node script without types
+import { deadlineNotification, expiredRoundOf } from '../../../scripts/push.mjs';
+import { expiredRound } from '../roundDeadline';
+import { roundsOf } from '../rounds';
+import { extractGameId } from '../utils';
+import { withDevice } from '../organizerPush';
+
+describe('push to the organizer: a round past its end (Turni con scadenza)', () => {
+  const END = Date.UTC(2026, 11, 7, 23); // the end of Monday 7 December in Italy
+  const link = (id: string) => `https://lichess.org/${id}`;
+  const all = [
+    { round: '1', white: 'anna', black: 'bruno', url: link('aaaaaaaa'), lichess: { status: 'mate' } },
+    { round: '2', white: 'carla', black: 'dario', url: link('bbbbbbbb'), lichess: { status: 'started' } },
+    { round: '2', white: 'anna', black: 'carla', url: link('cccccccc'), lichess: { status: 'started' } },
+  ];
+  const schedule = [...all.map(({ round, white, black }) => ({ round, white, black })), { round: '3', white: 'bruno', black: 'anna' }];
+  const tournament = { season: 'Stagione 3', schedule, roundDays: 14, roundEnds: [{ round: '2', at: END }] };
+  const fresh = { cccccccc: { status: 'resign', winner: 'white' } };
+
+  it('finds the same round as the organizer area', () => {
+    const script = expiredRoundOf(tournament, all, fresh, END, extractGameId);
+    const site = expiredRound(tournament, roundsOf(schedule, all as any), all as any, fresh as any, END);
+    expect(script).toMatchObject({ round: site!.round, next: site!.next, end: site!.end, key: `Stagione 3|2|${END}` });
+    expect(script.open).toEqual(site!.open.map(({ white, black }) => ({ white, black })));
+    expect(script.open).toEqual([{ white: 'carla', black: 'dario' }]);
+  });
+
+  it('says nothing before the end, with the option off, or with no round to start', () => {
+    expect(expiredRoundOf(tournament, all, {}, END - 1, extractGameId)).toBeNull();
+    expect(expiredRoundOf({ ...tournament, roundDays: 0 }, all, {}, END, extractGameId)).toBeNull();
+    expect(expiredRoundOf({ ...tournament, roundEnds: [] }, all, {}, END, extractGameId)).toBeNull();
+    expect(expiredRoundOf({ ...tournament, schedule: schedule.slice(0, 3) }, all, {}, END, extractGameId)).toBeNull();
+  });
+
+  it('tells which round to create and what goes on, opening the organizer area', () => {
+    const item = expiredRoundOf(tournament, all, fresh, END, extractGameId);
+    expect(deadlineNotification(item, nameOf)).toEqual({
+      title: 'Turno 2 scaduto',
+      body: 'Si è chiuso lunedì 7 dicembre: puoi creare il Turno 3. Continua: Carla – Dario.',
+      hash: '#admin',
+      tag: 'turni',
+    });
+    expect(deadlineNotification({ ...item, open: [] }, nameOf).body).toMatch(/Le sue partite sono tutte concluse\.$/);
+  });
+
+  it('keeps a short list of devices, the renewed one in place of the old', () => {
+    const d = (endpoint: string) => ({ endpoint, p256dh: 'p', auth: 'a', at: 1 });
+    expect(withDevice([d('x'), d('y')], d('z'), 'x').map((v) => v.endpoint)).toEqual(['y', 'z']);
+    expect(withDevice([d('y')], d('y')).map((v) => v.endpoint)).toEqual(['y']);
+    expect(withDevice(['1', '2', '3', '4', '5'].map(d), d('6')).map((v) => v.endpoint)).toEqual(['2', '3', '4', '5', '6']);
+  });
+});

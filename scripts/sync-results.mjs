@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fields } from './backup.mjs';
-import { movesNews, notificationFor, sameState, sendPush, vapidKeys } from './push.mjs';
+import { deadlineNotification, expiredRoundOf, movesNews, notificationFor, sameState, sendPush, vapidKeys } from './push.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const TOURNAMENT_DOC_ID = 'scacchi-and-chill-official';
@@ -157,6 +157,18 @@ async function setDoc(base, token, docPath, data) {
   if (!res.ok) throw new Error(`Salvataggio di ${docPath}: HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
 }
 
+// Only the given fields of a document (the others stay as they are)
+async function patchFields(base, token, docPath, data) {
+  const params = new URLSearchParams(Object.keys(data).map((k) => ['updateMask.fieldPaths', k]));
+  const res = await fetch(`${base}/${docPath}?${params}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ fields: toValue(data).mapValue.fields }),
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!res.ok) throw new Error(`Salvataggio di ${docPath}: HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
+}
+
 async function deleteDoc(base, token, docPath) {
   const res = await fetch(`${base}/${docPath}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30000) });
   if (!res.ok && res.status !== 404) throw new Error(`Cancellazione di ${docPath}: HTTP ${res.status}`);
@@ -169,10 +181,13 @@ const PUSH_SUBJECT = 'https://github.com/giordy/scacchi-and-chill';
 
 // The push notifications of the moves (scripts/push.mjs). games: every game of the season, with its
 // state from Lichess when read in this run
-async function notify(base, token, vapid, games, states, prev) {
-  const tournament = (await getDoc(base, token, '')) ?? {};
+const namesOf = (tournament) => {
   const names = new Map([...(tournament.roster ?? []), ...(tournament.players ?? [])].map((p) => [String(p.handle).toLowerCase(), p.name || p.handle]));
-  const nameOf = (h) => names.get(h.toLowerCase()) ?? h;
+  return (h) => names.get(String(h).toLowerCase()) ?? h;
+};
+
+async function notify(base, token, vapid, tournament, games, states, prev) {
+  const nameOf = namesOf(tournament);
   const { news, state } = movesNews(games, states, prev);
   if (news.length > 0) {
     const subs = (await listDocs(base, token, 'pushSubscriptions')).slice(0, MAX_SUBSCRIPTIONS);
@@ -197,6 +212,38 @@ async function notify(base, token, vapid, games, states, prev) {
   if (!sameState(prev, state)) await setDoc(base, token, 'private/push', state);
 }
 
+// Turni con scadenza (scripts/push.mjs expiredRoundOf): once per end of a round, to the organizer's
+// devices (private/organizerPush, written by the organizer area); what was told is kept in
+// private/deadlinePush. A device the push service calls gone is taken off the list.
+async function notifyOrganizer(base, token, vapid, tournament, games, states) {
+  const item = expiredRoundOf(tournament, games, states, Date.now(), gameIdOf);
+  if (!item) return;
+  const told = (await getDoc(base, token, 'private/deadlinePush'))?.told ?? [];
+  if (told.includes(item.key)) return;
+  const subs = (await getDoc(base, token, 'private/organizerPush'))?.subscriptions ?? [];
+  if (subs.length === 0) {
+    console.log(`Turno ${item.round} scaduto: nessun dispositivo dell'organizzatore con gli avvisi accesi.`);
+    return;
+  }
+  const payload = deadlineNotification(item, namesOf(tournament));
+  let sent = 0;
+  let failed = 0;
+  const gone = [];
+  for (const sub of subs) {
+    try {
+      if ((await sendPush(sub, payload, vapid, PUSH_SUBJECT)) === 'gone') gone.push(sub.endpoint);
+      else sent++;
+    } catch (e) {
+      failed++;
+      console.warn(`Avviso all'organizzatore non inviato: ${e.message}`);
+    }
+  }
+  if (gone.length > 0) await patchFields(base, token, 'private/organizerPush', { subscriptions: subs.filter((s) => !gone.includes(s.endpoint)) });
+  // Tried again at the next run only when no device got it and some could
+  if (sent > 0 || failed === 0) await setDoc(base, token, 'private/deadlinePush', { told: [...told, item.key].slice(-30) });
+  console.log(`Turno ${item.round} scaduto: avviso all'organizzatore su ${sent} dispositivi${gone.length ? `, ${gone.length} non più iscritti tolti` : ''}.`);
+}
+
 async function main() {
   const secret = process.env.FIREBASE_SERVICE_ACCOUNT?.trim();
   if (!secret) {
@@ -209,6 +256,7 @@ async function main() {
     `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/` +
     `${encodeURIComponent(cfg.firestoreDatabaseId || '(default)')}/documents/tournaments/${TOURNAMENT_DOC_ID}`;
   const token = await accessToken(account);
+  const tournament = (await getDoc(base, token, '')) ?? {};
   const all = await readGames(base, token);
   const targets = syncTargets(all);
   // The notifications need the games that were still open at the last run too: the organizer area
@@ -225,6 +273,8 @@ async function main() {
   const ids = [...new Set([...targets.map((g) => gameIdOf(g.url)), ...pushIds])];
   if (ids.length === 0) {
     console.log('Tutte le partite con un link hanno già il risultato salvato.');
+    // A round can be past its end with every game over
+    if (vapid) await notifyOrganizer(base, token, vapid, tournament, all, {});
     return;
   }
   const states = await readLichess(ids);
@@ -237,8 +287,10 @@ async function main() {
   }
   const finished = targets.filter((g) => isFinal(states[gameIdOf(g.url)])).length;
   console.log(`Partite da controllare: ${targets.length}; aggiornate: ${saved}; concluse ora: ${finished}.`);
-  if (vapid) await notify(base, token, vapid, watched, states, prevPush);
-  else console.log('Manca il secret VAPID_PRIVATE_KEY: nessuna notifica (vedi il README).');
+  if (vapid) {
+    await notify(base, token, vapid, tournament, watched, states, prevPush);
+    await notifyOrganizer(base, token, vapid, tournament, all, states);
+  } else console.log('Manca il secret VAPID_PRIVATE_KEY: nessuna notifica (vedi il README).');
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

@@ -280,6 +280,9 @@ describe('Turni con scadenza in the organizer area', () => {
     expect(on).toMatch(/<input id="round-deadline" type="checkbox" checked=""\/>/);
     expect(on).toContain('Durata del turno (giorni)');
     expect(on).toContain('Ogni turno dura 14 giorni');
+    // the notice to the organizer: here a browser without notifications
+    expect(on).toContain('si accende da un browser che le riceve');
+    expect(html).not.toContain('da un browser che le riceve');
   });
 
   it('tells when the round is over and the next one can start, the open games going on', async () => {

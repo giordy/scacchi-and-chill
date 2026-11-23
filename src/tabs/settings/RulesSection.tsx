@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TournamentMeta } from '../../types';
 import { DEFAULT_TOURNAMENT } from '../../lib/tournament';
 import { DaysField } from '../../components/DaysField';
+import { OrganizerPushToggle } from '../../components/OrganizerPushToggle';
 import { DEFAULT_ROUND_DAYS, MAX_ROUND_DAYS, MIN_ROUND_DAYS, roundDeadlinesOn } from '../../lib/roundDeadline';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
@@ -90,6 +91,7 @@ export function RulesSection({
             ? `Ogni turno dura ${meta!.roundDays} giorni dalla creazione delle sfide. Allo scadere puoi creare il turno successivo: le partite ancora aperte continuano, nessun risultato viene deciso dalla scadenza. Vale per i turni creati da qui in poi; in Turni puoi spostare o togliere la scadenza di un turno, o darla a quello in corso. Compare nella pagina pubblica, nei messaggi e nel regolamento.`
             : "Spenta: i turni non hanno una data di fine e il successivo parte quando lo crei. Accesa, ogni turno dura un numero di giorni e allo scadere puoi creare il successivo, mentre le partite ancora aperte continuano."}
         </p>
+        {roundDaysOn && <OrganizerPushToggle />}
       </div>
 
       <hr className="divider" />
