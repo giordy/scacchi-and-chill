@@ -12,6 +12,7 @@ import { reigningChampions } from './honours';
 import { PILLSBURY_EMOJI, PILLSBURY_TITLE, PillsburyRace, pillsburyRace, pillsburyWinners, reigningPillsbury } from './pillsbury';
 import { outForFairPlay, scudettoContenders } from './fairPlay';
 import { withScheduledGames } from './publicGames';
+import { formatRoundEnd, roundExpired, timeLeftText } from './roundDeadline';
 
 const DAY_MS = 86400000;
 
@@ -107,6 +108,7 @@ export interface BulletinInput {
   random?: () => number; // which phrase of each list; Math.random unless a test fixes it
   seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo of the colpacci
   matchesUrl?: string; // the site's Partite tab: where to follow the games during the round
+  roundEnd?: number; // Turni con scadenza (lib/roundDeadline.ts): when the round ends
 }
 
 export interface Bulletin {
@@ -137,7 +139,7 @@ const PHASE_TEXT: Record<GamePhase, string> = {
 };
 
 // The WhatsApp message on the state of a round, from the games and what Lichess says of them
-export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random, seasons = [], matchesUrl }: BulletinInput): Bulletin {
+export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random, seasons = [], matchesUrl, roundEnd }: BulletinInput): Bulletin {
   const nameOf = nameFrom(config.players);
   const idToHandle = (id?: string) =>
     config.players.find((p) => p.handle.toLowerCase() === String(id ?? "").toLowerCase())?.handle;
@@ -327,11 +329,21 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
   const reminder =
     toAccept.length > 0 ? `⏳ *Da accettare entro ${formatDeadline(deadlineMs)}:* ${toAccept.join(", ")}` : "";
 
+  // Turni con scadenza: until when the round goes on, while it does; once over, that the games still
+  // open go on (the next round can start)
+  const deadline =
+    roundEnd === undefined || isRoundComplete
+      ? ""
+      : roundExpired(roundEnd, now)
+      ? `⌛ *Tempo del turno scaduto* ${formatRoundEnd(roundEnd)}: le partite ancora aperte continuano, anche col turno successivo.`
+      : `🗓️ *Il turno si chiude ${formatRoundEnd(roundEnd)}* (${timeLeftText(roundEnd, now)})`;
+
   const vars = { round, ...count, summary: roundSummary(count) };
   const textResult = [
     fill(headerTemplate, vars),
     ...gameBlocks,
     reminder,
+    deadline,
     footerTemplate ? fill(footerTemplate, vars) : "",
     leader,
     table,

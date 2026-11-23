@@ -1,5 +1,6 @@
 import { TournamentMeta } from '../types';
 import type { TournamentDocData } from '../firebaseService';
+import { cleanRoundEnds } from './roundDeadline';
 
 export const DEFAULT_TOURNAMENT: TournamentMeta = {
   title: "Scacchi & Chill",
@@ -59,6 +60,8 @@ export function tournamentFromDoc(doc: TournamentDocData): TournamentMeta | null
     masterAnecdotes: doc.masterAnecdotes ?? (doc.season === DEFAULT_TOURNAMENT.season ? DEFAULT_TOURNAMENT.masterAnecdotes : []),
     daysPerMove: typeof doc.daysPerMove === "number" && doc.daysPerMove > 0 ? doc.daysPerMove : undefined,
     rated: typeof doc.rated === "boolean" ? doc.rated : undefined,
+    ...(typeof doc.roundDays === "number" && doc.roundDays > 0 ? { roundDays: doc.roundDays } : {}),
+    ...(cleanRoundEnds(doc.roundEnds) ? { roundEnds: cleanRoundEnds(doc.roundEnds) } : {}),
     winners: doc.winners || [],
     ...(Array.isArray(doc.roster) ? { roster: doc.roster } : {}),
     ...(Array.isArray(doc.seeds) ? { seeds: doc.seeds } : {}),
@@ -89,6 +92,9 @@ export function mergeTournamentMeta(
     masterAnecdotes: patch.masterAnecdotes ?? current?.masterAnecdotes ?? d.masterAnecdotes,
     daysPerMove: patch.daysPerMove ?? current?.daysPerMove,
     rated: patch.rated ?? current?.rated,
+    // 0 switches the deadlines off: kept as 0, so that the write reaches Firestore
+    ...((patch.roundDays ?? current?.roundDays) !== undefined ? { roundDays: patch.roundDays ?? current?.roundDays } : {}),
+    ...((patch.roundEnds ?? current?.roundEnds) ? { roundEnds: patch.roundEnds ?? current?.roundEnds } : {}),
     winners: patch.winners ?? current?.winners ?? d.winners,
     ...((patch.roster ?? current?.roster) ? { roster: patch.roster ?? current?.roster } : {}),
     ...((patch.seeds ?? current?.seeds) ? { seeds: patch.seeds ?? current?.seeds } : {}),

@@ -83,7 +83,8 @@ export async function restoreBackup(data: BackupData, summary: BackupSummary, cu
   io.onUpdatePlayers(data.players ?? []);
   io.onUpdateSchedule(data.schedule ?? []);
   // A file from before the withdrawals had none: the current ones must not survive the restore
-  io.onUpdateTournamentMeta({ ...data.tournament, withdrawals: data.tournament?.withdrawals ?? [] });
+  // Nor the ends of the rounds (lib/roundDeadline.ts): they belong to the season of the file
+  io.onUpdateTournamentMeta({ ...data.tournament, withdrawals: data.tournament?.withdrawals ?? [], roundEnds: data.tournament?.roundEnds ?? [] });
   for (const s of data.seasons ?? []) await io.saveSeasonArchive(s);
   for (const [id, dataUrl] of Object.entries(data.media ?? {})) {
     if (isStorableImage(dataUrl)) await io.saveMediaImage(id, dataUrl);

@@ -85,7 +85,7 @@ describe('restoreBackup', () => {
     expect(io.setHistory).toHaveBeenCalledWith(data.history);
     expect(io.onUpdatePlayers).toHaveBeenCalledWith(manual.players);
     expect(io.onUpdateSchedule).toHaveBeenCalledWith(manual.schedule);
-    expect(io.onUpdateTournamentMeta).toHaveBeenCalledWith(manual.tournament);
+    expect(io.onUpdateTournamentMeta).toHaveBeenCalledWith({ ...manual.tournament, roundEnds: [] });
     expect(io.saveSeasonArchive.mock.calls.map(([s]) => s.id)).toEqual(['stagione-1', 'stagione-0']);
   });
 
@@ -115,11 +115,19 @@ describe('restoreBackup', () => {
     expect(io.saveMediaImage).not.toHaveBeenCalled();
   });
 
+  it('restores the ends of the rounds of the file (Turni con scadenza)', async () => {
+    const roundEnds = [{ round: '1', at: 1_800_000_000_000 }];
+    const { data, summary } = parseBackup(JSON.stringify({ ...ok, tournament: { ...ok.tournament, roundDays: 14, roundEnds } }));
+    const { io } = fakeIO();
+    await restoreBackup(data, summary, '', io);
+    expect(io.onUpdateTournamentMeta).toHaveBeenCalledWith(expect.objectContaining({ roundDays: 14, roundEnds }));
+  });
+
   it('clears the current withdrawals when the file has none', async () => {
     const { data, summary } = parseBackup(JSON.stringify(ok));
     const { io } = fakeIO();
     await restoreBackup(data, summary, '', io);
-    expect(io.onUpdateTournamentMeta).toHaveBeenCalledWith({ ...ok.tournament, withdrawals: [] });
+    expect(io.onUpdateTournamentMeta).toHaveBeenCalledWith({ ...ok.tournament, withdrawals: [], roundEnds: [] });
   });
 
   it('touches nothing when the copy of the current data cannot be downloaded', async () => {

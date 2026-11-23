@@ -81,7 +81,9 @@ describe('closeSeason', () => {
       withdrawals: [],
       masterAnecdotes: [],
       seeds: [],
+      roundEnds: [], // the rounds start again from 1
     });
+    expect(patch).not.toHaveProperty('roundDays'); // the length of a round stays, as the days per move
     expect(patch.winners?.map((w: { season: string; handle?: string }) => [w.season, w.handle])).toEqual([
       ['Stagione 1', 'bruno'],
       ['Stagione 2 - Capablanca', 'anna'],

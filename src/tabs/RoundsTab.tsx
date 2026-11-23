@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, SeasonArchive, Settings } from '../types';
+import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, SeasonArchive, Settings, TournamentMeta } from '../types';
 import { RoundSummary, currentRound, nextRoundNumber, roundsOf } from '../lib/rounds';
 import { gameProgress } from '../lib/progress';
 import { errorMessage, extractGameId } from '../lib/utils';
@@ -8,6 +8,7 @@ import { usePersistentState } from '../hooks/usePersistentState';
 import { RoundDetail } from './rounds/RoundDetail';
 import { usePledges } from '../hooks/usePledges';
 import { pledgeStatus, rulesVersion } from '../lib/pledges';
+import { expiredRound, formatRoundEnd, roundEndOf, roundExpired } from '../lib/roundDeadline';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
 
@@ -23,6 +24,7 @@ export function RoundsTab({
   setHistory,
   gameStates,
   onUpdateSchedule,
+  onUpdateTournamentMeta,
   nameOf,
   flash,
   triggerToast,
@@ -40,6 +42,8 @@ export function RoundsTab({
   setHistory: React.Dispatch<React.SetStateAction<HistoryGame[]>>;
   gameStates: Record<string, LichessExportGame>;
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
+  // For the end of a round (Turni con scadenza, lib/roundDeadline.ts)
+  onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
   nameOf: (handle: string) => string;
   flash: Flash;
   triggerToast: (msg: string) => void;
@@ -64,6 +68,9 @@ export function RoundsTab({
 
   const rounds = roundsOf(schedule, [...history, ...unsaved]);
   const current = currentRound(rounds);
+  const now = Date.now();
+  // Turni con scadenza: the round in progress is over its end and the next one can start
+  const expired = expiredRound(config.tournament, rounds, history, gameStates, now);
 
   // Idempotent (one document per round/white/black), so it can be retried safely
   const save = async (games: HistoryGame[]): Promise<boolean> => {
@@ -126,6 +133,7 @@ export function RoundsTab({
           gameStates={gameStates}
           schedule={schedule}
           onUpdateSchedule={onUpdateSchedule}
+          onUpdateTournamentMeta={onUpdateTournamentMeta}
           onCreated={save}
           nameOf={nameOf}
           flash={flash}
@@ -141,6 +149,19 @@ export function RoundsTab({
   return (
     <div className="settings-stack">
       {unsavedNotice}
+      {expired && (
+        <div className="notice warning">
+          Il Turno {expired.round} è scaduto {formatRoundEnd(expired.end)}: puoi creare il Turno {expired.next}.{" "}
+          {expired.open.length === 0
+            ? "Le sue partite sono tutte concluse."
+            : `${expired.open.length === 1 ? "Continua" : "Continuano"} accanto al nuovo turno: ${expired.open
+                .map((g) => `${nameOf(g.white)} – ${nameOf(g.black)}`)
+                .join(", ")}.`}
+          <button className="secondary btn-block mt-8" type="button" onClick={() => setOpenRound(expired.next)}>
+            Apri il Turno {expired.next}
+          </button>
+        </div>
+      )}
       <section className="panel">
         <h2 className="panel-title">
           Turni <span className="muted-normal">· {rounds.length}</span>
@@ -172,7 +193,7 @@ export function RoundsTab({
                     · {r.matches.length} {r.matches.length === 1 ? "partita" : "partite"}
                   </span>
                 </span>
-                <RoundBadge summary={r} gameStates={gameStates} />
+                <RoundBadge summary={r} gameStates={gameStates} end={roundEndOf(config.tournament, r.round)} now={now} />
               </button>
             ))}
           </div>
@@ -193,9 +214,13 @@ export function RoundsTab({
 function RoundBadge({
   summary,
   gameStates,
+  end,
+  now,
 }: {
   summary: RoundSummary;
   gameStates: Record<string, LichessExportGame>;
+  end?: number; // Turni con scadenza: when the round ends
+  now: number;
 }) {
   const { matches, created } = summary;
   if (created === 0) return <span className="status-badge pending">Da avviare</span>;
@@ -206,9 +231,8 @@ function RoundBadge({
     const id = extractGameId(m.url);
     return gameProgress((id && gameStates[id]) || m.game?.lichess) === "finished";
   });
-  return finished ? (
-    <span className="status-badge result">Concluso</span>
-  ) : (
-    <span className="status-badge ongoing">In corso</span>
-  );
+  if (finished) return <span className="status-badge result">Concluso</span>;
+  // Past its end, with games still open: they go on, the badge says the time is up
+  if (end !== undefined && roundExpired(end, now)) return <span className="status-badge loss">Scaduto</span>;
+  return <span className="status-badge ongoing">In corso</span>;
 }

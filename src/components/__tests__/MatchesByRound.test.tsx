@@ -11,6 +11,22 @@ const games: HistoryGame[] = [
 const nameOf = (h: string) => h[0].toUpperCase() + h.slice(1).toLowerCase();
 
 describe('MatchesByRound', () => {
+  it('says until when the round in progress goes on, only with the Turni con scadenza', () => {
+    const open: HistoryGame[] = [
+      { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa', lichess: { id: 'aaaaaaaa', status: 'mate', winner: 'white' } },
+      { round: '2', white: 'carla', black: 'dario', url: 'https://lichess.org/bbbbbbbb', lichess: { id: 'bbbbbbbb', status: 'started' } },
+    ];
+    const end = Date.UTC(2026, 11, 7, 23); // the end of Monday 7 December in Italy
+    const now = Date.UTC(2026, 11, 4, 12);
+    const html = (roundEndOf?: (r: string) => number | undefined, at = now) =>
+      renderToStaticMarkup(<MatchesByRound games={open} gameStates={{}} nameOf={nameOf} roundEndOf={roundEndOf} now={at} />);
+    expect(html((r) => (r === '2' ? end : undefined))).toContain('Si chiude lunedì 7 dicembre · mancano 3 giorni');
+    expect(html((r) => (r === '2' ? end : undefined), end + 1)).toContain('Tempo scaduto lunedì 7 dicembre: le partite ancora aperte continuano');
+    expect(html()).not.toContain('round-group-deadline');
+    // only the current round: the played one says nothing, even with an end
+    expect(html((r) => (r === '1' ? end : undefined))).not.toContain('round-group-deadline');
+  });
+
   it('links every player name to their profile, played or planned games alike', () => {
     const html = renderToStaticMarkup(<MatchesByRound games={games} gameStates={{}} nameOf={nameOf} />);
     const links = [...html.matchAll(/<a href="([^"]+)" class="player-name player-page-link">([^<]+)<\/a>/g)].map((m) => [m[1], m[2]]);

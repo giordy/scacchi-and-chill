@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, SeasonArchive, Settings } from '../../types';
+import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, SeasonArchive, Settings, TournamentMeta } from '../../types';
 import { RoundMatch, RoundSummary, addMatch, removeMatch, removeRound, swapColors } from '../../lib/rounds';
 import { createChallenge } from '../../lib/lichess';
 import { errorMessage } from '../../lib/utils';
@@ -9,6 +9,19 @@ import { BulletinSection } from './BulletinSection';
 import { RelinkPanel } from './RelinkPanel';
 import { canRelink, linkState } from '../../lib/relink';
 import { stateOf } from '../../lib/games';
+import {
+  carriedOver,
+  formatRoundEnd,
+  roundDeadlinesOn,
+  roundEndFrom,
+  roundEndFromInput,
+  roundEndInputValue,
+  roundEndOf,
+  roundExpired,
+  roundStart,
+  timeLeftText,
+  withRoundEnd,
+} from '../../lib/roundDeadline';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
 type Panel = 'launch' | 'bulletin' | null;
@@ -29,6 +42,7 @@ export function RoundDetail({
   gameStates = {},
   schedule,
   onUpdateSchedule,
+  onUpdateTournamentMeta,
   onCreated,
   nameOf,
   flash,
@@ -52,6 +66,8 @@ export function RoundDetail({
   gameStates?: Record<string, LichessExportGame>;
   schedule: ScheduledMatch[];
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
+  // For the end of the round (Turni con scadenza, lib/roundDeadline.ts)
+  onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
   // Saves the games just created on Lichess in the tournament; false if saving failed
   onCreated: (games: HistoryGame[]) => Promise<boolean>;
   nameOf: (handle: string) => string;
@@ -64,6 +80,11 @@ export function RoundDetail({
   const matches = summary?.matches ?? [];
   const created = summary?.created ?? 0;
   const todo = matches.filter((m) => !m.url);
+  // Turni con scadenza: off unless the organizer set a length
+  const meta = config.tournament;
+  const deadlinesOn = roundDeadlinesOn(meta);
+  const end = roundEndOf(meta, round);
+  const setEnd = (at?: number) => onUpdateTournamentMeta({ roundEnds: withRoundEnd(meta?.roundEnds, round, at) });
 
   const [busy, setBusy] = useState("");
   const [panel, setPanel] = useState<Panel>(null);
@@ -128,6 +149,8 @@ export function RoundDetail({
         setHistory((prev) => prev.filter((g) => g.round !== round));
       }
       onUpdateSchedule(removeRound(schedule, round));
+      // A round created again with this number starts afresh, with its own end
+      if (meta?.roundEnds?.some((e) => e.round === round)) setEnd(undefined);
       flash("ok", `Turno ${round} eliminato.`);
       onBack();
     } catch (e) {
@@ -150,6 +173,8 @@ export function RoundDetail({
       return;
     const games: HistoryGame[] = [];
     const errors: string[] = [];
+    // The round starts now: with the deadlines on it gets its end, counted from its first challenge
+    const startsRound = created === 0 && end === undefined && deadlinesOn;
     for (const [i, m] of todo.entries()) {
       setBusy(`Creazione partita ${i + 1} di ${todo.length} su Lichess…`);
       try {
@@ -166,6 +191,9 @@ export function RoundDetail({
               : errorMessage(e))
         );
       }
+    }
+    if (startsRound && games.length > 0) {
+      setEnd(roundEndFrom(Math.min(...games.map((g) => g.createdAt ?? Date.now())), meta!.roundDays!));
     }
     // Save what was created even if some challenges failed
     setBusy("Salvataggio nel torneo…");
@@ -296,6 +324,16 @@ export function RoundDetail({
 
         {matches.length > 0 && byes.length > 0 && <p className="note note-sm">Riposa: {byes.join(", ")}</p>}
 
+        {deadlinesOn && matches.length > 0 && (
+          <RoundDeadline
+            round={round}
+            days={meta!.roundDays!}
+            end={end}
+            start={created > 0 ? roundStart(matches.flatMap((m) => (m.game ? [m.game] : []))) : undefined}
+            onSet={setEnd}
+          />
+        )}
+
         {free.length >= 2 && (
           <div className="add-form add-form-pair">
             <div>
@@ -360,6 +398,8 @@ export function RoundDetail({
                 templates={templates}
                 nameOf={nameOf}
                 flash={flash}
+                roundEnd={end}
+                carryOver={deadlinesOn ? carriedOver(round, history, gameStates) : []}
               />
             </div>
           )}
@@ -372,6 +412,7 @@ export function RoundDetail({
                 expiryDays={settings.expiry}
                 triggerToast={triggerToast}
                 seasons={seasons}
+                roundEnd={end}
               />
             </div>
           )}
@@ -386,5 +427,67 @@ export function RoundDetail({
         </div>
       )}
     </section>
+  );
+}
+
+// Turni con scadenza: when the round ends, and the organizer's way to move it, remove it, or give one to
+// a round started before the deadlines were switched on
+function RoundDeadline({
+  round,
+  days,
+  end,
+  start,
+  onSet,
+}: {
+  round: string;
+  days: number; // the length of a round, from the settings
+  end?: number;
+  start?: number; // its first challenge, once created
+  onSet: (at?: number) => void;
+}) {
+  const now = Date.now();
+  if (start === undefined && end === undefined) {
+    return (
+      <p className="note note-sm">
+        🗓️ Creando le sfide, il Turno {round} durerà {days} giorni: fino a {formatRoundEnd(roundEndFrom(now, days))}.
+      </p>
+    );
+  }
+  if (end === undefined) {
+    const proposed = roundEndFrom(start ?? now, days);
+    return (
+      <div className="note note-sm">
+        🗓️ Il Turno {round} non ha una scadenza: è partito prima che le accendessi, o l'hai tolta.{" "}
+        <button type="button" className="link-muted" onClick={() => onSet(proposed)}>
+          Dagli {days} giorni dalla creazione: fino a {formatRoundEnd(proposed)}
+        </button>
+        {roundExpired(proposed, now) ? " (già passati)" : ""}
+      </div>
+    );
+  }
+  return (
+    <div className="note note-sm">
+      <p className="note-flush">
+        🗓️{" "}
+        {roundExpired(end, now)
+          ? `Scaduto ${formatRoundEnd(end)}: le partite ancora aperte continuano accanto al turno successivo.`
+          : `Si chiude ${formatRoundEnd(end)} · ${timeLeftText(end, now)}.`}
+      </p>
+      <div className="round-end-edit">
+        <label htmlFor={`round-end-${round}`}>Ultimo giorno</label>
+        <input
+          id={`round-end-${round}`}
+          type="date"
+          value={roundEndInputValue(end)}
+          onChange={(e) => {
+            const at = roundEndFromInput(e.target.value);
+            if (at !== undefined) onSet(at);
+          }}
+        />
+        <button type="button" className="link-muted" onClick={() => onSet(undefined)}>
+          Togli la scadenza
+        </button>
+      </div>
+    </div>
   );
 }

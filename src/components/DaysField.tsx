@@ -7,12 +7,16 @@ export function DaysField({
   value,
   fallback,
   onCommit,
+  min = 1,
+  max = 14,
 }: {
   id: string;
   label: string;
   value: number;
   fallback: number;
   onCommit: (n: number) => void;
+  min?: number;
+  max?: number;
 }) {
   const [text, setText] = useState(String(value));
   useEffect(() => setText(String(value)), [value]);
@@ -21,10 +25,10 @@ export function DaysField({
     const raw = e.target.value.replace(/\D/g, "").slice(0, 2);
     setText(raw);
     const n = parseInt(raw, 10);
-    if (n >= 1 && n <= 14) onCommit(n);
+    if (n >= min && n <= max) onCommit(n);
   };
   const handleBlur = () => {
-    const n = clampDays(text, fallback);
+    const n = clampDays(text, fallback, min, max);
     if (n !== value) onCommit(n);
     setText(String(n));
   };

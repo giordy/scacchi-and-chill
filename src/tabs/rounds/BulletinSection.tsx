@@ -21,6 +21,7 @@ export function BulletinSection({
   expiryDays,
   triggerToast,
   seasons = [],
+  roundEnd,
 }: {
   round: string;
   history: HistoryGame[];
@@ -29,6 +30,7 @@ export function BulletinSection({
   expiryDays: number;
   triggerToast?: (msg: string) => void;
   seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo of the colpacci
+  roundEnd?: number; // Turni con scadenza: when the round ends
 }) {
   // Games annulled or won by forfeit after a withdrawal, as on the site
   const history = applyWithdrawals(rawHistory, config.tournament?.withdrawals);
@@ -54,8 +56,10 @@ export function BulletinSection({
         .map((g) => `${g.url}:${g.lichess?.status ?? ""}:${g.lichess?.moves?.length ?? 0}`)
         .join(",") +
       "|" +
-      rawHistory.length,
-    [round, rawHistory]
+      rawHistory.length +
+      "|" +
+      (roundEnd ?? ""),
+    [round, rawHistory, roundEnd]
   );
 
   const loadStatusForRound = async (targetRound: string): Promise<boolean> => {
@@ -90,7 +94,7 @@ export function BulletinSection({
         .filter((id): id is string => Boolean(id));
       const states = ids.length > 0 ? await fetchGameStates(ids) : {};
       const built = buildBulletin({
-        round, games, states, history, config, expiryDays, seasons,
+        round, games, states, history, config, expiryDays, seasons, roundEnd,
         matchesUrl: `${window.location.origin}${window.location.pathname}#/partite`,
       });
       if (editedRound.current === targetRound) setNewer(built.text === text ? null : { round: targetRound, text: built.text });

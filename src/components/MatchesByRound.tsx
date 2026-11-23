@@ -17,6 +17,7 @@ import { PresenceInfo, seenAtOf } from '../lib/presence';
 import { ColorDot } from './PresenceDot';
 import { OpeningFamily, playsFamily } from '../lib/masterOpening';
 import { recentMove } from '../lib/live';
+import { formatRoundEnd, roundExpired, timeLeftText } from '../lib/roundDeadline';
 
 export interface MasterTag {
   family: OpeningFamily;
@@ -33,11 +34,13 @@ interface MatchesByRoundProps {
   elo?: EloReport; // Elo del torneo, for the colpacci
   masterTag?: MasterTag; // the master's opening, tagged on the games that play it
   moved?: Set<string>; // Lichess ids of the games with moves the visitor has not seen (lib/seenMoves.ts)
+  roundEndOf?: (round: string) => number | undefined; // Turni con scadenza (lib/roundDeadline.ts)
+  now?: number;
 }
 
 // Public "Partite": the current round first (its games by what there is to see), then the unfinished games of earlier rounds,
 // the upcoming rounds and finally the played rounds, newest first; both collapsed
-export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence, elo, masterTag, moved }: MatchesByRoundProps) {
+export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits, presence, elo, masterTag, moved, roundEndOf, now = Date.now() }: MatchesByRoundProps) {
   const hasMoved = (g: HistoryGame) => {
     const id = extractGameId(g.url);
     return !!id && !!moved?.has(id);
@@ -86,7 +89,22 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
     </div>
   );
 
-  const header = (block: RoundBlock, tag?: string) => {
+  // Turni con scadenza: until when the round in progress goes on, while some of its games do
+  const deadlineOf = (block: RoundBlock) => {
+    const end = roundEndOf?.(block.round);
+    if (end === undefined || block.games.every((g) => progressOf(g) === "finished")) return null;
+    return roundExpired(end, now) ? (
+      <span className="round-group-deadline is-over">
+        <span aria-hidden="true">⌛ </span>Tempo scaduto {formatRoundEnd(end)}: le partite ancora aperte continuano
+      </span>
+    ) : (
+      <span className="round-group-deadline">
+        <span aria-hidden="true">🗓️ </span>Si chiude {formatRoundEnd(end)} · {timeLeftText(end, now)}
+      </span>
+    );
+  };
+
+  const header = (block: RoundBlock, tag?: string, deadline = false) => {
     const leg = legOf(block.round);
     return (
       <>
@@ -96,6 +114,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
           {tag && <span className="round-group-tag">{tag}</span>}
         </h3>
         <span className="round-group-summary">{summaryOf(block.games)}</span>
+        {deadline && deadlineOf(block)}
       </>
     );
   };
@@ -109,7 +128,7 @@ export function MatchesByRound({ games, gameStates, nameOf, returnStart, summits
 
   const openRound = (block: RoundBlock, extraClass = "", tag?: string, sorted = false) => (
     <section key={block.round} className={`round-group${extraClass}`} aria-labelledby={`round-${block.round}`}>
-      <header className="round-group-header">{header(block, tag)}</header>
+      <header className="round-group-header">{header(block, tag, block === layout.current)}</header>
       {grid(sorted ? byNews(block.games) : block.games)}
     </section>
   );

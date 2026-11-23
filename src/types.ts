@@ -40,6 +40,9 @@ export interface MessageTemplates {
   game: string;
   bye: string;
   footer: string;
+  // Turni con scadenza (lib/roundDeadline.ts): when the round ends, and the games of earlier rounds still open
+  roundEnd?: string;
+  carryOver?: string;
   [key: string]: string | undefined;
 }
 
@@ -119,6 +122,12 @@ export interface FamousGame {
   note?: string;
 }
 
+// When a round ends (lib/roundDeadline.ts): midnight in Italy after its last day
+export interface RoundEnd {
+  round: string;
+  at: number; // ms
+}
+
 export interface TournamentMeta {
   title: string;
   season: string;
@@ -144,6 +153,10 @@ export interface TournamentMeta {
   // Lichess parameters shown in the public rules (and used to create the challenges)
   daysPerMove?: number;
   rated?: boolean;
+  // Turni con scadenza (lib/roundDeadline.ts): how many days a round lasts; missing or 0 when off
+  roundDays?: number;
+  // The end each round got when its challenges were created (or as the organizer moved it)
+  roundEnds?: RoundEnd[];
   winners?: SeasonWinner[];
   // Every player who ever took part, with the name shown on the site (see lib/roster.ts)
   roster?: Player[];

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { AppConfig, MessageTemplates, Settings } from '../../types';
+import { AppConfig, HistoryGame, MessageTemplates, Settings } from '../../types';
 import { fill, formatDeadline } from '../../lib/utils';
 import { RoundMatch } from '../../lib/rounds';
 import { roundDeadline } from '../../lib/bulletin';
 import { WhatsAppPreview } from '../../WhatsAppPreview';
 import { anecdoteForRound, anecdoteText } from '../../lib/masterAnecdotes';
+import { formatRoundEnd } from '../../lib/roundDeadline';
 
 // WhatsApp message that opens the round: one line per game with its Lichess link, plus who rests
 export function LaunchMessage({
@@ -16,6 +17,8 @@ export function LaunchMessage({
   templates,
   nameOf,
   flash,
+  roundEnd,
+  carryOver = [],
 }: {
   round: string;
   matches: RoundMatch[];
@@ -25,6 +28,9 @@ export function LaunchMessage({
   templates: MessageTemplates;
   nameOf: (handle: string) => string;
   flash: (kind: 'ok' | 'err', text: string) => void;
+  // Turni con scadenza: when the round ends, and the games of earlier rounds still open
+  roundEnd?: number;
+  carryOver?: HistoryGame[];
 }) {
   const created = matches.filter((m) => m.url);
   // The challenges expire counting from their creation, not from when this message is written
@@ -36,6 +42,8 @@ export function LaunchMessage({
     expiryDeadline: formatDeadline(expiryMs),
     type: settings.rated ? config.typeLabels.rated : config.typeLabels.casual,
     bye: byes.join(", "),
+    roundEnd: roundEnd !== undefined ? formatRoundEnd(roundEnd) : "",
+    games: carryOver.map((g) => `${nameOf(g.white)} – ${nameOf(g.black)} (Turno ${g.round})`).join(", "),
   };
   const games = created.map((m, i) =>
     fill(templates.game, {
@@ -50,6 +58,8 @@ export function LaunchMessage({
     fill(templates.header, common),
     ...games,
     byes.length > 0 ? fill(templates.bye, common) : "",
+    roundEnd !== undefined && templates.roundEnd ? fill(templates.roundEnd, common) : "",
+    carryOver.length > 0 && templates.carryOver ? fill(templates.carryOver, common) : "",
     fill(templates.footer, common),
     // The anecdote about the master of the season that goes with this round
     (() => {

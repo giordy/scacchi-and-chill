@@ -122,6 +122,23 @@ describe('buildBulletin', () => {
     const b = buildBulletin({ round: '4', games, states: {}, history: games, config, expiryDays: 2, now: NOW, random: first });
     expect(b.text).toContain('Link scaduto: la sfida va ricreata 🔁');
   });
+
+  it('says until when the round goes on, with the Turni con scadenza (NOW is Thursday 5 November)', () => {
+    const games: HistoryGame[] = [
+      { round: '5', white: 'anna', black: 'bruno', url: url('gggggggg') },
+      { round: '5', white: 'carla', black: 'dario', url: url('hhhhhhhh'), lichess: finished('hhhhhhhh', 'white') },
+    ];
+    const states = { gggggggg: { id: 'gggggggg', status: 'started', moves: 'e4 e5' } as LichessExportGame };
+    const build = (roundEnd?: number, round = games) =>
+      buildBulletin({ round: '5', games: round, states, history: games, config, expiryDays: 2, now: NOW, random: first, roundEnd }).text;
+    // until the end of Sunday 8 November in Italy
+    const end = Date.UTC(2026, 10, 8, 23);
+    expect(build(end)).toContain('🗓️ *Il turno si chiude domenica 8 novembre* (mancano 3 giorni)');
+    expect(build(end - 4 * 86400e3)).toContain('⌛ *Tempo del turno scaduto* mercoledì 4 novembre: le partite ancora aperte continuano');
+    // without the option, or once the round is over, nothing
+    expect(build()).not.toMatch(/si chiude|scaduto/);
+    expect(build(end, games.slice(1))).not.toMatch(/si chiude|scaduto/);
+  });
 });
 
 describe('phrasePicker', () => {

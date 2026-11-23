@@ -918,6 +918,11 @@ button.btn-sm { font-size: 12px; padding: 3px 8px; }
 button.btn-compact { padding: 4px 10px; font-size: 13px; min-height: 32px; }
 button.btn-compact.xs { padding: 4px 8px; font-size: 12px; min-height: 30px; }
 button.link-muted { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
+
+/* Turni con scadenza: the last day of a round, in Turni */
+.round-end-edit { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 8px; }
+.round-end-edit label { margin: 0; }
+.round-end-edit input[type="date"] { width: auto; }
 button.link-inline { min-height: 0; background: none; border: none; padding: 0; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
 textarea.ta-xl { min-height: 220px; font-family: inherit; }
 
@@ -1444,6 +1449,13 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
 }
 
 .round-group-summary {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Turni con scadenza: until when the round in progress goes on, on a line of its own */
+.round-group-deadline {
+  flex-basis: 100%;
   font-size: 14px;
   color: var(--muted);
 }

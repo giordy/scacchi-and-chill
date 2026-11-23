@@ -80,8 +80,13 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
 
   const saveFailed = (what: string) => (e: unknown) => flash('err', `Salvataggio ${what} su Firestore non riuscito: ${errorMessage(e)}`);
 
+  // The latest metadata, also for an update made after an await (the end of a round, written once its
+  // challenges are on Lichess): merged on a stale copy it would bring back what changed meanwhile
+  const latestMeta = useRef(config.tournament);
+  latestMeta.current = config.tournament;
   const updateTournamentMeta = (patch: Partial<TournamentMeta>) => {
-    const updatedMeta: TournamentMeta = mergeTournamentMeta(config.tournament, patch);
+    const updatedMeta: TournamentMeta = mergeTournamentMeta(latestMeta.current, patch);
+    latestMeta.current = updatedMeta;
     setConfig((prev) => ({ ...prev, tournament: updatedMeta }));
     // Who may accept the rules follows the season and its players (lib/pledges.ts pledgeKeys)
     saveTournamentFullToFirebase({ meta: updatedMeta, pledgeKeys: pledgeKeys(updatedMeta.season, config.players) }).catch(saveFailed('del torneo'));
@@ -231,6 +236,7 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             setHistory={setHistory}
             gameStates={lichess.gameStates}
             onUpdateSchedule={updateSchedule}
+            onUpdateTournamentMeta={updateTournamentMeta}
             nameOf={nameOf}
             flash={flash}
             triggerToast={triggerToast}

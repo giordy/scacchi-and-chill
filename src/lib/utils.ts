@@ -1,9 +1,9 @@
 export const fill = (template: string, vars: Record<string, unknown>) =>
   template.replace(/\{(\w+)\}/g, (match, key) => (key in vars ? String(vars[key]) : match));
 
-export const clampDays = (value: string | number, fallback: number) => {
+export const clampDays = (value: string | number, fallback: number, min = 1, max = 14) => {
   const n = typeof value === 'number' ? value : parseInt(value, 10);
-  return Number.isFinite(n) ? Math.min(14, Math.max(1, n)) : fallback;
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
 };
 
 // Pages of Lichess with an 8-letter name: never a game id (ids are random letters and digits)

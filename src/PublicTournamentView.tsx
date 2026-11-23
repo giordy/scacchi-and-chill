@@ -32,6 +32,7 @@ import { PillsburyIcon } from "./components/PillsburyIcon";
 import { ScudettoIcon } from "./components/ScudettoIcon";
 import { currentScudetto } from "./lib/scudetto";
 import { extractGameId } from "./lib/utils";
+import { formatRoundEnd, roundDeadlinesOn, roundEndOf, roundExpired } from "./lib/roundDeadline";
 import { useSeenMoves } from "./hooks/useSeenMoves";
 import { lastMovesOf, newMoveIds, SeenMoves } from "./lib/seenMoves";
 import { SeasonAwards } from "./components/SeasonAwards";
@@ -310,12 +311,18 @@ export function PublicTournamentView({
   const [photoOpen, setPhotoOpen] = useState(false);
   const days = tournamentMeta.daysPerMove ?? config.defaults.days;
   const rated = tournamentMeta.rated ?? config.defaults.rated;
+  // Turni con scadenza (lib/roundDeadline.ts): nothing of it shows while it is off
+  const roundDays = roundDeadlinesOn(tournamentMeta) ? tournamentMeta.roundDays! : 0;
+  const now = Date.now();
+  const currentEnd = progress.currentRound ? roundEndOf(tournamentMeta, progress.currentRound) : undefined;
 
   // Once the last game is over the hero tells who won; until then the round and who leads
   const roundLine = concluded
     ? championText(scudettoContenders(standings, season.noTrophies), scudetto)
     : progress.currentRound
-    ? `Turno ${progress.currentRound} in corso.`
+    ? currentEnd !== undefined && !roundExpired(currentEnd, now)
+      ? `Turno ${progress.currentRound} in corso, fino a ${formatRoundEnd(currentEnd)}.`
+      : `Turno ${progress.currentRound} in corso.`
     : "La stagione sta per cominciare.";
   const leaderLine = concluded ? "" : leaderText(standings);
 
@@ -664,6 +671,8 @@ export function PublicTournamentView({
               elo={elo}
               masterTag={masterTag}
               moved={movedGames}
+              roundEndOf={(round) => roundEndOf(tournamentMeta, round)}
+              now={now}
             />
           )}
         </section>
@@ -820,6 +829,12 @@ export function PublicTournamentView({
               <li>
                 <strong>Tempo:</strong> {days} {days === 1 ? "giorno" : "giorni"} per mossa, in modalità corrispondenza.
               </li>
+              {roundDays > 0 && (
+                <li>
+                  <strong>Turni:</strong> ogni turno dura {roundDays} giorni. Allo scadere parte il successivo, e chi non ha
+                  finito continua la sua partita: la scadenza non decide nessun risultato.
+                </li>
+              )}
               <li>
                 {rated ? (
                   <><strong>Rated:</strong> le partite contano per il tuo Elo Lichess.</>

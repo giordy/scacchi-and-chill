@@ -14,6 +14,10 @@ export const RULES = [
   { key: "noEarlyDraw", label: "Niente patta nelle prime mosse" },
 ];
 
+// Lines of the round's message with the Turni con scadenza on, when config.json has none
+const DEFAULT_ROUND_END = "🗓️ Il turno si chiude {roundEnd}: chi non ha finito continua anche dopo";
+const DEFAULT_CARRY_OVER = "♟️ Continuano dai turni precedenti: {games}";
+
 // Untrusted JSON from config.json: every field is checked below before use.
 type RawJson = any;
 
@@ -143,6 +147,9 @@ export function validateAndNormalizeConfig(cfg: RawJson): AppConfig {
       game: rm.game,
       bye: rm.bye,
       footer: rm.footer,
+      // Optional: used only with the Turni con scadenza on
+      roundEnd: isText(rm.roundEnd) ? rm.roundEnd : DEFAULT_ROUND_END,
+      carryOver: isText(rm.carryOver) ? rm.carryOver : DEFAULT_CARRY_OVER,
     },
     typeLabels,
     challengeName,

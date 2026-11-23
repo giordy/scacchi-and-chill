@@ -71,7 +71,7 @@ describe('admin layout', () => {
   it('points to Stagioni for the calendar when there are no rounds', async () => {
     const { RoundsTab } = await import('../../tabs/RoundsTab');
     const html = renderToStaticMarkup(
-      <RoundsTab openRound="" setOpenRound={noop} config={{ ...config, schedule: [] }} settings={settings} templates={config.messageTemplates} history={[]} setHistory={noop as any} gameStates={{}} onUpdateSchedule={noop} nameOf={(h) => h} flash={noop} triggerToast={noop} onMissingToken={noop} onOpenCalendar={noop} />
+      <RoundsTab openRound="" setOpenRound={noop} config={{ ...config, schedule: [] }} settings={settings} templates={config.messageTemplates} history={[]} setHistory={noop as any} gameStates={{}} onUpdateSchedule={noop} onUpdateTournamentMeta={noop} nameOf={(h) => h} flash={noop} triggerToast={noop} onMissingToken={noop} onOpenCalendar={noop} />
     );
     expect(html).toContain('♛ Stagioni → Calendario');
     expect(html).not.toContain('Genera i turni in automatico');
@@ -244,5 +244,86 @@ describe('scudetto colour field', () => {
     const html = await render('', '');
     expect(html).toContain('Scudetto Chill');
     expect(html).not.toContain('cfg-color-auto');
+  });
+});
+
+describe('Turni con scadenza in the organizer area', () => {
+  const past = Date.now() - 86400e3;
+  const games = [
+    { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa', createdAt: past - 14 * 86400e3, lichess: { id: 'aaaaaaaa', status: 'started' } },
+  ] as any[];
+  const schedule = [
+    { round: '1', white: 'anna', black: 'bruno' },
+    { round: '2', white: 'bruno', black: 'anna' },
+  ];
+  const withDeadlines = (roundDays: number) => ({
+    ...config,
+    schedule,
+    tournament: { ...config.tournament, roundDays, roundEnds: [{ round: '1', at: past }] },
+  });
+  const rounds = async (cfg: any, openRound = '') => {
+    const { RoundsTab } = await import('../../tabs/RoundsTab');
+    return renderToStaticMarkup(
+      <RoundsTab openRound={openRound} setOpenRound={noop} config={cfg} settings={settings} templates={config.messageTemplates} history={games} setHistory={noop as any} gameStates={{}} onUpdateSchedule={noop} onUpdateTournamentMeta={noop} nameOf={(h) => h} flash={noop} triggerToast={noop} onMissingToken={noop} />
+    );
+  };
+
+  it('is off by default, with its switch under the rules', () => {
+    const html = renderToStaticMarkup(
+      <SeasonsTab config={config} settings={settings} setSettings={noop as any} history={[]} setHistory={noop as any} onSeasonReset={noop} gameStates={{}} seasons={[]} flash={noop} onUpdateTournamentMeta={noop} onUpdateSchedule={noop} />
+    );
+    expect(html).toMatch(/<input id="round-deadline" type="checkbox"\/>/);
+    expect(html).not.toContain('Durata del turno');
+    const on = renderToStaticMarkup(
+      <SeasonsTab config={withDeadlines(14)} settings={settings} setSettings={noop as any} history={[]} setHistory={noop as any} onSeasonReset={noop} gameStates={{}} seasons={[]} flash={noop} onUpdateTournamentMeta={noop} onUpdateSchedule={noop} />
+    );
+    expect(on).toMatch(/<input id="round-deadline" type="checkbox" checked=""\/>/);
+    expect(on).toContain('Durata del turno (giorni)');
+    expect(on).toContain('Ogni turno dura 14 giorni');
+  });
+
+  it('tells when the round is over and the next one can start, the open games going on', async () => {
+    const html = await rounds(withDeadlines(14));
+    expect(html).toMatch(/Il Turno 1 è scaduto \S+ \d+ \S+: puoi creare il Turno 2\. Continua accanto al nuovo turno: anna – bruno\./);
+    expect(html).toContain('Apri il Turno 2');
+    expect(html).toContain('>Scaduto<');
+    // switched off: as before
+    const off = await rounds(withDeadlines(0));
+    expect(off).not.toContain('è scaduto');
+    expect(off).not.toContain('>Scaduto<');
+  });
+
+  it('shows the end of a round, to move or remove, and what the next round will get', async () => {
+    const first = await rounds(withDeadlines(14), '1');
+    expect(first).toMatch(/🗓️ Scaduto \S+ \d+ \S+: le partite ancora aperte continuano accanto al turno successivo\./);
+    expect(first).toContain('Togli la scadenza');
+    expect(first).toMatch(/type="date" value="\d{4}-\d{2}-\d{2}"/);
+    const second = await rounds(withDeadlines(14), '2');
+    expect(second).toMatch(/Creando le sfide, il Turno 2 durerà 14 giorni: fino a \S+ \d+ \S+\./);
+    // a round started before the option was on: it can be given one
+    const before = await rounds({ ...withDeadlines(14), tournament: { ...config.tournament, roundDays: 14 } }, '1');
+    expect(before).toContain('non ha una scadenza');
+    expect(before).toContain('Dagli 14 giorni dalla creazione');
+    expect(await rounds(withDeadlines(0), '1')).not.toContain('🗓️');
+  });
+
+  it('writes the end and the games still open in the message of the round', async () => {
+    const { LaunchMessage } = await import('../../tabs/rounds/LaunchMessage');
+    const props = {
+      round: '2',
+      matches: [{ white: 'bruno', black: 'anna', url: 'https://lichess.org/cccccccc', scheduled: true }],
+      byes: [],
+      config,
+      settings,
+      templates: config.messageTemplates,
+      nameOf: (h: string) => h,
+      flash: noop,
+    };
+    const html = renderToStaticMarkup(<LaunchMessage {...props} roundEnd={Date.UTC(2026, 11, 7, 23)} carryOver={games} />);
+    expect(html).toContain('Il turno si chiude lunedì 7 dicembre: chi non ha finito continua anche dopo');
+    expect(html).toContain('Continuano dai turni precedenti: anna – bruno (Turno 1)');
+    const plain = renderToStaticMarkup(<LaunchMessage {...props} />);
+    expect(plain).not.toContain('si chiude');
+    expect(plain).not.toContain('Continuano');
   });
 });

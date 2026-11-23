@@ -3,7 +3,7 @@
     "Scacchi & Chill tournament configuration: defaults only. Players, season and calendar live on",
     "Firestore and are managed from the organizer area (#admin).",
     "1. defaults: default days per move, challenge link expiry days, and game rules.",
-    "2. roundMessage: message template used when creating a new round's pairings.",
+    "2. roundMessage: message template used when creating a new round's pairings ('roundEnd' and 'carryOver' only with the Turni con scadenza on).",
     "3. statusMessage: phrases used for the ongoing games status update.",
     "   (Leave 'closing' empty [] to end the status message right after the summary statistics)."
   ],
@@ -38,7 +38,9 @@
     "header": "⚔️ *Turno {round}: accoppiamenti e link*\n⏱️ {days} giorni a mossa · partite {type}",
     "game": "{n} *{white}* ⚪ vs *{black}* ⚫\n🔗 {url}",
     "bye": "🏖️ Riposa in questo turno: *{bye}*",
-    "footer": "⏳ I link scadono {expiryDeadline}: aprite il vostro e accettate la sfida. Buone partite!"
+    "footer": "⏳ I link scadono {expiryDeadline}: aprite il vostro e accettate la sfida. Buone partite!",
+    "roundEnd": "🗓️ Il turno si chiude {roundEnd}: chi non ha finito continua anche dopo",
+    "carryOver": "♟️ Continuano dai turni precedenti: {games}"
   },
   "statusMessage": {
     "header": [

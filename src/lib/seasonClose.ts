@@ -46,6 +46,7 @@ export async function closeSeason(input: SeasonCloseInput, io: SeasonCloseIO): P
     winners: withChampion(meta.winners, snapshot),
     withdrawals: [],
     masterAnecdotes: [],
+    roundEnds: [], // the next season's rounds start again from 1 (the length of a round stays)
     seeds: [], // the next season's esordienti get theirs at their first game (see lib/seeds.ts)
     // A game closed for cheating also costs the Trofeo Pillsbury and the awards: decided during
     // Stagione 2 for the seasons after it, so it starts with the next one, and the rules say so
