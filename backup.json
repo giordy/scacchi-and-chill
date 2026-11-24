@@ -1899,6 +1899,13 @@
       "stagione-2-capablanca--matepaco",
       "stagione-2-capablanca--scarsoforteh"
     ],
+    "roundDays": 14,
+    "roundEnds": [
+      {
+        "at": 1795820400000,
+        "round": "3"
+      }
+    ],
     "rulesText": "",
     "season": "Stagione 2 - Capablanca",
     "seeds": [
