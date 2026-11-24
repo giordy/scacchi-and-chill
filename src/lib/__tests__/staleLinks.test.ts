@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { staleLinks } from '../relink';
@@ -6,7 +6,8 @@ import { extractGameId } from '../utils';
 import { HistoryGame, LichessExportGame } from '../../types';
 // @ts-expect-error a Node script without types
 import { expiryDaysOf, staleLinksNotification, staleLinksOf } from '../../../scripts/push.mjs';
-import { RoundsTab } from '../../tabs/RoundsTab';
+import { AlertsPanel } from '../../components/AdminAlerts';
+import { adminAlerts } from '../adminAlerts';
 import { defaultConfig } from '../config';
 
 const DAY = 86400000;
@@ -72,29 +73,11 @@ describe('links to make again', () => {
     expect(staleLinksNotification(items.slice(0, 1), (h: string) => h).title).toBe('Sfida da rifare');
   });
 
-  it('are listed at the top of Turni', () => {
-    vi.useFakeTimers({ now: NOW });
-    const config = { ...defaultConfig, schedule: [] };
-    const settings = { token: '', days: 2, expiry: 2, rated: true, rules: defaultConfig.defaults.rules };
-    const html = renderToStaticMarkup(
-      React.createElement(RoundsTab, {
-        openRound: '',
-        setOpenRound: () => {},
-        config,
-        settings,
-        templates: config.messageTemplates,
-        history,
-        setHistory: () => {},
-        gameStates: {},
-        onUpdateSchedule: () => {},
-        onUpdateTournamentMeta: () => {},
-        nameOf: (h: string) => h,
-        flash: () => {},
-        triggerToast: () => {},
-        onMissingToken: () => {},
-      })
-    );
-    vi.useRealTimers();
+  it('are listed among the alerts of the organizer area', () => {
+    const alerts = adminAlerts({ meta: defaultConfig.tournament, schedule: [], history, gameStates: {}, expiryDays: 2, tokenCheck: null, syncHealth: null, withdrawals: [], fairPlaySeen: [], now: NOW });
+    expect(alerts.map((a) => a.kind)).toEqual(['staleLinks']);
+    const actions = { openRound: () => {}, openToken: () => {}, fairPlaySeen: [], onFairPlaySeen: () => {} };
+    const html = renderToStaticMarkup(React.createElement(AlertsPanel, { alerts, actions, nameOf: (h: string) => h }));
     expect(html).toContain('2 sfide sono da rifare');
     expect(html).toContain('anna – bruno (Turno 4): scaduta senza essere accettata');
     expect(html).toContain('elena – fabio (Turno 3): annullata su Lichess');

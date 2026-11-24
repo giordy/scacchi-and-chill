@@ -17,6 +17,25 @@ const config = {
   tournament: { ...(defaultConfig.tournament as any), winners: [] },
 } as any;
 const organizer = { anecdotes: {}, setAnecdote: noop } as any;
+// The alerts behind the 🔔 of the organizer area (lib/adminAlerts.ts), as AdminApp builds them
+const alertsOf = async (cfg: any, history: any[]) => {
+  const { adminAlerts } = await import('../../lib/adminAlerts');
+  const { AlertsPanel } = await import('../AdminAlerts');
+  const alerts = adminAlerts({
+    meta: cfg.tournament,
+    schedule: cfg.schedule ?? [],
+    history,
+    gameStates: {},
+    expiryDays: 2,
+    tokenCheck: null,
+    syncHealth: null,
+    withdrawals: [],
+    fairPlaySeen: [],
+    now: Date.now(),
+  });
+  const actions = { openRound: noop, openToken: noop, fairPlaySeen: [], onFairPlaySeen: noop };
+  return renderToStaticMarkup(<AlertsPanel alerts={alerts} actions={actions} nameOf={(h) => h} meta={cfg.tournament} />);
+};
 const summaries = (html: string) => [...html.matchAll(/<summary>([^<]+)<\/summary>/g)].map((m) => m[1]);
 
 describe('admin layout', () => {
@@ -298,20 +317,19 @@ describe('Turni con scadenza in the organizer area', () => {
   });
 
   it('tells when the round is over and the next one can start, the open games going on', async () => {
-    const html = await rounds(withDeadlines(14));
+    const html = await alertsOf(withDeadlines(14), games);
     expect(html).toMatch(/Il Turno 1 è scaduto \S+ \d+ \S+: puoi creare il Turno 2\. Continua accanto al nuovo turno: anna – bruno\./);
     expect(html).toContain('Apri il Turno 2');
-    expect(html).toContain('>Scaduto<');
+    expect(await rounds(withDeadlines(14))).toContain('>Scaduto<');
     // switched off: as before
-    const off = await rounds(withDeadlines(0));
-    expect(off).not.toContain('è scaduto');
-    expect(off).not.toContain('>Scaduto<');
+    expect(await alertsOf(withDeadlines(0), games)).not.toContain('è scaduto');
+    expect(await rounds(withDeadlines(0))).not.toContain('>Scaduto<');
   });
 
   it('in the last rounds waits for the games still open instead of proposing the next round', async () => {
     // two rounds in the calendar, the last one waits
     const last = { ...withDeadlines(14), tournament: { ...withDeadlines(14).tournament, finalRoundsWait: 1 } };
-    const html = await rounds(last);
+    const html = await alertsOf(last, games);
     expect(html).toMatch(/Il Turno 1 si è chiuso \S+ \d+ \S+\. Siamo alle ultime giornate: il Turno 2 parte\s+quando finisce l&#x27;ultima partita ancora in corso\./);
     // nobody is named while they are waited for
     expect(html).not.toContain('anna – bruno');
@@ -339,7 +357,7 @@ describe('Turni con scadenza in the organizer area', () => {
       renderToStaticMarkup(
         <RoundsTab openRound={openRound} setOpenRound={noop} config={cfg} settings={settings} templates={config.messageTemplates} history={busyGames} setHistory={noop as any} gameStates={{}} onUpdateSchedule={noop} onUpdateTournamentMeta={noop} nameOf={(h) => h} flash={noop} triggerToast={noop} onMissingToken={noop} />
       );
-    const list = render('');
+    const list = await alertsOf(cfg, busyGames);
     expect(list).toMatch(/Il Turno 2 si è chiuso \S+ \d+ \S+\. Il Turno 3 parte quando chi ha già 2 partite in corso ne chiude una\./);
     expect(list).not.toContain('puoi creare il Turno 3');
     expect(list).not.toMatch(/anna – |carla – /);
@@ -396,16 +414,15 @@ describe('results decided by the organizer and games past the days allowed', () 
   };
 
   it('lists the games past the days allowed in Turni, only with the option on', async () => {
-    const html = await rounds(cfg({ overdueDays: 21 }), history);
+    const html = await alertsOf(cfg({ overdueDays: 21 }), history);
     expect(html).toContain('Una partita è andata oltre i 21 giorni');
     expect(html).toMatch(/anna – bruno \(Turno 1, limite \S+ \d+ \S+\)/);
     expect(html).toContain('puoi registrare tu il risultato dalla partita (⚖️)');
-    expect(await rounds(cfg({}), history)).not.toContain('oltre i');
+    expect(await alertsOf(cfg({}), history)).not.toContain('oltre i');
     // decided: not past the limit any more, and the round is over
     const decided = [{ ...history[0], decision: { result: '½-½', at: Date.now() } }];
-    const after = await rounds(cfg({ overdueDays: 21 }), decided);
-    expect(after).not.toContain('oltre i');
-    expect(after).toContain('>Concluso<');
+    expect(await alertsOf(cfg({ overdueDays: 21 }), decided)).not.toContain('oltre i');
+    expect(await rounds(cfg({ overdueDays: 21 }), decided)).toContain('>Concluso<');
   });
 
   it('offers the decision on every game created, and shows the one taken', async () => {

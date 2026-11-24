@@ -1,34 +1,27 @@
 import React from 'react';
-import { HistoryGame, LichessExportGame, Withdrawal } from '../types';
-import { cheatCases } from '../lib/fairPlay';
+import { CheatCase } from '../lib/fairPlay';
 
-// Organizer area only: games Lichess closed for cheating, with what the rules say to do.
-// Never shown on the public page (the rules ask not to accuse anyone in the group).
+// Organizer area only, in the list of alerts (lib/adminAlerts.ts openCheatCases): games Lichess closed
+// for cheating, with what the rules say to do. Never shown on the public page (the rules ask not to
+// accuse anyone in the group).
 export function FairPlayAlert({
-  history,
-  gameStates,
-  withdrawals,
+  cases,
   seen,
   onSeen,
   nameOf,
   awardsBan,
 }: {
-  history: HistoryGame[];
-  gameStates: Record<string, LichessExportGame>;
-  withdrawals: Withdrawal[];
+  cases: CheatCase[];
   seen: string[];
   onSeen: (ids: string[]) => void;
   nameOf: (handle: string) => string;
   awardsBan?: boolean; // TournamentMeta.fairPlayAwardsBan: no trophy for the season
 }) {
-  const left = new Set(withdrawals.map((w) => w.handle.toLowerCase()));
-  // A first case stays until acknowledged; a repeat stays until the player is out of the tournament
-  const cases = cheatCases(history, gameStates).filter((c) => !left.has(c.handle.toLowerCase()) && (c.count >= 2 || !seen.includes(c.id)));
   if (cases.length === 0) return null;
   const firsts = cases.filter((c) => c.count === 1);
 
   return (
-    <div className="notice warning fairplay-alert" role="alert">
+    <div className="fairplay-alert">
       <strong>⚠️ Fair play: partite chiuse da Lichess per scorrettezza</strong>
       <ul>
         {cases.map((c) => (

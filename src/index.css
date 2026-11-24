@@ -989,7 +989,9 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
 }
 
 /* Admin layout */
-.admin-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; margin-bottom: 12px; flex-wrap: wrap; }
+/* The title whole: on a narrow phone the buttons go on a line of their own */
+.admin-header .header-actions .chip-link { white-space: nowrap; }
 .admin-identity { min-width: 0; }
 .admin-identity .view-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 0 0 16px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
@@ -4075,3 +4077,24 @@ button.btn-mini.btn-go {
   margin: 0;
   color: var(--danger);
 }
+
+/* The organizer's alerts (components/AdminAlerts.tsx): the bell in the header and the list it opens */
+.chip-link.alerts-bell { display: inline-flex; align-items: center; gap: 5px; }
+.chip-link.alerts-bell.is-active { border-color: var(--accent); }
+.alerts-count {
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; line-height: 1; background: var(--muted); color: var(--panel);
+}
+.alerts-count.is-urgent { background: var(--danger); }
+.alerts-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.alert-item {
+  padding: 10px 12px; border-radius: 8px; font-size: 15px;
+  border: 1px solid var(--warning); color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+}
+.alert-item.is-urgent { border-color: var(--danger); color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
+.alert-item.is-info { border-color: var(--line); color: var(--ink); background: transparent; }
+.alert-item ul { margin: 6px 0; padding-left: 18px; display: grid; gap: 4px; }
+.alert-item a { color: inherit; text-decoration: underline; }
+.alert-item button.link-muted { color: inherit; font-size: 13px; }

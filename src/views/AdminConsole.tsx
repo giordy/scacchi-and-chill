@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Toast } from '../WhatsAppPreview';
 import { onTabListKeyDown } from '../lib/tabKeys';
 import type { SyncHealth } from '../lib/syncHealth';
-import { AutoSyncAlert, AutoSyncNote } from '../components/AutoSyncStatus';
+import { AutoSyncNote } from '../components/AutoSyncStatus';
+import { AlertsBell } from '../components/AdminAlerts';
+import type { AdminAlert } from '../lib/adminAlerts';
 
 export type AdminTab = 'rounds' | 'whatsapp' | 'players' | 'seasons' | 'settings';
 
@@ -27,6 +29,9 @@ interface AdminConsoleProps {
   onSync: () => void;
   // The automatic sync (GitHub Action), lib/syncHealth.ts; null until read
   syncHealth?: SyncHealth | null;
+  // The organizer's alerts (lib/adminAlerts.ts): the bell in the header, the list it opens
+  alerts?: AdminAlert[];
+  alertsPanel?: (close: () => void) => React.ReactNode;
   toastMessage: string | null;
   children: React.ReactNode;
 }
@@ -42,9 +47,12 @@ export function AdminConsole({
   lastSyncTime,
   onSync,
   syncHealth = null,
+  alerts = [],
+  alertsPanel,
   toastMessage,
   children,
 }: AdminConsoleProps) {
+  const [alertsOpen, setAlertsOpen] = useState(false);
   return (
     <main className="admin">
       <header className="admin-header">
@@ -53,12 +61,15 @@ export function AdminConsole({
           <h1 className="view-title">{title}</h1>
         </div>
         <div className="header-actions">
+          {alertsPanel && <AlertsBell alerts={alerts} open={alertsOpen} onToggle={() => setAlertsOpen((o) => !o)} />}
           <a href="#" className="chip-link">Vista pubblica</a>
           <button type="button" className="chip-link is-danger" onClick={onLogout} title={`Esci (${email})`}>
             Esci
           </button>
         </div>
       </header>
+
+      {alertsOpen && alertsPanel?.(() => setAlertsOpen(false))}
 
       {/* Results sync: Lichess → Firestore (the public view reads from there) */}
       <div className="sync-bar">
@@ -70,7 +81,6 @@ export function AdminConsole({
         </span>
         <AutoSyncNote health={syncHealth} />
       </div>
-      <AutoSyncAlert health={syncHealth} />
 
       <nav className="tabs" role="tablist" aria-label="Sezioni" onKeyDown={onTabListKeyDown}>
         {ADMIN_TABS.map((t) => (

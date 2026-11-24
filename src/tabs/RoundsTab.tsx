@@ -8,9 +8,7 @@ import { usePersistentState } from '../hooks/usePersistentState';
 import { RoundDetail } from './rounds/RoundDetail';
 import { usePledges } from '../hooks/usePledges';
 import { pledgeStatus, rulesVersion } from '../lib/pledges';
-import { expiredRound, formatRoundEnd, roundEndOf, roundExpired, waitText } from '../lib/roundDeadline';
-import { overdueDaysOf, overdueGames } from '../lib/overdue';
-import { staleLinks } from '../lib/relink';
+import { roundEndOf, roundExpired } from '../lib/roundDeadline';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
 
@@ -71,12 +69,8 @@ export function RoundsTab({
   const rounds = roundsOf(schedule, [...history, ...unsaved]);
   const current = currentRound(rounds);
   const now = Date.now();
-  // Turni con scadenza: the round in progress is over its end and the next one can start
-  const expired = expiredRound(config.tournament, rounds, history, gameStates, now);
-  // Partite troppo lunghe (lib/overdue.ts): for the organizer only
-  const overdue = overdueGames(config.tournament, history, gameStates, now);
-  // Challenges expired without being accepted, games voided by Lichess: a new link is needed
-  const stale = staleLinks(history, gameStates, settings.expiry, now);
+  // The round past its end, the games too long and the links to make again are in the alerts of the
+  // organizer area (lib/adminAlerts.ts), behind the 🔔
 
   // Idempotent (one document per round/white/black), so it can be retried safely
   const save = async (games: HistoryGame[]): Promise<boolean> => {
@@ -155,60 +149,6 @@ export function RoundsTab({
   return (
     <div className="settings-stack">
       {unsavedNotice}
-      {stale.length > 0 && (
-        <div className="notice warning">
-          🔗 {stale.length === 1 ? "Una sfida è da rifare:" : `${stale.length} sfide sono da rifare:`}
-          <ul>
-            {stale.map(({ game, kind }) => (
-              <li key={`${game.round}|${game.white}|${game.black}`}>
-                {nameOf(game.white)} – {nameOf(game.black)} (Turno {game.round}):{" "}
-                {kind === "expired" ? "scaduta senza essere accettata" : "annullata su Lichess"}{" "}
-                <button type="button" className="link-muted" onClick={() => setOpenRound(game.round)}>
-                  Apri il turno
-                </button>
-              </li>
-            ))}
-          </ul>
-          Nel turno, 🔁 accanto alla partita crea un nuovo link e prepara il messaggio per i due giocatori.
-        </div>
-      )}
-      {overdue.length > 0 && (
-        <div className="notice warning">
-          ⏰ {overdue.length === 1 ? "Una partita è andata" : `${overdue.length} partite sono andate`} oltre i{" "}
-          {overdueDaysOf(config.tournament)} giorni dall'inizio del turno:
-          <ul>
-            {overdue.map(({ game, limit }) => (
-              <li key={`${game.round}|${game.white}|${game.black}`}>
-                {nameOf(game.white)} – {nameOf(game.black)} (Turno {game.round}, limite {formatRoundEnd(limit)}){" "}
-                <button type="button" className="link-muted" onClick={() => setOpenRound(game.round)}>
-                  Apri il turno
-                </button>
-              </li>
-            ))}
-          </ul>
-          Parla con i giocatori: se non si accordano, puoi registrare tu il risultato dalla partita (⚖️).
-        </div>
-      )}
-      {expired && expired.waitReason && (
-        <div className="notice">
-          Il Turno {expired.round} si è chiuso {formatRoundEnd(expired.end)}.{" "}
-          {expired.waitReason === "final" ? "Siamo alle ultime giornate: il" : "Il"} Turno {expired.next} parte{" "}
-          {waitText({ reason: expired.waitReason, count: expired.waitFor.length })}.
-        </div>
-      )}
-      {expired && !expired.waitReason && (
-        <div className="notice warning">
-          Il Turno {expired.round} è scaduto {formatRoundEnd(expired.end)}: puoi creare il Turno {expired.next}.{" "}
-          {expired.open.length === 0
-            ? "Le sue partite sono tutte concluse."
-            : `${expired.open.length === 1 ? "Continua" : "Continuano"} accanto al nuovo turno: ${expired.open
-                .map((g) => `${nameOf(g.white)} – ${nameOf(g.black)}`)
-                .join(", ")}.`}
-          <button className="secondary btn-block mt-8" type="button" onClick={() => setOpenRound(expired.next)}>
-            Apri il Turno {expired.next}
-          </button>
-        </div>
-      )}
       <section className="panel">
         <h2 className="panel-title">
           Turni <span className="muted-normal">· {rounds.length}</span>

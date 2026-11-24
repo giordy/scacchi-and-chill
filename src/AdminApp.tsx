@@ -16,7 +16,6 @@ import { useLichessSync } from './hooks/useLichessSync';
 import { useEloSeeds } from './hooks/useEloSeeds';
 import { useSyncHealth } from './hooks/useSyncHealth';
 import { useTokenCheck } from './hooks/useTokenCheck';
-import { tokenWarning } from './lib/tokenCheck';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Notice } from './components/Notice';
 import { RoundsTab } from './tabs/RoundsTab';
@@ -25,7 +24,8 @@ import { PlayersTab } from './tabs/PlayersTab';
 import { SettingsTab } from './tabs/SettingsTab';
 import { WhatsAppTab } from './tabs/WhatsAppTab';
 import { applyWithdrawals } from './lib/withdrawals';
-import { FairPlayAlert } from './components/FairPlayAlert';
+import { AlertsPanel } from './components/AdminAlerts';
+import { adminAlerts } from './lib/adminAlerts';
 import { AdminLogin } from './views/AdminLogin';
 import { AdminConsole, AdminTab, isAdminTab } from './views/AdminConsole';
 import { useNameOf } from './components/Names';
@@ -140,7 +140,6 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
   const lichess = useLichessSync(history, setHistory, flash);
   // Whether the Lichess token still works, asked once per token (lib/tokenCheck.ts)
   const tokenState = useTokenCheck(settings.token || undefined, admin.isAuthenticated && organizer.loaded);
-  const tokenAlert = tokenWarning(tokenState);
   // Whether the GitHub Action still syncs the results by itself (lib/syncHealth.ts)
   const syncHealth = useSyncHealth(admin.isAuthenticated);
 
@@ -194,6 +193,43 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // The organizer's alerts, behind the 🔔 of the header (lib/adminAlerts.ts): what is left to do
+  const alerts = gamesLoaded
+    ? adminAlerts({
+        meta: config.tournament,
+        schedule: config.schedule ?? [],
+        history,
+        gameStates: lichess.gameStates,
+        expiryDays: settings.expiry,
+        tokenCheck: tokenState,
+        syncHealth,
+        withdrawals: config.tournament?.withdrawals ?? [],
+        fairPlaySeen: organizer.fairPlaySeen ?? [],
+        now: Date.now(),
+      })
+    : [];
+  const alertsPanel = (close: () => void) => (
+    <AlertsPanel
+      alerts={alerts}
+      nameOf={nameOf}
+      meta={config.tournament}
+      actions={{
+        openRound: (r) => {
+          close();
+          setActiveTab('rounds');
+          setOpenRound(r);
+        },
+        openToken: () => {
+          close();
+          setActiveTab('settings');
+          setTimeout(() => openSection('token'), 60);
+        },
+        fairPlaySeen: organizer.fairPlaySeen ?? [],
+        onFairPlaySeen: (ids) => organizer.replaceAll({ fairPlaySeen: ids }),
+      }}
+    />
+  );
+
   if (!admin.authReady) {
     return <LoadingScreen label="Verifica accesso…" />;
   }
@@ -213,34 +249,10 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
       lastSyncTime={lichess.lastSyncTime}
       onSync={() => lichess.sync()}
       syncHealth={syncHealth}
+      alerts={alerts}
+      alertsPanel={alertsPanel}
       toastMessage={toastMessage}
     >
-      {tokenAlert && (
-        <div className="notice warning mb-14" role="status">
-          🔑 {tokenAlert}{" "}
-          <button
-            type="button"
-            className="link-muted"
-            onClick={() => {
-              setActiveTab('settings');
-              setTimeout(() => openSection('token'), 60);
-            }}
-          >
-            Vai al token
-          </button>
-        </div>
-      )}
-
-      <FairPlayAlert
-        history={history}
-        gameStates={lichess.gameStates}
-        withdrawals={config.tournament?.withdrawals ?? []}
-        seen={organizer.fairPlaySeen ?? []}
-        onSeen={(ids) => organizer.replaceAll({ fairPlaySeen: ids })}
-        nameOf={nameOf}
-        awardsBan={config.tournament?.fairPlayAwardsBan}
-      />
-
       {checklist && (
         <SeasonChecklistPanel
           checklist={checklist}

@@ -3,6 +3,9 @@
 // (`at`, or `errorAt` and `error` for a run that did not go through). When the outside cron stops (its
 // GitHub token expired) or a secret breaks, nothing else would say so: the standings just stop moving.
 
+// Where to look at its runs
+export const SYNC_WORKFLOW_URL = 'https://github.com/giordy/scacchi-and-chill/actions/workflows/sync-results.yml';
+
 // The outside cron starts a run every 10 minutes; GitHub's own hourly schedule is a slow fallback
 export const STALE_AFTER_MS = 60 * 60 * 1000;
 

@@ -12,11 +12,11 @@ export function AutoSyncNote({ health, now = Date.now() }: { health: SyncHealth 
   );
 }
 
-// Below the sync bar, only when the automatic sync stopped: what to look at
+// In the list of alerts, only when the automatic sync stopped: what to look at
 export function AutoSyncAlert({ health, now = Date.now() }: { health: SyncHealth | null; now?: number }) {
   if (health?.kind !== 'stale') return null;
   return (
-    <div className="notice warning mb-14" role="status">
+    <>
       ⚠️ La sincronizzazione automatica è ferma:{" "}
       {health.at !== undefined ? `l'ultimo giro riuscito è di ${agoLabel(health.at, now)}.` : "nessun giro è andato a buon fine."}
       {health.error && (
@@ -24,9 +24,8 @@ export function AutoSyncAlert({ health, now = Date.now() }: { health: SyncHealth
           {" "}L'ultimo errore: <em>{health.error}</em>.
         </>
       )}{" "}
-      Guarda su GitHub, in Actions, «Sincronizza risultati»: se non parte più da sola, il token GitHub usato da
-      cron-job.org potrebbe essere scaduto (vedi il README). Intanto i risultati si aggiornano quando apri quest'area o
-      premi «Sincronizza risultati».
-    </div>
+      Se su GitHub «Sincronizza risultati» non parte più da sola, il token GitHub usato da cron-job.org potrebbe essere
+      scaduto (vedi il README). Intanto i risultati si aggiornano quando apri quest'area o premi «Sincronizza risultati».
+    </>
   );
 }
