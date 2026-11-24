@@ -5,6 +5,7 @@ import {
 } from '../types';
 import { RULES } from './config';
 import { fill } from './utils';
+import { TokenInfo, tokenInfoOf } from './tokenCheck';
 
 export async function createChallenge(
   pair: GamePair,
@@ -63,6 +64,18 @@ export async function cancelChallenge(id: string, token: string): Promise<boolea
   } catch {
     return false;
   }
+}
+
+// What Lichess knows of a token: its account, permissions and expiry; null when it does not know it.
+// Throws when Lichess cannot be asked (no network, Lichess down): then nothing is known.
+export async function testToken(token: string): Promise<TokenInfo | null> {
+  const res = await fetch("https://lichess.org/api/token/test", {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: token,
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return tokenInfoOf(await res.json(), token);
 }
 
 // Lichess exports up to 300 games per call

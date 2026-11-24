@@ -289,6 +289,49 @@ export function overdueNotification(items, days, nameOf) {
   };
 }
 
+// ---- Sfide da rifare: the organizer's notification (src/lib/relink.ts staleLinks) ----
+
+const DAY_MS = 86400000;
+// Results decided by the organizer in the old way, on the Lichess state (src/lib/games.ts byOrganizer)
+const BY_ORGANIZER = new Set(['decided', 'doubleLoss']);
+
+// The games whose link must be made again, as src/lib/relink.ts staleLinks (a test checks they agree):
+// a challenge not accepted `expiryDays` days after its creation (Lichess exports a game only once
+// accepted), or a game Lichess voided. Each with the key it is told under once: its link, so a new
+// link is a new game to watch.
+export function staleLinksOf(games, states, expiryDays, now, idOf) {
+  return games
+    .filter((g) => g.url && !g.decision)
+    .flatMap((g) => {
+      const id = idOf(g.url);
+      const s = BY_ORGANIZER.has(g.lichess?.status) ? g.lichess : (id && states[id]) || g.lichess;
+      const item = { round: String(g.round), white: g.white, black: g.black, key: `link|${g.url}` };
+      if (s && UNPLAYED.has(s.status)) return [{ ...item, kind: 'void' }];
+      if (s) return [];
+      const created = Number(g.createdAt) > 0 ? Number(g.createdAt) : now;
+      return now > created + expiryDays * DAY_MS ? [{ ...item, kind: 'expired' }] : [];
+    })
+    .sort((a, b) => byRound(a.round, b.round));
+}
+
+// The days a challenge stays open, as the organizer area: its settings (private/organizer), else the
+// default of config.json (src/lib/config.ts accepts 1 to 14)
+export function expiryDaysOf(organizer, fallback) {
+  const n = Number(organizer?.settings?.expiry);
+  return Number.isInteger(n) && n >= 1 && n <= 14 ? n : fallback;
+}
+
+// One notification for the links newly to make again, with the names
+export function staleLinksNotification(items, nameOf) {
+  const pairs = items.map((o) => `${nameOf(o.white)} – ${nameOf(o.black)} (Turno ${o.round}, ${o.kind === 'expired' ? 'non accettata' : 'annullata'})`);
+  return {
+    title: items.length === 1 ? 'Sfida da rifare' : `${items.length} sfide da rifare`,
+    body: `${pairs.join(', ')}. Dall'area organizzatore, 🔁 crea un nuovo link.`,
+    hash: '#admin',
+    tag: 'link',
+  };
+}
+
 // Sends the organizer's notice to their devices (send: as sendPush, 'sent' or 'gone', or throws). Returns
 // what to keep: the devices still subscribed (null: unchanged) and the keys told, the latest 100 (null: unchanged; the
 // notice is told when a device got it, or when none could, all gone; with only failures it is tried

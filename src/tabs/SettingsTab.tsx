@@ -5,6 +5,7 @@ import { CollapsibleSection } from '../components/CollapsibleSection';
 import { TokenSection } from './settings/TokenSection';
 import { BackupSection } from './settings/BackupSection';
 import { AlertsSection } from './settings/AlertsSection';
+import type { TokenCheck } from '../lib/tokenCheck';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
@@ -22,6 +23,7 @@ export function SettingsTab({
   onUpdateTournamentMeta,
   onUpdatePlayers,
   onUpdateSchedule,
+  tokenCheck = null,
 }: {
   config: AppConfig;
   settings: Settings;
@@ -34,11 +36,12 @@ export function SettingsTab({
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
   onUpdatePlayers: (players: Player[]) => void;
   onUpdateSchedule: (schedule: ScheduledMatch[]) => void;
+  tokenCheck?: TokenCheck | null; // what Lichess says of the token (lib/tokenCheck.ts)
 }) {
   return (
     <div className="settings-stack">
-      <CollapsibleSection title="Token Lichess" defaultOpen={!settings.token}>
-        <TokenSection settings={settings} setSettings={setSettings} flash={flash} />
+      <CollapsibleSection title="Token Lichess" id="token" defaultOpen={!settings.token}>
+        <TokenSection settings={settings} setSettings={setSettings} flash={flash} check={tokenCheck} />
       </CollapsibleSection>
 
       <CollapsibleSection title="Avvisi all'organizzatore" id="avvisi">

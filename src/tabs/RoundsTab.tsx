@@ -10,6 +10,7 @@ import { usePledges } from '../hooks/usePledges';
 import { pledgeStatus, rulesVersion } from '../lib/pledges';
 import { expiredRound, formatRoundEnd, roundEndOf, roundExpired, waitText } from '../lib/roundDeadline';
 import { overdueDaysOf, overdueGames } from '../lib/overdue';
+import { staleLinks } from '../lib/relink';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
 
@@ -74,6 +75,8 @@ export function RoundsTab({
   const expired = expiredRound(config.tournament, rounds, history, gameStates, now);
   // Partite troppo lunghe (lib/overdue.ts): for the organizer only
   const overdue = overdueGames(config.tournament, history, gameStates, now);
+  // Challenges expired without being accepted, games voided by Lichess: a new link is needed
+  const stale = staleLinks(history, gameStates, settings.expiry, now);
 
   // Idempotent (one document per round/white/black), so it can be retried safely
   const save = async (games: HistoryGame[]): Promise<boolean> => {
@@ -152,6 +155,23 @@ export function RoundsTab({
   return (
     <div className="settings-stack">
       {unsavedNotice}
+      {stale.length > 0 && (
+        <div className="notice warning">
+          🔗 {stale.length === 1 ? "Una sfida è da rifare:" : `${stale.length} sfide sono da rifare:`}
+          <ul>
+            {stale.map(({ game, kind }) => (
+              <li key={`${game.round}|${game.white}|${game.black}`}>
+                {nameOf(game.white)} – {nameOf(game.black)} (Turno {game.round}):{" "}
+                {kind === "expired" ? "scaduta senza essere accettata" : "annullata su Lichess"}{" "}
+                <button type="button" className="link-muted" onClick={() => setOpenRound(game.round)}>
+                  Apri il turno
+                </button>
+              </li>
+            ))}
+          </ul>
+          Nel turno, 🔁 accanto alla partita crea un nuovo link e prepara il messaggio per i due giocatori.
+        </div>
+      )}
       {overdue.length > 0 && (
         <div className="notice warning">
           ⏰ {overdue.length === 1 ? "Una partita è andata" : `${overdue.length} partite sono andate`} oltre i{" "}

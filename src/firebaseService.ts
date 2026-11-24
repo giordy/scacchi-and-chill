@@ -30,6 +30,7 @@ import {
   GameDecision,
 } from "./types";
 import { cleanDecision } from "./lib/decisions";
+import type { SyncStatus } from "./lib/syncHealth";
 
 const firebaseConfig = {
   apiKey: firebaseConfigRaw.apiKey,
@@ -221,6 +222,21 @@ export async function readOrganizerPush(): Promise<OrganizerPushDevice[]> {
 
 export async function saveOrganizerPush(subscriptions: OrganizerPushDevice[]): Promise<void> {
   await setDoc(organizerPushRef(), { subscriptions, updatedAt: new Date().toISOString() });
+}
+
+// When the automatic results sync last ran (lib/syncHealth.ts): written by the GitHub Action
+// "Sincronizza risultati", read here only. null while the document does not exist.
+export function subscribeToSyncStatus(onUpdate: (status: SyncStatus | null) => void): () => void {
+  return onSnapshot(
+    doc(db, "tournaments", TOURNAMENT_DOC_ID, "private", "syncStatus"),
+    (snap) => {
+      if (!snap.exists()) return onUpdate(null);
+      const d = snap.data();
+      const str = (v: unknown) => (typeof v === "string" ? v : undefined);
+      onUpdate({ at: str(d.at), errorAt: str(d.errorAt), error: str(d.error) });
+    },
+    (err) => console.warn("Lettura dello stato della sincronizzazione automatica non riuscita:", err)
+  );
 }
 
 // Deletes every game of the tournament (used when starting a new season, after archiving)

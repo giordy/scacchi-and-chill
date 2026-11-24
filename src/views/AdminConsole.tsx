@@ -1,6 +1,8 @@
 import React from 'react';
 import { Toast } from '../WhatsAppPreview';
 import { onTabListKeyDown } from '../lib/tabKeys';
+import type { SyncHealth } from '../lib/syncHealth';
+import { AutoSyncAlert, AutoSyncNote } from '../components/AutoSyncStatus';
 
 export type AdminTab = 'rounds' | 'whatsapp' | 'players' | 'seasons' | 'settings';
 
@@ -23,6 +25,8 @@ interface AdminConsoleProps {
   isSyncing: boolean;
   lastSyncTime: string | null;
   onSync: () => void;
+  // The automatic sync (GitHub Action), lib/syncHealth.ts; null until read
+  syncHealth?: SyncHealth | null;
   toastMessage: string | null;
   children: React.ReactNode;
 }
@@ -37,6 +41,7 @@ export function AdminConsole({
   isSyncing,
   lastSyncTime,
   onSync,
+  syncHealth = null,
   toastMessage,
   children,
 }: AdminConsoleProps) {
@@ -63,7 +68,9 @@ export function AdminConsole({
         <span className="note sync-note">
           {lastSyncTime ? `Ultima alle ${lastSyncTime}` : "Porta i risultati Lichess sulla pagina pubblica"}
         </span>
+        <AutoSyncNote health={syncHealth} />
       </div>
+      <AutoSyncAlert health={syncHealth} />
 
       <nav className="tabs" role="tablist" aria-label="Sezioni" onKeyDown={onTabListKeyDown}>
         {ADMIN_TABS.map((t) => (

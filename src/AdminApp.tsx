@@ -14,6 +14,9 @@ import { useAdminAuth } from './hooks/useAdminAuth';
 import { useOrganizerData } from './hooks/useOrganizerData';
 import { useLichessSync } from './hooks/useLichessSync';
 import { useEloSeeds } from './hooks/useEloSeeds';
+import { useSyncHealth } from './hooks/useSyncHealth';
+import { useTokenCheck } from './hooks/useTokenCheck';
+import { tokenWarning } from './lib/tokenCheck';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Notice } from './components/Notice';
 import { RoundsTab } from './tabs/RoundsTab';
@@ -135,6 +138,11 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
   const seasonHistory = applyWithdrawals(history, config.tournament?.withdrawals);
 
   const lichess = useLichessSync(history, setHistory, flash);
+  // Whether the Lichess token still works, asked once per token (lib/tokenCheck.ts)
+  const tokenState = useTokenCheck(settings.token || undefined, admin.isAuthenticated && organizer.loaded);
+  const tokenAlert = tokenWarning(tokenState);
+  // Whether the GitHub Action still syncs the results by itself (lib/syncHealth.ts)
+  const syncHealth = useSyncHealth(admin.isAuthenticated);
 
   // Bring the latest Lichess results to the public page as soon as the organizer opens the admin area
   const autoSynced = useRef(false);
@@ -204,8 +212,25 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
       isSyncing={lichess.isSyncing}
       lastSyncTime={lichess.lastSyncTime}
       onSync={() => lichess.sync()}
+      syncHealth={syncHealth}
       toastMessage={toastMessage}
     >
+      {tokenAlert && (
+        <div className="notice warning mb-14" role="status">
+          🔑 {tokenAlert}{" "}
+          <button
+            type="button"
+            className="link-muted"
+            onClick={() => {
+              setActiveTab('settings');
+              setTimeout(() => openSection('token'), 60);
+            }}
+          >
+            Vai al token
+          </button>
+        </div>
+      )}
+
       <FairPlayAlert
         history={history}
         gameStates={lichess.gameStates}
@@ -316,6 +341,7 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
             onUpdateTournamentMeta={updateTournamentMeta}
             onUpdatePlayers={updatePlayers}
             onUpdateSchedule={updateSchedule}
+            tokenCheck={tokenState}
           />
         </>
       )}

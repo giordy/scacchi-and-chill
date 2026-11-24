@@ -68,7 +68,7 @@ describe('admin layout', () => {
     expect(html).toMatch(/<input id="overdue-games" type="checkbox"\/>/);
     expect(html).not.toContain('Giorni dall');
     expect(html).toContain('si accendono da un browser che le riceve');
-    expect(html).toMatch(/<details class="settings-section" open="">\s*<summary>Token Lichess/);
+    expect(html).toMatch(/<details class="settings-section" open=""[^>]*>\s*<summary>Token Lichess/);
     expect(html).not.toContain('Frasi del bollettino');
   });
 

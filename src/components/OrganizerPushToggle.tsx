@@ -52,7 +52,8 @@ export function OrganizerPushToggle() {
     <div className="note note-sm">
       <p className="note-flush">
         {on ? "🔔 Su questo dispositivo ti arrivano le notifiche" : "🔕 Le notifiche su questo dispositivo"}: quando scade un turno
-        (con i Turni con scadenza) e quando una partita va oltre i giorni impostati qui sopra. Le manda il workflow «Sincronizza
+        (con i Turni con scadenza), quando una sfida è da rifare (scaduta senza essere accettata, o annullata su Lichess) e
+        quando una partita va oltre i giorni impostati qui sopra. Le manda il workflow «Sincronizza
         risultati», una volta per turno o per partita.
       </p>
       <button type="button" className="secondary" disabled={busy} onClick={() => run(() => (on ? disableOrganizerPush().then(() => false) : enableOrganizerPush().then(() => true)))}>

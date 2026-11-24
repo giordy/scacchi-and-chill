@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Settings } from '../../types';
+import { TokenCheck, formatDay, tokenWarning } from '../../lib/tokenCheck';
 
 // The organizer's Lichess token, needed to create the challenges
 export function TokenSection({
   settings,
   setSettings,
   flash,
+  check = null,
 }: {
   settings: Settings;
+  check?: TokenCheck | null; // what Lichess says of the saved token; null while unknown
   setSettings: React.Dispatch<React.SetStateAction<Partial<Settings>>>;
   flash: (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 }) {
@@ -32,6 +35,7 @@ export function TokenSection({
         <p className="note">
           Crea un token su <code>lichess.org/account/oauth/token</code> con il permesso <em>Challenge</em>. Si salva nel documento privato del torneo, leggibile solo dal tuo account: vale su tutti i tuoi dispositivi.
         </p>
+        <TokenStatus check={check} />
       </div>
 
       <div className="actions two flush">
@@ -59,5 +63,23 @@ export function TokenSection({
         </button>
       </div>
     </>
+  );
+}
+
+// What Lichess says of the saved token
+export function TokenStatus({ check }: { check: TokenCheck | null }) {
+  if (!check) return null;
+  if (check.kind === 'ok') {
+    return (
+      <p className="note" role="status">
+        ✓ Valido{check.userId ? `, dell'account @${check.userId}` : ''}, con il permesso Challenge
+        {check.expires ? `: scade ${formatDay(check.expires)}.` : ', senza scadenza.'}
+      </p>
+    );
+  }
+  return (
+    <p className="notice warning" role="status">
+      {tokenWarning(check)}
+    </p>
   );
 }

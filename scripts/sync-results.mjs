@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fields } from './backup.mjs';
-import { deadlineNotification, deliverOrganizerNotice, expiredRoundOf, movesNews, notificationFor, organizerNews, overdueNotification, overdueOf, sameState, sendPush, vapidKeys } from './push.mjs';
+import { deadlineNotification, deliverOrganizerNotice, expiredRoundOf, expiryDaysOf, movesNews, notificationFor, organizerNews, overdueNotification, overdueOf, sameState, sendPush, staleLinksNotification, staleLinksOf, vapidKeys } from './push.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const TOURNAMENT_DOC_ID = 'scacchi-and-chill-official';
@@ -175,6 +175,9 @@ async function deleteDoc(base, token, docPath) {
   if (!res.ok && res.status !== 404) throw new Error(`Cancellazione di ${docPath}: HTTP ${res.status}`);
 }
 
+// The days a challenge stays open by default (config.json defaults.expiry)
+const defaultExpiry = () => expiryDaysOf({ settings: JSON.parse(fs.readFileSync(path.join(ROOT, 'config.json'), 'utf8')).defaults }, 2);
+
 // Who gets the notifications may be written by anyone (firestore.rules): never more than these a run
 const MAX_SUBSCRIPTIONS = 300;
 // The JWT's subject: who sends, for the push services
@@ -217,11 +220,17 @@ async function notify(base, token, vapid, tournament, games, states, prev) {
 // each told once (the keys in private/deadlinePush); a device the push service calls gone is taken off:
 // - Turni con scadenza (scripts/push.mjs expiredRoundOf): a round past its end, the next to create
 // - Partite troppo lunghe (overdueOf): the games newly past the days allowed, in one notification
+// - Sfide da rifare (staleLinksOf): challenges expired without being accepted, games voided by Lichess
 async function notifyOrganizer(base, token, vapid, tournament, games, states) {
   const now = Date.now();
   const item = expiredRoundOf(tournament, games, states, now, gameIdOf);
   const overdue = overdueOf(tournament, games, states, now, gameIdOf);
-  if (!item && overdue.length === 0) return;
+  // The days a challenge stays open are in the organizer's settings: read only with a challenge still
+  // to accept (no state from Lichess yet)
+  const awaiting = games.some((g) => g.url && !g.decision && !g.lichess && !states[gameIdOf(g.url)]);
+  const expiry = awaiting ? expiryDaysOf(await getDoc(base, token, 'private/organizer'), defaultExpiry()) : 1;
+  const stale = staleLinksOf(games, states, expiry, now, gameIdOf);
+  if (!item && overdue.length === 0 && stale.length === 0) return;
   let told = (await getDoc(base, token, 'private/deadlinePush'))?.told ?? [];
   const nameOf = namesOf(tournament);
   const deliveries = [];
@@ -230,6 +239,10 @@ async function notifyOrganizer(base, token, vapid, tournament, games, states) {
   const fresh = overdue.filter((o) => !told.includes(o.key));
   if (fresh.length > 0) {
     deliveries.push({ news: { keys: fresh.map((o) => o.key) }, payload: overdueNotification(fresh, tournament.overdueDays, nameOf), what: `${fresh.length} partite oltre il limite` });
+  }
+  const freshLinks = stale.filter((o) => !told.includes(o.key));
+  if (freshLinks.length > 0) {
+    deliveries.push({ news: { keys: freshLinks.map((o) => o.key) }, payload: staleLinksNotification(freshLinks, nameOf), what: `${freshLinks.length} sfide da rifare` });
   }
   if (deliveries.length === 0) return;
   let subs = (await getDoc(base, token, 'private/organizerPush'))?.subscriptions ?? [];
@@ -267,6 +280,23 @@ async function main() {
     `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/` +
     `${encodeURIComponent(cfg.firestoreDatabaseId || '(default)')}/documents/tournaments/${TOURNAMENT_DOC_ID}`;
   const token = await accessToken(account);
+  // The organizer area shows when the last run went through, and the error of one that did not
+  // (private/syncStatus, src/lib/syncHealth.ts): a sync that stops is seen, not only guessed
+  try {
+    await run(base, token);
+    await patchFields(base, token, 'private/syncStatus', { at: new Date().toISOString() });
+  } catch (e) {
+    await patchFields(base, token, 'private/syncStatus', failureOf(e, new Date())).catch(() => {});
+    throw e;
+  }
+}
+
+// What a run that did not go through leaves for the organizer area: when and why, briefly
+export function failureOf(e, date) {
+  return { errorAt: date.toISOString(), error: String(e?.message ?? e).slice(0, 300) };
+}
+
+async function run(base, token) {
   const tournament = (await getDoc(base, token, '')) ?? {};
   const all = await readGames(base, token);
   const targets = syncTargets(all);
