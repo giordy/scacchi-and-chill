@@ -28,7 +28,8 @@ export function liveGameIds(
   const ids = new Set<string>();
   history.forEach((g) => {
     const id = extractGameId(g.url);
-    if (id && isLiveGame(g, gameStates[id], presence, now)) ids.add(id);
+    // decided by the organizer (lib/decisions.ts): over, whatever is played on Lichess
+    if (id && !g.decision && isLiveGame(g, gameStates[id], presence, now)) ids.add(id);
   });
   return ids;
 }

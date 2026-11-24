@@ -20,6 +20,8 @@ export function savedSeenMoves(): SeenMoves | null {
 export function lastMovesOf(history: HistoryGame[], gameStates: Record<string, LichessExportGame>): SeenMoves {
   const moves: SeenMoves = {};
   history.forEach((g) => {
+    // A game decided by the organizer (lib/decisions.ts) has no news, also when moved on Lichess
+    if (g.decision) return;
     const id = extractGameId(g.url);
     const at = id ? gameStates[id]?.lastMoveAt : undefined;
     if (id && typeof at === 'number' && at > 0) moves[id] = at;

@@ -23,8 +23,9 @@ export function cleanDecision(raw: unknown): GameDecision | undefined {
 }
 
 // The state of a decided game, as the rest of the site reads a result: 'decided' (a winner, or a draw
-// without one) or 'doubleLoss' (0-0). It ends when it was decided; what Lichess told of the game (the
-// moves so far, the opening, the players) stays, without the final position: there is none
+// without one) or 'doubleLoss' (0-0), ended when it was decided. The result only: no moves, opening
+// nor final position, which are those of a game not finished on the board (they would count among
+// the games of the master's opening, or as "2 mosse" on its card). The players stay, for the names
 export function decidedState(g: HistoryGame, d: GameDecision): LichessExportGame {
   const base = g.lichess;
   return {
@@ -34,8 +35,6 @@ export function decidedState(g: HistoryGame, d: GameDecision): LichessExportGame
     lastMoveAt: d.at,
     ...(base?.createdAt ? { createdAt: base.createdAt } : {}),
     ...(base?.players ? { players: base.players } : {}),
-    ...(base?.moves ? { moves: base.moves } : {}),
-    ...(base?.opening ? { opening: base.opening } : {}),
   };
 }
 

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { AppConfig, HistoryGame, LichessExportGame, NoticeState, PlayerStanding, SeasonArchive } from "./types";
 import { WhatsAppPreview } from "./WhatsAppPreview";
-import { fullMovesOf, isVoid, stateOf } from "./lib/games";
-import { computeStandings, sharedRanks } from "./lib/standings";
+import { byOrganizer, fullMovesOf, isVoid, stateOf } from "./lib/games";
+import { computeStandings, scoredResult, sharedRanks } from "./lib/standings";
 import { currentSeason, isNewcomer, ratingOf, tournamentElo } from "./lib/tournamentElo";
 import { pillsburyRace, reigningPillsbury } from "./lib/pillsbury";
 import { withScheduledGames } from "./lib/publicGames";
@@ -22,6 +22,48 @@ interface ReviewsTabProps {
 }
 
 export type ReviewMoment = "andata" | "volata" | "finale";
+
+export interface ReviewMatch {
+  round: string;
+  white: string;
+  black: string;
+  result: string;
+  winner?: string;
+  moves?: number;
+  opening?: string;
+}
+
+// The games of the season for the AI's story: the finished ones with their result (a result decided by
+// the organizer said as such, 0-0 as a defeat for both, without moves nor opening), the others still on
+export function reviewMatches(
+  history: HistoryGame[],
+  gameStates: Record<string, LichessExportGame>
+): { finishedMatches: ReviewMatch[]; ongoingMatches: Array<{ white: string; black: string; round: string }> } {
+  const finishedMatches: ReviewMatch[] = [];
+  const ongoingMatches: Array<{ white: string; black: string; round: string }> = [];
+  history.forEach((g) => {
+    const s = stateOf(g, gameStates);
+    const { white, black } = g;
+    if (!s || s.status === "created" || s.status === "started") {
+      ongoingMatches.push({ white, black, round: g.round });
+    } else if (byOrganizer(s.status)) {
+      const result = scoredResult(s) ?? "½-½";
+      finishedMatches.push({
+        round: g.round,
+        white,
+        black,
+        result: `${result} (deciso dall'organizzatore${result === "0-0" ? ", persa per entrambi" : ""})`,
+        ...(s.winner ? { winner: s.winner === "white" ? white : black } : {}),
+      });
+    } else if (!isVoid(s)) {
+      const moves = fullMovesOf(s);
+      const opening = s.opening?.name;
+      const result = s.winner === "white" ? "1-0" : s.winner === "black" ? "0-1" : "½-½";
+      finishedMatches.push({ round: g.round, white, black, result, ...(s.winner ? { winner: s.winner === "white" ? white : black } : {}), moves, opening });
+    }
+  });
+  return { finishedMatches, ongoingMatches };
+}
 
 export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, organizer, seasons = [] }: ReviewsTabProps) {
   // null: the moment detected from the games, until the organizer picks one
@@ -51,43 +93,7 @@ export function ReviewsTab({ history, gameStates, config, nameOf, triggerToast, 
     finishedMatches: Array<{ round: string; white: string; black: string; result: string; winner?: string; moves?: number; opening?: string }>;
     ongoingMatches: Array<{ white: string; black: string; round: string }>;
   } => {
-    const finishedMatches: Array<{
-      round: string;
-      white: string;
-      black: string;
-      result: string;
-      winner?: string;
-      moves?: number;
-      opening?: string;
-    }> = [];
-
-    const ongoingMatches: Array<{ white: string; black: string; round: string }> = [];
-
-    history.forEach((g) => {
-      const s = stateOf(g, gameStates);
-      const white = g.white;
-      const black = g.black;
-
-      if (!s) {
-        ongoingMatches.push({ white, black, round: g.round });
-        return;
-      }
-
-      if (s.status === "created" || s.status === "started") {
-        ongoingMatches.push({ white, black, round: g.round });
-      } else if (!isVoid(s)) {
-        const moves = fullMovesOf(s);
-        const opening = s.opening?.name;
-
-        if (s.winner === "white") {
-          finishedMatches.push({ round: g.round, white, black, result: "1-0", winner: white, moves, opening });
-        } else if (s.winner === "black") {
-          finishedMatches.push({ round: g.round, white, black, result: "0-1", winner: black, moves, opening });
-        } else {
-          finishedMatches.push({ round: g.round, white, black, result: "½-½", moves, opening });
-        }
-      }
-    });
+    const { finishedMatches, ongoingMatches } = reviewMatches(history, gameStates);
 
     // Same order as the public standings (points, Sonneborn-Berger, wins, name)
     const official = computeStandings(config.players, history, gameStates).standings;

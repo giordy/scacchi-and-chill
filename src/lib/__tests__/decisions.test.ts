@@ -48,9 +48,12 @@ describe('a result decided by the organizer', () => {
     expect(gameFromDoc({ round: '1', white: 'a', black: 'b', url: '' })).not.toHaveProperty('decision');
   });
 
-  it('becomes the state of the game: the result, ended when decided, the moves so far kept', () => {
+  it('becomes the state of the game: the result only, ended when decided', () => {
     const s = decidedState(raw[0], { result: '0-1', at: AT });
-    expect(s).toMatchObject({ id: 'aaaaaaaa', status: 'decided', winner: 'black', lastMoveAt: AT, moves: 'e4 e5 Nf3', opening: { name: 'Italian Game' } });
+    expect(s).toMatchObject({ id: 'aaaaaaaa', status: 'decided', winner: 'black', lastMoveAt: AT });
+    // nothing of the game left unfinished on the board: no moves, opening, final position
+    expect(s).not.toHaveProperty('moves');
+    expect(s).not.toHaveProperty('opening');
     expect(s).not.toHaveProperty('lastFen');
     expect(decidedState(raw[1], { result: '0-0', at: AT })).toMatchObject({ id: 'bbbbbbbb', status: 'doubleLoss' });
     expect(decidedState(raw[1], { result: '½-½', at: AT })).not.toHaveProperty('winner');
