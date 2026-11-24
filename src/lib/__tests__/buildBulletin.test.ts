@@ -69,7 +69,9 @@ describe('buildBulletin', () => {
     expect(d.text).toContain('🛡️ Colpaccio di patta: Elena ferma Fabio');
     // Without past seasons everyone is at 1500: no colpaccio
     expect(buildBulletin({ round: '2', games: end, states, history: end, config, expiryDays: 2, now: NOW, random: first }).text).not.toContain('Colpaccio');
-    expect(b.text).toContain('📊 *1 finita · 1 in corso · 1 da avviare*');
+    expect(b.text).toContain('📋 *1 finita · 1 in corso · 1 da avviare*');
+    // one 📊 only, in the header: the summary has its own
+    expect(b.text.match(/📊/g)).toHaveLength(1);
     expect(b.details).toHaveLength(3);
     expect(b.details[1]).toContain('fase Lichess=middlegame');
   });
@@ -172,7 +174,7 @@ describe('buildBulletin: deadlines and phrases', () => {
     expect(b.text).toContain(':* Anna–Bruno, Carla–Dario');
     expect(b.text).not.toContain('Elena–Fabio');
     // before the summary of the round
-    expect(b.text.indexOf('Da accettare')).toBeLessThan(b.text.lastIndexOf('📊 *'));
+    expect(b.text.indexOf('Da accettare')).toBeLessThan(b.text.lastIndexOf('📋 *'));
   });
 
   it('asks to recreate expired challenges, without a deadline already past', () => {

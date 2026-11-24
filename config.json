@@ -95,9 +95,9 @@
       "In attesa di cominciare ⏳"
     ],
     "footer": [
-      "📊 *{summary}*",
-      "📊 *Riepilogo: {summary}*",
-      "📊 *In numeri: {summary}*"
+      "📋 *{summary}*",
+      "📋 *Riepilogo: {summary}*",
+      "📋 *In numeri: {summary}*"
     ],
     "summit": [
       "🔝 Scontro al vertice: {positions} in classifica",
