@@ -56,7 +56,7 @@ export function AlertsPanel({
   now?: number;
 }) {
   return (
-    <section className="panel alerts-panel mb-14" id={ALERTS_PANEL_ID} aria-label="Avvisi">
+    <section className="panel alerts-panel" id={ALERTS_PANEL_ID} aria-label="Avvisi">
       <h2 className="panel-title">🔔 Avvisi</h2>
       {alerts.length === 0 ? (
         <p className="note note-flush">Nessun avviso: tutto in ordine.</p>

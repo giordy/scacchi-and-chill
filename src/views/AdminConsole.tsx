@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Toast } from '../WhatsAppPreview';
 import { onTabListKeyDown } from '../lib/tabKeys';
 import type { SyncHealth } from '../lib/syncHealth';
@@ -52,7 +52,24 @@ export function AdminConsole({
   toastMessage,
   children,
 }: AdminConsoleProps) {
+  // The alerts open over the page, not in its flow: closed by a tap outside, Esc, a tab or an action
   const [alertsOpen, setAlertsOpen] = useState(false);
+  const bellRef = useRef<HTMLSpanElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!alertsOpen) return;
+    const outside = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (!bellRef.current?.contains(t) && !panelRef.current?.contains(t)) setAlertsOpen(false);
+    };
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setAlertsOpen(false);
+    document.addEventListener('pointerdown', outside);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.removeEventListener('pointerdown', outside);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [alertsOpen]);
   return (
     <main className="admin">
       <header className="admin-header">
@@ -61,15 +78,22 @@ export function AdminConsole({
           <h1 className="view-title">{title}</h1>
         </div>
         <div className="header-actions">
-          {alertsPanel && <AlertsBell alerts={alerts} open={alertsOpen} onToggle={() => setAlertsOpen((o) => !o)} />}
+          {alertsPanel && (
+            <span ref={bellRef} className="alerts-anchor">
+              <AlertsBell alerts={alerts} open={alertsOpen} onToggle={() => setAlertsOpen((o) => !o)} />
+            </span>
+          )}
           <a href="#" className="chip-link">Vista pubblica</a>
           <button type="button" className="chip-link is-danger" onClick={onLogout} title={`Esci (${email})`}>
             Esci
           </button>
         </div>
+        {alertsOpen && alertsPanel && (
+          <div ref={panelRef} className="alerts-popover">
+            {alertsPanel(() => setAlertsOpen(false))}
+          </div>
+        )}
       </header>
-
-      {alertsOpen && alertsPanel?.(() => setAlertsOpen(false))}
 
       {/* Results sync: Lichess → Firestore (the public view reads from there) */}
       <div className="sync-bar">
@@ -92,7 +116,10 @@ export function AdminConsole({
             aria-selected={activeTab === t.key}
             tabIndex={activeTab === t.key ? 0 : -1}
             aria-controls="admin-panel"
-            onClick={() => setActiveTab(t.key)}
+            onClick={() => {
+              setAlertsOpen(false);
+              setActiveTab(t.key);
+            }}
           >
             <span className="tab-icon" aria-hidden="true">{t.icon}</span>
             <span className="tab-label">{t.label}</span>

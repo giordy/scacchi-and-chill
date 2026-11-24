@@ -989,7 +989,7 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
 }
 
 /* Admin layout */
-.admin-header { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.admin-header { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; margin-bottom: 12px; flex-wrap: wrap; }
 /* The title whole: on a narrow phone the buttons go on a line of their own */
 .admin-header .header-actions .chip-link { white-space: nowrap; }
 .admin-identity { min-width: 0; }
@@ -4098,3 +4098,9 @@ button.btn-mini.btn-go {
 .alert-item ul { margin: 6px 0; padding-left: 18px; display: grid; gap: 4px; }
 .alert-item a { color: inherit; text-decoration: underline; }
 .alert-item button.link-muted { color: inherit; font-size: 13px; }
+/* Over the page, under the header: the content below stays where it is */
+.alerts-popover {
+  position: absolute; top: 100%; right: 0; z-index: 60; /* over the sticky tabs (50), under the toast */ margin-top: 6px;
+  width: min(440px, 100%);
+}
+.alerts-popover .alerts-panel { max-height: 70vh; overflow-y: auto; box-shadow: var(--shadow), 0 12px 32px rgba(0, 0, 0, 0.18); }
