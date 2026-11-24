@@ -88,6 +88,7 @@ export function AdminConsole({
             Esci
           </button>
         </div>
+        {alertsOpen && alertsPanel && <div className="alerts-backdrop" aria-hidden="true" />}
         {alertsOpen && alertsPanel && (
           <div ref={panelRef} className="alerts-popover">
             {alertsPanel(() => setAlertsOpen(false))}

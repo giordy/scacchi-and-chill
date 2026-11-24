@@ -4103,4 +4103,10 @@ button.btn-mini.btn-go {
   position: absolute; top: 100%; right: 0; z-index: 60; /* over the sticky tabs (50), under the toast */ margin-top: 6px;
   width: min(440px, 100%);
 }
-.alerts-popover .alerts-panel { max-height: 70vh; overflow-y: auto; box-shadow: var(--shadow), 0 12px 32px rgba(0, 0, 0, 0.18); }
+.alerts-popover .alerts-panel {
+  max-height: 70vh; overflow-y: auto;
+  border: 1px solid var(--brass); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+/* The page dimmed behind the open list, so the list stands out (in dark mode too) */
+.alerts-backdrop { position: fixed; inset: 0; z-index: 55; background: rgba(0, 0, 0, 0.45); }
+.alerts-anchor { position: relative; z-index: 60; }
