@@ -5,7 +5,7 @@ import { extractGameId, fill, formatDeadline, getApproxMoves, HIDDEN_PLIES, HOW_
 import { gamePhase, GamePhase } from './phase';
 import { upsetOf } from './upset';
 import { roundHalf, tournamentElo } from './tournamentElo';
-import { fullMovesOf, isVoid, movesText, nameFrom, pliesOf, storedStates } from './games';
+import { byOrganizer, DOUBLE_LOSS, fullMovesOf, isVoid, movesText, nameFrom, pliesOf, storedStates } from './games';
 import { summitGames, summitKey } from './summit';
 import { computeSeasonProgress, gameProgress } from './progress';
 import { reigningChampions } from './honours';
@@ -159,6 +159,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
 
   // Saved results plus the fresh ones, for the standings
   const allStates: Record<string, LichessExportGame> = { ...storedStates(history), ...states };
+  // (the standings read the games through stateOf: a result decided by the organizer wins there too)
   // Scontro al vertice: same rule as the badge on the site
   const summits = summitGames(config.players, history, allStates);
   // Colpaccio: same rule as the badge on the site, on the Elo del torneo
@@ -171,7 +172,8 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     const id = extractGameId(g.url);
     // Fresh state for the open games; a finished game keeps its stored (final) result, and a game
     // won by forfeit after a withdrawal has no Lichess link: its result is stored with it
-    const s = id ? states[id] ?? (gameProgress(g.lichess) === "finished" ? g.lichess : undefined) : g.lichess;
+    // A result decided by the organizer wins over Lichess (lib/decisions.ts)
+    const s = byOrganizer(g.lichess?.status) ? g.lichess : id ? states[id] ?? (gameProgress(g.lichess) === "finished" ? g.lichess : undefined) : g.lichess;
     const white = idToHandle(s?.players?.white?.user?.id) ?? g.white;
     const black = idToHandle(s?.players?.black?.user?.id) ?? g.black;
     const head = `${config.numberEmojis[i] ?? i + 1 + "."} *${nameOf(white)}* ⚪ vs *${nameOf(black)}* ⚫`;
@@ -210,6 +212,16 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
         `${i + 1}. ${id}: bianco=${s.players?.white?.user?.name ?? "?"}, nero=${s.players?.black?.user?.name ?? "?"}, ` +
           `semimosse visibili via API=${plies} (Lichess ne nasconde fino a ${HIDDEN_PLIES}), ~${approx.approxMoves}, fase Lichess=${lichessPhase ?? "n/d"}`
       );
+    } else if (byOrganizer(s.status)) {
+      // Decided by the organizer (lib/decisions.ts): no moves nor opening, the result only
+      count.finished++;
+      body =
+        s.status === DOUBLE_LOSS
+          ? "⚖️ Deciso dall'organizzatore: persa per entrambi *(0-0)*"
+          : s.winner
+          ? `⚖️ Deciso dall'organizzatore: vince ${nameOf(s.winner === "white" ? white : black)} *(${s.winner === "white" ? "1-0" : "0-1"})*`
+          : "⚖️ Deciso dall'organizzatore: patta *(½-½)*";
+      detailsList.push(`${i + 1}. ${id || "senza link"}: risultato deciso dall'organizzatore`);
     } else if (isVoid(s)) {
       body = pickFor("aborted");
       detailsList.push(`${i + 1}. ${id}: stato ${s.status}`);

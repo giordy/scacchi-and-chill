@@ -3314,6 +3314,9 @@ button.career-toggle:focus-visible { outline: 2px solid var(--accent); outline-o
 .relink { display: grid; gap: 8px; margin: -2px 0 6px; padding: 10px; background: var(--panel); border: 1px dashed var(--line); border-radius: 8px; }
 .relink .note { margin: 0; }
 .relink-label { font-size: 13px; color: var(--muted); }
+.decision-choices { border: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.decision-choices .inline { min-height: 36px; }
+.decision-choices legend { padding: 0; margin-bottom: 2px; }
 .relink-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
 .relink-row input { min-width: 0; }
 .relink-message { display: grid; gap: 6px; }

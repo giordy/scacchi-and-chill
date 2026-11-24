@@ -1,4 +1,5 @@
-import { LichessExportGame } from '../types';
+import { GameResult, LichessExportGame } from '../types';
+import { decidedAtTable } from './games';
 import { CURRENT, EloGame, EloReport, gameKey } from './tournamentElo';
 import { scoredResult } from './standings';
 
@@ -21,8 +22,9 @@ export interface Ratings {
 }
 
 // Pure rule, from the result and the two ratings before the game
-export function upsetFrom(result: '1-0' | '0-1' | '½-½' | null | undefined, ratings: Ratings | undefined): Upset | null {
-  if (!result || !ratings || ratings.newcomer) return null;
+export function upsetFrom(result: GameResult | null | undefined, ratings: Ratings | undefined): Upset | null {
+  // 0-0 is decided by the organizer: nobody pulled anything off
+  if (!result || result === '0-0' || !ratings || ratings.newcomer) return null;
   const diff = Math.round(ratings.black - ratings.white); // > 0: Black was stronger
   if (result === '½-½') {
     const gap = Math.abs(diff);
@@ -47,7 +49,7 @@ export function upsetOf(
   report: EloReport | undefined,
   game: { round?: string; white: string; black: string; id?: string }
 ): Upset | null {
-  if (!state || state.status === 'forfeit') return null;
+  if (!state || decidedAtTable(state.status)) return null;
   return upsetFrom(scoredResult(state), ratingsBefore(report, game));
 }
 

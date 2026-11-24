@@ -1,3 +1,4 @@
+import { scoreFor } from './standings';
 import { ArchivedGame, SeasonDeparture, Withdrawal } from '../types';
 import type { NameOf } from './roster';
 import { byRound } from './games';
@@ -85,7 +86,7 @@ export function ownRows<T extends OwnRow>(standings: T[], departures: SeasonDepa
         to = { handle: d?.handle ?? who, name: d?.name ?? who, played: 0, won: 0, drawn: 0, lost: 0, points: 0 };
         added.push(to);
       }
-      const score = g.result === '½-½' ? 0.5 : (g.result === '1-0') === white ? 1 : 0;
+      const score = scoreFor(g.result, white);
       const key = score === 1 ? 'won' : score === 0 ? 'lost' : 'drawn';
       [to, from].forEach((r, i) => {
         const sign = i === 0 ? 1 : -1;

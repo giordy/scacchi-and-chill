@@ -6,6 +6,7 @@ import { HistoryGame, SeasonArchive } from '../types';
 import type { TournamentDocData } from '../firebaseService';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { Pledge, pledgeDocId, pledgeFromDoc } from './pledges';
+import { cleanDecision } from './decisions';
 
 export const TOURNAMENT_DOC_ID = 'scacchi-and-chill-official';
 
@@ -39,6 +40,7 @@ export function gameFromDoc(data: Record<string, unknown>): HistoryGame | null {
     url: String(data.url || ''),
     createdAt: Number(data.createdAt) || undefined,
     lichess: (data.lichess as HistoryGame['lichess']) || undefined,
+    ...(cleanDecision(data.decision) ? { decision: cleanDecision(data.decision) } : {}),
   };
 }
 

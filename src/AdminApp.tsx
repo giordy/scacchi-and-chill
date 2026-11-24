@@ -165,7 +165,8 @@ export default function AdminApp({ config, setConfig, history, setHistory, games
     meta: config.tournament,
     players: config.players,
     schedule: config.schedule ?? [],
-    history,
+    // With the results decided by the organizer: a game decided is over, also when still open on Lichess
+    history: seasonHistory,
     gameStates: lichess.gameStates,
     pledges: pledgesLoaded ? pledgeStatus(pledges, config.tournament?.season ?? '', config.players, rulesVersion(config.tournament)) : undefined,
     ticks: organizer.checklist ?? {},

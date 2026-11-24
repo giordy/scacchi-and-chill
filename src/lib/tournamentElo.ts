@@ -17,7 +17,7 @@
 //
 // Lichess ratings are used only for that first step: for correspondence they are provisional for
 // almost everyone here, and they also depend on games played outside the tournament.
-import { EloSeed, HistoryGame, LichessExportGame, SeasonArchive, SeasonDeparture } from '../types';
+import { EloSeed, HistoryGame, LichessExportGame, SeasonArchive, SeasonDeparture, ArchivedGame } from '../types';
 import { byRound, stateOf, isVoid } from './games';
 import { scoredResult } from './standings';
 import { extractGameId } from './utils';
@@ -362,7 +362,7 @@ export function eloSeasonFromArchive(archive: SeasonArchive): EloSeasonInput {
     key: archive.id,
     players: [...archive.standings.map((s) => s.handle), ...replaced.filter(known).map((d) => d.handle)],
     games: (archive.games ?? [])
-      .filter((g) => !decidedAtTable(g.status))
+      .filter((g): g is ArchivedGame & { result: EloResult } => !decidedAtTable(g.status) && g.result !== '0-0')
       .map((g) => ({ white: playedBy(g.white, g.round, g.end), black: playedBy(g.black, g.round, g.end), result: g.result, end: g.end, round: g.round, id: g.id })),
     doubtful: replaced.filter((d) => !known(d)).map((d) => d.replacedBy!.handle),
     seeds: seedRatings(archive.seeds),
@@ -390,7 +390,7 @@ export function eloSeasonFromCurrent(
   history.forEach((g) => {
     const s = stateOf(g, gameStates);
     const result = scoredResult(s);
-    if (!s || !result || isVoid(s) || decidedAtTable(s.status)) return;
+    if (!s || !result || result === '0-0' || isVoid(s) || decidedAtTable(s.status)) return;
     games.push({ ...playersOnBoard(g, s, players), result, end: s.lastMoveAt, round: g.round, id: extractGameId(g.url) || undefined });
   });
   return { key: CURRENT, players, games, seeds: seedRatings(seeds), seedSigmas: seedSigmas(seeds) };

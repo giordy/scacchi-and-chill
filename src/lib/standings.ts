@@ -1,5 +1,5 @@
-import { HistoryGame, LichessExportGame, Player } from '../types';
-import { stateOf } from './games';
+import { GameResult, HistoryGame, LichessExportGame, Player } from '../types';
+import { DOUBLE_LOSS, stateOf } from './games';
 
 export interface PlayerStanding {
   handle: string;
@@ -20,10 +20,23 @@ export type Crosstable = Record<string, Record<string, CrosstableResult>>;
 const UNFINISHED_STATUSES = new Set(["created", "started", "aborted", "noStart"]);
 
 // The result a game counts for in the standings, null while it has none
-export function scoredResult(s?: LichessExportGame): "1-0" | "0-1" | "½-½" | null {
+export function scoredResult(s?: LichessExportGame): GameResult | null {
   if (!s || UNFINISHED_STATUSES.has(s.status)) return null;
+  if (s.status === DOUBLE_LOSS) return "0-0";
   return s.winner === "white" ? "1-0" : s.winner === "black" ? "0-1" : "½-½";
 }
+
+// The points of White and Black in a game. 0-0 (decided by the organizer: both lose) is the only
+// result whose points do not add up to 1, so a side's points never come from "1 - the other's"
+export function pointsOf(result: GameResult | string | null | undefined): [number, number] {
+  if (result === "1-0") return [1, 0];
+  if (result === "0-1") return [0, 1];
+  if (result === "0-0") return [0, 0];
+  return [0.5, 0.5];
+}
+
+// The points of one side
+export const scoreFor = (result: GameResult | string | null | undefined, white: boolean) => pointsOf(result)[white ? 0 : 1];
 
 // The handle of a game as the players list spells it: Lichess ignores case, the site's data may not
 // (a game restored or typed by hand as "anna" for the player "Anna")
@@ -58,7 +71,7 @@ export function computeStandings(
     if (crosstable[a] && crosstable[b]) crosstable[a][b] = value;
   };
 
-  const finished: Array<{ white: string; black: string; result: "1-0" | "0-1" | "½-½" }> = [];
+  const finished: Array<{ white: string; black: string; result: GameResult }> = [];
 
   const canon = canonicalHandle(players);
   history.forEach((g) => {
@@ -89,6 +102,12 @@ export function computeStandings(
       setCross(white, black, "0");
       setCross(black, white, "1");
       finished.push({ white, black, result: "0-1" });
+    } else if (result === "0-0") {
+      // Both lose: no points, nothing to the Sonneborn-Berger
+      stats[white].lost++;
+      stats[black].lost++;
+      setCross(white, black, "0");
+      setCross(black, white, "0");
     } else {
       stats[white].drawn++;
       stats[white].points += 0.5;

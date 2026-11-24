@@ -1,3 +1,4 @@
+import { byOrganizer } from '../lib/games';
 import React, { useEffect, useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
 import { allTimeHeadToHead, allTimeNameOf, archivedName, careerOf, SeasonGames, seasonsWithGames } from '../lib/allTime';
@@ -598,7 +599,9 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                   )}
                 </span>
                 <span className={`status-badge ${OUTCOME_CLASS[game.outcome]}`}>{OUTCOME_LABEL[game.outcome]}</span>
-                {game.url ? (
+                {byOrganizer(game.status) ? (
+                  <span className="opening-label">Deciso dall'organizzatore</span>
+                ) : game.url ? (
                   <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
                     Lichess
                   </a>

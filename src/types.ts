@@ -17,6 +17,19 @@ export interface HistoryGame {
   createdAt?: number;
   // Stato della partita su Lichess, salvato in Firestore dal pulsante "Sincronizza"
   lichess?: LichessExportGame;
+  // The result the organizer decided, in place of Lichess' (lib/decisions.ts)
+  decision?: GameDecision;
+}
+
+// The result of a game: 0-0 is the organizer's only, both lose (e.g. a game neither player started)
+export type GameResult = '1-0' | '0-1' | '½-½' | '0-0';
+
+// A result decided by the organizer (lib/decisions.ts): it wins over the game on Lichess, which may
+// still be open there. Counts for the standings, not for the Elo del torneo (see decidedAtTable)
+export interface GameDecision {
+  result: GameResult;
+  at: number; // when it was decided, ms: the end of the game for the cronaca and the order of results
+  note?: string; // the organizer's reason, private to the organizer area
 }
 
 export interface GameRules {
@@ -160,6 +173,9 @@ export interface TournamentMeta {
   // Ultime giornate (lib/roundDeadline.ts): how many of the last rounds start only once the rounds
   // before are over; missing or 0 when off. Only with the deadlines on
   finalRoundsWait?: number;
+  // Partite troppo lunghe (lib/overdue.ts): the organizer is told of a game not over this many days
+  // after the start of its round; missing or 0 when off. A notice for the organizer, not a rule
+  overdueDays?: number;
   winners?: SeasonWinner[];
   // Every player who ever took part, with the name shown on the site (see lib/roster.ts)
   roster?: Player[];
@@ -344,9 +360,9 @@ export interface ArchivedGame {
   round: string;
   white: string;
   black: string;
-  result: '1-0' | '0-1' | '½-½';
+  result: GameResult;
   id?: string; // Lichess game id; none for a game won by forfeit
-  status?: string; // Lichess status: mate, resign, outoftime, draw... or forfeit
+  status?: string; // Lichess status: mate, resign, outoftime, draw... or forfeit, decided, doubleLoss
   plies?: number; // half-moves played
   end?: number; // last move, ms
   whiteRating?: number; // Lichess ratings at the start of the game

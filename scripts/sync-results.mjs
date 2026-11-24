@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fields } from './backup.mjs';
-import { deadlineNotification, deliverOrganizerNotice, expiredRoundOf, movesNews, notificationFor, organizerNews, sameState, sendPush, vapidKeys } from './push.mjs';
+import { deadlineNotification, deliverOrganizerNotice, expiredRoundOf, movesNews, notificationFor, organizerNews, overdueNotification, overdueOf, sameState, sendPush, vapidKeys } from './push.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const TOURNAMENT_DOC_ID = 'scacchi-and-chill-official';
@@ -41,8 +41,9 @@ export function gameIdOf(url) {
 const isFinal = (s) => Boolean(s && s.status && s.status !== 'created' && s.status !== 'started');
 
 // The games to read again: with a link, and no final result saved (as src/lib/games.ts syncTargets)
+// A game with a result decided by the organizer (src/lib/decisions.ts) is not read again either
 export function syncTargets(games) {
-  return games.filter((g) => gameIdOf(g.url) && !isFinal(g.lichess));
+  return games.filter((g) => gameIdOf(g.url) && !isFinal(g.lichess) && !g.decision);
 }
 
 // A state from Lichess is saved only when it says something new: a game still to accept, or one
@@ -212,25 +213,46 @@ async function notify(base, token, vapid, tournament, games, states, prev) {
   if (!sameState(prev, state)) await setDoc(base, token, 'private/push', state);
 }
 
-// Turni con scadenza (scripts/push.mjs expiredRoundOf): once per end of a round, to the organizer's
-// devices (private/organizerPush, written by the organizer area); what was told is kept in
-// private/deadlinePush. A device the push service calls gone is taken off the list.
+// The organizer's notifications, to their devices (private/organizerPush, written by the organizer area),
+// each told once (the keys in private/deadlinePush); a device the push service calls gone is taken off:
+// - Turni con scadenza (scripts/push.mjs expiredRoundOf): a round past its end, the next to create
+// - Partite troppo lunghe (overdueOf): the games newly past the days allowed, in one notification
 async function notifyOrganizer(base, token, vapid, tournament, games, states) {
-  const item = expiredRoundOf(tournament, games, states, Date.now(), gameIdOf);
-  if (!item) return;
-  const told = (await getDoc(base, token, 'private/deadlinePush'))?.told ?? [];
+  const now = Date.now();
+  const item = expiredRoundOf(tournament, games, states, now, gameIdOf);
+  const overdue = overdueOf(tournament, games, states, now, gameIdOf);
+  if (!item && overdue.length === 0) return;
+  let told = (await getDoc(base, token, 'private/deadlinePush'))?.told ?? [];
+  const nameOf = namesOf(tournament);
+  const deliveries = [];
   const news = organizerNews(item, told);
-  if (!news) return;
-  const subs = (await getDoc(base, token, 'private/organizerPush'))?.subscriptions ?? [];
+  if (news) deliveries.push({ news, payload: deadlineNotification(item, nameOf, news.kind), what: `Turno ${item.round}` });
+  const fresh = overdue.filter((o) => !told.includes(o.key));
+  if (fresh.length > 0) {
+    deliveries.push({ news: { keys: fresh.map((o) => o.key) }, payload: overdueNotification(fresh, tournament.overdueDays, nameOf), what: `${fresh.length} partite oltre il limite` });
+  }
+  if (deliveries.length === 0) return;
+  let subs = (await getDoc(base, token, 'private/organizerPush'))?.subscriptions ?? [];
   if (subs.length === 0) {
-    console.log(`Turno ${item.round} scaduto: nessun dispositivo dell'organizzatore con gli avvisi accesi.`);
+    console.log(`${deliveries.map((d) => d.what).join(', ')}: nessun dispositivo dell'organizzatore con gli avvisi accesi.`);
     return;
   }
-  const payload = deadlineNotification(item, namesOf(tournament), news.kind);
-  const out = await deliverOrganizerNotice(news, payload, told, subs, (sub, p) => sendPush(sub, p, vapid, PUSH_SUBJECT));
-  if (out.subs) await patchFields(base, token, 'private/organizerPush', { subscriptions: out.subs });
-  if (out.told) await setDoc(base, token, 'private/deadlinePush', { told: out.told });
-  console.log(`Turno ${item.round}: avviso all'organizzatore su ${out.sent} dispositivi${out.gone ? `, ${out.gone} non più iscritti tolti` : ''}${out.failed ? `, ${out.failed} non riusciti` : ''}.`);
+  let subsChanged = false;
+  let toldChanged = false;
+  for (const d of deliveries) {
+    const out = await deliverOrganizerNotice(d.news, d.payload, told, subs, (sub, p) => sendPush(sub, p, vapid, PUSH_SUBJECT));
+    if (out.subs) {
+      subs = out.subs;
+      subsChanged = true;
+    }
+    if (out.told) {
+      told = out.told;
+      toldChanged = true;
+    }
+    console.log(`${d.what}: avviso all'organizzatore su ${out.sent} dispositivi${out.gone ? `, ${out.gone} non più iscritti tolti` : ''}${out.failed ? `, ${out.failed} non riusciti` : ''}.`);
+  }
+  if (subsChanged) await patchFields(base, token, 'private/organizerPush', { subscriptions: subs });
+  if (toldChanged) await setDoc(base, token, 'private/deadlinePush', { told });
 }
 
 async function main() {
@@ -256,7 +278,8 @@ async function main() {
     const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'push.json'), 'utf8'));
     if (cfg.vapidPublicKey !== vapid.publicKey) console.warn('VAPID_PRIVATE_KEY non corrisponde alla chiave pubblica di push.json: le notifiche non arriveranno.');
   }
-  const watched = all.map((g) => ({ ...g, id: gameIdOf(g.url) })).filter((g) => g.id);
+  // The moves of a game decided by the organizer are no news any more
+  const watched = all.map((g) => ({ ...g, id: gameIdOf(g.url) })).filter((g) => g.id && !g.decision);
   const prevPush = vapid ? await getDoc(base, token, 'private/push') : null;
   const pushIds = vapid ? watched.filter((g) => !prevPush?.games?.[g.id]?.final).map((g) => g.id) : [];
   const ids = [...new Set([...targets.map((g) => gameIdOf(g.url)), ...pushIds])];

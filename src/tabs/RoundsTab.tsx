@@ -9,6 +9,7 @@ import { RoundDetail } from './rounds/RoundDetail';
 import { usePledges } from '../hooks/usePledges';
 import { pledgeStatus, rulesVersion } from '../lib/pledges';
 import { expiredRound, formatRoundEnd, roundEndOf, roundExpired, waitText } from '../lib/roundDeadline';
+import { overdueDaysOf, overdueGames } from '../lib/overdue';
 
 type Flash = (kind: 'ok' | 'err' | 'warning', text: string, items?: string[]) => void;
 
@@ -71,6 +72,8 @@ export function RoundsTab({
   const now = Date.now();
   // Turni con scadenza: the round in progress is over its end and the next one can start
   const expired = expiredRound(config.tournament, rounds, history, gameStates, now);
+  // Partite troppo lunghe (lib/overdue.ts): for the organizer only
+  const overdue = overdueGames(config.tournament, history, gameStates, now);
 
   // Idempotent (one document per round/white/black), so it can be retried safely
   const save = async (games: HistoryGame[]): Promise<boolean> => {
@@ -149,6 +152,23 @@ export function RoundsTab({
   return (
     <div className="settings-stack">
       {unsavedNotice}
+      {overdue.length > 0 && (
+        <div className="notice warning">
+          ⏰ {overdue.length === 1 ? "Una partita è andata" : `${overdue.length} partite sono andate`} oltre i{" "}
+          {overdueDaysOf(config.tournament)} giorni dall'inizio del turno:
+          <ul>
+            {overdue.map(({ game, limit }) => (
+              <li key={`${game.round}|${game.white}|${game.black}`}>
+                {nameOf(game.white)} – {nameOf(game.black)} (Turno {game.round}, limite {formatRoundEnd(limit)}){" "}
+                <button type="button" className="link-muted" onClick={() => setOpenRound(game.round)}>
+                  Apri il turno
+                </button>
+              </li>
+            ))}
+          </ul>
+          Parla con i giocatori: se non si accordano, puoi registrare tu il risultato dalla partita (⚖️).
+        </div>
+      )}
       {expired && expired.waitReason && (
         <div className="notice">
           Il Turno {expired.round} si è chiuso {formatRoundEnd(expired.end)}.{" "}
@@ -235,6 +255,7 @@ function RoundBadge({
     return <span className="status-badge pending">Link {created}/{matches.length}</span>;
   }
   const finished = matches.every((m) => {
+    if (m.game?.decision) return true; // decided by the organizer (lib/decisions.ts)
     const id = extractGameId(m.url);
     return gameProgress((id && gameStates[id]) || m.game?.lichess) === "finished";
   });

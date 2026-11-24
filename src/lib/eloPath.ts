@@ -3,6 +3,7 @@
 // same steps as lib/tournamentElo.ts computeElo (K = 32, against an esordiente only the esordiente
 // moves); at the end of a first (archived) season the rating then becomes the performance, so the
 // end can differ from the last step.
+import { scoreFor } from './standings';
 import { CURRENT, ELO_K, EloReport, expectedScore, gameKey } from './tournamentElo';
 
 export interface EloStep {
@@ -41,8 +42,7 @@ export function seasonEloPath(elo: EloReport, handle: string, key: string): EloP
       const opponent = white ? game.black : game.white;
       const before = white ? at.white : at.black;
       const opponentElo = white ? at.black : at.white;
-      const whiteScore = game.result === '1-0' ? 1 : game.result === '0-1' ? 0 : 0.5;
-      const score = (white ? whiteScore : 1 - whiteScore) as EloStep['score'];
+      const score = scoreFor(game.result, white) as EloStep['score'];
       const expected = expectedScore(before, opponentElo);
       const still = season.newcomers.has(opponent.toLowerCase()) && !season.newcomers.has(me);
       steps.push({ opponent, round: game.round, score, opponentElo, expected, before, after: still ? before : before + ELO_K * (score - expected), still });

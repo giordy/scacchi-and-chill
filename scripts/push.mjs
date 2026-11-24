@@ -171,7 +171,8 @@ export function expiredRoundOf(tournament, games, states, now, idOf) {
   const next = rounds.find((r) => byRound(r.round, current.round) > 0 && r.created === 0);
   if (!next) return null;
   const isOpen = (g) => {
-    if (!g.url) return false;
+    // a result decided by the organizer (src/lib/decisions.ts) ends the game, also when open on Lichess
+    if (!g.url || g.decision) return false;
     const id = idOf(g.url);
     return !isFinal((id && states[id]) || g.lichess);
   };
@@ -223,11 +224,78 @@ export function organizerNews(item, told) {
   return { key: item.key, kind: told.includes(`${item.key}|attesa`) ? 'over' : 'expired' };
 }
 
+// ---- Partite troppo lunghe: the organizer's notification (src/lib/overdue.ts) ----
+
+// The day in Italy and its midnight, as src/lib/roundDeadline.ts (a test checks they agree)
+function romeParts(ms, withTime) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Rome',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    ...(withTime ? { hour: 'numeric', minute: 'numeric', hourCycle: 'h23' } : {}),
+  }).formatToParts(new Date(ms));
+  const get = (t) => Number(parts.find((p) => p.type === t)?.value);
+  return { y: get('year'), m: get('month'), d: get('day'), h: get('hour'), min: get('minute') };
+}
+const romeOffset = (ms) => {
+  const p = romeParts(ms, true);
+  return Date.UTC(p.y, p.m - 1, p.d, p.h, p.min) - Math.floor(ms / 60000) * 60000;
+};
+function romeMidnight(y, m, d) {
+  const utc = Date.UTC(y, m - 1, d);
+  let t = utc - romeOffset(utc);
+  t = utc - romeOffset(t);
+  return t;
+}
+export function roundEndFrom(start, days) {
+  const { y, m, d } = romeParts(start, false);
+  return romeMidnight(y, m, d + days + 1);
+}
+
+// The games not over `overdueDays` days after the start of their round (its first challenge), as
+// src/lib/overdue.ts overdueGames, each with the key it is told under once
+export function overdueOf(tournament, games, states, now, idOf) {
+  const days = typeof tournament?.overdueDays === 'number' && tournament.overdueDays > 0 ? Math.floor(tournament.overdueDays) : 0;
+  if (days === 0) return [];
+  const isOpen = (g) => {
+    if (!g.url || g.decision) return false;
+    const id = idOf(g.url);
+    return !isFinal((id && states[id]) || g.lichess);
+  };
+  const startOf = (round) => {
+    const times = games.filter((g) => String(g.round) === round && g.url).map((g) => Number(g.createdAt)).filter((t) => t > 0);
+    return times.length > 0 ? Math.min(...times) : undefined;
+  };
+  return games
+    .filter(isOpen)
+    .flatMap((g) => {
+      const start = startOf(String(g.round));
+      if (start === undefined) return [];
+      const limit = roundEndFrom(start, days);
+      return now >= limit ? [{ round: String(g.round), white: g.white, black: g.black, limit, key: `ritardo|${tournament.season ?? ''}|${g.round}|${g.white}|${g.black}|${limit}` }] : [];
+    })
+    .sort((a, b) => byRound(a.round, b.round) || a.limit - b.limit);
+}
+
+// One notification for the games newly past the days allowed: the organizer needs the names to act
+export function overdueNotification(items, days, nameOf) {
+  const pairs = items.map((o) => `${nameOf(o.white)} – ${nameOf(o.black)} (Turno ${o.round})`);
+  return {
+    title: items.length === 1 ? `Partita oltre i ${days} giorni` : `${items.length} partite oltre i ${days} giorni`,
+    body: `${pairs.join(', ')}. Senza un accordo, puoi registrare il risultato dall'area organizzatore.`,
+    hash: '#admin',
+    tag: 'ritardi',
+  };
+}
+
 // Sends the organizer's notice to their devices (send: as sendPush, 'sent' or 'gone', or throws). Returns
-// what to keep: the devices still subscribed (null: unchanged) and the keys told (null: unchanged; the
+// what to keep: the devices still subscribed (null: unchanged) and the keys told, the latest 100 (null: unchanged; the
 // notice is told when a device got it, or when none could, all gone; with only failures it is tried
 // again at the next run). With no device nothing is told, so a device switched on later still gets it.
 export async function deliverOrganizerNotice(news, payload, told, subs, send) {
+  // one key, or several (the overdue games told together)
+  const keys = news.keys ?? [news.key];
   if (subs.length === 0) return { sent: 0, failed: 0, gone: 0, subs: null, told: null };
   let sent = 0;
   let failed = 0;
@@ -246,7 +314,7 @@ export async function deliverOrganizerNotice(news, payload, told, subs, send) {
     failed,
     gone: gone.length,
     subs: gone.length > 0 ? subs.filter((s) => !gone.includes(s.endpoint)) : null,
-    told: sent > 0 || failed === 0 ? [...told, news.key].slice(-30) : null,
+    told: sent > 0 || failed === 0 ? [...told, ...keys].slice(-100) : null,
   };
 }
 

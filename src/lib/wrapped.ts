@@ -2,6 +2,7 @@
 // archived (the same shape for the current season, see allTime.seasonsWithGames): the results, the
 // best run, the opponent who hurt most and the one beaten most, the longest game, the quickest win,
 // the opening played most, the colpacci and how the Elo del torneo moved.
+import { scoreFor } from './standings';
 import { ArchivedGame } from '../types';
 import { byRound, decidedAtTable } from './games';
 import { EloReport, gameKey } from './tournamentElo';
@@ -32,10 +33,7 @@ export interface SeasonWrapped {
   elo?: { start: number; end: number };
 }
 
-const scoreOf = (handle: string, g: ArchivedGame) => {
-  if (g.result === '½-½') return 0.5;
-  return (g.result === '1-0') === same(g.white, handle) ? 1 : 0;
-};
+const scoreOf = (handle: string, g: ArchivedGame) => scoreFor(g.result, same(g.white, handle));
 
 // "Sicilian Defense: Najdorf Variation" -> "Sicilian Defense"
 const family = (opening: string) => opening.split(':')[0].trim();
@@ -61,7 +59,7 @@ export function seasonWrapped(handle: string, games: ArchivedGame[], elo?: EloRe
     const o = opp(g);
     const r = records.get(o.toLowerCase()) ?? { opponent: o, scored: 0, conceded: 0 };
     r.scored += scores[i];
-    r.conceded += 1 - scores[i];
+    r.conceded += scoreFor(g.result, !same(g.white, handle)); // 0 too in a 0-0
     records.set(o.toLowerCase(), r);
   });
   const list = [...records.values()];

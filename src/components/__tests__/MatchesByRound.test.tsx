@@ -11,6 +11,19 @@ const games: HistoryGame[] = [
 const nameOf = (h: string) => h[0].toUpperCase() + h.slice(1).toLowerCase();
 
 describe('MatchesByRound', () => {
+  it('shows a result decided by the organizer, 0-0 included, over what Lichess says', () => {
+    const decided: HistoryGame[] = [
+      { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa', lichess: { id: 'aaaaaaaa', status: 'doubleLoss', lastMoveAt: 1 } },
+      { round: '1', white: 'carla', black: 'dario', url: 'https://lichess.org/bbbbbbbb', lichess: { id: 'bbbbbbbb', status: 'decided', lastMoveAt: 1 } },
+    ];
+    const live = { aaaaaaaa: { id: 'aaaaaaaa', status: 'started' } as any };
+    const html = renderToStaticMarkup(<MatchesByRound games={decided} gameStates={live} nameOf={nameOf} />);
+    expect(html).toContain('0 – 0');
+    expect(html).toContain('½ – ½');
+    expect(html.match(/Deciso dall&#x27;organizzatore/g)).toHaveLength(2);
+    expect(html).not.toContain('In corso');
+  });
+
   it('says until when the round in progress goes on, only with the Turni con scadenza', () => {
     const open: HistoryGame[] = [
       { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa', lichess: { id: 'aaaaaaaa', status: 'mate', winner: 'white' } },

@@ -4,10 +4,11 @@ import type { OrganizerStore } from '../hooks/useOrganizerData';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { TokenSection } from './settings/TokenSection';
 import { BackupSection } from './settings/BackupSection';
+import { AlertsSection } from './settings/AlertsSection';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
 
-// Set-and-forget settings: the Lichess token and the copy of the data. The texts of the WhatsApp
+// Set-and-forget settings: the Lichess token, the organizer's notices and the copy of the data. The texts of the WhatsApp
 // messages are in WhatsAppTab, the season in SeasonsTab, the players in PlayersTab.
 export function SettingsTab({
   config,
@@ -38,6 +39,10 @@ export function SettingsTab({
     <div className="settings-stack">
       <CollapsibleSection title="Token Lichess" defaultOpen={!settings.token}>
         <TokenSection settings={settings} setSettings={setSettings} flash={flash} />
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Avvisi all'organizzatore" id="avvisi">
+        <AlertsSection meta={config.tournament} onUpdateTournamentMeta={onUpdateTournamentMeta} />
       </CollapsibleSection>
 
       <CollapsibleSection title="Copia dei dati" id="copia-dati">

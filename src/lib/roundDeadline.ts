@@ -160,7 +160,9 @@ export function roundStart(games: Pick<HistoryGame, 'createdAt' | 'url'>[]): num
   return times.length > 0 ? Math.min(...times) : undefined;
 }
 
-const isOpen = (g: HistoryGame, states: Record<string, LichessExportGame>) => !!g.url && gameProgress(stateOf(g, states)) !== 'finished';
+// Still being played: on Lichess, and without a result decided by the organizer (lib/decisions.ts)
+export const isOpen = (g: HistoryGame, states: Record<string, LichessExportGame>) =>
+  !!g.url && !g.decision && gameProgress(stateOf(g, states)) !== 'finished';
 
 // The games of the rounds before this one that are not over yet: they go on alongside it
 export function carriedOver(round: string, history: HistoryGame[], states: Record<string, LichessExportGame>): HistoryGame[] {

@@ -1,7 +1,7 @@
 import { collectFinishedGames, playerMoveTimes } from './moveTimes';
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch } from '../types';
 import { computeStandings, isTied, PlayerStanding, seasonStarted, sharedRanks } from './standings';
-import { byRound, isVoid, stateOf } from './games';
+import { byRound, isVoid, stateOf, DECIDED, DOUBLE_LOSS } from './games';
 
 export type GameOutcome = "win" | "loss" | "draw" | "ongoing" | "pending";
 
@@ -118,7 +118,8 @@ export function computePlayerProfile(
     let outcome: GameOutcome = "pending";
     if (s) {
       if (s.winner) outcome = s.winner === color ? "win" : "loss";
-      else if (s.status === "draw" || s.status === "stalemate") outcome = "draw";
+      else if (s.status === DOUBLE_LOSS) outcome = "loss"; // 0-0, decided by the organizer
+      else if (s.status === "draw" || s.status === "stalemate" || s.status === DECIDED) outcome = "draw";
       else if (s.status === "started") outcome = "ongoing";
     }
     met.add(opponent);
@@ -189,7 +190,8 @@ export function computePlayerProfile(
         opponent: p.handle,
         outcomes: vs.map((g) => g.outcome),
         scored: finished.reduce((sum, g) => sum + POINTS[g.outcome], 0),
-        conceded: finished.reduce((sum, g) => sum + (1 - POINTS[g.outcome]), 0),
+        // a 0-0 decided by the organizer gives the opponent nothing either
+        conceded: finished.reduce((sum, g) => sum + (g.status === DOUBLE_LOSS ? 0 : 1 - POINTS[g.outcome]), 0),
         upcoming,
       };
     });

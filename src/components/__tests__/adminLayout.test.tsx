@@ -63,7 +63,11 @@ describe('admin layout', () => {
     const html = renderToStaticMarkup(
       <SettingsTab config={config} settings={settings} setSettings={noop as any} history={[]} setHistory={noop as any} seasons={[]} organizer={organizer} flash={noop} onUpdateTournamentMeta={noop} onUpdatePlayers={noop} onUpdateSchedule={noop} />
     );
-    expect(summaries(html)).toEqual(['Token Lichess', 'Copia dei dati']);
+    expect(summaries(html)).toEqual(['Token Lichess', 'Avvisi all&#x27;organizzatore', 'Copia dei dati']);
+    // the organizer's notices: off, and a browser without notifications here
+    expect(html).toMatch(/<input id="overdue-games" type="checkbox"\/>/);
+    expect(html).not.toContain('Giorni dall');
+    expect(html).toContain('si accendono da un browser che le riceve');
     expect(html).toMatch(/<details class="settings-section" open="">\s*<summary>Token Lichess/);
     expect(html).not.toContain('Frasi del bollettino');
   });
@@ -280,9 +284,9 @@ describe('Turni con scadenza in the organizer area', () => {
     expect(on).toMatch(/<input id="round-deadline" type="checkbox" checked=""\/>/);
     expect(on).toContain('Durata del turno (giorni)');
     expect(on).toContain('Ogni turno dura 14 giorni');
-    // the notice to the organizer: here a browser without notifications
-    expect(on).toContain('si accende da un browser che le riceve');
-    expect(html).not.toContain('da un browser che le riceve');
+    // the notification to the organizer: in Impostazioni now
+    expect(on).toContain('La notifica quando scade un turno si accende in Impostazioni');
+    expect(html).not.toContain('La notifica quando scade un turno');
     // the last rounds without overlap: a switch of its own, off
     expect(on).toMatch(/<input id="final-rounds" type="checkbox"\/>/);
     expect(on).not.toContain('Quante giornate');
@@ -375,5 +379,60 @@ describe('Turni con scadenza in the organizer area', () => {
     const plain = renderToStaticMarkup(<LaunchMessage {...props} />);
     expect(plain).not.toContain('si chiude');
     expect(plain).not.toContain('Continuano');
+  });
+});
+
+describe('results decided by the organizer and games past the days allowed', () => {
+  const longAgo = Date.now() - 40 * 86400e3;
+  const history = [
+    { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa', createdAt: longAgo, lichess: { id: 'aaaaaaaa', status: 'started', moves: 'e4 e5' } },
+  ] as any[];
+  const cfg = (extra: object) => ({ ...config, schedule: [{ round: '1', white: 'anna', black: 'bruno' }], tournament: { ...config.tournament, ...extra } });
+  const rounds = async (c: any, h: any[], openRound = '') => {
+    const { RoundsTab } = await import('../../tabs/RoundsTab');
+    return renderToStaticMarkup(
+      <RoundsTab openRound={openRound} setOpenRound={noop} config={c} settings={settings} templates={config.messageTemplates} history={h} setHistory={noop as any} gameStates={{}} onUpdateSchedule={noop} onUpdateTournamentMeta={noop} nameOf={(x) => x} flash={noop} triggerToast={noop} onMissingToken={noop} />
+    );
+  };
+
+  it('lists the games past the days allowed in Turni, only with the option on', async () => {
+    const html = await rounds(cfg({ overdueDays: 21 }), history);
+    expect(html).toContain('Una partita è andata oltre i 21 giorni');
+    expect(html).toMatch(/anna – bruno \(Turno 1, limite \S+ \d+ \S+\)/);
+    expect(html).toContain('puoi registrare tu il risultato dalla partita (⚖️)');
+    expect(await rounds(cfg({}), history)).not.toContain('oltre i');
+    // decided: not past the limit any more, and the round is over
+    const decided = [{ ...history[0], decision: { result: '½-½', at: Date.now() } }];
+    const after = await rounds(cfg({ overdueDays: 21 }), decided);
+    expect(after).not.toContain('oltre i');
+    expect(after).toContain('>Concluso<');
+  });
+
+  it('offers the decision on every game created, and shows the one taken', async () => {
+    const open = await rounds(cfg({}), history, '1');
+    expect(open).toContain('aria-label="Risultato deciso dall&#x27;organizzatore per anna – bruno"');
+    const decided = await rounds(cfg({}), [{ ...history[0], decision: { result: '0-0', at: Date.now() } }], '1');
+    expect(decided).toContain('⚖️ Deciso');
+    // no new link while decided: it would drop the decision
+    expect(decided).not.toContain('title="Nuovo link"');
+  });
+
+  it('has a panel to decide, with the four results and what Lichess says', async () => {
+    const { DecisionPanel, lichessSummary } = await import('../../tabs/rounds/DecisionPanel');
+    const html = renderToStaticMarkup(<DecisionPanel game={history[0]} state={history[0].lichess} nameOf={(x) => x[0].toUpperCase() + x.slice(1)} flash={noop} onSaved={noop} />);
+    expect(html).toContain('1-0: vince Anna');
+    expect(html).toContain('0-1: vince Bruno');
+    expect(html).toContain('½-½: patta');
+    expect(html).toContain('0-0: persa per entrambi');
+    expect(html).toContain('Su Lichess la partita è in corso, meno di 10 mosse');
+    expect(html).not.toContain('Torna al risultato di Lichess');
+    const taken = renderToStaticMarkup(
+      <DecisionPanel game={{ ...history[0], decision: { result: '0-0', at: Date.UTC(2026, 11, 15, 12), note: 'nessun accordo' } }} nameOf={(x) => x} flash={noop} onSaved={noop} />
+    );
+    expect(taken).toContain('Deciso il 15 dicembre: <strong>0-0: persa per entrambi</strong>. Nota: nessun accordo');
+    expect(taken).toContain('Torna al risultato di Lichess');
+    expect(lichessSummary(undefined)).toBe('la sfida non è ancora stata accettata');
+    expect(lichessSummary({ id: 'x', status: 'started' })).toBe('iniziata, ma nessuno ha ancora mosso');
+    expect(lichessSummary({ id: 'x', status: 'mate', winner: 'black' })).toBe('già finita (0-1): il risultato deciso la sostituisce');
   });
 });

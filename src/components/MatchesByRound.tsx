@@ -11,7 +11,7 @@ import { upsetOf, upsetSentence } from '../lib/upset';
 import { EloReport } from '../lib/tournamentElo';
 import { extractGameId } from '../lib/utils';
 import { summitKey } from '../lib/summit';
-import { stateOf } from '../lib/games';
+import { byOrganizer, DECIDED, DOUBLE_LOSS, stateOf } from '../lib/games';
 import { playerHref } from '../lib/routes';
 import { PresenceInfo, seenAtOf } from '../lib/presence';
 import { ColorDot } from './PresenceDot';
@@ -243,7 +243,8 @@ function MatchCard({
   // Neutral result: here 0-1 is a win for Black, not a "loss"
   else if (s?.winner === "white") badge = <span className="status-badge result">1 – 0</span>;
   else if (s?.winner === "black") badge = <span className="status-badge result">0 – 1</span>;
-  else if (s?.status === "draw" || s?.status === "stalemate") badge = <span className="status-badge result">½ – ½</span>;
+  else if (s?.status === "draw" || s?.status === "stalemate" || s?.status === DECIDED) badge = <span className="status-badge result">½ – ½</span>;
+  else if (s?.status === DOUBLE_LOSS) badge = <span className="status-badge result">0 – 0</span>;
 
   const progress = gameProgress(s);
   // Ongoing games: Lichess hides the last moves, so only an approximate count is shown
@@ -361,6 +362,8 @@ function MatchCard({
         </div>
         {s?.status === "forfeit" ? (
           <span className="opening-label">Vittoria a tavolino</span>
+        ) : byOrganizer(s?.status) ? (
+          <span className="opening-label">Deciso dall'organizzatore</span>
         ) : game.url ? (
           <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
             Apri su Lichess

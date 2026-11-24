@@ -1,9 +1,9 @@
 // Cronaca: what happened in the tournament, as a list of events in the order they happened. Everything
 // is read from the data the site already has (games, their Lichess states, withdrawals, archived
 // seasons): nothing is stored for it. Ongoing games give no event, Lichess hides their last moves.
-import { HistoryGame, LichessExportGame, MasterAnecdote, Player, ScheduledMatch, SeasonArchive, Withdrawal } from '../types';
+import { HistoryGame, LichessExportGame, MasterAnecdote, Player, ScheduledMatch, SeasonArchive, Withdrawal, GameResult } from '../types';
 import { byRound, isVoid, movesText, startedAt, stateOf } from './games';
-import { leadersOf, pointsText, scoredResult } from './standings';
+import { leadersOf, pointsText, scoredResult, pointsOf, scoreFor } from './standings';
 import {
   boardCalendar,
   CURRENT,
@@ -70,7 +70,7 @@ export interface ActivityTag {
   label: string;
 }
 
-type Result = '1-0' | '0-1' | '½-½';
+type Result = GameResult;
 
 // A scored game as the cronaca needs it, from the current season or an archive
 interface ScoredGame {
@@ -191,20 +191,20 @@ function gameEvents(games: ScoredGame[], seasonKey: string, masterLabel: string,
     const b = lower(g.black);
     shown.set(w, g.white);
     shown.set(b, g.black);
-    const sw = g.result === '1-0' ? 1 : g.result === '0-1' ? 0 : 0.5;
+    const [sw, sbk] = pointsOf(g.result);
     points.set(w, (points.get(w) ?? 0) + sw);
-    points.set(b, (points.get(b) ?? 0) + 1 - sw);
+    points.set(b, (points.get(b) ?? 0) + sbk);
     if (sw === 1) won.set(w, (won.get(w) ?? 0) + 1);
-    if (sw === 0) won.set(b, (won.get(b) ?? 0) + 1);
+    if (sbk === 1) won.set(b, (won.get(b) ?? 0) + 1);
     done.push(g);
 
     const sb = new Map<string, number>();
     done.forEach((d) => {
       const dw = lower(d.white);
       const db = lower(d.black);
-      const s = d.result === '1-0' ? 1 : d.result === '0-1' ? 0 : 0.5;
+      const [s, t] = pointsOf(d.result);
       sb.set(dw, (sb.get(dw) ?? 0) + s * (points.get(db) ?? 0));
-      sb.set(db, (sb.get(db) ?? 0) + (1 - s) * (points.get(dw) ?? 0));
+      sb.set(db, (sb.get(db) ?? 0) + t * (points.get(dw) ?? 0));
     });
     const rows = [...points.keys()]
       .map((h) => ({ handle: h, points: points.get(h)!, sb: sb.get(h) ?? 0, won: won.get(h) ?? 0 }))
@@ -366,11 +366,13 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
     const result = scoredResult(s);
     if (!s || !result || isVoid(s)) return;
     const forfeit = s.status === 'forfeit';
+    // A result decided by the organizer ends when it was decided (lib/decisions.ts: lastMoveAt)
+    const atTable = decidedAtTable(s.status);
     const at = forfeit ? forfeitAt.get(`${g.round}|${lower(g.white)}|${lower(g.black)}`) : s.lastMoveAt;
     if (typeof at !== 'number' || !(at > 0)) return;
     finishedAt.set(g, at);
     const id = extractGameId(g.url) || undefined;
-    const board = forfeit ? { white: g.white, black: g.black } : playersOnBoard(g, s, handles);
+    const board = atTable && s.status !== 'cheat' ? { white: g.white, black: g.black } : playersOnBoard(g, s, handles);
     games.push({
       key: id ?? `${g.round}|${g.white}|${g.black}|${i}`,
       round: g.round,
@@ -384,7 +386,7 @@ export function currentSeasonActivity(input: CurrentSeasonInput): ActivityEvent[
       opening: s.opening?.name,
       at,
       id,
-      upset: !forfeit && !!upsetOf(s, elo, { ...board, round: g.round, id }),
+      upset: !atTable && !!upsetOf(s, elo, { ...board, round: g.round, id }),
       master: !!family && playsFamily(s.opening?.name, family),
       summit: summits.has(summitKey(g)),
       silent: decidedAtTable(s.status),
@@ -523,8 +525,7 @@ function objectiveEvents(input: CurrentSeasonInput, elo: EloReport, calendar: Hi
       if (!side) continue;
       const opp = lower(side === 'white' ? g.black : g.white);
       if (season.newcomers.has(opp)) continue;
-      const s = g.result === '1-0' ? 1 : g.result === '0-1' ? 0 : 0.5;
-      points += side === 'white' ? s : 1 - s;
+      points += scoreFor(g.result, side === 'white');
       if (points >= target) {
         events.push({
           key: `${CURRENT}:o:${me}`,
@@ -564,10 +565,10 @@ function finalTable(games: ScoredGame[]) {
   const won = new Map<string, number>();
   const name = new Map<string, string>();
   games.forEach((g) => {
-    const s = g.result === '1-0' ? 1 : g.result === '0-1' ? 0 : 0.5;
+    const [s, t] = pointsOf(g.result);
     [
       [g.white, s],
-      [g.black, 1 - s],
+      [g.black, t],
     ].forEach(([h, p]) => {
       const k = lower(h as string);
       name.set(k, h as string);
@@ -577,11 +578,11 @@ function finalTable(games: ScoredGame[]) {
   });
   const sb = new Map<string, number>();
   games.forEach((g) => {
-    const s = g.result === '1-0' ? 1 : g.result === '0-1' ? 0 : 0.5;
+    const [s, t] = pointsOf(g.result);
     const w = lower(g.white);
     const b = lower(g.black);
     sb.set(w, (sb.get(w) ?? 0) + s * pts.get(b)!);
-    sb.set(b, (sb.get(b) ?? 0) + (1 - s) * pts.get(w)!);
+    sb.set(b, (sb.get(b) ?? 0) + t * pts.get(w)!);
   });
   return [...pts.keys()]
     .map((k) => ({ handle: name.get(k)!, points: pts.get(k)!, sb: sb.get(k) ?? 0, won: won.get(k) ?? 0 }))

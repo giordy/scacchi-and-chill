@@ -9,6 +9,8 @@ import {
   deleteDoc,
   onSnapshot,
   writeBatch,
+  updateDoc,
+  deleteField,
 } from "firebase/firestore";
 import firebaseConfigRaw from "../firebase-applet-config.json";
 import {
@@ -25,7 +27,9 @@ import {
   EloSeed,
   FamousGame,
   RoundEnd,
+  GameDecision,
 } from "./types";
+import { cleanDecision } from "./lib/decisions";
 
 const firebaseConfig = {
   apiKey: firebaseConfigRaw.apiKey,
@@ -70,6 +74,7 @@ export interface TournamentDocData {
   roundDays?: number;
   roundEnds?: RoundEnd[];
   finalRoundsWait?: number;
+  overdueDays?: number;
   winners?: SeasonWinner[];
   roster?: Player[];
   seeds?: EloSeed[];
@@ -111,6 +116,7 @@ export async function saveTournamentFullToFirebase(data: {
     if (data.meta.rated !== undefined) payload.rated = data.meta.rated;
     if (data.meta.roundDays !== undefined) payload.roundDays = data.meta.roundDays;
     if (data.meta.finalRoundsWait !== undefined) payload.finalRoundsWait = data.meta.finalRoundsWait;
+    if (data.meta.overdueDays !== undefined) payload.overdueDays = data.meta.overdueDays;
     // A list, not a map: a merge write would keep the keys of a map that were removed
     if (data.meta.roundEnds !== undefined) payload.roundEnds = data.meta.roundEnds.map(({ round, at }) => ({ round, at }));
     // Firestore rejects undefined values (e.g. a winner without notes): the JSON round trip drops them
@@ -246,6 +252,7 @@ export async function replaceAllGames(games: HistoryGame[]): Promise<void> {
       };
       // Firestore rejects undefined values: the JSON round trip drops them
       if (g.lichess) data.lichess = JSON.parse(JSON.stringify(g.lichess));
+      if (g.decision) data.decision = JSON.parse(JSON.stringify(g.decision));
       batch.set(doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", gameDocIdOf(g)), data);
     });
     await batch.commit();
@@ -354,6 +361,16 @@ export async function replaceGameLink(old: HistoryGame, next: HistoryGame): Prom
   await batch.commit();
 }
 
+// A result decided by the organizer (lib/decisions.ts) on a game, or none to give Lichess' back.
+// Only the field `decision`: the state read from Lichess stays.
+export async function saveGameDecision(game: Pick<HistoryGame, "round" | "white" | "black">, decision: GameDecision | null): Promise<void> {
+  const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "games", gameDocIdOf(game));
+  await updateDoc(ref, {
+    decision: decision ? JSON.parse(JSON.stringify(decision)) : deleteField(),
+    updatedAt: new Date().toISOString(),
+  });
+}
+
 // 4b. Salva lo stato Lichess (esito, mosse, apertura) sulle partite corrispondenti
 export async function saveLichessStatesToFirebase(
   games: HistoryGame[],
@@ -407,6 +424,7 @@ export function subscribeToGames(
             url: String(data.url || ""),
             createdAt: Number(data.createdAt) || undefined,
             lichess: data.lichess || undefined,
+            ...(cleanDecision(data.decision) ? { decision: cleanDecision(data.decision) } : {}),
           });
         }
       });

@@ -1,3 +1,4 @@
+import { applyDecisions } from './decisions';
 import { HistoryGame, LichessExportGame, Player, ScheduledMatch, Withdrawal } from '../types';
 import { gameProgress } from './progress';
 import { isVoid, stateOf } from './games';
@@ -44,12 +45,13 @@ export function planWithdrawal(
   return { played, total, mode: played * 2 < total ? 'annulled' : 'forfeit', open, created };
 }
 
-// The season as the standings must see it, from the stored games and the withdrawals:
+// The season as the standings must see it, from the stored games, the results decided by the organizer
+// (lib/decisions.ts) and the withdrawals:
 // - annulled: every game of the player is dropped;
 // - forfeit: the games left become wins for the opponents (no Lichess link);
 // - replaced: the substitute takes over the games already played by the player who left.
 export function applyWithdrawals(history: HistoryGame[], withdrawals: Withdrawal[] | undefined): HistoryGame[] {
-  let out = history;
+  let out = applyDecisions(history);
   (withdrawals ?? []).forEach((w) => {
     if (w.mode === 'annulled') {
       out = out.filter((g) => !involves(g, w.handle));

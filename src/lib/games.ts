@@ -12,11 +12,18 @@ export const isVoid = (s?: LichessExportGame) => !!s && VOID_STATUSES.has(s.stat
 // Games decided at the table: points in the standings, but they say nothing of anyone's level or
 // play, so they are out of the Elo del torneo, the Trofeo Pillsbury, the awards and the records:
 // forfeits after a withdrawal, and games Lichess closed for cheating ("cheat detected")
-export const decidedAtTable = (status: string | undefined) => status === 'forfeit' || status === 'cheat';
+// and results decided by the organizer (lib/decisions.ts: 'decided', 'doubleLoss' for 0-0)
+export const DECIDED = 'decided';
+export const DOUBLE_LOSS = 'doubleLoss';
+export const decidedAtTable = (status: string | undefined) =>
+  status === 'forfeit' || status === 'cheat' || status === DECIDED || status === DOUBLE_LOSS;
+export const byOrganizer = (status: string | undefined) => status === DECIDED || status === DOUBLE_LOSS;
 
 // The Lichess state of a game: the fresh one read from Lichess when there is one, otherwise the
 // one stored with the game (also the only one of a game won by forfeit, which has no link)
+// A result decided by the organizer (lib/decisions.ts applyDecisions) wins over the one read from Lichess.
 export function stateOf(g: HistoryGame, gameStates: Record<string, LichessExportGame>): LichessExportGame | undefined {
+  if (byOrganizer(g.lichess?.status)) return g.lichess;
   const id = extractGameId(g.url);
   return (id && gameStates[id]) || g.lichess;
 }

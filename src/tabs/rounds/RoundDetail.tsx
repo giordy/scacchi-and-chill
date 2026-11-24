@@ -7,6 +7,7 @@ import { deleteGamesFromFirebase } from '../../firebaseService';
 import { LaunchMessage } from './LaunchMessage';
 import { BulletinSection } from './BulletinSection';
 import { RelinkPanel } from './RelinkPanel';
+import { DecisionPanel } from './DecisionPanel';
 import { canRelink, linkState } from '../../lib/relink';
 import { stateOf } from '../../lib/games';
 import {
@@ -108,6 +109,8 @@ export function RoundDetail({
   const [panel, setPanel] = useState<Panel>(null);
   // The game whose link is being replaced, by its two players (the colors may change)
   const [relinking, setRelinking] = useState("");
+  // The game whose result the organizer is deciding (lib/decisions.ts), by its two players
+  const [deciding, setDeciding] = useState("");
   const pairKey = (m: { white: string; black: string }) => [m.white, m.black].sort().join("|");
   const [white, setWhite] = useState("");
   const [black, setBlack] = useState("");
@@ -276,7 +279,10 @@ export function RoundDetail({
           {matches.map((m) => {
             const link = m.game && m.url ? linkState(m.game, stateOf(m.game, gameStates), settings.expiry) : null;
             // Stays open after a change, also when the new link is a game already started (to copy the message)
-            const open = !!link && relinking === pairKey(m);
+            const decided = !!m.game?.decision;
+            // A new link would drop the decision: not offered while there is one
+            const open = !!link && !decided && relinking === pairKey(m);
+            const decidingThis = !!m.game && deciding === pairKey(m);
             return (
             <React.Fragment key={pairKey(m)}>
             <div className="list-row round-match">
@@ -289,10 +295,26 @@ export function RoundDetail({
                 </span>
               </div>
               <div className="header-actions">
-                {link && (link.kind === 'expired' || link.kind === 'void') && (
-                  <span className="status-badge loss">{link.kind === 'expired' ? 'Scaduta' : 'Annullata'}</span>
+                {decided ? (
+                  <span className="status-badge result">⚖️ Deciso</span>
+                ) : (
+                  link && (link.kind === 'expired' || link.kind === 'void') && (
+                    <span className="status-badge loss">{link.kind === 'expired' ? 'Scaduta' : 'Annullata'}</span>
+                  )
                 )}
-                {link && canRelink(link) && (
+                {m.game && (
+                  <button
+                    type="button"
+                    className={`secondary btn-mini${decidingThis ? ' is-active' : ''}`}
+                    title="Risultato deciso dall'organizzatore"
+                    aria-expanded={decidingThis}
+                    aria-label={`Risultato deciso dall'organizzatore per ${nameOf(m.white)} – ${nameOf(m.black)}`}
+                    onClick={() => setDeciding(decidingThis ? "" : pairKey(m))}
+                  >
+                    ⚖️
+                  </button>
+                )}
+                {link && !decided && canRelink(link) && (
                   <button
                     type="button"
                     className={`secondary btn-mini btn-mini-edit${open ? ' is-active' : ''}`}
@@ -330,6 +352,19 @@ export function RoundDetail({
                 </button>
               </div>
             </div>
+            {decidingThis && m.game && (
+              <DecisionPanel
+                game={m.game}
+                state={stateOf(m.game, gameStates)}
+                nameOf={nameOf}
+                flash={flash}
+                onSaved={(nextGame) =>
+                  setHistory((prev) =>
+                    prev.map((g) => (g.round === nextGame.round && g.white === nextGame.white && g.black === nextGame.black ? nextGame : g))
+                  )
+                }
+              />
+            )}
             {open && m.game && link && (
               <RelinkPanel
                 game={m.game}

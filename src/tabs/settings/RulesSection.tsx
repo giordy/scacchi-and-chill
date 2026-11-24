@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { TournamentMeta } from '../../types';
 import { DEFAULT_TOURNAMENT } from '../../lib/tournament';
 import { DaysField } from '../../components/DaysField';
-import { OrganizerPushToggle } from '../../components/OrganizerPushToggle';
 import { DEFAULT_FINAL_ROUNDS, DEFAULT_ROUND_DAYS, finalRoundsOf, MAX_FINAL_ROUNDS, MAX_ROUND_DAYS, MIN_ROUND_DAYS, roundDeadlinesOn } from '../../lib/roundDeadline';
 
 type Flash = (kind: 'ok' | 'err', text: string, items?: string[]) => void;
@@ -119,7 +118,7 @@ export function RulesSection({
                 ? `Le ultime ${finalRounds === 1 ? "giornata parte" : `${finalRounds} giornate partono`} solo quando sono finite tutte le partite dei turni prima: allo scadere di un turno il sito non propone il successivo finché resta una partita in corso, così nessuno gioca il finale conoscendo i risultati di un turno dopo. Avvisi e bollettino dicono quante partite mancano, senza nominare nessuno. Creando le sfide prima, chiede conferma. Compare nel regolamento.`
                 : "Spenta: anche nelle ultime giornate, allo scadere di un turno puoi creare il successivo mentre le partite aperte continuano."}
             </p>
-            <OrganizerPushToggle />
+            <p className="note">🔔 La notifica quando scade un turno si accende in Impostazioni → Avvisi all'organizzatore.</p>
           </>
         )}
       </div>

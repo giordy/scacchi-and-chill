@@ -269,6 +269,13 @@ describe('push to the organizer: a round past its end (Turni con scadenza)', () 
     expect(expiredRoundOf(rests, busyAll, fresh, END, extractGameId).waitReason).toBeUndefined();
   });
 
+  it('counts a game decided by the organizer as over, as the organizer area', () => {
+    const decided = all.map((g) => (g.lichess.status === 'started' ? { ...g, decision: { result: '½-½', at: 1 } } : g));
+    const item = expiredRoundOf(tournament, decided, {}, END, extractGameId);
+    expect(item.open).toEqual([]);
+    expect(expiredRound(tournament, roundsOf(schedule, decided as any), decided as any, {}, END)!.open).toEqual([]);
+  });
+
   it('reads the tournament as Firestore gives it back (numbers from integerValue)', () => {
     const stored = fields(toValue(tournament).mapValue.fields);
     expect(expiredRoundOf(stored, all, fresh, END, extractGameId)).toMatchObject({ round: '2', next: '3', end: END });
@@ -314,12 +321,14 @@ describe('push to the organizer: a round past its end (Turni con scadenza)', () 
       expect(gone).toMatchObject({ sent: 0, gone: 1, told: ['S|2|1'], subs: [] });
     });
 
-    it('keeps only the latest 30 keys told', async () => {
-      const told = Array.from({ length: 30 }, (_, i) => `k${i}`);
+    it('keeps only the latest 100 keys told, and several at once', async () => {
+      const told = Array.from({ length: 100 }, (_, i) => `k${i}`);
       const out = await deliverOrganizerNotice(news, payload, told, [sub('a')], async () => 'sent');
-      expect(out.told).toHaveLength(30);
-      expect(out.told[29]).toBe('S|2|1');
+      expect(out.told).toHaveLength(100);
+      expect(out.told[99]).toBe('S|2|1');
       expect(out.told[0]).toBe('k1');
+      const many = await deliverOrganizerNotice({ keys: ['x', 'y'] }, payload, ['k'], [sub('a')], async () => 'sent');
+      expect(many.told).toEqual(['k', 'x', 'y']);
     });
   });
 

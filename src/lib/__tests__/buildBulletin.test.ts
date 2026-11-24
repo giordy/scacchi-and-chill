@@ -261,4 +261,23 @@ describe('buildBulletin: deadlines and phrases', () => {
     const mid = buildBulletin({ round: '1', games, states, history: games, config: { ...config, schedule }, expiryDays: 2, now: NOW, random: first, seasons: [pastSeason(2)] });
     expect(mid.text).toContain('🏅 *Trofeo Pillsbury* (punti oltre le attese): Elena +½');
   });
+
+  it('writes a result decided by the organizer as such, without moves', () => {
+    const games: HistoryGame[] = [
+      { round: '6', white: 'anna', black: 'bruno', url: url('iiiiiiii'), decision: { result: '0-1', at: NOW } },
+      { round: '6', white: 'carla', black: 'dario', url: url('jjjjjjjj'), decision: { result: '0-0', at: NOW } },
+      { round: '6', white: 'elena', black: 'fabio', url: url('kkkkkkkk'), decision: { result: '½-½', at: NOW } },
+    ];
+    const view = applyWithdrawals(games, []);
+    // Lichess still says the first one goes on: the decision wins
+    const states = { iiiiiiii: { id: 'iiiiiiii', status: 'started', moves: 'e4 e5' } as LichessExportGame };
+    const b = buildBulletin({ round: '6', games: view, states, history: view, config, expiryDays: 2, now: NOW, random: first });
+    expect(b.text).toContain("*Anna* ⚪ vs *Bruno* ⚫\n⚖️ Deciso dall'organizzatore: vince Bruno *(0-1)*");
+    expect(b.text).toContain("⚖️ Deciso dall'organizzatore: persa per entrambi *(0-0)*");
+    expect(b.text).toContain("⚖️ Deciso dall'organizzatore: patta *(½-½)*");
+    expect(b.isComplete).toBe(true);
+    // the table after the round: Bruno 1, Elena and Fabio ½, Carla and Dario 0
+    expect(b.text).toMatch(/Bruno – 1 punto/);
+    expect(b.text).toMatch(/Carla – 0 punti/);
+  });
 });

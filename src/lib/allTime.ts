@@ -3,7 +3,7 @@
 // (head-to-heads, records) only the seasons whose games were archived, and the current one.
 import { ArchivedGame, HistoryGame, LichessExportGame, SeasonArchive, SeasonWinner } from '../types';
 import { archivedGames, seasonId } from './seasons';
-import { RankKey, seasonStarted, sharedRanks } from './standings';
+import { RankKey, seasonStarted, sharedRanks, scoreFor } from './standings';
 import { fullPodium, placesWithPodium } from './honours';
 import { upsetFrom } from './upset';
 import { decidedAtTable } from './games';
@@ -48,8 +48,7 @@ export function seasonsWithGames(seasons: SeasonArchive[], current?: CurrentSeas
 function scoreOf(handle: string, g: ArchivedGame): number | null {
   const white = same(g.white, handle);
   if (!white && !same(g.black, handle)) return null;
-  if (g.result === '½-½') return 0.5;
-  return (g.result === '1-0') === white ? 1 : 0;
+  return scoreFor(g.result, white);
 }
 
 export interface AllTimeHeadToHead {
@@ -77,7 +76,8 @@ export function allTimeHeadToHead(handle: string, list: SeasonGames[]): AllTimeH
       else if (score === 0) row.lost++;
       else row.drawn++;
       row.scored += score;
-      row.conceded += 1 - score;
+      // what the opponent scored: 0 too in a 0-0, decided by the organizer
+      row.conceded += scoreFor(g.result, !same(g.white, handle));
       row.seasonSet.add(season);
       rows.set(key, row);
     })
@@ -297,7 +297,7 @@ export function allTimeRecords(list: SeasonGames[], nameOf: (handle: string) => 
   }
 
   const quickest = board
-    .filter(({ g }) => g.result !== '½-½' && g.status !== 'outoftime' && g.status !== 'timeout')
+    .filter(({ g }) => (g.result === '1-0' || g.result === '0-1') && g.status !== 'outoftime' && g.status !== 'timeout')
     .reduce<(typeof board)[number] | null>((best, x) => (!best || x.g.plies! < best.g.plies! ? x : best), null);
   if (quickest) {
     const winner = quickest.g.result === '1-0' ? quickest.g.white : quickest.g.black;
