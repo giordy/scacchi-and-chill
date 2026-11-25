@@ -2,7 +2,8 @@ name: Sincronizza risultati
 
 # The results of the games still open are read from Lichess and saved on Firestore, as the organizer
 # area does when it opens: the saved results no longer wait for the organizer. Then the push
-# notifications of the moves go out (scripts/push.mjs).
+# notifications of the moves go out (scripts/push.mjs). A game just finished is analysed by Stockfish
+# in a second job, run only when a game waits for it (scripts/analyse-games.mjs).
 # Needs the secret FIREBASE_SERVICE_ACCOUNT (see the README); without it the run does nothing. The
 # notifications need the secret VAPID_PRIVATE_KEY too.
 # GitHub runs the schedule below when it has room, in practice every few hours: an outside cron
@@ -16,13 +17,15 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: "sync-results"
-  cancel-in-progress: false
-
 jobs:
   sync:
+    # One sync at a time; an analysis still running does not hold up the next one
+    concurrency:
+      group: "sync-results"
+      cancel-in-progress: false
     runs-on: ubuntu-latest
+    outputs:
+      analyse: ${{ steps.sync.outputs.analyse }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -33,7 +36,39 @@ jobs:
           node-version: 22
 
       - name: Lichess -> Firestore
+        id: sync
         run: node scripts/sync-results.mjs
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+
+  # The key moments of the finished games, for the replay on the site: Ubuntu's Stockfish, chess.js
+  # (a dev dependency) for the moves. At most a few games a run, the others at the next one.
+  analyse:
+    needs: sync
+    if: needs.sync.outputs.analyse == 'true'
+    concurrency:
+      group: "analyse-games"
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Install Stockfish
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq stockfish
+
+      - name: Analyse the finished games
+        run: node scripts/analyse-games.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

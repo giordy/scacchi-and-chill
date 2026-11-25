@@ -18,6 +18,7 @@ import { ColorDot } from './PresenceDot';
 import { OpeningFamily, playsFamily } from '../lib/masterOpening';
 import { recentMove } from '../lib/live';
 import { formatRoundEnd, roundExpired } from '../lib/roundDeadline';
+import { analysisOf, hasMoments } from '../lib/analysis';
 
 export interface MasterTag {
   family: OpeningFamily;
@@ -262,6 +263,9 @@ function MatchCard({
 
   const [replay, setReplay] = useState(false);
   const pairing = `${nameOf(game.white)} – ${nameOf(game.black)}`;
+  // The key moments, once the GitHub Action has analysed the game: in the replay, for everyone
+  const analysis = finalFen ? analysisOf(game) : undefined;
+  const moments = hasMoments(analysis);
   const tile = finalFen ? (
     <MiniBoard fen={finalFen} label={`Posizione finale di ${pairing}`} />
   ) : progress === 'ongoing' ? (
@@ -344,9 +348,14 @@ function MatchCard({
               <span aria-hidden="true">♞</span> L'apertura {masterTag!.surname ? `di ${masterTag!.surname}` : "del maestro"}
             </span>
           )}
-          {(progressText || upset || summit) && (
+          {(progressText || upset || summit || moments) && (
             <span className="match-progress">
               {progressText}
+              {moments && (
+                <button type="button" className="match-moments" onClick={() => setReplay(true)}>
+                  <span aria-hidden="true">✨</span> Momenti chiave
+                </button>
+              )}
               {summit && (
                 <InfoTip className="match-summit" text={`Scontro al vertice: ${summit} in classifica a inizio turno.`}>
                   🔝 Scontro al vertice
@@ -372,7 +381,15 @@ function MatchCard({
           <span className="opening-label">Link in arrivo all'inizio del turno</span>
         )}
       </div>
-      {replay && <GameReplay url={game.url} title={pairing} onClose={() => setReplay(false)} />}
+      {replay && (
+        <GameReplay
+          url={game.url}
+          title={pairing}
+          onClose={() => setReplay(false)}
+          analysis={analysis}
+          names={{ white: nameOf(game.white), black: nameOf(game.black) }}
+        />
+      )}
     </article>
   );
 }

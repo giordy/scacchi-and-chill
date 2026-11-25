@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fields } from './backup.mjs';
+import { needsAnalysis } from './analysis.mjs';
 import { deadlineNotification, deliverOrganizerNotice, expiredRoundOf, expiryDaysOf, movesNews, notificationFor, organizerNews, overdueNotification, overdueOf, sameState, sendPush, staleLinksNotification, staleLinksOf, vapidKeys } from './push.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -55,7 +56,7 @@ export function changed(saved, next) {
 }
 
 // An OAuth token for Firestore from the service account key (a signed JWT, no library)
-async function accessToken(account) {
+export async function accessToken(account) {
   const now = Math.floor(Date.now() / 1000);
   const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
   const unsigned = `${b64({ alg: 'RS256', typ: 'JWT' })}.${b64({
@@ -76,7 +77,7 @@ async function accessToken(account) {
   return (await res.json()).access_token;
 }
 
-async function readGames(base, token) {
+export async function readGames(base, token) {
   const res = await fetch(`${base}:runQuery`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -114,21 +115,20 @@ async function readLichess(ids) {
   return states;
 }
 
-// Only the fields `lichess` and `syncedAt`, and only on a game document that exists
-async function saveState(base, token, docId, state) {
-  const params = new URLSearchParams([
-    ['updateMask.fieldPaths', 'lichess'],
-    ['updateMask.fieldPaths', 'syncedAt'],
-    ['currentDocument.exists', 'true'],
-  ]);
+// Only the given fields, and only on a game document that exists (never one the organizer deleted)
+export async function saveGameFields(base, token, docId, data) {
+  const params = new URLSearchParams([...Object.keys(data).map((k) => ['updateMask.fieldPaths', k]), ['currentDocument.exists', 'true']]);
   const res = await fetch(`${base}/games/${encodeURIComponent(docId)}?${params}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ fields: { lichess: toValue(JSON.parse(JSON.stringify(state))), syncedAt: toValue(new Date().toISOString()) } }),
+    body: JSON.stringify({ fields: toValue(data).mapValue.fields }),
     signal: AbortSignal.timeout(30000),
   });
   if (!res.ok) throw new Error(`Salvataggio di ${docId}: HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
 }
+
+const saveState = (base, token, docId, state) =>
+  saveGameFields(base, token, docId, { lichess: JSON.parse(JSON.stringify(state)), syncedAt: new Date().toISOString() });
 
 async function getDoc(base, token, docPath) {
   const res = await fetch(docPath ? `${base}/${docPath}` : base, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30000) });
@@ -159,7 +159,7 @@ async function setDoc(base, token, docPath, data) {
 }
 
 // Only the given fields of a document (the others stay as they are)
-async function patchFields(base, token, docPath, data) {
+export async function patchFields(base, token, docPath, data) {
   const params = new URLSearchParams(Object.keys(data).map((k) => ['updateMask.fieldPaths', k]));
   const res = await fetch(`${base}/${docPath}?${params}`, {
     method: 'PATCH',
@@ -283,8 +283,12 @@ async function main() {
   // The organizer area shows when the last run went through, and the error of one that did not
   // (private/syncStatus, src/lib/syncHealth.ts): a sync that stops is seen, not only guessed
   try {
-    await run(base, token);
+    const games = await run(base, token);
     await patchFields(base, token, 'private/syncStatus', { at: new Date().toISOString() });
+    // The analysis job of the workflow (scripts/analyse-games.mjs) runs only when a game waits for it
+    const waiting = games.filter((g) => needsAnalysis(g, gameIdOf)).length;
+    if (waiting > 0) console.log(`Partite da analizzare: ${waiting}.`);
+    if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `analyse=${waiting > 0}\n`);
   } catch (e) {
     await patchFields(base, token, 'private/syncStatus', failureOf(e, new Date())).catch(() => {});
     throw e;
@@ -317,7 +321,7 @@ async function run(base, token) {
     console.log('Tutte le partite con un link hanno già il risultato salvato.');
     // A round can be past its end with every game over
     if (vapid) await notifyOrganizer(base, token, vapid, tournament, all, {});
-    return;
+    return all;
   }
   const states = await readLichess(ids);
   let saved = 0;
@@ -333,6 +337,11 @@ async function run(base, token) {
     await notify(base, token, vapid, tournament, watched, states, prevPush);
     await notifyOrganizer(base, token, vapid, tournament, all, states);
   } else console.log('Manca il secret VAPID_PRIVATE_KEY: nessuna notifica (vedi il README).');
+  // The games as they are now saved: a game finished in this run waits for its analysis
+  return all.map((g) => {
+    const next = targets.includes(g) ? states[gameIdOf(g.url)] : undefined;
+    return changed(g.lichess, next) ? { ...g, lichess: next } : g;
+  });
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

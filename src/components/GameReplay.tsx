@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { extractGameId } from '../lib/utils';
 import { ColorDot } from './PresenceDot';
+import { KeyMoments } from './KeyMoments';
+import { GameAnalysis } from '../types';
+import { hasMoments } from '../lib/analysis';
 
 // Animated replay of a finished game, as Lichess renders it (Staunty pieces, as on this site)
 export const replayGifUrl = (gameId: string) =>
@@ -27,8 +30,21 @@ export function playersFromTitle(title: string): { white: string; black: string 
   return m ? { white: m[1], black: m[2] } : undefined;
 }
 
-// Modal with the game replayed move by move; the GIF is downloaded only when it opens
-export function GameReplay({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
+// Modal with the game replayed move by move; the GIF is downloaded only when it opens. A tournament
+// game analysed by the GitHub Action has its key moments under it (lib/analysis.ts)
+export function GameReplay({
+  url,
+  title,
+  onClose,
+  analysis,
+  names,
+}: {
+  url: string;
+  title: string;
+  onClose: () => void;
+  analysis?: GameAnalysis;
+  names?: { white: string; black: string };
+}) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const gif = replayGifFor(url);
@@ -79,6 +95,7 @@ export function GameReplay({ url, title, onClose }: { url: string; title: string
           </p>
         )}
         {(!gif || state === 'error') && <p className="note">Non riesco a caricare l'animazione della partita.</p>}
+        {analysis && names && hasMoments(analysis) && <KeyMoments analysis={analysis} names={names} />}
         <a href={url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn replay-link">
           Apri su Lichess per l'analisi
         </a>

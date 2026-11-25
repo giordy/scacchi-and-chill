@@ -17,6 +17,9 @@ describe('firestoreRest', () => {
   it('reads a game document as the site uses it, none when incomplete', () => {
     expect(gameFromDoc({ round: 1, white: 'anna', black: 'bruno', createdAt: 5 })).toEqual({ round: '1', white: 'anna', black: 'bruno', url: '', createdAt: 5, lichess: undefined });
     expect(gameFromDoc({ round: '1', white: 'anna' })).toBeNull();
+    // The key moments saved by the GitHub Action reach the page
+    const analysis = { v: 1, id: 'AbCd1234', curve: [50, 52], turns: [], best: [] };
+    expect(gameFromDoc({ round: 1, white: 'anna', black: 'bruno', analysis })?.analysis).toEqual(analysis);
   });
 });
 

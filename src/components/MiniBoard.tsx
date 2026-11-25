@@ -5,8 +5,36 @@ import { StauntonPiece } from './StauntonPiece';
 
 export const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
+// An arrow on the board, from square to square ("e2", "e4"): the move played or the engine's
+export interface BoardArrow {
+  from: string;
+  to: string;
+  kind: 'played' | 'best';
+}
+
+const centre = (sq: string) => ({ x: (sq.charCodeAt(0) - 97) * 100 + 50, y: (56 - sq.charCodeAt(1)) * 100 + 50 });
+
+// A straight arrow with its head drawn as a triangle (no <marker>: its id would clash between boards)
+function Arrow({ from, to, kind }: BoardArrow) {
+  const a = centre(from);
+  const b = centre(to);
+  const len = Math.hypot(b.x - a.x, b.y - a.y);
+  if (!len) return null;
+  const ux = (b.x - a.x) / len;
+  const uy = (b.y - a.y) / len;
+  const head = 34;
+  const end = { x: b.x - ux * head, y: b.y - uy * head };
+  const side = { x: -uy * 26, y: ux * 26 };
+  return (
+    <g className={`mb-arrow is-${kind}`}>
+      <line x1={a.x} y1={a.y} x2={end.x} y2={end.y} strokeWidth="16" strokeLinecap="round" />
+      <polygon points={`${b.x},${b.y} ${end.x + side.x},${end.y + side.y} ${end.x - side.x},${end.y - side.y}`} />
+    </g>
+  );
+}
+
 // faded: a picture rather than a real result (the starting position of a game still to play)
-export function MiniBoard({ fen, label, faded = false }: { fen: string; label: string; faded?: boolean }) {
+export function MiniBoard({ fen, label, faded = false, arrows = [] }: { fen: string; label: string; faded?: boolean; arrows?: BoardArrow[] }) {
   const board = parseFenBoard(fen);
   if (!board) return null;
   return (
@@ -21,6 +49,9 @@ export function MiniBoard({ fen, label, faded = false }: { fen: string; label: s
           </g>
         ))
       )}
+      {arrows.map((ar) => (
+        <Arrow key={`${ar.kind}-${ar.from}${ar.to}`} {...ar} />
+      ))}
     </svg>
   );
 }

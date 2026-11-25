@@ -2364,6 +2364,107 @@ button.replay-close {
   justify-self: start;
 }
 
+/* The key moments of an analysed game, under its replay (components/KeyMoments.tsx) */
+button.match-moments {
+  margin-left: 6px;
+  min-height: 0;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--win);
+  background: color-mix(in srgb, var(--win) 12%, transparent);
+  cursor: pointer;
+}
+
+.key-moments {
+  display: grid;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.km-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+/* White's chances along the game: chess colours, the same in both themes */
+.km-curve {
+  width: 100%;
+  height: 48px;
+  display: block;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+.km-curve .km-black { fill: #2b302d; }
+.km-curve .km-white { fill: #f1ece0; }
+.km-curve .km-mid { stroke: #8d958f; stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.km-curve .km-dot { stroke: #fff; stroke-width: 1.5; }
+.km-curve .km-dot.is-turn { fill: #c9852f; }
+.km-curve .km-dot.is-best { fill: #3c9a68; }
+
+.km-story {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.km-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.km-item {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.km-item .mini-board {
+  width: 112px;
+  height: 112px;
+}
+
+.km-text {
+  display: grid;
+  gap: 3px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.km-item.is-best .km-text strong { color: var(--win); }
+.km-item.is-turn .km-text strong { color: var(--brass); }
+
+.mb-arrow { opacity: 0.85; }
+.mb-arrow.is-played line { stroke: #c9852f; }
+.mb-arrow.is-played polygon { fill: #c9852f; }
+.mb-arrow.is-best line { stroke: #3c9a68; }
+.mb-arrow.is-best polygon { fill: #3c9a68; }
+
+.km-note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.km-key {
+  display: inline-block;
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+.km-key.is-played { background: #c9852f; }
+.km-key.is-best { background: #3c9a68; }
+
 .anecdotes {
   display: grid;
 }

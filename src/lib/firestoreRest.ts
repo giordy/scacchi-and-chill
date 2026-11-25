@@ -40,6 +40,7 @@ export function gameFromDoc(data: Record<string, unknown>): HistoryGame | null {
     url: String(data.url || ''),
     createdAt: Number(data.createdAt) || undefined,
     lichess: (data.lichess as HistoryGame['lichess']) || undefined,
+    ...(data.analysis ? { analysis: data.analysis as HistoryGame['analysis'] } : {}),
     ...(cleanDecision(data.decision) ? { decision: cleanDecision(data.decision) } : {}),
   };
 }

@@ -440,6 +440,7 @@ export function subscribeToGames(
             url: String(data.url || ""),
             createdAt: Number(data.createdAt) || undefined,
             lichess: data.lichess || undefined,
+            ...(data.analysis ? { analysis: data.analysis } : {}),
             ...(cleanDecision(data.decision) ? { decision: cleanDecision(data.decision) } : {}),
           });
         }

@@ -19,6 +19,34 @@ export interface HistoryGame {
   lichess?: LichessExportGame;
   // The result the organizer decided, in place of Lichess' (lib/decisions.ts)
   decision?: GameDecision;
+  // The key moments, saved by the GitHub Action once the game is over (lib/analysis.ts)
+  analysis?: GameAnalysis;
+}
+
+// A key moment of a game (scripts/analysis.mjs): a move where the game turned, or a player's best move.
+// before/after: the mover's winning chances (0-100) before and after the move
+export interface AnalysisMoment {
+  ply: number; // 1 = White's first move
+  color: 'white' | 'black';
+  san: string; // the move played, in English SAN as Lichess writes it
+  uci: string;
+  fen: string; // the position before the move
+  bestSan?: string; // a turn: the engine's move in its place
+  bestUci?: string;
+  before?: number;
+  after: number;
+  gap?: number; // a best move: how much worse the next best was
+}
+
+export interface GameAnalysis {
+  v: number;
+  id: string; // the Lichess game analysed
+  engine?: string;
+  skipped?: string; // why there is no analysis (moves that do not make a game)
+  curve?: number[]; // White's winning chances in each position, the start included
+  turns?: AnalysisMoment[];
+  swings?: number; // the turns found, before keeping the three biggest
+  best?: AnalysisMoment[];
 }
 
 // The result of a game: 0-0 is the organizer's only, both lose (e.g. a game neither player started)
