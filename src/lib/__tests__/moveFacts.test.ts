@@ -102,7 +102,9 @@ describe('the facts behind a key moment', () => {
       best: [],
       finish: { ply: 2, color: 'black', san: 'Rxd1#', uci: 'd8d1', fen: plies[1].fen },
     };
-    const out = withFacts(result, plies, undefined);
+    const out = withFacts({ ...result, chances: [{ ...result.turns[0] }] }, plies, undefined);
+    // a chance gets the same facts as a turn
+    expect(out.chances[0].reply).toMatchObject({ san: 'Rxd1#', played: true });
     expect(out.turns[0].reply.san).toBe('Rxd1#');
     // the next ply is the answer played
     expect(out.turns[0].reply.played).toBe(true);

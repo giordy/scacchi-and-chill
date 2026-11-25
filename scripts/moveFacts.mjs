@@ -127,6 +127,8 @@ export function withFacts(result, plies, final) {
   return {
     ...result,
     turns: result.turns.map((t) => ({ ...t, ...turnFacts(plies[t.ply - 1], after(t.ply - 1), plies[t.ply]?.uci) })),
+    // A chance is told as a turn: the answer that would take it, played or not
+    ...(result.chances ? { chances: result.chances.map((c) => ({ ...c, ...turnFacts(plies[c.ply - 1], after(c.ply - 1), plies[c.ply]?.uci) })) } : {}),
     best: result.best.map((b) => ({ ...b, ...bestFacts(plies[b.ply - 1]) })),
     ...(result.finish ? { finish: { ...result.finish, ...(finish ? { move: moveInfo(finish) } : {}) } } : {}),
   };

@@ -5,7 +5,7 @@ import { ANALYSIS_VERSION, keyMoments, needsAnalysis, phasesOf, winPercent } fro
 import { parseSearch } from '../../../scripts/analyse-games.mjs';
 // @ts-expect-error a Node script without types
 import { gameIdOf } from '../../../scripts/sync-results.mjs';
-import { analysisOf, bestText, endingText, finishText, figurineSan, hasMoments, materialText, missedText, momentsOf, moveLabel, openingText, phaseText, promotionText, squaresOf, storyOf, StoryContext, streakText, turnText } from '../analysis';
+import { analysisOf, bestText, chanceText, endingText, finishText, figurineSan, hasMoments, materialText, missedText, momentsOf, moveLabel, openingText, phaseText, promotionText, squaresOf, storyOf, StoryContext, streakText, turnText } from '../analysis';
 import { AnalysisMoment, GameAnalysis } from '../../types';
 
 const moves20 = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7';
@@ -188,9 +188,17 @@ describe('the key moments', () => {
     // the last ply of the opening is not counted, the first after it is
     expect(keyMoments(plies(curve, { 7: { second: { white: 10 } } }), 50).best).toEqual([]);
     expect(keyMoments(plies(curve, { 8: { second: { white: 10 } } }), 50).best.map((b: AnalysisMoment) => b.ply)).toEqual([9]);
-    // two good moves of White eight plies apart: only the better is told
-    const close = keyMoments(plies(curve, { 8: { second: { white: 20 } }, 16: { second: { white: 30 } } }), 50);
+    // two only moves of White eight plies apart: both told; four plies apart: the better only
+    const apart = keyMoments(plies(curve, { 8: { second: { white: 20 } }, 16: { second: { white: 30 } } }), 50);
+    expect(apart.best.map((b: AnalysisMoment) => b.ply)).toEqual([9, 17]);
+    const close = keyMoments(plies(curve, { 8: { second: { white: 20 } }, 12: { second: { white: 30 } } }), 50);
     expect(close.best.map((b: AnalysisMoment) => b.ply)).toEqual([9]);
+    // four only moves (gaps 30, 20, 25, 40): the three biggest, never a fourth
+    const many = keyMoments(plies(Array(40).fill(50), { 8: { second: { white: 20 } }, 16: { second: { white: 30 } }, 24: { second: { white: 25 } }, 32: { second: { white: 10 } } }), 50);
+    expect(many.best.filter((b: AnalysisMoment) => b.color === 'white').map((b: AnalysisMoment) => b.ply)).toEqual([9, 25, 33]);
+    // a third move with a smaller gap (not an only move): not told
+    const small = keyMoments(plies(Array(40).fill(50), { 8: { second: { white: 20 } }, 16: { second: { white: 30 } }, 24: { second: { white: 38 } } }), 50);
+    expect(small.best.filter((b: AnalysisMoment) => b.color === 'white').map((b: AnalysisMoment) => b.ply)).toEqual([9, 17]);
   });
 
   it('caps the turns of a wild game, keeping the biggest and counting them all', () => {
@@ -200,9 +208,30 @@ describe('the key moments', () => {
     curve.push(50);
     const a = keyMoments(plies(curve.slice(0, -1)), curve[curve.length - 1]);
     expect(a.swings).toBe(20);
-    expect(a.turns.length).toBe(8);
+    expect(a.turns.length).toBe(12);
     expect(new Set(a.turns.map((t: AnalysisMoment) => t.color))).toEqual(new Set(['white', 'black']));
     expect(a.turns.map((t: AnalysisMoment) => t.ply)).toEqual([...a.turns.map((t: AnalysisMoment) => t.ply)].sort((x, y) => x - y));
+  });
+
+  it('finds the chances: drops that were no turn, taken or not by the opponent', () => {
+    // White drops from 60 to 40 (still level) and Black gives it back at once: White's chance not
+    // taken, and Black's giving it back a chance for White, taken
+    const back = [60, 60, 60, 60, 60, 40, 60, 60, 60, 60, 60];
+    const a = keyMoments(plies(back.slice(0, -1)), 60);
+    expect(a.turns).toEqual([]);
+    expect(a.chances.map((c: AnalysisMoment) => [c.ply, c.color, c.before, c.after, c.taken])).toEqual([
+      [5, 'white', 60, 40, false],
+      [6, 'black', 60, 40, true],
+    ]);
+    // Black keeps it: taken
+    const kept = [60, 60, 60, 60, 60, 40, 38, 38, 45, 45, 45];
+    expect(keyMoments(plies(kept.slice(0, -1)), 45).chances.map((c: AnalysisMoment) => [c.ply, c.taken])).toEqual([[5, true]]);
+    // too small a drop, or a game already decided: no chance
+    expect(keyMoments(plies([60, 60, 60, 60, 60, 48, 60, 60, 60, 60]), 60).chances).toEqual([]);
+    expect(keyMoments(plies([95, 95, 95, 95, 95, 75, 95, 95, 95, 95]), 95).chances).toEqual([]);
+    expect(keyMoments(plies([20, 20, 20, 20, 20, 2, 20, 20, 20, 20]), 20).chances).toEqual([]);
+    // Black at 25% already behind, dropping to 5%: no chance that matters
+    expect(keyMoments(plies([75, 75, 75, 75, 75, 75, 95, 95, 95, 95]), 95).chances).toEqual([]);
   });
 
   it("finds each player's longest streak of moves as good as the engine's, past the opening, in a game still open", () => {
@@ -230,15 +259,15 @@ describe('the key moments', () => {
     expect(mate.promotions).toEqual([]);
   });
 
-  it('finds a mate the winner missed, the shortest, only when they won', () => {
+  it("finds each player's shortest mate missed, saying who won all the same", () => {
     const curve = Array(30).fill(99);
-    const missedAt = (extra: Record<number, Partial<Ply>>, winner?: string) => keyMoments(plies(curve, extra), 100, { winner }).missed.map((m: AnalysisMoment) => [m.ply, m.mate, m.bestSan]);
+    const missedAt = (extra: Record<number, Partial<Ply>>, winner?: string) => keyMoments(plies(curve, extra), 100, { winner }).missed.map((m: AnalysisMoment) => [m.ply, m.mate, m.bestSan, m.won]);
     // White had a mate in 2 at ply 21 and a mate in 1 at ply 25, played other moves, and won
     const extra = { 20: { best: { uci: 'h2h4', san: 'Qh7+', white: 100, score: { mate: 2 } } }, 24: { best: { uci: 'h2h4', san: 'Qf7#', white: 100, score: { mate: 1 } } } };
-    expect(missedAt(extra, 'white')).toEqual([[25, 1, 'Qf7#']]);
-    // the game not won by White: nothing told
-    expect(missedAt(extra, undefined)).toEqual([]);
-    expect(missedAt(extra, 'black')).toEqual([]);
+    expect(missedAt(extra, 'white')).toEqual([[25, 1, 'Qf7#', true]]);
+    // the game not won by White: told all the same, without "won"
+    expect(missedAt(extra, undefined)).toEqual([[25, 1, 'Qf7#', false]]);
+    expect(missedAt(extra, 'black')).toEqual([[25, 1, 'Qf7#', false]]);
     // a mate in 4: not told; a move played that gives mate all the same: nothing missed
     expect(missedAt({ 20: { best: { uci: 'h2h4', san: 'Qh7+', white: 100, score: { mate: 4 } } } }, 'white')).toEqual([]);
     expect(missedAt({ 24: { san: 'Qf8#', best: { uci: 'h2h4', san: 'Qf7#', white: 100, score: { mate: 1 } } } }, 'white')).toEqual([]);
@@ -404,12 +433,30 @@ describe('the key moments on the page', () => {
     expect(finishText({ ...f, san: 'e8=Q#', uci: 'e7e8q', move: { piece: 'p', to: 'e8', promotion: 'q', check: true } }, names, level(60))).toBe('Anna promuove in e8 e chiude la partita: e8=\u2655\uFE0E#.');
   });
 
+  it('tells a chance soberly, taken or not', () => {
+    const c: AnalysisMoment = { ply: 35, color: 'black', san: 'e3', uci: 'e4e3', fen: 'x', bestSan: 'O-O-O', bestUci: 'e8c8', before: 59, after: 43, move: { piece: 'p', to: 'e3' } };
+    const ctx = { seed: 1, curve: [], turns: [] };
+    expect(chanceText({ ...c, taken: false, reply: { san: 'Qh5', piece: 'q', to: 'h5', played: false } }, names, ctx)).toBe(
+      "Con e3 Bruno lascia un'occasione ad Anna, che però non la sfrutta: la risposta giusta era \u2655\uFE0Eh5. Meglio era O-O-O."
+    );
+    expect(chanceText({ ...c, taken: true, reply: { san: 'Qh5', piece: 'q', to: 'h5', played: true } }, names, ctx)).toBe(
+      "Con e3 Bruno lascia un'occasione ad Anna, che la coglie con \u2655\uFE0Eh5. Meglio era O-O-O."
+    );
+    // taken with another good move; the second wording starts with a plain word, never the move
+    expect(chanceText({ ...c, taken: true, reply: { san: 'Qh5', piece: 'q', to: 'h5', played: false } }, names, { ...ctx, seed: 0 })).toBe(
+      "La mossa e3 dà un'occasione ad Anna, che la sfrutta. Meglio era O-O-O."
+    );
+    expect(chanceText({ ...c, taken: false }, names)).toBe("La mossa e3 dà un'occasione ad Anna, che però non la sfrutta. Meglio era O-O-O.");
+  });
+
   it('tells promotions, mates missed and streaks', () => {
     expect(promotionText({ ply: 55, color: 'white', san: 'e8=Q', uci: 'e7e8q', fen: 'x' }, names)).toBe('Il pedone di Anna arriva in e8 e diventa donna.');
     expect(promotionText({ ply: 56, color: 'black', san: 'a1=N', uci: 'a2a1n', fen: 'x' }, names)).toBe('Il pedone di Bruno arriva in a1 e diventa cavallo.');
-    const m: AnalysisMoment = { ply: 85, color: 'white', san: 'Qg8+', uci: 'e8g8', bestSan: 'Qf7#', bestUci: 'e8f7', fen: 'x', mate: 1 };
+    const m: AnalysisMoment = { ply: 85, color: 'white', san: 'Qg8+', uci: 'e8g8', bestSan: 'Qf7#', bestUci: 'e8f7', fen: 'x', mate: 1, won: true };
     expect(missedText(m, names)).toBe('Qui Anna aveva un matto in una mossa con \u2655\uFE0Ef7#, al posto di \u2655\uFE0Eg8+: ha vinto lo stesso.');
     expect(missedText({ ...m, mate: 3, bestSan: 'Qh7+' }, names)).toBe('Qui Anna aveva un matto in 3 con \u2655\uFE0Eh7+, al posto di \u2655\uFE0Eg8+: ha vinto lo stesso.');
+    // the game not won: the fact alone
+    expect(missedText({ ...m, won: false }, names)).toBe('Qui Anna aveva un matto in una mossa con \u2655\uFE0Ef7#, al posto di \u2655\uFE0Eg8+.');
     expect(streakText({ color: 'black', from: 18, to: 40, moves: 12 }, names)).toBe('Bruno gioca 12 mosse di fila come il motore, dalla mossa 9 alla 20.');
   });
 

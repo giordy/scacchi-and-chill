@@ -32,8 +32,8 @@ function Curve({ curve, marks, phases, current }: { curve: number[]; marks: Mark
 
 // The arrows of a moment: green for a move as good as the engine's; a turn has the move played in
 // brass and the engine's in green
-// A turn and a mate missed show the move played and the engine's move in its place
-const showsBoth = (m: MomentText) => m.kind === 'turn' || m.kind === 'missed';
+// A turn, a chance and a mate missed show the move played and the engine's move in its place
+const showsBoth = (m: MomentText) => m.kind === 'turn' || m.kind === 'chance' || m.kind === 'missed';
 
 function arrowsOf(m: MomentText): BoardArrow[] {
   const shows = showsBoth(m);

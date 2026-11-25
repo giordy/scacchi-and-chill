@@ -2424,6 +2424,7 @@ button.match-moments {
 .km-curve .km-phase { stroke: #8d958f; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .km-curve .km-dot { stroke: #fff; stroke-width: 1.5; }
 .km-curve .km-dot.is-turn,
+.km-curve .km-dot.is-chance,
 .km-curve .km-dot.is-missed {
   fill: #c9852f;
 }
@@ -2482,6 +2483,7 @@ button.match-moments {
 }
 
 .km-viewer.is-turn .km-viewer-title,
+.km-viewer.is-chance .km-viewer-title,
 .km-viewer.is-missed .km-viewer-title {
   color: var(--brass);
 }
@@ -2560,6 +2562,7 @@ button.km-nav-dot::after {
 }
 
 button.km-nav-dot.is-turn::after,
+button.km-nav-dot.is-chance::after,
 button.km-nav-dot.is-missed::after {
   background: #c9852f;
 }

@@ -21,7 +21,7 @@ export function analysisOf(game: Pick<HistoryGame, 'url' | 'analysis' | 'decisio
 
 // Something to tell: a moment, or at least the phases of the game
 export const hasMoments = (a?: GameAnalysis) =>
-  !!a && ((a.turns?.length ?? 0) + (a.best?.length ?? 0) + (a.promotions?.length ?? 0) + (a.missed?.length ?? 0) > 0 || !!a.finish || !!a.phases?.middle);
+  !!a && ((a.turns?.length ?? 0) + (a.best?.length ?? 0) + (a.promotions?.length ?? 0) + (a.missed?.length ?? 0) + (a.chances?.length ?? 0) > 0 || !!a.finish || !!a.phases?.middle);
 
 // The pieces as figurines, as Lichess writes them: ♔ ♕ ♖ ♗ ♘, the same outline for both sides (the
 // move number says whose), clear to anyone and free of the Italian letters' trap (R is the king, not
@@ -42,7 +42,7 @@ const standing = (p: number): Standing => (p >= 70 ? 'ahead' : p > 30 ? 'level' 
 
 export interface MomentText {
   key: string;
-  kind: 'turn' | 'best' | 'finish' | 'promotion' | 'missed';
+  kind: 'turn' | 'best' | 'finish' | 'promotion' | 'missed' | 'chance';
   title: string;
   text: string;
   moment: AnalysisMoment;
@@ -209,12 +209,33 @@ export function promotionText(p: AnalysisMoment, names: Names): string {
   return `Il pedone di ${names[p.color]} arriva in ${p.uci.slice(2, 4)} e diventa ${piece}.`;
 }
 
-// A mate missed in a game won all the same: told lightly, as a curiosity
+// A mate missed, and whether the player won all the same
 export function missedText(m: AnalysisMoment, names: Names): string {
   const mover = names[m.color];
   const best = figurineSan(m.bestSan ?? '');
   const mate = m.mate === 1 ? 'un matto in una mossa' : `un matto in ${m.mate}`;
-  return `Qui ${mover} aveva ${mate} con ${best}, al posto di ${figurineSan(m.san)}: ha vinto lo stesso.`;
+  return `Qui ${mover} aveva ${mate} con ${best}, al posto di ${figurineSan(m.san)}${m.won ? ': ha vinto lo stesso' : ''}.`;
+}
+
+// A chance given to the opponent, and whether they took it: with the answer that took it, when it
+// was the engine's, and the move that was more solid
+export function chanceText(c: AnalysisMoment, names: Names, ctx?: StoryContext): string {
+  const mover = names[c.color];
+  const other = names[otherOf(c.color)];
+  const played = figurineSan(c.san);
+  const best = figurineSan(c.bestSan ?? '');
+  const reply = c.reply ? figurineSan(c.reply.san) : '';
+  const seed = (ctx?.seed ?? 0) + c.ply;
+  // Begins with a plain word, never a move or a name
+  const head = pick([`con ${played} ${mover} lascia un'occasione ${toName(other)}`, `la mossa ${played} dà un'occasione ${toName(other)}`], seed);
+  const outcome = c.taken
+    ? c.reply?.played
+      ? `, che la coglie con ${reply}`
+      : `, che la sfrutta`
+    : reply
+      ? `, che però non la sfrutta: la risposta giusta era ${reply}`
+      : `, che però non la sfrutta`;
+  return `${capitalize(head)}${outcome}. Meglio era ${best}.`;
 }
 
 // The moments in the order they were played: the turns, the best moves, the promotions, the mates
@@ -229,14 +250,15 @@ export function momentsOf(a: GameAnalysis, names: Names): MomentText[] {
     // The checkmate is told as the final blow
     .filter((b) => b.ply !== a.finish?.ply)
     .map((b) => ({ key: `b${b.ply}`, kind: 'best' as const, title: `${moveLabel(b.ply, b.san)} · La mossa di ${names[b.color]}`, text: bestText(b, names, ctx), moment: b }));
-  const taken = new Set([...turns, ...best, ...finish].map((m) => m.moment.ply));
+  const chances = (a.chances ?? []).map((c) => ({ key: `c${c.ply}`, kind: 'chance' as const, title: `${moveLabel(c.ply, c.san)} · L'occasione`, text: chanceText(c, names, ctx), moment: c }));
+  const taken = new Set([...turns, ...best, ...finish, ...chances].map((m) => m.moment.ply));
   const promotions = (a.promotions ?? [])
     .filter((p) => !taken.has(p.ply))
     .map((p) => ({ key: `p${p.ply}`, kind: 'promotion' as const, title: `${moveLabel(p.ply, p.san)} · La promozione`, text: promotionText(p, names), moment: p }));
   const missed = (a.missed ?? [])
     .filter((m) => !taken.has(m.ply))
     .map((m) => ({ key: `m${m.ply}`, kind: 'missed' as const, title: `${moveLabel(m.ply, m.san)} · Il matto nascosto`, text: missedText(m, names), moment: m }));
-  return [...turns, ...best, ...promotions, ...missed, ...finish].sort((x, y) => x.moment.ply - y.moment.ply);
+  return [...turns, ...best, ...chances, ...promotions, ...missed, ...finish].sort((x, y) => x.moment.ply - y.moment.ply);
 }
 
 // Who is better from White's chances, in five steps: clearly, a little, or nobody

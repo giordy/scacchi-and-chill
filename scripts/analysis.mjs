@@ -1,7 +1,7 @@
 // The key moments of a finished game, from Stockfish's evaluations (scripts/analyse-games.mjs runs
-// the engine). The whole game is told, phase by phase (lib/analysis.ts on the site), in the spirit of
-// the site: the moves where the game turned, each player's best moves and the final blow, with no
-// list of small mistakes and no accuracy figures.
+// the engine). The whole game is told, phase by phase (lib/analysis.ts on the site), soberly: every
+// move that mattered (the turns, the chances given and whether they were taken, the only moves, the
+// mates missed, the promotions, the final blow), with no small inaccuracies and no accuracy figures.
 // Pure functions, shared by the results sync (which games still wait for their analysis) and tested.
 
 // Bump to analyse every game again (e.g. after changing how the moments are chosen, or the engine);
@@ -50,21 +50,29 @@ const round = (x) => Math.round(x);
 const TURN_DROP = 15;
 const LOST = 30;
 // A safety cap for a game going back and forth: the biggest are kept
-const MAX_TURNS = 8;
+const MAX_TURNS = 12;
+// A chance: any other move dropping a player's chances as much, in a game still open (how they stand
+// not changed, the drop made up later): the opponent may take it or not. Taken: the mover's chances
+// stay down after the opponent's next move.
+const CHANCE_TO = 85;
+const TAKEN_SLACK = 7;
+const MAX_CHANCES = 12;
 // Each player's best moves: the engine's choice (or as good) where the next best was the most worse,
-// at least by a little (the page tells how much: lib/analysis.ts); a second one, far from the first,
-// when it clearly mattered
+// at least by a little (the page tells how much: lib/analysis.ts); more, apart from each other, where
+// every other move was clearly worse (only moves), up to three
 const BEST_GAP = 5;
 const SECOND_BEST_GAP = 10;
-const BEST_APART = 10;
+const ONLY_MOVE_GAP = 20;
+const BEST_APART = 6;
+const MAX_BEST = 3;
 const SAME_AS_BEST = 2;
 
 // A streak: moves in a row as good as the engine's, past the opening and in a game still open
 // (where nearly every move would do, it means nothing); the longest of each player, if long enough
 const STREAK_FROM = 16;
 const STREAK_MIN = 8;
-// A mate missed: the engine saw a mate in so few moves, the move played did not keep it as fast,
-// and the player won all the same (told lightly, only then); the shortest of each player
+// A mate missed: the engine saw a mate in so few moves and the move played did not keep it as fast;
+// the shortest of each player
 const MISSED_MATE_MAX = 3;
 
 // Taking the piece the opponent just moved (a recapture, a trade offered, a piece left hanging): the
@@ -101,9 +109,12 @@ export function keyMoments(plies, final, { mate = false, winner } = {}) {
   const best = [];
   for (const color of ['white', 'black']) {
     const mine = candidates.filter((c) => c.color === color).sort((a, b) => b.gap - a.gap);
-    if (mine[0]) best.push(mine[0]);
-    const other = mine.find((c) => c.gap >= SECOND_BEST_GAP && Math.abs(c.ply - mine[0].ply) >= BEST_APART);
-    if (other) best.push(other);
+    const kept = [];
+    for (const c of mine) {
+      if (kept.length >= MAX_BEST || kept.some((k) => Math.abs(k.ply - c.ply) < BEST_APART)) continue;
+      if (kept.length === 0 || c.gap >= ONLY_MOVE_GAP || (kept.length === 1 && c.gap >= SECOND_BEST_GAP)) kept.push(c);
+    }
+    best.push(...kept);
   }
   // Two turns of the same player a move or two apart are one moment: the bigger tells it
   const kept = [];
@@ -134,27 +145,46 @@ export function keyMoments(plies, final, { mate = false, winner } = {}) {
     const i = plies.findIndex((p, k) => p.color === color && p.uci.length === 5 && !told.has(k + 1));
     if (i >= 0) promotions.push({ ply: i + 1, color, san: plies[i].san, uci: plies[i].uci, fen: plies[i].fen });
   }
-  // Mates missed, in games the player won
+  // Mates missed, the shortest of each player; won: they won the game all the same
   const mateIn = (score, color) => (score?.mate !== undefined && score.mate !== 0 && (score.mate > 0) === (color === 'white') ? Math.abs(score.mate) : 0);
   const missed = [];
-  if (winner) {
+  for (const color of ['white', 'black']) {
     let shortest;
     plies.forEach((p, i) => {
-      if (p.color !== winner || told.has(i + 1) || p.uci === p.best.uci || p.san.includes('#')) return;
-      const n = mateIn(p.best.score, winner);
+      if (p.color !== color || told.has(i + 1) || p.uci === p.best.uci || p.san.includes('#')) return;
+      const n = mateIn(p.best.score, color);
       if (!n || n > MISSED_MATE_MAX) return;
       // The move played kept a mate as fast: nothing missed
-      const after = i + 1 < plies.length ? mateIn(plies[i + 1].best.score, winner) : 0;
+      const after = i + 1 < plies.length ? mateIn(plies[i + 1].best.score, color) : 0;
       if (after && after <= n - 1) return;
-      if (!shortest || n < shortest.mate) shortest = { ply: i + 1, color: winner, san: p.san, uci: p.uci, bestSan: p.best.san, bestUci: p.best.uci, fen: p.fen, mate: n };
+      if (!shortest || n < shortest.mate) shortest = { ply: i + 1, color, san: p.san, uci: p.uci, bestSan: p.best.san, bestUci: p.best.uci, fen: p.fen, mate: n, won: winner === color };
     });
     if (shortest) missed.push(shortest);
   }
+  missed.forEach((m) => told.add(m.ply));
+  // Chances: the drops that were no turn, in a game still open; taken or not by the opponent
+  const chances = plies
+    .map((p, i) => {
+      const before = own(p.color, curve[i]);
+      const after = own(p.color, curve[i + 1]);
+      // from level or a little ahead: a player already behind gives no chance that matters
+      if (told.has(i + 1) || before - after < TURN_DROP || before <= LOST || before > CHANCE_TO) return undefined;
+      const next = i + 2 < curve.length ? own(p.color, curve[i + 2]) : after;
+      return { ply: i + 1, color: p.color, san: p.san, uci: p.uci, bestSan: p.best.san, bestUci: p.best.uci, fen: p.fen, before: round(before), after: round(after), taken: next <= after + TAKEN_SLACK, drop: before - after };
+    })
+    .filter(Boolean)
+    // turns near the same move tell it already
+    .filter((c) => !chosen.some((t) => t.color === c.color && Math.abs(t.ply - c.ply) <= 2))
+    .sort((a, b) => b.drop - a.drop)
+    .slice(0, MAX_CHANCES)
+    .sort((a, b) => a.ply - b.ply)
+    .map(({ drop, ...c }) => c);
   return {
     curve: curve.map(round),
     turns: chosen.map(({ drop, ...t }) => t),
     swings: kept.length,
     best: best.map((b) => ({ ...b, gap: round(b.gap) })).sort((a, b) => a.ply - b.ply),
+    chances,
     streaks,
     promotions,
     missed,

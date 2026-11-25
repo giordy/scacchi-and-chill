@@ -44,6 +44,8 @@ export interface AnalysisMoment {
   mate?: number; // a mate in so many moves: for the opponent after a turn, for the player after a best move
   sacrifice?: boolean; // a best move giving material away
   alt?: { gain?: number; mate?: number }; // a best move: what the next best would have cost
+  won?: boolean; // a mate missed: the player won all the same
+  taken?: boolean; // a chance: the opponent took it
 }
 
 // A move as the key moments tell it: the piece (p, n, b, r, q, k), where it goes, what it takes
@@ -67,7 +69,8 @@ export interface GameAnalysis {
   best?: AnalysisMoment[];
   finish?: AnalysisMoment; // the move that gave checkmate
   promotions?: AnalysisMoment[]; // each player's first promotion
-  missed?: AnalysisMoment[]; // a mate missed by the winner (bestSan, mate: in so many moves)
+  missed?: AnalysisMoment[]; // a mate missed (bestSan, mate: in so many moves, won: the game all the same)
+  chances?: AnalysisMoment[]; // a drop that was no turn: a chance given to the opponent (taken: whether they took it)
   streaks?: { color: 'white' | 'black'; from: number; to: number; moves: number }[]; // moves in a row as good as the engine's
   phases?: { middle?: number; end?: number }; // plies where the middlegame and the endgame begin
 }
