@@ -406,7 +406,7 @@ describe('the games with moves not seen yet, in the Partite tab', () => {
   it('has no Live badge any more: the game is in progress, whoever is on Lichess', () => {
     const html = matches({ aaaaaaaa: 2, bbbbbbbb: t - 60_000 }, { carla: t - 60_000, anna: t - 60_000 });
     expect(html).not.toContain('status-badge live');
-    expect(html).toContain('status-badge ongoing');
+    expect(html).toContain('class="match-live">In corso');
   });
 });
 

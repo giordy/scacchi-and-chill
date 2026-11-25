@@ -89,13 +89,11 @@ export function MiniBoard({
   );
 }
 
-const PHASES: GamePhase[] = ['opening', 'middlegame', 'endgame'];
-
 const PHASE_PIECE: Record<GamePhase, string> = { opening: 'P', middlegame: 'N', endgame: 'K' };
 
 // Ongoing game: never the real position (Lichess shows it a few plies late), only an empty faded
-// board with a big piece for the phase and three segments with the current one lit.
-// Without a phase from Lichess it shows a knight and no segments.
+// board with a big piece for the phase (pawn, knight, king); the card says the phase in words.
+// Without a phase from Lichess it shows a knight.
 export function PhaseTile({ phase, label }: { phase?: GamePhase; label: string }) {
   return (
     <svg className="mini-board phase-tile" viewBox="0 0 800 800" role="img" aria-label={label}>
@@ -105,19 +103,7 @@ export function PhaseTile({ phase, label }: { phase?: GamePhase; label: string }
         return <rect key={i} x={c * 100} y={r * 100} width="100" height="100" className={(r + c) % 2 === 0 ? 'mb-light' : 'mb-dark'} />;
       })}
       <rect width="800" height="800" className="pt-veil" />
-      <StauntonPiece piece={phase ? PHASE_PIECE[phase] : 'N'} x={160} y={phase ? 70 : 150} size={480} />
-      {phase &&
-        PHASES.map((p, i) => (
-          <rect
-            key={p}
-            x={130 + i * 190}
-            y="660"
-            width="160"
-            height="44"
-            rx="22"
-            className={p === phase ? 'pt-seg is-current' : PHASES.indexOf(phase) > i ? 'pt-seg is-done' : 'pt-seg'}
-          />
-        ))}
+      <StauntonPiece piece={phase ? PHASE_PIECE[phase] : 'N'} x={160} y={150} size={480} />
     </svg>
   );
 }

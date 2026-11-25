@@ -15,7 +15,7 @@ import { periodLabel, periodOfGames } from "./lib/period";
 import { adjacentTab, SwipeStep } from "./lib/swipe";
 import { isReturnLeg, returnLegStart } from "./lib/legs";
 import { MatchesByRound } from "./components/MatchesByRound";
-import { summitGames } from "./lib/summit";
+import { summitRanks } from "./lib/summit";
 import { reigningChampions } from "./lib/honours";
 import { withdrawalNote } from "./lib/withdrawals";
 import { needText, titleRace } from "./lib/titleRace";
@@ -171,7 +171,7 @@ export function PublicTournamentView({
       awards: concluded ? computeSeasonAwards(players, history, gameStates, seasons, tournamentMeta.seeds, tournamentMeta.withdrawals, { name: tournamentMeta.masterName, opening: tournamentMeta.masterOpening }, tournamentMeta.fairPlayAwardsBan) : [],
       allGames,
       rounds: [...new Set(allGames.map((g) => g.round))].sort(byRound),
-      summits: summitGames(players, allGames, gameStates),
+      summits: summitRanks(players, allGames, gameStates),
       race: titleRace(players, allGames, gameStates, noTrophies),
       stats: seasonStats(players, history, gameStates),
       // Who can win no trophy this season (fair play): out of the Scudetto
