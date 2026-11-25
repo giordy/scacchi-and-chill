@@ -46,6 +46,28 @@ describe('which games wait for their analysis', () => {
     expect(needsAnalysis(finished({ lichess: { ...state, moves: 'e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7#' } }), gameIdOf)).toBe(false);
     expect(needsAnalysis(finished({ decision: { result: '1-0' } }), gameIdOf)).toBe(false);
     expect(needsAnalysis({ url: '', lichess: undefined }, gameIdOf)).toBe(false);
+    expect(needsAnalysis(finished({ lichess: { ...state, status: 'noStart' } }), gameIdOf)).toBe(false);
+    expect(needsAnalysis(finished({ lichess: { ...state, status: 'unknownFinish' } }), gameIdOf)).toBe(false);
+    expect(needsAnalysis(finished({ lichess: { ...state, variant: 'fromPosition' } }), gameIdOf)).toBe(false);
+    expect(needsAnalysis(finished({ lichess: { ...state, moves: '' } }), gameIdOf)).toBe(false);
+  });
+
+  it('analyses every other way a game can end, and a game with no variant written', () => {
+    const state = finished().lichess;
+    for (const status of ['mate', 'resign', 'outoftime', 'timeout', 'draw', 'stalemate']) {
+      expect(needsAnalysis(finished({ lichess: { ...state, status } }), gameIdOf)).toBe(true);
+    }
+    expect(needsAnalysis(finished({ lichess: { ...state, variant: undefined } }), gameIdOf)).toBe(true);
+    // exactly the shortest game told, and one move short of it
+    const plies = moves20.split(' ');
+    expect(needsAnalysis(finished({ lichess: { ...state, moves: plies.slice(0, 16).join(' ') } }), gameIdOf)).toBe(true);
+    expect(needsAnalysis(finished({ lichess: { ...state, moves: plies.slice(0, 15).join(' ') } }), gameIdOf)).toBe(false);
+  });
+
+  it('does not try again moves that made no game, until the next version; a game with no link goes by its Lichess id', () => {
+    expect(needsAnalysis(finished({ analysis: { v: ANALYSIS_VERSION, id: 'AbCd1234', skipped: 'moves' } }), gameIdOf)).toBe(false);
+    expect(needsAnalysis(finished({ analysis: { v: ANALYSIS_VERSION - 1, id: 'AbCd1234', skipped: 'moves' } }), gameIdOf)).toBe(true);
+    expect(needsAnalysis(finished({ url: '', analysis: { v: ANALYSIS_VERSION, id: 'AbCd1234' } }), gameIdOf)).toBe(false);
   });
 });
 
@@ -142,6 +164,30 @@ describe('the key moments', () => {
     expect(keyMoments(worse, 50).best.map((b: AnalysisMoment) => b.ply)).not.toContain(9);
   });
 
+  it('picks no best move where only one move was legal, nor in the opening, nor a second one too close', () => {
+    const curve = Array(30).fill(50);
+    // no second line: one legal move only
+    expect(keyMoments(plies(curve, { 9: { second: undefined } }).map((p, i) => (i === 9 ? p : { ...p, second: undefined })), 50).best).toEqual([]);
+    // the last ply of the opening is not counted, the first after it is
+    expect(keyMoments(plies(curve, { 7: { second: { white: 10 } } }), 50).best).toEqual([]);
+    expect(keyMoments(plies(curve, { 8: { second: { white: 10 } } }), 50).best.map((b: AnalysisMoment) => b.ply)).toEqual([9]);
+    // two good moves of White eight plies apart: only the better is told
+    const close = keyMoments(plies(curve, { 8: { second: { white: 20 } }, 16: { second: { white: 30 } } }), 50);
+    expect(close.best.map((b: AnalysisMoment) => b.ply)).toEqual([9]);
+  });
+
+  it('caps the turns of a wild game, keeping the biggest and counting them all', () => {
+    // Ten times White loses the balance and Black then throws the lead away, five plies apart
+    const curve: number[] = [];
+    for (let k = 0; k < 10; k++) curve.push(50, 50, 50, 50, 50, 20, 20, 20, 20, 20);
+    curve.push(50);
+    const a = keyMoments(plies(curve.slice(0, -1)), curve[curve.length - 1]);
+    expect(a.swings).toBe(20);
+    expect(a.turns.length).toBe(8);
+    expect(new Set(a.turns.map((t: AnalysisMoment) => t.color))).toEqual(new Set(['white', 'black']));
+    expect(a.turns.map((t: AnalysisMoment) => t.ply)).toEqual([...a.turns.map((t: AnalysisMoment) => t.ply)].sort((x, y) => x - y));
+  });
+
   it('keeps the checkmate as the final blow', () => {
     const curve = Array(20).fill(50);
     const a = keyMoments(plies(curve, { 19: { san: 'Qxf7#', uci: 'd5f7' } }), 0, { mate: true });
@@ -159,6 +205,11 @@ describe('the key moments', () => {
     expect(phasesOf(undefined, [start, start])).toEqual({});
     // a long opening ends by move 15 at the latest
     expect(phasesOf(undefined, Array(40).fill(start))).toEqual({ middle: 30 });
+    // Lichess' division with the endgame only: the middlegame starts there too
+    expect(phasesOf({ end: 50 }, [])).toEqual({ middle: 50, end: 50 });
+    expect(phasesOf({ middle: 20 }, [])).toEqual({ middle: 20 });
+    // an empty division: from the pieces
+    expect(phasesOf({}, [start, start])).toEqual({});
   });
 
   it('leaves out recaptures and games already decided', () => {
@@ -238,7 +289,8 @@ describe('the key moments on the page', () => {
     expect(bestText(best({ sacrifice: true }), names, ctx)).toBe("Bruno sacrifica materiale con Txd4, l'unica mossa che tiene l'equilibrio.");
     expect(bestText(best({ move: { piece: 'q', to: 'h4', check: true }, mate: 4 }, 21), names, ctx)).toBe('Bruno dà scacco con Txd4 e avvia un matto in 4.');
     expect(bestText(best({ move: { piece: 'r', to: 'd4', capture: 'n' }, alt: { gain: 5 } }), names, ctx)).toBe('Bruno prende il cavallo con Txd4: ogni altra mossa costava molto materiale.');
-    expect(bestText(best({ alt: { mate: 2 } }, 23), names, ctx)).toBe('Bruno gioca Txd4: con ogni altra mossa Anna aveva un matto in 2.');
+    // the mate in so many moves is the next best's only: no number for every other move
+    expect(bestText(best({ alt: { mate: 2 } }, 23), names, ctx)).toBe('Bruno gioca Txd4: ogni altra mossa lasciava ad Anna il matto.');
     // Right after the opponent's turn: the chance taken
     const punish = { ...ctx, turns: [{ ...turn(50, 20), ply: 19 }] };
     expect(bestText(best({ move: { piece: 'r', to: 'd4', capture: 'q', check: true } }), names, punish)).toBe(
@@ -256,6 +308,9 @@ describe('the key moments on the page', () => {
     expect(finishText(f, names, level(60))).toBe('La donna di Anna arriva in h7 e chiude la partita.');
     expect(finishText(f, names, { ...level(60), seed: 1 })).toBe('Anna chiude la partita con la donna in h7.');
     expect(finishText({ ...f, move: undefined }, names)).toBe('Anna chiude la partita con Dh7#.');
+    // castling or a promotion: the piece that mates is not the one that moved
+    expect(finishText({ ...f, san: 'O-O#', uci: 'e1g1', move: { piece: 'k', to: 'g1', castle: true, check: true } }, names, level(60))).toBe('Anna arrocca e chiude la partita: O-O#.');
+    expect(finishText({ ...f, san: 'e8=Q#', uci: 'e7e8q', move: { piece: 'p', to: 'e8', promotion: 'q', check: true } }, names, level(60))).toBe('Anna promuove in e8 e chiude la partita: e8=D#.');
   });
 
   it('tells the moments in the order they were played', () => {
@@ -302,6 +357,9 @@ describe('the key moments on the page', () => {
     expect(endingText('draw', undefined, 100, names)).toBe('Patta alla mossa 50.');
     expect(endingText('stalemate', undefined, 99, names)).toBe('Stallo alla mossa 50: patta.');
     expect(endingText('cheat', 'white', 40, names)).toBeUndefined();
+    // out of time with no winner (the other side could not mate): no line
+    expect(endingText('outoftime', undefined, 40, names)).toBeUndefined();
+    expect(endingText(undefined, undefined, 40, names)).toBeUndefined();
   });
 
   it('tells the whole game phase by phase, each with its moments', () => {
@@ -331,6 +389,15 @@ describe('the key moments on the page', () => {
     expect(flat.phases.map((p) => [p.key, p.title, p.moments.length])).toEqual([['game', undefined, 2]]);
     expect(flat.intro).toBe('Nessuna svolta improvvisa: la partita è cambiata poco a poco.');
     expect(storyOf({ ...a, swings: 5 }, names).intro).toBe('Una partita sulle montagne russe: 5 svolte.');
+    // no endgame reached, or the endgame starting where the game ends: opening and middlegame only
+    expect(storyOf({ ...a, phases: { middle: 20 } }, names).phases.map((p) => [p.key, p.moments.map((m) => m.moment.ply)])).toEqual([
+      ['opening', [9]],
+      ['middlegame', [25, 60]],
+    ]);
+    expect(storyOf({ ...a, phases: { middle: 20, end: 60 } }, names).phases.map((p) => p.key)).toEqual(['opening', 'middlegame']);
+    // a middlegame starting at the very end, or a curve too short: one list
+    expect(storyOf({ ...a, phases: { middle: 60 } }, names).phases.map((p) => p.key)).toEqual(['game']);
+    expect(storyOf({ ...a, curve: [50], phases: { middle: 20 } }, names).phases.map((p) => p.key)).toEqual(['game']);
   });
 
   it('uses only the analysis of the game behind the current link', () => {
@@ -341,6 +408,10 @@ describe('the key moments on the page', () => {
     expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: { ...analysis, v: 99 } })).toBeUndefined();
     // an older version stays on the page until the game is analysed again
     expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: { ...analysis, v: 2 } })).toBeDefined();
+    // a result decided by the organizer: the story would tell another end
+    expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis, decision: { result: '0-1', at: 1 } })).toBeUndefined();
+    // no link: whatever game it was
+    expect(analysisOf({ url: '', analysis })).toBe(analysis);
     expect(hasMoments(analysis)).toBe(false);
     expect(hasMoments({ ...analysis, phases: { middle: 20 } })).toBe(true);
   });

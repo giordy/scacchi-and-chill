@@ -185,7 +185,14 @@ async function main() {
       const analysis = result
         ? { v: ANALYSIS_VERSION, id, engine: e.name, nodes: NODES, at: new Date().toISOString(), ...result }
         : { v: ANALYSIS_VERSION, id, skipped: 'moves' };
-      await saveGameFields(base, token, g.docId, { analysis });
+      try {
+        await saveGameFields(base, token, g.docId, { analysis });
+      } catch (err) {
+        // A game deleted meanwhile (a new season, a link made again): nothing to save it on
+        if (!/HTTP (400|404)\b/.test(String(err?.message))) throw err;
+        console.warn(`${g.docId}: partita non più presente, analisi non salvata.`);
+        continue;
+      }
       console.log(`${g.docId}: ${result ? `${result.turns.length} svolte, ${result.best.length} mosse migliori` : 'mosse non valide'} (${Math.round((Date.now() - started) / 1000)} s).`);
     }
   } finally {

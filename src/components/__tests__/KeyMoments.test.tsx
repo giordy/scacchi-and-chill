@@ -36,4 +36,22 @@ describe('KeyMoments', () => {
     expect(html.match(/class="km-nav-dot /g)).toHaveLength(2);
     expect(html).toContain('disabled="" aria-label="Momento precedente"');
   });
+
+  it('tells an older analysis, without the facts, in plain words', () => {
+    const v1 = renderToStaticMarkup(<KeyMoments analysis={{ ...analysis, v: 1, phases: undefined }} names={{ white: 'Anna', black: 'Bruno' }} />);
+    expect(v1).toContain('Anna trova Cc3, la mossa che tiene l&#x27;equilibrio.');
+    // no phases: no story by phase, the moments still on the board
+    expect(v1).not.toContain('Nel mediogioco');
+    expect(v1).toContain('<span>1 di 2</span>');
+  });
+
+  it('with no moment to show, tells the phases only and shows no board', () => {
+    const quiet = renderToStaticMarkup(
+      <KeyMoments analysis={{ ...analysis, turns: [], best: [], swings: 0 }} names={{ white: 'Anna', black: 'Bruno' }} state={{ status: 'draw' }} />
+    );
+    expect(quiet).toContain('Nessuna svolta improvvisa');
+    expect(quiet).toContain('Patta alla mossa 30.');
+    expect(quiet).not.toContain('km-viewer');
+    expect(quiet).not.toContain('mini-board');
+  });
 });

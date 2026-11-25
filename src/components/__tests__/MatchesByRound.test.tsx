@@ -79,4 +79,19 @@ describe('MatchesByRound', () => {
     const html = renderToStaticMarkup(<MatchesByRound games={round} gameStates={{}} nameOf={nameOf} moved={new Set(['dddddddd'])} />);
     expect(whites(html).slice(0, 4)).toEqual(['Gino', 'Elena', 'Carla', 'Anna']);
   });
+
+  it('offers the key moments of an analysed finished game, and of no other', () => {
+    const analysis = { v: 3, id: 'aaaaaaaa', curve: [50, 60], turns: [], best: [{ ply: 1, color: 'white' as const, san: 'e4', uci: 'e2e4', fen: 'x', after: 60, gap: 10 }], swings: 0 };
+    const finishedState = { id: 'aaaaaaaa', status: 'mate', winner: 'white' as const, moves: 'e4 e5', lastFen: '8/8/8/8/8/8/8/K6k w - - 0 1' };
+    const card = (g: HistoryGame) => renderToStaticMarkup(<MatchesByRound games={[g]} gameStates={{}} nameOf={nameOf} />);
+    const base: HistoryGame = { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa', lichess: finishedState };
+    expect(card({ ...base, analysis })).toContain('Momenti chiave');
+    // not analysed yet, an analysis of another link, a game still going, a result decided by the organizer
+    expect(card(base)).not.toContain('Momenti chiave');
+    expect(card({ ...base, analysis: { ...analysis, id: 'zzzzzzzz' } })).not.toContain('Momenti chiave');
+    expect(card({ ...base, lichess: { ...finishedState, status: 'started', winner: undefined }, analysis })).not.toContain('Momenti chiave');
+    expect(card({ ...base, analysis, decision: { result: '0-1', at: 1 } })).not.toContain('Momenti chiave');
+    // the small board of the card has no files and ranks
+    expect(card({ ...base, analysis })).not.toContain('mb-coords');
+  });
 });

@@ -10,11 +10,11 @@ import { extractGameId } from './utils';
 // the same data, analysed again with a newer engine
 const VERSIONS = new Set([1, 2, 3]);
 
-// The analysis of the game behind the current link; none for an old link, a skipped game or a
-// version this page does not know
-export function analysisOf(game: Pick<HistoryGame, 'url' | 'analysis'>): GameAnalysis | undefined {
+// The analysis of the game behind the current link; none for an old link, a skipped game, a version
+// this page does not know, or a result decided by the organizer (the story would tell another end)
+export function analysisOf(game: Pick<HistoryGame, 'url' | 'analysis' | 'decision'>): GameAnalysis | undefined {
   const a = game.analysis;
-  if (!a || !VERSIONS.has(a.v) || a.skipped || !Array.isArray(a.curve)) return undefined;
+  if (!a || game.decision || !VERSIONS.has(a.v) || a.skipped || !Array.isArray(a.curve)) return undefined;
   const id = extractGameId(game.url);
   return id && a.id !== id ? undefined : a;
 }
@@ -158,7 +158,8 @@ export function bestText(b: AnalysisMoment, names: Names, ctx?: StoryContext): s
   const captured = m.capture ? (PIECES_IT[m.capture]?.value ?? 0) : 0;
   if (b.mate && b.mate <= 8) why = ` e avvia un matto in ${b.mate}`;
   else if (b.gain && b.gain >= 2 && b.gain > captured + 1) why = ` e guadagna ${materialText(b.gain)}`;
-  else if (b.alt?.mate && b.alt.mate <= 6) why = `: con ogni altra mossa ${other} aveva un matto in ${b.alt.mate}`;
+  // The mate in so many moves is the next best's only: the others may mate sooner
+  else if (b.alt?.mate) why = `: ogni altra mossa lasciava ${toName(other)} il matto`;
   else if (b.alt?.gain && b.alt.gain >= 2) why = `: ogni altra mossa costava ${materialText(b.alt.gain)}`;
   else why = `, ${which} ${keeps}`;
   // After "non perdona:" the player is named already; names are written as they are
@@ -170,6 +171,9 @@ export function finishText(f: AnalysisMoment, names: Names, ctx?: StoryContext):
   const mover = names[f.color];
   const san = italianSan(f.san);
   if (!f.move || !ctx) return `${mover} chiude la partita con ${san}.`;
+  // Castling or a promotion: the piece that mates is not the one that moved
+  if (f.move.castle) return `${mover} arrocca e chiude la partita: ${san}.`;
+  if (f.move.promotion) return `${mover} promuove in ${f.move.to} e chiude la partita: ${san}.`;
   // The title says "Scacco matto" already
   return pick([`${capitalize(the(f.move.piece))} di ${mover} arriva in ${f.move.to} e chiude la partita.`, `${mover} chiude la partita con ${the(f.move.piece)} in ${f.move.to}.`], ctx.seed + f.ply);
 }

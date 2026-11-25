@@ -54,7 +54,9 @@ export function KeyMoments({
 }) {
   const story = storyOf(analysis, names, state);
   const steps = story.phases.flatMap((p) => p.moments.map((m) => ({ m, phase: p.title })));
-  const [at, setAt] = useState(0);
+  const [chosen, setAt] = useState(0);
+  // The analysis may change while the replay is open (analysed again, with fewer moments)
+  const at = Math.max(0, Math.min(chosen, steps.length - 1));
   const go = (i: number) => setAt(Math.max(0, Math.min(steps.length - 1, i)));
   const touch = useRef<{ x: number; y: number; t: number } | null>(null);
   const phaseLines = [analysis.phases?.middle, analysis.phases?.end].filter((p): p is number => !!p && p < (analysis.curve?.length ?? 0) - 1);

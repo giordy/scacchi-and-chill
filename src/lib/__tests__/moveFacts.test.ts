@@ -60,6 +60,31 @@ describe('the facts behind a key moment', () => {
     expect(mate.move).toEqual({ piece: 'r', to: 'd1', capture: 'r', check: true });
   });
 
+  it("tells what any other move would cost only when the move played was the engine's first choice", () => {
+    const BLACK = '3r2k1/5ppp/8/1N6/8/8/5PPP/3R2K1 b - - 0 1';
+    const second = { pv: ['g8f8', 'd1d8', 'f8e7', 'd8d1'], score: { mate: 3 } };
+    // as good as the engine's move, but not it: it may be the second line itself
+    const notFirst = bestFacts({ fen: BLACK, uci: 'g8f8', best: { uci: 'd8d1', pv: ['d8d1'], score: { mate: -1 } }, second });
+    expect(notFirst).toEqual({ move: { piece: 'k', to: 'f8' } });
+    const first = bestFacts({ fen: BLACK, uci: 'd8d1', best: { uci: 'd8d1', pv: ['d8d1'], score: { mate: -1 } }, second });
+    expect(first.alt).toEqual({ gain: 5, mate: 3 });
+  });
+
+  it('copes with a turn on the last move, an en passant capture and lines that break off', () => {
+    // the last move of a game ended on the board: no line after it
+    const last = turnFacts({ fen: BACK_RANK, uci: 'd4b5', best: { uci: 'd4f3' } }, undefined);
+    expect(last).toEqual({ move: { piece: 'n', to: 'b5' }, bestMove: { piece: 'n', to: 'f3' } });
+    // en passant: a pawn taken on another square than where the capturing pawn lands
+    const EP = 'rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3';
+    expect(moveInfo(new Chess(EP).move('exf6'))).toEqual({ piece: 'p', to: 'f6', capture: 'p' });
+    // an engine line with an illegal move in it: counted as far as it goes
+    const broken = turnFacts({ fen: BACK_RANK, uci: 'd4b5', best: { uci: 'd4f3' } }, { pv: ['d8d1', 'a1a8'], score: { mate: -1 } });
+    expect(broken.gain).toBe(5);
+    // a move that is not legal in the position: no facts
+    expect(turnFacts({ fen: BACK_RANK, uci: 'a1a8', best: { uci: 'd4f3' } }, undefined)).toEqual({});
+    expect(bestFacts({ fen: BACK_RANK, uci: 'a1a8', best: { uci: 'a1a8', pv: [] } })).toEqual({});
+  });
+
   it('adds the facts to the chosen moments only', () => {
     const plies = [
       { fen: BACK_RANK, uci: 'd4b5', san: 'Nb5', color: 'white', best: { uci: 'd4f3', pv: ['d4f3'], score: { cp: 0 } } },

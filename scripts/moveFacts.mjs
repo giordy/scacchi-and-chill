@@ -52,11 +52,12 @@ function playLine(fen, ucis) {
 
 // How much material a side wins along a line, from the start, counted after a move of the given
 // parity (odd: after the side that began the line moved again, so a piece taken can be taken back).
-// A line that ends within max (a mate, the engine's whole line) counts to its end.
+// A line that ends within max (a mate, the engine's whole line), or breaks off on a move that is not
+// legal, counts to where it goes.
 function gainAlong(fen, ucis, side, parity, max) {
   const { fens } = playLine(fen, ucis.slice(0, max));
   let n = fens.length - 1;
-  const whole = ucis.length <= max && n === ucis.length;
+  const whole = ucis.length <= max || n < max;
   while (!whole && n > 0 && n % 2 !== parity) n--;
   if (n === 0) return undefined;
   return balance(fens[n], side) - balance(fen, side);
@@ -104,7 +105,9 @@ export function bestFacts(p) {
     const mate = mateFor(p.best.score, side);
     if (mate) facts.mate = mate;
   }
-  if (p.second?.pv?.length) {
+  // What any other move would have cost: only when the move played is the engine's first choice
+  // (a move as good but not the first may be the second line itself)
+  if (p.uci === p.best.uci && p.second?.pv?.length) {
     const alt = {};
     const lost = gainAlong(p.fen, p.second.pv, other(side), 1, 7);
     if (lost !== undefined && lost >= 1) alt.gain = lost;

@@ -109,7 +109,8 @@ export function keyMoments(plies, final, { mate = false } = {}) {
 // boards: the piece placement (first field of the FEN) of each position, the start included.
 const LATEST_MIDDLE = 30;
 export function phasesOf(division, boards) {
-  if (division && (division.middle || division.end)) return { middle: division.middle, end: division.end };
+  // A division with the endgame only: the middlegame starts there too
+  if (division && (division.middle || division.end)) return { middle: division.middle || division.end, ...(division.end ? { end: division.end } : {}) };
   const pieces = (b) => (b.match(/[nbrqNBRQ]/g) ?? []).length;
   const backRank = (b, white) => (b.split('/')[white ? 7 : 0].match(white ? /[NBRQK]/g : /[nbrqk]/g) ?? []).length;
   // The opening is over by move 15 at the latest (Lichess also looks at how mixed the pawns are)
