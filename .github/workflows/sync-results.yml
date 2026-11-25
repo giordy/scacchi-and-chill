@@ -42,8 +42,8 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
 
-  # The key moments of the finished games, for the replay on the site: Ubuntu's Stockfish, chess.js
-  # (a dev dependency) for the moves. At most a few games a run, the others at the next one.
+  # The key moments of the finished games, for the replay on the site: Stockfish, chess.js (a dev
+  # dependency) for the moves. At most a few games a run, the others at the next one.
   analyse:
     needs: sync
     if: needs.sync.outputs.analyse == 'true'
@@ -65,8 +65,28 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
+      # Stockfish 19, the official build for Linux (one binary that picks the best code for the CPU);
+      # if it cannot be had, Ubuntu's older Stockfish 16, so the analysis does not stop. The engine's
+      # name is saved with each analysis. A newer release: change the tag below.
       - name: Install Stockfish
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq stockfish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SF_TAG: sf_19
+        run: |
+          dir="$RUNNER_TEMP/stockfish"
+          mkdir -p "$dir"
+          for name in stockfish-ubuntu-x86-64.tar stockfish-ubuntu-x86-64-avx2.tar; do
+            gh release download "$SF_TAG" --repo official-stockfish/Stockfish --pattern "$name" --dir "$dir" && break
+          done
+          tar -xf "$dir"/*.tar -C "$dir" 2>/dev/null || true
+          bin=$(find "$dir" -type f -name 'stockfish-ubuntu-x86-64*' ! -name '*.tar' | head -n 1)
+          if [ -n "$bin" ] && chmod +x "$bin" && printf 'uci\nquit\n' | "$bin" | grep -q '^id name Stockfish'; then
+            echo "STOCKFISH=$bin" >> "$GITHUB_ENV"
+            printf 'uci\nquit\n' | "$bin" | grep '^id name'
+          else
+            echo "::warning::Stockfish $SF_TAG non disponibile: uso quello di Ubuntu"
+            sudo apt-get update -qq && sudo apt-get install -y -qq stockfish
+          fi
 
       - name: Analyse the finished games
         run: node scripts/analyse-games.mjs

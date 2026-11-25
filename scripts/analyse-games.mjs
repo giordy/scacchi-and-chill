@@ -11,7 +11,7 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { Chess } from 'chess.js';
-import { ANALYSIS_VERSION, keyMoments, needsAnalysis, winPercent } from './analysis.mjs';
+import { ANALYSIS_VERSION, keyMoments, needsAnalysis, phasesOf, winPercent } from './analysis.mjs';
 import { accessToken, gameIdOf, readGames, saveGameFields } from './sync-results.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -127,13 +127,14 @@ export async function evaluate(e, moves) {
   }
   let final = terminal(chess);
   if (final === undefined) final = winPercent((await search(e, chess.fen()))[0].score);
-  return { plies, final };
+  const boards = [...plies.map((p) => p.fen), chess.fen()].map((f) => f.split(' ')[0]);
+  return { plies, final, mate: chess.isCheckmate(), boards };
 }
 
-// The key moments of one game (scripts/analysis.mjs)
-export async function analyse(e, moves) {
+// The key moments of one game and its phases (scripts/analysis.mjs); division: Lichess' own, if any
+export async function analyse(e, moves, division) {
   const seen = await evaluate(e, moves);
-  return seen && keyMoments(seen.plies, seen.final);
+  return seen && { ...keyMoments(seen.plies, seen.final, { mate: seen.mate }), phases: phasesOf(division, seen.boards) };
 }
 
 async function main() {
@@ -166,7 +167,7 @@ async function main() {
     for (const g of pending.slice(0, MAX_GAMES)) {
       const id = gameIdOf(g.url) ?? g.lichess.id;
       const started = Date.now();
-      const result = await analyse(e, g.lichess.moves);
+      const result = await analyse(e, g.lichess.moves, g.lichess.division);
       // Moves that do not make a game are marked, so they are not tried again at every run
       const analysis = result
         ? { v: ANALYSIS_VERSION, id, engine: e.name, nodes: NODES, at: new Date().toISOString(), ...result }

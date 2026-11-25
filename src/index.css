@@ -2403,14 +2403,37 @@ button.match-moments {
 .km-curve .km-black { fill: #2b302d; }
 .km-curve .km-white { fill: #f1ece0; }
 .km-curve .km-mid { stroke: #8d958f; stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.km-curve .km-phase { stroke: #8d958f; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .km-curve .km-dot { stroke: #fff; stroke-width: 1.5; }
 .km-curve .km-dot.is-turn { fill: #c9852f; }
-.km-curve .km-dot.is-best { fill: #3c9a68; }
+.km-curve .km-dot.is-best,
+.km-curve .km-dot.is-finish {
+  fill: #3c9a68;
+}
 
 .km-story {
   margin: 0;
   font-size: 14px;
   color: var(--muted);
+}
+
+.km-phase-block {
+  display: grid;
+  gap: 8px;
+}
+
+.km-phase-title {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.km-ending {
+  margin: 0;
+  font-weight: 700;
 }
 
 .km-list {
@@ -2440,7 +2463,10 @@ button.match-moments {
   line-height: 1.4;
 }
 
-.km-item.is-best .km-text strong { color: var(--win); }
+.km-item.is-best .km-text strong,
+.km-item.is-finish .km-text strong {
+  color: var(--win);
+}
 .km-item.is-turn .km-text strong { color: var(--brass); }
 
 .mb-arrow { opacity: 0.85; }

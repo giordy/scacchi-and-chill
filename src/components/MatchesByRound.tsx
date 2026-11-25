@@ -388,6 +388,7 @@ function MatchCard({
           onClose={() => setReplay(false)}
           analysis={analysis}
           names={{ white: nameOf(game.white), black: nameOf(game.black) }}
+          ending={s}
         />
       )}
     </article>

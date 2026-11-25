@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error a Node script without types
-import { ANALYSIS_VERSION, keyMoments, needsAnalysis, winPercent } from '../../../scripts/analysis.mjs';
+import { ANALYSIS_VERSION, keyMoments, needsAnalysis, phasesOf, winPercent } from '../../../scripts/analysis.mjs';
 // @ts-expect-error a Node script without types
 import { parseSearch } from '../../../scripts/analyse-games.mjs';
 // @ts-expect-error a Node script without types
 import { gameIdOf } from '../../../scripts/sync-results.mjs';
-import { analysisOf, bestText, hasMoments, italianSan, momentsOf, moveLabel, squaresOf, storyLine, turnText } from '../analysis';
+import { analysisOf, bestText, endingText, hasMoments, italianSan, momentsOf, moveLabel, openingText, phaseText, squaresOf, storyOf, turnText } from '../analysis';
 import { AnalysisMoment, GameAnalysis } from '../../types';
 
 const moves20 = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7';
@@ -94,20 +94,22 @@ describe('the key moments', () => {
     expect(a.turns.map((t: AnalysisMoment) => t.ply)).toEqual([9]);
   });
 
-  it('tells two turns of the same player close together as one, at most three in all', () => {
+  it('tells two turns of the same player close together as one, and every other turn', () => {
     // White from ahead to level at ply 5, then from level to behind at ply 7: one moment, the bigger
     const curve = [80, 80, 80, 80, 80, 50, 50, 25, 25, 25];
     const a = keyMoments(plies(curve.slice(0, -1)), curve[curve.length - 1]);
     expect(a.turns.map((t: AnalysisMoment) => [t.ply, t.color])).toEqual([[5, 'white']]);
     expect(a.swings).toBe(1);
-    // A game back and forth: the three biggest, in the order played
+    // A game back and forth: every turn, in the order played
     const many = [50, 50, 50, 50, 50, 20, 20, 20, 20, 20, 50, 50, 50, 50, 50, 50, 50, 15, 15, 15, 15, 15, 50, 50, 50, 50, 50, 50, 50, 10, 10];
     const b = keyMoments(plies(many.slice(0, -1)), many[many.length - 1]);
     expect(b.swings).toBe(5);
-    expect(b.turns.map((t: AnalysisMoment) => [t.ply, t.after])).toEqual([
-      [17, 15],
-      [22, 50],
-      [29, 10],
+    expect(b.turns.map((t: AnalysisMoment) => [t.ply, t.color, t.after])).toEqual([
+      [5, 'white', 20],
+      [10, 'black', 50],
+      [17, 'white', 15],
+      [22, 'black', 50],
+      [29, 'white', 10],
     ]);
   });
 
@@ -128,9 +130,35 @@ describe('the key moments', () => {
       [9, 'white', 20],
       [12, 'black', 10],
     ]);
+    // A second best move of the same player, far from the first, when it clearly mattered
+    const long = Array(30).fill(50);
+    const two = keyMoments(plies(long, { 8: { second: { white: 30 } }, 12: { second: { white: 44 } }, 24: { second: { white: 38 } } }), 50);
+    expect(two.best.map((b: AnalysisMoment) => [b.ply, b.gap])).toEqual([
+      [9, 20],
+      [25, 12],
+    ]);
     // A move worse than the engine's is no best move, however bad the next best
     const worse = plies([...curve.slice(0, 9), 40, ...curve.slice(10)], { 8: { second: { white: 0 } } });
     expect(keyMoments(worse, 50).best.map((b: AnalysisMoment) => b.ply)).not.toContain(9);
+  });
+
+  it('keeps the checkmate as the final blow', () => {
+    const curve = Array(20).fill(50);
+    const a = keyMoments(plies(curve, { 19: { san: 'Qxf7#', uci: 'd5f7' } }), 0, { mate: true });
+    expect(a.finish).toEqual({ ply: 20, color: 'black', san: 'Qxf7#', uci: 'd5f7', fen: 'fen19' });
+    expect(keyMoments(plies(curve), 50).finish).toBeUndefined();
+  });
+
+  it("finds the phases: Lichess' own, or from the pieces left", () => {
+    expect(phasesOf({ middle: 18, end: 60 }, [])).toEqual({ middle: 18, end: 60 });
+    const start = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+    // White's back rank thins out: the middlegame; six pieces left: the endgame
+    const developed = 'r1bqkb1r/pppppppp/2n2n2/8/2B1Q3/2N2N2/PPPPPPPP/R4RK1';
+    const endgame = '4k3/pp3ppp/2n5/8/8/2N5/PP3PPP/2R1R1K1';
+    expect(phasesOf(undefined, [start, start, developed, developed, endgame])).toEqual({ middle: 2, end: 4 });
+    expect(phasesOf(undefined, [start, start])).toEqual({});
+    // a long opening ends by move 15 at the latest
+    expect(phasesOf(undefined, Array(40).fill(start))).toEqual({ middle: 30 });
   });
 
   it('leaves out recaptures and games already decided', () => {
@@ -140,6 +168,9 @@ describe('the key moments', () => {
       9: { san: 'dxe5', uci: 'd6e5', best: { uci: 'd6e5', san: 'dxe5', white: 50 }, second: { white: 90 } },
     };
     expect(keyMoments(plies(curve, recapture), 50).best).toEqual([]);
+    // nor taking a piece just moved there, a queen offered for a trade
+    const trade = { 8: { san: 'Qf3', uci: 'd1f3' }, 9: { san: 'Qxf3', uci: 'g4f3', best: { uci: 'g4f3', san: 'Qxf3', white: 50 }, second: { white: 90 } } };
+    expect(keyMoments(plies(curve, trade), 50).best).toEqual([]);
     const won = Array(14).fill(99);
     expect(keyMoments(plies(won, { 8: { second: { white: 50 } } }), 99).best).toEqual([]);
   });
@@ -187,9 +218,66 @@ describe('the key moments on the page', () => {
       ['best', '10... Txd4 · La mossa di Bruno'],
       ['turn', '23. Cxe5 · La svolta'],
     ]);
-    expect(storyLine(a)).toBeUndefined();
-    expect(storyLine({ ...a, turns: [], swings: 0 })).toBe('Nessuna svolta improvvisa: la partita è cambiata poco a poco.');
-    expect(storyLine({ ...a, swings: 5 })).toBe('Una partita sulle montagne russe: 5 svolte, ecco le più grandi.');
+    // The checkmate is told once, as the final blow
+    const mate = { ply: 20, color: 'black' as const, san: 'Rxd4#', uci: 'd8d4', fen: 'x' };
+    expect(momentsOf({ ...a, finish: mate }, names).map((m) => [m.kind, m.title, m.text])).toEqual([
+      ['finish', '10... Txd4# · Scacco matto', 'Bruno chiude la partita con Txd4#.'],
+      ['turn', '23. Cxe5 · La svolta', "Con Cxe5 la partita gira a favore di Bruno: Df3 teneva l'equilibrio."],
+    ]);
+  });
+
+  it('tells each phase by who gained, never by who lost ground', () => {
+    expect(openingText(50, names)).toBe("Si esce dall'apertura in equilibrio.");
+    expect(openingText(62, names)).toBe("Anna esce dall'apertura un po' meglio.");
+    expect(openingText(20, names)).toBe("Bruno esce dall'apertura in vantaggio.");
+    const p = 'Nel mediogioco';
+    expect(phaseText(p, 50, 52, names)).toBe('Nel mediogioco la partita resta in equilibrio.');
+    expect(phaseText(p, 50, 80, names)).toBe('Nel mediogioco Anna prende il vantaggio.');
+    expect(phaseText(p, 50, 35, names)).toBe("Nel mediogioco Bruno si porta un po' avanti.");
+    expect(phaseText(p, 75, 50, names)).toBe('Nel mediogioco Bruno rimette la partita in equilibrio.');
+    expect(phaseText(p, 75, 20, names)).toBe('Nel mediogioco Bruno ribalta la partita.');
+    expect(phaseText(p, 62, 90, names)).toBe('Nel mediogioco Anna allunga.');
+    expect(phaseText(p, 90, 62, names)).toBe('Nel mediogioco Bruno accorcia le distanze.');
+    expect(phaseText(p, 90, 99, names)).toBe('Nel mediogioco Anna conserva il vantaggio.');
+    expect(phaseText(p, 38, 35, names)).toBe('Nel mediogioco Bruno conserva un piccolo vantaggio.');
+  });
+
+  it('tells how the game ended', () => {
+    expect(endingText('mate', 'white', 61, names)).toBe('Scacco matto alla mossa 31.');
+    expect(endingText('resign', 'white', 74, names)).toBe('Bruno abbandona alla mossa 37.');
+    expect(endingText('outoftime', 'black', 40, names)).toBe('Alla mossa 20 scade il tempo di Anna.');
+    expect(endingText('draw', undefined, 100, names)).toBe('Patta alla mossa 50.');
+    expect(endingText('stalemate', undefined, 99, names)).toBe('Stallo alla mossa 50: patta.');
+    expect(endingText('cheat', 'white', 40, names)).toBeUndefined();
+  });
+
+  it('tells the whole game phase by phase, each with its moments', () => {
+    const curve = [...Array(21).fill(50), ...Array(20).fill(75), ...Array(20).fill(100)];
+    const a: GameAnalysis = {
+      v: 1,
+      id: 'AbCd1234',
+      curve,
+      turns: [{ ...turn(50, 20), ply: 25, color: 'black' }],
+      best: [{ ply: 9, color: 'white', san: 'Nc3', uci: 'b1c3', fen: 'x', after: 50, gap: 12 }],
+      finish: { ply: 60, color: 'white', san: 'Qh7#', uci: 'd3h7', fen: 'x' },
+      swings: 1,
+      phases: { middle: 20, end: 45 },
+    };
+    const story = storyOf(a, names, { status: 'mate', winner: 'white' });
+    expect(story.intro).toBeUndefined();
+    expect(story.phases.map((p) => [p.title, p.text, p.moments.map((m) => m.moment.ply)])).toEqual([
+      ["L'apertura", "Si esce dall'apertura in equilibrio.", [9]],
+      ['Il mediogioco', 'Nel mediogioco Anna prende il vantaggio.', [25]],
+      ['Il finale', 'Nel finale Anna conserva il vantaggio.', [60]],
+    ]);
+    // The checkmate is told by the final blow; a resignation in the last line
+    expect(story.ending).toBeUndefined();
+    expect(storyOf({ ...a, finish: undefined }, names, { status: 'resign', winner: 'white' }).ending).toBe('Bruno abbandona alla mossa 30.');
+    // No phases: the moments in one list; no turn at all, or many, said first
+    const flat = storyOf({ ...a, phases: undefined, turns: [], swings: 0 }, names);
+    expect(flat.phases.map((p) => [p.key, p.title, p.moments.length])).toEqual([['game', undefined, 2]]);
+    expect(flat.intro).toBe('Nessuna svolta improvvisa: la partita è cambiata poco a poco.');
+    expect(storyOf({ ...a, swings: 5 }, names).intro).toBe('Una partita sulle montagne russe: 5 svolte.');
   });
 
   it('uses only the analysis of the game behind the current link', () => {
@@ -199,5 +287,6 @@ describe('the key moments on the page', () => {
     expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: { ...analysis, skipped: 'moves' } })).toBeUndefined();
     expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: { ...analysis, v: 99 } })).toBeUndefined();
     expect(hasMoments(analysis)).toBe(false);
+    expect(hasMoments({ ...analysis, phases: { middle: 20 } })).toBe(true);
   });
 });

@@ -1,6 +1,7 @@
 // The key moments of a finished game, from Stockfish's evaluations (scripts/analyse-games.mjs runs
-// the engine). Kept light on purpose, in the spirit of the site: no list of mistakes, no accuracy
-// figures, only the few moves where the game turned and each player's best move.
+// the engine). The whole game is told, phase by phase (lib/analysis.ts on the site), in the spirit of
+// the site: the moves where the game turned, each player's best moves and the final blow, with no
+// list of small mistakes and no accuracy figures.
 // Pure functions, shared by the results sync (which games still wait for their analysis) and tested.
 
 // Bump to analyse every game again (e.g. after changing how the moments are chosen)
@@ -39,24 +40,29 @@ const round = (x) => Math.round(x);
 // A turn is a move that changes how its player stands (from ahead to level, from level to behind…)
 // with a real drop of their chances, not a step across the line
 const TURN_DROP = 15;
-const MAX_TURNS = 3;
-// Each player's best move: the engine's choice (or as good) where the next best was the most worse,
-// at least by a little (the page tells how much: lib/analysis.ts)
+// A safety cap for a game going back and forth: the biggest are kept
+const MAX_TURNS = 8;
+// Each player's best moves: the engine's choice (or as good) where the next best was the most worse,
+// at least by a little (the page tells how much: lib/analysis.ts); a second one, far from the first,
+// when it clearly mattered
 const BEST_GAP = 5;
+const SECOND_BEST_GAP = 10;
+const BEST_APART = 10;
 const SAME_AS_BEST = 2;
 
-// Taking back on the square where a piece was just taken: the only move, but no news to anyone
-const recapture = (p, prev) => !!prev && p.san.includes('x') && prev.san.includes('x') && p.uci.slice(2, 4) === prev.uci.slice(2, 4);
+// Taking the piece the opponent just moved (a recapture, a trade offered, a piece left hanging): the
+// only move, but no news to anyone
+const recapture = (p, prev) => !!prev && p.san.includes('x') && p.uci.slice(2, 4) === prev.uci.slice(2, 4);
 
 // plies: one per move, in order: { san, uci, color, fen (before the move), best: { uci, san, white },
 // second?: { white } } with `white` White's winning chances after the engine's best (second) move.
-// final: White's winning chances in the final position.
-// Returns what is saved on the game (field `analysis`) besides the version, id and engine.
-export function keyMoments(plies, final) {
+// final: White's winning chances in the final position; mate: the last move gave checkmate.
+// Returns what is saved on the game (field `analysis`) besides the version, id, engine and phases.
+export function keyMoments(plies, final, { mate = false } = {}) {
   // White's chances in each position, the start included: the engine's best line from there
   const curve = [...plies.map((p) => p.best.white), final];
   const turns = [];
-  const best = {};
+  const candidates = [];
   plies.forEach((p, i) => {
     const before = own(p.color, curve[i]);
     const after = own(p.color, curve[i + 1]);
@@ -69,20 +75,47 @@ export function keyMoments(plies, final) {
     const gap = before - own(p.color, p.second.white);
     // Not in a game already decided either way, where every move wins or every move loses
     if (!played || gap < BEST_GAP || before < 5 || before > 97 || recapture(p, plies[i - 1])) return;
-    if (!best[p.color] || gap > best[p.color].gap) {
-      best[p.color] = { ply: i + 1, color: p.color, san: p.san, uci: p.uci, fen: p.fen, after: round(after), gap: round(gap) };
-    }
+    candidates.push({ ply: i + 1, color: p.color, san: p.san, uci: p.uci, fen: p.fen, after: round(after), gap });
   });
+  const best = [];
+  for (const color of ['white', 'black']) {
+    const mine = candidates.filter((c) => c.color === color).sort((a, b) => b.gap - a.gap);
+    if (mine[0]) best.push(mine[0]);
+    const other = mine.find((c) => c.gap >= SECOND_BEST_GAP && Math.abs(c.ply - mine[0].ply) >= BEST_APART);
+    if (other) best.push(other);
+  }
   // Two turns of the same player a move or two apart are one moment: the bigger tells it
   const kept = [];
   for (const t of [...turns].sort((a, b) => b.drop - a.drop)) {
     if (!kept.some((k) => k.color === t.color && Math.abs(k.ply - t.ply) <= 4)) kept.push(t);
   }
   const chosen = kept.slice(0, MAX_TURNS).sort((a, b) => a.ply - b.ply);
+  const last = plies[plies.length - 1];
   return {
     curve: curve.map(round),
     turns: chosen.map(({ drop, ...t }) => t),
     swings: kept.length,
-    best: Object.values(best).sort((a, b) => a.ply - b.ply),
+    best: best.map((b) => ({ ...b, gap: round(b.gap) })).sort((a, b) => a.ply - b.ply),
+    // The final blow: the move that gave checkmate
+    ...(mate && last ? { finish: { ply: plies.length, color: last.color, san: last.san, uci: last.uci, fen: last.fen } } : {}),
   };
+}
+
+// Where the middlegame and the endgame begin (plies; missing when not reached): Lichess' own
+// division when the game has it, otherwise from the pieces on the board, as Lichess roughly does.
+// boards: the piece placement (first field of the FEN) of each position, the start included.
+const LATEST_MIDDLE = 30;
+export function phasesOf(division, boards) {
+  if (division && (division.middle || division.end)) return { middle: division.middle, end: division.end };
+  const pieces = (b) => (b.match(/[nbrqNBRQ]/g) ?? []).length;
+  const backRank = (b, white) => (b.split('/')[white ? 7 : 0].match(white ? /[NBRQK]/g : /[nbrqk]/g) ?? []).length;
+  // The opening is over by move 15 at the latest (Lichess also looks at how mixed the pawns are)
+  const found = boards.findIndex((b) => pieces(b) <= 10 || backRank(b, true) < 4 || backRank(b, false) < 4);
+  const middle = found > 0 ? Math.min(found, LATEST_MIDDLE) : boards.length > LATEST_MIDDLE + 1 ? LATEST_MIDDLE : -1;
+  const end = boards.findIndex((b) => pieces(b) <= 6);
+  const out = {};
+  if (middle > 0) out.middle = middle;
+  if (end > 0) out.end = end;
+  if (out.end && !out.middle) out.middle = out.end;
+  return out;
 }

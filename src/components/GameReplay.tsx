@@ -38,12 +38,15 @@ export function GameReplay({
   onClose,
   analysis,
   names,
+  ending,
 }: {
   url: string;
   title: string;
   onClose: () => void;
   analysis?: GameAnalysis;
   names?: { white: string; black: string };
+  // How the game ended on Lichess, for the last line of the key moments
+  ending?: { status?: string; winner?: 'white' | 'black' };
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -95,7 +98,7 @@ export function GameReplay({
           </p>
         )}
         {(!gif || state === 'error') && <p className="note">Non riesco a caricare l'animazione della partita.</p>}
-        {analysis && names && hasMoments(analysis) && <KeyMoments analysis={analysis} names={names} />}
+        {analysis && names && hasMoments(analysis) && <KeyMoments analysis={analysis} names={names} state={ending} />}
         <a href={url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn replay-link">
           Apri su Lichess per l'analisi
         </a>

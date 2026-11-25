@@ -34,7 +34,7 @@ export interface AnalysisMoment {
   bestSan?: string; // a turn: the engine's move in its place
   bestUci?: string;
   before?: number;
-  after: number;
+  after?: number;
   gap?: number; // a best move: how much worse the next best was
 }
 
@@ -47,6 +47,8 @@ export interface GameAnalysis {
   turns?: AnalysisMoment[];
   swings?: number; // the turns found, before keeping the three biggest
   best?: AnalysisMoment[];
+  finish?: AnalysisMoment; // the move that gave checkmate
+  phases?: { middle?: number; end?: number }; // plies where the middlegame and the endgame begin
 }
 
 // The result of a game: 0-0 is the organizer's only, both lose (e.g. a game neither player started)
