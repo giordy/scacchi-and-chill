@@ -261,7 +261,8 @@ function MatchCard({
   // Final position only: during the game Lichess hides the latest moves
   const finalFen = progress === "finished" && s?.lastFen && game.url ? s.lastFen : "";
 
-  const [replay, setReplay] = useState(false);
+  // The replay, opened on the animation or (from "Momenti chiave") on the key moments
+  const [replay, setReplay] = useState<false | 'game' | 'moments'>(false);
   const pairing = `${nameOf(game.white)} – ${nameOf(game.black)}`;
   // The key moments, once the GitHub Action has analysed the game: in the replay, for everyone
   const analysis = finalFen ? analysisOf(game) : undefined;
@@ -281,7 +282,7 @@ function MatchCard({
         {tile &&
           (finalFen ? (
             // Finished game: the final position opens its replay
-            <button type="button" className="mini-board-link mini-board-replay" onClick={() => setReplay(true)} aria-label={`Rivedi ${pairing}`}>
+            <button type="button" className="mini-board-link mini-board-replay" onClick={() => setReplay('game')} aria-label={`Rivedi ${pairing}`}>
               {tile}
               <span className="replay-badge" aria-hidden="true">▶</span>
             </button>
@@ -352,7 +353,7 @@ function MatchCard({
             <span className="match-progress">
               {progressText}
               {moments && (
-                <button type="button" className="match-moments" onClick={() => setReplay(true)}>
+                <button type="button" className="match-moments" onClick={() => setReplay('moments')}>
                   <span aria-hidden="true">✨</span> Momenti chiave
                 </button>
               )}
@@ -389,6 +390,7 @@ function MatchCard({
           analysis={analysis}
           names={{ white: nameOf(game.white), black: nameOf(game.black) }}
           ending={s}
+          toMoments={replay === 'moments'}
         />
       )}
     </article>

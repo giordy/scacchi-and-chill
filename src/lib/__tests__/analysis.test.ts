@@ -286,6 +286,8 @@ describe('the key moments on the page', () => {
     expect(analysisOf({ url: 'https://lichess.org/Zzzz9999', analysis })).toBeUndefined();
     expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: { ...analysis, skipped: 'moves' } })).toBeUndefined();
     expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: { ...analysis, v: 99 } })).toBeUndefined();
+    // an older version stays on the page until the game is analysed again
+    expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: { ...analysis, v: 2 } })).toBeDefined();
     expect(hasMoments(analysis)).toBe(false);
     expect(hasMoments({ ...analysis, phases: { middle: 20 } })).toBe(true);
   });

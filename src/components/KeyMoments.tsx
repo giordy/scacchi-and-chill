@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { GameAnalysis } from '../types';
 import { MomentText, squaresOf, storyOf } from '../lib/analysis';
+import { swipeStep } from '../lib/swipe';
 import { BoardArrow, MiniBoard } from './MiniBoard';
 
 type Mark = { ply: number; kind: MomentText['kind'] };
 
 // How the game went: White's chances along the game, the light part, against Black's, the dark one,
-// with a dot on each key moment and a thin line where the middlegame and the endgame begin
-function Curve({ curve, marks, phases }: { curve: number[]; marks: Mark[]; phases: number[] }) {
+// with a dot on each key moment (bigger on the one on the board) and a thin line where the
+// middlegame and the endgame begin
+function Curve({ curve, marks, phases, current }: { curve: number[]; marks: Mark[]; phases: number[]; current?: number }) {
   const w = 300;
   const h = 48;
   const x = (i: number) => (curve.length > 1 ? (i / (curve.length - 1)) * w : 0);
@@ -21,33 +23,26 @@ function Curve({ curve, marks, phases }: { curve: number[]; marks: Mark[]; phase
       {phases.map((ply) => (
         <line key={ply} x1={x(ply)} x2={x(ply)} y1="0" y2={h} className="km-phase" />
       ))}
-      {marks.map((m) => (
-        <circle key={`${m.kind}${m.ply}`} cx={x(m.ply)} cy={y(curve[m.ply] ?? 50)} r="3.5" className={`km-dot is-${m.kind}`} />
+      {marks.map((m, i) => (
+        <circle key={`${m.kind}${m.ply}`} cx={x(m.ply)} cy={y(curve[m.ply] ?? 50)} r={i === current ? 5.5 : 3.5} className={`km-dot is-${m.kind}${i === current ? ' is-current' : ''}`} />
       ))}
     </svg>
   );
 }
 
-function Moment({ m }: { m: MomentText }) {
+// The arrows of a moment: green for a move as good as the engine's; a turn has the move played in
+// brass and the engine's in green
+function arrowsOf(m: MomentText): BoardArrow[] {
   const played = squaresOf(m.moment.uci);
   const best = squaresOf(m.moment.bestUci);
-  // Green for a move as good as the engine's, brass for a turn, with the engine's move in green
-  const arrows: BoardArrow[] = [
+  return [
     ...(played ? [{ ...played, kind: m.kind === 'turn' ? ('played' as const) : ('best' as const) }] : []),
     ...(m.kind === 'turn' && best ? [{ ...best, kind: 'best' as const }] : []),
   ];
-  return (
-    <li className={`km-item is-${m.kind}`}>
-      <MiniBoard fen={m.moment.fen} label={`Posizione prima di ${m.title}`} arrows={arrows} />
-      <div className="km-text">
-        <strong>{m.title}</strong>
-        <span>{m.text}</span>
-      </div>
-    </li>
-  );
 }
 
-// The whole game told phase by phase, with its key moments (lib/analysis.ts)
+// The whole game told phase by phase in a few lines, then its key moments one at a time on a board as
+// wide as the screen: arrows, a swipe on the board, or a dot, to go from one to the next (lib/analysis.ts)
 export function KeyMoments({
   analysis,
   names,
@@ -58,32 +53,82 @@ export function KeyMoments({
   state?: { status?: string; winner?: 'white' | 'black' };
 }) {
   const story = storyOf(analysis, names, state);
-  const marks = story.phases.flatMap((p) => p.moments.map((m) => ({ ply: m.moment.ply, kind: m.kind })));
+  const steps = story.phases.flatMap((p) => p.moments.map((m) => ({ m, phase: p.title })));
+  const [at, setAt] = useState(0);
+  const go = (i: number) => setAt(Math.max(0, Math.min(steps.length - 1, i)));
+  const touch = useRef<{ x: number; y: number; t: number } | null>(null);
   const phaseLines = [analysis.phases?.middle, analysis.phases?.end].filter((p): p is number => !!p && p < (analysis.curve?.length ?? 0) - 1);
-  const hasTurn = marks.some((m) => m.kind === 'turn');
+  const step = steps[at];
+
   return (
     <section className="key-moments" aria-label="I momenti chiave">
       <h3 className="km-title">I momenti chiave</h3>
-      {analysis.curve && <Curve curve={analysis.curve} marks={marks} phases={phaseLines} />}
-      {story.intro && <p className="km-story">{story.intro}</p>}
-      {story.phases.map((p) => (
-        <div key={p.key} className="km-phase-block">
-          {p.title && <h4 className="km-phase-title">{p.title}</h4>}
-          {p.text && <p className="km-story">{p.text}</p>}
-          {p.moments.length > 0 && (
-            <ol className="km-list">
-              {p.moments.map((m) => (
-                <Moment key={m.key} m={m} />
+      {analysis.curve && <Curve curve={analysis.curve} marks={steps.map((s) => ({ ply: s.m.moment.ply, kind: s.m.kind }))} phases={phaseLines} current={at} />}
+      <div className="km-story">
+        {story.intro && <p>{story.intro}</p>}
+        {story.phases
+          .filter((p) => p.text)
+          .map((p) => (
+            // The sentence names its phase already
+            <p key={p.key}>{p.text}</p>
+          ))}
+        {story.ending && <p className="km-ending">{story.ending}</p>}
+      </div>
+      {step && (
+        <div className={`km-viewer is-${step.m.kind}`}>
+          <div className="km-viewer-head">
+            <span>{step.phase ?? ''}</span>
+            <span>
+              {at + 1} di {steps.length}
+            </span>
+          </div>
+          <strong className="km-viewer-title" aria-live="polite">
+            {step.m.title}
+          </strong>
+          <div
+            className="km-board"
+            onTouchStart={(e) => {
+              const t = e.touches[0];
+              touch.current = e.touches.length === 1 ? { x: t.clientX, y: t.clientY, t: Date.now() } : null;
+            }}
+            onTouchEnd={(e) => {
+              const start = touch.current;
+              touch.current = null;
+              const t = e.changedTouches[0];
+              if (!start || !t) return;
+              const s = swipeStep(t.clientX - start.x, t.clientY - start.y, Date.now() - start.t);
+              if (s) go(at + s);
+            }}
+          >
+            <MiniBoard fen={step.m.moment.fen} label={`Posizione prima di ${step.m.title}`} arrows={arrowsOf(step.m)} />
+          </div>
+          <p className="km-viewer-text">{step.m.text}</p>
+          <div className="km-nav">
+            <button type="button" className="km-nav-btn" onClick={() => go(at - 1)} disabled={at === 0} aria-label="Momento precedente">
+              ‹
+            </button>
+            <div className="km-nav-dots">
+              {steps.map((s, i) => (
+                <button
+                  key={s.m.key}
+                  type="button"
+                  className={`km-nav-dot is-${s.m.kind}${i === at ? ' is-current' : ''}`}
+                  onClick={() => go(i)}
+                  aria-label={s.m.title}
+                  aria-current={i === at ? 'step' : undefined}
+                />
               ))}
-            </ol>
+            </div>
+            <button type="button" className="km-nav-btn" onClick={() => go(at + 1)} disabled={at === steps.length - 1} aria-label="Momento successivo">
+              ›
+            </button>
+          </div>
+          {step.m.kind === 'turn' && (
+            <p className="km-note">
+              <span className="km-key is-played" aria-hidden="true" /> la mossa giocata · <span className="km-key is-best" aria-hidden="true" /> quella che consigliava il computer
+            </p>
           )}
         </div>
-      ))}
-      {story.ending && <p className="km-ending">{story.ending}</p>}
-      {hasTurn && (
-        <p className="km-note">
-          <span className="km-key is-played" aria-hidden="true" /> la mossa giocata · <span className="km-key is-best" aria-hidden="true" /> quella che consigliava il computer
-        </p>
       )}
     </section>
   );

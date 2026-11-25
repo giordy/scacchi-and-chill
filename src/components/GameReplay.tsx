@@ -39,6 +39,7 @@ export function GameReplay({
   analysis,
   names,
   ending,
+  toMoments = false,
 }: {
   url: string;
   title: string;
@@ -47,6 +48,8 @@ export function GameReplay({
   names?: { white: string; black: string };
   // How the game ended on Lichess, for the last line of the key moments
   ending?: { status?: string; winner?: 'white' | 'black' };
+  // Opened from "Momenti chiave": straight to them, past the animation
+  toMoments?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -58,6 +61,7 @@ export function GameReplay({
   useEffect(() => {
     const d = dialog.current;
     if (d && !d.open) d.showModal?.();
+    if (toMoments) d?.querySelector('.key-moments')?.scrollIntoView?.({ block: 'start' });
     return () => d?.close?.();
   }, []);
 

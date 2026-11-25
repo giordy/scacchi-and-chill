@@ -6,14 +6,15 @@ import { extractGameId } from './utils';
 // words. In the spirit of the site: the moves where the game turned and each player's best move,
 // told kindly, with no list of mistakes and no accuracy figures.
 
-// The version of scripts/analysis.mjs (ANALYSIS_VERSION) whose moments this page knows how to tell
-const VERSION = 1;
+// The versions of scripts/analysis.mjs (ANALYSIS_VERSION) whose moments this page knows how to tell:
+// the same data, analysed again with a newer engine
+const VERSIONS = new Set([1, 2]);
 
 // The analysis of the game behind the current link; none for an old link, a skipped game or a
 // version this page does not know
 export function analysisOf(game: Pick<HistoryGame, 'url' | 'analysis'>): GameAnalysis | undefined {
   const a = game.analysis;
-  if (!a || a.v !== VERSION || a.skipped || !Array.isArray(a.curve)) return undefined;
+  if (!a || !VERSIONS.has(a.v) || a.skipped || !Array.isArray(a.curve)) return undefined;
   const id = extractGameId(game.url);
   return id && a.id !== id ? undefined : a;
 }

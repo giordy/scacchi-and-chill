@@ -2412,18 +2412,36 @@ button.match-moments {
 }
 
 .km-story {
-  margin: 0;
+  display: grid;
+  gap: 4px;
   font-size: 14px;
+  line-height: 1.45;
   color: var(--muted);
 }
 
-.km-phase-block {
-  display: grid;
-  gap: 8px;
+.km-story p {
+  margin: 0;
 }
 
-.km-phase-title {
-  margin: 4px 0 0;
+.km-ending {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* One moment at a time, on a board as wide as the dialog */
+.km-viewer {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.km-viewer-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -2431,43 +2449,101 @@ button.match-moments {
   color: var(--muted);
 }
 
-.km-ending {
-  margin: 0;
-  font-weight: 700;
+.km-viewer-title {
+  font-size: 16px;
 }
 
-.km-list {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.km-item {
-  display: grid;
-  grid-template-columns: 112px 1fr;
-  gap: 12px;
-  align-items: start;
-}
-
-.km-item .mini-board {
-  width: 112px;
-  height: 112px;
-}
-
-.km-text {
-  display: grid;
-  gap: 3px;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.km-item.is-best .km-text strong,
-.km-item.is-finish .km-text strong {
+.km-viewer.is-best .km-viewer-title,
+.km-viewer.is-finish .km-viewer-title {
   color: var(--win);
 }
-.km-item.is-turn .km-text strong { color: var(--brass); }
+
+.km-viewer.is-turn .km-viewer-title {
+  color: var(--brass);
+}
+
+.km-board {
+  line-height: 0;
+  touch-action: pan-y;
+}
+
+.km-board .mini-board {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.km-viewer-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.km-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button.km-nav-btn {
+  min-height: 0;
+  width: 44px;
+  height: 40px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+button.km-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.km-nav-dots {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+}
+
+/* A dot is small, its button big enough for a finger */
+button.km-nav-dot {
+  min-height: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+button.km-nav-dot::after {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #3c9a68;
+  opacity: 0.45;
+}
+
+button.km-nav-dot.is-turn::after {
+  background: #c9852f;
+}
+
+button.km-nav-dot.is-current::after {
+  width: 12px;
+  height: 12px;
+  opacity: 1;
+}
 
 .mb-arrow { opacity: 0.85; }
 .mb-arrow.is-played line { stroke: #c9852f; }
