@@ -14,11 +14,12 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+# Two jobs, as in GitHub's own Pages workflow: in a single job the deploy step looked up the site
+# package right after it was uploaded and often did not find it yet ("No artifacts named
+# github-pages were found"), while a re-run found it. A failed deploy can also be re-run alone,
+# without the tests.
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -65,6 +66,13 @@ jobs:
         with:
           path: './dist'
 
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
