@@ -7,7 +7,8 @@
 // Bump to analyse every game again (e.g. after changing how the moments are chosen, or the engine);
 // the site shows the analyses of the versions it knows (src/lib/analysis.ts) until the new ones arrive.
 // 2: everything again with Stockfish 19 (the first games were analysed by Ubuntu's Stockfish 17)
-export const ANALYSIS_VERSION = 2;
+// 3: the facts of each moment (scripts/moveFacts.mjs), for the page to tell why it mattered
+export const ANALYSIS_VERSION = 3;
 
 // Shorter games have no story to tell; the first plies are the opening, where the best move is no news
 export const MIN_PLIES = 16;

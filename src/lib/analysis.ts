@@ -8,7 +8,7 @@ import { extractGameId } from './utils';
 
 // The versions of scripts/analysis.mjs (ANALYSIS_VERSION) whose moments this page knows how to tell:
 // the same data, analysed again with a newer engine
-const VERSIONS = new Set([1, 2]);
+const VERSIONS = new Set([1, 2, 3]);
 
 // The analysis of the game behind the current link; none for an old link, a skipped game or a
 // version this page does not know
@@ -48,37 +48,143 @@ type Names = { white: string; black: string };
 type Color = 'white' | 'black';
 const otherOf = (c: Color): Color => (c === 'white' ? 'black' : 'white');
 
-export function turnText(t: AnalysisMoment, names: Names): string {
+// What the page knows of the game around a moment, to tell it in context and in varied words
+export interface StoryContext {
+  seed: number; // from the game: the same game always reads the same
+  curve: number[];
+  turns: AnalysisMoment[];
+}
+
+const hashOf = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+const pick = <T,>(list: T[], seed: number): T => list[seed % list.length];
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+// "a Bruno", "ad Anna"
+const toName = (name: string) => (/^a/i.test(name) ? `ad ${name}` : `a ${name}`);
+
+const PIECES_IT: Record<string, { the: string; name: string; value: number }> = {
+  p: { the: 'il pedone', name: 'pedone', value: 1 },
+  n: { the: 'il cavallo', name: 'cavallo', value: 3 },
+  b: { the: "l'alfiere", name: 'alfiere', value: 3 },
+  r: { the: 'la torre', name: 'torre', value: 5 },
+  q: { the: 'la donna', name: 'donna', value: 9 },
+  k: { the: 'il re', name: 're', value: 0 },
+};
+const the = (piece?: string) => PIECES_IT[piece ?? '']?.the ?? 'il pezzo';
+
+// Material won along a line, in words
+export function materialText(gain: number): string {
+  if (gain >= 5) return 'molto materiale';
+  if (gain >= 3) return 'un pezzo';
+  if (gain === 2) return 'due pedoni';
+  return 'un pedone';
+}
+
+// Full moves of balance right before a ply
+function levelMovesBefore(curve: number[], ply: number): number {
+  let n = 0;
+  for (let i = ply - 1; i >= 0 && curve[i] > 30 && curve[i] < 70; i--) n++;
+  return Math.floor(n / 2);
+}
+
+const ownChances = (color: Color, white: number) => (color === 'white' ? white : 100 - white);
+
+// A turn: how the game changed with the move played, why (the answer that punished it and what it
+// won, or a mate), and the move that held. Without the facts (an older analysis), in plain words.
+export function turnText(t: AnalysisMoment, names: Names, ctx?: StoryContext): string {
   const mover = names[t.color];
   const other = names[otherOf(t.color)];
   const played = italianSan(t.san);
   const best = italianSan(t.bestSan ?? '');
   const from = standing(t.before ?? 50);
   const to = standing(t.after ?? 50);
-  if (from === 'ahead' && to === 'level') return `Con ${played} il vantaggio di ${mover} sfuma: con ${best} restava dalla sua parte.`;
-  if (from === 'ahead') return `Con ${played} la partita si capovolge a favore di ${other}: con ${best} ${mover} restava avanti.`;
-  return `Con ${played} la partita gira a favore di ${other}: ${best} teneva l'equilibrio.`;
+  if (!t.move || !ctx) {
+    if (from === 'ahead' && to === 'level') return `Con ${played} il vantaggio di ${mover} sfuma: con ${best} restava dalla sua parte.`;
+    if (from === 'ahead') return `Con ${played} la partita si capovolge a favore di ${other}: con ${best} ${mover} restava avanti.`;
+    return `Con ${played} la partita gira a favore di ${other}: ${best} teneva l'equilibrio.`;
+  }
+  const seed = ctx.seed + t.ply;
+  const calm = levelMovesBefore(ctx.curve, t.ply);
+  const lead = from === 'level' && calm >= 10 ? `dopo ${calm} mosse di equilibrio, ` : '';
+  const head =
+    from === 'ahead' && to === 'level'
+      ? pick([`con ${played} il vantaggio di ${mover} sfuma`, `la mossa ${played} lascia sfumare il vantaggio di ${mover}`], seed)
+      : from === 'ahead'
+        ? pick([`con ${played} la partita si capovolge`, `la mossa ${played} capovolge la partita`], seed)
+        : pick([`con ${played} la partita gira a favore di ${other}`, `la mossa ${played} apre la porta ${toName(other)}`, `con ${played} la bilancia pende verso ${other}`], seed);
+  let why = '';
+  const reply = t.reply ? italianSan(t.reply.san) : '';
+  if (t.mate && t.mate <= 6) why = reply ? `${other} ha un matto in ${t.mate}, a cominciare da ${reply}` : `${other} ha un matto in ${t.mate}`;
+  else if (reply && t.gain && t.gain >= 1) {
+    const taken = t.reply?.capture && (PIECES_IT[t.reply.capture]?.value ?? 0) >= Math.min(t.gain, 9) - 1 ? `prende ${the(t.reply.capture)} in ${t.reply.to}` : `guadagna ${materialText(t.gain)}`;
+    why = pick([`${other} risponde ${reply} e ${taken}`, `arriva ${reply}, e ${other} ${taken}`], seed);
+  } else if (reply) why = pick([`${other} risponde ${reply} e prende l'iniziativa`, `dopo ${reply} la posizione di ${other} è migliore`], seed);
+  const hold =
+    from === 'ahead' && to === 'level'
+      ? pick([`Con ${best} il vantaggio restava ${toName(mover)}.`, `${best} avrebbe conservato il vantaggio.`], seed)
+      : from === 'ahead'
+        ? pick([`Con ${best} ${mover} restava avanti.`, `${best} teneva ${mover} in vantaggio.`], seed)
+        : pick([`${best} teneva l'equilibrio.`, `Con ${best} la partita restava in equilibrio.`, `Meglio era ${best}, che teneva la posizione.`], seed);
+  // Every head begins with a plain word ("con", "la mossa"), never with a move or a name
+  return `${capitalize(lead + head)}${why ? `: ${why}` : ''}. ${hold}`;
 }
 
-export function bestText(b: AnalysisMoment, names: Names): string {
+// A best move: what kind of move it was (a sacrifice, a check, a capture…), what it wins or what
+// any other move would have cost, and when it came (right after the opponent's turn, from behind).
+// Without the facts (an older analysis), by how much worse the next best was.
+export function bestText(b: AnalysisMoment, names: Names, ctx?: StoryContext): string {
   const mover = names[b.color];
+  const san = italianSan(b.san);
   // How much worse the next best was: the only move, a clear one, or just the most precise
   const gap = b.gap ?? 0;
   const which = gap >= 20 ? "l'unica mossa che" : gap >= 10 ? 'la mossa che' : 'la mossa giusta, che';
   const keeps = { ahead: 'tiene il vantaggio', level: "tiene l'equilibrio", behind: 'tiene aperta la partita' }[standing(b.after ?? 50)];
-  return `${mover} trova ${italianSan(b.san)}, ${which} ${keeps}.`;
+  if (!b.move || !ctx) return `${mover} trova ${san}, ${which} ${keeps}.`;
+  const seed = ctx.seed + b.ply;
+  const other = names[otherOf(b.color)];
+  // Right after the opponent's turn: the chance taken; or a player who was behind and is back
+  const punishes = ctx.turns.some((t) => t.ply === b.ply - 1 && t.color !== b.color);
+  const back = !punishes && standing(b.after ?? 50) !== 'behind' && ctx.curve.slice(0, b.ply).some((w) => ownChances(b.color, w) <= 30);
+  const lead = punishes ? pick([`${mover} non perdona: `, `${mover} coglie l'occasione: `], seed) : back ? 'Senza mollare, ' : '';
+  const m = b.move;
+  let act: string;
+  if (b.sacrifice) act = pick([`sacrifica materiale con ${san}`, `${san}, un sacrificio`], seed);
+  else if (m.castle) act = `arrocca al momento giusto, ${san}`;
+  else if (m.promotion) act = `promuove: ${san}`;
+  else if (m.capture && m.check) act = `prende ${the(m.capture)} con scacco, ${san}`;
+  else if (m.capture) act = `prende ${the(m.capture)} con ${san}`;
+  else if (m.check) act = `dà scacco con ${san}`;
+  else act = pick([`trova ${san}`, `gioca ${san}`], seed);
+  let why: string;
+  const captured = m.capture ? (PIECES_IT[m.capture]?.value ?? 0) : 0;
+  if (b.mate && b.mate <= 8) why = ` e avvia un matto in ${b.mate}`;
+  else if (b.gain && b.gain >= 2 && b.gain > captured + 1) why = ` e guadagna ${materialText(b.gain)}`;
+  else if (b.alt?.mate && b.alt.mate <= 6) why = `: con ogni altra mossa ${other} aveva un matto in ${b.alt.mate}`;
+  else if (b.alt?.gain && b.alt.gain >= 2) why = `: ogni altra mossa costava ${materialText(b.alt.gain)}`;
+  else why = `, ${which} ${keeps}`;
+  // After "non perdona:" the player is named already; names are written as they are
+  return `${lead}${punishes ? '' : `${mover} `}${act}${why}.`;
+}
+
+// The final blow: the checkmate, told by the piece that gives it
+export function finishText(f: AnalysisMoment, names: Names, ctx?: StoryContext): string {
+  const mover = names[f.color];
+  const san = italianSan(f.san);
+  if (!f.move || !ctx) return `${mover} chiude la partita con ${san}.`;
+  // The title says "Scacco matto" already
+  return pick([`${capitalize(the(f.move.piece))} di ${mover} arriva in ${f.move.to} e chiude la partita.`, `${mover} chiude la partita con ${the(f.move.piece)} in ${f.move.to}.`], ctx.seed + f.ply);
 }
 
 // The moments in the order they were played: the turns, the best moves and the final blow
 export function momentsOf(a: GameAnalysis, names: Names): MomentText[] {
-  const turns = (a.turns ?? []).map((t) => ({ key: `t${t.ply}`, kind: 'turn' as const, title: `${moveLabel(t.ply, t.san)} · La svolta`, text: turnText(t, names), moment: t }));
+  const ctx: StoryContext = { seed: hashOf(a.id ?? ''), curve: a.curve ?? [], turns: a.turns ?? [] };
+  const turns = (a.turns ?? []).map((t) => ({ key: `t${t.ply}`, kind: 'turn' as const, title: `${moveLabel(t.ply, t.san)} · La svolta`, text: turnText(t, names, ctx), moment: t }));
   const finish = a.finish
-    ? [{ key: `f${a.finish.ply}`, kind: 'finish' as const, title: `${moveLabel(a.finish.ply, a.finish.san)} · Scacco matto`, text: `${names[a.finish.color]} chiude la partita con ${italianSan(a.finish.san)}.`, moment: a.finish }]
+    ? [{ key: `f${a.finish.ply}`, kind: 'finish' as const, title: `${moveLabel(a.finish.ply, a.finish.san)} · Scacco matto`, text: finishText(a.finish, names, ctx), moment: a.finish }]
     : [];
   const best = (a.best ?? [])
     // The checkmate is told as the final blow
     .filter((b) => b.ply !== a.finish?.ply)
-    .map((b) => ({ key: `b${b.ply}`, kind: 'best' as const, title: `${moveLabel(b.ply, b.san)} · La mossa di ${names[b.color]}`, text: bestText(b, names), moment: b }));
+    .map((b) => ({ key: `b${b.ply}`, kind: 'best' as const, title: `${moveLabel(b.ply, b.san)} · La mossa di ${names[b.color]}`, text: bestText(b, names, ctx), moment: b }));
   return [...turns, ...best, ...finish].sort((x, y) => x.moment.ply - y.moment.ply);
 }
 

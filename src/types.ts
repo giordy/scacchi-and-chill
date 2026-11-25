@@ -36,6 +36,24 @@ export interface AnalysisMoment {
   before?: number;
   after?: number;
   gap?: number; // a best move: how much worse the next best was
+  // The facts behind the moment (scripts/moveFacts.mjs), from version 3 of the analysis
+  move?: MoveFacts; // the move played
+  bestMove?: MoveFacts; // a turn: the engine's move in its place
+  reply?: MoveFacts & { san: string }; // a turn: the opponent's best answer
+  gain?: number; // material won along the engine's line: by the opponent after a turn, by the player after a best move
+  mate?: number; // a mate in so many moves: for the opponent after a turn, for the player after a best move
+  sacrifice?: boolean; // a best move giving material away
+  alt?: { gain?: number; mate?: number }; // a best move: what the next best would have cost
+}
+
+// A move as the key moments tell it: the piece (p, n, b, r, q, k), where it goes, what it takes
+export interface MoveFacts {
+  piece: string;
+  to?: string;
+  capture?: string;
+  check?: boolean;
+  castle?: boolean;
+  promotion?: string;
 }
 
 export interface GameAnalysis {

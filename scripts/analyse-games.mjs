@@ -12,6 +12,7 @@ import readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { Chess } from 'chess.js';
 import { ANALYSIS_VERSION, keyMoments, needsAnalysis, phasesOf, winPercent } from './analysis.mjs';
+import { withFacts } from './moveFacts.mjs';
 import { accessToken, gameIdOf, readGames, saveGameFields } from './sync-results.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -72,14 +73,18 @@ export async function startEngine() {
   return e;
 }
 
-// The engine's two best moves in a position, with their scores from White's side
+// The engine's lines kept: enough to see what a move wins or loses (scripts/moveFacts.mjs)
+const PV_LENGTH = 8;
+
+// The engine's two best moves in a position, with their scores from White's side and their lines
 export function parseSearch(lines, whiteToMove) {
   const lines2 = {};
   for (const l of lines) {
-    const m = l.match(/^info .*\bmultipv (\d+) .*\bscore (cp|mate) (-?\d+).*? pv (\S+)/);
+    const m = l.match(/^info .*\bmultipv (\d+) .*\bscore (cp|mate) (-?\d+).*? pv (.+)$/);
     if (!m) continue;
     const v = Number(m[3]) * (whiteToMove ? 1 : -1);
-    lines2[m[1]] = { score: m[2] === 'cp' ? { cp: v } : { mate: v }, uci: m[4] };
+    const pv = m[4].trim().split(/\s+/).slice(0, PV_LENGTH);
+    lines2[m[1]] = { score: m[2] === 'cp' ? { cp: v } : { mate: v }, uci: pv[0], pv };
   }
   return [lines2['1'], lines2['2']].filter(Boolean);
 }
@@ -122,19 +127,27 @@ export async function evaluate(e, moves) {
   }
   for (const p of plies) {
     const [first, second] = await search(e, p.fen);
-    p.best = { uci: first.uci, san: sanOf(p.fen, first.uci), white: winPercent(first.score) };
-    if (second) p.second = { white: winPercent(second.score) };
+    p.best = { uci: first.uci, san: sanOf(p.fen, first.uci), white: winPercent(first.score), score: first.score, pv: first.pv };
+    if (second) p.second = { white: winPercent(second.score), score: second.score, pv: second.pv };
   }
   let final = terminal(chess);
-  if (final === undefined) final = winPercent((await search(e, chess.fen()))[0].score);
+  // The engine's line from the final position: what the last move allowed, for a turn there
+  let finalLine;
+  if (final === undefined) {
+    const [first] = await search(e, chess.fen());
+    final = winPercent(first.score);
+    finalLine = { score: first.score, pv: first.pv };
+  }
   const boards = [...plies.map((p) => p.fen), chess.fen()].map((f) => f.split(' ')[0]);
-  return { plies, final, mate: chess.isCheckmate(), boards };
+  return { plies, final, finalLine, mate: chess.isCheckmate(), boards };
 }
 
 // The key moments of one game and its phases (scripts/analysis.mjs); division: Lichess' own, if any
 export async function analyse(e, moves, division) {
   const seen = await evaluate(e, moves);
-  return seen && { ...keyMoments(seen.plies, seen.final, { mate: seen.mate }), phases: phasesOf(division, seen.boards) };
+  if (!seen) return undefined;
+  const moments = withFacts(keyMoments(seen.plies, seen.final, { mate: seen.mate }), seen.plies, seen.finalLine);
+  return { ...moments, phases: phasesOf(division, seen.boards) };
 }
 
 async function main() {
