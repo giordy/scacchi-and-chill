@@ -3,8 +3,20 @@ import { GameAnalysis } from '../types';
 import { MomentText, squaresOf, storyOf } from '../lib/analysis';
 import { swipeStep } from '../lib/swipe';
 import { BoardArrow, MiniBoard } from './MiniBoard';
+import { ColorDot } from './PresenceDot';
 
 type Mark = { ply: number; kind: MomentText['kind'] };
+
+// A player's name by their side of the board, as on Lichess; the one to move marked
+function PlayerBar({ color, name, toMove }: { color: 'w' | 'b'; name: string; toMove: boolean }) {
+  return (
+    <div className={`km-player${toMove ? ' is-to-move' : ''}`}>
+      <ColorDot color={color} now={0} name={name} />
+      <span className="km-player-name">{name}</span>
+      {toMove && <span className="km-to-move">ha la mossa</span>}
+    </div>
+  );
+}
 
 // How the game went: White's chances along the game, the light part, against Black's, the dark one,
 // with a dot on each key moment (bigger on the one on the board) and a thin line where the
@@ -106,7 +118,10 @@ export function KeyMoments({
               if (s) go(at + s);
             }}
           >
+            {/* White at the bottom, as on the board: Black's name above it, White's below */}
+            <PlayerBar color="b" name={names.black} toMove={step.m.moment.color === 'black'} />
             <MiniBoard fen={step.m.moment.fen} label={`Posizione prima di ${step.m.title}`} arrows={arrowsOf(step.m)} coords />
+            <PlayerBar color="w" name={names.white} toMove={step.m.moment.color === 'white'} />
           </div>
           <p className="km-viewer-text">{step.m.text}</p>
           <div className="km-nav">

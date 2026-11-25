@@ -2493,6 +2493,31 @@ button.match-moments {
   touch-action: pan-y;
 }
 
+/* The players by their side of the board: Black above, White below */
+.km-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--muted);
+}
+
+.km-player.is-to-move {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.km-to-move {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .km-board .mini-board {
   width: 100%;
   height: auto;

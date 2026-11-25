@@ -28,6 +28,8 @@ describe('KeyMoments', () => {
     expect(html).toContain('5. \u2658\uFE0Ec3 · La mossa di Anna');
     expect(html).not.toContain('La svolta</strong>');
     expect(html.match(/class="mini-board/g)).toHaveLength(1);
+    // the players by their side of the board, Black above and White below, the one to move marked
+    expect(html).toMatch(/km-player"><span class="dot b"[^]*?km-player-name">Bruno<[^]*?<svg class="mini-board[^]*?km-player is-to-move"><span class="dot w"[^]*?km-player-name">Anna<\/span><span class="km-to-move">ha la mossa/);
     // with the files and ranks, each in the colour of the other square
     expect(html).toContain('<text x="94" y="792" text-anchor="end" class="on-dark">a</text>');
     expect(html).toContain('<text x="6" y="26" class="on-light">8</text>');
