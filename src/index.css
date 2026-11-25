@@ -1977,6 +1977,15 @@ a.champion-badge {
 
 .mini-board.is-faded { opacity: 0.45; }
 
+/* Files and ranks on a big board: in the colour of the other square, as on Lichess */
+.mini-board .mb-coords text {
+  font-family: var(--font-ui);
+  font-size: 24px;
+  font-weight: 700;
+}
+.mini-board .mb-coords .on-light { fill: color-mix(in srgb, var(--board-dark) 70%, #1a211e); }
+.mini-board .mb-coords .on-dark { fill: var(--board-light); }
+
 /* Ongoing game: faded empty board, big piece for the phase, three phase segments */
 .phase-tile .pt-veil { fill: var(--panel); opacity: 0.6; }
 .phase-tile .pt-seg { fill: var(--line); }

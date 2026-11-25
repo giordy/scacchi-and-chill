@@ -100,7 +100,7 @@ export function KeyMoments({
               if (s) go(at + s);
             }}
           >
-            <MiniBoard fen={step.m.moment.fen} label={`Posizione prima di ${step.m.title}`} arrows={arrowsOf(step.m)} />
+            <MiniBoard fen={step.m.moment.fen} label={`Posizione prima di ${step.m.title}`} arrows={arrowsOf(step.m)} coords />
           </div>
           <p className="km-viewer-text">{step.m.text}</p>
           <div className="km-nav">

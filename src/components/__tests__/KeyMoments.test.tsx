@@ -28,6 +28,10 @@ describe('KeyMoments', () => {
     expect(html).toContain('5. Cc3 · La mossa di Anna');
     expect(html).not.toContain('La svolta</strong>');
     expect(html.match(/class="mini-board/g)).toHaveLength(1);
+    // with the files and ranks, each in the colour of the other square
+    expect(html).toContain('<text x="94" y="792" text-anchor="end" class="on-dark">a</text>');
+    expect(html).toContain('<text x="6" y="26" class="on-light">8</text>');
+    expect(html).toContain('<text x="6" y="726" class="on-dark">1</text>');
     // one dot per moment to jump to it, the arrows to go back and forth
     expect(html.match(/class="km-nav-dot /g)).toHaveLength(2);
     expect(html).toContain('disabled="" aria-label="Momento precedente"');

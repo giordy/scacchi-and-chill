@@ -33,8 +33,40 @@ function Arrow({ from, to, kind }: BoardArrow) {
   );
 }
 
-// faded: a picture rather than a real result (the starting position of a game still to play)
-export function MiniBoard({ fen, label, faded = false, arrows = [] }: { fen: string; label: string; faded?: boolean; arrows?: BoardArrow[] }) {
+// The files under the board and the ranks on its side, inside the edge squares as on Lichess: a help
+// to follow the moves for whoever does not know the board by heart
+function Coordinates() {
+  return (
+    <g className="mb-coords" aria-hidden="true">
+      {'abcdefgh'.split('').map((f, c) => (
+        <text key={f} x={c * 100 + 94} y={792} textAnchor="end" className={(7 + c) % 2 === 0 ? 'on-light' : 'on-dark'}>
+          {f}
+        </text>
+      ))}
+      {[8, 7, 6, 5, 4, 3, 2, 1].map((n, r) => (
+        <text key={n} x={6} y={r * 100 + 26} className={r % 2 === 0 ? 'on-light' : 'on-dark'}>
+          {n}
+        </text>
+      ))}
+    </g>
+  );
+}
+
+// faded: a picture rather than a real result (the starting position of a game still to play);
+// coords: the files and ranks on the board, for a board shown big
+export function MiniBoard({
+  fen,
+  label,
+  faded = false,
+  arrows = [],
+  coords = false,
+}: {
+  fen: string;
+  label: string;
+  faded?: boolean;
+  arrows?: BoardArrow[];
+  coords?: boolean;
+}) {
   const board = parseFenBoard(fen);
   if (!board) return null;
   return (
@@ -49,6 +81,7 @@ export function MiniBoard({ fen, label, faded = false, arrows = [] }: { fen: str
           </g>
         ))
       )}
+      {coords && <Coordinates />}
       {arrows.map((ar) => (
         <Arrow key={`${ar.kind}-${ar.from}${ar.to}`} {...ar} />
       ))}
