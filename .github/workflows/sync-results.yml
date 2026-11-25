@@ -65,21 +65,26 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      # Stockfish 19, the official build for Linux (one binary that picks the best code for the CPU);
-      # if it cannot be had, Ubuntu's older Stockfish 16, so the analysis does not stop. The engine's
-      # name is saved with each analysis. A newer release: change the tag below.
+      # Stockfish 19, the official build for Linux (one "universal" binary that picks the best code for
+      # the CPU), checked against the release's sha256; if it cannot be had, Ubuntu's Stockfish, so the
+      # analysis does not stop. The engine's name is saved with each analysis. A newer release: change
+      # the tag, the file name and the sha256 (all on the release page).
       - name: Install Stockfish
         env:
           GH_TOKEN: ${{ github.token }}
           SF_TAG: sf_19
+          SF_FILE: stockfish-linux-x86-64-universal.tar.gz
+          SF_SHA256: 9defc0d4e55d49c65a6d042f3e571a39fcea499ade6dbe741b53b8c65e03611f
         run: |
           dir="$RUNNER_TEMP/stockfish"
           mkdir -p "$dir"
-          for name in stockfish-ubuntu-x86-64.tar stockfish-ubuntu-x86-64-avx2.tar; do
-            gh release download "$SF_TAG" --repo official-stockfish/Stockfish --pattern "$name" --dir "$dir" && break
-          done
-          tar -xf "$dir"/*.tar -C "$dir" 2>/dev/null || true
-          bin=$(find "$dir" -type f -name 'stockfish-ubuntu-x86-64*' ! -name '*.tar' | head -n 1)
+          bin=""
+          if gh release download "$SF_TAG" --repo official-stockfish/Stockfish --pattern "$SF_FILE" --dir "$dir" \
+            && echo "$SF_SHA256  $dir/$SF_FILE" | sha256sum -c - \
+            && tar -xzf "$dir/$SF_FILE" -C "$dir"; then
+            bin=$(find "$dir" -type f -name 'stockfish*universal*' ! -name "$SF_FILE" | head -n 1)
+            [ -n "$bin" ] || bin=$(find "$dir" -type f -name 'stockfish*' ! -name "$SF_FILE" -size +5M | head -n 1)
+          fi
           if [ -n "$bin" ] && chmod +x "$bin" && printf 'uci\nquit\n' | "$bin" | grep -q '^id name Stockfish'; then
             echo "STOCKFISH=$bin" >> "$GITHUB_ENV"
             printf 'uci\nquit\n' | "$bin" | grep '^id name'
