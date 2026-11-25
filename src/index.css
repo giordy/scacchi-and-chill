@@ -2280,6 +2280,12 @@ button.mini-board-replay {
   background: rgba(20, 24, 22, 0.72);
 }
 
+/* An open dialog (a game's replay, a photo) holds the page still: scrolling inside it never moves the
+   page below, a dialog too short to scroll included */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
 .replay-dialog {
   width: min(92vw, 480px);
   max-width: none;
@@ -2289,6 +2295,9 @@ button.mini-board-replay {
   border-radius: 12px;
   background: var(--panel);
   color: var(--ink);
+  /* At its top or bottom, the scroll stops there instead of passing to the page */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .replay-dialog::backdrop {
@@ -4111,6 +4120,7 @@ button.link-button {
 /* The master's photo, large over the page: a tap anywhere closes it */
 /* The whole screen, so that any tap lands on it and closes it */
 .photo-dialog {
+  overscroll-behavior: contain;
   width: 100vw;
   height: 100dvh;
   max-width: none;
