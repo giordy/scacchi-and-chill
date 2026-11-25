@@ -3,7 +3,7 @@ import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Chess } from 'chess.js';
 // @ts-expect-error a Node script without types
-import { analyse, evaluate, parseSearch } from '../../../scripts/analyse-games.mjs';
+import { analyse, evaluate, NoLine, parseSearch } from '../../../scripts/analyse-games.mjs';
 // @ts-expect-error a Node script without types
 import { saveGameFields } from '../../../scripts/sync-results.mjs';
 
@@ -69,6 +69,19 @@ describe('the analysis of a game, start to end', () => {
     const seen = await evaluate(fakeEngine(), stalemate);
     expect(seen.final).toBe(50);
     expect(seen.mate).toBe(false);
+  });
+
+  it('stops on a position the engine gives no line for, as a game that cannot be analysed', async () => {
+    // an engine that, at its third search, answers with no line at all
+    const silent = () => {
+      const e = fakeEngine();
+      return { ...e, async ask(cmd: string) {
+        const out = await e.ask(cmd);
+        return e.searched.length === 3 ? ['bestmove (none)'] : out;
+      } };
+    };
+    await expect(evaluate(silent(), 'e4 e5 Nf3 Nc6')).rejects.toBeInstanceOf(NoLine);
+    await expect(analyse(silent(), 'e4 e5 Nf3 Nc6')).rejects.toThrow('Nessuna linea del motore');
   });
 
   it('gives up on moves that do not make a game', async () => {

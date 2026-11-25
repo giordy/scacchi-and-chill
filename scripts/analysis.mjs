@@ -169,8 +169,9 @@ export function keyMoments(plies, final, { mate = false, winner } = {}) {
       const after = own(p.color, curve[i + 1]);
       // from level or a little ahead: a player already behind gives no chance that matters
       if (told.has(i + 1) || before - after < TURN_DROP || before <= LOST || before > CHANCE_TO) return undefined;
-      const next = i + 2 < curve.length ? own(p.color, curve[i + 2]) : after;
-      return { ply: i + 1, color: p.color, san: p.san, uci: p.uci, bestSan: p.best.san, bestUci: p.best.uci, fen: p.fen, before: round(before), after: round(after), taken: next <= after + TAKEN_SLACK, drop: before - after };
+      // The game over right after (time, a draw): the opponent never had the move, nothing taken or not
+      const next = i + 2 < curve.length ? own(p.color, curve[i + 2]) : undefined;
+      return { ply: i + 1, color: p.color, san: p.san, uci: p.uci, bestSan: p.best.san, bestUci: p.best.uci, fen: p.fen, before: round(before), after: round(after), ...(next === undefined ? {} : { taken: next <= after + TAKEN_SLACK }), drop: before - after };
     })
     .filter(Boolean)
     // turns near the same move tell it already

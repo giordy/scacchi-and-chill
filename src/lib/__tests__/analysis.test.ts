@@ -223,6 +223,9 @@ describe('the key moments', () => {
       [5, 'white', 60, 40, false],
       [6, 'black', 60, 40, true],
     ]);
+    // a chance on the very last move (time ran out, a draw): neither taken nor not
+    const atEnd = keyMoments(plies([60, 60, 60, 60, 60, 60, 60, 60, 60]), 40);
+    expect(atEnd.chances.map((c: AnalysisMoment) => [c.ply, 'taken' in c])).toEqual([[9, false]]);
     // Black keeps it: taken
     const kept = [60, 60, 60, 60, 60, 40, 38, 38, 45, 45, 45];
     expect(keyMoments(plies(kept.slice(0, -1)), 45).chances.map((c: AnalysisMoment) => [c.ply, c.taken])).toEqual([[5, true]]);
@@ -447,6 +450,8 @@ describe('the key moments on the page', () => {
       "La mossa e3 dà un'occasione ad Anna, che la sfrutta. Meglio era O-O-O."
     );
     expect(chanceText({ ...c, taken: false }, names)).toBe("La mossa e3 dà un'occasione ad Anna, che però non la sfrutta. Meglio era O-O-O.");
+    // the game over right after: nothing said of what came next
+    expect(chanceText({ ...c, taken: undefined, reply: { san: 'Qh5', piece: 'q', to: 'h5', played: false } }, names)).toBe("La mossa e3 dà un'occasione ad Anna. Meglio era O-O-O.");
   });
 
   it('tells promotions, mates missed and streaks', () => {
@@ -561,9 +566,38 @@ describe('the key moments on the page', () => {
     expect(storyOf({ ...a, curve: [50], phases: { middle: 20 } }, names).phases.map((p) => p.key)).toEqual(['game']);
   });
 
+  it('keeps only what it can tell from what Firestore holds', () => {
+    const good: AnalysisMoment = { ply: 9, color: 'white', san: 'Nc3', uci: 'b1c3', fen: 'x', after: 50, gap: 12 };
+    const messy = {
+      v: 5,
+      id: 'AbCd1234',
+      curve: [50, 55, 60],
+      // a moment without its move, one with a side unknown, one not even an object
+      turns: [good, { ...good, san: undefined }, { ...good, color: 'green' }, null, 'x'],
+      best: 'not a list',
+      chances: [{ ...good, ply: '9' }],
+      finish: { ply: 3 },
+      streaks: [{ color: 'white', from: 17, to: 33, moves: 9 }, { color: 'white', from: 'a' }],
+      phases: { middle: 'x', end: 40 },
+    } as unknown as GameAnalysis;
+    const a = analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: messy })!;
+    expect(a.turns).toEqual([good]);
+    expect(a.best).toEqual([]);
+    expect(a.chances).toEqual([]);
+    expect(a.finish).toBeUndefined();
+    expect(a.streaks).toEqual([{ color: 'white', from: 17, to: 33, moves: 9 }]);
+    expect(a.phases).toEqual({ middle: undefined, end: 40 });
+    // the story and its sentences come out of it whole
+    expect(storyOf(a, names).phases[0].moments.map((m) => m.title)).toEqual(['5. \u2658\uFE0Ec3 · La svolta']);
+    // a curve that is not numbers: nothing shown
+    expect(analysisOf({ url: '', analysis: { ...messy, curve: [50, 'x'] } as unknown as GameAnalysis })).toBeUndefined();
+    expect(analysisOf({ url: '', analysis: { ...messy, curve: [50, NaN] } })).toBeUndefined();
+    expect(figurineSan(undefined as unknown as string)).toBe('');
+  });
+
   it('uses only the analysis of the game behind the current link', () => {
     const analysis: GameAnalysis = { v: 1, id: 'AbCd1234', curve: [50], turns: [], best: [] };
-    expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis })).toBe(analysis);
+    expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis })).toMatchObject(analysis);
     expect(analysisOf({ url: 'https://lichess.org/Zzzz9999', analysis })).toBeUndefined();
     expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: { ...analysis, skipped: 'moves' } })).toBeUndefined();
     expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: { ...analysis, v: 99 } })).toBeUndefined();
@@ -572,7 +606,7 @@ describe('the key moments on the page', () => {
     // a result decided by the organizer: the story would tell another end
     expect(analysisOf({ url: 'https://lichess.org/AbCd1234', analysis, decision: { result: '0-1', at: 1 } })).toBeUndefined();
     // no link: whatever game it was
-    expect(analysisOf({ url: '', analysis })).toBe(analysis);
+    expect(analysisOf({ url: '', analysis })).toMatchObject(analysis);
     expect(hasMoments(analysis)).toBe(false);
     expect(hasMoments({ ...analysis, phases: { middle: 20 } })).toBe(true);
   });

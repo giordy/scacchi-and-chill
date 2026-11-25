@@ -14,9 +14,35 @@ const VERSIONS = new Set([1, 2, 3, 4, 5]);
 // this page does not know, or a result decided by the organizer (the story would tell another end)
 export function analysisOf(game: Pick<HistoryGame, 'url' | 'analysis' | 'decision'>): GameAnalysis | undefined {
   const a = game.analysis;
-  if (!a || game.decision || !VERSIONS.has(a.v) || a.skipped || !Array.isArray(a.curve)) return undefined;
+  if (!a || game.decision || !VERSIONS.has(a.v) || a.skipped || !Array.isArray(a.curve) || !a.curve.every(isNumber)) return undefined;
   const id = extractGameId(game.url);
-  return id && a.id !== id ? undefined : a;
+  return id && a.id !== id ? undefined : sane(a);
+}
+
+// What the page reads from Firestore, kept to what it can tell: a moment missing its move, its
+// position or its side (a save cut short, a version to come) is left out, the rest shown
+const isNumber = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x);
+const isMoment = (m: unknown): m is AnalysisMoment => {
+  const x = m as AnalysisMoment | null;
+  return !!x && isNumber(x.ply) && typeof x.san === 'string' && typeof x.uci === 'string' && typeof x.fen === 'string' && (x.color === 'white' || x.color === 'black');
+};
+const moments = (list: unknown) => (Array.isArray(list) ? list.filter(isMoment) : []);
+function sane(a: GameAnalysis): GameAnalysis {
+  const streaks = Array.isArray(a.streaks)
+    ? a.streaks.filter((s) => !!s && (s.color === 'white' || s.color === 'black') && isNumber(s.from) && isNumber(s.to) && isNumber(s.moves))
+    : [];
+  const phases = a.phases && typeof a.phases === 'object' ? { middle: isNumber(a.phases.middle) ? a.phases.middle : undefined, end: isNumber(a.phases.end) ? a.phases.end : undefined } : undefined;
+  return {
+    ...a,
+    turns: moments(a.turns),
+    best: moments(a.best),
+    chances: moments(a.chances),
+    promotions: moments(a.promotions),
+    missed: moments(a.missed),
+    finish: isMoment(a.finish) ? a.finish : undefined,
+    streaks,
+    phases,
+  };
 }
 
 // Something to tell: a moment, or at least the phases of the game
@@ -28,7 +54,7 @@ export const hasMoments = (a?: GameAnalysis) =>
 // the rook). Each is followed by U+FE0E, which asks for the plain glyph: some phones draw these
 // symbols as coloured emoji otherwise. Squares and castling stay as they are.
 const FIGURINES: Record<string, string> = { K: '\u2654', Q: '\u2655', R: '\u2656', B: '\u2657', N: '\u2658' };
-export const figurineSan = (san: string) => san.replace(/[KQRBN]/g, (p) => `${FIGURINES[p]}\uFE0E`);
+export const figurineSan = (san: string) => (san ?? '').replace(/[KQRBN]/g, (p) => `${FIGURINES[p]}\uFE0E`);
 
 // "23. Cxe5" for White, "23... Cxe5" for Black
 export function moveLabel(ply: number, san: string): string {
@@ -228,7 +254,10 @@ export function chanceText(c: AnalysisMoment, names: Names, ctx?: StoryContext):
   const seed = (ctx?.seed ?? 0) + c.ply;
   // Begins with a plain word, never a move or a name
   const head = pick([`con ${played} ${mover} lascia un'occasione ${toName(other)}`, `la mossa ${played} dà un'occasione ${toName(other)}`], seed);
-  const outcome = c.taken
+  // No outcome when the game ended right after
+  const outcome = c.taken === undefined
+    ? ''
+    : c.taken
     ? c.reply?.played
       ? `, che la coglie con ${reply}`
       : `, che la sfrutta`

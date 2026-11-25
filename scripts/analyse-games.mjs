@@ -95,6 +95,14 @@ async function search(e, fen) {
   return parseSearch(out, fen.split(' ')[1] === 'w');
 }
 
+// The engine gave no line for a position the game went on from: that game cannot be analysed (the
+// engine dying is another error, and the run fails to try again)
+export class NoLine extends Error {
+  constructor(fen) {
+    super(`Nessuna linea del motore per ${fen}`);
+  }
+}
+
 // White's chances in a position the game cannot go on from
 function terminal(chess) {
   if (chess.isCheckmate()) return chess.turn() === 'w' ? 0 : 100;
@@ -127,6 +135,7 @@ export async function evaluate(e, moves) {
   }
   for (const p of plies) {
     const [first, second] = await search(e, p.fen);
+    if (!first) throw new NoLine(p.fen);
     p.best = { uci: first.uci, san: sanOf(p.fen, first.uci), white: winPercent(first.score), score: first.score, pv: first.pv };
     if (second) p.second = { white: winPercent(second.score), score: second.score, pv: second.pv };
   }
@@ -135,6 +144,7 @@ export async function evaluate(e, moves) {
   let finalLine;
   if (final === undefined) {
     const [first] = await search(e, chess.fen());
+    if (!first) throw new NoLine(chess.fen());
     final = winPercent(first.score);
     finalLine = { score: first.score, pv: first.pv };
   }
@@ -181,11 +191,20 @@ async function main() {
     for (const g of pending.slice(0, MAX_GAMES)) {
       const id = gameIdOf(g.url) ?? g.lichess.id;
       const started = Date.now();
-      const result = await analyse(e, g.lichess.moves, g.lichess.division, g.lichess.winner);
-      // Moves that do not make a game are marked, so they are not tried again at every run
+      let result;
+      let skipped = 'moves';
+      try {
+        result = await analyse(e, g.lichess.moves, g.lichess.division, g.lichess.winner);
+      } catch (err) {
+        if (!(err instanceof NoLine)) throw err;
+        console.warn(`${g.docId}: ${err.message}`);
+        skipped = 'engine';
+      }
+      // Moves that do not make a game, or a position the engine gives no line for, are marked, so
+      // they are not tried again at every run (until the next version)
       const analysis = result
         ? { v: ANALYSIS_VERSION, id, engine: e.name, nodes: NODES, at: new Date().toISOString(), ...result }
-        : { v: ANALYSIS_VERSION, id, skipped: 'moves' };
+        : { v: ANALYSIS_VERSION, id, skipped };
       try {
         await saveGameFields(base, token, g.docId, { analysis });
       } catch (err) {
