@@ -9,7 +9,8 @@
 // 2: everything again with Stockfish 19 (the first games were analysed by Ubuntu's Stockfish 17)
 // 3: the facts of each moment (scripts/moveFacts.mjs), for the page to tell why it mattered
 // 4: what other moves cost only after the engine's first choice; lines that break off counted
-// 5: the point of no return: a turn too where a player starts a slide they never come back from
+// 5: the point of no return: a turn too where a player starts a slide they never come back from;
+// the answer to a turn played or not; streaks, promotions and mates missed in games won
 export const ANALYSIS_VERSION = 5;
 
 // Shorter games have no story to tell; the first plies are the opening, where the best move is no news
@@ -58,15 +59,25 @@ const SECOND_BEST_GAP = 10;
 const BEST_APART = 10;
 const SAME_AS_BEST = 2;
 
+// A streak: moves in a row as good as the engine's, past the opening and in a game still open
+// (where nearly every move would do, it means nothing); the longest of each player, if long enough
+const STREAK_FROM = 16;
+const STREAK_MIN = 8;
+// A mate missed: the engine saw a mate in so few moves, the move played did not keep it as fast,
+// and the player won all the same (told lightly, only then); the shortest of each player
+const MISSED_MATE_MAX = 3;
+
 // Taking the piece the opponent just moved (a recapture, a trade offered, a piece left hanging): the
 // only move, but no news to anyone
 const recapture = (p, prev) => !!prev && p.san.includes('x') && p.uci.slice(2, 4) === prev.uci.slice(2, 4);
 
 // plies: one per move, in order: { san, uci, color, fen (before the move), best: { uci, san, white },
 // second?: { white } } with `white` White's winning chances after the engine's best (second) move.
-// final: White's winning chances in the final position; mate: the last move gave checkmate.
+// final: White's winning chances in the final position; mate: the last move gave checkmate; winner:
+// who won on Lichess ('white', 'black', none for a draw). With the engine's scores (best.score, from
+// White's side), the mates missed too.
 // Returns what is saved on the game (field `analysis`) besides the version, id, engine and phases.
-export function keyMoments(plies, final, { mate = false } = {}) {
+export function keyMoments(plies, final, { mate = false, winner } = {}) {
   // White's chances in each position, the start included: the engine's best line from there
   const curve = [...plies.map((p) => p.best.white), final];
   const turns = [];
@@ -101,11 +112,52 @@ export function keyMoments(plies, final, { mate = false } = {}) {
   }
   const chosen = kept.slice(0, MAX_TURNS).sort((a, b) => a.ply - b.ply);
   const last = plies[plies.length - 1];
+  const finishPly = mate && last ? plies.length : 0;
+  const told = new Set([...chosen.map((t) => t.ply), ...best.map((b) => b.ply), finishPly]);
+  // Streaks
+  const streaks = [];
+  for (const color of ['white', 'black']) {
+    let run = [];
+    let longest = [];
+    plies.forEach((p, i) => {
+      if (p.color !== color) return;
+      const before = own(color, curve[i]);
+      const good = i >= STREAK_FROM && before >= 10 && before <= 90 && (p.uci === p.best.uci || before - own(color, curve[i + 1]) <= SAME_AS_BEST);
+      run = good ? [...run, i + 1] : [];
+      if (run.length > longest.length) longest = run;
+    });
+    if (longest.length >= STREAK_MIN) streaks.push({ color, from: longest[0], to: longest[longest.length - 1], moves: longest.length });
+  }
+  // Promotions: the first of each player, the checkmate told as the final blow
+  const promotions = [];
+  for (const color of ['white', 'black']) {
+    const i = plies.findIndex((p, k) => p.color === color && p.uci.length === 5 && !told.has(k + 1));
+    if (i >= 0) promotions.push({ ply: i + 1, color, san: plies[i].san, uci: plies[i].uci, fen: plies[i].fen });
+  }
+  // Mates missed, in games the player won
+  const mateIn = (score, color) => (score?.mate !== undefined && score.mate !== 0 && (score.mate > 0) === (color === 'white') ? Math.abs(score.mate) : 0);
+  const missed = [];
+  if (winner) {
+    let shortest;
+    plies.forEach((p, i) => {
+      if (p.color !== winner || told.has(i + 1) || p.uci === p.best.uci || p.san.includes('#')) return;
+      const n = mateIn(p.best.score, winner);
+      if (!n || n > MISSED_MATE_MAX) return;
+      // The move played kept a mate as fast: nothing missed
+      const after = i + 1 < plies.length ? mateIn(plies[i + 1].best.score, winner) : 0;
+      if (after && after <= n - 1) return;
+      if (!shortest || n < shortest.mate) shortest = { ply: i + 1, color: winner, san: p.san, uci: p.uci, bestSan: p.best.san, bestUci: p.best.uci, fen: p.fen, mate: n };
+    });
+    if (shortest) missed.push(shortest);
+  }
   return {
     curve: curve.map(round),
     turns: chosen.map(({ drop, ...t }) => t),
     swings: kept.length,
     best: best.map((b) => ({ ...b, gap: round(b.gap) })).sort((a, b) => a.ply - b.ply),
+    streaks,
+    promotions,
+    missed,
     // The final blow: the move that gave checkmate
     ...(mate && last ? { finish: { ply: plies.length, color: last.color, san: last.san, uci: last.uci, fen: last.fen } } : {}),
   };

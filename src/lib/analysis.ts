@@ -20,7 +20,8 @@ export function analysisOf(game: Pick<HistoryGame, 'url' | 'analysis' | 'decisio
 }
 
 // Something to tell: a moment, or at least the phases of the game
-export const hasMoments = (a?: GameAnalysis) => !!a && ((a.turns?.length ?? 0) + (a.best?.length ?? 0) > 0 || !!a.finish || !!a.phases?.middle);
+export const hasMoments = (a?: GameAnalysis) =>
+  !!a && ((a.turns?.length ?? 0) + (a.best?.length ?? 0) + (a.promotions?.length ?? 0) + (a.missed?.length ?? 0) > 0 || !!a.finish || !!a.phases?.middle);
 
 // The pieces as figurines, as Lichess writes them: ♔ ♕ ♖ ♗ ♘, the same outline for both sides (the
 // move number says whose), clear to anyone and free of the Italian letters' trap (R is the king, not
@@ -41,7 +42,7 @@ const standing = (p: number): Standing => (p >= 70 ? 'ahead' : p > 30 ? 'level' 
 
 export interface MomentText {
   key: string;
-  kind: 'turn' | 'best' | 'finish';
+  kind: 'turn' | 'best' | 'finish' | 'promotion' | 'missed';
   title: string;
   text: string;
   moment: AnalysisMoment;
@@ -202,7 +203,22 @@ export function finishText(f: AnalysisMoment, names: Names, ctx?: StoryContext):
   return pick([`${capitalize(the(f.move.piece))} di ${mover} arriva in ${f.move.to} e chiude la partita.`, `${mover} chiude la partita con ${the(f.move.piece)} in ${f.move.to}.`], ctx.seed + f.ply);
 }
 
-// The moments in the order they were played: the turns, the best moves and the final blow
+// A promotion: the pawn that becomes a queen (or another piece), told as a milestone
+export function promotionText(p: AnalysisMoment, names: Names): string {
+  const piece = PIECES_IT[p.uci.charAt(4)]?.name ?? 'donna';
+  return `Il pedone di ${names[p.color]} arriva in ${p.uci.slice(2, 4)} e diventa ${piece}.`;
+}
+
+// A mate missed in a game won all the same: told lightly, as a curiosity
+export function missedText(m: AnalysisMoment, names: Names): string {
+  const mover = names[m.color];
+  const best = figurineSan(m.bestSan ?? '');
+  const mate = m.mate === 1 ? 'un matto in una mossa' : `un matto in ${m.mate}`;
+  return `Qui ${mover} aveva ${mate} con ${best}, al posto di ${figurineSan(m.san)}: ha vinto lo stesso.`;
+}
+
+// The moments in the order they were played: the turns, the best moves, the promotions, the mates
+// missed and the final blow
 export function momentsOf(a: GameAnalysis, names: Names): MomentText[] {
   const ctx: StoryContext = { seed: hashOf(a.id ?? ''), curve: a.curve ?? [], turns: a.turns ?? [] };
   const turns = (a.turns ?? []).map((t) => ({ key: `t${t.ply}`, kind: 'turn' as const, title: `${moveLabel(t.ply, t.san)} · La svolta`, text: turnText(t, names, ctx), moment: t }));
@@ -213,7 +229,14 @@ export function momentsOf(a: GameAnalysis, names: Names): MomentText[] {
     // The checkmate is told as the final blow
     .filter((b) => b.ply !== a.finish?.ply)
     .map((b) => ({ key: `b${b.ply}`, kind: 'best' as const, title: `${moveLabel(b.ply, b.san)} · La mossa di ${names[b.color]}`, text: bestText(b, names, ctx), moment: b }));
-  return [...turns, ...best, ...finish].sort((x, y) => x.moment.ply - y.moment.ply);
+  const taken = new Set([...turns, ...best, ...finish].map((m) => m.moment.ply));
+  const promotions = (a.promotions ?? [])
+    .filter((p) => !taken.has(p.ply))
+    .map((p) => ({ key: `p${p.ply}`, kind: 'promotion' as const, title: `${moveLabel(p.ply, p.san)} · La promozione`, text: promotionText(p, names), moment: p }));
+  const missed = (a.missed ?? [])
+    .filter((m) => !taken.has(m.ply))
+    .map((m) => ({ key: `m${m.ply}`, kind: 'missed' as const, title: `${moveLabel(m.ply, m.san)} · Il matto nascosto`, text: missedText(m, names), moment: m }));
+  return [...turns, ...best, ...promotions, ...missed, ...finish].sort((x, y) => x.moment.ply - y.moment.ply);
 }
 
 // Who is better from White's chances, in five steps: clearly, a little, or nobody
@@ -249,16 +272,35 @@ export function openingText(white: number, names: Names): string {
   return l.size === 2 ? `${names[l.who]} esce dall'apertura in vantaggio.` : `${names[l.who]} esce dall'apertura un po' meglio.`;
 }
 
-// How the game ended, from Lichess' status
-export function endingText(status: string | undefined, winner: Color | undefined, plies: number, names: Names): string | undefined {
+// How the game ended, from Lichess' status; with White's chances in the final position, an ending
+// the board did not ask for is said: a resignation with the game still open, time running out on
+// a player who was ahead, a draw agreed by a player ahead
+export function endingText(status: string | undefined, winner: Color | undefined, plies: number, names: Names, finalWhite?: number): string | undefined {
   const n = Math.ceil(plies / 2);
-  const loser = winner ? names[otherOf(winner)] : undefined;
+  const loserColor = winner ? otherOf(winner) : undefined;
+  const loser = loserColor ? names[loserColor] : undefined;
+  const loserChances = loserColor && finalWhite !== undefined ? ownChances(loserColor, finalWhite) : undefined;
   if (status === 'mate') return `Scacco matto alla mossa ${n}.`;
-  if (status === 'resign' && loser) return `${loser} abbandona alla mossa ${n}.`;
-  if ((status === 'outoftime' || status === 'timeout') && loser) return `Alla mossa ${n} scade il tempo di ${loser}.`;
+  if (status === 'resign' && loser) {
+    if (loserChances !== undefined && loserChances >= 40) return `${loser} abbandona alla mossa ${n}, con la partita ancora aperta.`;
+    return `${loser} abbandona alla mossa ${n}.`;
+  }
+  if ((status === 'outoftime' || status === 'timeout') && loser) {
+    if (loserChances !== undefined && loserChances >= 70) return `Alla mossa ${n} scade il tempo di ${loser}, che era in vantaggio.`;
+    if (loserChances !== undefined && loserChances > 30) return `Alla mossa ${n} scade il tempo di ${loser}, con la partita ancora in equilibrio.`;
+    return `Alla mossa ${n} scade il tempo di ${loser}.`;
+  }
   if (status === 'stalemate') return `Stallo alla mossa ${n}: patta.`;
-  if (status === 'draw') return `Patta alla mossa ${n}.`;
+  if (status === 'draw') {
+    const ahead = finalWhite === undefined ? undefined : finalWhite >= 70 ? 'white' : finalWhite <= 30 ? 'black' : undefined;
+    return ahead ? `Patta alla mossa ${n}, anche se ${names[ahead]} era in vantaggio.` : `Patta alla mossa ${n}.`;
+  }
   return undefined;
+}
+
+// The longest streak of each player: moves in a row as good as the engine's
+export function streakText(s: { color: Color; from: number; to: number; moves: number }, names: Names): string {
+  return `${names[s.color]} gioca ${s.moves} mosse di fila come il motore, dalla mossa ${Math.ceil(s.from / 2)} alla ${Math.ceil(s.to / 2)}.`;
 }
 
 export interface PhaseStory {
@@ -271,6 +313,7 @@ export interface PhaseStory {
 export interface GameStory {
   intro?: string;
   phases: PhaseStory[];
+  streaks: string[];
   ending?: string;
 }
 
@@ -288,10 +331,11 @@ export function storyOf(a: GameAnalysis, names: Names, state?: { status?: string
         ? `Una partita sulle montagne russe: ${swings} svolte.`
         : undefined;
   // A checkmate is told by the final blow
-  const ending = a.finish ? undefined : endingText(state?.status, state?.winner, last, names);
+  const ending = a.finish ? undefined : endingText(state?.status, state?.winner, last, names, curve[last]);
+  const streaks = (a.streaks ?? []).map((s) => streakText(s, names));
   const middle = a.phases?.middle;
   const end = a.phases?.end;
-  if (!middle || middle >= last || last < 1) return { intro, phases: [{ key: 'game', moments }], ending };
+  if (!middle || middle >= last || last < 1) return { intro, phases: [{ key: 'game', moments }], streaks, ending };
   const within = (from: number, to: number) => moments.filter((m) => m.moment.ply > from && m.moment.ply <= to);
   const phases: PhaseStory[] = [{ key: 'opening', title: "L'apertura", text: openingText(curve[middle], names), moments: within(0, middle) }];
   const middleEnd = end && end > middle && end < last ? end : last;
@@ -299,7 +343,7 @@ export function storyOf(a: GameAnalysis, names: Names, state?: { status?: string
   if (middleEnd < last) {
     phases.push({ key: 'endgame', title: 'Il finale', text: phaseText('Nel finale', curve[middleEnd], curve[last], names), moments: within(middleEnd, last) });
   }
-  return { intro, phases, ending };
+  return { intro, phases, streaks, ending };
 }
 
 // The squares of a move in UCI ("e2e4", "e7e8q")

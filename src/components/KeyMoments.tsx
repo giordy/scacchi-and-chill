@@ -32,12 +32,16 @@ function Curve({ curve, marks, phases, current }: { curve: number[]; marks: Mark
 
 // The arrows of a moment: green for a move as good as the engine's; a turn has the move played in
 // brass and the engine's in green
+// A turn and a mate missed show the move played and the engine's move in its place
+const showsBoth = (m: MomentText) => m.kind === 'turn' || m.kind === 'missed';
+
 function arrowsOf(m: MomentText): BoardArrow[] {
+  const shows = showsBoth(m);
   const played = squaresOf(m.moment.uci);
   const best = squaresOf(m.moment.bestUci);
   return [
-    ...(played ? [{ ...played, kind: m.kind === 'turn' ? ('played' as const) : ('best' as const) }] : []),
-    ...(m.kind === 'turn' && best ? [{ ...best, kind: 'best' as const }] : []),
+    ...(played ? [{ ...played, kind: shows ? ('played' as const) : ('best' as const) }] : []),
+    ...(shows && best ? [{ ...best, kind: 'best' as const }] : []),
   ];
 }
 
@@ -74,6 +78,9 @@ export function KeyMoments({
             // The sentence names its phase already
             <p key={p.key}>{p.text}</p>
           ))}
+        {story.streaks.map((s) => (
+          <p key={s}>{s}</p>
+        ))}
         {story.ending && <p className="km-ending">{story.ending}</p>}
       </div>
       {step && (
@@ -125,7 +132,7 @@ export function KeyMoments({
               ›
             </button>
           </div>
-          {step.m.kind === 'turn' && (
+          {showsBoth(step.m) && (
             <p className="km-note">
               <span className="km-key is-played" aria-hidden="true" /> la mossa giocata · <span className="km-key is-best" aria-hidden="true" /> quella che consigliava il computer
             </p>

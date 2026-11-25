@@ -142,11 +142,12 @@ export async function evaluate(e, moves) {
   return { plies, final, finalLine, mate: chess.isCheckmate(), boards };
 }
 
-// The key moments of one game and its phases (scripts/analysis.mjs); division: Lichess' own, if any
-export async function analyse(e, moves, division) {
+// The key moments of one game and its phases (scripts/analysis.mjs); division: Lichess' own, if any;
+// winner: who won on Lichess
+export async function analyse(e, moves, division, winner) {
   const seen = await evaluate(e, moves);
   if (!seen) return undefined;
-  const moments = withFacts(keyMoments(seen.plies, seen.final, { mate: seen.mate }), seen.plies, seen.finalLine);
+  const moments = withFacts(keyMoments(seen.plies, seen.final, { mate: seen.mate, winner }), seen.plies, seen.finalLine);
   return { ...moments, phases: phasesOf(division, seen.boards) };
 }
 
@@ -180,7 +181,7 @@ async function main() {
     for (const g of pending.slice(0, MAX_GAMES)) {
       const id = gameIdOf(g.url) ?? g.lichess.id;
       const started = Date.now();
-      const result = await analyse(e, g.lichess.moves, g.lichess.division);
+      const result = await analyse(e, g.lichess.moves, g.lichess.division, g.lichess.winner);
       // Moves that do not make a game are marked, so they are not tried again at every run
       const analysis = result
         ? { v: ANALYSIS_VERSION, id, engine: e.name, nodes: NODES, at: new Date().toISOString(), ...result }

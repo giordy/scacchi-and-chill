@@ -66,6 +66,9 @@ export interface GameAnalysis {
   swings?: number; // the turns found, before keeping the three biggest
   best?: AnalysisMoment[];
   finish?: AnalysisMoment; // the move that gave checkmate
+  promotions?: AnalysisMoment[]; // each player's first promotion
+  missed?: AnalysisMoment[]; // a mate missed by the winner (bestSan, mate: in so many moves)
+  streaks?: { color: 'white' | 'black'; from: number; to: number; moves: number }[]; // moves in a row as good as the engine's
   phases?: { middle?: number; end?: number }; // plies where the middlegame and the endgame begin
 }
 

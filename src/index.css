@@ -2423,8 +2423,12 @@ button.match-moments {
 .km-curve .km-mid { stroke: #8d958f; stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
 .km-curve .km-phase { stroke: #8d958f; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .km-curve .km-dot { stroke: #fff; stroke-width: 1.5; }
-.km-curve .km-dot.is-turn { fill: #c9852f; }
+.km-curve .km-dot.is-turn,
+.km-curve .km-dot.is-missed {
+  fill: #c9852f;
+}
 .km-curve .km-dot.is-best,
+.km-curve .km-dot.is-promotion,
 .km-curve .km-dot.is-finish {
   fill: #3c9a68;
 }
@@ -2472,11 +2476,13 @@ button.match-moments {
 }
 
 .km-viewer.is-best .km-viewer-title,
+.km-viewer.is-promotion .km-viewer-title,
 .km-viewer.is-finish .km-viewer-title {
   color: var(--win);
 }
 
-.km-viewer.is-turn .km-viewer-title {
+.km-viewer.is-turn .km-viewer-title,
+.km-viewer.is-missed .km-viewer-title {
   color: var(--brass);
 }
 
@@ -2553,7 +2559,8 @@ button.km-nav-dot::after {
   opacity: 0.45;
 }
 
-button.km-nav-dot.is-turn::after {
+button.km-nav-dot.is-turn::after,
+button.km-nav-dot.is-missed::after {
   background: #c9852f;
 }
 
