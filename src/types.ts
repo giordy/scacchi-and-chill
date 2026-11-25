@@ -71,7 +71,6 @@ export interface GameAnalysis {
   promotions?: AnalysisMoment[]; // each player's first promotion
   missed?: AnalysisMoment[]; // a mate missed (bestSan, mate: in so many moves, won: the game all the same)
   chances?: AnalysisMoment[]; // a drop that was no turn: a chance given to the opponent (taken: whether they took it)
-  streaks?: { color: 'white' | 'black'; from: number; to: number; moves: number }[]; // moves in a row as good as the engine's
   phases?: { middle?: number; end?: number }; // plies where the middlegame and the endgame begin
 }
 

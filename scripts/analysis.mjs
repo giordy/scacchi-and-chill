@@ -10,7 +10,7 @@
 // 3: the facts of each moment (scripts/moveFacts.mjs), for the page to tell why it mattered
 // 4: what other moves cost only after the engine's first choice; lines that break off counted
 // 5: the point of no return: a turn too where a player starts a slide they never come back from;
-// the answer to a turn played or not; streaks, promotions and mates missed in games won
+// the answer to a turn played or not; promotions and mates missed
 export const ANALYSIS_VERSION = 5;
 
 // Shorter games have no story to tell; the first plies are the opening, where the best move is no news
@@ -67,10 +67,6 @@ const BEST_APART = 6;
 const MAX_BEST = 3;
 const SAME_AS_BEST = 2;
 
-// A streak: moves in a row as good as the engine's, past the opening and in a game still open
-// (where nearly every move would do, it means nothing); the longest of each player, if long enough
-const STREAK_FROM = 16;
-const STREAK_MIN = 8;
 // A mate missed: the engine saw a mate in so few moves and the move played did not keep it as fast;
 // the shortest of each player
 const MISSED_MATE_MAX = 3;
@@ -125,20 +121,6 @@ export function keyMoments(plies, final, { mate = false, winner } = {}) {
   const last = plies[plies.length - 1];
   const finishPly = mate && last ? plies.length : 0;
   const told = new Set([...chosen.map((t) => t.ply), ...best.map((b) => b.ply), finishPly]);
-  // Streaks
-  const streaks = [];
-  for (const color of ['white', 'black']) {
-    let run = [];
-    let longest = [];
-    plies.forEach((p, i) => {
-      if (p.color !== color) return;
-      const before = own(color, curve[i]);
-      const good = i >= STREAK_FROM && before >= 10 && before <= 90 && (p.uci === p.best.uci || before - own(color, curve[i + 1]) <= SAME_AS_BEST);
-      run = good ? [...run, i + 1] : [];
-      if (run.length > longest.length) longest = run;
-    });
-    if (longest.length >= STREAK_MIN) streaks.push({ color, from: longest[0], to: longest[longest.length - 1], moves: longest.length });
-  }
   // Promotions: the first of each player, the checkmate told as the final blow
   const promotions = [];
   for (const color of ['white', 'black']) {
@@ -186,7 +168,6 @@ export function keyMoments(plies, final, { mate = false, winner } = {}) {
     swings: kept.length,
     best: best.map((b) => ({ ...b, gap: round(b.gap) })).sort((a, b) => a.ply - b.ply),
     chances,
-    streaks,
     promotions,
     missed,
     // The final blow: the move that gave checkmate

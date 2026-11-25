@@ -78,9 +78,6 @@ export function KeyMoments({
             // The sentence names its phase already
             <p key={p.key}>{p.text}</p>
           ))}
-        {story.streaks.map((s) => (
-          <p key={s}>{s}</p>
-        ))}
         {story.ending && <p className="km-ending">{story.ending}</p>}
       </div>
       {step && (

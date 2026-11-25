@@ -56,15 +56,16 @@ describe('KeyMoments', () => {
     expect(quiet).not.toContain('mini-board');
   });
 
-  it('tells the streaks, and shows promotions and mates missed on the board', () => {
-    const more: GameAnalysis = {
+  it('shows promotions and mates missed on the board, and no streak', () => {
+    const more = {
       ...analysis,
       streaks: [{ color: 'black', from: 30, to: 50, moves: 11 }],
       promotions: [{ ply: 55, color: 'white', san: 'e8=Q', uci: 'e7e8q', fen }],
       missed: [{ ply: 57, color: 'white', san: 'Qg8+', uci: 'e8g8', bestSan: 'Qf7#', bestUci: 'e8f7', fen, mate: 1 }],
-    };
+    } as GameAnalysis;
     const html = renderToStaticMarkup(<KeyMoments analysis={more} names={{ white: 'Anna', black: 'Bruno' }} />);
-    expect(html).toContain('<p>Bruno gioca 11 mosse di fila come il motore, dalla mossa 15 alla 25.</p>');
+    // a streak in an analysis saved before (like the engine: a word that would invite talk of cheating) is not told
+    expect(html).not.toContain('come il motore');
     expect(html).toContain('<span>1 di 4</span>');
     expect(html).toContain('aria-label="28. e8=\u2655\uFE0E · La promozione"');
     expect(html).toContain('class="km-nav-dot is-missed"');

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { awardsMessage, computeSeasonAwards, estimateMoveTimes } from '../awards';
+import { awardsMessage, computeSeasonAwards, estimateMoveTimes, leadChanges } from '../awards';
 import { buildSeasonArchive } from '../seasons';
 import { HistoryGame, LichessExportGame, Player } from '../../types';
 
@@ -283,5 +283,87 @@ describe('Trofeo Pillsbury', () => {
     expect(awardEmoji({ id: 'pillsbury', emoji: '🌱', title: 'Premio Pillsbury', description: '', winners: [], detail: '' })).toBe('🏅');
     expect(awardTitle({ id: 'pillsbury', emoji: '🌱', title: 'Premio Pillsbury', description: '', winners: [], detail: '' })).toBe('Trofeo Pillsbury');
     expect(awardTitle({ id: 'draws', emoji: '🧱', title: 'Il muro', description: '', winners: [], detail: '' })).toBe('Il muro');
+  });
+});
+
+describe('the awards from the analysis of the games', () => {
+  const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  const m = (ply: number, color: 'white' | 'black', extra: Record<string, unknown> = {}) => ({ ply, color, san: 'Nf3', uci: 'g1f3', fen, ...extra });
+  const analysed = (id: string, curve: number[], extra: Record<string, unknown> = {}) => ({ v: 5, id, curve, turns: [], best: [], chances: [], ...extra });
+  const finished = (white: string, black: string, id: string, status: string, winner: 'white' | 'black' | undefined, analysis?: Record<string, unknown>): HistoryGame => ({
+    ...g(white, black, id),
+    lichess: st(id, status, 60, 30, winner),
+    ...(analysis ? { analysis: analysis as unknown as HistoryGame['analysis'] } : {}),
+  });
+  const of = (history: HistoryGame[], id: string, ban?: boolean) => computeSeasonAwards(players, history, {}, [], undefined, undefined, undefined, ban).find((a) => a.id === id);
+
+  it('Houdini: the game won or drawn from the lowest chances', () => {
+    const history = [
+      // Anna (White) down to 12%, then wins
+      finished('anna', 'bruno', 'aaaaaaaa', 'mate', 'white', analysed('aaaaaaaa', [50, 30, 12, 40, 100])),
+      // Carla (Black) down to 15% (White at 85), draw
+      finished('bruno', 'carla', 'bbbbbbbb', 'draw', undefined, analysed('bbbbbbbb', [50, 85, 60, 50])),
+    ];
+    const h = of(history, 'houdini')!;
+    expect(h.winners.map((w) => w.handle)).toEqual(['anna']);
+    expect(h.detail).toBe('da 12% di possibilità alla vittoria contro Bruno');
+    expect(h.games).toEqual(['aaaaaaaa']);
+    // without Anna's game: Carla's draw
+    expect(of(history.slice(1), 'houdini')!.detail).toBe('da 15% di possibilità alla patta contro Bruno');
+  });
+
+  it('Houdini: never from a game lost, won on time, not analysed, or not low enough', () => {
+    const low = [50, 10, 50, 100];
+    // Anna down to 10% and losing: her low is no comeback (Bruno never below 50%)
+    expect(of([finished('anna', 'bruno', 'aaaaaaaa', 'resign', 'black', analysed('aaaaaaaa', [50, 10, 50, 0]))], 'houdini')).toBeUndefined();
+    expect(of([finished('anna', 'bruno', 'aaaaaaaa', 'outoftime', 'white', analysed('aaaaaaaa', low))], 'houdini')).toBeUndefined();
+    expect(of([finished('anna', 'bruno', 'aaaaaaaa', 'mate', 'white')], 'houdini')).toBeUndefined();
+    expect(of([finished('anna', 'bruno', 'aaaaaaaa', 'mate', 'white', analysed('aaaaaaaa', [50, 25, 100]))], 'houdini')).toBeUndefined();
+    // an analysis of another link: not this game's
+    expect(of([finished('anna', 'bruno', 'aaaaaaaa', 'mate', 'white', analysed('zzzzzzzz', low))], 'houdini')).toBeUndefined();
+    // less than 1%
+    expect(of([finished('anna', 'bruno', 'aaaaaaaa', 'mate', 'white', analysed('aaaaaaaa', [50, 0, 100]))], 'houdini')!.detail).toBe("da meno dell'1% di possibilità alla vittoria contro Bruno");
+  });
+
+  it('La mossa della stagione: the only move with every other move the most worse', () => {
+    const history = [
+      finished('anna', 'bruno', 'aaaaaaaa', 'mate', 'white', analysed('aaaaaaaa', [50, 50], { best: [m(21, 'white', { gap: 25 }), m(30, 'black', { gap: 40, san: 'Qxd4' })] })),
+      finished('carla', 'anna', 'bbbbbbbb', 'mate', 'white', analysed('bbbbbbbb', [50, 50], { best: [m(15, 'white', { gap: 15 })] })),
+    ];
+    const a = of(history, 'move')!;
+    expect(a.winners.map((w) => w.handle)).toEqual(['bruno']);
+    expect(a.detail).toBe('15... ♕︎xd4 contro Anna');
+    expect(a.games).toEqual(['aaaaaaaa']);
+    // no only move (every gap under 20): no award
+    expect(of(history.slice(1), 'move')).toBeUndefined();
+  });
+
+  it('La partita della stagione: the most fought game, to both its players, with why', () => {
+    const swing = [50, 70, 30, 70, 30, 50];
+    const history = [
+      finished('anna', 'bruno', 'aaaaaaaa', 'mate', 'white', analysed('aaaaaaaa', swing, { turns: [m(10, 'white'), m(20, 'black')], chances: [m(30, 'white')] })),
+      finished('bruno', 'carla', 'bbbbbbbb', 'mate', 'white', analysed('bbbbbbbb', [50, 60, 70], { turns: [m(10, 'black')] })),
+    ];
+    const a = of(history, 'battle')!;
+    expect(a.winners.map((w) => w.handle)).toEqual(['anna', 'bruno']);
+    expect(a.detail).toBe('2 svolte, 1 occasione e il vantaggio passato di mano 3 volte');
+    expect(a.games).toEqual(['aaaaaaaa']);
+    // a quiet game only (one turn, the lead never changing hands): no award
+    expect(of(history.slice(1), 'battle')).toBeUndefined();
+  });
+
+  it('gives none of them to a player with a game closed for cheating, when the season says so', () => {
+    const history = [
+      finished('anna', 'bruno', 'aaaaaaaa', 'mate', 'white', analysed('aaaaaaaa', [50, 70, 30, 70, 30, 10, 100], { turns: [m(10, 'white'), m(20, 'black')], best: [m(21, 'white', { gap: 30 })] })),
+      finished('anna', 'carla', 'cccccccc', 'cheat', 'black'),
+    ];
+    expect(['houdini', 'move', 'battle'].map((id) => of(history, id)?.winners.map((w) => w.handle))).toEqual([['anna'], ['anna'], ['anna', 'bruno']]);
+    expect(['houdini', 'move', 'battle'].map((id) => of(history, id, true))).toEqual([undefined, undefined, undefined]);
+  });
+
+  it('counts the changes of lead, the level stretches between not counted', () => {
+    expect(leadChanges([50, 60, 55, 45, 40, 50, 70, 41])).toBe(3);
+    expect(leadChanges([50, 50, 50])).toBe(0);
+    expect(leadChanges([])).toBe(0);
   });
 });

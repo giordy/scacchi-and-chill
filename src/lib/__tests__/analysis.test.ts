@@ -5,7 +5,7 @@ import { ANALYSIS_VERSION, keyMoments, needsAnalysis, phasesOf, winPercent } fro
 import { parseSearch } from '../../../scripts/analyse-games.mjs';
 // @ts-expect-error a Node script without types
 import { gameIdOf } from '../../../scripts/sync-results.mjs';
-import { analysisOf, bestText, chanceText, endingText, finishText, figurineSan, hasMoments, materialText, missedText, momentsOf, moveLabel, openingText, phaseText, promotionText, squaresOf, storyOf, StoryContext, streakText, turnText } from '../analysis';
+import { analysisOf, bestText, chanceText, endingText, finishText, figurineSan, hasMoments, materialText, missedText, momentsOf, moveLabel, openingText, phaseText, promotionText, squaresOf, storyOf, StoryContext, turnText } from '../analysis';
 import { AnalysisMoment, GameAnalysis } from '../../types';
 
 const moves20 = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7';
@@ -237,22 +237,6 @@ describe('the key moments', () => {
     expect(keyMoments(plies([75, 75, 75, 75, 75, 75, 95, 95, 95, 95]), 95).chances).toEqual([]);
   });
 
-  it("finds each player's longest streak of moves as good as the engine's, past the opening, in a game still open", () => {
-    // 50 plies all level, no move losing anything: both players from ply 17 and 18 on, 17 moves each
-    const a = keyMoments(plies(Array(50).fill(50)), 50);
-    expect(a.streaks).toEqual([
-      { color: 'white', from: 17, to: 49, moves: 17 },
-      { color: 'black', from: 18, to: 50, moves: 17 },
-    ]);
-    // a White move losing 10 points at ply 33 breaks White's run in two of 8 moves each
-    const broken = [...Array(32).fill(50), 50, ...Array(17).fill(40)];
-    const b = keyMoments(plies(broken), 40);
-    expect(b.streaks.find((s: { color: string }) => s.color === 'white')).toEqual({ color: 'white', from: 17, to: 31, moves: 8 });
-    // in a game already decided nothing counts; too short, no streak
-    expect(keyMoments(plies(Array(50).fill(95)), 95).streaks).toEqual([]);
-    expect(keyMoments(plies(Array(30).fill(50)), 50).streaks).toEqual([]);
-  });
-
   it("finds each player's first promotion, not one told otherwise", () => {
     const curve = Array(30).fill(80);
     const a = keyMoments(plies(curve, { 20: { san: 'e8=Q', uci: 'e7e8q' }, 24: { san: 'a8=N', uci: 'a7a8n' } }), 80);
@@ -454,7 +438,7 @@ describe('the key moments on the page', () => {
     expect(chanceText({ ...c, taken: undefined, reply: { san: 'Qh5', piece: 'q', to: 'h5', played: false } }, names)).toBe("La mossa e3 dà un'occasione ad Anna. Meglio era O-O-O.");
   });
 
-  it('tells promotions, mates missed and streaks', () => {
+  it('tells promotions and mates missed', () => {
     expect(promotionText({ ply: 55, color: 'white', san: 'e8=Q', uci: 'e7e8q', fen: 'x' }, names)).toBe('Il pedone di Anna arriva in e8 e diventa donna.');
     expect(promotionText({ ply: 56, color: 'black', san: 'a1=N', uci: 'a2a1n', fen: 'x' }, names)).toBe('Il pedone di Bruno arriva in a1 e diventa cavallo.');
     const m: AnalysisMoment = { ply: 85, color: 'white', san: 'Qg8+', uci: 'e8g8', bestSan: 'Qf7#', bestUci: 'e8f7', fen: 'x', mate: 1, won: true };
@@ -462,7 +446,6 @@ describe('the key moments on the page', () => {
     expect(missedText({ ...m, mate: 3, bestSan: 'Qh7+' }, names)).toBe('Qui Anna aveva un matto in 3 con \u2655\uFE0Eh7+, al posto di \u2655\uFE0Eg8+: ha vinto lo stesso.');
     // the game not won: the fact alone
     expect(missedText({ ...m, won: false }, names)).toBe('Qui Anna aveva un matto in una mossa con \u2655\uFE0Ef7#, al posto di \u2655\uFE0Eg8+.');
-    expect(streakText({ color: 'black', from: 18, to: 40, moves: 12 }, names)).toBe('Bruno gioca 12 mosse di fila come il motore, dalla mossa 9 alla 20.');
   });
 
   it('says an ending the board did not ask for', () => {
@@ -577,7 +560,6 @@ describe('the key moments on the page', () => {
       best: 'not a list',
       chances: [{ ...good, ply: '9' }],
       finish: { ply: 3 },
-      streaks: [{ color: 'white', from: 17, to: 33, moves: 9 }, { color: 'white', from: 'a' }],
       phases: { middle: 'x', end: 40 },
     } as unknown as GameAnalysis;
     const a = analysisOf({ url: 'https://lichess.org/AbCd1234', analysis: messy })!;
@@ -585,7 +567,6 @@ describe('the key moments on the page', () => {
     expect(a.best).toEqual([]);
     expect(a.chances).toEqual([]);
     expect(a.finish).toBeUndefined();
-    expect(a.streaks).toEqual([{ color: 'white', from: 17, to: 33, moves: 9 }]);
     expect(a.phases).toEqual({ middle: undefined, end: 40 });
     // the story and its sentences come out of it whole
     expect(storyOf(a, names).phases[0].moments.map((m) => m.title)).toEqual(['5. \u2658\uFE0Ec3 · La svolta']);

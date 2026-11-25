@@ -28,9 +28,6 @@ const isMoment = (m: unknown): m is AnalysisMoment => {
 };
 const moments = (list: unknown) => (Array.isArray(list) ? list.filter(isMoment) : []);
 function sane(a: GameAnalysis): GameAnalysis {
-  const streaks = Array.isArray(a.streaks)
-    ? a.streaks.filter((s) => !!s && (s.color === 'white' || s.color === 'black') && isNumber(s.from) && isNumber(s.to) && isNumber(s.moves))
-    : [];
   const phases = a.phases && typeof a.phases === 'object' ? { middle: isNumber(a.phases.middle) ? a.phases.middle : undefined, end: isNumber(a.phases.end) ? a.phases.end : undefined } : undefined;
   return {
     ...a,
@@ -40,7 +37,6 @@ function sane(a: GameAnalysis): GameAnalysis {
     promotions: moments(a.promotions),
     missed: moments(a.missed),
     finish: isMoment(a.finish) ? a.finish : undefined,
-    streaks,
     phases,
   };
 }
@@ -349,11 +345,6 @@ export function endingText(status: string | undefined, winner: Color | undefined
   return undefined;
 }
 
-// The longest streak of each player: moves in a row as good as the engine's
-export function streakText(s: { color: Color; from: number; to: number; moves: number }, names: Names): string {
-  return `${names[s.color]} gioca ${s.moves} mosse di fila come il motore, dalla mossa ${Math.ceil(s.from / 2)} alla ${Math.ceil(s.to / 2)}.`;
-}
-
 export interface PhaseStory {
   key: 'opening' | 'middlegame' | 'endgame' | 'game';
   title?: string;
@@ -364,7 +355,6 @@ export interface PhaseStory {
 export interface GameStory {
   intro?: string;
   phases: PhaseStory[];
-  streaks: string[];
   ending?: string;
 }
 
@@ -383,10 +373,9 @@ export function storyOf(a: GameAnalysis, names: Names, state?: { status?: string
         : undefined;
   // A checkmate is told by the final blow
   const ending = a.finish ? undefined : endingText(state?.status, state?.winner, last, names, curve[last]);
-  const streaks = (a.streaks ?? []).map((s) => streakText(s, names));
   const middle = a.phases?.middle;
   const end = a.phases?.end;
-  if (!middle || middle >= last || last < 1) return { intro, phases: [{ key: 'game', moments }], streaks, ending };
+  if (!middle || middle >= last || last < 1) return { intro, phases: [{ key: 'game', moments }], ending };
   const within = (from: number, to: number) => moments.filter((m) => m.moment.ply > from && m.moment.ply <= to);
   const phases: PhaseStory[] = [{ key: 'opening', title: "L'apertura", text: openingText(curve[middle], names), moments: within(0, middle) }];
   const middleEnd = end && end > middle && end < last ? end : last;
@@ -394,7 +383,7 @@ export function storyOf(a: GameAnalysis, names: Names, state?: { status?: string
   if (middleEnd < last) {
     phases.push({ key: 'endgame', title: 'Il finale', text: phaseText('Nel finale', curve[middleEnd], curve[last], names), moments: within(middleEnd, last) });
   }
-  return { intro, phases, streaks, ending };
+  return { intro, phases, ending };
 }
 
 // The squares of a move in UCI ("e2e4", "e7e8q")

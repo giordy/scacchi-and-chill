@@ -13,6 +13,10 @@ import { pointsText } from './standings';
 import { outForFairPlay } from './fairPlay';
 import { decidedAtTable } from './games';
 import { MASTER_OPENING_ID, MASTER_OPENING_TITLE, masterSurname, openingFamily, playsFamily } from './masterOpening';
+import { analysisOf, moveLabel } from './analysis';
+import { extractGameId } from './utils';
+import type { FinishedGame } from './moveTimes';
+import type { GameAnalysis } from '../types';
 // L'ammazzagiganti (most colpacci) was given until the Trofeo Pillsbury took its place: past
 // seasons keep it, with the Lichess ratings and the gap it used then.
 const LEGACY_UPSET_GAP = 150;
@@ -182,6 +186,124 @@ export function computeSeasonAwards(
     }
   }
 
+  awards.push(...analysisAwards(history, games, can, nameOf, who));
+
+  return awards;
+}
+
+// The awards from the analysis of the games (lib/analysis.ts): only the games the GitHub Action has
+// analysed count, so a game finished in the last minutes may be missing. None on how alike a
+// player's moves are to the engine's: it would invite talk of cheating.
+// Houdini: the lowest chances (%) a game was saved or won from: a lost position
+const HOUDINI_MAX = 20;
+// La mossa della stagione: an only move, every other move clearly worse (points of chances)
+const MOVE_MIN_GAP = 20;
+// La partita della stagione: turns, chances and changes of lead, together at least
+const BATTLE_MIN = 3;
+
+// How many times the lead changed hands along a game: White ahead (58% or more) to Black ahead
+// (42% or less) or back, the level stretches between not counted
+export function leadChanges(curve: number[]): number {
+  let leader: 'white' | 'black' | undefined;
+  let changes = 0;
+  for (const w of curve) {
+    const now = w >= 58 ? 'white' : w <= 42 ? 'black' : undefined;
+    if (!now) continue;
+    if (leader && now !== leader) changes++;
+    leader = now;
+  }
+  return changes;
+}
+
+type Who = (handles: string[]) => { handle: string; name: string }[];
+
+function analysisAwards(history: HistoryGame[], games: FinishedGame[], can: (h?: string) => boolean, nameOf: (h: string) => string, who: Who): SeasonAward[] {
+  const byId = new Map(games.map((g) => [g.state.id, g]));
+  const analysed: { g: FinishedGame; a: GameAnalysis }[] = history.flatMap((h) => {
+    const id = extractGameId(h.url);
+    const g = id ? byId.get(id) : undefined;
+    const a = g ? analysisOf(h) : undefined;
+    return g && a ? [{ g, a }] : [];
+  });
+  const other = (g: FinishedGame, h: string) => (h === g.white ? g.black : g.white);
+  const awards: SeasonAward[] = [];
+
+  // Houdini: a game won or drawn from the lowest chances; a win on time is no comeback on the board
+  const escapes = analysed.flatMap(({ g, a }) =>
+    (['white', 'black'] as const).flatMap((color) => {
+      const handle = g[color];
+      if (!can(handle) || (g.winner && g.winner !== handle) || g.status === 'outoftime' || g.status === 'timeout') return [];
+      const low = Math.min(...(a.curve ?? []).map((w) => (color === 'white' ? w : 100 - w)));
+      return low <= HOUDINI_MAX ? [{ handle, low, g, won: g.winner === handle }] : [];
+    })
+  );
+  if (escapes.length > 0) {
+    const lowest = Math.min(...escapes.map((e) => e.low));
+    const top = escapes.filter((e) => e.low === lowest);
+    const pct = lowest < 1 ? "meno dell'1%" : `${lowest}%`;
+    const one = top.length === 1 ? top[0] : undefined;
+    awards.push({
+      id: 'houdini',
+      emoji: '🪄',
+      title: 'Houdini',
+      description: "La rimonta più grande: la partita vinta o salvata dalla posizione più difficile, secondo l'analisi",
+      winners: who([...new Set(top.map((e) => e.handle))]),
+      detail: one ? `da ${pct} di possibilità ${one.won ? 'alla vittoria' : 'alla patta'} contro ${nameOf(other(one.g, one.handle))}` : `da ${pct} di possibilità`,
+      ...linked(top.map((e) => e.g.state.id)),
+    });
+  }
+
+  // La mossa della stagione: the only move with every other move the most worse
+  const onlyMoves = analysed.flatMap(({ g, a }) =>
+    (a.best ?? []).map((b) => ({ b, g, handle: g[b.color] })).filter((x) => can(x.handle) && (x.b.gap ?? 0) >= MOVE_MIN_GAP)
+  );
+  if (onlyMoves.length > 0) {
+    const widest = Math.max(...onlyMoves.map((x) => x.b.gap ?? 0));
+    const top = onlyMoves.filter((x) => x.b.gap === widest);
+    const one = top.length === 1 ? top[0] : undefined;
+    awards.push({
+      id: 'move',
+      emoji: '🎯',
+      title: 'La mossa della stagione',
+      description: "La mossa più difficile da trovare: quella in cui ogni altra mossa era peggiore di più, secondo l'analisi",
+      winners: who([...new Set(top.map((x) => x.handle))]),
+      detail: one ? `${moveLabel(one.b.ply, one.b.san)} contro ${nameOf(other(one.g, one.handle))}` : 'mosse uniche di pari valore',
+      ...linked(top.map((x) => x.g.state.id)),
+    });
+  }
+
+  // La partita della stagione: the most fought game, to both its players, with why it was
+  const battles = analysed
+    .filter(({ g }) => can(g.white) && can(g.black))
+    .map(({ g, a }) => {
+      const turns = a.turns?.length ?? 0;
+      const chances = a.chances?.length ?? 0;
+      const changes = leadChanges(a.curve ?? []);
+      return { g, turns, chances, changes, score: 2 * turns + chances + changes };
+    })
+    .filter((x) => x.turns + x.chances + x.changes >= BATTLE_MIN)
+    // the most fought; on a tie, more turns, then the longer game
+    .sort((x, y) => y.score - x.score || y.turns - x.turns || y.g.moves - x.g.moves);
+  const battle = battles[0];
+  if (battle) {
+    const { g } = battle;
+    const why = [
+      battle.turns > 0 ? plural(battle.turns, 'svolta', 'svolte') : '',
+      battle.chances > 0 ? plural(battle.chances, 'occasione', 'occasioni') : '',
+      battle.changes > 0 ? `il vantaggio passato di mano ${battle.changes === 1 ? 'una volta' : `${battle.changes} volte`}` : '',
+    ].filter(Boolean);
+    const list = why.length > 1 ? `${why.slice(0, -1).join(', ')} e ${why[why.length - 1]}` : why[0];
+    awards.push({
+      id: 'battle',
+      emoji: '🎢',
+      title: 'La partita della stagione',
+      description: "La partita più combattuta, ai suoi due giocatori: più svolte, occasioni e cambi di vantaggio, secondo l'analisi",
+      winners: who([g.white, g.black]),
+      // the players are the winners already: the detail is why
+      detail: list,
+      ...linked([g.state.id]),
+    });
+  }
   return awards;
 }
 
