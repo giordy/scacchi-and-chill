@@ -1402,7 +1402,12 @@ button.infotip-trigger.match-master {
   padding: 0 2px;
   font-size: 15px;
   color: var(--brass);
-  vertical-align: -1px;
+}
+
+/* The ♞ opens the line, closer to the text than the line's own gap */
+.match-meta > .infotip:has(> .match-master) {
+  flex-shrink: 0;
+  margin-right: -4px;
 }
 
 .infotip.is-open > button.infotip-trigger.match-mark,
@@ -3241,6 +3246,17 @@ details.pillsbury-about > summary { cursor: pointer; font-size: 14px; font-weigh
   right: auto;
   width: max-content;
   max-width: min(220px, calc(100vw - 48px));
+}
+/* The signs of a game card (colpaccio, summit, the master's opening): same, under the sign tapped */
+.infotip:has(> .match-mark) {
+  position: relative;
+}
+.infotip:has(> .match-mark) .infotip-bubble {
+  top: calc(100% + 8px);
+  left: -6px;
+  right: auto;
+  width: max-content;
+  max-width: min(260px, calc(100vw - 48px));
 }
 
 @keyframes infotip-in {

@@ -366,13 +366,7 @@ function MatchCard({
         : [
             fresh,
             forfeit ? "Vittoria a tavolino" : decided ? "Deciso dall'organizzatore" : "",
-            family && (
-              <span title={opening}>
-                {master}
-                {master && " "}
-                {family}
-              </span>
-            ),
+            family && <span title={opening}>{family}</span>,
             moves,
           ];
   const lichess = game.url && !forfeit && !decided;
@@ -399,6 +393,8 @@ function MatchCard({
         {scores && <span className="sr-only">Risultato {scores[0]} – {scores[1]}</span>}
       </div>
       <div className="match-meta">
+        {/* Outside the line that shortens with an ellipsis, which would cut its explanation */}
+        {progress === "finished" && master}
         <span className="match-meta-text">
           {joinDots([showRound && <span className="match-round">Turno {game.round}</span>, ...meta])}
         </span>
