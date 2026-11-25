@@ -109,6 +109,23 @@ describe('the key moments', () => {
     expect(a.swings).toBe(2);
   });
 
+  it('finds the point of no return: a drop never made up, in a game then lost', () => {
+    // White slides from 56 to 36 and never comes back: a turn though still "level"; then 36 -> 20
+    // is a step of less than the drop needed
+    const slide = [55, 55, 55, 55, 56, 36, 36, 34, 34, 20, 20, 10, 10, 0];
+    const a = keyMoments(plies(slide.slice(0, -1)), slide[slide.length - 1]);
+    expect(a.turns.map((t: AnalysisMoment) => [t.ply, t.color, t.before, t.after])).toEqual([[5, 'white', 56, 36]]);
+    // the same drop made up later: no turn
+    const back = [55, 55, 55, 55, 56, 36, 36, 50, 50, 20, 20, 10, 10, 0];
+    expect(keyMoments(plies(back.slice(0, -1)), 0).turns.map((t: AnalysisMoment) => t.ply)).not.toContain(5);
+    // never made up, but the game not lost (a draw): no turn
+    const draw = [55, 55, 55, 55, 56, 36, 36, 34, 34, 36, 36, 35, 35, 40];
+    expect(keyMoments(plies(draw.slice(0, -1)), 40).turns).toEqual([]);
+    // a drop in a game already lost: never
+    const lost = [28, 28, 28, 28, 28, 10, 10, 5, 5, 0];
+    expect(keyMoments(plies(lost.slice(0, -1)), 0).turns).toEqual([]);
+  });
+
   it('does not count a small step across the line, nor a move in a lost game', () => {
     // 72 -> 66 is a step across the line; 66 -> 5 a turn; 5 -> 0 a move in a lost game
     const curve = [50, 50, 50, 50, 50, 72, 72, 66, 66, 5, 5, 0];
@@ -244,6 +261,20 @@ describe('the key moments on the page', () => {
     expect(moveLabel(45, 'Nxe5')).toBe('23. \u2658\uFE0Exe5');
     expect(moveLabel(46, 'Qf3')).toBe('23... \u2655\uFE0Ef3');
     expect(squaresOf('e7e8q')).toEqual({ from: 'e7', to: 'e8' });
+  });
+
+  it('tells the point of no return as the start of the turn', () => {
+    expect(turnText(turn(56, 36), names)).toBe("Con \u2658\uFE0Exe5 la partita comincia a girare a favore di Bruno: \u2655\uFE0Ef3 teneva l'equilibrio.");
+    expect(turnText(turn(90, 72), names)).toBe('Con \u2658\uFE0Exe5 il vantaggio di Anna comincia a sfumare: \u2655\uFE0Ef3 lo teneva.');
+    const facts = { ...turn(56, 36), move: { piece: 'n', to: 'e5' }, reply: { san: 'Nxe5', piece: 'n', to: 'e5' } };
+    // seed 3 + ply 45: the first wording of each list
+    expect(turnText(facts, names, { seed: 3, curve: [], turns: [] })).toBe(
+      "Con \u2658\uFE0Exe5 la partita comincia a girare a favore di Bruno: Bruno risponde \u2658\uFE0Exe5 e prende l'iniziativa. \u2655\uFE0Ef3 teneva l'equilibrio."
+    );
+    // ahead and still ahead: the advantage that held, said as such
+    expect(turnText({ ...facts, before: 90, after: 72 }, names, { seed: 3, curve: [], turns: [] })).toBe(
+      "Con \u2658\uFE0Exe5 il vantaggio di Anna comincia a sfumare: Bruno risponde \u2658\uFE0Exe5 e prende l'iniziativa. Con \u2655\uFE0Ef3 il vantaggio restava ad Anna."
+    );
   });
 
   it('tells a turn kindly, by how the player stood', () => {

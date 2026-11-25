@@ -9,7 +9,8 @@
 // 2: everything again with Stockfish 19 (the first games were analysed by Ubuntu's Stockfish 17)
 // 3: the facts of each moment (scripts/moveFacts.mjs), for the page to tell why it mattered
 // 4: what other moves cost only after the engine's first choice; lines that break off counted
-export const ANALYSIS_VERSION = 4;
+// 5: the point of no return: a turn too where a player starts a slide they never come back from
+export const ANALYSIS_VERSION = 5;
 
 // Shorter games have no story to tell; the first plies are the opening, where the best move is no news
 export const MIN_PLIES = 16;
@@ -42,8 +43,11 @@ const own = (color, white) => (color === 'white' ? white : 100 - white);
 const round = (x) => Math.round(x);
 
 // A turn is a move that changes how its player stands (from ahead to level, from level to behind…)
-// with a real drop of their chances, not a step across the line
+// with a real drop of their chances, not a step across the line. Or the point of no return: the
+// same drop, how the player stands not changed yet, but their chances never come back for the rest
+// of a game they lose (an advantage built in two or three steps). Never a move in a game already lost.
 const TURN_DROP = 15;
+const LOST = 30;
 // A safety cap for a game going back and forth: the biggest are kept
 const MAX_TURNS = 8;
 // Each player's best moves: the engine's choice (or as good) where the next best was the most worse,
@@ -67,11 +71,13 @@ export function keyMoments(plies, final, { mate = false } = {}) {
   const curve = [...plies.map((p) => p.best.white), final];
   const turns = [];
   const candidates = [];
+  const noReturn = (color, i, before) =>
+    before > LOST && own(color, curve[curve.length - 1]) <= LOST && Math.max(...curve.slice(i + 1).map((w) => own(color, w))) <= before - TURN_DROP;
   plies.forEach((p, i) => {
     const before = own(p.color, curve[i]);
     const after = own(p.color, curve[i + 1]);
     const drop = before - after;
-    if (drop >= TURN_DROP && standing(after) < standing(before)) {
+    if (drop >= TURN_DROP && (standing(after) < standing(before) || noReturn(p.color, i, before))) {
       turns.push({ ply: i + 1, color: p.color, san: p.san, uci: p.uci, bestSan: p.best.san, bestUci: p.best.uci, fen: p.fen, before: round(before), after: round(after), drop });
     }
     if (i < OPENING_PLIES || !p.second) return;

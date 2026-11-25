@@ -8,7 +8,7 @@ import { extractGameId } from './utils';
 
 // The versions of scripts/analysis.mjs (ANALYSIS_VERSION) whose moments this page knows how to tell:
 // the same data, analysed again with a newer engine
-const VERSIONS = new Set([1, 2, 3, 4]);
+const VERSIONS = new Set([1, 2, 3, 4, 5]);
 
 // The analysis of the game behind the current link; none for an old link, a skipped game, a version
 // this page does not know, or a result decided by the organizer (the story would tell another end)
@@ -100,7 +100,10 @@ export function turnText(t: AnalysisMoment, names: Names, ctx?: StoryContext): s
   const best = figurineSan(t.bestSan ?? '');
   const from = standing(t.before ?? 50);
   const to = standing(t.after ?? 50);
+  // The point of no return: how the player stands has not changed yet, the game starts turning
+  const starts = from === to;
   if (!t.move || !ctx) {
+    if (starts) return from === 'ahead' ? `Con ${played} il vantaggio di ${mover} comincia a sfumare: ${best} lo teneva.` : `Con ${played} la partita comincia a girare a favore di ${other}: ${best} teneva l'equilibrio.`;
     if (from === 'ahead' && to === 'level') return `Con ${played} il vantaggio di ${mover} sfuma: con ${best} restava dalla sua parte.`;
     if (from === 'ahead') return `Con ${played} la partita si capovolge a favore di ${other}: con ${best} ${mover} restava avanti.`;
     return `Con ${played} la partita gira a favore di ${other}: ${best} teneva l'equilibrio.`;
@@ -108,8 +111,11 @@ export function turnText(t: AnalysisMoment, names: Names, ctx?: StoryContext): s
   const seed = ctx.seed + t.ply;
   const calm = levelMovesBefore(ctx.curve, t.ply);
   const lead = from === 'level' && calm >= 10 ? `dopo ${calm} mosse di equilibrio, ` : '';
-  const head =
-    from === 'ahead' && to === 'level'
+  const head = starts
+    ? from === 'ahead'
+      ? pick([`con ${played} il vantaggio di ${mover} comincia a sfumare`, `la mossa ${played} rimette in gioco ${other}`], seed)
+      : pick([`con ${played} la partita comincia a girare a favore di ${other}`, `la mossa ${played} dà a ${other} la strada giusta`], seed)
+    : from === 'ahead' && to === 'level'
       ? pick([`con ${played} il vantaggio di ${mover} sfuma`, `la mossa ${played} lascia sfumare il vantaggio di ${mover}`], seed)
       : from === 'ahead'
         ? pick([`con ${played} la partita si capovolge`, `la mossa ${played} capovolge la partita`], seed)
@@ -122,7 +128,7 @@ export function turnText(t: AnalysisMoment, names: Names, ctx?: StoryContext): s
     why = pick([`${other} risponde ${reply} e ${taken}`, `arriva ${reply}, e ${other} ${taken}`], seed);
   } else if (reply) why = pick([`${other} risponde ${reply} e prende l'iniziativa`, `dopo ${reply} la posizione di ${other} è migliore`], seed);
   const hold =
-    from === 'ahead' && to === 'level'
+    from === 'ahead' && (to === 'level' || starts)
       ? pick([`Con ${best} il vantaggio restava ${toName(mover)}.`, `${best} avrebbe conservato il vantaggio.`], seed)
       : from === 'ahead'
         ? pick([`Con ${best} ${mover} restava avanti.`, `${best} teneva ${mover} in vantaggio.`], seed)
