@@ -8,7 +8,7 @@ import { extractGameId } from './utils';
 
 // The versions of scripts/analysis.mjs (ANALYSIS_VERSION) whose moments this page knows how to tell:
 // the same data, analysed again with a newer engine
-const VERSIONS = new Set([1, 2, 3]);
+const VERSIONS = new Set([1, 2, 3, 4]);
 
 // The analysis of the game behind the current link; none for an old link, a skipped game, a version
 // this page does not know, or a result decided by the organizer (the story would tell another end)
