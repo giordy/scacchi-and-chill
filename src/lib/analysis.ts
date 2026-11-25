@@ -122,11 +122,26 @@ export function turnText(t: AnalysisMoment, names: Names, ctx?: StoryContext): s
         : pick([`con ${played} la partita gira a favore di ${other}`, `la mossa ${played} apre la porta ${toName(other)}`, `con ${played} la bilancia pende verso ${other}`], seed);
   let why = '';
   const reply = t.reply ? figurineSan(t.reply.san) : '';
-  if (t.mate && t.mate <= 6) why = reply ? `${other} ha un matto in ${t.mate}, a cominciare da ${reply}` : `${other} ha un matto in ${t.mate}`;
-  else if (reply && t.gain && t.gain >= 1) {
-    const taken = t.reply?.capture && (PIECES_IT[t.reply.capture]?.value ?? 0) >= Math.min(t.gain, 9) - 1 ? `prende ${the(t.reply.capture)} in ${t.reply.to}` : `guadagna ${materialText(t.gain)}`;
-    why = pick([`${other} risponde ${reply} e ${taken}`, `arriva ${reply}, e ${other} ${taken}`], seed);
-  } else if (reply) why = pick([`${other} risponde ${reply} e prende l'iniziativa`, `dopo ${reply} la posizione di ${other} è migliore`], seed);
+  // The engine's answer, not always the one played: then told as what could have been
+  const could = t.reply?.played === false;
+  const takesPiece = t.reply?.capture && t.gain && (PIECES_IT[t.reply.capture]?.value ?? 0) >= Math.min(t.gain, 9) - 1;
+  if (t.mate && t.mate <= 6) {
+    why = could
+      ? `${other} aveva un matto in ${t.mate}, a cominciare da ${reply}`
+      : reply
+        ? `${other} ha un matto in ${t.mate}, a cominciare da ${reply}`
+        : `${other} ha un matto in ${t.mate}`;
+  } else if (reply && t.gain && t.gain >= 1) {
+    if (could) why = `${other} poteva rispondere ${reply} e ${takesPiece ? `prendere ${the(t.reply?.capture)} in ${t.reply?.to}` : `guadagnare ${materialText(t.gain)}`}`;
+    else {
+      const taken = takesPiece ? `prende ${the(t.reply?.capture)} in ${t.reply?.to}` : `guadagna ${materialText(t.gain)}`;
+      why = pick([`${other} risponde ${reply} e ${taken}`, `arriva ${reply}, e ${other} ${taken}`], seed);
+    }
+  } else if (reply) {
+    why = could
+      ? pick([`${other} poteva rispondere ${reply} e prendere l'iniziativa`, `con ${reply} la posizione di ${other} sarebbe stata migliore`], seed)
+      : pick([`${other} risponde ${reply} e prende l'iniziativa`, `dopo ${reply} la posizione di ${other} è migliore`], seed);
+  }
   const hold =
     from === 'ahead' && (to === 'level' || starts)
       ? pick([`Con ${best} il vantaggio restava ${toName(mover)}.`, `${best} avrebbe conservato il vantaggio.`], seed)

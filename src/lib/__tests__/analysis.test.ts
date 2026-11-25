@@ -263,6 +263,21 @@ describe('the key moments on the page', () => {
     expect(squaresOf('e7e8q')).toEqual({ from: 'e7', to: 'e8' });
   });
 
+  it("tells the engine's answer as what could have been when another move was played", () => {
+    const base = { ...turn(50, 20), move: { piece: 'n', to: 'e5' } };
+    const ctx = { seed: 3, curve: [], turns: [] };
+    const rook = { san: 'Rxd1', piece: 'r', to: 'd1', capture: 'r' };
+    expect(turnText({ ...base, reply: { ...rook, played: false }, gain: 5 }, names, ctx)).toBe(
+      "Con \u2658\uFE0Exe5 la partita gira a favore di Bruno: Bruno poteva rispondere \u2656\uFE0Exd1 e prendere la torre in d1. \u2655\uFE0Ef3 teneva l'equilibrio."
+    );
+    expect(turnText({ ...base, reply: { ...rook, played: true }, gain: 5 }, names, ctx)).toBe(
+      "Con \u2658\uFE0Exe5 la partita gira a favore di Bruno: Bruno risponde \u2656\uFE0Exd1 e prende la torre in d1. \u2655\uFE0Ef3 teneva l'equilibrio."
+    );
+    expect(turnText({ ...base, reply: { san: 'd5', piece: 'p', to: 'd5', played: false }, gain: 3 }, names, ctx)).toContain('Bruno poteva rispondere d5 e guadagnare un pezzo.');
+    expect(turnText({ ...base, reply: { san: 'd5', piece: 'p', to: 'd5', played: false } }, names, ctx)).toContain("Bruno poteva rispondere d5 e prendere l'iniziativa.");
+    expect(turnText({ ...base, reply: { san: 'Qh4', piece: 'q', to: 'h4', played: false }, mate: 3 }, names, ctx)).toContain('Bruno aveva un matto in 3, a cominciare da \u2655\uFE0Eh4.');
+  });
+
   it('tells the point of no return as the start of the turn', () => {
     expect(turnText(turn(56, 36), names)).toBe("Con \u2658\uFE0Exe5 la partita comincia a girare a favore di Bruno: \u2655\uFE0Ef3 teneva l'equilibrio.");
     expect(turnText(turn(90, 72), names)).toBe('Con \u2658\uFE0Exe5 il vantaggio di Anna comincia a sfumare: \u2655\uFE0Ef3 lo teneva.');

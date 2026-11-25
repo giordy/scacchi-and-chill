@@ -25,14 +25,19 @@ describe('the facts behind a key moment', () => {
 
   it("finds the answer that punished a turn, what it won and the mate", () => {
     const p = { fen: BACK_RANK, uci: 'd4b5', best: { uci: 'd4f3' } };
-    const facts = turnFacts(p, { pv: ['d8d1'], score: { mate: -1 } });
+    // Black played the engine's answer
+    const facts = turnFacts(p, { pv: ['d8d1'], score: { mate: -1 } }, 'd8d1');
     expect(facts).toEqual({
       move: { piece: 'n', to: 'b5' },
       bestMove: { piece: 'n', to: 'f3' },
-      reply: { san: 'Rxd1#', piece: 'r', to: 'd1', capture: 'r', check: true },
+      reply: { san: 'Rxd1#', piece: 'r', to: 'd1', capture: 'r', check: true, played: true },
       gain: 5,
       mate: 1,
     });
+    // Black played something else: the answer is what could have been
+    expect(turnFacts(p, { pv: ['d8d1'], score: { mate: -1 } }, 'g8f8').reply.played).toBe(false);
+    // the game ended there (a resignation): nothing was played
+    expect(turnFacts(p, { pv: ['d8d1'], score: { mate: -1 } }, undefined).reply.played).toBe(false);
     // A piece taken and taken back is no gain
     const trade = turnFacts({ fen: ITALIAN, uci: 'c4f7', best: { uci: 'e1g1' } }, { pv: ['e8f7', 'f3g5', 'f7g8'], score: { cp: 0 } });
     expect(trade.gain).toBe(2);
@@ -99,6 +104,8 @@ describe('the facts behind a key moment', () => {
     };
     const out = withFacts(result, plies, undefined);
     expect(out.turns[0].reply.san).toBe('Rxd1#');
+    // the next ply is the answer played
+    expect(out.turns[0].reply.played).toBe(true);
     expect(out.turns[0].gain).toBe(5);
     expect(out.finish.move).toEqual({ piece: 'r', to: 'd1', capture: 'r', check: true });
   });

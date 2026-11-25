@@ -39,7 +39,7 @@ export interface AnalysisMoment {
   // The facts behind the moment (scripts/moveFacts.mjs), from version 3 of the analysis
   move?: MoveFacts; // the move played
   bestMove?: MoveFacts; // a turn: the engine's move in its place
-  reply?: MoveFacts & { san: string }; // a turn: the opponent's best answer
+  reply?: MoveFacts & { san: string; played?: boolean }; // a turn: the opponent's best answer, and whether they played it
   gain?: number; // material won along the engine's line: by the opponent after a turn, by the player after a best move
   mate?: number; // a mate in so many moves: for the opponent after a turn, for the player after a best move
   sacrifice?: boolean; // a best move giving material away

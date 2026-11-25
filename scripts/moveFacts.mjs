@@ -69,8 +69,9 @@ const other = (side) => (side === 'w' ? 'b' : 'w');
 
 // A turn: the move played, the engine's move in its place, and the line that punished it.
 // p: the ply ({ fen, uci, best: { uci } }); after: the engine's line from the position after the
-// move ({ pv, score })
-export function turnFacts(p, after) {
+// move ({ pv, score }); next: the move the opponent actually played then (UCI), if any: the
+// engine's answer may not be it, and the page tells it as what could have been
+export function turnFacts(p, after, next) {
   const side = p.fen.split(' ')[1];
   const { moves, fens } = playLine(p.fen, [p.uci]);
   if (!moves[0]) return {};
@@ -79,7 +80,7 @@ export function turnFacts(p, after) {
   if (best) facts.bestMove = moveInfo(best);
   const pv = after?.pv ?? [];
   const reply = playLine(fens[1], pv.slice(0, 1)).moves[0];
-  if (reply) facts.reply = { san: reply.san, ...moveInfo(reply) };
+  if (reply) facts.reply = { san: reply.san, ...moveInfo(reply), played: next === pv[0] };
   // What the opponent wins: the move played and their line, counted after the mover's next move
   const gain = gainAlong(p.fen, [p.uci, ...pv], other(side), 1, 7);
   if (gain !== undefined && gain > 0) facts.gain = gain;
@@ -125,7 +126,7 @@ export function withFacts(result, plies, final) {
   const finish = result.finish && playLine(result.finish.fen, [result.finish.uci]).moves[0];
   return {
     ...result,
-    turns: result.turns.map((t) => ({ ...t, ...turnFacts(plies[t.ply - 1], after(t.ply - 1)) })),
+    turns: result.turns.map((t) => ({ ...t, ...turnFacts(plies[t.ply - 1], after(t.ply - 1), plies[t.ply]?.uci) })),
     best: result.best.map((b) => ({ ...b, ...bestFacts(plies[b.ply - 1]) })),
     ...(result.finish ? { finish: { ...result.finish, ...(finish ? { move: moveInfo(finish) } : {}) } } : {}),
   };
