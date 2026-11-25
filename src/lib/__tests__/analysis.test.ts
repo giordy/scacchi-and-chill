@@ -5,7 +5,7 @@ import { ANALYSIS_VERSION, keyMoments, needsAnalysis, phasesOf, winPercent } fro
 import { parseSearch } from '../../../scripts/analyse-games.mjs';
 // @ts-expect-error a Node script without types
 import { gameIdOf } from '../../../scripts/sync-results.mjs';
-import { analysisOf, bestText, endingText, finishText, hasMoments, italianSan, materialText, momentsOf, moveLabel, openingText, phaseText, squaresOf, storyOf, StoryContext, turnText } from '../analysis';
+import { analysisOf, bestText, endingText, finishText, figurineSan, hasMoments, materialText, momentsOf, moveLabel, openingText, phaseText, squaresOf, storyOf, StoryContext, turnText } from '../analysis';
 import { AnalysisMoment, GameAnalysis } from '../../types';
 
 const moves20 = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7';
@@ -231,29 +231,32 @@ describe('the key moments on the page', () => {
   const names = { white: 'Anna', black: 'Bruno' };
   const turn = (before: number, after: number): AnalysisMoment => ({ ply: 45, color: 'white', san: 'Nxe5', uci: 'f3e5', fen: 'x', bestSan: 'Qf3', bestUci: 'd1f3', before, after });
 
-  it('writes the moves the Italian way', () => {
-    expect(italianSan('Nxe5+')).toBe('Cxe5+');
-    expect(italianSan('Bb5')).toBe('Ab5');
-    expect(italianSan('Rxe8#')).toBe('Txe8#');
-    expect(italianSan('Kf1')).toBe('Rf1');
-    expect(italianSan('e8=Q')).toBe('e8=D');
-    expect(italianSan('O-O-O')).toBe('O-O-O');
-    expect(moveLabel(45, 'Nxe5')).toBe('23. Cxe5');
-    expect(moveLabel(46, 'Qf3')).toBe('23... Df3');
+  it('writes the pieces as figurines, as Lichess does', () => {
+    expect(figurineSan('Nxe5+')).toBe('\u2658\uFE0Exe5+');
+    expect(figurineSan('Bb5')).toBe('\u2657\uFE0Eb5');
+    expect(figurineSan('Rxe8#')).toBe('\u2656\uFE0Exe8#');
+    expect(figurineSan('Kf1')).toBe('\u2654\uFE0Ef1');
+    expect(figurineSan('Qh5')).toBe('\u2655\uFE0Eh5');
+    expect(figurineSan('e8=Q')).toBe('e8=\u2655\uFE0E');
+    // pawns, squares and castling as they are
+    expect(figurineSan('exd5')).toBe('exd5');
+    expect(figurineSan('O-O-O')).toBe('O-O-O');
+    expect(moveLabel(45, 'Nxe5')).toBe('23. \u2658\uFE0Exe5');
+    expect(moveLabel(46, 'Qf3')).toBe('23... \u2655\uFE0Ef3');
     expect(squaresOf('e7e8q')).toEqual({ from: 'e7', to: 'e8' });
   });
 
   it('tells a turn kindly, by how the player stood', () => {
-    expect(turnText(turn(50, 20), names)).toBe("Con Cxe5 la partita gira a favore di Bruno: Df3 teneva l'equilibrio.");
-    expect(turnText(turn(80, 50), names)).toBe('Con Cxe5 il vantaggio di Anna sfuma: con Df3 restava dalla sua parte.');
-    expect(turnText(turn(85, 10), names)).toBe('Con Cxe5 la partita si capovolge a favore di Bruno: con Df3 Anna restava avanti.');
+    expect(turnText(turn(50, 20), names)).toBe("Con \u2658\uFE0Exe5 la partita gira a favore di Bruno: \u2655\uFE0Ef3 teneva l'equilibrio.");
+    expect(turnText(turn(80, 50), names)).toBe('Con \u2658\uFE0Exe5 il vantaggio di Anna sfuma: con \u2655\uFE0Ef3 restava dalla sua parte.');
+    expect(turnText(turn(85, 10), names)).toBe('Con \u2658\uFE0Exe5 la partita si capovolge a favore di Bruno: con \u2655\uFE0Ef3 Anna restava avanti.');
   });
 
   it("tells a player's best move by how much it mattered", () => {
     const best = (gap: number, after: number): AnalysisMoment => ({ ply: 20, color: 'black', san: 'Rxd4', uci: 'd8d4', fen: 'x', after, gap });
-    expect(bestText(best(25, 50), names)).toBe("Bruno trova Txd4, l'unica mossa che tiene l'equilibrio.");
-    expect(bestText(best(12, 80), names)).toBe('Bruno trova Txd4, la mossa che tiene il vantaggio.');
-    expect(bestText(best(6, 20), names)).toBe('Bruno trova Txd4, la mossa giusta, che tiene aperta la partita.');
+    expect(bestText(best(25, 50), names)).toBe("Bruno trova \u2656\uFE0Exd4, l'unica mossa che tiene l'equilibrio.");
+    expect(bestText(best(12, 80), names)).toBe('Bruno trova \u2656\uFE0Exd4, la mossa che tiene il vantaggio.');
+    expect(bestText(best(6, 20), names)).toBe('Bruno trova \u2656\uFE0Exd4, la mossa giusta, che tiene aperta la partita.');
   });
 
   // seed 0: the first wording of each list
@@ -264,18 +267,18 @@ describe('the key moments on the page', () => {
     const ctx = level(60);
     // seed 0 + ply 45: the first wording of three, the second of two; after 22 moves of balance
     expect(turnText({ ...facts, reply: { san: 'Rxd1', piece: 'r', to: 'd1', capture: 'r' }, gain: 5 }, names, ctx)).toBe(
-      "Dopo 22 mosse di equilibrio, con Cxe5 la partita gira a favore di Bruno: arriva Txd1, e Bruno prende la torre in d1. Df3 teneva l'equilibrio."
+      "Dopo 22 mosse di equilibrio, con \u2658\uFE0Exe5 la partita gira a favore di Bruno: arriva \u2656\uFE0Exd1, e Bruno prende la torre in d1. \u2655\uFE0Ef3 teneva l'equilibrio."
     );
     // seed 1: the second wordings
     expect(turnText({ ...facts, reply: { san: 'Qh4', piece: 'q', to: 'h4' }, mate: 3 }, names, { ...ctx, seed: 1, curve: [] })).toBe(
-      'La mossa Cxe5 apre la porta a Bruno: Bruno ha un matto in 3, a cominciare da Dh4. Con Df3 la partita restava in equilibrio.'
+      'La mossa \u2658\uFE0Exe5 apre la porta a Bruno: Bruno ha un matto in 3, a cominciare da \u2655\uFE0Eh4. Con \u2655\uFE0Ef3 la partita restava in equilibrio.'
     );
     expect(turnText({ ...facts, reply: { san: 'Bd6', piece: 'b', to: 'd6' } }, names, { ...ctx, seed: 2, curve: [] })).toBe(
-      "Con Cxe5 la bilancia pende verso Bruno: dopo Ad6 la posizione di Bruno è migliore. Meglio era Df3, che teneva la posizione."
+      "Con \u2658\uFE0Exe5 la bilancia pende verso Bruno: dopo \u2657\uFE0Ed6 la posizione di Bruno è migliore. Meglio era \u2655\uFE0Ef3, che teneva la posizione."
     );
     // From ahead: what the player lost, never a harsh word
     expect(turnText({ ...turn(85, 50), move: { piece: 'n', to: 'e5' }, reply: { san: 'd5', piece: 'p', to: 'd5' }, gain: 3 }, names, { ...ctx, seed: 1 })).toBe(
-      'Con Cxe5 il vantaggio di Anna sfuma: Bruno risponde d5 e guadagna un pezzo. Con Df3 il vantaggio restava ad Anna.'
+      'Con \u2658\uFE0Exe5 il vantaggio di Anna sfuma: Bruno risponde d5 e guadagna un pezzo. Con \u2655\uFE0Ef3 il vantaggio restava ad Anna.'
     );
     expect(materialText(1)).toBe('un pedone');
     expect(materialText(2)).toBe('due pedoni');
@@ -286,31 +289,31 @@ describe('the key moments on the page', () => {
   it("tells a best move by its facts: what it is, what it wins, what the others cost", () => {
     const best = (extra: Partial<AnalysisMoment>, ply = 20): AnalysisMoment => ({ ply, color: 'black', san: 'Rxd4', uci: 'd8d4', fen: 'x', after: 50, gap: 25, move: { piece: 'r', to: 'd4' }, ...extra });
     const ctx = level(60);
-    expect(bestText(best({ sacrifice: true }), names, ctx)).toBe("Bruno sacrifica materiale con Txd4, l'unica mossa che tiene l'equilibrio.");
-    expect(bestText(best({ move: { piece: 'q', to: 'h4', check: true }, mate: 4 }, 21), names, ctx)).toBe('Bruno dà scacco con Txd4 e avvia un matto in 4.');
-    expect(bestText(best({ move: { piece: 'r', to: 'd4', capture: 'n' }, alt: { gain: 5 } }), names, ctx)).toBe('Bruno prende il cavallo con Txd4: ogni altra mossa costava molto materiale.');
+    expect(bestText(best({ sacrifice: true }), names, ctx)).toBe("Bruno sacrifica materiale con \u2656\uFE0Exd4, l'unica mossa che tiene l'equilibrio.");
+    expect(bestText(best({ move: { piece: 'q', to: 'h4', check: true }, mate: 4 }, 21), names, ctx)).toBe('Bruno dà scacco con \u2656\uFE0Exd4 e avvia un matto in 4.');
+    expect(bestText(best({ move: { piece: 'r', to: 'd4', capture: 'n' }, alt: { gain: 5 } }), names, ctx)).toBe('Bruno prende il cavallo con \u2656\uFE0Exd4: ogni altra mossa costava molto materiale.');
     // the mate in so many moves is the next best's only: no number for every other move
-    expect(bestText(best({ alt: { mate: 2 } }, 23), names, ctx)).toBe('Bruno gioca Txd4: ogni altra mossa lasciava ad Anna il matto.');
+    expect(bestText(best({ alt: { mate: 2 } }, 23), names, ctx)).toBe('Bruno gioca \u2656\uFE0Exd4: ogni altra mossa lasciava ad Anna il matto.');
     // Right after the opponent's turn: the chance taken
     const punish = { ...ctx, turns: [{ ...turn(50, 20), ply: 19 }] };
     expect(bestText(best({ move: { piece: 'r', to: 'd4', capture: 'q', check: true } }), names, punish)).toBe(
-      "Bruno non perdona: prende la donna con scacco, Txd4, l'unica mossa che tiene l'equilibrio."
+      "Bruno non perdona: prende la donna con scacco, \u2656\uFE0Exd4, l'unica mossa che tiene l'equilibrio."
     );
     // Back from a lost position
     const back = { ...ctx, curve: [50, 90, 90, ...Array(60).fill(50)] };
-    expect(bestText(best({}), names, back)).toBe("Senza mollare, Bruno trova Txd4, l'unica mossa che tiene l'equilibrio.");
+    expect(bestText(best({}), names, back)).toBe("Senza mollare, Bruno trova \u2656\uFE0Exd4, l'unica mossa che tiene l'equilibrio.");
     // An older analysis, without the facts
-    expect(bestText({ ...best({}), move: undefined }, names, ctx)).toBe("Bruno trova Txd4, l'unica mossa che tiene l'equilibrio.");
+    expect(bestText({ ...best({}), move: undefined }, names, ctx)).toBe("Bruno trova \u2656\uFE0Exd4, l'unica mossa che tiene l'equilibrio.");
   });
 
   it('tells the final blow by the piece that gives it', () => {
     const f: AnalysisMoment = { ply: 60, color: 'white', san: 'Qh7#', uci: 'd3h7', fen: 'x', move: { piece: 'q', to: 'h7', check: true } };
     expect(finishText(f, names, level(60))).toBe('La donna di Anna arriva in h7 e chiude la partita.');
     expect(finishText(f, names, { ...level(60), seed: 1 })).toBe('Anna chiude la partita con la donna in h7.');
-    expect(finishText({ ...f, move: undefined }, names)).toBe('Anna chiude la partita con Dh7#.');
+    expect(finishText({ ...f, move: undefined }, names)).toBe('Anna chiude la partita con \u2655\uFE0Eh7#.');
     // castling or a promotion: the piece that mates is not the one that moved
     expect(finishText({ ...f, san: 'O-O#', uci: 'e1g1', move: { piece: 'k', to: 'g1', castle: true, check: true } }, names, level(60))).toBe('Anna arrocca e chiude la partita: O-O#.');
-    expect(finishText({ ...f, san: 'e8=Q#', uci: 'e7e8q', move: { piece: 'p', to: 'e8', promotion: 'q', check: true } }, names, level(60))).toBe('Anna promuove in e8 e chiude la partita: e8=D#.');
+    expect(finishText({ ...f, san: 'e8=Q#', uci: 'e7e8q', move: { piece: 'p', to: 'e8', promotion: 'q', check: true } }, names, level(60))).toBe('Anna promuove in e8 e chiude la partita: e8=\u2655\uFE0E#.');
   });
 
   it('tells the moments in the order they were played', () => {
@@ -323,14 +326,14 @@ describe('the key moments on the page', () => {
       swings: 1,
     };
     expect(momentsOf(a, names).map((m) => [m.kind, m.title])).toEqual([
-      ['best', '10... Txd4 · La mossa di Bruno'],
-      ['turn', '23. Cxe5 · La svolta'],
+      ['best', '10... \u2656\uFE0Exd4 · La mossa di Bruno'],
+      ['turn', '23. \u2658\uFE0Exe5 · La svolta'],
     ]);
     // The checkmate is told once, as the final blow
     const mate = { ply: 20, color: 'black' as const, san: 'Rxd4#', uci: 'd8d4', fen: 'x' };
     expect(momentsOf({ ...a, finish: mate }, names).map((m) => [m.kind, m.title, m.text])).toEqual([
-      ['finish', '10... Txd4# · Scacco matto', 'Bruno chiude la partita con Txd4#.'],
-      ['turn', '23. Cxe5 · La svolta', "Con Cxe5 la partita gira a favore di Bruno: Df3 teneva l'equilibrio."],
+      ['finish', '10... \u2656\uFE0Exd4# · Scacco matto', 'Bruno chiude la partita con \u2656\uFE0Exd4#.'],
+      ['turn', '23. \u2658\uFE0Exe5 · La svolta', "Con \u2658\uFE0Exe5 la partita gira a favore di Bruno: \u2655\uFE0Ef3 teneva l'equilibrio."],
     ]);
   });
 

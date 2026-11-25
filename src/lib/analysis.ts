@@ -22,14 +22,17 @@ export function analysisOf(game: Pick<HistoryGame, 'url' | 'analysis' | 'decisio
 // Something to tell: a moment, or at least the phases of the game
 export const hasMoments = (a?: GameAnalysis) => !!a && ((a.turns?.length ?? 0) + (a.best?.length ?? 0) > 0 || !!a.finish || !!a.phases?.middle);
 
-// Italian piece letters: Re, Donna, Torre, Alfiere, Cavallo (squares and castling stay as they are)
-const PIECES: Record<string, string> = { K: 'R', Q: 'D', R: 'T', B: 'A', N: 'C' };
-export const italianSan = (san: string) => san.replace(/[KQRBN]/g, (p) => PIECES[p]);
+// The pieces as figurines, as Lichess writes them: ♔ ♕ ♖ ♗ ♘, the same outline for both sides (the
+// move number says whose), clear to anyone and free of the Italian letters' trap (R is the king, not
+// the rook). Each is followed by U+FE0E, which asks for the plain glyph: some phones draw these
+// symbols as coloured emoji otherwise. Squares and castling stay as they are.
+const FIGURINES: Record<string, string> = { K: '\u2654', Q: '\u2655', R: '\u2656', B: '\u2657', N: '\u2658' };
+export const figurineSan = (san: string) => san.replace(/[KQRBN]/g, (p) => `${FIGURINES[p]}\uFE0E`);
 
 // "23. Cxe5" for White, "23... Cxe5" for Black
 export function moveLabel(ply: number, san: string): string {
   const n = Math.ceil(ply / 2);
-  return `${n}${ply % 2 === 1 ? '.' : '...'} ${italianSan(san)}`;
+  return `${n}${ply % 2 === 1 ? '.' : '...'} ${figurineSan(san)}`;
 }
 
 // How a player stands from their own chances: ahead, level, behind (the same lines as the script)
@@ -93,8 +96,8 @@ const ownChances = (color: Color, white: number) => (color === 'white' ? white :
 export function turnText(t: AnalysisMoment, names: Names, ctx?: StoryContext): string {
   const mover = names[t.color];
   const other = names[otherOf(t.color)];
-  const played = italianSan(t.san);
-  const best = italianSan(t.bestSan ?? '');
+  const played = figurineSan(t.san);
+  const best = figurineSan(t.bestSan ?? '');
   const from = standing(t.before ?? 50);
   const to = standing(t.after ?? 50);
   if (!t.move || !ctx) {
@@ -112,7 +115,7 @@ export function turnText(t: AnalysisMoment, names: Names, ctx?: StoryContext): s
         ? pick([`con ${played} la partita si capovolge`, `la mossa ${played} capovolge la partita`], seed)
         : pick([`con ${played} la partita gira a favore di ${other}`, `la mossa ${played} apre la porta ${toName(other)}`, `con ${played} la bilancia pende verso ${other}`], seed);
   let why = '';
-  const reply = t.reply ? italianSan(t.reply.san) : '';
+  const reply = t.reply ? figurineSan(t.reply.san) : '';
   if (t.mate && t.mate <= 6) why = reply ? `${other} ha un matto in ${t.mate}, a cominciare da ${reply}` : `${other} ha un matto in ${t.mate}`;
   else if (reply && t.gain && t.gain >= 1) {
     const taken = t.reply?.capture && (PIECES_IT[t.reply.capture]?.value ?? 0) >= Math.min(t.gain, 9) - 1 ? `prende ${the(t.reply.capture)} in ${t.reply.to}` : `guadagna ${materialText(t.gain)}`;
@@ -133,7 +136,7 @@ export function turnText(t: AnalysisMoment, names: Names, ctx?: StoryContext): s
 // Without the facts (an older analysis), by how much worse the next best was.
 export function bestText(b: AnalysisMoment, names: Names, ctx?: StoryContext): string {
   const mover = names[b.color];
-  const san = italianSan(b.san);
+  const san = figurineSan(b.san);
   // How much worse the next best was: the only move, a clear one, or just the most precise
   const gap = b.gap ?? 0;
   const which = gap >= 20 ? "l'unica mossa che" : gap >= 10 ? 'la mossa che' : 'la mossa giusta, che';
@@ -169,7 +172,7 @@ export function bestText(b: AnalysisMoment, names: Names, ctx?: StoryContext): s
 // The final blow: the checkmate, told by the piece that gives it
 export function finishText(f: AnalysisMoment, names: Names, ctx?: StoryContext): string {
   const mover = names[f.color];
-  const san = italianSan(f.san);
+  const san = figurineSan(f.san);
   if (!f.move || !ctx) return `${mover} chiude la partita con ${san}.`;
   // Castling or a promotion: the piece that mates is not the one that moved
   if (f.move.castle) return `${mover} arrocca e chiude la partita: ${san}.`;

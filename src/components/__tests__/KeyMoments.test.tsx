@@ -25,7 +25,7 @@ describe('KeyMoments', () => {
 
   it('shows one moment at a time on a big board, the first one first', () => {
     expect(html).toContain('<span>1 di 2</span>');
-    expect(html).toContain('5. Cc3 · La mossa di Anna');
+    expect(html).toContain('5. \u2658\uFE0Ec3 · La mossa di Anna');
     expect(html).not.toContain('La svolta</strong>');
     expect(html.match(/class="mini-board/g)).toHaveLength(1);
     // with the files and ranks, each in the colour of the other square
@@ -39,7 +39,7 @@ describe('KeyMoments', () => {
 
   it('tells an older analysis, without the facts, in plain words', () => {
     const v1 = renderToStaticMarkup(<KeyMoments analysis={{ ...analysis, v: 1, phases: undefined }} names={{ white: 'Anna', black: 'Bruno' }} />);
-    expect(v1).toContain('Anna trova Cc3, la mossa che tiene l&#x27;equilibrio.');
+    expect(v1).toContain('Anna trova \u2658\uFE0Ec3, la mossa che tiene l&#x27;equilibrio.');
     // no phases: no story by phase, the moments still on the board
     expect(v1).not.toContain('Nel mediogioco');
     expect(v1).toContain('<span>1 di 2</span>');
