@@ -1331,7 +1331,9 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
   box-shadow: inset 3px 0 0 var(--info);
 }
 
+/* Positioned: the explanation of a sign opens under its own line, across it */
 .match-card .player-row {
+  position: relative;
   gap: 9px;
 }
 
@@ -1418,6 +1420,7 @@ button.infotip-trigger.match-mark:focus-visible {
 
 /* The line under the players, across the card */
 .match-meta {
+  position: relative;
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
@@ -3247,17 +3250,9 @@ details.pillsbury-about > summary { cursor: pointer; font-size: 14px; font-weigh
   width: max-content;
   max-width: min(220px, calc(100vw - 48px));
 }
-/* The signs of a game card (colpaccio, summit, the master's opening): same, under the sign tapped */
-.infotip:has(> .match-mark) {
-  position: relative;
-}
-.infotip:has(> .match-mark) .infotip-bubble {
-  top: calc(100% + 8px);
-  left: -6px;
-  right: auto;
-  width: max-content;
-  max-width: min(260px, calc(100vw - 48px));
-}
+/* The signs of a game card (colpaccio, summit, the master's opening): under the line of the sign
+   tapped, across that line. Placed against the sign itself it ran past the edge of the page, which
+   cuts it (see .match-card .player-row, .match-meta) */
 
 @keyframes infotip-in {
   from { opacity: 0; transform: translateY(-4px); }
