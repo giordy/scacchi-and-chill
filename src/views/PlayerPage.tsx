@@ -612,10 +612,16 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                 {byOrganizer(game.status) ? (
                   <span className="opening-label">Deciso dall'organizzatore</span>
                 ) : replayOf(game) ? (
-                  // A finished game opens its replay, with its key moments when it has them
-                  <GameLink id={replayOf(game)!.id} moments={replayOf(game)!.moments} className="lichess-link-btn player-game-replay">
-                    {replayOf(game)!.moments ? "✨ Momenti" : "▶ Rivedi"}
-                  </GameLink>
+                  // A finished game opens its replay, with its key moments when it has them, and beside
+                  // it the game on Lichess, as on the match cards
+                  <span className="player-game-actions">
+                    <GameLink id={replayOf(game)!.id} moments={replayOf(game)!.moments} className="lichess-link-btn player-game-replay">
+                      {replayOf(game)!.moments ? "✨ Momenti" : "▶ Rivedi"}
+                    </GameLink>
+                    <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn player-game-lichess" aria-label="Apri su Lichess" title="Apri su Lichess">
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                  </span>
                 ) : game.url ? (
                   <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
                     Lichess

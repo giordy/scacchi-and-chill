@@ -4372,8 +4372,14 @@ button.btn-mini.btn-go {
   background: var(--panel);
   font-size: 13px;
 }
-.player-game .lichess-link-btn:not(.player-game-replay)::after {
+.player-game .lichess-link-btn:not(.player-game-replay, .player-game-lichess)::after {
   content: " ↗";
+}
+/* The replay on the site and, beside it, the game on Lichess */
+.player-game-actions {
+  display: flex;
+  gap: 6px;
+  justify-self: start;
 }
 
 /* Partite: the push notifications of the moves (components/PushToggle.tsx) */
