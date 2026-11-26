@@ -5,22 +5,23 @@ import { PILLSBURY_ID } from '../lib/pillsbury';
 import { awardEmoji, awardTitle } from '../lib/awards';
 import { PillsburyIcon } from './PillsburyIcon';
 import { useNameOf } from './Names';
+import { GameLink } from './GameRoute';
 
 // The Trofeo Pillsbury has its own drawn medal; the other awards their emoji
 const AwardMark = ({ award }: { award: SeasonAward }) => (award.id === PILLSBURY_ID ? <PillsburyIcon /> : <>{awardEmoji(award)}</>);
 
 // Grid of the end-of-season awards, each winner linking to their player page
-// Links to the games of an award: "vedi su Lichess", or "su Lichess: 1 · 2" when there are more (the
-// same words as the records)
+// Links to the games of an award, replayed on the site with their key moments: "vedi la partita",
+// or "partite: 1 · 2" when there are more
 function GameLinks({ ids }: { ids?: string[] }) {
   if (!ids || ids.length === 0) return null;
   const link = (id: string, text: string) => (
-    <a key={id} href={`https://lichess.org/${id}`} target="_blank" rel="noopener noreferrer">{text}</a>
+    <GameLink key={id} id={id}>{text}</GameLink>
   );
-  if (ids.length === 1) return <> · {link(ids[0], 'vedi su Lichess')}</>;
+  if (ids.length === 1) return <> · {link(ids[0], 'vedi la partita')}</>;
   return (
     <>
-      {' · su Lichess: '}
+      {' · partite: '}
       {ids.map((id, i) => (
         <React.Fragment key={id}>
           {i > 0 && ' · '}

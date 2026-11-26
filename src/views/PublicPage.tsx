@@ -5,6 +5,7 @@ import { useHash } from '../hooks/useHash';
 import { parsePlayerHash, publicViewHref } from '../lib/routes';
 
 import { LoadingScreen } from '../components/LoadingScreen';
+import { GameRoute } from '../components/GameRoute';
 import { PublicTournamentView } from '../PublicTournamentView';
 import { PresenceInfo } from '../lib/presence';
 import { NameOf } from '../lib/roster';
@@ -56,12 +57,15 @@ export function PublicPage({ seasons, ready, failed, staleAt, pledges, onPledged
       <button type="button" className="link-button" onClick={onRetry}>Riprova ora</button>
     </p>
   );
+  // A game opened by its address (lib/routes.ts): its replay, over the page
+  const game = <GameRoute hash={hash} history={history} gameStates={gameStates} seasons={seasons} nameOf={nameOf} />;
   const playerHandle = parsePlayerHash(hash);
   if (playerHandle) {
     return (
       <Suspense fallback={<LoadingScreen label="Caricamento…" />}>
         {stale}
         <PlayerPage handle={playerHandle} config={config} history={history} gameStates={gameStates} nameOf={nameOf} presence={presence} seasons={seasons} />
+        {game}
       </Suspense>
     );
   }
@@ -93,6 +97,7 @@ export function PublicPage({ seasons, ready, failed, staleAt, pledges, onPledged
           <a href="#admin" className="admin-link">Area organizzatore</a>
         </nav>
       </footer>
+      {game}
     </main>
   );
 }

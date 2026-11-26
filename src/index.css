@@ -2344,8 +2344,8 @@ button.infotip-trigger.player-elo-badge {
   margin-bottom: 8px;
 }
 
-/* Finished game: the final position opens the replay */
-button.mini-board-replay {
+/* Finished game: the final position opens the replay (a link: the game has an address of its own) */
+.mini-board-replay {
   position: relative;
   padding: 0;
   border: 0;
@@ -2470,6 +2470,36 @@ button.replay-close {
 
 .replay-link {
   justify-self: start;
+}
+
+/* Title and, under it, the season and the round */
+.replay-title {
+  display: grid;
+  min-width: 0;
+}
+.replay-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Lichess and «Condividi», on one line */
+.replay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+}
+button.replay-share {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+.replay-shared {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .key-moments {
@@ -4342,7 +4372,7 @@ button.btn-mini.btn-go {
   background: var(--panel);
   font-size: 13px;
 }
-.player-game .lichess-link-btn::after {
+.player-game .lichess-link-btn:not(.player-game-replay)::after {
   content: " ↗";
 }
 

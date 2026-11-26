@@ -65,6 +65,27 @@ describe('before closing', () => {
     expect(closeReminders(input({ history }))).toEqual(['1 partita non ancora conclusa', 'il racconto finale non risulta mandato', 'i premi non risultano mandati']);
     expect(closeReminders(input({ history: [done('1', 'anna', 'bruno')], ticks: { 'stagione-3-fischer': ['review', 'awards'] } }))).toEqual([]);
   });
+
+  it('reminds of the finished games still waiting for their key moments, which closing now would lose', () => {
+    const moves = Array.from({ length: 20 }, () => 'e4').join(' ');
+    const ticks = { 'stagione-3-fischer': ['review', 'awards'] };
+    const played = (id: string, extra: Partial<HistoryGame> = {}): HistoryGame => ({
+      round: '1',
+      white: 'anna',
+      black: 'bruno',
+      url: `https://lichess.org/${id}`,
+      lichess: { id, status: 'resign', winner: 'white', moves },
+      ...extra,
+    });
+    const history = [
+      played('aaaaaaaa'),
+      played('bbbbbbbb', { analysis: { v: 4, id: 'bbbbbbbb' } }), // an older version is still kept
+      played('cccccccc', { decision: { result: '1-0', at: 1 } }),
+      played('dddddddd', { lichess: { id: 'dddddddd', status: 'resign', winner: 'white', moves: 'e4 e5' } }), // too short to analyse
+      played('eeeeeeee', { lichess: { id: 'eeeeeeee', status: 'cheat', winner: 'white', moves } }),
+    ];
+    expect(closeReminders(input({ history, ticks }))).toEqual(['1 partita aspetta ancora i momenti chiave (arrivano entro qualche ora)']);
+  });
 });
 
 describe('toggleTick', () => {

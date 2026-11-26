@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { parseBackup, restoreBackup, RestoreIO } from '../backup';
-import type { SeasonArchive } from '../../types';
+import type { GameAnalysis, SeasonArchive } from '../../types';
 
 const ok = {
   version: '2.0',
@@ -71,6 +71,9 @@ describe('restoreBackup', () => {
       saveMediaImage: vi.fn(async (_id: string, _dataUrl: string) => {
         steps.push('media');
       }),
+      saveAnalyses: vi.fn(async (_analyses: Record<string, GameAnalysis>) => {
+        steps.push('analyses');
+      }),
       replaceOrganizerData: vi.fn(() => steps.push('organizer')),
     } satisfies RestoreIO;
     return { io, steps };
@@ -87,6 +90,16 @@ describe('restoreBackup', () => {
     expect(io.onUpdateSchedule).toHaveBeenCalledWith(manual.schedule);
     expect(io.onUpdateTournamentMeta).toHaveBeenCalledWith({ ...manual.tournament, roundEnds: [] });
     expect(io.saveSeasonArchive.mock.calls.map(([s]) => s.id)).toEqual(['stagione-1', 'stagione-0']);
+  });
+
+  it('puts back the key moments of the archived games, each only under its own game', async () => {
+    const analysis = (id: string) => ({ v: 5, id, curve: [50, 60] });
+    const file = { ...manual, analyses: { abcdefgh: analysis('abcdefgh'), ijklmnop: analysis('zzzzzzzz'), 'non-valido': analysis('non-valido') } };
+    const { data, summary } = parseBackup(JSON.stringify(file));
+    const { io, steps } = fakeIO();
+    await restoreBackup(data, summary, '', io);
+    expect(io.saveAnalyses).toHaveBeenCalledWith({ abcdefgh: analysis('abcdefgh') });
+    expect(steps.indexOf('analyses')).toBeGreaterThan(steps.indexOf('season'));
   });
 
   it('saves only the photos that are small images', async () => {
@@ -113,6 +126,7 @@ describe('restoreBackup', () => {
     expect(io.replaceOrganizerData).not.toHaveBeenCalled();
     expect(io.saveSeasonArchive).not.toHaveBeenCalled();
     expect(io.saveMediaImage).not.toHaveBeenCalled();
+    expect(io.saveAnalyses).not.toHaveBeenCalled();
   });
 
   it('restores the ends of the rounds of the file (Turni con scadenza)', async () => {

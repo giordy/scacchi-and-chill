@@ -335,6 +335,8 @@ export interface BackupData {
   settings?: Omit<Settings, "token">;
   anecdotes?: Record<string, string>;
   media?: Record<string, string>; // uploaded photos by id (see lib/media.ts): compressed JPEG data URLs
+  // The key moments of the archived seasons' games, by Lichess id (tournaments/<id>/analyses)
+  analyses?: Record<string, GameAnalysis>;
 }
 
 

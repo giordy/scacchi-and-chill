@@ -92,9 +92,14 @@ describe.skipIf(!emulator)('firebaseService on Firestore', () => {
       gamesPlayed: 1,
     } as unknown as SeasonArchive;
     await service.saveSeasonArchive(archive);
+    // The key moments go to a collection of their own before the games are deleted
+    await service.saveAnalyses({ g0000000: { v: 5, id: 'g0000000', curve: [50, 70] } });
     await service.deleteAllGames();
     const publicSeason = await getDoc(doc(env.unauthenticatedContext().firestore(), `${T}/seasons/stagione-2`));
     expect(publicSeason.data()).toMatchObject({ season: 'Stagione 2', champion: { handle: 'w0' } });
+    const moments = await getDoc(doc(env.unauthenticatedContext().firestore(), `${T}/analyses/g0000000`));
+    expect(moments.data()).toEqual({ v: 5, id: 'g0000000', curve: [50, 70] });
+    expect(await service.loadAllAnalyses()).toEqual({ g0000000: { v: 5, id: 'g0000000', curve: [50, 70] } });
     expect((await storedGames()).ids).toEqual([]);
   });
 });

@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { HistoryGame, LichessExportGame } from '../types';
-import { GameReplay } from './GameReplay';
+import { GameLink } from './GameRoute';
 import { InfoTip } from './InfoTip';
 import { gameProgress } from '../lib/progress';
 import { isReturnLeg } from '../lib/legs';
@@ -275,10 +275,10 @@ function MatchCard({
   const decided = byOrganizer(s?.status);
 
   // Final position only: during the game Lichess hides the latest moves
-  const finalFen = progress === "finished" && s?.lastFen && game.url ? s.lastFen : "";
+  const finalFen = progress === "finished" && s?.lastFen && extractGameId(game.url) ? s.lastFen : "";
 
-  // The replay, opened on the animation or (from the key moments) on the key moments
-  const [replay, setReplay] = useState<false | 'game' | 'moments'>(false);
+  // The replay has an address of its own (lib/routes.ts): on the animation, or on the key moments
+  const gameId = extractGameId(game.url);
   const pairing = `${nameOf(game.white)} – ${nameOf(game.black)}`;
   // The key moments, once the GitHub Action has analysed the game: in the replay, for everyone
   const analysis = finalFen ? analysisOf(game) : undefined;
@@ -376,10 +376,10 @@ function MatchCard({
       {tile &&
         (finalFen ? (
           // Finished game: the final position opens its replay
-          <button type="button" className="mini-board-link mini-board-replay" onClick={() => setReplay('game')} aria-label={`Rivedi ${pairing}`}>
+          <GameLink id={gameId!} className="mini-board-link mini-board-replay" aria-label={`Rivedi ${pairing}`}>
             {tile}
             <span className="replay-badge" aria-hidden="true">▶</span>
-          </button>
+          </GameLink>
         ) : game.url ? (
           <a href={game.url} target="_blank" rel="noopener noreferrer" className="mini-board-link">
             {tile}
@@ -401,10 +401,10 @@ function MatchCard({
         {(moments || lichess) && (
           <span className="match-actions">
             {moments && (
-              <button type="button" className="match-action match-moments" onClick={() => setReplay('moments')} aria-label="Momenti chiave" title="Momenti chiave">
+              <GameLink id={gameId!} moments className="match-action match-moments" aria-label="Momenti chiave" title="Momenti chiave">
                 <span aria-hidden="true">✨</span>
                 <span className="match-action-label" aria-hidden="true">Momenti</span>
-              </button>
+              </GameLink>
             )}
             {lichess && (
               <a href={game.url} target="_blank" rel="noopener noreferrer" className="match-action match-lichess" aria-label="Apri su Lichess" title="Apri su Lichess">
@@ -414,17 +414,6 @@ function MatchCard({
           </span>
         )}
       </div>
-      {replay && (
-        <GameReplay
-          url={game.url}
-          title={pairing}
-          onClose={() => setReplay(false)}
-          analysis={analysis}
-          names={{ white: nameOf(game.white), black: nameOf(game.black) }}
-          ending={s}
-          toMoments={replay === 'moments'}
-        />
-      )}
     </article>
   );
 }

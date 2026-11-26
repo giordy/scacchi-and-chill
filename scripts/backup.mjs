@@ -1,6 +1,8 @@
 // Nightly backup (GitHub Action "Backup"): reads the public tournament data from Firestore and
 // writes it as one JSON file, in the same format as "Scarica copia JSON" in the organizer area,
 // so "Ripristina da file" can restore either. Games still on the board keep only link and status.
+// The key moments of the archived seasons' games are included (analyses), not those of the current
+// season's games, which are on the games themselves.
 // The private organizer document (token, anecdotes, message texts) is readable only by
 // the organizer and is not included.
 // Usage: node scripts/backup.mjs <output file>
@@ -62,8 +64,9 @@ const byGame = (a, b) =>
   `${a.round}|${a.white}|${a.black}`.localeCompare(`${b.round}|${b.white}|${b.black}`, undefined, { numeric: true });
 
 // The backup file from the plain documents: same format as the manual export of the app. Uploaded
-// photos (media) are added only when there are some, so older backups keep the same shape.
-export function toBackup(doc, gameDocs, seasonDocs, mediaDocs = []) {
+// photos (media) and the key moments of the archived games (analyses) are added only when there are
+// some, so older backups keep the same shape.
+export function toBackup(doc, gameDocs, seasonDocs, mediaDocs = [], analysisDocs = []) {
   const { players = [], schedule = [], updatedAt: _u, ...tournament } = doc;
   const history = gameDocs
     .map(({ id: _id, updatedAt: _gu, syncedAt: _s, ...g }) =>
@@ -72,6 +75,8 @@ export function toBackup(doc, gameDocs, seasonDocs, mediaDocs = []) {
     .sort(byGame);
   const seasons = [...seasonDocs].sort((a, b) => String(a.archivedAt).localeCompare(String(b.archivedAt)));
   const media = Object.fromEntries(mediaDocs.filter((m) => typeof m.dataUrl === 'string').map((m) => [m.id, m.dataUrl]));
+  // The document id is the Lichess game, the same as the analysis' own id
+  const analyses = Object.fromEntries(analysisDocs.map((a) => [a.id, a]));
   return sorted({
     version: '2.0',
     source: 'backup automatico',
@@ -81,6 +86,7 @@ export function toBackup(doc, gameDocs, seasonDocs, mediaDocs = []) {
     history,
     seasons,
     ...(Object.keys(media).length > 0 ? { media } : {}),
+    ...(Object.keys(analyses).length > 0 ? { analyses } : {}),
   });
 }
 
@@ -94,7 +100,8 @@ async function main(out) {
     doc,
     await list(base, cfg.apiKey, 'games'),
     await list(base, cfg.apiKey, 'seasons'),
-    await list(base, cfg.apiKey, 'media')
+    await list(base, cfg.apiKey, 'media'),
+    await list(base, cfg.apiKey, 'analyses')
   );
   fs.writeFileSync(out, JSON.stringify(backup, null, 2) + '\n');
   console.log(

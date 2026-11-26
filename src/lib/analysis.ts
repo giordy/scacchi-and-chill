@@ -1,4 +1,4 @@
-import { AnalysisMoment, GameAnalysis, HistoryGame } from '../types';
+import { AnalysisMoment, GameAnalysis, HistoryGame, LichessExportGame } from '../types';
 import { extractGameId } from './utils';
 
 // The key moments of a finished game, as the replay tells them. The GitHub Action analyses each
@@ -17,6 +17,18 @@ export function analysisOf(game: Pick<HistoryGame, 'url' | 'analysis' | 'decisio
   if (!a || game.decision || !VERSIONS.has(a.v) || a.skipped || !Array.isArray(a.curve) || !a.curve.every(isNumber)) return undefined;
   const id = extractGameId(game.url);
   return id && a.id !== id ? undefined : sane(a);
+}
+
+// A finished game the GitHub Action has not analysed yet (the same rules as needsAnalysis in
+// scripts/analysis.mjs, any version counting as done): closing the season before its turn would
+// leave it without key moments for good
+const NOT_ANALYSED = new Set(['created', 'started', 'aborted', 'noStart', 'cheat', 'unknownFinish']);
+const MIN_PLIES = 16;
+export function awaitsAnalysis(game: HistoryGame, state: LichessExportGame | undefined): boolean {
+  if (!state || game.decision || NOT_ANALYSED.has(state.status) || !state.moves) return false;
+  if (state.moves.trim().split(/\s+/).length < MIN_PLIES) return false;
+  const id = extractGameId(game.url) ?? state.id;
+  return !(game.analysis && game.analysis.id === id);
 }
 
 // What the page reads from Firestore, kept to what it can tell: a moment missing its move, its

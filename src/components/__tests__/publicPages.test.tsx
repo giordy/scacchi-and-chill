@@ -211,7 +211,7 @@ describe('player page', () => {
     const html = renderToStaticMarkup(<PlayerPage handle="bruno" config={config} history={upsetHistory} gameStates={states} nameOf={nameOf} seasons={[season1]} />);
     expect(html).toContain('Elo massimo');
     expect(html).toContain('Colpaccio migliore');
-    expect(html).toContain('href="https://lichess.org/dddddddd"');
+    expect(html).toContain('href="#/partita/dddddddd"'); // replayed on the site
     // In the Carriera, in a card of their own before the concluded seasons: they count the season in progress too
     expect(html.indexOf('Elo massimo')).toBeGreaterThan(html.indexOf('Carriera'));
     expect(html.indexOf('class="section-heading">Primati')).toBeLessThan(html.indexOf('Elo massimo'));
@@ -259,8 +259,9 @@ describe('awards of a past season', () => {
     };
     const html = publicPage('#/albo', [withAwards]);
     expect(html).toContain('in 10 mosse');
-    expect(html).toContain('href="https://lichess.org/cccccccc"');
-    expect(html).toContain('vedi su Lichess');
+    // The game replayed on the site, at its own address
+    expect(html).toContain('href="#/partita/cccccccc"');
+    expect(html).toContain('vedi la partita');
   });
 
   it('leave out Re del matto, no longer given', () => {

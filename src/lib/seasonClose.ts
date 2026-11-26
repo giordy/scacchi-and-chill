@@ -1,10 +1,11 @@
-import { HistoryGame, LichessExportGame, Player, ScheduledMatch, SeasonArchive, TournamentMeta } from '../types';
-import { buildSeasonArchive, withChampion } from './seasons';
+import { GameAnalysis, HistoryGame, LichessExportGame, Player, ScheduledMatch, SeasonArchive, TournamentMeta } from '../types';
+import { archivedAnalyses, buildSeasonArchive, withChampion } from './seasons';
 import { withAwardsBanRule } from './fairPlay';
 
 // What closing a season writes, passed in so the order of the steps can be tested without Firestore
 export interface SeasonCloseIO {
   saveSeasonArchive: (archive: SeasonArchive) => Promise<void>;
+  saveAnalyses: (analyses: Record<string, GameAnalysis>) => Promise<void>;
   deleteAllGames: () => Promise<number>;
   clearHistory: () => void;
   onSeasonReset: () => void;
@@ -23,13 +24,16 @@ export interface SeasonCloseInput {
   clearSchedule: boolean;
 }
 
-// Closes the season and starts the next one. The archive is saved first: if that fails, it throws
-// before anything is deleted. Returns the archive that was saved.
+// Closes the season and starts the next one. The archive and the key moments of the games are saved
+// first: if either fails, it throws before anything is deleted. Returns the archive that was saved.
 export async function closeSeason(input: SeasonCloseInput, io: SeasonCloseIO): Promise<SeasonArchive> {
   const { meta, players, history, gameStates, seasons } = input;
   // 1. Archive first: if this fails nothing is deleted
   const snapshot = buildSeasonArchive(meta, players, history, gameStates, undefined, seasons);
   await io.saveSeasonArchive(snapshot);
+  // The key moments live on the games, which are about to be deleted: they go to a collection of their own
+  const analyses = archivedAnalyses(history, gameStates);
+  if (Object.keys(analyses).length > 0) await io.saveAnalyses(analyses);
   // 2. Remove the old season's games from Firestore and from this device
   await io.deleteAllGames();
   io.clearHistory();

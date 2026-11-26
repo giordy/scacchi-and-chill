@@ -10,7 +10,7 @@ import {
   Settings,
   TournamentMeta,
 } from '../../types';
-import { loadAllMediaImages, replaceAllGames, saveMediaImage, saveSeasonArchive } from '../../firebaseService';
+import { loadAllAnalyses, loadAllMediaImages, replaceAllGames, saveAnalyses, saveMediaImage, saveSeasonArchive } from '../../firebaseService';
 import { BackupSummary, parseBackup, restoreBackup } from '../../lib/backup';
 import { errorMessage } from '../../lib/utils';
 
@@ -64,6 +64,13 @@ export function BackupSection({
     } catch (e) {
       console.warn("Foto non incluse nella copia:", e);
     }
+    // The key moments of the archived seasons' games, likewise
+    try {
+      const analyses = await loadAllAnalyses();
+      if (Object.keys(analyses).length > 0) backup.analyses = analyses;
+    } catch (e) {
+      console.warn("Momenti chiave delle stagioni passate non inclusi nella copia:", e);
+    }
 
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
@@ -113,6 +120,7 @@ export function BackupSection({
         onUpdateTournamentMeta,
         saveSeasonArchive,
         saveMediaImage,
+        saveAnalyses,
         replaceOrganizerData: organizer.replaceAll,
       });
       flash("ok", `Ripristinata «${summary.season}»: ${summary.games} partite, ${summary.players} giocatori.`);

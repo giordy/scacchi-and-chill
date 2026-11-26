@@ -2,6 +2,8 @@ import { HistoryGame, LichessExportGame, Player, ScheduledMatch, TournamentMeta 
 import { computeSeasonProgress } from './progress';
 import { PledgeStatus } from './pledges';
 import { seasonId } from './seasons';
+import { stateOf } from './games';
+import { awaitsAnalysis } from './analysis';
 
 // The steps between two seasons, in the organizer area: closing the one that ended, then preparing
 // the next until its first round. Most are read from the data (a photo is there, the calendar is
@@ -145,6 +147,9 @@ export function closeReminders(input: ChecklistInput): string[] {
   const progress = computeSeasonProgress(history, gameStates, schedule);
   const open = progress.total - progress.finished;
   if (open > 0) out.push(`${plural(open, 'partita', 'partite')} non ancora ${open === 1 ? 'conclusa' : 'concluse'}`);
+  // Analysed a few at a time, every 10 minutes: closing now would leave these without key moments
+  const waiting = history.filter((g) => awaitsAnalysis(g, stateOf(g, gameStates))).length;
+  if (waiting > 0) out.push(`${plural(waiting, 'partita aspetta', 'partite aspettano')} ancora i momenti chiave (arrivano entro qualche ora)`);
   const ticked = new Set(ticks[seasonId(meta.season)] ?? []);
   if (!ticked.has('review')) out.push('il racconto finale non risulta mandato');
   if (!ticked.has('awards')) out.push('i premi non risultano mandati');

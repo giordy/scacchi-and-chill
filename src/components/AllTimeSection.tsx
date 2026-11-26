@@ -5,6 +5,8 @@ import { useNameOf } from './Names';
 import { shortSeason } from '../lib/honours';
 import { PillsburyIcon } from './PillsburyIcon';
 import { PILLSBURY_TITLE } from '../lib/pillsbury';
+import { extractGameId } from '../lib/utils';
+import { GameLink } from './GameRoute';
 
 const fmt = (n: number) => String(n).replace(".5", "½").replace(/^0½/, "½");
 
@@ -82,7 +84,12 @@ export function AllTimeSection({ rows, records, gamesSince, title }: { rows: All
                     {r.url && (
                       <>
                         {" · "}
-                        <a href={r.url} target="_blank" rel="noopener noreferrer">vedi su Lichess</a>
+                        {/* The replay on the site, with the key moments and the link to Lichess */}
+                        {extractGameId(r.url) ? (
+                          <GameLink id={extractGameId(r.url)!}>vedi la partita</GameLink>
+                        ) : (
+                          <a href={r.url} target="_blank" rel="noopener noreferrer">vedi su Lichess</a>
+                        )}
                       </>
                     )}
                   </span>

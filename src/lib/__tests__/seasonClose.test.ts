@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { closeSeason, SeasonCloseInput, SeasonCloseIO } from '../seasonClose';
-import { HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchive, TournamentMeta } from '../../types';
+import { GameAnalysis, HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchive, TournamentMeta } from '../../types';
 
 const game = (id: string, white: string, black: string): HistoryGame => ({ round: '1', white, black, url: `https://lichess.org/${id}` });
-const history = [game('aaaaaaaa', 'anna', 'bruno'), game('bbbbbbbb', 'carla', 'anna')];
+const analysis = (id: string): GameAnalysis => ({ v: 5, id, curve: [50, 70, 100], turns: [] });
+const history = [{ ...game('aaaaaaaa', 'anna', 'bruno'), analysis: analysis('aaaaaaaa') }, game('bbbbbbbb', 'carla', 'anna')];
 const gameStates: Record<string, LichessExportGame> = {
   aaaaaaaa: { id: 'aaaaaaaa', status: 'mate', winner: 'white' },
   bbbbbbbb: { id: 'bbbbbbbb', status: 'draw' },
@@ -35,14 +36,20 @@ const input = (patch: Partial<SeasonCloseInput> = {}): SeasonCloseInput => ({
 });
 
 // Every step is recorded in one list, so the tests can check the order
-function fakeIO(fail: { archive?: boolean; delete?: boolean } = {}) {
+function fakeIO(fail: { archive?: boolean; analyses?: boolean; delete?: boolean } = {}) {
   const steps: string[] = [];
   const archives: SeasonArchive[] = [];
+  const kept: Record<string, GameAnalysis>[] = [];
   const io = {
     saveSeasonArchive: vi.fn(async (a: SeasonArchive) => {
       steps.push('archive');
       if (fail.archive) throw new Error('rete assente');
       archives.push(a);
+    }),
+    saveAnalyses: vi.fn(async (a: Record<string, GameAnalysis>) => {
+      steps.push('analyses');
+      if (fail.analyses) throw new Error('regole non pubblicate');
+      kept.push(a);
     }),
     deleteAllGames: vi.fn(async () => {
       steps.push('delete');
@@ -54,14 +61,14 @@ function fakeIO(fail: { archive?: boolean; delete?: boolean } = {}) {
     onUpdateTournamentMeta: vi.fn((_patch: Partial<TournamentMeta>) => steps.push('meta')),
     onUpdateSchedule: vi.fn((_schedule: ScheduledMatch[]) => steps.push('schedule')),
   } satisfies SeasonCloseIO;
-  return { io, steps, archives };
+  return { io, steps, archives, kept };
 }
 
 describe('closeSeason', () => {
   it('archives the season before deleting its games, then starts the next one', async () => {
     const { io, steps, archives } = fakeIO();
     const saved = await closeSeason(input(), io);
-    expect(steps).toEqual(['archive', 'delete', 'clearHistory', 'reset', 'meta', 'schedule']);
+    expect(steps).toEqual(['archive', 'analyses', 'delete', 'clearHistory', 'reset', 'meta', 'schedule']);
     expect(archives).toEqual([saved]);
     expect(saved.id).toBe('stagione-2-capablanca');
     expect(saved.champion).toMatchObject({ handle: 'anna', points: 1.5 });
@@ -108,6 +115,27 @@ describe('closeSeason', () => {
     expect(steps).not.toContain('schedule');
   });
 
+  it('keeps the key moments of the analysed games, which go with the games', async () => {
+    const { io, kept } = fakeIO();
+    await closeSeason(input(), io);
+    expect(kept).toEqual([{ aaaaaaaa: analysis('aaaaaaaa') }]);
+  });
+
+  it('writes no key moments when no game was analysed', async () => {
+    const { io, steps } = fakeIO();
+    await closeSeason(input({ history: history.map(({ analysis: _a, ...g }) => g) }), io);
+    expect(io.saveAnalyses).not.toHaveBeenCalled();
+    expect(steps[1]).toBe('delete');
+  });
+
+  it('deletes nothing when the key moments cannot be saved', async () => {
+    const { io, steps } = fakeIO({ analyses: true });
+    await expect(closeSeason(input(), io)).rejects.toThrow('regole non pubblicate');
+    expect(steps).toEqual(['archive', 'analyses']);
+    expect(io.deleteAllGames).not.toHaveBeenCalled();
+    expect(io.onUpdateTournamentMeta).not.toHaveBeenCalled();
+  });
+
   it('deletes nothing when the archive cannot be saved', async () => {
     const { io, steps } = fakeIO({ archive: true });
     await expect(closeSeason(input(), io)).rejects.toThrow('rete assente');
@@ -120,7 +148,7 @@ describe('closeSeason', () => {
   it('leaves the season as it is when the games cannot be deleted (the archive is already safe)', async () => {
     const { io, steps, archives } = fakeIO({ delete: true });
     await expect(closeSeason(input(), io)).rejects.toThrow('permesso negato');
-    expect(steps).toEqual(['archive', 'delete']);
+    expect(steps).toEqual(['archive', 'analyses', 'delete']);
     expect(archives).toHaveLength(1);
     expect(io.clearHistory).not.toHaveBeenCalled();
     expect(io.onUpdateTournamentMeta).not.toHaveBeenCalled();

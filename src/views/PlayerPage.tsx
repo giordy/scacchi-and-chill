@@ -28,6 +28,9 @@ import { PillsburyIcon } from '../components/PillsburyIcon';
 import { ScudettoIcon } from '../components/ScudettoIcon';
 import { scudettoOf } from '../lib/scudetto';
 import { SEED_PERF_LABEL, seedDayLabel } from '../lib/seeds';
+import { GameLink } from '../components/GameRoute';
+import { extractGameId } from '../lib/utils';
+import { analysisOf, hasMoments } from '../lib/analysis';
 
 interface PlayerPageProps {
   handle: string;
@@ -157,7 +160,7 @@ function CareerHighs({ handle, elo, seasonName, nameOf, title }: {
             <span className="career-high-when">
               (
               {upset.game.id ? (
-                <a href={`https://lichess.org/${upset.game.id}`} target="_blank" rel="noopener noreferrer">{season(upset.season)}</a>
+                <GameLink id={upset.game.id}>{season(upset.season)}</GameLink>
               ) : (
                 season(upset.season)
               )}
@@ -343,6 +346,13 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
   }
 
   const { player, rank, tied, standing, games, pointsByRound, headToHead, pace, byColor, endings } = profile;
+  // A finished game on Lichess: its replay on the site, on the key moments when it has them
+  const replayOf = (game: (typeof games)[number]) => {
+    const id = extractGameId(game.url);
+    if (!id || game.status === "forfeit" || !["win", "loss", "draw"].includes(game.outcome)) return undefined;
+    const played = history.find((g) => g.url === game.url);
+    return { id, moments: !!played && hasMoments(analysisOf(played)) };
+  };
   const sum = (counts: Record<EndReason, number>) => END_ORDER.reduce((n, r) => n + counts[r], 0);
   const wins = sum(endings.wins);
   const losses = sum(endings.losses);
@@ -601,6 +611,11 @@ export function PlayerPage({ handle, config, history, gameStates, nameOf, presen
                 <span className={`status-badge ${OUTCOME_CLASS[game.outcome]}`}>{OUTCOME_LABEL[game.outcome]}</span>
                 {byOrganizer(game.status) ? (
                   <span className="opening-label">Deciso dall'organizzatore</span>
+                ) : replayOf(game) ? (
+                  // A finished game opens its replay, with its key moments when it has them
+                  <GameLink id={replayOf(game)!.id} moments={replayOf(game)!.moments} className="lichess-link-btn player-game-replay">
+                    {replayOf(game)!.moments ? "✨ Momenti" : "▶ Rivedi"}
+                  </GameLink>
                 ) : game.url ? (
                   <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
                     Lichess
