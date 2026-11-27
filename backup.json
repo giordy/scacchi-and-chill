@@ -1,6 +1,273 @@
 {
   "history": [
     {
+      "analysis": {
+        "at": "2026-11-25T19:12:25.096Z",
+        "best": [],
+        "chances": [],
+        "curve": [
+          54,
+          53,
+          53,
+          50,
+          51,
+          51,
+          52,
+          51,
+          54,
+          51,
+          54,
+          51,
+          55,
+          51,
+          53,
+          50,
+          50,
+          51,
+          55,
+          55,
+          56,
+          53,
+          61,
+          54,
+          59,
+          59,
+          59,
+          54,
+          56,
+          56,
+          56,
+          56,
+          63,
+          63,
+          63,
+          57,
+          59,
+          58,
+          57,
+          58,
+          58,
+          54,
+          72,
+          60,
+          86,
+          87,
+          87,
+          85,
+          84,
+          84,
+          84,
+          80,
+          78,
+          79,
+          87,
+          79,
+          82,
+          72,
+          73,
+          73,
+          76,
+          76,
+          80,
+          83,
+          86,
+          87,
+          89,
+          87,
+          88,
+          87,
+          92,
+          89,
+          90,
+          64,
+          81,
+          83,
+          84,
+          82,
+          88,
+          85,
+          85,
+          78,
+          86,
+          87,
+          91,
+          91,
+          94,
+          90,
+          92,
+          85,
+          96,
+          97,
+          97,
+          97,
+          97,
+          92,
+          92,
+          92,
+          93,
+          93,
+          93,
+          92,
+          93,
+          94,
+          94,
+          94,
+          95,
+          94,
+          95,
+          94,
+          95,
+          94,
+          97,
+          96,
+          98,
+          98,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100
+        ],
+        "engine": "Stockfish 19",
+        "finish": {
+          "color": "white",
+          "fen": "6Q1/5P2/8/p4K1k/P7/8/8/8 w - - 5 69",
+          "move": {
+            "check": true,
+            "piece": "q",
+            "to": "g5"
+          },
+          "ply": 137,
+          "san": "Qg5#",
+          "uci": "g8g5"
+        },
+        "id": "KXmPfreU",
+        "missed": [
+          {
+            "bestSan": "c7",
+            "bestUci": "c6c7",
+            "color": "white",
+            "fen": "4k3/8/2P1KP2/p7/P7/8/8/8 w - - 1 64",
+            "mate": 2,
+            "ply": 127,
+            "san": "f7+",
+            "uci": "f6f7",
+            "won": true
+          }
+        ],
+        "nodes": 600000,
+        "phases": {
+          "end": 75,
+          "middle": 23
+        },
+        "promotions": [
+          {
+            "color": "white",
+            "fen": "8/2P2Pk1/4K3/p7/P7/8/8/8 w - - 1 66",
+            "ply": 131,
+            "san": "c8=Q",
+            "uci": "c7c8q"
+          }
+        ],
+        "swings": 3,
+        "turns": [
+          {
+            "after": 14,
+            "before": 40,
+            "bestMove": {
+              "piece": "b",
+              "to": "d7"
+            },
+            "bestSan": "Bd7",
+            "bestUci": "c8d7",
+            "color": "black",
+            "fen": "r1b2rk1/1p4p1/1b2p1p1/pPpp4/P2P1Pp1/2P1P1P1/6BP/R1B2RK1 b - - 0 22",
+            "move": {
+              "piece": "p",
+              "to": "c4"
+            },
+            "ply": 44,
+            "reply": {
+              "piece": "b",
+              "played": true,
+              "san": "Ba3",
+              "to": "a3"
+            },
+            "san": "c4",
+            "uci": "c5c4"
+          },
+          {
+            "after": 64,
+            "before": 90,
+            "bestMove": {
+              "piece": "b",
+              "to": "d3"
+            },
+            "bestSan": "Bd3",
+            "bestUci": "c4d3",
+            "color": "white",
+            "fen": "r3r3/1pbb2p1/4p1k1/pP6/P1BPK3/2P3P1/R7/2B4R w - - 2 37",
+            "move": {
+              "piece": "b",
+              "to": "f4"
+            },
+            "ply": 73,
+            "reply": {
+              "piece": "p",
+              "played": false,
+              "san": "e5",
+              "to": "e5"
+            },
+            "san": "Bf4",
+            "uci": "c1f4"
+          },
+          {
+            "after": 19,
+            "before": 36,
+            "bestMove": {
+              "piece": "p",
+              "to": "e5"
+            },
+            "bestSan": "e5",
+            "bestUci": "e6e5",
+            "color": "black",
+            "fen": "r3r3/1pbb2p1/4p1k1/pP6/P1BPKB2/2P3P1/R7/7R b - - 3 37",
+            "move": {
+              "capture": "b",
+              "piece": "b",
+              "to": "f4"
+            },
+            "ply": 74,
+            "reply": {
+              "capture": "b",
+              "piece": "p",
+              "played": true,
+              "san": "gxf4",
+              "to": "f4"
+            },
+            "san": "Bxf4",
+            "uci": "c7f4"
+          }
+        ],
+        "v": 5
+      },
       "black": "luca_sgarbossa",
       "createdAt": 1793551785003,
       "lichess": {
@@ -48,6 +315,156 @@
       "white": "fsgach"
     },
     {
+      "analysis": {
+        "at": "2026-11-25T19:21:55.756Z",
+        "best": [
+          {
+            "after": 44,
+            "color": "white",
+            "fen": "r2q1rk1/p3npp1/5n1p/2bpp3/6b1/P1NB1N2/1PPBQPPP/R4RK1 w - - 0 15",
+            "gain": 1,
+            "gap": 20,
+            "move": {
+              "capture": "p",
+              "piece": "q",
+              "to": "e5"
+            },
+            "ply": 29,
+            "san": "Qxe5",
+            "uci": "e2e5"
+          }
+        ],
+        "chances": [],
+        "curve": [
+          53,
+          53,
+          52,
+          52,
+          51,
+          51,
+          51,
+          51,
+          53,
+          52,
+          52,
+          50,
+          49,
+          48,
+          50,
+          50,
+          50,
+          45,
+          46,
+          45,
+          45,
+          45,
+          45,
+          45,
+          48,
+          39,
+          45,
+          44,
+          45,
+          44,
+          50,
+          14,
+          24,
+          9,
+          8,
+          6,
+          7,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          3,
+          3,
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          3,
+          3,
+          2,
+          2,
+          2,
+          3,
+          2,
+          2,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "engine": "Stockfish 19",
+        "id": "qmKRFYcR",
+        "missed": [
+          {
+            "bestSan": "Qe2",
+            "bestUci": "e4e2",
+            "color": "black",
+            "fen": "5k2/p5p1/8/4n1p1/4q3/P5P1/7P/6K1 b - - 2 36",
+            "mate": 3,
+            "ply": 72,
+            "san": "Qf3",
+            "uci": "e4f3",
+            "won": true
+          }
+        ],
+        "nodes": 600000,
+        "phases": {
+          "end": 48,
+          "middle": 25
+        },
+        "promotions": [],
+        "swings": 1,
+        "turns": [
+          {
+            "after": 14,
+            "before": 50,
+            "bestMove": {
+              "capture": "b",
+              "piece": "p",
+              "to": "f3"
+            },
+            "bestSan": "gxf3",
+            "bestUci": "g2f3",
+            "color": "white",
+            "fen": "r2q1rk1/p3npp1/5n1p/2bpQ3/8/P1NB1b2/1PPB1PPP/R4RK1 w - - 0 16",
+            "move": {
+              "capture": "p",
+              "piece": "b",
+              "to": "h6"
+            },
+            "ply": 31,
+            "reply": {
+              "piece": "b",
+              "played": false,
+              "san": "Bd6",
+              "to": "d6"
+            },
+            "san": "Bxh6",
+            "uci": "d2h6"
+          }
+        ],
+        "v": 5
+      },
       "black": "battimat",
       "createdAt": 1793551785003,
       "lichess": {
@@ -147,6 +564,159 @@
       "white": "matepaco"
     },
     {
+      "analysis": {
+        "at": "2026-11-25T19:12:47.740Z",
+        "best": [
+          {
+            "after": 63,
+            "color": "white",
+            "fen": "rnbq1rk1/ppp1ppbp/3p2p1/6Bn/3PP2P/2N2P2/PPP3P1/R2QKBNR w KQ - 1 7",
+            "gap": 5,
+            "move": {
+              "piece": "n",
+              "to": "e2"
+            },
+            "ply": 13,
+            "san": "Nge2",
+            "uci": "g1e2"
+          },
+          {
+            "after": 96,
+            "color": "black",
+            "fen": "rnbq1rk1/ppp2pb1/3p2p1/3Pp2P/4P2R/2N2P2/PPP1N3/R2QKB2 b Q - 0 11",
+            "gain": 4,
+            "gap": 21,
+            "move": {
+              "capture": "r",
+              "check": true,
+              "piece": "q",
+              "to": "h4"
+            },
+            "ply": 22,
+            "san": "Qxh4+",
+            "uci": "d8h4"
+          }
+        ],
+        "chances": [],
+        "curve": [
+          55,
+          54,
+          54,
+          51,
+          58,
+          52,
+          52,
+          51,
+          52,
+          52,
+          56,
+          52,
+          62,
+          63,
+          62,
+          60,
+          61,
+          52,
+          51,
+          50,
+          50,
+          3,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          4,
+          5,
+          3,
+          3,
+          3,
+          3,
+          3,
+          2,
+          2,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          3,
+          3,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "engine": "Stockfish 19",
+        "finish": {
+          "color": "black",
+          "fen": "6k1/p1p5/3p2pb/3Pp3/2P1PP2/q7/1r6/2KQ4 b - - 4 31",
+          "move": {
+            "check": true,
+            "piece": "q",
+            "to": "a1"
+          },
+          "ply": 62,
+          "san": "Qa1#",
+          "uci": "a3a1"
+        },
+        "id": "49lZveZH",
+        "missed": [],
+        "nodes": 600000,
+        "phases": {
+          "end": 49,
+          "middle": 23
+        },
+        "promotions": [],
+        "swings": 1,
+        "turns": [
+          {
+            "after": 3,
+            "before": 50,
+            "bestMove": {
+              "piece": "r",
+              "to": "h1"
+            },
+            "bestSan": "Rh1",
+            "bestUci": "h4h1",
+            "color": "white",
+            "fen": "rnbq1rk1/ppp2pb1/3p2p1/4p2P/3PP2R/2N2P2/PPP1N3/R2QKB2 w Q - 0 11",
+            "gain": 4,
+            "move": {
+              "piece": "p",
+              "to": "d5"
+            },
+            "ply": 21,
+            "reply": {
+              "capture": "r",
+              "check": true,
+              "piece": "q",
+              "played": true,
+              "san": "Qxh4+",
+              "to": "h4"
+            },
+            "san": "d5",
+            "uci": "d4d5"
+          }
+        ],
+        "v": 5
+      },
       "black": "drake097",
       "createdAt": 1793551785002,
       "lichess": {
@@ -195,6 +765,182 @@
       "white": "scarsoforteh"
     },
     {
+      "analysis": {
+        "at": "2026-11-25T19:02:43.230Z",
+        "best": [
+          {
+            "after": 66,
+            "color": "white",
+            "fen": "r4rk1/5p2/pqnppn1p/1p1p1bp1/1P1P3N/P1N1P2P/2PQBPP1/R4RK1 w - - 0 15",
+            "gap": 15,
+            "move": {
+              "capture": "b",
+              "piece": "n",
+              "to": "f5"
+            },
+            "ply": 29,
+            "san": "Nxf5",
+            "uci": "h4f5"
+          },
+          {
+            "after": 36,
+            "alt": {
+              "gain": 1
+            },
+            "color": "black",
+            "fen": "r4rk1/5p2/pqnp1n1p/1p1p1pp1/1P1P4/P1NBP2P/2PQ1PP1/R4RK1 b - - 1 16",
+            "gap": 10,
+            "move": {
+              "piece": "n",
+              "to": "e7"
+            },
+            "ply": 32,
+            "san": "Ne7",
+            "uci": "c6e7"
+          }
+        ],
+        "chances": [],
+        "curve": [
+          53,
+          52,
+          52,
+          51,
+          54,
+          53,
+          54,
+          52,
+          52,
+          50,
+          51,
+          48,
+          50,
+          50,
+          50,
+          50,
+          49,
+          49,
+          49,
+          46,
+          48,
+          46,
+          48,
+          48,
+          49,
+          50,
+          50,
+          49,
+          63,
+          66,
+          65,
+          65,
+          64,
+          63,
+          63,
+          64,
+          71,
+          69,
+          84,
+          80,
+          88,
+          88,
+          88,
+          86,
+          90,
+          89,
+          88,
+          88,
+          91,
+          89,
+          89,
+          89,
+          92,
+          90,
+          95,
+          91,
+          91,
+          91,
+          97,
+          97,
+          98,
+          97,
+          98,
+          97,
+          98,
+          98,
+          98,
+          98,
+          98,
+          95,
+          97,
+          97,
+          98,
+          98,
+          100,
+          98,
+          98,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100
+        ],
+        "engine": "Stockfish 19",
+        "id": "n8dWafTV",
+        "missed": [
+          {
+            "bestSan": "Qf7#",
+            "bestUci": "g7f7",
+            "color": "white",
+            "fen": "8/6QR/p2pk3/1p1n1n2/1P1P4/P3PP2/5K2/8 w - - 11 43",
+            "mate": 1,
+            "ply": 85,
+            "san": "Qg8+",
+            "uci": "g7g8",
+            "won": true
+          }
+        ],
+        "nodes": 600000,
+        "phases": {
+          "end": 63,
+          "middle": 21
+        },
+        "promotions": [],
+        "swings": 1,
+        "turns": [
+          {
+            "after": 16,
+            "before": 31,
+            "bestMove": {
+              "piece": "q",
+              "to": "d8"
+            },
+            "bestSan": "Qd8",
+            "bestUci": "b6d8",
+            "color": "black",
+            "fen": "r4rk1/5p2/pq1p2np/1p1p1pp1/1P1Pn3/P2BPP1P/2P1N1P1/R3QRK1 b - - 0 19",
+            "move": {
+              "piece": "n",
+              "to": "f6"
+            },
+            "ply": 38,
+            "reply": {
+              "piece": "p",
+              "played": false,
+              "san": "f4",
+              "to": "f4"
+            },
+            "san": "Nf6",
+            "uci": "e4f6"
+          }
+        ],
+        "v": 5
+      },
       "black": "scarsoforteh",
       "createdAt": 1793551785004,
       "lichess": {
@@ -247,6 +993,156 @@
       "white": "battimat"
     },
     {
+      "analysis": {
+        "at": "2026-11-25T19:04:30.584Z",
+        "best": [
+          {
+            "after": 16,
+            "alt": {
+              "gain": 3
+            },
+            "color": "white",
+            "fen": "r5k1/ppp2p1p/2p2n2/2b3p1/1P6/3B2qb/P1PPQPP1/RNB3K1 w - - 0 14",
+            "gap": 9,
+            "move": {
+              "piece": "q",
+              "to": "f3"
+            },
+            "ply": 27,
+            "san": "Qf3",
+            "uci": "e2f3"
+          },
+          {
+            "after": 91,
+            "alt": {
+              "gain": 2
+            },
+            "color": "black",
+            "fen": "4r1k1/ppp4p/2pb4/3B1pp1/2N2n2/2P2P1b/PB1P1P2/4R2K b - - 3 23",
+            "gap": 47,
+            "move": {
+              "piece": "k",
+              "to": "f8"
+            },
+            "ply": 46,
+            "san": "Kf8",
+            "uci": "g8f8"
+          },
+          {
+            "after": 93,
+            "color": "black",
+            "fen": "8/pp4kB/3p3p/2p2p2/3P1p2/2P2P1K/P4P2/8 b - - 0 33",
+            "gain": 3,
+            "gap": 36,
+            "move": {
+              "capture": "b",
+              "piece": "k",
+              "to": "h7"
+            },
+            "ply": 66,
+            "san": "Kxh7",
+            "uci": "g7h7"
+          }
+        ],
+        "chances": [],
+        "curve": [
+          53,
+          53,
+          53,
+          52,
+          67,
+          66,
+          68,
+          67,
+          67,
+          55,
+          54,
+          44,
+          50,
+          50,
+          50,
+          35,
+          31,
+          30,
+          31,
+          30,
+          26,
+          26,
+          26,
+          21,
+          19,
+          15,
+          16,
+          16,
+          16,
+          15,
+          15,
+          14,
+          14,
+          11,
+          12,
+          10,
+          10,
+          9,
+          8,
+          7,
+          7,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          10,
+          10,
+          12,
+          10,
+          12,
+          10,
+          17,
+          17,
+          15,
+          10,
+          10,
+          9,
+          9,
+          9,
+          8,
+          8,
+          7,
+          7,
+          7,
+          6,
+          6,
+          4,
+          4,
+          3,
+          3,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          0
+        ],
+        "engine": "Stockfish 19",
+        "id": "en2rPxjK",
+        "missed": [],
+        "nodes": 600000,
+        "phases": {
+          "end": 48,
+          "middle": 20
+        },
+        "promotions": [],
+        "swings": 0,
+        "turns": [],
+        "v": 5
+      },
       "black": "matepaco",
       "createdAt": 1793551785003,
       "lichess": {
@@ -296,6 +1192,241 @@
       "white": "drake097"
     },
     {
+      "analysis": {
+        "at": "2026-11-25T19:11:44.606Z",
+        "best": [
+          {
+            "after": 96,
+            "color": "white",
+            "fen": "5rnr/1bp1qpk1/pp1p1n1p/3Pp1pP/2P1P3/3B1NN1/PP2QPP1/R3R1K1 w - - 0 26",
+            "gain": 5,
+            "gap": 15,
+            "move": {
+              "check": true,
+              "piece": "n",
+              "to": "f5"
+            },
+            "ply": 51,
+            "san": "Nf5+",
+            "uci": "g3f5"
+          }
+        ],
+        "chances": [],
+        "curve": [
+          53,
+          53,
+          58,
+          58,
+          59,
+          58,
+          61,
+          62,
+          61,
+          58,
+          60,
+          59,
+          59,
+          58,
+          58,
+          57,
+          57,
+          56,
+          57,
+          55,
+          58,
+          56,
+          58,
+          56,
+          59,
+          57,
+          60,
+          60,
+          91,
+          58,
+          58,
+          54,
+          62,
+          57,
+          58,
+          56,
+          56,
+          56,
+          60,
+          53,
+          63,
+          56,
+          65,
+          66,
+          70,
+          70,
+          87,
+          77,
+          86,
+          87,
+          96,
+          96,
+          96,
+          95,
+          95,
+          94,
+          96,
+          96,
+          96,
+          95,
+          96,
+          95,
+          96,
+          95,
+          96,
+          96,
+          96,
+          96,
+          97,
+          97,
+          97,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          96,
+          97,
+          96,
+          96,
+          95,
+          96,
+          95,
+          97,
+          95,
+          96,
+          94,
+          95,
+          94,
+          96,
+          95,
+          96,
+          96,
+          97,
+          98,
+          98,
+          98,
+          98,
+          98,
+          98,
+          98,
+          100,
+          100,
+          100,
+          100,
+          100,
+          100
+        ],
+        "engine": "Stockfish 19",
+        "finish": {
+          "color": "white",
+          "fen": "2R5/r4pk1/p2r2b1/4p3/7Q/1B3P2/P4K2/6R1 w - - 0 54",
+          "move": {
+            "check": true,
+            "piece": "q",
+            "to": "h8"
+          },
+          "ply": 107,
+          "san": "Qh8#",
+          "uci": "h4h8"
+        },
+        "id": "1aNlBoQV",
+        "missed": [],
+        "nodes": 600000,
+        "phases": {
+          "middle": 15
+        },
+        "promotions": [],
+        "swings": 3,
+        "turns": [
+          {
+            "after": 9,
+            "before": 40,
+            "bestMove": {
+              "piece": "n",
+              "to": "f6"
+            },
+            "bestSan": "Nf6",
+            "bestUci": "d7f6",
+            "color": "black",
+            "fen": "r3q1rk/1bpnnpbp/pp1pp1pB/6N1/3PPQ2/2PB2N1/PP3PPP/R4RK1 b - - 7 14",
+            "gain": 1,
+            "move": {
+              "piece": "r",
+              "to": "f8"
+            },
+            "ply": 28,
+            "reply": {
+              "piece": "q",
+              "played": false,
+              "san": "Qh4",
+              "to": "h4"
+            },
+            "san": "Rf8",
+            "uci": "g8f8"
+          },
+          {
+            "after": 58,
+            "before": 91,
+            "bestMove": {
+              "piece": "q",
+              "to": "h4"
+            },
+            "bestSan": "Qh4",
+            "bestUci": "f4h4",
+            "color": "white",
+            "fen": "r3qr1k/1bpnnpbp/pp1pp1pB/6N1/3PPQ2/2PB2N1/PP3PPP/R4RK1 w - - 8 15",
+            "move": {
+              "capture": "b",
+              "check": true,
+              "piece": "b",
+              "to": "g7"
+            },
+            "ply": 29,
+            "reply": {
+              "capture": "b",
+              "piece": "k",
+              "played": true,
+              "san": "Kxg7",
+              "to": "g7"
+            },
+            "san": "Bxg7+",
+            "uci": "h6g7"
+          },
+          {
+            "after": 13,
+            "before": 30,
+            "bestMove": {
+              "piece": "n",
+              "to": "f6"
+            },
+            "bestSan": "N4f6",
+            "bestUci": "g4f6",
+            "color": "black",
+            "fen": "5rnr/1bp1qpk1/pp1pp1pp/7P/3PP1n1/2PB1NN1/PP2QPP1/R3R1K1 b - - 0 23",
+            "gain": 1,
+            "move": {
+              "piece": "p",
+              "to": "g5"
+            },
+            "ply": 46,
+            "reply": {
+              "piece": "p",
+              "played": false,
+              "san": "e5",
+              "to": "e5"
+            },
+            "san": "g5",
+            "uci": "g6g5"
+          }
+        ],
+        "v": 5
+      },
       "black": "fsgach",
       "createdAt": 1793551785004,
       "lichess": {
@@ -344,6 +1475,303 @@
       "white": "frasal"
     },
     {
+      "analysis": {
+        "at": "2026-11-25T19:03:33.704Z",
+        "best": [
+          {
+            "after": 70,
+            "color": "black",
+            "fen": "2kr1b1r/pp1n1pp1/1qp1p2p/4P3/2BP2PQ/1P2BP1N/P1b4P/R4RK1 b - - 1 15",
+            "gap": 15,
+            "move": {
+              "capture": "p",
+              "piece": "n",
+              "to": "e5"
+            },
+            "ply": 30,
+            "san": "Nxe5",
+            "uci": "d7e5"
+          }
+        ],
+        "chances": [
+          {
+            "after": 41,
+            "before": 63,
+            "bestMove": {
+              "castle": true,
+              "piece": "k",
+              "to": "c8"
+            },
+            "bestSan": "O-O-O",
+            "bestUci": "e8c8",
+            "color": "black",
+            "fen": "r3kb1r/pp1npppp/1qp5/4PbB1/2BPp3/1P3P2/P1P3PP/R2QK1NR b KQkq - 0 9",
+            "move": {
+              "piece": "p",
+              "to": "e3"
+            },
+            "ply": 18,
+            "reply": {
+              "piece": "n",
+              "played": false,
+              "san": "Ne2",
+              "to": "e2"
+            },
+            "san": "e3",
+            "taken": false,
+            "uci": "e4e3"
+          },
+          {
+            "after": 36,
+            "before": 53,
+            "bestMove": {
+              "capture": "p",
+              "piece": "n",
+              "to": "e5"
+            },
+            "bestSan": "Nxe5",
+            "bestUci": "d7e5",
+            "color": "black",
+            "fen": "r3kb1r/pp1npppp/1qp5/4Pb2/2BP4/1P2BP2/P1P3PP/R2QK1NR b KQkq - 0 10",
+            "move": {
+              "piece": "p",
+              "to": "e6"
+            },
+            "ply": 20,
+            "reply": {
+              "piece": "q",
+              "played": false,
+              "san": "Qd2",
+              "to": "d2"
+            },
+            "san": "e6",
+            "taken": false,
+            "uci": "e7e6"
+          },
+          {
+            "after": 41,
+            "before": 57,
+            "bestMove": {
+              "piece": "k",
+              "to": "f2"
+            },
+            "bestSan": "Kf2",
+            "bestUci": "e1f2",
+            "color": "white",
+            "fen": "r3kb1r/pp1n1ppp/1qp1p1b1/4P3/2BP2P1/1P2BP2/P1P4P/R2QK1NR w KQkq - 1 12",
+            "gain": 1,
+            "move": {
+              "piece": "n",
+              "to": "h3"
+            },
+            "ply": 23,
+            "reply": {
+              "capture": "p",
+              "piece": "n",
+              "played": false,
+              "san": "Nxe5",
+              "to": "e5"
+            },
+            "san": "Nh3",
+            "taken": false,
+            "uci": "g1h3"
+          },
+          {
+            "after": 36,
+            "before": 59,
+            "bestMove": {
+              "capture": "p",
+              "piece": "n",
+              "to": "e5"
+            },
+            "bestSan": "Nxe5",
+            "bestUci": "d7e5",
+            "color": "black",
+            "fen": "r3kb1r/pp1n1ppp/1qp1p1b1/4P3/2BP2P1/1P2BP1N/P1P4P/R2QK2R b KQkq - 2 12",
+            "move": {
+              "piece": "p",
+              "to": "h6"
+            },
+            "ply": 24,
+            "reply": {
+              "piece": "k",
+              "played": false,
+              "san": "Kf2",
+              "to": "f2"
+            },
+            "san": "h6",
+            "taken": false,
+            "uci": "h7h6"
+          },
+          {
+            "after": 48,
+            "before": 64,
+            "bestMove": {
+              "piece": "k",
+              "to": "f2"
+            },
+            "bestSan": "Kf2",
+            "bestUci": "e1f2",
+            "color": "white",
+            "fen": "r3kb1r/pp1n1pp1/1qp1p1bp/4P3/2BP2P1/1P2BP1N/P1P4P/R2QK2R w KQkq - 0 13",
+            "gain": 1,
+            "move": {
+              "castle": true,
+              "piece": "k",
+              "to": "g1"
+            },
+            "ply": 25,
+            "reply": {
+              "capture": "p",
+              "piece": "n",
+              "played": false,
+              "san": "Nxe5",
+              "to": "e5"
+            },
+            "san": "O-O",
+            "taken": false,
+            "uci": "e1g1"
+          },
+          {
+            "after": 32,
+            "before": 52,
+            "bestMove": {
+              "capture": "p",
+              "piece": "n",
+              "to": "e5"
+            },
+            "bestSan": "Nxe5",
+            "bestUci": "d7e5",
+            "color": "black",
+            "fen": "r3kb1r/pp1n1pp1/1qp1p1bp/4P3/2BP2P1/1P2BP1N/P1P4P/R2Q1RK1 b kq - 1 13",
+            "move": {
+              "castle": true,
+              "piece": "k",
+              "to": "c8"
+            },
+            "ply": 26,
+            "reply": {
+              "piece": "q",
+              "played": false,
+              "san": "Qe2",
+              "to": "e2"
+            },
+            "san": "O-O-O",
+            "taken": false,
+            "uci": "e8c8"
+          }
+        ],
+        "curve": [
+          54,
+          54,
+          53,
+          54,
+          53,
+          53,
+          63,
+          64,
+          63,
+          64,
+          64,
+          64,
+          65,
+          57,
+          59,
+          50,
+          51,
+          37,
+          59,
+          47,
+          64,
+          56,
+          57,
+          41,
+          64,
+          48,
+          68,
+          59,
+          59,
+          33,
+          30,
+          13,
+          13,
+          13,
+          13,
+          10,
+          12,
+          8,
+          9,
+          9,
+          8,
+          4,
+          7,
+          5,
+          5,
+          5,
+          5,
+          3,
+          3,
+          2,
+          2,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        "engine": "Stockfish 19",
+        "finish": {
+          "color": "black",
+          "fen": "2k4r/pp3pp1/2p4p/8/1Rb3PQ/5P1K/P4N1P/6q1 b - - 6 28",
+          "move": {
+            "check": true,
+            "piece": "b",
+            "to": "f1"
+          },
+          "ply": 56,
+          "san": "Bf1#",
+          "uci": "c4f1"
+        },
+        "id": "qDjywa51",
+        "missed": [],
+        "nodes": 600000,
+        "phases": {
+          "end": 49,
+          "middle": 29
+        },
+        "promotions": [],
+        "swings": 1,
+        "turns": [
+          {
+            "after": 33,
+            "before": 59,
+            "bestMove": {
+              "piece": "p",
+              "to": "f4"
+            },
+            "bestSan": "f4",
+            "bestUci": "f3f4",
+            "color": "white",
+            "fen": "2kr1b1r/pp1n1pp1/1qp1p2p/4P3/2BP2P1/1P2BP1N/P1b4P/R3QRK1 w - - 0 15",
+            "move": {
+              "piece": "q",
+              "to": "h4"
+            },
+            "ply": 29,
+            "reply": {
+              "capture": "p",
+              "piece": "n",
+              "played": true,
+              "san": "Nxe5",
+              "to": "e5"
+            },
+            "san": "Qh4",
+            "uci": "e1h4"
+          }
+        ],
+        "v": 5
+      },
       "black": "giords",
       "createdAt": 1793551785004,
       "lichess": {
@@ -393,6 +1821,240 @@
       "white": "luca_sgarbossa"
     },
     {
+      "analysis": {
+        "at": "2026-11-25T18:52:31.860Z",
+        "best": [
+          {
+            "after": 36,
+            "color": "white",
+            "fen": "r2q1rk1/ppp2pp1/1b2b2p/8/2BnN3/P2P1p1P/1PPQ1PPN/R4RK1 w - - 0 15",
+            "gain": 2,
+            "gap": 8,
+            "move": {
+              "capture": "b",
+              "piece": "b",
+              "to": "e6"
+            },
+            "ply": 29,
+            "san": "Bxe6",
+            "uci": "c4e6"
+          },
+          {
+            "after": 89,
+            "color": "black",
+            "fen": "4rrk1/pppq2p1/7p/4p3/2Pb1nP1/P1NP1N1P/1P1Q1P2/4RR1K b - - 0 22",
+            "gain": 2,
+            "gap": 20,
+            "move": {
+              "capture": "p",
+              "piece": "n",
+              "to": "h3"
+            },
+            "ply": 44,
+            "san": "Nxh3",
+            "uci": "f4h3"
+          }
+        ],
+        "chances": [
+          {
+            "after": 36,
+            "before": 53,
+            "bestMove": {
+              "piece": "p",
+              "to": "f5"
+            },
+            "bestSan": "f5",
+            "bestUci": "f7f5",
+            "color": "black",
+            "fen": "r2q1rk1/ppp2pp1/1bn1b2p/3np3/2B1N3/P2P1N1P/1PP1QPP1/R1B2RK1 b - - 7 11",
+            "move": {
+              "piece": "n",
+              "to": "f4"
+            },
+            "ply": 22,
+            "reply": {
+              "capture": "n",
+              "piece": "b",
+              "played": true,
+              "san": "Bxf4",
+              "to": "f4"
+            },
+            "san": "Nf4",
+            "taken": true,
+            "uci": "d5f4"
+          },
+          {
+            "after": 47,
+            "before": 65,
+            "bestMove": {
+              "capture": "b",
+              "piece": "b",
+              "to": "e6"
+            },
+            "bestSan": "Bxe6",
+            "bestUci": "c4e6",
+            "color": "white",
+            "fen": "r2q1rk1/ppp2pp1/1bn1b2p/8/2B1Np2/P2P1N1P/1PP1QPP1/R4RK1 w - - 0 13",
+            "move": {
+              "piece": "q",
+              "to": "d2"
+            },
+            "ply": 25,
+            "reply": {
+              "capture": "b",
+              "piece": "b",
+              "played": false,
+              "san": "Bxc4",
+              "to": "c4"
+            },
+            "san": "Qd2",
+            "taken": true,
+            "uci": "e2d2"
+          },
+          {
+            "after": 32,
+            "before": 51,
+            "bestMove": {
+              "capture": "b",
+              "piece": "b",
+              "to": "e6"
+            },
+            "bestSan": "Bxe6",
+            "bestUci": "c4e6",
+            "color": "white",
+            "fen": "r2q1rk1/ppp2pp1/1b2b2p/8/2BnNp2/P2P1N1P/1PPQ1PP1/R4RK1 w - - 2 14",
+            "move": {
+              "piece": "n",
+              "to": "h2"
+            },
+            "ply": 27,
+            "reply": {
+              "piece": "p",
+              "played": true,
+              "san": "f3",
+              "to": "f3"
+            },
+            "san": "Nh2",
+            "taken": true,
+            "uci": "f3h2"
+          }
+        ],
+        "curve": [
+          52,
+          52,
+          53,
+          49,
+          49,
+          49,
+          51,
+          51,
+          52,
+          50,
+          50,
+          50,
+          51,
+          51,
+          51,
+          51,
+          51,
+          50,
+          50,
+          50,
+          50,
+          47,
+          64,
+          64,
+          65,
+          47,
+          51,
+          32,
+          32,
+          36,
+          37,
+          36,
+          42,
+          35,
+          30,
+          29,
+          41,
+          41,
+          43,
+          35,
+          37,
+          8,
+          12,
+          11,
+          11,
+          10,
+          10,
+          9,
+          9,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "engine": "Stockfish 19",
+        "finish": {
+          "color": "black",
+          "fen": "5rk1/ppp3p1/7p/7r/1PPpNq2/P2P1P2/4R1K1/5R2 b - - 2 30",
+          "move": {
+            "check": true,
+            "piece": "q",
+            "to": "h2"
+          },
+          "ply": 60,
+          "san": "Qh2#",
+          "uci": "f4h2"
+        },
+        "id": "HiOldHtt",
+        "missed": [],
+        "nodes": 600000,
+        "phases": {
+          "end": 54,
+          "middle": 23
+        },
+        "promotions": [],
+        "streaks": [],
+        "swings": 1,
+        "turns": [
+          {
+            "after": 8,
+            "before": 37,
+            "bestMove": {
+              "piece": "p",
+              "to": "b4"
+            },
+            "bestSan": "b4",
+            "bestUci": "b2b4",
+            "color": "white",
+            "fen": "4rrk1/pppq2p1/7p/4p3/2PbN1P1/P2P1p1P/1P1QnP1N/4RR1K w - - 1 21",
+            "move": {
+              "piece": "n",
+              "to": "c3"
+            },
+            "ply": 41,
+            "reply": {
+              "capture": "n",
+              "piece": "b",
+              "played": false,
+              "san": "Bxc3",
+              "to": "c3"
+            },
+            "san": "Nc3",
+            "uci": "e4c3"
+          }
+        ],
+        "v": 5
+      },
       "black": "battimat",
       "createdAt": 1794247049269,
       "lichess": {
@@ -445,6 +2107,376 @@
       "white": "fsgach"
     },
     {
+      "analysis": {
+        "at": "2026-11-25T18:51:58.668Z",
+        "best": [
+          {
+            "after": 52,
+            "alt": {
+              "gain": 2
+            },
+            "color": "white",
+            "fen": "r1bqr1k1/2p3pp/ppn1pb2/2N2p2/3P3P/P1PB1NP1/1P4P1/R2QR1K1 w - - 0 17",
+            "gap": 11,
+            "move": {
+              "piece": "n",
+              "to": "b3"
+            },
+            "ply": 33,
+            "san": "Nb3",
+            "uci": "c5b3"
+          },
+          {
+            "after": 79,
+            "color": "black",
+            "fen": "5rk1/6pp/p1bNp3/2pr4/2P1p2P/P5P1/1P4PK/3RR3 b - - 0 34",
+            "gap": 19,
+            "move": {
+              "capture": "r",
+              "piece": "r",
+              "to": "d1"
+            },
+            "ply": 68,
+            "san": "Rxd1",
+            "uci": "d5d1"
+          }
+        ],
+        "chances": [
+          {
+            "after": 35,
+            "before": 50,
+            "bestMove": {
+              "capture": "n",
+              "piece": "b",
+              "to": "c5"
+            },
+            "bestSan": "Bxc5",
+            "bestUci": "e7c5",
+            "color": "black",
+            "fen": "r1bqr1k1/1pp1b1pp/p1n1p3/2N2p2/3P4/P1PB1NP1/1P4PP/R2QR1K1 b - - 3 15",
+            "move": {
+              "piece": "b",
+              "to": "f6"
+            },
+            "ply": 30,
+            "reply": {
+              "piece": "b",
+              "played": false,
+              "san": "Bc4",
+              "to": "c4"
+            },
+            "san": "Bf6",
+            "taken": false,
+            "uci": "e7f6"
+          },
+          {
+            "after": 50,
+            "before": 65,
+            "bestMove": {
+              "piece": "b",
+              "to": "c4"
+            },
+            "bestSan": "Bc4",
+            "bestUci": "d3c4",
+            "color": "white",
+            "fen": "r1bqr1k1/1pp3pp/p1n1pb2/2N2p2/3P4/P1PB1NP1/1P4PP/R2QR1K1 w - - 4 16",
+            "move": {
+              "piece": "p",
+              "to": "h4"
+            },
+            "ply": 31,
+            "reply": {
+              "capture": "p",
+              "piece": "n",
+              "played": false,
+              "san": "Nxd4",
+              "to": "d4"
+            },
+            "san": "h4",
+            "taken": true,
+            "uci": "h2h4"
+          },
+          {
+            "after": 32,
+            "before": 48,
+            "bestMove": {
+              "piece": "p",
+              "to": "g6"
+            },
+            "bestSan": "g6",
+            "bestUci": "g7g6",
+            "color": "black",
+            "fen": "r1bqr1k1/2p3pp/ppn1pb2/5p2/3P3P/PNPB1NP1/1P4P1/R2QR1K1 b - - 1 17",
+            "move": {
+              "piece": "q",
+              "to": "d6"
+            },
+            "ply": 34,
+            "reply": {
+              "capture": "p",
+              "piece": "b",
+              "played": false,
+              "san": "Bxf5",
+              "to": "f5"
+            },
+            "san": "Qd6",
+            "taken": false,
+            "uci": "d8d6"
+          },
+          {
+            "after": 50,
+            "before": 68,
+            "bestMove": {
+              "capture": "p",
+              "piece": "b",
+              "to": "f5"
+            },
+            "bestSan": "Bxf5",
+            "bestUci": "d3f5",
+            "color": "white",
+            "fen": "r1b1r1k1/2p3pp/ppnqpb2/5p2/3P3P/PNPB1NP1/1P4P1/R2QR1K1 w - - 2 18",
+            "move": {
+              "piece": "k",
+              "to": "h2"
+            },
+            "ply": 35,
+            "reply": {
+              "piece": "p",
+              "played": false,
+              "san": "e5",
+              "to": "e5"
+            },
+            "san": "Kh2",
+            "taken": true,
+            "uci": "g1h2"
+          },
+          {
+            "after": 58,
+            "before": 80,
+            "bestMove": {
+              "piece": "r",
+              "to": "d8"
+            },
+            "bestSan": "Rd8",
+            "bestUci": "f8d8",
+            "color": "black",
+            "fen": "5rk1/6pp/p1bNp3/2p5/2P1p2P/P5P1/1P4PK/3R4 b - - 0 35",
+            "move": {
+              "piece": "r",
+              "to": "f2"
+            },
+            "ply": 70,
+            "reply": {
+              "piece": "r",
+              "played": false,
+              "san": "Re1",
+              "to": "e1"
+            },
+            "san": "Rf2",
+            "taken": false,
+            "uci": "f8f2"
+          }
+        ],
+        "curve": [
+          53,
+          52,
+          52,
+          50,
+          50,
+          49,
+          51,
+          52,
+          51,
+          52,
+          53,
+          52,
+          53,
+          53,
+          56,
+          52,
+          54,
+          54,
+          54,
+          53,
+          59,
+          53,
+          57,
+          55,
+          57,
+          57,
+          58,
+          46,
+          53,
+          50,
+          65,
+          50,
+          51,
+          52,
+          68,
+          50,
+          52,
+          53,
+          57,
+          56,
+          57,
+          53,
+          56,
+          53,
+          54,
+          52,
+          52,
+          51,
+          51,
+          49,
+          53,
+          53,
+          53,
+          52,
+          52,
+          53,
+          52,
+          52,
+          53,
+          53,
+          53,
+          51,
+          52,
+          51,
+          52,
+          17,
+          49,
+          21,
+          21,
+          20,
+          42,
+          25,
+          24,
+          10,
+          9,
+          9,
+          9,
+          8,
+          7,
+          7,
+          16,
+          5,
+          5,
+          5,
+          5,
+          0,
+          0
+        ],
+        "engine": "Stockfish 19",
+        "finish": {
+          "color": "black",
+          "fen": "8/5kp1/p3p3/7p/2P4P/PP1N1bPK/4pr2/4R3 b - - 2 43",
+          "move": {
+            "check": true,
+            "piece": "b",
+            "to": "g4"
+          },
+          "ply": 86,
+          "san": "Bg4#",
+          "uci": "f3g4"
+        },
+        "id": "ATMJ3iLY",
+        "missed": [],
+        "nodes": 600000,
+        "phases": {
+          "end": 62,
+          "middle": 26
+        },
+        "promotions": [],
+        "streaks": [
+          {
+            "color": "white",
+            "from": 45,
+            "moves": 10,
+            "to": 63
+          }
+        ],
+        "swings": 3,
+        "turns": [
+          {
+            "after": 17,
+            "before": 52,
+            "bestMove": {
+              "piece": "p",
+              "to": "g4"
+            },
+            "bestSan": "g4",
+            "bestUci": "g3g4",
+            "color": "white",
+            "fen": "5rk1/1b4pp/p3p3/2pr4/2N1p2P/P1P3P1/1P4PK/3RR3 w - - 2 33",
+            "move": {
+              "piece": "n",
+              "to": "d6"
+            },
+            "ply": 65,
+            "reply": {
+              "capture": "r",
+              "piece": "r",
+              "played": false,
+              "san": "Rxd1",
+              "to": "d1"
+            },
+            "san": "Nd6",
+            "uci": "c4d6"
+          },
+          {
+            "after": 51,
+            "before": 83,
+            "bestMove": {
+              "capture": "r",
+              "piece": "r",
+              "to": "d1"
+            },
+            "bestSan": "Rxd1",
+            "bestUci": "d5d1",
+            "color": "black",
+            "fen": "5rk1/1b4pp/p2Np3/2pr4/4p2P/P1P3P1/1P4PK/3RR3 b - - 3 33",
+            "move": {
+              "piece": "b",
+              "to": "c6"
+            },
+            "ply": 66,
+            "reply": {
+              "piece": "n",
+              "played": false,
+              "san": "Nc4",
+              "to": "c4"
+            },
+            "san": "Bc6",
+            "uci": "b7c6"
+          },
+          {
+            "after": 25,
+            "before": 42,
+            "bestMove": {
+              "piece": "r",
+              "to": "e1"
+            },
+            "bestSan": "Re1",
+            "bestUci": "d1e1",
+            "color": "white",
+            "fen": "6k1/6pp/p1bNp3/2p5/2P1p2P/P5P1/1P3rPK/3R4 w - - 1 36",
+            "move": {
+              "piece": "n",
+              "to": "c8"
+            },
+            "ply": 71,
+            "reply": {
+              "piece": "k",
+              "played": true,
+              "san": "Kf7",
+              "to": "f7"
+            },
+            "san": "Nc8",
+            "uci": "d6c8"
+          }
+        ],
+        "v": 5
+      },
       "black": "frasal",
       "createdAt": 1794247049489,
       "lichess": {
@@ -499,6 +2531,144 @@
       "white": "giords"
     },
     {
+      "analysis": {
+        "at": "2026-11-25T18:52:50.775Z",
+        "best": [
+          {
+            "after": 18,
+            "alt": {
+              "gain": 5
+            },
+            "color": "white",
+            "fen": "r1bqk2r/ppppbppp/5n2/4p3/2BnP3/3P1Q1N/PPP2PPP/RNB1K2R w KQkq - 3 6",
+            "gain": 1,
+            "gap": 7,
+            "move": {
+              "piece": "q",
+              "to": "d1"
+            },
+            "ply": 11,
+            "san": "Qd1",
+            "uci": "f3d1"
+          },
+          {
+            "after": 82,
+            "color": "black",
+            "fen": "r1bqk2r/ppppbppp/5n2/4p3/2BnP3/3P3N/PPP2PPP/RNBQK2R b KQkq - 4 6",
+            "gap": 22,
+            "move": {
+              "piece": "p",
+              "to": "d5"
+            },
+            "ply": 12,
+            "san": "d5",
+            "uci": "d7d5"
+          }
+        ],
+        "chances": [],
+        "curve": [
+          52,
+          53,
+          51,
+          49,
+          51,
+          49,
+          48,
+          38,
+          49,
+          19,
+          20,
+          18,
+          18,
+          12,
+          12,
+          8,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          5,
+          5,
+          3,
+          3,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "engine": "Stockfish 19",
+        "finish": {
+          "color": "black",
+          "fen": "2k3r1/ppp1b2p/8/4pp2/2P5/3q3P/PP3P1P/RNB4K b - - 2 18",
+          "move": {
+            "check": true,
+            "piece": "q",
+            "to": "f1"
+          },
+          "ply": 36,
+          "san": "Qf1#",
+          "uci": "d3f1"
+        },
+        "id": "IUQYFfYM",
+        "missed": [
+          {
+            "bestSan": "Qd1#",
+            "bestUci": "d3d1",
+            "color": "black",
+            "fen": "2kr2r1/ppp1b2p/8/4pp2/2P5/3q3P/PP3PQP/RNB3K1 b - - 2 16",
+            "mate": 1,
+            "ply": 32,
+            "san": "Rxg2+",
+            "uci": "g8g2",
+            "won": true
+          }
+        ],
+        "nodes": 600000,
+        "phases": {
+          "end": 33,
+          "middle": 17
+        },
+        "promotions": [],
+        "streaks": [],
+        "swings": 1,
+        "turns": [
+          {
+            "after": 19,
+            "before": 49,
+            "bestMove": {
+              "piece": "n",
+              "to": "e2"
+            },
+            "bestSan": "Ne2",
+            "bestUci": "g1e2",
+            "color": "white",
+            "fen": "r1bqk2r/ppppbppp/2n2n2/4p3/2B1P3/3P1Q2/PPP2PPP/RNB1K1NR w KQkq - 1 5",
+            "move": {
+              "piece": "n",
+              "to": "h3"
+            },
+            "ply": 9,
+            "reply": {
+              "piece": "n",
+              "played": true,
+              "san": "Nd4",
+              "to": "d4"
+            },
+            "san": "Nh3",
+            "uci": "g1h3"
+          }
+        ],
+        "v": 5
+      },
       "black": "drake097",
       "createdAt": 1794247049378,
       "lichess": {
