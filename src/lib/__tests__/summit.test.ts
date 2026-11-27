@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { positionsText, summitGames, summitKey } from '../summit';
+import { positionsText, summitGames, summitKey, summitRanks } from '../summit';
 import { HistoryGame, LichessExportGame, Player } from '../../types';
 
 const players: Player[] = ['anna', 'bruno', 'carla', 'dario', 'elena', 'fabio'].map((h) => ({ handle: h, name: h }));
@@ -31,6 +31,11 @@ describe('summitGames', () => {
     expect(s.get(summitKey(r4[0]))).toBe('1° contro 2°');
     expect(s.has(summitKey(r4[1]))).toBe(false);
     expect(s.size).toBe(1);
+  });
+
+  it('keeps the place of each player, for the card of the game', () => {
+    const r4 = [g('4', 'carla', 'anna'), g('4', 'elena', 'bruno'), g('4', 'dario', 'fabio')];
+    expect(summitRanks(players, [...firstRounds(), ...r4], states).get(summitKey(r4[0]))).toEqual({ white: 2, black: 1 });
   });
 
   it('says nothing in the first three rounds, even between the leaders', () => {

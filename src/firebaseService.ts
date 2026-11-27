@@ -28,6 +28,7 @@ import {
   FamousGame,
   RoundEnd,
   GameDecision,
+  GameAnalysis,
 } from "./types";
 import { cleanDecision } from "./lib/decisions";
 import type { SyncStatus } from "./lib/syncHealth";
@@ -279,6 +280,22 @@ export async function replaceAllGames(games: HistoryGame[]): Promise<void> {
 export async function saveSeasonArchive(archive: SeasonArchive): Promise<void> {
   const ref = doc(db, "tournaments", TOURNAMENT_DOC_ID, "seasons", archive.id);
   await setDoc(ref, archive);
+}
+
+// The key moments of the archived seasons' games (lib/seasons.ts archivedAnalyses): one public
+// document per Lichess game, written only by the organizer, when a season is closed or restored
+export async function saveAnalyses(analyses: Record<string, GameAnalysis>): Promise<void> {
+  const entries = Object.entries(analyses);
+  for (let i = 0; i < entries.length; i += 400) {
+    const batch = writeBatch(db);
+    entries.slice(i, i + 400).forEach(([id, a]) => batch.set(doc(db, "tournaments", TOURNAMENT_DOC_ID, "analyses", id), a));
+    await batch.commit();
+  }
+}
+
+export async function loadAllAnalyses(): Promise<Record<string, GameAnalysis>> {
+  const snap = await getDocs(collection(db, "tournaments", TOURNAMENT_DOC_ID, "analyses"));
+  return Object.fromEntries(snap.docs.map((d) => [d.id, d.data() as GameAnalysis]));
 }
 
 export function subscribeToSeasons(onUpdate: (seasons: SeasonArchive[]) => void): () => void {

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { HistoryGame, LichessExportGame } from '../types';
-import { GameReplay } from './GameReplay';
+import { GameLink } from './GameRoute';
 import { InfoTip } from './InfoTip';
 import { gameProgress } from '../lib/progress';
 import { isReturnLeg } from '../lib/legs';
@@ -10,7 +10,7 @@ import { layoutMatches, RoundBlock } from '../lib/matchesLayout';
 import { upsetOf, upsetSentence } from '../lib/upset';
 import { EloReport } from '../lib/tournamentElo';
 import { extractGameId } from '../lib/utils';
-import { summitKey } from '../lib/summit';
+import { positionsText, summitKey, SummitRanks } from '../lib/summit';
 import { byOrganizer, DECIDED, DOUBLE_LOSS, stateOf } from '../lib/games';
 import { playerHref } from '../lib/routes';
 import { PresenceInfo, seenAtOf } from '../lib/presence';
@@ -30,7 +30,7 @@ interface MatchesByRoundProps {
   gameStates: Record<string, LichessExportGame>;
   nameOf: (handle: string) => string;
   returnStart?: string; // first round of the return leg, if any
-  summits?: Map<string, string>; // scontro al vertice: positions text by summitKey
+  summits?: Map<string, SummitRanks>; // scontro al vertice: the places of its two players, by summitKey
   presence?: PresenceInfo; // when each player was last on Lichess, for the ongoing games
   elo?: EloReport; // Elo del torneo, for the colpacci
   masterTag?: MasterTag; // the master's opening, tagged on the games that play it
@@ -215,6 +215,28 @@ function FoldedRounds({ blocks, render, more }: { blocks: RoundBlock[]; render: 
   );
 }
 
+// Each player's score, as on a scoreboard: none while the game is not over
+function scoresOf(s?: LichessExportGame): [string, string] | null {
+  if (!s || s.status === "started") return null;
+  if (s.winner === "white") return ["1", "0"];
+  if (s.winner === "black") return ["0", "1"];
+  if (s.status === "draw" || s.status === "stalemate" || s.status === DECIDED) return ["½", "½"];
+  if (s.status === DOUBLE_LOSS) return ["0", "0"];
+  return null;
+}
+
+// Separates the pieces of the line under the players
+const joinDots = (parts: React.ReactNode[]) =>
+  parts.filter(Boolean).map((part, i) => (
+    <Fragment key={i}>
+      {i > 0 && " · "}
+      {part}
+    </Fragment>
+  ));
+
+// A game: its board, the two players with their scores, and one line for the rest. The signs
+// (colpaccio, summit, the master's opening) sit by what they speak of and explain themselves on a
+// tap; only the actions (key moments, Lichess) look like buttons.
 function MatchCard({
   game,
   state: s,
@@ -230,39 +252,33 @@ function MatchCard({
   state?: LichessExportGame;
   nameOf: (handle: string) => string;
   showRound?: boolean;
-  summit?: string; // e.g. "1° contro 2°"
+  summit?: SummitRanks;
   presence?: PresenceInfo;
   elo?: EloReport;
   masterTag?: MasterTag;
   moved?: boolean; // moves the visitor has not seen yet
 }) {
-  // Scheduled game not created on Lichess yet
-  let badge = game.url
-    ? <span className="status-badge pending">Da giocare</span>
-    : <span className="status-badge pending">In programma</span>;
-  if (s?.status === "started") badge = <span className="status-badge ongoing">In corso</span>;
-  // Neutral result: here 0-1 is a win for Black, not a "loss"
-  else if (s?.winner === "white") badge = <span className="status-badge result">1 – 0</span>;
-  else if (s?.winner === "black") badge = <span className="status-badge result">0 – 1</span>;
-  else if (s?.status === "draw" || s?.status === "stalemate" || s?.status === DECIDED) badge = <span className="status-badge result">½ – ½</span>;
-  else if (s?.status === DOUBLE_LOSS) badge = <span className="status-badge result">0 – 0</span>;
-
   const progress = gameProgress(s);
+  const ongoing = s?.status === "started";
+  const scores = scoresOf(s);
   // Ongoing games: Lichess hides the last moves, so only an approximate count is shown
   const moves = progress === 'pending' ? '' : movesLabel(s, progress === 'finished');
   const phase = progress === 'ongoing' ? gamePhase(s) : undefined;
   // Only when the move is fresh: see lib/live.ts
   const lastMove = progress === 'ongoing' ? recentMove(s, presence?.now ?? Date.now()) : null;
-  const progressText = [moves, phase && PHASE_LABEL[phase]].filter(Boolean).join(' · ');
   const opening = s?.opening?.name ?? '';
+  // The family alone ("Italian Game"), on one line: the whole name on hover
+  const family = opening.split(':')[0].trim();
   const inMasterOpening = !!masterTag && playsFamily(opening, masterTag.family);
   const upset = progress === 'finished' ? upsetOf(s, elo, { ...game, id: extractGameId(game.url) || undefined }) : null;
+  const forfeit = s?.status === "forfeit";
+  const decided = byOrganizer(s?.status);
 
   // Final position only: during the game Lichess hides the latest moves
-  const finalFen = progress === "finished" && s?.lastFen && game.url ? s.lastFen : "";
+  const finalFen = progress === "finished" && s?.lastFen && extractGameId(game.url) ? s.lastFen : "";
 
-  // The replay, opened on the animation or (from "Momenti chiave") on the key moments
-  const [replay, setReplay] = useState<false | 'game' | 'moments'>(false);
+  // The replay has an address of its own (lib/routes.ts): on the animation, or on the key moments
+  const gameId = extractGameId(game.url);
   const pairing = `${nameOf(game.white)} – ${nameOf(game.black)}`;
   // The key moments, once the GitHub Action has analysed the game: in the replay, for everyone
   const analysis = finalFen ? analysisOf(game) : undefined;
@@ -277,130 +293,137 @@ function MatchCard({
     <MiniBoard fen={START_FEN} faded label={`${pairing}: partita da giocare`} />
   ) : null;
 
-  return (
-    <article className={`match-card${s?.status === "started" ? " is-ongoing" : ""}${upset ? " is-upset" : ""}${moved ? " has-new-moves" : ""}`}>
-
-      <div className="match-card-body">
-        {tile &&
-          (finalFen ? (
-            // Finished game: the final position opens its replay
-            <button type="button" className="mini-board-link mini-board-replay" onClick={() => setReplay('game')} aria-label={`Rivedi ${pairing}`}>
-              {tile}
-              <span className="replay-badge" aria-hidden="true">▶</span>
-            </button>
-          ) : game.url ? (
-            <a href={game.url} target="_blank" rel="noopener noreferrer" className="mini-board-link">
-              {tile}
-            </a>
-          ) : (
-            <span className="mini-board-link">{tile}</span>
-          ))}
-        <div className="match-players">
-          <div className={`player-row ${s?.winner === "white" ? "is-winner" : ""}`}>
-            <ColorDot
-              color="w"
-              seenAt={progress === "ongoing" ? seenAtOf(presence, game.white) : undefined}
-              now={presence?.now ?? 0}
-              name={nameOf(game.white)}
-            />
-            <a href={playerHref(game.white)} className="player-name player-page-link">{nameOf(game.white)}</a>
-          </div>
-          <div className={`player-row ${s?.winner === "black" ? "is-winner" : ""}`}>
-            <ColorDot
-              color="b"
-              seenAt={progress === "ongoing" ? seenAtOf(presence, game.black) : undefined}
-              now={presence?.now ?? 0}
-              name={nameOf(game.black)}
-            />
-            <a href={playerHref(game.black)} className="player-name player-page-link">{nameOf(game.black)}</a>
-          </div>
-        </div>
-        <div className="match-status">
-          {lastMove ? (
-            // The badge with the time of the last move centred under it, as one block
-            <span className="status-stack">
-              {badge}
-              <span className="last-move-note" title={lastMove.full}>
-                <span aria-hidden="true">{"\u265F\uFE0E"} {lastMove.short}</span>
-                <span className="sr-only">{lastMove.full}</span>
-              </span>
-            </span>
-          ) : (
-            badge
-          )}
-          {moved && (
-            // Under the state, where the eye goes; the same brass dot as on the tab
-            <span className="new-moves-tag">
-              <span className="switch-dot" aria-hidden="true" />
-              {progress === "finished" ? "Appena conclusa" : "Mosse nuove"}
-            </span>
-          )}
-        </div>
+  // By the name: the place in the standings of a summit, the colpaccio of who pulled it off
+  const summitText = summit && `Scontro al vertice: ${positionsText(summit.white, summit.black)} in classifica a inizio turno.`;
+  const marksOf = (side: "white" | "black") => {
+    const rank = summit?.[side];
+    const upsetHere = upset?.player === side;
+    if (rank === undefined && !upsetHere) return null;
+    return (
+      <span className="match-marks">
+        {rank !== undefined && (
+          <InfoTip className="match-mark match-rank" text={summitText!}>
+            <span aria-hidden="true">{rank}°</span>
+            <span className="sr-only">Scontro al vertice</span>
+          </InfoTip>
+        )}
+        {upsetHere && (
+          <InfoTip className="match-mark match-upset" text={`Colpaccio: ${upsetSentence(upset, nameOf(game[side]))}.`}>
+            <span aria-hidden="true">💥</span>
+            <span className="sr-only">Colpaccio</span>
+          </InfoTip>
+        )}
+      </span>
+    );
+  };
+  const row = (side: "white" | "black") => {
+    const score = scores?.[side === "white" ? 0 : 1];
+    return (
+      <div className={`player-row ${s?.winner === side ? "is-winner" : ""}`}>
+        <ColorDot
+          color={side === "white" ? "w" : "b"}
+          seenAt={progress === "ongoing" ? seenAtOf(presence, game[side]) : undefined}
+          now={presence?.now ?? 0}
+          name={nameOf(game[side])}
+        />
+        <a href={playerHref(game[side])} className="player-name player-page-link">{nameOf(game[side])}</a>
+        {marksOf(side)}
+        {score && <span className="match-score" aria-hidden="true">{score}</span>}
       </div>
-      <div className="match-footer">
-        <div className="match-footer-info">
-          {(showRound || opening) && (
-            <span className="opening-label">
-              {showRound && <span className="match-round">Turno {game.round}</span>}
-              {showRound && opening ? " · " : ""}
-              {opening}
+    );
+  };
+
+  const fresh = moved && (
+    // The same brass dot as on the tab
+    <span className="new-moves-tag">
+      <span className="switch-dot" aria-hidden="true" />
+      {progress === "finished" ? "Appena conclusa" : "Mosse nuove"}
+    </span>
+  );
+  const master = inMasterOpening && (
+    <InfoTip
+      className="match-mark match-master"
+      text={`L'apertura ${masterTag!.surname ? `di ${masterTag!.surname}` : "del maestro"}: ${masterTag!.family.label}.`}
+    >
+      <span aria-hidden="true">♞</span>
+      <span className="sr-only">L'apertura {masterTag!.surname ? `di ${masterTag!.surname}` : "del maestro"}</span>
+    </InfoTip>
+  );
+  const meta =
+    progress === "ongoing"
+      ? [
+          fresh || <span className="match-live">In corso</span>,
+          phase && PHASE_LABEL[phase],
+          lastMove ? (
+            <span title={lastMove.full}>
+              <span aria-hidden="true">{"\u265F\uFE0E"} {lastMove.short}</span>
+              <span className="sr-only">{lastMove.full}</span>
             </span>
-          )}
-          {inMasterOpening && (
-            <span className="master-opening-tag">
-              <span aria-hidden="true">♞</span> L'apertura {masterTag!.surname ? `di ${masterTag!.surname}` : "del maestro"}
-            </span>
-          )}
-          {(progressText || upset || summit || moments || pending) && (
-            <span className="match-progress">
-              {progressText}
-              {moments && (
-                <button type="button" className="match-moments" onClick={() => setReplay('moments')}>
-                  <span aria-hidden="true">✨</span> Momenti chiave
-                </button>
-              )}
-              {pending && (
-                <InfoTip className="match-moments is-pending" text="L'analisi è in preparazione: di solito arriva entro un quarto d'ora dalla fine della partita.">
-                  <span aria-hidden="true">✨</span> Momenti chiave
-                </InfoTip>
-              )}
-              {summit && (
-                <InfoTip className="match-summit" text={`Scontro al vertice: ${summit} in classifica a inizio turno.`}>
-                  🔝 Scontro al vertice
-                </InfoTip>
-              )}
-              {upset && (
-                <InfoTip className="match-upset" text={`Colpaccio: ${upsetSentence(upset, nameOf(upset.player === "white" ? game.white : game.black))}.`}>
-                  💥 Colpaccio
-                </InfoTip>
-              )}
-            </span>
-          )}
-        </div>
-        {s?.status === "forfeit" ? (
-          <span className="opening-label">Vittoria a tavolino</span>
-        ) : byOrganizer(s?.status) ? (
-          <span className="opening-label">Deciso dall'organizzatore</span>
+          ) : (
+            moves
+          ),
+        ]
+      : progress === "pending"
+        ? [game.url ? "Da giocare" : "In programma", !game.url && "link in arrivo all'inizio del turno"]
+        : [
+            fresh,
+            forfeit ? "Vittoria a tavolino" : decided ? "Deciso dall'organizzatore" : "",
+            family && <span title={opening}>{family}</span>,
+            moves,
+          ];
+  const lichess = game.url && !forfeit && !decided;
+
+  return (
+    <article className={`match-card${ongoing ? " is-ongoing" : ""}${upset ? " is-upset" : ""}${moved ? " has-new-moves" : ""}${tile ? "" : " no-tile"}`}>
+      {tile &&
+        (finalFen ? (
+          // Finished game: the final position opens its replay
+          <GameLink id={gameId!} className="mini-board-link mini-board-replay" aria-label={`Rivedi ${pairing}`}>
+            {tile}
+            <span className="replay-badge" aria-hidden="true">▶</span>
+          </GameLink>
         ) : game.url ? (
-          <a href={game.url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn">
-            Apri su Lichess
+          <a href={game.url} target="_blank" rel="noopener noreferrer" className="mini-board-link">
+            {tile}
           </a>
         ) : (
-          <span className="opening-label">Link in arrivo all'inizio del turno</span>
+          <span className="mini-board-link">{tile}</span>
+        ))}
+      <div className="match-players">
+        {row("white")}
+        {row("black")}
+        {scores && <span className="sr-only">Risultato {scores[0]} – {scores[1]}</span>}
+      </div>
+      <div className="match-meta">
+        {/* Outside the line that shortens with an ellipsis, which would cut its explanation */}
+        {progress === "finished" && master}
+        <span className="match-meta-text">
+          {joinDots([showRound && <span className="match-round">Turno {game.round}</span>, ...meta])}
+        </span>
+        {(moments || pending || lichess) && (
+          <span className="match-actions">
+            {moments && (
+              <GameLink id={gameId!} moments className="match-action match-moments" aria-label="Momenti chiave" title="Momenti chiave">
+                <span aria-hidden="true">✨</span>
+                <span className="match-action-label" aria-hidden="true">Momenti</span>
+              </GameLink>
+            )}
+            {pending && (
+              // Finished a few minutes ago: greyed, a tap says the analysis is on its way
+              <InfoTip className="match-action match-moments is-pending" text="L'analisi è in preparazione: di solito arriva entro un quarto d'ora dalla fine della partita.">
+                <span aria-hidden="true">✨</span>
+                <span className="match-action-label" aria-hidden="true">Momenti</span>
+                <span className="sr-only">Momenti chiave in preparazione</span>
+              </InfoTip>
+            )}
+            {lichess && (
+              <a href={game.url} target="_blank" rel="noopener noreferrer" className="match-action match-lichess" aria-label="Apri su Lichess" title="Apri su Lichess">
+                <span aria-hidden="true">↗</span>
+              </a>
+            )}
+          </span>
         )}
       </div>
-      {replay && (
-        <GameReplay
-          url={game.url}
-          title={pairing}
-          onClose={() => setReplay(false)}
-          analysis={analysis}
-          names={{ white: nameOf(game.white), black: nameOf(game.black) }}
-          ending={s}
-          toMoments={replay === 'moments'}
-          pending={pending}
-        />
-      )}
     </article>
   );
 }

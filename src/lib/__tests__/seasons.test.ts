@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buildSeasonArchive, seasonId, sortSeasons, standingsCsv, validateNewSeasonName, withChampion } from '../seasons';
-import { HistoryGame, LichessExportGame, Player, SeasonArchive, TournamentMeta } from '../../types';
+import { archivedAnalyses, buildSeasonArchive, seasonId, sortSeasons, standingsCsv, validateNewSeasonName, withChampion } from '../seasons';
+import { GameAnalysis, HistoryGame, LichessExportGame, Player, SeasonArchive, TournamentMeta } from '../../types';
 
 const players: Player[] = [
   { name: 'Anna', handle: 'anna' },
@@ -182,5 +182,30 @@ describe('closing a season with a substitute', () => {
     ];
     const a = buildSeasonArchive(meta, players, history, { aaaaaaaa: on('aaaaaaaa', 'greta', 'anna'), bbbbbbbb: on('bbbbbbbb', 'anna', 'sub') });
     expect(a.departures?.[0]).toMatchObject({ handle: 'greta', fromRound: '2' });
+  });
+});
+
+describe('archivedAnalyses', () => {
+  const analysis = (id: string, extra: Partial<GameAnalysis> = {}): GameAnalysis => ({ v: 5, id, curve: [50, 80, 100], ...extra });
+  const states = { aaaaaaaa: st('aaaaaaaa', 'mate', 'white'), bbbbbbbb: st('bbbbbbbb', 'resign', 'black'), cccccccc: st('cccccccc', 'started'), dddddddd: st('dddddddd', 'draw') };
+
+  it('keeps the key moments of the archived games, by Lichess id', () => {
+    const history = [{ ...game('aaaaaaaa'), analysis: analysis('aaaaaaaa') }, game('bbbbbbbb')];
+    expect(archivedAnalyses(history, states)).toEqual({ aaaaaaaa: analysis('aaaaaaaa') });
+  });
+
+  it('leaves out what the replay would not tell: an old link, a skipped game, a decided result, an unfinished game', () => {
+    const history: HistoryGame[] = [
+      { ...game('aaaaaaaa'), analysis: analysis('zzzzzzzz') }, // made for the link before
+      { ...game('bbbbbbbb'), analysis: analysis('bbbbbbbb', { skipped: 'moves' }) },
+      { ...game('cccccccc'), analysis: analysis('cccccccc') }, // not archived: still on the board
+      { ...game('dddddddd'), analysis: analysis('dddddddd'), decision: { result: '1-0', at: 1 } },
+    ];
+    expect(archivedAnalyses(history, states)).toEqual({});
+  });
+
+  it('drops the fields Firestore would refuse as undefined', () => {
+    const history = [{ ...game('aaaaaaaa'), analysis: analysis('aaaaaaaa', { engine: undefined }) }];
+    expect(Object.keys(archivedAnalyses(history, states).aaaaaaaa)).not.toContain('engine');
   });
 });

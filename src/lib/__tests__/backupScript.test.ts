@@ -45,5 +45,14 @@ describe('nightly backup script', () => {
     expect(withPhoto.media).toEqual({ 'stagione-3': 'data:image/jpeg;base64,AAAA' });
     expect(parseBackup(JSON.stringify({ ...withPhoto, players: [{ handle: 'a', name: 'A' }] })).data.media).toEqual(withPhoto.media);
   });
-});
 
+  it('adds the key moments of the archived games only when there are some, each under its game', () => {
+    const doc = { title: 'T', season: 'S', players: [], schedule: [] };
+    expect(toBackup(doc, [], [], [])).not.toHaveProperty('analyses');
+    // As the listing reads them: the document id, then the fields, the analysis' own id among them
+    const analysis = { id: 'abcdefgh', v: 5, curve: [50, 60] };
+    const withMoments = toBackup(doc, [], [], [], [analysis]);
+    expect(withMoments.analyses).toEqual({ abcdefgh: analysis });
+    expect(parseBackup(JSON.stringify({ ...withMoments, players: [{ handle: 'a', name: 'A' }] })).data.analyses).toEqual(withMoments.analyses);
+  });
+});

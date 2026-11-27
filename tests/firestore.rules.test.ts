@@ -16,6 +16,7 @@ const tournament = { title: 'Scacchi & Chill', season: 'Stagione 2', players: []
 const game = { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/abcdefgh' };
 const season = { season: 'Stagione 1', standings: [], games: [], departures: [] };
 const photo = { dataUrl: 'data:image/jpeg;base64,AAAA' };
+const analysis = { v: 5, id: 'abcdefgh', curve: [50, 52], turns: [] };
 
 describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
   let env: RulesTestEnvironment;
@@ -34,6 +35,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
       await setDoc(doc(db, `${T}/games/g1`), game);
       await setDoc(doc(db, `${T}/seasons/stagione-1`), season);
       await setDoc(doc(db, `${T}/media/m1`), photo);
+      await setDoc(doc(db, `${T}/analyses/abcdefgh`), analysis);
       await setDoc(doc(db, `${T}/private/organizer`), { token: 'secret' });
       await setDoc(doc(db, `admins/${ADMIN}`), {});
     });
@@ -45,7 +47,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
 
   describe('public data', () => {
     it('can be read by anyone', async () => {
-      for (const p of [T, `${T}/games/g1`, `${T}/seasons/stagione-1`, `${T}/media/m1`]) {
+      for (const p of [T, `${T}/games/g1`, `${T}/seasons/stagione-1`, `${T}/media/m1`, `${T}/analyses/abcdefgh`]) {
         await assertSucceeds(getDoc(doc(visitor(), p)));
       }
     });
@@ -58,6 +60,8 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
         await assertFails(setDoc(doc(db, `${T}/seasons/stagione-2`), season));
         await assertFails(setDoc(doc(db, `${T}/media/m2`), photo));
         await assertFails(deleteDoc(doc(db, `${T}/media/m1`)));
+        await assertFails(setDoc(doc(db, `${T}/analyses/ijklmnop`), { ...analysis, id: 'ijklmnop' }));
+        await assertFails(deleteDoc(doc(db, `${T}/analyses/abcdefgh`)));
       }
     });
   });
@@ -112,6 +116,15 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('firestore.rules', () => {
     it('archives seasons with their games and departures', async () => {
       await assertSucceeds(setDoc(doc(admin(), `${T}/seasons/stagione-2`), { ...season, season: 'Stagione 2' }));
       await assertFails(setDoc(doc(admin(), `${T}/seasons/stagione-3`), { season: 'Stagione 3' }));
+    });
+
+    it('keeps the key moments of archived games, each under its own Lichess id', async () => {
+      await assertSucceeds(setDoc(doc(admin(), `${T}/analyses/ijklmnop`), { ...analysis, id: 'ijklmnop' }));
+      await assertSucceeds(getDocs(collection(visitor(), `${T}/analyses`)));
+      await assertFails(setDoc(doc(admin(), `${T}/analyses/qrstuvwx`), analysis)); // another game's
+      await assertFails(setDoc(doc(admin(), `${T}/analyses/not-a-game-id`), { ...analysis, id: 'not-a-game-id' }));
+      await assertFails(setDoc(doc(admin(), `${T}/analyses/qrstuvwx`), { id: 'qrstuvwx' })); // no version
+      await assertSucceeds(deleteDoc(doc(admin(), `${T}/analyses/abcdefgh`)));
     });
 
     it('uploads photos only as small image data URLs', async () => {

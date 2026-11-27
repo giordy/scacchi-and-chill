@@ -137,7 +137,9 @@ export async function sendPush(sub, payload, vapid, subject) {
       'Content-Encoding': 'aes128gcm',
       'Content-Type': 'application/octet-stream',
       TTL: String(6 * 3600),
-      Urgency: 'normal',
+      // high: Android delivers it at once. With normal a phone lying idle (Doze) kept it until it
+      // woke, and the notification arrived only when the app was opened
+      Urgency: 'high',
     },
     body: encryptPayload(JSON.stringify(payload), sub.p256dh, sub.auth),
     signal: AbortSignal.timeout(20000),

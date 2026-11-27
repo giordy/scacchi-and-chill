@@ -42,6 +42,18 @@ service cloud.firestore {
                      && request.resource.data.standings is list;
       }
 
+      // The key moments of the archived seasons' games (src/lib/seasons.ts archivedAnalyses): public,
+      // written only by the organizer when a season is closed or restored, one document per Lichess
+      // game, under its own id
+      match /analyses/{gameId} {
+        allow read: if true;
+        allow delete: if isAdmin();
+        allow create, update: if isAdmin()
+                     && gameId.matches('[A-Za-z0-9]{8}')
+                     && request.resource.data.id == gameId
+                     && request.resource.data.v is int;
+      }
+
       // Photos uploaded from the organizer area (one per season, see src/lib/media.ts): public,
       // written only by the organizer, and only as an image data URL below the document limit
       match /media/{mediaId} {

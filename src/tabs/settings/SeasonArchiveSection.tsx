@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchive, TournamentMeta } from '../../types';
 import { buildSeasonArchive, seasonId, standingsCsv, validateNewSeasonName } from '../../lib/seasons';
 import { closeSeason } from '../../lib/seasonClose';
-import { deleteAllGames, saveSeasonArchive } from '../../firebaseService';
+import { deleteAllGames, saveAnalyses, saveSeasonArchive } from '../../firebaseService';
 import { errorMessage } from '../../lib/utils';
 import { pastSeasonPeriod } from '../../lib/period';
 
@@ -77,7 +77,7 @@ export function SeasonArchiveSection({
     try {
       const snapshot = await closeSeason(
         { meta, players: config.players, history, gameStates, seasons, nextSeason, nextMaster, clearSchedule },
-        { saveSeasonArchive, deleteAllGames, clearHistory: () => setHistory([]), onSeasonReset, onUpdateTournamentMeta, onUpdateSchedule }
+        { saveSeasonArchive, saveAnalyses, deleteAllGames, clearHistory: () => setHistory([]), onSeasonReset, onUpdateTournamentMeta, onUpdateSchedule }
       );
       setNextSeason("");
       setNextMaster("");
@@ -102,6 +102,7 @@ export function SeasonArchiveSection({
           <li>la classifica finale va nello storico pubblico{alreadyArchived ? " (sostituisce quella già archiviata)" : ""};</li>
           <li>il primo in classifica entra nell'Albo d'Oro come campione;</li>
           <li>i premi della stagione vengono salvati insieme alla classifica;</li>
+          <li>i momenti chiave delle partite restano, per rivederle dalle stagioni passate;</li>
           <li><strong>tutte le partite della stagione vengono cancellate</strong>; giocatori e impostazioni restano.</li>
         </ul>
         <div className="grid2 field">

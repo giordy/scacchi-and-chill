@@ -2,6 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { MatchesByRound } from '../MatchesByRound';
+import { summitKey } from '../../lib/summit';
 import { HistoryGame } from '../../types';
 
 const games: HistoryGame[] = [
@@ -105,11 +106,11 @@ describe('MatchesByRound', () => {
     expect(html).toContain('L&#x27;analisi è in preparazione: di solito arriva entro un quarto d&#x27;ora dalla fine della partita.');
     // once analysed: the real button, no more greyed one
     const done = card({ ...base, analysis: { v: 5, id: 'aaaaaaaa', curve: [50, 60], turns: [], best: [], chances: [], phases: { middle: 1 } } });
-    expect(done).toContain('class="match-moments"');
+    expect(done).toContain('class="match-action match-moments"');
     expect(done).not.toContain('is-pending');
     // a game the analysis leaves out, or could not analyse: no button at all
-    expect(card({ ...base, lichess: { ...state, moves: 'e4 e5' } })).not.toContain('Momenti chiave');
-    expect(card({ ...base, analysis: { v: 5, id: 'aaaaaaaa', skipped: 'engine' } })).not.toContain('Momenti chiave');
+    expect(card({ ...base, lichess: { ...state, moves: 'e4 e5' } })).not.toContain('match-moments');
+    expect(card({ ...base, analysis: { v: 5, id: 'aaaaaaaa', skipped: 'engine' } })).not.toContain('match-moments');
   });
 
   it('says in the replay that the key moments are on their way', async () => {
@@ -117,5 +118,28 @@ describe('MatchesByRound', () => {
     const html = renderToStaticMarkup(<GameReplay url="https://lichess.org/aaaaaaaa" title="Anna – Bruno" onClose={() => {}} pending />);
     expect(html).toContain('I momenti chiave sono in preparazione');
     expect(renderToStaticMarkup(<GameReplay url="https://lichess.org/aaaaaaaa" title="Anna – Bruno" onClose={() => {}} />)).not.toContain('in preparazione');
+  });
+
+  it("puts each player's score on their own row, and none while the game is not over", () => {
+    const html = renderToStaticMarkup(<MatchesByRound games={games} gameStates={{}} nameOf={nameOf} />);
+    expect(html).toMatch(/giocatore\/anna".*?class="match-score"[^>]*>1<.*?giocatore\/Bruno".*?class="match-score"[^>]*>0</);
+    expect(html).toContain('Risultato 1 – 0');
+    // the planned game: no score, its state in words, no link to Lichess yet
+    expect(html.match(/match-score/g)).toHaveLength(2);
+    expect(html).toContain("In programma · link in arrivo all&#x27;inizio del turno");
+    expect(html.match(/match-lichess/g)).toHaveLength(1);
+  });
+
+  it('shows the places of a summit by the names, with the explanation on a tap', () => {
+    const summits = new Map([[summitKey(games[0]), { white: 2, black: 1 }]]);
+    const html = renderToStaticMarkup(<MatchesByRound games={games} gameStates={{}} nameOf={nameOf} summits={summits} />);
+    expect(html).toMatch(/giocatore\/anna".*?match-rank.*?2°.*?giocatore\/Bruno".*?match-rank.*?1°/);
+    expect(html).toContain('Scontro al vertice: 1° contro 2° in classifica a inizio turno.');
+  });
+
+  it('shows the family of the opening, the whole name on hover', () => {
+    const named: HistoryGame = { ...games[0], lichess: { ...games[0].lichess!, opening: { name: "Italian Game: Two Knights Defense" } } as any };
+    const html = renderToStaticMarkup(<MatchesByRound games={[named]} gameStates={{}} nameOf={nameOf} />);
+    expect(html).toContain('<span title="Italian Game: Two Knights Defense">Italian Game</span>');
   });
 });

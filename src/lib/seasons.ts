@@ -1,4 +1,4 @@
-import { ArchivedGame, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonDeparture, SeasonWinner, TournamentMeta } from '../types';
+import { ArchivedGame, GameAnalysis, HistoryGame, LichessExportGame, Player, SeasonArchive, SeasonDeparture, SeasonWinner, TournamentMeta } from '../types';
 import { computeStandings, scoredResult, seasonStarted, sharedRanks } from './standings';
 import { byRound, pliesOf, stateOf } from './games';
 import { extractGameId } from './utils';
@@ -9,6 +9,7 @@ import { monthKey, periodOfGames } from './period';
 import { departuresOf } from './departures';
 import { playersOnBoard } from './tournamentElo';
 import { outForFairPlay, scudettoContenders } from './fairPlay';
+import { analysisOf } from './analysis';
 
 // Stable document id from the season name: "Stagione 2 - Capablanca" -> "stagione-2-capablanca"
 export function seasonId(season: string): string {
@@ -125,6 +126,23 @@ export function archivedGames(history: HistoryGame[], gameStates: Record<string,
     out.push(game);
   });
   return out.sort((a, b) => byRound(a.round, b.round) || (a.end ?? 0) - (b.end ?? 0));
+}
+
+// The key moments of the season's games, kept when the season is closed: the archive has no room for
+// them (each one is a few kB, the public page reads every archive at the start), so they go to a
+// collection of their own, one document per Lichess game, read when a game of a past season is opened.
+// Only the analyses the replay can tell: the game behind the current link, no result decided by the
+// organizer, nothing skipped; and only games the archive keeps.
+export function archivedAnalyses(history: HistoryGame[], gameStates: Record<string, LichessExportGame>): Record<string, GameAnalysis> {
+  const kept = new Set(archivedGames(history, gameStates).map((g) => g.id).filter(Boolean));
+  const out: Record<string, GameAnalysis> = {};
+  history.forEach((g) => {
+    const id = extractGameId(g.url);
+    if (!id || !kept.has(id) || !g.analysis || !analysisOf(g)) return;
+    // Firestore rejects undefined values: the JSON round trip drops them
+    out[id] = JSON.parse(JSON.stringify(g.analysis));
+  });
+  return out;
 }
 
 // Puts the champion and the podium in the hall of fame, one entry per season name. An existing

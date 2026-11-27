@@ -1,8 +1,8 @@
 name: Backup
 
 # Every night, a copy of the public tournament data (torneo, giocatori, calendario, partite finite,
-# stagioni) on the "backups" branch: one commit only when something changed, so the branch
-# history is the list of versions. Restore from the organizer area: Impostazioni > Copia dei dati.
+# stagioni, momenti chiave delle stagioni archiviate) on the "backups" branch: one commit only when
+# something changed, so the branch history is the list of versions. Restore from the organizer area: Impostazioni > Copia dei dati.
 on:
   schedule:
     - cron: "17 2 * * *" # 02:17 UTC

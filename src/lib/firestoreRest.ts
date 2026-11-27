@@ -2,7 +2,8 @@
 // four public documents do not need its 900 kB of JavaScript, and on a phone opened from a WhatsApp
 // link that weighs. The organizer area, loaded on demand, keeps the SDK (sign-in, writes, live updates).
 // The same requests as scripts/backup.mjs; the security rules allow them (public reads and queries).
-import { HistoryGame, SeasonArchive } from '../types';
+import { GameAnalysis, HistoryGame, SeasonArchive } from '../types';
+import { analysisOf } from './analysis';
 import type { TournamentDocData } from '../firebaseService';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { Pledge, pledgeDocId, pledgeFromDoc } from './pledges';
@@ -85,6 +86,22 @@ export async function readSeasons(): Promise<SeasonArchive[]> {
 export async function readMediaImage(id: string): Promise<string | null> {
   const doc = await getDocument(`/media/${encodeURIComponent(id)}`);
   return typeof doc?.dataUrl === 'string' ? doc.dataUrl : null;
+}
+
+// The key moments of a game of an archived season (lib/seasons.ts archivedAnalyses), read when its
+// replay opens; none when the game was never analysed. Each is read once per visit.
+const analyses = new Map<string, Promise<GameAnalysis | undefined>>();
+export function readArchivedAnalysis(id: string): Promise<GameAnalysis | undefined> {
+  let read = analyses.get(id);
+  if (!read) {
+    read = getDocument(`/analyses/${encodeURIComponent(id)}`).then((doc) =>
+      doc ? analysisOf({ url: `https://lichess.org/${id}`, analysis: doc as unknown as GameAnalysis }) : undefined
+    );
+    // A failure (no network) is tried again at the next opening
+    read.catch(() => analyses.delete(id));
+    analyses.set(id, read);
+  }
+  return read;
 }
 
 // Who accepted the rules (lib/pledges.ts), every season

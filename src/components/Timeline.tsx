@@ -3,6 +3,7 @@ import { SeasonArchive } from '../types';
 import { ActivityEvent, ActivityKind, archivedSeasonActivity, FRAME_KINDS, HIGHLIGHT_KINDS, isNewSince, newsSince } from '../lib/activity';
 import { EloReport } from '../lib/tournamentElo';
 import { playerHref } from '../lib/routes';
+import { GameLink } from './GameRoute';
 
 interface TimelineProps {
   season: string;
@@ -131,9 +132,10 @@ export function Timeline(props: TimelineProps) {
                       </a>
                     )}
                     {e.gameId && (
-                      <a href={`https://lichess.org/${e.gameId}`} target="_blank" rel="noopener noreferrer" className="timeline-game-link">
+                      // The replay on the site, with the key moments and the link to Lichess
+                      <GameLink id={e.gameId} className="timeline-game-link">
                         Partita
-                      </a>
+                      </GameLink>
                     )}
                   </span>
                 </li>

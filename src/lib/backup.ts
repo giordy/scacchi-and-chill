@@ -1,4 +1,4 @@
-import { BackupData, HistoryGame, Player, ScheduledMatch, SeasonArchive, TournamentMeta } from '../types';
+import { BackupData, GameAnalysis, HistoryGame, Player, ScheduledMatch, SeasonArchive, TournamentMeta } from '../types';
 import type { OrganizerData } from '../firebaseService';
 import { isStorableImage } from './media';
 
@@ -44,6 +44,7 @@ export function parseBackup(text: string): { data: BackupData; summary: BackupSu
     history: d.history.map((g: HistoryGame) => ({ ...g, url: g.url ?? '' })),
     schedule: d.schedule ?? [],
     seasons: Array.isArray(d.seasons) ? d.seasons.filter((s) => s && isText(s.id)) : [],
+    analyses: d.analyses && typeof d.analyses === 'object' && !Array.isArray(d.analyses) ? d.analyses : undefined,
   };
   return {
     data,
@@ -70,6 +71,7 @@ export interface RestoreIO {
   onUpdateTournamentMeta: (patch: Partial<TournamentMeta>) => void;
   saveSeasonArchive: (archive: SeasonArchive) => Promise<void>;
   saveMediaImage: (id: string, dataUrl: string) => Promise<void>;
+  saveAnalyses: (analyses: Record<string, GameAnalysis>) => Promise<void>;
   replaceOrganizerData: (data: Partial<OrganizerData>) => void;
 }
 
@@ -89,6 +91,9 @@ export async function restoreBackup(data: BackupData, summary: BackupSummary, cu
   for (const [id, dataUrl] of Object.entries(data.media ?? {})) {
     if (isStorableImage(dataUrl)) await io.saveMediaImage(id, dataUrl);
   }
+  // The key moments of the archived games: only those saved under their own game
+  const analyses = Object.fromEntries(Object.entries(data.analyses ?? {}).filter(([id, a]) => /^[A-Za-z0-9]{8}$/.test(id) && a?.id === id && Number.isInteger(a.v)));
+  if (Object.keys(analyses).length > 0) await io.saveAnalyses(analyses);
   if (summary.privateData) {
     io.replaceOrganizerData({
       ...(data.anecdotes ? { anecdotes: data.anecdotes } : {}),

@@ -19,6 +19,19 @@ export function analysisOf(game: Pick<HistoryGame, 'url' | 'analysis' | 'decisio
   return id && a.id !== id ? undefined : sane(a);
 }
 
+// A finished game the GitHub Action has not analysed yet (the same rules as needsAnalysis in
+// scripts/analysis.mjs, any version counting as done): closing the season before its turn would
+// leave it without key moments for good
+const NOT_ANALYSED = new Set(['created', 'started', 'aborted', 'noStart', 'cheat', 'unknownFinish']);
+export const MIN_PLIES = 16;
+export function awaitsAnalysis(game: HistoryGame, state: LichessExportGame | undefined): boolean {
+  if (!state || game.decision || NOT_ANALYSED.has(state.status) || !state.moves) return false;
+  if (state.variant && state.variant !== 'standard') return false;
+  if (state.moves.trim().split(/\s+/).length < MIN_PLIES) return false;
+  const id = extractGameId(game.url) ?? state.id;
+  return !(game.analysis && game.analysis.id === id);
+}
+
 // What the page reads from Firestore, kept to what it can tell: a moment missing its move, its
 // position or its side (a save cut short, a version to come) is left out, the rest shown
 const isNumber = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x);
@@ -41,12 +54,9 @@ function sane(a: GameAnalysis): GameAnalysis {
   };
 }
 
-// The games the GitHub Action analyses (scripts/analysis.mjs: NOT_ANALYSED, MIN_PLIES, needsAnalysis)
-const NOT_ANALYSED = new Set(['created', 'started', 'aborted', 'noStart', 'cheat', 'unknownFinish']);
-export const MIN_PLIES = 16;
-
-// A finished game whose analysis is on its way: one the GitHub Action will analyse, not analysed
-// yet (or analysed for another link); never one it leaves out, nor one it could not analyse
+// A finished game whose analysis is on its way, for the site to say so: one the GitHub Action will
+// analyse (the same rules as above), with no analysis to show yet (or one for another link); never
+// one it leaves out, nor one it could not analyse
 export function analysisPending(game: Pick<HistoryGame, 'url' | 'analysis' | 'decision'>, state?: LichessExportGame): boolean {
   if (!state || game.decision || NOT_ANALYSED.has(state.status) || !state.moves) return false;
   if (state.variant && state.variant !== 'standard') return false;

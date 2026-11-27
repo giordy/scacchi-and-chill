@@ -40,6 +40,10 @@ export function GameReplay({
   names,
   ending,
   toMoments = false,
+  subtitle,
+  shareUrl,
+  ongoing = false,
+  loadingMoments = false,
   pending = false,
 }: {
   url: string;
@@ -51,12 +55,21 @@ export function GameReplay({
   ending?: { status?: string; winner?: 'white' | 'black' };
   // Opened from "Momenti chiave": straight to them, past the animation
   toMoments?: boolean;
+  // Under the title: the season and the round
+  subtitle?: string;
+  // The game's own address on the site, for "Condividi" (lib/routes.ts gameHref)
+  shareUrl?: string;
+  // Still on the board: no animation (it would show the position the site keeps hidden)
+  ongoing?: boolean;
+  // The key moments of an archived game, still being read
+  loadingMoments?: boolean;
   // The analysis on its way: said under the animation
   pending?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
-  const gif = replayGifFor(url);
+  const gif = ongoing ? undefined : replayGifFor(url);
+  const [shared, setShared] = useState<'copied' | 'failed' | null>(null);
   // A study chapter GIF has no names around the board: they come from the title
   const study = !!studyChapterOf(url);
   const players = study ? playersFromTitle(title) : undefined;
@@ -64,22 +77,50 @@ export function GameReplay({
   useEffect(() => {
     const d = dialog.current;
     if (d && !d.open) d.showModal?.();
-    if (toMoments) d?.querySelector('.key-moments')?.scrollIntoView?.({ block: 'start' });
     return () => d?.close?.();
   }, []);
+  // Straight to the key moments, also when they arrive after the dialog (an archived game's)
+  const showMoments = !!analysis && !!names && hasMoments(analysis);
+  useEffect(() => {
+    if (toMoments && showMoments) dialog.current?.querySelector('.key-moments')?.scrollIntoView?.({ block: 'start' });
+  }, [toMoments, showMoments]);
+
+  // The phone's share sheet (WhatsApp…) where there is one, otherwise the link copied
+  const share = async () => {
+    if (!shareUrl) return;
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title, url: shareUrl });
+      } catch {
+        // Closed without sharing
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShared('copied');
+    } catch {
+      setShared('failed');
+    }
+  };
 
   return (
     <dialog
       ref={dialog}
       className="replay-dialog"
       aria-label={`Rivedi ${title}`}
-      onClose={onClose}
+      // Only a real close: one followed at once by a new opening (React mounting the dialog twice
+      // in development) is no close, and would take the visitor back a page
+      onClose={() => !dialog.current?.open && onClose()}
       // A click on the backdrop (the dialog itself, outside its content) closes it
       onClick={(e) => e.target === e.currentTarget && dialog.current?.close()}
     >
       <div className="replay-body">
         <div className="replay-head">
-          <strong>{title}</strong>
+          <span className="replay-title">
+            <strong>{title}</strong>
+            {subtitle && <span className="replay-subtitle">{subtitle}</span>}
+          </span>
           <button type="button" className="replay-close" aria-label="Chiudi" onClick={() => dialog.current?.close()}>
             ✕
           </button>
@@ -104,12 +145,29 @@ export function GameReplay({
             <span><ColorDot color="b" now={0} name={players.black} /> {players.black}</span>
           </p>
         )}
-        {(!gif || state === 'error') && <p className="note">Non riesco a caricare l'animazione della partita.</p>}
-        {analysis && names && hasMoments(analysis) && <KeyMoments analysis={analysis} names={names} state={ending} />}
+        {ongoing ? (
+          <p className="note">La partita è ancora in corso: il replay e i momenti chiave arrivano quando finisce.</p>
+        ) : (
+          (!gif || state === 'error') && <p className="note">Non riesco a caricare l'animazione della partita.</p>
+        )}
+        {showMoments && <KeyMoments analysis={analysis!} names={names!} state={ending} />}
+        {loadingMoments && <p className="note replay-loading-moments">Carico i momenti chiave…</p>}
         {pending && <p className="note">I momenti chiave sono in preparazione: di solito arrivano entro un quarto d'ora dalla fine della partita.</p>}
-        <a href={url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn replay-link">
-          Apri su Lichess per l'analisi
-        </a>
+        <div className="replay-actions">
+          <a href={url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn replay-link">
+            {ongoing ? 'Segui su Lichess' : "Apri su Lichess per l'analisi"}
+          </a>
+          {shareUrl && (
+            <button type="button" className="lichess-link-btn replay-share" onClick={share}>
+              Condividi
+            </button>
+          )}
+        </div>
+        {shared && (
+          <p className="note note-sm replay-shared" role="status">
+            {shared === 'copied' ? 'Link copiato: incollalo dove vuoi.' : `Copia il link: ${shareUrl}`}
+          </p>
+        )}
       </div>
     </dialog>
   );

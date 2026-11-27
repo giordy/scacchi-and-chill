@@ -651,17 +651,6 @@ details .body {
   gap: 4px;
 }
 
-.match-footer {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid var(--line);
-  gap: 8px;
-  padding-top: 8px;
-  margin-top: 4px;
-}
-
 /* WhatsApp Message Preview Bubble */
 .wa-preview-wrapper {
   margin: 14px 0 10px;
@@ -1306,103 +1295,231 @@ details.season-entry[open] .season-more::after { content: " ▴"; }
   gap: 10px;
 }
 
+/* A game: board on the left, the players with their scores beside it, then one line across the
+   card for the rest (opening, moves, the signs) with the actions at its end. One accent at most:
+   the stripe of a game in progress. */
 .match-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px 14px;
+  position: relative;
+  /* the label of the key moments shows when the card is wide enough for it */
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 12px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
 }
 
-.match-card.is-upset {
-  border-color: color-mix(in srgb, var(--brass) 55%, var(--line));
-  box-shadow: inset 4px 0 0 var(--brass);
+.match-card.no-tile {
+  grid-template-columns: minmax(0, 1fr);
 }
 
-.match-upset {
-  margin-left: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
-  color: var(--brass);
-  background: var(--brass-soft);
+/* An open explanation spans the card under it, over the next one */
+.match-card:has(.infotip.is-open) {
+  z-index: 7;
 }
 
-.match-summit {
-  margin-left: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
-  color: var(--info);
-  background: color-mix(in srgb, var(--info) 12%, transparent);
+.match-card .mini-board {
+  width: 72px;
+  height: 72px;
 }
 
 .match-card.is-ongoing {
-  border-color: color-mix(in srgb, var(--info) 45%, var(--line));
-  box-shadow: inset 4px 0 0 var(--info);
+  border-color: color-mix(in srgb, var(--info) 40%, var(--line));
+  box-shadow: inset 3px 0 0 var(--info);
 }
 
-/* Moves the visitor has not seen: the brass of the dot on the Partite tab */
-.match-card.has-new-moves {
-  border-color: var(--brass);
+/* Positioned: the explanation of a sign opens under its own line, across it */
+.match-card .player-row {
+  position: relative;
+  gap: 9px;
 }
 
-/* The state of the game, with the mark of new moves under it */
-.match-status {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
+.match-card .player-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 18px;
+}
+
+/* The score on each player's row, as on a scoreboard */
+.match-score {
+  flex-shrink: 0;
+  min-width: 1.2em;
+  margin-left: auto;
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--muted);
+}
+
+.player-row.is-winner .match-score {
+  color: var(--win);
+}
+
+/* The signs by a name (the place of a summit, the colpaccio) and before the opening (the master's):
+   no frame, since they do nothing but explain themselves on a tap */
+.match-marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   flex-shrink: 0;
 }
 
-/* The badge and the time of the last move, centred under it: a short line right-aligned under a
-   filled badge looks indented, whichever edge it is lined up with */
-.status-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+button.infotip-trigger.match-mark {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-height: 20px;
+  padding: 0 3px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: inherit;
 }
 
-.last-move-note {
+/* A larger area to tap than the sign shows */
+button.infotip-trigger.match-mark::after {
+  content: "";
+  position: absolute;
+  inset: -8px -4px;
+}
+
+button.infotip-trigger.match-rank {
+  padding: 0 6px;
   font-size: 12px;
+  color: var(--info);
+  background: color-mix(in srgb, var(--info) 13%, transparent);
+}
+
+button.infotip-trigger.match-master {
+  padding: 0 2px;
+  font-size: 15px;
+  color: var(--brass);
+}
+
+/* The ♞ opens the line, closer to the text than the line's own gap */
+.match-meta > .infotip:has(> .match-master) {
+  flex-shrink: 0;
+  margin-right: -4px;
+}
+
+.infotip.is-open > button.infotip-trigger.match-mark,
+button.infotip-trigger.match-mark:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 1px;
+}
+
+/* The line under the players, across the card */
+.match-meta {
+  position: relative;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 32px;
+  font-size: 13px;
   color: var(--muted);
+}
+
+.match-meta-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.match-live,
 .new-moves-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: var(--brass-soft);
-  color: var(--brass);
-  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
 }
 
-.new-moves-tag .switch-dot,
-.new-moves-note .switch-dot {
-  margin: 0;
+.match-live {
+  color: var(--info);
+}
+
+.match-live::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 1px;
+}
+
+/* Moves the visitor has not seen: the brass of the dot on the Partite tab */
+.new-moves-tag {
+  color: var(--brass);
+}
+
+.new-moves-tag .switch-dot {
+  margin: 0 5px 0 0;
   vertical-align: 1px;
 }
 
 .new-moves-note .switch-dot {
-  margin-right: 6px;
+  margin: 0 6px 0 0;
+  vertical-align: 1px;
 }
 
-.match-card-body {
+/* The actions: the only things on the card that look like buttons */
+.match-actions {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+button.match-action,
+a.match-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 34px;
+  height: 32px;
+  min-height: 0;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 9%, var(--panel));
+  color: var(--accent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button.match-action:hover,
+a.match-action:hover {
+  background: color-mix(in srgb, var(--accent) 16%, var(--panel));
+}
+
+/* "Momenti" beside the ✨ only where the card has room for it (large phones, tablets); with a
+   mouse, the title of the button says it */
+.match-action-label {
+  display: none;
+}
+
+@container (min-width: 340px) {
+  .match-action-label {
+    display: inline;
+  }
 }
 
 /* Matches grouped by round, under "Andata" / "Ritorno" when there is a return leg */
@@ -1554,6 +1671,12 @@ button.rounds-more {
   margin-bottom: 14px;
 }
 
+.match-card .dot {
+  width: 14px;
+  height: 14px;
+  border-width: 1.5px;
+}
+
 .match-round {
   font-size: 14px;
   font-weight: 500;
@@ -1581,11 +1704,7 @@ button.rounds-more {
   color: var(--ink);
 }
 
-.match-card .dot {
-  width: 16px;
-  height: 16px;
-  border-width: 1.5px;
-}
+
 
 .opening-label {
   min-width: 0;
@@ -1598,22 +1717,6 @@ button.rounds-more {
   line-clamp: 2;
   overflow: hidden;
   overflow-wrap: anywhere;
-}
-
-.match-footer-info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  gap: 1px;
-}
-
-.match-progress {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 0;
-  font-size: 12px;
-  color: var(--muted);
 }
 
 .lichess-link-btn {
@@ -1932,7 +2035,6 @@ a.champion-badge {
     transition: none;
   }
   .sq-ongoing,
-  .phase-tile .pt-seg.is-current,
   .status-badge.ongoing::before {
     animation: none;
   }
@@ -1986,20 +2088,8 @@ a.champion-badge {
 .mini-board .mb-coords .on-light { fill: color-mix(in srgb, var(--board-dark) 70%, #1a211e); }
 .mini-board .mb-coords .on-dark { fill: var(--board-light); }
 
-/* Ongoing game: faded empty board, big piece for the phase, three phase segments */
+/* Ongoing game: faded empty board, big piece for the phase */
 .phase-tile .pt-veil { fill: var(--panel); opacity: 0.6; }
-.phase-tile .pt-seg { fill: var(--line); }
-.phase-tile .pt-seg.is-done { fill: color-mix(in srgb, var(--info) 40%, var(--line)); }
-.phase-tile .pt-seg.is-current { fill: var(--info); animation: phasePulse 1.6s ease-in-out infinite; }
-
-@keyframes phasePulse {
-  50% { opacity: 0.45; }
-}
-
-.match-card-body .match-players {
-  flex: 1;
-  min-width: 0;
-}
 
 /* Player page: points chart */
 .points-chart {
@@ -2254,8 +2344,8 @@ button.infotip-trigger.player-elo-badge {
   margin-bottom: 8px;
 }
 
-/* Finished game: the final position opens the replay */
-button.mini-board-replay {
+/* Finished game: the final position opens the replay (a link: the game has an address of its own) */
+.mini-board-replay {
   position: relative;
   padding: 0;
   border: 0;
@@ -2382,32 +2472,42 @@ button.replay-close {
   justify-self: start;
 }
 
-/* The key moments of an analysed game, under its replay (components/KeyMoments.tsx) */
-button.match-moments {
-  margin-left: 6px;
+/* Title and, under it, the season and the round */
+.replay-title {
+  display: grid;
+  min-width: 0;
+}
+.replay-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Lichess and «Condividi», on one line */
+.replay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+}
+button.replay-share {
   min-height: 0;
-  font: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
+  padding: 0;
   border: 0;
-  border-radius: 6px;
-  color: var(--win);
-  background: color-mix(in srgb, var(--win) 12%, transparent);
+  background: none;
+  font-family: inherit;
   cursor: pointer;
+}
+.replay-shared {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 /* The analysis on its way: the same button, greyed, that explains with a tap */
-button.infotip-trigger.match-moments.is-pending {
-  margin-left: 6px;
-  padding: 2px 8px;
-  border: 0;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
+button.infotip-trigger.match-action.is-pending {
   color: var(--muted);
-  background: color-mix(in srgb, var(--muted) 12%, transparent);
-  opacity: 0.8;
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--muted) 8%, var(--panel));
+  opacity: 0.75;
 }
 
 .key-moments {
@@ -3119,11 +3219,6 @@ button.infotip-trigger.career-high-label {
   color: var(--muted);
 }
 
-button.infotip-trigger.match-summit,
-button.infotip-trigger.match-upset {
-  border: 0;
-}
-
 .infotip-mark {
   font-weight: 400;
   color: var(--muted);
@@ -3193,6 +3288,9 @@ details.pillsbury-about > summary { cursor: pointer; font-size: 14px; font-weigh
   width: max-content;
   max-width: min(220px, calc(100vw - 48px));
 }
+/* The signs of a game card (colpaccio, summit, the master's opening): under the line of the sign
+   tapped, across that line. Placed against the sign itself it ran past the edge of the page, which
+   cuts it (see .match-card .player-row, .match-meta) */
 
 @keyframes infotip-in {
   from { opacity: 0; transform: translateY(-4px); }
@@ -3272,11 +3370,6 @@ button.infotip-trigger.presence-trigger {
   width: 7px;
   height: 7px;
   box-shadow: 0 0 0 1.5px var(--panel);
-}
-
-/* Its explanation spans the card, under the players */
-.match-card-body {
-  position: relative;
 }
 
 /* Player page: "@handle su Lichess  ● ultimo accesso 5 ore fa", the dot as separator, wrapping as a whole */
@@ -3952,20 +4045,6 @@ button.btn-mini.is-active { background: var(--brass-soft); }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath d='M0 24V18Q100 12 200 17T400 15V24Z' fill='%23e3b54e' fill-opacity='0.85'/%3E%3Cg fill='%23f6dc94'%3E%3Crect x='30' y='13' width='4' height='3'/%3E%3Crect x='90' y='11' width='3' height='4'/%3E%3Crect x='150' y='14' width='4' height='3'/%3E%3Crect x='215' y='12' width='3' height='4'/%3E%3Crect x='280' y='13' width='4' height='3'/%3E%3Crect x='345' y='11' width='3' height='4'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* The master's opening: a brass tag on the games that play it, a line in the Stagione tab */
-.master-opening-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  align-self: flex-start;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: var(--brass-soft);
-  color: var(--brass);
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .dossier-opening {
   margin: 10px 0 0;
   color: var(--muted);
@@ -4293,8 +4372,7 @@ button.btn-mini.btn-go {
 /* A single minor pill (the colours, before the time per move is known) is a slim line, not a box */
 .player-season .stat-pills-minor .stat-pill:only-child { display: flex; justify-content: center; align-items: baseline; gap: 8px; }
 /* The link to Lichess of a game (player page, Partite) looks like what it is, something to tap */
-.player-game .lichess-link-btn,
-.match-footer .lichess-link-btn {
+.player-game .lichess-link-btn {
   justify-self: start;
   padding: 3px 10px;
   border: 1px solid var(--line);
@@ -4302,11 +4380,15 @@ button.btn-mini.btn-go {
   background: var(--panel);
   font-size: 13px;
 }
-.player-game .lichess-link-btn::after,
-.match-footer .lichess-link-btn::after {
+.player-game .lichess-link-btn:not(.player-game-replay, .player-game-lichess)::after {
   content: " ↗";
 }
-.match-footer .lichess-link-btn { white-space: nowrap; }
+/* The replay on the site and, beside it, the game on Lichess */
+.player-game-actions {
+  display: flex;
+  gap: 6px;
+  justify-self: start;
+}
 
 /* Partite: the push notifications of the moves (components/PushToggle.tsx) */
 .push-button {
