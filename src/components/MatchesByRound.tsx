@@ -18,7 +18,7 @@ import { ColorDot } from './PresenceDot';
 import { OpeningFamily, playsFamily } from '../lib/masterOpening';
 import { recentMove } from '../lib/live';
 import { formatRoundEnd, roundExpired } from '../lib/roundDeadline';
-import { analysisOf, hasMoments } from '../lib/analysis';
+import { analysisOf, analysisPending, hasMoments } from '../lib/analysis';
 
 export interface MasterTag {
   family: OpeningFamily;
@@ -267,6 +267,8 @@ function MatchCard({
   // The key moments, once the GitHub Action has analysed the game: in the replay, for everyone
   const analysis = finalFen ? analysisOf(game) : undefined;
   const moments = hasMoments(analysis);
+  // Finished a few minutes ago: the analysis arrives with the next runs of the GitHub Action
+  const pending = !!finalFen && !moments && analysisPending(game, s);
   const tile = finalFen ? (
     <MiniBoard fen={finalFen} label={`Posizione finale di ${pairing}`} />
   ) : progress === 'ongoing' ? (
@@ -349,13 +351,18 @@ function MatchCard({
               <span aria-hidden="true">♞</span> L'apertura {masterTag!.surname ? `di ${masterTag!.surname}` : "del maestro"}
             </span>
           )}
-          {(progressText || upset || summit || moments) && (
+          {(progressText || upset || summit || moments || pending) && (
             <span className="match-progress">
               {progressText}
               {moments && (
                 <button type="button" className="match-moments" onClick={() => setReplay('moments')}>
                   <span aria-hidden="true">✨</span> Momenti chiave
                 </button>
+              )}
+              {pending && (
+                <InfoTip className="match-moments is-pending" text="L'analisi è in preparazione: di solito arriva entro un quarto d'ora dalla fine della partita.">
+                  <span aria-hidden="true">✨</span> Momenti chiave
+                </InfoTip>
               )}
               {summit && (
                 <InfoTip className="match-summit" text={`Scontro al vertice: ${summit} in classifica a inizio turno.`}>
@@ -391,6 +398,7 @@ function MatchCard({
           names={{ white: nameOf(game.white), black: nameOf(game.black) }}
           ending={s}
           toMoments={replay === 'moments'}
+          pending={pending}
         />
       )}
     </article>

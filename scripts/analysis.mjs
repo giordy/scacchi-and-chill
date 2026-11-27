@@ -18,7 +18,8 @@ export const MIN_PLIES = 16;
 const OPENING_PLIES = 8;
 
 // Endings that are no game to comment on: aborted, never started, or a player banned for cheating
-const NOT_ANALYSED = new Set(['created', 'started', 'aborted', 'noStart', 'cheat', 'unknownFinish']);
+// (the site knows them too, to tell a game whose analysis is on its way: src/lib/analysis.ts)
+export const NOT_ANALYSED = new Set(['created', 'started', 'aborted', 'noStart', 'cheat', 'unknownFinish']);
 
 // Winning chances of White, 0-100, from a score in centipawns from White's side: the curve Lichess
 // uses for its analysis (a mate counts as the edge of the scale)

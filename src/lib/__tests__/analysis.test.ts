@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error a Node script without types
-import { ANALYSIS_VERSION, keyMoments, needsAnalysis, phasesOf, winPercent } from '../../../scripts/analysis.mjs';
+import { ANALYSIS_VERSION, keyMoments, MIN_PLIES as SCRIPT_MIN_PLIES, NOT_ANALYSED, needsAnalysis, phasesOf, winPercent } from '../../../scripts/analysis.mjs';
 // @ts-expect-error a Node script without types
 import { parseSearch } from '../../../scripts/analyse-games.mjs';
 // @ts-expect-error a Node script without types
 import { gameIdOf } from '../../../scripts/sync-results.mjs';
-import { analysisOf, bestText, chanceText, endingText, finishText, figurineSan, hasMoments, materialText, missedText, momentsOf, moveLabel, openingText, phaseText, promotionText, squaresOf, storyOf, StoryContext, turnText } from '../analysis';
-import { AnalysisMoment, GameAnalysis } from '../../types';
+import { analysisOf, analysisPending, bestText, chanceText, endingText, finishText, figurineSan, hasMoments, materialText, MIN_PLIES, missedText, momentsOf, moveLabel, openingText, phaseText, promotionText, squaresOf, storyOf, StoryContext, turnText } from '../analysis';
+import { AnalysisMoment, GameAnalysis, LichessExportGame } from '../../types';
 
 const moves20 = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7';
 const finished = (extra = {}) => ({
@@ -68,6 +68,39 @@ describe('which games wait for their analysis', () => {
     expect(needsAnalysis(finished({ analysis: { v: ANALYSIS_VERSION, id: 'AbCd1234', skipped: 'moves' } }), gameIdOf)).toBe(false);
     expect(needsAnalysis(finished({ analysis: { v: ANALYSIS_VERSION - 1, id: 'AbCd1234', skipped: 'moves' } }), gameIdOf)).toBe(true);
     expect(needsAnalysis(finished({ url: '', analysis: { v: ANALYSIS_VERSION, id: 'AbCd1234' } }), gameIdOf)).toBe(false);
+  });
+});
+
+describe('a game whose analysis is on its way', () => {
+  it('is a finished game the GitHub Action will analyse and has not yet', () => {
+    const g = finished();
+    expect(analysisPending(g, g.lichess as LichessExportGame)).toBe(true);
+    // analysed: the real button instead
+    expect(analysisPending({ ...g, analysis: { v: ANALYSIS_VERSION, id: 'AbCd1234', curve: [50] } }, g.lichess as LichessExportGame)).toBe(false);
+    // analysed for an old link: the new one is on its way
+    expect(analysisPending({ ...g, analysis: { v: ANALYSIS_VERSION, id: 'Zzzz9999', curve: [50] } }, g.lichess as LichessExportGame)).toBe(true);
+  });
+
+  it('is never a game the GitHub Action leaves out or could not analyse', () => {
+    const g = finished();
+    const state = g.lichess as LichessExportGame;
+    expect(analysisPending(g, undefined)).toBe(false);
+    expect(analysisPending(g, { ...state, status: 'started' })).toBe(false);
+    expect(analysisPending(g, { ...state, status: 'cheat' })).toBe(false);
+    expect(analysisPending(g, { ...state, variant: 'chess960' })).toBe(false);
+    expect(analysisPending(g, { ...state, moves: 'e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7#' })).toBe(false);
+    expect(analysisPending({ ...g, decision: { result: '1-0', at: 1 } }, state)).toBe(false);
+    expect(analysisPending({ ...g, analysis: { v: ANALYSIS_VERSION, id: 'AbCd1234', skipped: 'moves' } }, state)).toBe(false);
+  });
+
+  it('follows the same rules as the script', () => {
+    expect(MIN_PLIES).toBe(SCRIPT_MIN_PLIES);
+    for (const status of NOT_ANALYSED) expect(analysisPending(finished(), { ...(finished().lichess as LichessExportGame), status })).toBe(false);
+    // and every game the script would analyse is on its way until it is
+    for (const status of ['mate', 'resign', 'outoftime', 'timeout', 'draw', 'stalemate']) {
+      const g = finished({ lichess: { ...finished().lichess, status } });
+      expect(analysisPending(g, g.lichess as LichessExportGame)).toBe(needsAnalysis(g, gameIdOf));
+    }
   });
 });
 

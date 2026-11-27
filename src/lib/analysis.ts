@@ -1,4 +1,4 @@
-import { AnalysisMoment, GameAnalysis, HistoryGame } from '../types';
+import { AnalysisMoment, GameAnalysis, HistoryGame, LichessExportGame } from '../types';
 import { extractGameId } from './utils';
 
 // The key moments of a finished game, as the replay tells them. The GitHub Action analyses each
@@ -39,6 +39,21 @@ function sane(a: GameAnalysis): GameAnalysis {
     finish: isMoment(a.finish) ? a.finish : undefined,
     phases,
   };
+}
+
+// The games the GitHub Action analyses (scripts/analysis.mjs: NOT_ANALYSED, MIN_PLIES, needsAnalysis)
+const NOT_ANALYSED = new Set(['created', 'started', 'aborted', 'noStart', 'cheat', 'unknownFinish']);
+export const MIN_PLIES = 16;
+
+// A finished game whose analysis is on its way: one the GitHub Action will analyse, not analysed
+// yet (or analysed for another link); never one it leaves out, nor one it could not analyse
+export function analysisPending(game: Pick<HistoryGame, 'url' | 'analysis' | 'decision'>, state?: LichessExportGame): boolean {
+  if (!state || game.decision || NOT_ANALYSED.has(state.status) || !state.moves) return false;
+  if (state.variant && state.variant !== 'standard') return false;
+  if (state.moves.trim().split(/\s+/).length < MIN_PLIES) return false;
+  const id = extractGameId(game.url);
+  if (game.analysis?.skipped && (!id || game.analysis.id === id)) return false;
+  return !analysisOf(game);
 }
 
 // Something to tell: a moment, or at least the phases of the game

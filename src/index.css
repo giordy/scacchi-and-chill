@@ -2397,6 +2397,19 @@ button.match-moments {
   cursor: pointer;
 }
 
+/* The analysis on its way: the same button, greyed, that explains with a tap */
+button.infotip-trigger.match-moments.is-pending {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--muted) 12%, transparent);
+  opacity: 0.8;
+}
+
 .key-moments {
   display: grid;
   gap: 10px;

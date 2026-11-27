@@ -40,6 +40,7 @@ export function GameReplay({
   names,
   ending,
   toMoments = false,
+  pending = false,
 }: {
   url: string;
   title: string;
@@ -50,6 +51,8 @@ export function GameReplay({
   ending?: { status?: string; winner?: 'white' | 'black' };
   // Opened from "Momenti chiave": straight to them, past the animation
   toMoments?: boolean;
+  // The analysis on its way: said under the animation
+  pending?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -103,6 +106,7 @@ export function GameReplay({
         )}
         {(!gif || state === 'error') && <p className="note">Non riesco a caricare l'animazione della partita.</p>}
         {analysis && names && hasMoments(analysis) && <KeyMoments analysis={analysis} names={names} state={ending} />}
+        {pending && <p className="note">I momenti chiave sono in preparazione: di solito arrivano entro un quarto d'ora dalla fine della partita.</p>}
         <a href={url} target="_blank" rel="noopener noreferrer" className="lichess-link-btn replay-link">
           Apri su Lichess per l'analisi
         </a>

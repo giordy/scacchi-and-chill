@@ -300,6 +300,7 @@ export interface LichessExportGame {
   lastFen?: string;
   daysPerTurn?: number;
   speed?: string; // "correspondence", "blitz"...
+  variant?: string; // "standard", "chess960"...
   lastMoveAt?: number;
   createdAt?: number;
   opening?: {

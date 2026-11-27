@@ -94,4 +94,28 @@ describe('MatchesByRound', () => {
     // the small board of the card has no files and ranks
     expect(card({ ...base, analysis })).not.toContain('mb-coords');
   });
+
+  it('shows the key moments greyed, explained with a tap, while the analysis of a finished game is on its way', () => {
+    const moves = 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8';
+    const state = { id: 'aaaaaaaa', status: 'resign', winner: 'white' as const, moves, lastFen: '8/8/8/8/8/8/8/K6k w - - 0 1' };
+    const base: HistoryGame = { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa', lichess: state };
+    const card = (g: HistoryGame) => renderToStaticMarkup(<MatchesByRound games={[g]} gameStates={{}} nameOf={nameOf} />);
+    const html = card(base);
+    expect(html).toContain('match-moments is-pending');
+    expect(html).toContain('L&#x27;analisi è in preparazione: di solito arriva entro un quarto d&#x27;ora dalla fine della partita.');
+    // once analysed: the real button, no more greyed one
+    const done = card({ ...base, analysis: { v: 5, id: 'aaaaaaaa', curve: [50, 60], turns: [], best: [], chances: [], phases: { middle: 1 } } });
+    expect(done).toContain('class="match-moments"');
+    expect(done).not.toContain('is-pending');
+    // a game the analysis leaves out, or could not analyse: no button at all
+    expect(card({ ...base, lichess: { ...state, moves: 'e4 e5' } })).not.toContain('Momenti chiave');
+    expect(card({ ...base, analysis: { v: 5, id: 'aaaaaaaa', skipped: 'engine' } })).not.toContain('Momenti chiave');
+  });
+
+  it('says in the replay that the key moments are on their way', async () => {
+    const { GameReplay } = await import('../GameReplay');
+    const html = renderToStaticMarkup(<GameReplay url="https://lichess.org/aaaaaaaa" title="Anna – Bruno" onClose={() => {}} pending />);
+    expect(html).toContain('I momenti chiave sono in preparazione');
+    expect(renderToStaticMarkup(<GameReplay url="https://lichess.org/aaaaaaaa" title="Anna – Bruno" onClose={() => {}} />)).not.toContain('in preparazione');
+  });
 });
