@@ -6,10 +6,12 @@ import { errorMessage } from '../../lib/utils';
 import { deleteGamesFromFirebase } from '../../firebaseService';
 import { LaunchMessage } from './LaunchMessage';
 import { BulletinSection } from './BulletinSection';
+import { openRounds } from '../../lib/bulletin';
+import { applyWithdrawals } from '../../lib/withdrawals';
 import { RelinkPanel } from './RelinkPanel';
 import { DecisionPanel } from './DecisionPanel';
 import { canRelink, linkState } from '../../lib/relink';
-import { stateOf } from '../../lib/games';
+import { byRound, stateOf } from '../../lib/games';
 import {
   carriedOver,
   endOnCreate,
@@ -43,6 +45,7 @@ export function RoundDetail({
   prev,
   next,
   onOpen,
+  initialPanel,
   onBack,
   config,
   settings,
@@ -65,7 +68,8 @@ export function RoundDetail({
   summary?: RoundSummary;
   prev?: string;
   next?: string;
-  onOpen: (round: string) => void;
+  onOpen: (round: string, panel?: 'bulletin') => void;
+  initialPanel?: 'bulletin'; // the panel open on arrival
   onBack: () => void;
   config: AppConfig;
   settings: Settings;
@@ -105,8 +109,15 @@ export function RoundDetail({
     ? roundWait(meta, roundNames, next, playersOf(allRounds.find((r) => r.round === next)?.matches), history, gameStates)?.reason
     : undefined;
 
+  // One weekly bulletin for all the rounds still open: the last one's, with the earlier ones in short at
+  // its bottom (lib/bulletin.ts). An earlier round still open points there; once over, it has its own
+  // message of the round's end
+  const stillOpen = openRounds(applyWithdrawals(history, meta?.withdrawals), gameStates);
+  const weeklyRound = stillOpen[stillOpen.length - 1];
+  const bulletinElsewhere = stillOpen.includes(round) && weeklyRound !== undefined && byRound(weeklyRound, round) > 0 ? weeklyRound : undefined;
+
   const [busy, setBusy] = useState("");
-  const [panel, setPanel] = useState<Panel>(null);
+  const [panel, setPanel] = useState<Panel>(initialPanel ?? null);
   // The game whose link is being replaced, by its two players (the colors may change)
   const [relinking, setRelinking] = useState("");
   // The game whose result the organizer is deciding (lib/decisions.ts), by its two players
@@ -468,7 +479,20 @@ export function RoundDetail({
               />
             </div>
           )}
-          {panel === 'bulletin' && (
+          {panel === 'bulletin' && bulletinElsewhere && (
+            <div className="result">
+              <p className="note">
+                Il Turno {round} ha ancora partite aperte: le trovi in breve in fondo al bollettino del Turno {bulletinElsewhere}, un solo
+                messaggio per tutti i turni in corso. Quando finiscono, qui c'è il messaggio di fine turno.
+              </p>
+              <div className="actions">
+                <button type="button" className="secondary" onClick={() => onOpen(bulletinElsewhere, 'bulletin')}>
+                  📊 Apri il bollettino del Turno {bulletinElsewhere}
+                </button>
+              </div>
+            </div>
+          )}
+          {panel === 'bulletin' && !bulletinElsewhere && (
             <div className="result">
               <BulletinSection
                 round={round}

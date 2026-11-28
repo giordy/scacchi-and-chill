@@ -453,3 +453,35 @@ describe('results decided by the organizer and games past the days allowed', () 
     expect(lichessSummary({ id: 'x', status: 'mate', winner: 'black' })).toBe('già finita (0-1): il risultato deciso la sostituisce');
   });
 });
+
+describe('one weekly bulletin for the rounds still open', () => {
+  const games = [
+    { round: '1', white: 'anna', black: 'bruno', url: 'https://lichess.org/aaaaaaaa', lichess: { id: 'aaaaaaaa', status: 'started' } },
+    { round: '2', white: 'bruno', black: 'anna', url: 'https://lichess.org/bbbbbbbb', lichess: { id: 'bbbbbbbb', status: 'started' } },
+  ] as any[];
+  const schedule = [
+    { round: '1', white: 'anna', black: 'bruno' },
+    { round: '2', white: 'bruno', black: 'anna' },
+  ];
+  const cfg = { ...config, schedule };
+  const detail = async (round: string, history = games) => {
+    const { RoundDetail } = await import('../../tabs/rounds/RoundDetail');
+    const { roundsOf } = await import('../../lib/rounds');
+    const summary = roundsOf(schedule, history).find((r) => r.round === round);
+    return renderToStaticMarkup(
+      <RoundDetail round={round} summary={summary} onOpen={noop} initialPanel="bulletin" onBack={noop} config={cfg} settings={settings} templates={config.messageTemplates} history={history} setHistory={noop as any} schedule={schedule} onUpdateSchedule={noop} onUpdateTournamentMeta={noop} onCreated={async () => true} nameOf={(h) => h} flash={noop} triggerToast={noop} onMissingToken={noop} />
+    );
+  };
+
+  it('points an earlier round still open to the bulletin of the last one', async () => {
+    const html = await detail('1');
+    expect(html).toContain('Il Turno 1 ha ancora partite aperte');
+    expect(html).toContain('Apri il bollettino del Turno 2');
+    expect(await detail('2')).not.toContain('Apri il bollettino');
+  });
+
+  it('keeps the message of the end in a round that is over', async () => {
+    const over = [{ ...games[0], lichess: { id: 'aaaaaaaa', status: 'resign', winner: 'white' } }, games[1]];
+    expect(await detail('1', over)).not.toContain('Apri il bollettino');
+  });
+});

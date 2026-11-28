@@ -1,18 +1,18 @@
-import { AppConfig, HistoryGame, LichessExportGame, SeasonArchive } from '../types';
+import { AppConfig, HistoryGame, LichessExportGame, ScheduledMatch, SeasonArchive } from '../types';
 import { computeStandings, leadersOf, leaderText, PlayerStanding, pointsText, seasonStarted, sharedRanks } from './standings';
 import { scudettoTitle } from './masterOpening';
 import { extractGameId, fill, formatDeadline, getApproxMoves, HIDDEN_PLIES, HOW_DRAW, HOW_WIN, tidy } from './utils';
 import { gamePhase, GamePhase } from './phase';
 import { upsetOf } from './upset';
 import { roundHalf, tournamentElo } from './tournamentElo';
-import { byOrganizer, DOUBLE_LOSS, fullMovesOf, isVoid, movesText, nameFrom, pliesOf, storedStates } from './games';
+import { byOrganizer, byRound, DOUBLE_LOSS, fullMovesOf, isVoid, movesText, nameFrom, pliesOf, storedStates } from './games';
 import { summitGames, summitKey } from './summit';
 import { computeSeasonProgress, gameProgress } from './progress';
 import { reigningChampions } from './honours';
 import { PILLSBURY_EMOJI, PILLSBURY_TITLE, PillsburyRace, pillsburyRace, pillsburyWinners, reigningPillsbury } from './pillsbury';
 import { outForFairPlay, scudettoContenders } from './fairPlay';
 import { withScheduledGames } from './publicGames';
-import { formatRoundEnd, MAX_OPEN_GAMES, roundExpired, WaitReason } from './roundDeadline';
+import { formatRoundEnd, MAX_OPEN_GAMES, roundEndOf, roundExpired, WaitReason } from './roundDeadline';
 
 const DAY_MS = 86400000;
 
@@ -55,14 +55,114 @@ export function scudettoLine(standings: PlayerStanding[], trophy: string): strin
 //   1. Carla – 2 punti
 //   2. Anna 👑 – 1½ punti
 // The crown marks the reigning champion(s), the medal who holds the Trofeo Pillsbury (lower-case
-// handles), as in the site's table: only here, once per round, not on every game line
-export function standingsBlock(standings: PlayerStanding[], round: string, champions: string[] = [], pillsbury: string[] = []): string {
+// handles), as in the site's table: only here, once per round, not on every game line.
+// laterNote: the games of later rounds already in the table (laterGamesNote), said beside the title
+export function standingsBlock(standings: PlayerStanding[], round: string, champions: string[] = [], pillsbury: string[] = [], laterNote = ''): string {
   if (!seasonStarted(standings)) return '';
   const ranks = sharedRanks(standings);
   const marks = (s: PlayerStanding) =>
     (champions.includes(s.handle.toLowerCase()) ? ' 👑' : '') + (pillsbury.includes(s.handle.toLowerCase()) ? ` ${PILLSBURY_EMOJI}` : '');
   const rows = standings.map((s, i) => `${ranks[i]}. ${s.name}${marks(s)} – ${pointsText(s.points)}`);
-  return [`📈 *Classifica dopo il Turno ${round}*`, ...rows].join('\n');
+  return [`📈 *Classifica dopo il Turno ${round}*${laterNote ? ` (${laterNote})` : ''}`, ...rows].join('\n');
+}
+
+// With overlapping rounds the table at the end of a round already counts the games of a later round
+// that are over: one round per such game. "con 2 partite già finite del Turno 4"; "" for none
+export function laterGamesNote(rounds: string[]): string {
+  const n = rounds.length;
+  if (n === 0) return '';
+  const what = n === 1 ? '1 partita già finita' : `${n} partite già finite`;
+  return new Set(rounds).size === 1 ? `con ${what} del Turno ${rounds[0]}` : `con ${what} dei turni successivi`;
+}
+
+const PHASE_TEXT: Record<GamePhase, string> = {
+  opening: "in apertura",
+  middlegame: "nel mediogioco",
+  endgame: "nel finale",
+};
+
+// The state the bulletin reads of a game: fresh from Lichess for the open games; a finished game keeps
+// its stored (final) result, and a game won by forfeit after a withdrawal has no Lichess link: its
+// result is stored with it. A result decided by the organizer wins over Lichess (lib/decisions.ts)
+export function bulletinState(g: HistoryGame, states: Record<string, LichessExportGame>): LichessExportGame | undefined {
+  if (byOrganizer(g.lichess?.status)) return g.lichess;
+  const id = extractGameId(g.url);
+  if (!id) return g.lichess;
+  return states[id] ?? (gameProgress(g.lichess) === 'finished' ? g.lichess : undefined);
+}
+
+// Over, for the bulletin: a result on the board or decided by the organizer. A void game (aborted,
+// never started) is still to be replayed, so its round is not over yet
+export const gameDone = (s?: LichessExportGame): boolean =>
+  !!s && (byOrganizer(s.status) || (gameProgress(s) === 'finished' && !isVoid(s)));
+
+// The rounds with a game not over yet, in round order (history with the withdrawals applied). The
+// weekly bulletin is the last one's; the others are told at its bottom, in short, until they end and
+// get their own message of the round's end
+export function openRounds(history: HistoryGame[], states: Record<string, LichessExportGame>): string[] {
+  const open = new Set(history.filter((g) => !gameDone(bulletinState(g, states))).map((g) => g.round));
+  return [...open].sort(byRound);
+}
+
+// The games in the order of the calendar; those not in it after the others, as they come
+export function inCalendarOrder(games: HistoryGame[], schedule: ScheduledMatch[] = []): HistoryGame[] {
+  if (schedule.length === 0) return games;
+  const index = (g: HistoryGame) => schedule.findIndex((m) => m.round === g.round && m.white === g.white && m.black === g.black);
+  return [...games].sort((a, b) => {
+    const [ia, ib] = [index(a), index(b)];
+    if (ia !== -1 && ib !== -1) return ia - ib;
+    if (ia !== -1) return -1;
+    if (ib !== -1) return 1;
+    return 0;
+  });
+}
+
+// An earlier round still open, at the bottom of the weekly bulletin: one short line per game, the
+// results without phrases nor openings (told in full by the message of its end)
+//   🔚 *Coda del Turno 3* (chiuso domenica 7 dicembre)
+//   ✅ Ezio – Fabio *(1-0)*
+//   ♟️ Anna – Carla: in corso (più di 20 mosse, nel mediogioco)
+export function tailSection({
+  round,
+  games,
+  states,
+  nameOf,
+  idToHandle,
+  end,
+  expiryDays,
+  now,
+}: {
+  round: string;
+  games: HistoryGame[];
+  states: Record<string, LichessExportGame>;
+  nameOf: (handle: string) => string;
+  idToHandle: (id?: string) => string | undefined;
+  end?: number; // when the round ended (Turni con scadenza)
+  expiryDays: number;
+  now: number;
+}): string {
+  const lines = games.map((g) => {
+    const s = bulletinState(g, states);
+    const white = nameOf(idToHandle(s?.players?.white?.user?.id) ?? g.white);
+    const black = nameOf(idToHandle(s?.players?.black?.user?.id) ?? g.black);
+    const pair = `${white} – ${black}`;
+    if (!s) {
+      const deadline = roundDeadline([g], expiryDays, now);
+      return now > deadline
+        ? `🔁 ${pair}: link scaduto, la sfida va ricreata`
+        : `🔗 ${pair}: sfida da accettare entro ${formatDeadline(deadline)}`;
+    }
+    if (s.status === 'created' || s.status === 'started') {
+      const approx = getApproxMoves(pliesOf(s));
+      const phase = gamePhase(s);
+      return `♟️ ${pair}: in corso (${[approx.approxMoves, phase && PHASE_TEXT[phase]].filter(Boolean).join(', ')})`;
+    }
+    if (isVoid(s)) return `🚫 ${pair}: partita annullata`;
+    const result = s.status === DOUBLE_LOSS ? '0-0' : s.winner === 'white' ? '1-0' : s.winner === 'black' ? '0-1' : '½-½';
+    return byOrganizer(s.status) ? `⚖️ ${pair} *(${result})*, deciso dall'organizzatore` : `✅ ${pair} *(${result})*`;
+  });
+  const closed = end !== undefined && roundExpired(end, now) ? ` (chiuso ${formatRoundEnd(end)})` : '';
+  return [`🔚 *Coda del Turno ${round}*${closed}`, ...lines].join('\n');
 }
 
 // "Anna", "Anna e Bruno", "Anna, Bruno e Carla"
@@ -116,6 +216,7 @@ export interface Bulletin {
   text: string;
   details: string[]; // what was read from Lichess, game by game (shown to the organizer)
   isComplete: boolean;
+  tails: string[]; // the earlier rounds still open, told at the bottom (newest first)
 }
 
 // Picks phrases at random without repeating one of a list until all were used
@@ -132,12 +233,6 @@ export function phrasePicker(phrases: Record<string, unknown>, random: () => num
     return list[i];
   };
 }
-
-const PHASE_TEXT: Record<GamePhase, string> = {
-  opening: "in apertura",
-  middlegame: "nel mediogioco",
-  endgame: "nel finale",
-};
 
 // The WhatsApp message on the state of a round, from the games and what Lichess says of them
 export function buildBulletin({ round, games, states, history, config, expiryDays, now = Date.now(), random, seasons = [], matchesUrl, roundEnd, nextWait }: BulletinInput): Bulletin {
@@ -170,10 +265,7 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
   const upsetLines: string[] = [];
   const blocks = games.map((g, i) => {
     const id = extractGameId(g.url);
-    // Fresh state for the open games; a finished game keeps its stored (final) result, and a game
-    // won by forfeit after a withdrawal has no Lichess link: its result is stored with it
-    // A result decided by the organizer wins over Lichess (lib/decisions.ts)
-    const s = byOrganizer(g.lichess?.status) ? g.lichess : id ? states[id] ?? (gameProgress(g.lichess) === "finished" ? g.lichess : undefined) : g.lichess;
+    const s = bulletinState(g, states);
     const white = idToHandle(s?.players?.white?.user?.id) ?? g.white;
     const black = idToHandle(s?.players?.black?.user?.id) ?? g.black;
     const head = `${config.numberEmojis[i] ?? i + 1 + "."} *${nameOf(white)}* ⚪ vs *${nameOf(black)}* ⚫`;
@@ -329,7 +421,10 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     // The Scudetto to the first of who can win it (fair play)
     const contenders = scudettoContenders(standings, outForFairPlay(config.tournament?.fairPlayAwardsBan, history, allStates));
     leader = seasonOver && (config.schedule?.length ?? 0) > 0 ? scudettoLine(contenders, scudettoTitle(config.tournament?.masterName)) : leaderLine(standings);
-    table = standingsBlock(standings, round, reigningChampions(config.tournament?.winners)?.handles, reigningPillsbury(seasons)?.handles);
+    // With overlapping rounds the table already counts the games of later rounds that are over: said
+    // beside its title, so that "after Turno 3" is not taken literally
+    const later = history.filter((g) => byRound(g.round, round) > 0 && gameDone(bulletinState(g, allStates))).map((g) => g.round);
+    table = standingsBlock(standings, round, reigningChampions(config.tournament?.winners)?.handles, reigningPillsbury(seasons)?.handles, laterGamesNote(later));
     // The second trophy, after the Scudetto; from the second season (in the first all are esordienti)
     if (seasons.length > 0) {
       // Against the whole calendar, games still to create included, as the race table of the site
@@ -355,12 +450,35 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
         : `🗓️ *Il turno si è chiuso* ${formatRoundEnd(roundEnd)}: le partite in corso continuano anche col turno successivo.`
       : `🗓️ *Il turno si chiude ${formatRoundEnd(roundEnd)}*`; // the date only, no countdown
 
+  // The earlier rounds still open (turni con scadenza: the games go on alongside the new round), newest
+  // first, in short under this round's games: one weekly message for all. Not in the message of the
+  // round's end, which speaks of its round only; a tail round once over leaves the bulletin and gets
+  // its own message of the end
+  const tailRounds = isRoundComplete
+    ? []
+    : openRounds(history, states)
+        .filter((r) => byRound(r, round) < 0)
+        .reverse();
+  const tails = tailRounds.map((r) =>
+    tailSection({
+      round: r,
+      games: inCalendarOrder(history.filter((g) => g.round === r), config.schedule),
+      states,
+      nameOf,
+      idToHandle,
+      end: roundEndOf(config.tournament, r),
+      expiryDays,
+      now,
+    })
+  );
+
   const vars = { round, ...count, summary: roundSummary(count) };
   const textResult = [
     fill(headerTemplate, vars),
     ...gameBlocks,
     reminder,
     deadline,
+    ...tails,
     footerTemplate ? fill(footerTemplate, vars) : "",
     leader,
     table,
@@ -375,5 +493,5 @@ export function buildBulletin({ round, games, states, history, config, expiryDay
     .filter(Boolean)
     .join("\n\n");
 
-  return { text: textResult, details: detailsList, isComplete: isRoundComplete };
+  return { text: textResult, details: detailsList, isComplete: isRoundComplete, tails: tailRounds };
 }

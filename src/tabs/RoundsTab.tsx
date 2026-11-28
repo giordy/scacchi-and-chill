@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppConfig, HistoryGame, LichessExportGame, MessageTemplates, ScheduledMatch, SeasonArchive, Settings, TournamentMeta } from '../types';
 import { RoundSummary, currentRound, nextRoundNumber, roundsOf } from '../lib/rounds';
 import { gameProgress } from '../lib/progress';
@@ -53,6 +53,9 @@ export function RoundsTab({
   seasons?: SeasonArchive[]; // archived seasons, for the Elo del torneo in the bulletin
 }) {
   const schedule = config.schedule ?? [];
+  // The panel to open in the round: the bulletin, when an earlier round still open points to it
+  // (with its round: a round opened otherwise, from the list or an alert, opens with no panel)
+  const [openPanel, setOpenPanel] = useState<{ round: string; panel: 'bulletin' } | undefined>(undefined);
   // Who accepted the rules of the season (lib/pledges.ts)
   const { pledges, loaded: pledgesLoaded } = usePledges();
   const season = config.tournament?.season ?? '';
@@ -123,8 +126,15 @@ export function RoundsTab({
           summary={summary}
           prev={prev}
           next={next}
-          onOpen={setOpenRound}
-          onBack={() => setOpenRound("")}
+          onOpen={(r, panel) => {
+            setOpenPanel(panel ? { round: r, panel } : undefined);
+            setOpenRound(r);
+          }}
+          initialPanel={openPanel?.round === openRound ? openPanel.panel : undefined}
+          onBack={() => {
+            setOpenPanel(undefined);
+            setOpenRound("");
+          }}
           config={config}
           settings={settings}
           templates={templates}

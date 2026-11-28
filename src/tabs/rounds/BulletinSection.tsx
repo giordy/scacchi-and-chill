@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState } from 'react';
 import { AppConfig, HistoryGame, SeasonArchive } from '../../types';
 import { errorMessage, extractGameId } from '../../lib/utils';
-import { buildBulletin } from '../../lib/bulletin';
+import { buildBulletin, inCalendarOrder } from '../../lib/bulletin';
+import { byRound } from '../../lib/games';
 import type { WaitReason } from '../../lib/roundDeadline';
 import { fetchGameStates } from '../../lib/lichess';
 import { applyWithdrawals } from '../../lib/withdrawals';
@@ -11,7 +12,8 @@ import { useVisiblePolling } from '../../hooks/useVisiblePolling';
 
 const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 
-// Round bulletin: state of the round's games on Lichess and the WhatsApp update message. It keeps
+// Round bulletin: state of the round's games on Lichess and the WhatsApp update message, with the
+// earlier rounds still open told in short at its bottom (lib/bulletin.ts tailSection). It keeps
 // itself up to date, with no button: built when the round opens, again as soon as the stored results
 // change (the sync at the top of the area, a new game), and every 5 minutes from Lichess while the page
 // is visible (as the public page). A text edited by hand is not overwritten.
@@ -41,6 +43,7 @@ export function BulletinSection({
   const [text, setText] = useState("");
   const [details, setDetails] = useState<string[]>([]);
   const [isRoundComplete, setIsRoundComplete] = useState(false);
+  const [tails, setTails] = useState<string[]>([]);
   const [status, setStatus] = useState({ busy: false, error: "", info: "" });
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   // The round whose text was changed by hand: later updates do not overwrite it, until the organizer
@@ -55,7 +58,8 @@ export function BulletinSection({
       round +
       "|" +
       rawHistory
-        .filter((g) => g.round === round)
+        // this round and the earlier ones, whose games still open are told at the bottom
+        .filter((g) => byRound(g.round, round) <= 0)
         .map((g) => `${g.url}:${g.lichess?.status ?? ""}:${g.lichess?.moves?.length ?? 0}`)
         .join(",") +
       "|" +
@@ -66,33 +70,21 @@ export function BulletinSection({
   );
 
   const loadStatusForRound = async (targetRound: string): Promise<boolean> => {
-    let games = history.filter((g) => g.round === targetRound);
+    // The games in the order of the calendar
+    const games = inCalendarOrder(history.filter((g) => g.round === targetRound), config.schedule);
     if (games.length === 0) {
       setText("");
       setIsRoundComplete(false);
+      setTails([]);
       return true;
     }
 
-    // Sort games in the exact order defined in the tournament schedule
-    if (config.schedule && config.schedule.length > 0) {
-      games = [...games].sort((a, b) => {
-        const idxA = config.schedule!.findIndex(
-          (m) => m.round === a.round && m.white === a.white && m.black === a.black
-        );
-        const idxB = config.schedule!.findIndex(
-          (m) => m.round === b.round && m.white === b.white && m.black === b.black
-        );
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return 0;
-      });
-    }
     setStatus({ busy: true, error: "", info: "" });
     try {
-      // Finished games are final and already stored: Lichess is asked only about the open ones
-      const ids = games
-        .filter((g) => gameProgress(g.lichess) !== "finished")
+      // Finished games are final and already stored: Lichess is asked only about the open ones, of this
+      // round and of the earlier ones (told at the bottom while they go on)
+      const ids = history
+        .filter((g) => byRound(g.round, targetRound) <= 0 && gameProgress(g.lichess) !== "finished")
         .map((g) => extractGameId(g.url))
         .filter((id): id is string => Boolean(id));
       const states = ids.length > 0 ? await fetchGameStates(ids) : {};
@@ -108,6 +100,7 @@ export function BulletinSection({
       }
       setDetails(built.details);
       setIsRoundComplete(built.isComplete);
+      setTails(built.tails);
       setUpdatedAt(new Date());
       setStatus((st) => ({ ...st, busy: false, error: "" }));
       return true;
@@ -168,6 +161,14 @@ export function BulletinSection({
             <div className="notice ok my-10-12">
               🏁 <strong>Turno {round} completato!</strong> Tutte le partite sono terminate. Il messaggio contiene i risultati finali.
             </div>
+          )}
+
+          {tails.length > 0 && (
+            <p className="note note-13">
+              {tails.length === 1
+                ? `In fondo, in breve, la coda del Turno ${tails[0]}. Quando finiscono le sue partite esce da qui, e il messaggio di fine turno lo trovi nel Turno ${tails[0]}.`
+                : `In fondo, in breve, la coda dei Turni ${[...tails].reverse().join(" e ")}. Ognuno esce da qui quando finiscono le sue partite, e il suo messaggio di fine turno lo trovi nel turno stesso.`}
+            </p>
           )}
 
           {updatedAt && (
